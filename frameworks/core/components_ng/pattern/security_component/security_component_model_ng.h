@@ -21,8 +21,9 @@
 #include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 
 namespace OHOS::Ace::NG {
 struct SecurityComponentElementStyle {
@@ -56,6 +57,8 @@ public:
     static void SetIconBorderRadius(FrameNode* frameNode, const std::optional<BorderRadiusProperty>& value);
     static void SetIcon(const ImageSourceInfo& value);
     static void SetIcon(FrameNode* frameNode, const std::optional<ImageSourceInfo>& value);
+    static void SetIcon(std::uint32_t value);
+    static void SetIcon(FrameNode* frameNode, std::uint32_t value);
     static void SetText(const std::string& value);
     static void SetText(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
@@ -153,8 +156,8 @@ protected:
 private:
     static void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
         bool isButtonVisible);
-    static void SetDefaultSymbolIconStyle(const RefPtr<FrameNode>& symbolNode, uint32_t symbolId,
-        bool isButtonVisible);
+    static void SetDefaultSymbolIconStyle(const RefPtr<FrameNode>& symbolNode,
+        const SymbolSourceInfo& symbolSourceInfo, bool isButtonVisible);
     static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
     static bool IsBackgroundVisible();
     static bool IsBackgroundVisible(FrameNode* frameNode);

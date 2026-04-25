@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_SUB_MENU_LAYOUT_ALGORITHM_H
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SubMenuLayoutAlgorithm : public MenuLayoutAlgorithm {
@@ -48,6 +49,17 @@ private:
         LayoutWrapper* layoutWrapper);
     float CalcStackSubMenuPositionYHalfScreen(const SizeF& size, const RefPtr<FrameNode>& parentMenu,
         const RefPtr<FrameNode>& parentMenuItem);
+    OffsetF MenuLayoutTargetSpace(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
+        SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper = nullptr);
+    OffsetF UpdateStackPosition(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
+        SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper = nullptr);
+    OffsetF UpdateSidePosition(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
+        SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper = nullptr);
+    OffsetF LayoutSubMenuTargetSpace(
+        const SizeF& size, OffsetF position, const SizeF& menuItemSize, LayoutWrapper* layoutWrapper = nullptr);
+    OffsetF CurrentPositionCheck(OffsetF& position, const SizeF& size, float flip, bool widthEnough);
+    OffsetF OthersPositionCheck(OffsetF& position, const SizeF& size);
+    float MenuVerticalPan(const OffsetF& position, const SizeF& size);
     float NormalizePositionY(const RefPtr<FrameNode>& frameNode, float menuTopPositionY, float positionY);
     float margin_ = 0.0f;
     float paddingStart_ = 0.0f;

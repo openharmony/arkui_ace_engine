@@ -14,8 +14,8 @@
  */
 
 #include "text_input_base.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "frameworks/core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
@@ -24,6 +24,7 @@ namespace {
 const int32_t TWO = 2;
 const int32_t FIVE = 5;
 constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1<<8;
+constexpr float MAGNIFIER_TEST_INITIAL_Y = 500.0f;
 } // namespace
 
 class TextFieldPatternFuncTest : public TextInputBases {
@@ -48,6 +49,40 @@ int32_t MyGetCaretIndex()
 NG::OffsetF MyGetCaretPosition()
 {
     return OffsetF(FIVE, FIVE);
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateMagnifierEdgeY
+ * @tc.desc: Test MagnifierController UpdateMagnifierEdgeY when host is SEARCH_Field and parent is SEARCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, MagnifierController_UpdateMagnifierEdgeY, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto searchNode = FrameNode::GetOrCreateFrameNode(V2::SEARCH_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::SEARCH_Field_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(searchNode, nullptr);
+    ASSERT_NE(textFieldNode, nullptr);
+    searchNode->MountToParent(rootUINode);
+    textFieldNode->MountToParent(searchNode);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
+    auto controller = pattern->magnifierController_;
+    ASSERT_NE(controller, nullptr);
+    float magnifierY = MAGNIFIER_TEST_INITIAL_Y;
+    float patternVisibleBottom = 0.0f;
+    float windowScale = 0.0f;
+    int32_t screenHeight = 0;
+    EXPECT_TRUE(
+        controller->UpdateMagnifierEdgeY(pipeline, magnifierY, patternVisibleBottom, windowScale, screenHeight));
+    rootUINode->RemoveChild(searchNode);
 }
 
 /**
@@ -977,7 +1012,7 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay005, TestSize.Level1)
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     EXPECT_NE(paintProperty, nullptr);
 }
- 
+
 /**
  * @tc.name: BaseTextSelectOverlay006
  * @tc.desc: test base_text_select_overlay.cpp GetVisibleContentRect
@@ -1039,7 +1074,7 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay007, TestSize.Level1)
     EXPECT_EQ(rect.GetX(), 0);
     EXPECT_EQ(rect.GetY(), 0);
 }
- 
+
 /**
  * @tc.name: BaseTextSelectOverlay008
  * @tc.desc: test base_text_select_overlay.cpp GetLocalPointWithTransform
@@ -1126,7 +1161,7 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay010, TestSize.Level1)
     EXPECT_EQ(rect.GetX(), 0);
     EXPECT_EQ(rect.GetY(), 0);
 }
- 
+
 /**
  * @tc.name: BaseTextSelectOverlay011
  * @tc.desc: test base_text_select_overlay.cpp UpdateMenuWhileAncestorNodeChanged
@@ -1156,7 +1191,7 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay011, TestSize.Level1)
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     EXPECT_NE(paintProperty, nullptr);
 }
- 
+
 /**
  * @tc.name: BaseTextSelectOverlay012
  * @tc.desc: test base_text_select_overlay.cpp RegisterScrollingListener
@@ -1488,7 +1523,7 @@ HWTEST_F(TextFieldPatternFuncTest, GetSelectAreaFromRectsWithTransform, TestSize
     manager->shareOverlayInfo_ = shareOverlayInfo;
     pattern->selectOverlay_->OnBind(manager);
     manager->SetHolder(pattern->selectOverlay_);
-    
+
     /**
      * @tc.steps: step3. Enable transform and set up test rectangles.
      */
@@ -1496,12 +1531,12 @@ HWTEST_F(TextFieldPatternFuncTest, GetSelectAreaFromRectsWithTransform, TestSize
     pattern->contentRect_ = RectF(0, 0, 300, 100);
     pattern->textRect_ = RectF(10, 10, 290, 90);
     pattern->selectController_->caretInfo_.rect.SetRect(50, 30, 100, 40);
-    
+
     /**
      * @tc.steps: step4. Call GetSelectAreaFromRects with LEFT_TOP_POINT.
      */
     auto result = pattern->selectOverlay_->GetSelectAreaFromRects(SelectRectsType::LEFT_TOP_POINT);
-    
+
     /**
      * @tc.expected: The result should be constrained within content rect.
      */
@@ -1650,5 +1685,64 @@ HWTEST_F(TextFieldPatternFuncTest, UpdateMagnifierOffset, TestSize.Level1)
     EXPECT_TRUE(magnifierOffset.GetY() >= 0.0f);
     rootUINode->RemoveChild(textFieldNode);
     rootUINode->renderContext_ = rootUINodeRenderContext;
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlayOnHandleGlobalTouchEvent
+ * @tc.desc: Test TextFieldSelectOverlay OnHandleGlobalTouchEvent when GetClearPolicy is
+ * CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH and IsTouchUp is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlayOnHandleGlobalTouchEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern and initialize select overlay.
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set clear policy to CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH.
+     * @tc.expected: When this policy is set, text selection should be cleared when user clicks outside the text field.
+     */
+    pattern_->selectOverlay_->SetTextSelectionClearPolicy(
+        TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH);
+
+    /**
+     * @tc.steps: step3. Get select controller and set up initial selection.
+     */
+    auto selectController = pattern_->GetTextSelectController();
+    ASSERT_NE(selectController, nullptr);
+    
+    /**
+     * @tc.steps: step4. Test scenario 1: TOUCH source with UP type.
+     * @tc.desc: Set text selection range (2, 5) and trigger global touch event.
+     * This simulates user clicking outside the text field with touch input.
+     */
+    selectController->UpdateHandleIndex(2, 5);
+    pattern_->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP, true);
+
+    /**
+     * @tc.expected: Text selection should be cleared after the event.
+     * The condition in OnHandleGlobalTouchEvent is:
+     *   GetClearPolicy() == CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH && IsTouchUp() == true
+     * When both conditions are met, OnResetTextSelection() is called to clear selection.
+     */
+    EXPECT_FALSE(selectController->IsSelected());
+    
+    /**
+     * @tc.steps: step5. Test scenario 2: TOUCH_PAD source with UP type.
+     * @tc.desc: Set text selection range (3, 7) and trigger global touch event.
+     * This simulates user clicking outside the text field with touchpad input.
+     */
+    selectController->UpdateHandleIndex(3, 7);
+    pattern_->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH_PAD, TouchType::UP, true);
+    
+    /**
+     * @tc.expected: Text selection should be cleared after the event.
+     * Both TOUCH and TOUCH_PAD sources satisfy IsTouchUp() when TouchType is UP.
+     */
+    EXPECT_FALSE(selectController->IsSelected());
 }
 } // namespace OHOS::Ace::NG

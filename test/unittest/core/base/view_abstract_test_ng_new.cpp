@@ -14,12 +14,14 @@
  */
 
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+#include "core/common/event_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/event/key_event.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -149,6 +149,13 @@ public:
         return contentNode_;
     }
 
+    const RefPtr<UINode>& GetOverlayNode() const
+    {
+        return overlayNode_;
+    }
+    RefPtr<FrameNode> GetOrCreateOverlayNode();
+    bool UpdateOverlayNodeVisibility();
+
     void SetDividerNode(const RefPtr<UINode>& dividerNode)
     {
         dividerNode_ = dividerNode;
@@ -231,6 +238,10 @@ public:
         bool isNavBarOrHomeDestination = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
         bool isNavBarOrHomeDestination = false);
+    void UpdateContainerVisibility(const RefPtr<FrameNode>& node, VisibleType visibleType);
+    void UpdateVisibilityAfterOverlayPush(const RefPtr<FrameNode>& curNode);
+    void UpdateVisibilityInOverlayPop(const RefPtr<FrameNode>& curNode);
+    void UpdateVisibilityAfterOverlayTransition(const RefPtr<NavDestinationGroupNode>& navDestination);
     virtual void CreateAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBarOrHomeDestination = false);
     virtual void CreateAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
@@ -250,7 +261,7 @@ public:
         const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBarOrHomeDestination);
     void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBarOrHomeDestination, bool isAnimated = true);
     void NotifyPageHide();
-    void UpdateLastStandardIndex();
+    void UpdateLastStandardIndex(bool& hasFullScreenOverlay);
 
     int32_t GetPreLastStandardIndex() const
     {
@@ -270,12 +281,14 @@ public:
         bool isTransitionIn);
 
     void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList,
-        const std::vector<WeakPtr<FrameNode>>& curNavList);
+        const std::vector<WeakPtr<FrameNode>>& curNavList, bool onlyHandleCurrentOverlay = false);
     void InitPopCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList,
-        bool isNavbarNeedAnimation);
+        bool isNavbarNeedAnimation, bool skipUnderlyingAnimation = false);
     void InitPushPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& prevNavList,
-        const std::vector<WeakPtr<FrameNode>>& curNavList, bool isNavbarNeedAnimation);
-    void InitPushCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList);
+        const std::vector<WeakPtr<FrameNode>>& curNavList, bool isNavbarNeedAnimation,
+        bool skipUnderlyingAnimation = false);
+    void InitPushCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList,
+        bool onlyHandleCurrentOverlay = false);
 
     std::vector<WeakPtr<NavDestinationGroupNode>> FindNodesPoped(const RefPtr<FrameNode>& preNode,
         const RefPtr<FrameNode>& curNode);
@@ -297,6 +310,10 @@ public:
     void SetIsOnAnimation(bool isOnAnimation)
     {
         isOnAnimation_ = isOnAnimation;
+    }
+    bool IsOnAnimation() const
+    {
+        return isOnAnimation_;
     }
     RefPtr<FrameNode> GetTopDestination();
     void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override;
@@ -388,6 +405,50 @@ public:
         return isStaticPlaceholder_;
     }
 
+    //-------for force split------- begin------
+    void SetDividerWidth(float width)
+    {
+        dividerWidth_ = width;
+    }
+    float GetDividerWidth() const
+    {
+        return dividerWidth_;
+    }
+    void SetPrimaryPartitionWidth(float width)
+    {
+        primaryPartitionWidth_ = width;
+    }
+    float GetPrimaryPartitionWidth() const
+    {
+        return primaryPartitionWidth_;
+    }
+    void SetSecondaryPartitionWidth(float width)
+    {
+        secondaryPartitionWidth_ = width;
+    }
+    float GetSecondaryPartitionWidth() const
+    {
+        return secondaryPartitionWidth_;
+    }
+    void StartSplitPushAnimation(
+        const RefPtr<FrameNode>& pushExitNode, const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    void StartSplitPopAnimation(
+        const RefPtr<FrameNode>& popEnterNode, const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    void StopForceSplitAnimations();
+    void CleanSplitPushAnimations()
+    {
+        splitPushAnimations_.clear();
+    }
+    void CleanSplitPopAnimations()
+    {
+        splitPopAnimations_.clear();
+    }
+    std::vector<RefPtr<NavDestinationGroupNode>> TakePrimaryNodesToBeRemoved()
+    {
+        return std::move(primaryNodesToBeRemoved_);
+    }
+    //-------for force split------- end  ------
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -398,7 +459,7 @@ private:
         const RefPtr<UINode>& preLastStandardNode);
     bool ReorderNavDestination(
         const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
-        RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
+        RefPtr<FrameNode>& navigationContentNode, int32_t& slot, int32_t& overlaySlot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged,
         const RefPtr<NavDestinationGroupNode>& preLastStandardNode);
@@ -424,16 +485,26 @@ private:
         const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
         const NavigationGroupNode::AnimationFinishCallback& callback);
     bool HandleBackForHomeOrRelatedDestination();
-    void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect();
-    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     RefPtr<FrameNode> GetStaticDeveloperPlaceholderNode(const RefPtr<UINode>& node);
+
+    //-------for force split------- begin------
+    bool CreateSplitPushAnimation(
+        const TransitionUnitInfo& pushExitInfo, const TransitionUnitInfo& preInfo,
+        const TransitionUnitInfo& curInfo, const AnimationFinishCallback finishCallback);
+    bool CreateSplitPopAnimation(
+        const TransitionUnitInfo& popEnterInfo, const TransitionUnitInfo& preInfo,
+        const TransitionUnitInfo& curInfo, const AnimationFinishCallback finishCallback);
+    void UpdateForceSplitTransitionAuxiliaryState(bool hasRunningAnimation);
+    void UpdateContentClipForForceSplitAnimation(bool enableClip);
+    //-------for force split------- end  ------
 
     std::optional<bool> useHomeDestination_;
     RefPtr<UINode> customHomeNode_;
     RefPtr<UINode> customHomeDestination_;
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
+    RefPtr<UINode> overlayNode_;
     RefPtr<UINode> dividerNode_;
     RefPtr<UINode> dragBarNode_;
     bool isStaticPlaceholder_ = false;
@@ -462,6 +533,15 @@ private:
     RefPtr<UINode> forceSplitPlaceHolderNode_;
     RefPtr<UINode> relatedPageCustomNode_;
     RefPtr<UINode> relatedPageDestinationNode_;
+    float dividerWidth_ = 0.0f;
+    float primaryPartitionWidth_ = 0.0f;
+    float secondaryPartitionWidth_ = 0.0f;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> splitPushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> splitPopAnimations_;
+    // Divider opacity and content clip are shared by split-push/split-pop animations.
+    // Use one counter so continuous split push/pop transitions only recover them after
+    // the last running animation finishes.
+    int32_t forceSplitRunningAnimationCount_ = 0;
     //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG

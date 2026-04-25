@@ -20,6 +20,7 @@
 
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {

@@ -138,6 +138,9 @@ function secondaryTitleStyles(fontStyle: FontStyle) {
   .maxLines(fontStyle?.maxLines)
   .textOverflow({ overflow: TextOverflow.Ellipsis })
   .align(fontStyle?.alignment)
+  .fallbackLineSpacing(true)
+  .wordBreak(WordBreak.HYPHENATION)
+  .orphanCharOptimization(true)
 }
 
 @Extend(Text)
@@ -148,6 +151,9 @@ function primaryTitleStyles(fontStyle: FontStyle) {
   .maxLines(fontStyle?.maxLines)
   .textOverflow({ overflow: TextOverflow.Ellipsis })
   .align(fontStyle?.alignment)
+  .fallbackLineSpacing(true)
+  .wordBreak(WordBreak.HYPHENATION)
+  .orphanCharOptimization(true)
 }
 
 @Styles

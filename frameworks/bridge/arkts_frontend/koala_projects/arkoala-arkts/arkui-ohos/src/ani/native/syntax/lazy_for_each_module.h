@@ -17,8 +17,6 @@
 #define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_LAZY_FOR_EACH_MODULE_H
 
 #include "load.h"
-
-#include <memory>
  
 namespace OHOS::Ace::Ani {
  

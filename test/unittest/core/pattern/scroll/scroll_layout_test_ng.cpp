@@ -17,6 +17,7 @@
 
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_container_info.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
@@ -27,6 +28,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float LAZY_GRID_ITEM_HEIGHT = 50.0f;
 constexpr float LAZY_GRID_GAP = 5.0f;
+constexpr int32_t LAZY_GRID_SMALL_ITEM_COUNT = 4;
 
 void CreateLazyVGridInScroll(float itemHeight, int32_t itemCount)
 {
@@ -542,6 +544,78 @@ HWTEST_F(ScrollLayoutTestNg, LazyVGridInScrollAlignment001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.0f, (HEIGHT - expectedHeight) / 2.0f)));
     EXPECT_EQ(gridPattern->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(gridPattern->layoutInfo_->endIndex_, 3);
+}
+
+/**
+ * @tc.name: LazyVGridInScrollAlignment002
+ * @tc.desc: Test LazyVGrid direct child keeps top alignment when content is smaller than viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, LazyVGridInScrollAlignment002, TestSize.Level1)
+{
+    CreateScroll();
+    layoutProperty_->UpdateAlignment(Alignment::TOP_CENTER);
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    const float expectedHeight = LAZY_GRID_ITEM_HEIGHT * 2 + LAZY_GRID_GAP;
+    EXPECT_TRUE(IsEqual(gridNode->GetGeometryNode()->GetFrameSize(), SizeF(WIDTH, expectedHeight)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.0f, 0.0f)));
+    EXPECT_EQ(gridPattern->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(gridPattern->layoutInfo_->endIndex_, LAZY_GRID_SMALL_ITEM_COUNT - 1);
+}
+
+/**
+ * @tc.name: LazyVGridInScrollAlignment003
+ * @tc.desc: Test LazyVGrid direct child keeps centered alignment when content is smaller than viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, LazyVGridInScrollAlignment003, TestSize.Level1)
+{
+    CreateScroll();
+    layoutProperty_->UpdateAlignment(Alignment::CENTER);
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    const float expectedHeight = LAZY_GRID_ITEM_HEIGHT * 2 + LAZY_GRID_GAP;
+    EXPECT_TRUE(IsEqual(gridNode->GetGeometryNode()->GetFrameSize(), SizeF(WIDTH, expectedHeight)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.0f, (HEIGHT - expectedHeight) / 2.0f)));
+    EXPECT_EQ(gridPattern->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(gridPattern->layoutInfo_->endIndex_, LAZY_GRID_SMALL_ITEM_COUNT - 1);
+}
+
+/**
+ * @tc.name: LazyVGridInScrollAlignment004
+ * @tc.desc: Test LazyVGrid direct child keeps bottom alignment when content is smaller than viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, LazyVGridInScrollAlignment004, TestSize.Level1)
+{
+    CreateScroll();
+    layoutProperty_->UpdateAlignment(Alignment::BOTTOM_CENTER);
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+    auto gridPattern = gridNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(gridPattern, nullptr);
+
+    const float expectedHeight = LAZY_GRID_ITEM_HEIGHT * 2 + LAZY_GRID_GAP;
+    EXPECT_TRUE(IsEqual(gridNode->GetGeometryNode()->GetFrameSize(), SizeF(WIDTH, expectedHeight)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.0f, HEIGHT - expectedHeight)));
+    EXPECT_EQ(gridPattern->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(gridPattern->layoutInfo_->endIndex_, LAZY_GRID_SMALL_ITEM_COUNT - 1);
 }
 
 /**

@@ -32,6 +32,7 @@ class RsNodeAdapter {
 public:
     RsNodeAdapter() = default;
     ~RsNodeAdapter() = default;
+    static std::shared_ptr<Rosen::RSNode> CreateDepthNode();
     static std::shared_ptr<Rosen::RSNode> CreateRootNode();
     static std::shared_ptr<Rosen::RSNode> CreateCanvasNode();
     ACE_FORCE_EXPORT static std::shared_ptr<Rosen::RSNode> CreateSurfaceNode(

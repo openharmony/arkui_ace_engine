@@ -23,7 +23,7 @@ import {
     HorizontalAlign, ButtonAttribute, LocalizedMargin, LoadingProgress, LocalizedPadding, CommonMethod, ButtonStyleMode,
     RelativeContainer, BaseGestureEvent, ThemeColorMode, NestedScrollMode, GestureRecognizer, GestureJudgeResult,
     ConstraintSizeOptions, CustomPopupOptions, TextHeightAdaptivePolicy, PopupStateChangeParam, LocalizedAlignRuleOptions,
-    PromptActionDialogController, CustomLayout, ButtonLabelStyle
+    PromptActionDialogController, CustomLayout, ButtonLabelStyle, WordBreak, TextAttribute
   } from '@ohos.arkui.component';
   import {
     Local, Once, Trace, Event, Param, Require, Monitor, PropRef, Provider, IMonitor, Consumer, Computed, ObservedV2,
@@ -99,6 +99,13 @@ import {
   export type AdvancedDialogV2OnCheckedChange = (checked: boolean) => void;
   
   export type AdvancedDialogV2ButtonAction = () => void;
+
+  function textAttributeExtension(this: TextAttribute): TextAttribute {
+    this.fallbackLineSpacing(true);
+    this.wordBreak(WordBreak.HYPHENATION);
+    this.orphanCharOptimization(true);
+    return this;
+  }
   
   @ObservedV2
   export class AdvancedDialogV2Button {
@@ -287,6 +294,7 @@ import {
             .layoutWeight(1)
             .focusable(false)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .textAttributeExtension()
         }
       }
       .accessibilityGroup(true)
@@ -352,6 +360,7 @@ import {
                 .maxLines(CONTENT_MAX_LINES)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .width('100%')
+                .textAttributeExtension()
             }
             .padding({ bottom: $r('sys.float.padding_level8') } as Padding)
           }
@@ -374,6 +383,7 @@ import {
                   }
                   return false
                 })
+                .textAttributeExtension()
             }
           }
         }
@@ -596,6 +606,7 @@ import {
                 .fontWeight(FontWeight.Regular)
                 .fontColor(this.fontColorWithTheme)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .textAttributeExtension()
             }.applyStyles(this.paddingContentStyle).width('100%')
           }
           List() {
@@ -610,6 +621,7 @@ import {
                         .fontColor(this.fontColorWithTheme)
                         .layoutWeight(1)
                         .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
+                        .textAttributeExtension()
                       Radio({ value: 'item.title', group: 'radioGroup' })
                         .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                         .checked(this.selectedIndexInner === index)
@@ -872,6 +884,7 @@ import {
                 return false
               })
               .width('100%')
+              .textAttributeExtension()
           }
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
           .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -906,6 +919,7 @@ import {
           .focusable(false)
           .layoutWeight(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAttributeExtension()
       }
       .accessibilityGroup(true)
       .accessibilityText(this.getCheckTipsAccessibilityText(this.checkTips, this.checkedInner))
@@ -1031,6 +1045,7 @@ import {
               }
               return false
             })
+            .textAttributeExtension()
         }
         .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
         .width('100%')
@@ -1430,6 +1445,7 @@ import {
             .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .width('100%')
+            .textAttributeExtension()
         }
         .width('100%')
   
@@ -1450,6 +1466,7 @@ import {
             .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .width('100%')
+            .textAttributeExtension()
         }
         .width('100%')
       }
@@ -1881,6 +1898,7 @@ import {
               strokeWidth: LengthMetrics.px(0)
             })
             .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .textAttributeExtension()
           LoadingProgress()
             .color(this.loadingProgressIconColorWithTheme)
             .width(LOADING_PROGRESS_WIDTH)

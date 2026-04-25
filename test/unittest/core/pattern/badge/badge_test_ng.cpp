@@ -14,15 +14,17 @@
  */
 
 #include <optional>
+#include "core/accessibility/accessibility_manager.h"
 #include <utility>
 
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components/badge/badge_theme.h"
@@ -34,6 +36,7 @@
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
+#include "core/components_ng/pattern/badge/badge_theme_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -100,16 +103,20 @@ protected:
 void BadgeTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_BADGE);
     auto badgeTheme = BadgeTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(badgeTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Return(BadgeThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants)));
 }
 
 void BadgeTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    MockContainer::TearDown();
 }
 
 void BadgeTestNg::SetUp() {}
@@ -1355,6 +1362,24 @@ HWTEST_F(BadgeTestNg, BadgePatternTest011, TestSize.Level0)
     pattern_->OnModifyDone();
 }
 
+HWTEST_F(BadgeTestNg, BadgePatternTextProperty001, TestSize.Level0)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode_);
+    pattern_->textNodeId_ = textNodeId;
+    pattern_->OnModifyDone();
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
 /**
  * @tc.name: BadgePatternTest010
  * @tc.desc: Test UpdateOuterBorderWidth
@@ -1807,7 +1832,7 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBorderColor, TestSize.Level1)
      * @tc.steps: step2. call to ProcessBorderColor.
      */
     badgeParameters.resourceBorderColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    badge.ProcessBorderColor(pattern_, badgeParameters.resourceBorderColorObject);
+    badge.ProcessBorderColor(pattern_, badgeParameters.resourceBorderColorObject, frameNode_);
 
     /**
      * @tc.steps: step3. check the key value.
@@ -1886,7 +1911,7 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeColor, TestSize.Level1)
      * @tc.steps: step2. call to ProcessBadgeColor.
      */
     badgeParameters.resourceBadgeColorObject = AceType::MakeRefPtr<ResourceObject>();
-    badge.ProcessBadgeColor(pattern_, badgeParameters.resourceBadgeColorObject);
+    badge.ProcessBadgeColor(pattern_, badgeParameters.resourceBadgeColorObject, frameNode_);
 
     /**
      * @tc.steps: step3. check the key value.

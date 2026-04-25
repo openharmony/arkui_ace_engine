@@ -71,6 +71,7 @@
 namespace OHOS::Ace {
 class WebDelegateObserver;
 class ImageAnalyzerManager;
+struct TextDetectConfig;
 }
 
 namespace OHOS::NWeb {
@@ -98,6 +99,7 @@ class WebAccessibilityChildTreeCallback;
 class ViewDataCommon;
 class TransitionalNodeInfo;
 class WebDomDocument;
+enum class AccessibilityHoverEventType;
 
 namespace {
 
@@ -283,7 +285,7 @@ public:
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
-
+    int32_t OnInjectionEvent(const std::string& command) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
 
     Color GetDefaultBackgroundColor();
@@ -629,6 +631,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAppearanceMode, WebKeyboardAppearanceMode);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
@@ -648,6 +651,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackToTop, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDefaultContextMenu, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDrag, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollbarLayoutPolicy, ScrollbarLayoutPolicy);
 
     bool IsFocus() const
     {
@@ -808,6 +813,8 @@ public:
     {
         return isImeStatus_ == VkState::VK_SHOW;
     }
+    bool OnNestedScrollV2(float& x, float& y);
+    bool OnNestedFling(float& xVelocity, float& yVelocity);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
     void EnableScrollDirectionalLock(bool enabled,
@@ -925,9 +932,12 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
+    void OnDirectionConfigurationUpdate() override;
+    void OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy);
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
-
+    std::string GetLayoutModeStr();
     void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
     void AddExtraInfoWithParamConfig(
@@ -1040,6 +1050,12 @@ public:
     }
 
     bool CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
+    int SendCommandToNWeb(std::unique_ptr<JsonValue> comJson);
+    int ExecuteInputCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteSelectCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteCommand(const std::string& eventTypeStr, const std::string& xpathStr, int32_t durationInt,
+                        const std::string& alignStr, int32_t offsetInt);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
@@ -1093,6 +1109,9 @@ public:
         isTextSelectionEnable_ = textSelectionEnable;
     }
     void NotifyOverlayRotation();
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
+    void UpdateScrollbarLayout();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {
@@ -1217,6 +1236,7 @@ private:
     void WindowDrag(int32_t width, int32_t height);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
+    void OnKeyboardAppearanceModeUpdate(const WebKeyboardAppearanceMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
@@ -1228,6 +1248,7 @@ private:
     void OnForceEnableZoomUpdate(bool value);
     void OnEnableAutoFillUpdate(bool isEnabled);
     void OnEnableDefaultContextMenuUpdate(bool isEnabled);
+    void OnEnableDragUpdate(bool isEnabled);
 
     int GetWebId();
 
@@ -1374,6 +1395,34 @@ private:
     bool FilterScrollEventHandleVelocity(const float velocity);
     void CheckAndSetWebNestedScrollExisted();
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
+
+    // Tooltip placement avoidance methods
+    struct TooltipPosition {
+        float x;
+        float y;
+    };
+
+    // Encapsulates parameters for tooltip placement calculation
+    struct TooltipCalculationContext {
+        float mouseX;
+        float mouseY;
+        float tooltipWidth;
+        float tooltipHeight;
+        float webWidth;
+        float webHeight;
+    };
+
+    OffsetF CalculateTooltipOffsetWithPlacement(const TooltipCalculationContext& context);
+
+    TooltipPosition GetPositionForPlacement(
+        Placement placement,
+        float mouseX, float mouseY,
+        float tooltipWidth, float tooltipHeight);
+
+    bool CheckPlacementAvailable(
+        const TooltipPosition& pos,
+        const TooltipCalculationContext& context);
+
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
@@ -1709,6 +1758,7 @@ private:
     // Directional lock properties
     bool isDirectionalLockEnabled_ = true;
     ScrollDirectionalLockType scrollDirectionalLockType_ = ScrollDirectionalLockType::NESTED_SCROLL;
+    ScrollbarLayoutPolicy scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

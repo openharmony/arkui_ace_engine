@@ -21,9 +21,6 @@
 #include <utility>
 #include <vector>
 
-#include "core/interfaces/native/node/view_model.h"
-#include "core/interfaces/native/node/node_timepicker_modifier.h"
-
 #include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -31,20 +28,15 @@
 #include "compatible/components/picker/picker_base_component.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
-#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -59,7 +51,6 @@ const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 const int32_t INVISIBLE_OPTIONS_COUNT = 2;
-const int32_t COLUMNS_SIZE = 3;
 const int32_t COLUMNS_ZERO = 0;
 const int32_t COLUMNS_ONE = 1;
 const int32_t COLUMNS_TWO = 2;
@@ -99,6 +90,9 @@ void DatePickerPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -151,6 +145,7 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     } else {
         auto pickerPadding = pickerTheme->GetPickerPadding();
         standardButtonHeight = static_cast<float>((height - pickerPadding * RATE).ConvertToPx());
@@ -226,6 +221,11 @@ void DatePickerPattern::AddIsFocusActiveUpdateEvent()
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+RefPtr<EventHub> DatePickerPattern::CreateEventHub()
+{
+    return MakeRefPtr<DatePickerEventHub>();
 }
 
 void DatePickerPattern::RemoveIsFocusActiveUpdateEvent()
@@ -413,6 +413,14 @@ void DatePickerPattern::OnModifyDone()
     Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
+    isWindowFullscreen_ = (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN);
+
     auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(datePickerRowLayoutProperty);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -450,6 +458,11 @@ void DatePickerPattern::OnModifyDone()
             refPtr->ShowTitle(titleId);
         }
     });
+    InitFocusAndSelector();
+}
+
+void DatePickerPattern::InitFocusAndSelector()
+{
     InitFocusKeyEvent();
     SetDefaultFocus();
     InitFocusEvent();
@@ -687,7 +700,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
 
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
@@ -738,6 +751,9 @@ bool DatePickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     host->SetNeedCallChildrenUpdate(false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_RETURN(pickerProperty, result);
@@ -2275,10 +2291,11 @@ int DatePickerPattern::LunarDateCompare(const LunarDate& left, const LunarDate& 
     return leftEqualRight;
 }
 
-void DatePickerPattern::InitColumnsOrder(RefPtr<FrameNode>* columns) const
+void DatePickerPattern::InitColumnsOrder(RefPtr<FrameNode> (*columns)[COLUMNS_SIZE]) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(columns);
     int index = 0;
     int order[COLUMNS_SIZE];
     if (dateOrder_ == "M-d-y") {
@@ -2299,7 +2316,7 @@ void DatePickerPattern::InitColumnsOrder(RefPtr<FrameNode>* columns) const
         auto blendChild = stackChild->GetLastChild();
         CHECK_NULL_VOID(blendChild);
         auto child = blendChild->GetLastChild();
-        columns[order[index]] = GetColumn(child->GetId());
+        (*columns)[order[index]] = GetColumn(child->GetId());
         index++;
     }
 }
@@ -2322,7 +2339,7 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     RefPtr<FrameNode> dayColumn;
     RefPtr<FrameNode> columns[COLUMNS_SIZE];
 
-    InitColumnsOrder(columns);
+    InitColumnsOrder(&columns);
     yearColumn = columns[COLUMNS_ZERO];
     monthColumn = columns[COLUMNS_ONE];
     dayColumn = columns[COLUMNS_TWO];
@@ -2447,7 +2464,7 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
 
     RefPtr<FrameNode> columns[COLUMNS_SIZE];
 
-    InitColumnsOrder(columns);
+    InitColumnsOrder(&columns);
     yearColumn = columns[COLUMNS_ZERO];
     monthColumn = columns[COLUMNS_ONE];
     dayColumn = columns[COLUMNS_TWO];
@@ -3437,6 +3454,7 @@ bool DatePickerPattern::IsNotSetStartEndDate()
     auto endDate = LunarToSolar(dataPickerRowLayoutProperty->GetEndDate().value_or(SolarToLunar(endDefaultDateSolar_)));
     return startDate == startDefaultDateSolar_ && endDate == endDefaultDateSolar_;
 }
+
 int32_t DatePickerPattern::OnInjectionEvent(const std::string& command)
 {
     if (GetIsShowInDialog()) {
@@ -3489,7 +3507,8 @@ bool DatePickerPattern::ValidateDateParameters(const std::unique_ptr<JsonValue>&
         year = yearValue->GetInt();
         month = monthValue->GetInt();
         day = dayValue->GetInt();
-        if (year < MIN_YEAR || month < MIN_MONTH || month > MAX_MONTH || day < MIN_DAY ||
+        if (year < MIN_YEAR || month < static_cast<int32_t>(MIN_MONTH) ||
+            month > static_cast<int32_t>(MAX_MONTH) || day < static_cast<int32_t>(MIN_DAY) ||
             day > static_cast<int32_t>(PickerDate::GetMaxDay(year, month))) {
             return false;
         }
@@ -3737,5 +3756,31 @@ bool DatePickerPattern::CheckDialogParamDataValid(const std::unique_ptr<JsonValu
         return false;
     }
     return true;
+}
+
+void DatePickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    bool oldFullscreen = isWindowFullscreen_;
+    switch (type) {
+        case WindowSizeChangeReason::SPLIT_TO_FULL:
+        case WindowSizeChangeReason::FLOATING_TO_FULL:
+            isWindowFullscreen_ = true;
+            break;
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::FULL_TO_FLOATING:
+            isWindowFullscreen_ = false;
+            break;
+        default:
+            break;
+    }
+    if (oldFullscreen != isWindowFullscreen_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (auto& column : datePickerColumns_) {
+            auto columnNode = column.Upgrade();
+            CHECK_NULL_VOID(columnNode);
+            columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

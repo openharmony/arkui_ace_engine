@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,17 +71,16 @@ void ProgressPattern::OnDetachFromMainTree()
 
 void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(progressTheme);
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     InitColorProperty(progressAnimatableProperty, progressTheme, paintProperty);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto contentSize = geometryNode->GetContentSize();
@@ -159,11 +158,13 @@ void ProgressPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    bool isScan = paintProperty->GetEnableScanEffect().value_or(false)
-        || paintProperty->GetEnableRingScanEffect().value_or(false)
-        || paintProperty->GetEnableLinearScanEffect().value_or(false);
     ProgressStatus progressStatus = paintProperty->GetProgressStatusValue(ProgressStatus::PROGRESSING);
-    CHECK_NULL_VOID(isScan || progressStatus == ProgressStatus::LOADING);
+    bool hasAnimation = paintProperty->GetEnableSmoothEffectValue(true)
+        || paintProperty->GetEnableScanEffect().value_or(false)
+        || paintProperty->GetEnableRingScanEffect().value_or(false)
+        || paintProperty->GetEnableLinearScanEffect().value_or(false)
+        || progressStatus == ProgressStatus::LOADING;
+    CHECK_NULL_VOID(hasAnimation);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
@@ -191,9 +192,9 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto theme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
@@ -318,7 +319,7 @@ void ProgressPattern::ClearFocusStyle()
 
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         renderContext->ResetBorderRadius();
         isFocusShadowSet_ = false;
     }
@@ -443,9 +444,7 @@ void ProgressPattern::HandleEnabled()
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
     auto alpha = theme->GetProgressDisable();
     auto originalOpacity = renderContext->GetOpacityValue(1.0);
@@ -455,12 +454,10 @@ void ProgressPattern::HandleEnabled()
 void ProgressPattern::OnPress(const TouchEventInfo& info)
 {
     auto touchType = info.GetTouches().front().GetTouchType();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
-    CHECK_NULL_VOID(theme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto theme = host->GetTheme<ProgressTheme>(true);
+    CHECK_NULL_VOID(theme);
     auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto textHost = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
@@ -566,9 +563,7 @@ void ProgressPattern::OnModifyDone()
     }
 
     if (progressLayoutProperty->GetType() == ProgressType::RING && !progressLayoutProperty->GetPaddingProperty()) {
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+        auto theme = host->GetTheme<ProgressTheme>(true);
         CHECK_NULL_VOID(theme);
         PaddingProperty padding;
         padding.SetEdges(CalcLength(theme->GetRingDefaultPadding()));
@@ -644,9 +639,9 @@ void ProgressPattern::ToJsonValueForCapsuleStyleOptions(
     }
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(progressTheme);
     auto capsuleStyle = JsonUtil::Create(true);
     auto font = JsonUtil::Create(true);
@@ -708,9 +703,7 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = frameNode->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
 
     auto jsonValue = JsonUtil::Create(true);
@@ -733,9 +726,7 @@ void ProgressPattern::ToJsonValueForLinearStyleOptions(
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = frameNode->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
 
     auto jsonValue = JsonUtil::Create(true);
@@ -877,12 +868,13 @@ bool ProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, result);
     const auto& type = paintProperty->GetProgressType();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, result);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_RETURN(progressTheme, result);
 
     result = !paintProperty->HasBackgroundColor() ||

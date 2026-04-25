@@ -26,6 +26,8 @@ std::string g_clipboard;
 RefPtr<PixelMap> g_pixmap;
 #else
 const std::string AUTO_FILL_SECURE_PASTE = "autofill/secure";
+/* Check the device logs for "async task timeout" to confirm if a timeout occurred. */
+static constexpr const int32_t WAIT_TIME = 200; // 200ms
 #endif
 } // namespace
 
@@ -61,7 +63,9 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData, bool isAutoFi
     taskExecutor_->PostSyncTask(
         [&hasData, &isAutoFill]() {
             hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
-            isAutoFill = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(AUTO_FILL_SECURE_PASTE);
+            /* Check the device logs for "async task timeout" to confirm if a timeout occurred. */
+            isAutoFill = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(AUTO_FILL_SECURE_PASTE,
+                WAIT_TIME);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardHasData");
     callback(hasData, isAutoFill);
@@ -78,7 +82,8 @@ void ClipboardImpl::HasDataType(
     taskExecutor_->PostSyncTask(
         [&hasData, &isAutoFill, mimeTypes]() {
             for (auto mimeType = mimeTypes.begin(); mimeType != mimeTypes.end(); ++mimeType) {
-                hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(*mimeType);
+                /* Check the device logs for "async task timeout" to confirm if a timeout occurred. */
+                hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(*mimeType, WAIT_TIME);
                 TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "Clipboard data mimeType %{public}s available ? %{public}d",
                     mimeType->c_str(), hasData);
                 if (hasData) {

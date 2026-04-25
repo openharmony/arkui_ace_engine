@@ -14,6 +14,10 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/container_handler.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <chrono>
 
@@ -28,11 +32,14 @@
 #include "system_ability_definition.h"
 #include "wm_common.h"
 #include "form_ashmem.h"
+#include "pointer_event.h"
 
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "core/image/image_cache.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
+#include "adapter/ohos/entrance/data_share_observer_helper.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/high_contrast_observer.h"
@@ -68,14 +75,15 @@
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/event/crown_event.h"
 #include "frameworks/core/common/dynamic_module_helper.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -85,6 +93,7 @@
 #include "base/ressched/ressched_report.h"
 
 #include "accessibility_config.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -341,6 +350,8 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     themeManager->LoadResourceThemes();
 
     if (clearCache) {
+        LOGI("[%{public}s][%{public}s][%{public}d] Clear resource cache when init.", bundleName.c_str(),
+            moduleName.c_str(), pipelineContext->GetInstanceId());
         ResourceManager::GetInstance().Reset();
     }
 
@@ -921,7 +932,12 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
                 return true;
             }
-            instanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+            auto parentInstanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+            if (RemoveOverlayBySubwindowManager(parentInstanceId)) {
+                TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
+                return true;
+            }
+            return false;
         } else {
             SubwindowManager::GetInstance()->CloseMenu();
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "Menu consumed backpressed event");
@@ -1311,12 +1327,14 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
+    auto mousePassMode = AceApplicationInfo::GetInstance().GetMouseEventPassMode();
     int32_t debugMode = SystemProperties::GetTouchAccelarate();
     if (debugMode != static_cast<int32_t>(touchPassMode)) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Debug touch pass mode %{public}d", debugMode);
         touchPassMode = static_cast<TouchPassMode>(debugMode);
         AceApplicationInfo::GetInstance().SetTouchEventPassMode(touchPassMode);
     }
+    pipelineContext_->SetMousePassThrough(mousePassMode == MousePassMode::PASS_THROUGH);
     pipelineContext_->SetTouchAccelarate(touchPassMode == TouchPassMode::ACCELERATE);
     pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
@@ -1661,8 +1679,8 @@ void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t 
     container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
-UIContentErrorCode AceContainer::SetViewNew(
-    const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
+UIContentErrorCode AceContainer::SetViewNew(const RefPtr<AceView>& view, double density, float width, float height,
+    sptr<OHOS::Rosen::Window> rsWindow, sptr<IRemoteObject> connectToRender)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_RETURN(view, UIContentErrorCode::NULL_POINTER);
@@ -1673,7 +1691,7 @@ UIContentErrorCode AceContainer::SetViewNew(
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     if (container->isFormRender_) {
-        auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId(), connectToRender);
         if (!window->GetRSSurfaceNode()) {
             TAG_LOGW(AceLogTag::ACE_FORM,
                 "SurfaceNode is null, try to create form render window again, instanceId_:%{public}d.",
@@ -1752,16 +1770,11 @@ UIContentErrorCode AceContainer::RunPage(
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-    container->LoadCompleteManagerStartCollect(content);
     if (isNamedRouter) {
-        auto result = front->RunPageByNamedRouter(content, params);
-        container->LoadCompleteManagerStopCollect();
-        return result;
+        return front->RunPageByNamedRouter(content, params);
     }
 
-    auto result = front->RunPage(content, params);
-    container->LoadCompleteManagerStopCollect();
-    return result;
+    return front->RunPage(content, params);
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1772,10 +1785,7 @@ UIContentErrorCode AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
-    container->LoadCompleteManagerStartCollect(params);
-    auto result = front->RunPage(content, params);
-    container->LoadCompleteManagerStopCollect();
-    return result;
+    return front->RunPage(content, params);
 }
 
 bool AceContainer::RunDynamicPage(
@@ -3040,9 +3050,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
             jsEngine->JsSetAceDebugMode();
-            if (AceApplicationInfo::GetInstance().GetEnableCustomComponentCrossAbility()) {
-                jsEngine->JsEnableSwitchInstance();
-            }
         }
     }
 
@@ -3076,7 +3083,15 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
                                      useStageModel = useStageModel_]() {
         return AceType::MakeRefPtr<DataAbilityHelperStandard>(ability.lock(), runtimeContext.lock(), useStageModel);
     };
-    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(dataAbilityHelperImpl);
+    auto dataShareObserverHelperImpl = [runtimeContext = runtimeContext_,
+                                          container = WeakClaim(this),
+                                          useStageModel = useStageModel_]() {
+        return AceType::MakeRefPtr<DataShareObserverHelper>(runtimeContext.lock(),
+            container.Upgrade(), useStageModel);
+    };
+
+    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(
+        dataAbilityHelperImpl, dataShareObserverHelperImpl);
     pipelineContext_->SetDataProviderManager(dataProviderManager);
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -3333,6 +3348,13 @@ void AceContainer::InitWindowCallback()
                     isFullScreen ? "yes" : "no");
                 window->NotifyIsFullScreenInForceSplitMode(isFullScreen);
             }
+    });
+
+    windowManager->SetUpdateForceSplitRatioCallback(
+        [window = uiWindow_](float ratio) {
+            CHECK_NULL_VOID(window);
+            window->NotifySplitRatioChanged(ratio);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will notify window force split ratio to %{public}f", ratio);
     });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, weak = WeakClaim(this)]() -> Rect {
@@ -5192,13 +5214,6 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     }
 }
 
-void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
-{
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->GetLoadCompleteManager()->StartCollect(url);
-}
-
 void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback)
 {
     if (!IsUIExtensionWindow()) {
@@ -5208,10 +5223,10 @@ void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& 
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "RegisterTerminateUIExtension success");
-    uiExtensionContext->TerminateSelfWithAnimation(std::move(callback));
+    uiExtensionContext->RegisterTerminateSelfWithAnimation(std::move(callback));
 }
 
-void AceContainer::TerminateUIExtensionInner()
+void AceContainer::TerminateUIExtensionInner(int32_t code)
 {
     if (!IsUIExtensionWindow()) {
         return;
@@ -5219,13 +5234,6 @@ void AceContainer::TerminateUIExtensionInner()
     auto sharedContext = runtimeContext_.lock();
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
-    uiExtensionContext->TerminateSelfInner();
-}
-
-void AceContainer::LoadCompleteManagerStopCollect()
-{
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->GetLoadCompleteManager()->StopCollect();
+    uiExtensionContext->TerminateSelfInner(code);
 }
 } // namespace OHOS::Ace::Platform

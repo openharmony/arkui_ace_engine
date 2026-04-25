@@ -22,7 +22,7 @@ import { PeerNode } from '../PeerNode'
 import { InternalListener } from './DataChangeListener'
 import { setNeedCreate } from '../ArkComponentRoot'
 import { IDataSource } from '../component/lazyForEach'
-import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
+import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps, LazyForEachOptions } from '#generated'
 import { LazyNodePeer, LazyItemNode, NodeHolder } from './SyntaxNodeBase'
 import { CustomComponent } from '../component/customComponent'
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
@@ -48,6 +48,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     keyGenerator?: (item: T, index: int32) => string,
     onMove?: OnMoveHandler,
     itemDragEvent?: ItemDragEventHandler,
+    options?: LazyForEachOptions,
     isRepeat: boolean = false
 ) {
     const node = createLazyNode(isRepeat)
@@ -99,6 +100,9 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
             ObserveSingleton.instance.renderingComponent = lastRenderingComponent
             ExtendableComponent.current = lastExtendableComponent
         }
+    }
+    if (options !== undefined) {
+        LazyForEachOps.SetOptions(node.getPeerPtr(), options as LazyForEachOptions)
     }
     LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
 

@@ -674,7 +674,8 @@ void UpdateAlignment(const RefPtr<FrameNode>& node, const OHOS::Ace::Alignment& 
 void SetAccessibilityIsShow(const RefPtr<FrameNode>& node, bool isShow)
 {
     CHECK_NULL_VOID(node);
-    auto menuAccessibilityProperty = node->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto menuAccessibilityProperty =
+        AceType::DynamicCast<MenuAccessibilityProperty>(node->GetAccessibilityProperty<AccessibilityProperty>());
     CHECK_NULL_VOID(menuAccessibilityProperty);
     menuAccessibilityProperty->SetAccessibilityIsShow(isShow);
 }

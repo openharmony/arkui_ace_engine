@@ -14,9 +14,9 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/properties/shadow_config.h"
@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -31,6 +33,7 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/repeat_model_ng.h"
 #include "core/components_ng/syntax/repeat_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/common/resource/resource_parse_utils.h"
 
@@ -221,7 +224,9 @@ ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter(in
     auto header = GetHeaderOrFooterButtonBuilder(count, "header", index);
     auto footer = GetHeaderOrFooterButtonBuilder(count, "footer", index);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::NONE);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::NONE;
+    groupModel.Create(groupOptions);
     groupModel.SetHeader(std::move(header));
     groupModel.SetFooter(std::move(footer));
     auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -1777,7 +1782,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(GROUP_ITEM_NUMBER, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();
@@ -1824,7 +1831,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest002, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(GROUP_ITEM_NUMBER, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();
@@ -1876,7 +1885,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest003, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(5, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();

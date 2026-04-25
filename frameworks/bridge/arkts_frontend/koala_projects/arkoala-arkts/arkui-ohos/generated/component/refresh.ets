@@ -18,27 +18,27 @@
 
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, Bindable, ArkCommonMethodComponent, Bindable_Boolean_serializer } from './common'
+import { Resource as arkui_component_units_Resource, ResourceStr } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
 import { AttributeModifier, extractors, hookRefreshAttributeModifier, AttributeUpdater } from '#handwritten'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { ResourceStr, Resource as arkui_component_units_Resource } from './units'
-import { Resource as global_resource_Resource } from 'global.resource'
 import { ComponentContentBase } from 'arkui.ComponentContent'
 import { RefreshModifier } from './../RefreshModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { global_resource_Resource_serializer } from './../framework/resource'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
-    attributeSet?: RefreshModifier;
+    refreshAttributeSet?: RefreshModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -80,7 +80,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RefreshAttribute_setOnRefreshing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setRefreshOffsetAttribute(value: double | undefined): void {
+    setRefreshOffset0Attribute(value: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -89,7 +89,19 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._RefreshAttribute_setRefreshOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RefreshAttribute_setRefreshOffset0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setRefreshOffset1Attribute(value: arkui_component_units_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            global_resource_Resource_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RefreshAttribute_setRefreshOffset1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPullToRefreshAttribute(value: boolean | undefined): void {
@@ -140,7 +152,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RefreshAttribute_setPullDownRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxPullDownDistanceAttribute(value: double | undefined): void {
+    setMaxPullDownDistance0Attribute(value: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -149,7 +161,19 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._RefreshAttribute_setMaxPullDownDistance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RefreshAttribute_setMaxPullDownDistance0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMaxPullDownDistance1Attribute(value: arkui_component_units_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            global_resource_Resource_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RefreshAttribute_setMaxPullDownDistance1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -179,6 +203,9 @@ export interface RefreshAttribute extends CommonMethod {
     refreshOffset(value: double | undefined): this {
         throw new Error('Unimplemented method refreshOffset')
     }
+    refreshOffset(value: arkui_component_units_Resource | undefined): this {
+        throw new Error('Unimplemented method refreshOffset')
+    }
     pullToRefresh(value: boolean | undefined): this {
         throw new Error('Unimplemented method pullToRefresh')
     }
@@ -192,6 +219,9 @@ export interface RefreshAttribute extends CommonMethod {
         throw new Error('Unimplemented method pullDownRatio')
     }
     maxPullDownDistance(value: double | undefined): this {
+        throw new Error('Unimplemented method maxPullDownDistance')
+    }
+    maxPullDownDistance(value: arkui_component_units_Resource | undefined): this {
         throw new Error('Unimplemented method maxPullDownDistance')
     }
     attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -221,7 +251,12 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
     }
     public refreshOffset(value: double | undefined): this {
         const value_casted = value as (double | undefined)
-        this.getPeer()?.setRefreshOffsetAttribute(value_casted)
+        this.getPeer()?.setRefreshOffset0Attribute(value_casted)
+        return this
+    }
+    public refreshOffset(value: arkui_component_units_Resource | undefined): this {
+        const value_casted = value as (arkui_component_units_Resource | undefined)
+        this.getPeer()?.setRefreshOffset1Attribute(value_casted)
         return this
     }
     public pullToRefresh(value: boolean | undefined): this {
@@ -246,7 +281,12 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
     }
     public maxPullDownDistance(value: double | undefined): this {
         const value_casted = value as (double | undefined)
-        this.getPeer()?.setMaxPullDownDistanceAttribute(value_casted)
+        this.getPeer()?.setMaxPullDownDistance0Attribute(value_casted)
+        return this
+    }
+    public maxPullDownDistance(value: arkui_component_units_Resource | undefined): this {
+        const value_casted = value as (arkui_component_units_Resource | undefined)
+        this.getPeer()?.setMaxPullDownDistance1Attribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {

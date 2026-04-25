@@ -17,9 +17,9 @@
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/base/frame_node.h"

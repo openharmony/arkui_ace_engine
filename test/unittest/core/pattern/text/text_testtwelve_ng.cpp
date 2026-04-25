@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "foundation/arkui/ace_engine/test/mock/core/render/mock_paragraph.h"
+#include "foundation/arkui/ace_engine/test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "text_base.h"
@@ -1179,5 +1179,97 @@ HWTEST_F(TextTwelveTestNg, TextConvertMenuId, TestSize.Level1)
     EXPECT_EQ(strId, "OH_DEFAULT_COPY");
     strId = SelectOverlayNode::ConvertToStrMenuId(200);
     EXPECT_EQ(strId, "200");
+}
+
+/**
+ * @tc.name: OnWillCopy.
+ * @tc.desc: Test OnWillCopy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTwelveTestNg, OnWillCopy, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->onWillCopy_, nullptr);
+    std::u16string expected = u"Hello";
+    EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
+    std::u16string value = u"";
+    bool result = false;
+    auto onWillCopyResult = [&value, &result](const std::u16string& param) -> bool {
+        value = param;
+        return result;
+    };
+    textModelNG.SetOnWillCopy(frameNode, onWillCopyResult);
+    EXPECT_FALSE(eventHub->FireOnWillCopy(expected));
+    EXPECT_EQ(expected, value);
+    result = true;
+    EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
+}
+
+/**
+ * @tc.name: TextSelectOverlayOnHandleGlobalTouchEvent
+ * @tc.desc: Test TextSelectOverlay OnHandleGlobalTouchEvent when GetClearPolicy is
+ * CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH and IsTouchUp is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTwelveTestNg, TextSelectOverlayOnHandleGlobalTouchEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    ASSERT_NE(textPattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set clear policy to CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH.
+     * @tc.expected: When this policy is set, text selection should be cleared when user clicks outside of text.
+     */
+    textPattern->selectOverlay_->SetTextSelectionClearPolicy(
+        TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH);
+
+    /**
+     * @tc.steps: step3. Test scenario 1: TOUCH source with UP type.
+     * @tc.desc: Set text selection range (2, 4) and trigger global touch event.
+     * This simulates user clicking outside of text field with touch input.
+     */
+    TextSelector textSelector(2, 4);
+    textPattern->textSelector_ = textSelector;
+    EXPECT_FALSE(textPattern->GetTextSelector().SelectNothing());
+
+    textPattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP, true);
+
+    /**
+     * @tc.expected: Text selection should be cleared after the event.
+     * The condition in OnHandleGlobalTouchEvent is:
+     *   GetClearPolicy() == CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH && IsTouchUp() == true
+     * When both conditions are met, ResetSelection() is called to clear selection.
+     * SelectNothing() returns true when textSelector_.baseOffset == textSelector_.destinationOffset
+     * After ResetSelection(), both baseOffset and destinationOffset are set to -1.
+     */
+    EXPECT_TRUE(textPattern->GetTextSelector().SelectNothing());
+
+    /**
+     * @tc.steps: step4. Test scenario 2: TOUCH_PAD source with UP type.
+     * @tc.desc: Set text selection range (3, 5) and trigger global touch event.
+     * This simulates user clicking outside of text field with touchpad input.
+     */
+    textSelector = TextSelector(3, 5);
+    textPattern->textSelector_ = textSelector;
+    EXPECT_FALSE(textPattern->GetTextSelector().SelectNothing());
+
+    textPattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH_PAD, TouchType::UP, true);
+
+    /**
+     * @tc.expected: Text selection should be cleared after the event.
+     * Both TOUCH and TOUCH_PAD sources satisfy IsTouchUp() when TouchType is UP.
+     */
+    EXPECT_TRUE(textPattern->GetTextSelector().SelectNothing());
 }
 } // namespace OHOS::Ace::NG

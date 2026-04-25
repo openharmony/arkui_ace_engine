@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
@@ -1914,7 +1915,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode, .systemMaterial = dialogAttr.systemMaterial
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -2040,7 +2041,8 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
@@ -2310,6 +2312,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -3856,6 +3859,15 @@ void FrontendDelegateDeclarative::GetSnapshotWithRange(const NG::NodeIdentity& s
 #endif
 }
 
+NG::SnapshotSizeLimitation FrontendDelegateDeclarative::GetSizeLimitation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSizeLimitation();
+#else
+    return {};
+#endif
+}
+
 void FrontendDelegateDeclarative::CreateSnapshot(
     std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector,
     const NG::SnapshotParam& param)
@@ -3898,6 +3910,26 @@ void FrontendDelegateDeclarative::AddFrameNodeWithOrder(const RefPtr<NG::FrameNo
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->AddFrameNodeWithOrder(node, levelOrder);
+}
+
+void FrontendDelegateDeclarative::OpenOrderOverlay(const RefPtr<NG::FrameNode>& node,
+    const NG::OrderOverlayOptions& options, std::function<void(int32_t)>&& callback)
+{
+    CHECK_NULL_VOID(node);
+    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(node)),
+        options, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenOrderOverlay calling OpenOrderOverlay.");
+        overlayManager->OpenOrderOverlay(node, options, std::move(callback));
+    };
+
+    if (options.levelMode == LevelMode::EMBEDDED) {
+        NG::DialogManager::ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowOrder", options.levelUniqueId);
+    } else {
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowOrder", nullptr);
+    }
 }
 
 void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -4012,5 +4044,15 @@ std::string FrontendDelegateDeclarative::GetPagePathByUrl(const std::string& url
     std::string path;
     pageRouterManager_->GetPageNameAndPath(url, name, path);
     return path + name;
+}
+
+bool FrontendDelegateDeclarative::IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+{
+    CHECK_NULL_RETURN(page, false);
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    return pageRouterManager_->IsPageInStack(page);
 }
 } // namespace OHOS::Ace::Framework

@@ -37,7 +37,7 @@ import { ToggleModifier } from './../ToggleModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkTogglePeer extends ArkCommonMethodPeer {
-    attributeSet?: ToggleModifier;
+    toggleAttributeSet?: ToggleModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

@@ -81,6 +81,17 @@ enum class ListItemGroupStyle {
     CARD,
 };
 
+enum class ListItemGroupHeaderFooterStyle {
+    NONE = 0,
+    FLOATING,
+};
+
+struct ListItemGroupOptions {
+    ListItemGroupStyle style = ListItemGroupStyle::NONE;
+    ListItemGroupHeaderFooterStyle headerStyle = ListItemGroupHeaderFooterStyle::NONE;
+    ListItemGroupHeaderFooterStyle footerStyle = ListItemGroupHeaderFooterStyle::NONE;
+};
+
 struct EditMode {
     enum : uint32_t {
         NONE = 0,
@@ -126,6 +137,14 @@ using OnEnterDeleteAreaEvent = std::function<void()>;
 using OnExitDeleteAreaEvent = std::function<void()>;
 using OnOffsetChangeFunc = std::function<void(int32_t)>;
 using OnStateChangedEvent = std::function<void(SwipeActionState)>;
+
+namespace NG {
+using ItemState = uint32_t;
+inline constexpr ItemState ITEM_STATE_NORMAL = 0;
+inline constexpr ItemState ITEM_STATE_PRESSED = 1;
+inline constexpr ItemState ITEM_STATE_FOCUSED = 1 << 1;
+inline constexpr ItemState ITEM_STATE_HOVERED = 1 << 2;
+} // namespace NG
 
 } // namespace OHOS::Ace
 

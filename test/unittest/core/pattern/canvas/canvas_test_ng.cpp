@@ -22,11 +22,11 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
@@ -151,6 +151,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
+     * @tc.expected: needResetSurface_ is false.
      */
     needReset = false;
     pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
@@ -162,6 +163,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step3. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
+     * @tc.expected: needResetSurface_ is false.
      */
     needReset = false;
     config.frameSizeChange = false;
@@ -175,6 +177,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step4. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
+     * @tc.expected: needResetSurface_ is false.
      */
     needReset = false;
     config.frameSizeChange = true;
@@ -188,6 +191,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step5. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
+     * @tc.expected: needResetSurface_ is false.
      */
     needReset = true;
     config.frameSizeChange = false;
@@ -201,6 +205,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step6. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
+     * @tc.expected: needResetSurface_ is true.
      */
     needReset = true;
     config.frameSizeChange = true;
@@ -214,6 +219,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level0)
 
     /**
      * @tc.steps: step7. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
+     * @tc.expected: needResetSurface_ is true.
      */
     needReset = true;
     config.frameSizeChange = false;
@@ -403,8 +409,10 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level0)
     /**
      * @tc.steps: step1. HasShadow() == false
      */
-    Shadow shadow1 = Shadow(5.0f, Offset(0.0, 0.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
-    Shadow shadow2 = Shadow(5.0f, Offset(10.0, 10.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
+    Shadow shadow1 =
+        Shadow(5.0f, Offset(0.0, 0.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
+    Shadow shadow2 =
+        Shadow(5.0f, Offset(10.0, 10.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
     paintMethod->state_.shadow = shadow1;
     EXPECT_FALSE(paintMethod->HasShadow());
     /**
@@ -438,7 +446,8 @@ HWTEST_F(CanvasTestNg, OnAttachToMainTreeTest, TestSize.Level0)
     /**
      * @tc.steps2: instantiation paintMethod_.
      */
-    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+    auto customNode =
+        CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
     customNode->SetJSViewName("testName");
     frameNode->SetParent(customNode);
     auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();

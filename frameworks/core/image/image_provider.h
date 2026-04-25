@@ -16,10 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_PROVIDER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_PROVIDER_H
 
+#include <cstdint>
 #include <string>
-
-#include "include/codec/SkCodec.h"
-#include "draw/color.h"
 
 #include "base/memory/ace_type.h"
 #include "base/resource/internal_resource.h"
@@ -31,6 +29,8 @@
 #include "core/pipeline/pipeline_base.h"
 
 class SkSVGDOM;
+template<typename T>
+class sk_sp;
 namespace OHOS::Ace {
 
 class ImageObject;
@@ -92,7 +92,7 @@ public:
 
     static bool IsWideGamut(const std::shared_ptr<RSColorSpace>& rsColorSpace);
 
-    static bool NeedExchangeWidthAndHeight(SkEncodedOrigin origin);
+    static bool NeedExchangeWidthAndHeight(int32_t encodedOrigin);
 
     // This is a synchronization interface for getting out source image.
     ACE_FORCE_EXPORT static std::shared_ptr<RSImage> GetDrawingImage(
@@ -109,8 +109,8 @@ public:
 
     static RefPtr<ImageObject> QueryImageObjectFromCache(
         const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase>& pipelineContext);
-    static Rosen::Drawing::ColorType PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap);
-    static Rosen::Drawing::AlphaType AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap);
+    static int32_t PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap);
+    static int32_t AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap);
     ACE_FORCE_EXPORT static RSBitmapFormat MakeRSBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static std::shared_ptr<RSColorSpace> ColorSpaceToDrawingColorSpace(const RefPtr<PixelMap>& pixmap);
     static RSImageInfo MakeRSImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);

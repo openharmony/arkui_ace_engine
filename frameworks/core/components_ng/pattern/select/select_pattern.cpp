@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cstdint>
 #include <optional>
@@ -31,7 +32,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -86,6 +87,7 @@ constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 
 constexpr int32_t FIRST_NODE_INDEX = 0;
+constexpr Dimension MIN_HOT_ZONE_HEIGHT = 32.0_vp;
 
 static std::string ConvertControlSizeToString(ControlSize controlSize)
 {
@@ -128,6 +130,32 @@ static std::string ConvertVectorToString(std::vector<std::string> vec)
         oss << ((i == 0) ? "" : ",") << vec[i];
     }
     return oss.str();
+}
+
+RectF ExpandRectHeightToMinimum(RectF rect, float minHeight)
+{
+    if (GreatOrEqual(rect.Height(), minHeight)) {
+        return rect;
+    }
+    auto expandHeight = (minHeight - rect.Height()) / 2.0f;
+    rect.SetOffset(OffsetF(rect.GetX(), rect.GetY() - expandHeight));
+    rect.SetHeight(minHeight);
+    return rect;
+}
+
+bool HasUserDefinedHeight(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (layoutProperty->HasUserDefinedHeightConfig()) {
+        return true;
+    }
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (!calcLayoutConstraint || !calcLayoutConstraint->selfIdealSize.has_value()) {
+        return false;
+    }
+    return calcLayoutConstraint->selfIdealSize->Height().has_value();
 }
 } // namespace
 
@@ -204,8 +232,7 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(selectPaintProperty);
     auto material = renderContext->GetSystemMaterial();
     if (selectPaintProperty->HasBackgroundColor() ||
-        (material && material->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
-            material->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX))) {
+        (material && MaterialUtils::CheckMaterialValid(material->GetType()))) {
         return;
     }
     auto context = host->GetContextRefPtr();
@@ -227,6 +254,22 @@ void SelectPattern::OnModifyDone()
             renderContext->UpdateBackgroundColor(theme->GetButtonBackgroundColor());
         }
     }
+}
+
+bool SelectPattern::IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const
+{
+    if (sourceType != SourceType::TOUCH) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX), false);
+    return !HasUserDefinedHeight(host);
+}
+
+RectF SelectPattern::ExpandDefaultResponseRegion(RectF& rect)
+{
+    return ExpandRectHeightToMinimum(rect, MIN_HOT_ZONE_HEIGHT.ConvertToPx());
 }
 
 void SelectPattern::OnAfterModifyDone()
@@ -315,6 +358,10 @@ void SelectPattern::ConfigMenuParam()
     menuParam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
     menuParam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
     menuParam.systemMaterial = GetMenuSystemMaterial();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && MaterialUtils::IsMaterialEnabled() && !menuParam.systemMaterial) {
+        menuParam.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    }
     auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
     ACE_UINODE_TRACE(menuNode);
@@ -1626,6 +1673,7 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
+    textProps->UpdateEnableSmallLanguageTruncation(true);
     textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());
@@ -2118,8 +2166,9 @@ void SelectPattern::OnColorConfigurationUpdate()
     } else {
         renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
     }
-
-    UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
+    auto configurationChange = pipeline->GetConfigurationChange();
+    configurationChange.colorModeUpdate = true;
+    UpdateMenuChildColorConfiguration(menuNode, configurationChange);
     auto optionNode = menuModifier->getOptions(menuNode);
     auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto child : optionNode) {
@@ -2237,9 +2286,7 @@ void SelectPattern::UpdateMenuChildColorConfiguration(
     const RefPtr<FrameNode>& menuNode, const ConfigurationChange& configurationChange)
 {
     CHECK_NULL_VOID(menuNode);
-    auto scrollNode = menuNode->GetFirstChild();
-    CHECK_NULL_VOID(scrollNode);
-    scrollNode->UpdateConfigurationUpdate(configurationChange);
+    menuNode->UpdateConfigurationUpdate(configurationChange);
 }
 
 bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -2264,6 +2311,14 @@ bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(selectPaintProperty, false);
     if (!selectPaintProperty->HasBackgroundColor()) {
         selectRenderContext->UpdateBackgroundColor(selectTheme->GetButtonBackgroundColor());
+        result = true;
+    }
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto menuNode = GetMenuNode();
+        CHECK_NULL_RETURN(menuNode, false);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, false);
+        menuPattern->OnThemeScopeUpdate(themeScopeId);
         result = true;
     }
     return result;
@@ -2393,6 +2448,12 @@ void SelectPattern::SetOptionHeight(const Dimension& value)
 
 void SelectPattern::SetMenuBackgroundColor(const Color& color)
 {
+    CHECK_NULL_VOID(menuWrapper_);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto params = wrapperPattern->GetMenuParam();
+    params.backgroundColor = color;
+    wrapperPattern->SetMenuParam(params);
     menuBackgroundColor_ = color;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
@@ -2404,6 +2465,12 @@ void SelectPattern::SetMenuBackgroundColor(const Color& color)
 
 void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
 {
+    CHECK_NULL_VOID(menuWrapper_);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto params = wrapperPattern->GetMenuParam();
+    params.blurStyleOption = blurStyle;
+    wrapperPattern->SetMenuParam(params);
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     ACE_UINODE_TRACE(menu);

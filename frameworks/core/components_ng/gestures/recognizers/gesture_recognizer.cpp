@@ -20,8 +20,12 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+#include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -746,6 +750,26 @@ void NGGestureRecognizer::HandleGestureAccept(
         return;
     }
     UIObserverHandler::GetInstance().NotifyGestureStateChange(listenerType, info, Claim(this), node, phase);
+}
+
+void NGGestureRecognizer::ReportToGestureDebugManager(GestureCallbackType type, GestureListenerType listenerType)
+{
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+    auto node = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(node);
+    if (SystemProperties::GetGestureDebugBoundaryEnabled()) {
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto eventManager = pipeline->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        auto& manager = eventManager->GetGestureDebugBoundaryManager();
+        CHECK_NULL_VOID(manager);
+        if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+            return;
+        }
+        manager->HandleGestureAccept(listenerType, node);
+    }
+#endif
 }
 
 GestureActionPhase NGGestureRecognizer::GetActionPhase(

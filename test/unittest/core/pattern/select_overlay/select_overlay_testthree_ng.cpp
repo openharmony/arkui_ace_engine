@@ -21,11 +21,13 @@
 #include "base/memory/ace_type.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/property/property.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -36,6 +38,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #undef private
 #undef protected
 

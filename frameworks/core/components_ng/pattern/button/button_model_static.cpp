@@ -484,6 +484,11 @@ void ButtonModelStatic::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, c
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+        textLayoutProperty->UpdateWordBreak(WordBreak::HYPHENATION);
+    }
     textLayoutProperty->UpdateContent(label);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
@@ -552,8 +557,14 @@ void ButtonModelStatic::ResetButtonFontSize(FrameNode* frameNode)
 
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-    Dimension buttonFontSize = (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) ?
-        buttonTheme->GetTextButtonFontSize() : buttonTheme->GetTextSize(controlSize);
+    Dimension buttonFontSize;
+    if (buttonTheme->GetIsApplyTextFontSize()) {
+        buttonFontSize = (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL)
+                                        ? buttonTheme->GetTextButtonFontSize()
+                                        : buttonTheme->GetTextSize(controlSize);
+    } else {
+        buttonFontSize = buttonTheme->GetTextStyle().GetFontSize();
+    }
     layoutProperty->UpdateFontSize(buttonFontSize);
 }
 } // namespace OHOS::Ace::NG

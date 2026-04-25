@@ -453,7 +453,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public layoutWeightAttribute(value: number | string | undefined): void;
     public chainWeightAttribute(value: ChainWeightOptions | undefined): void;
     public paddingAttribute(value: Padding | Length | LocalizedPadding | undefined): void;
-    public safeAreaPaddingAttribute(value: Padding | LengthMetrics | LocalizedPadding | undefined): void;
+    public setSafeAreaPaddingAttribute(value: Padding | LengthMetrics | LocalizedPadding | undefined): void;
     public marginAttribute(value: Padding | Length | LocalizedPadding | undefined): void;
     public backgroundColor0Attribute(value: ResourceColor | undefined): void;
     public backgroundColor1Attribute(value: ResourceColor | undefined): void;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/counter/bridge/arkts_native_counter_bridge.h"
-
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_counter_theme.h"
 #include "ui/base/ace_type.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
@@ -82,6 +82,7 @@ ArkUINativeModuleValue CounterBridge::CreateCounter(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
     GetArkUINodeModifiers()->getCounterModifier()->createModel();
+    Framework::JSCounterTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
 }
 

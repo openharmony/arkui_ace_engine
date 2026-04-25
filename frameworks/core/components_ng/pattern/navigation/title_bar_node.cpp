@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navdestination_node_base.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -116,5 +119,72 @@ bool TitleBarNode::IsChildEmpty() const
 {
     bool isMenuEmpty = menu_ ? menu_->GetChildren().empty() : true;
     return !title_ && !subtitle_ && !backButton_ && isMenuEmpty;
+}
+
+void TitleBarNode::UpdateJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    SetTitleJsonValue(json, filter);
+    SetMenuJsonValue(json, filter);
+    auto backButton = AceType::DynamicCast<FrameNode>(backButton_);
+    CHECK_NULL_VOID(backButton);
+    auto layoutProperty = backButton->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        return;
+    }
+    auto& borderWidth = layoutProperty->GetBorderWidthProperty();
+    CHECK_NULL_VOID(borderWidth);
+    auto info = JsonUtil::Create(true);
+    info->Put("iconWidth", borderWidth->ToString().c_str());
+    auto renderContext = backButton->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto iconColor = renderContext->GetBorderColor();
+    info->Put("iconColor", iconColor->ToString().c_str());
+    json->PutExtAttr("backButton", info, filter);
+}
+
+void TitleBarNode::SetTitleJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto mainTitleNode = AceType::DynamicCast<FrameNode>(title_);
+    CHECK_NULL_VOID(mainTitleNode);
+    auto titleBarLayoutProperty = GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto textLayoutProperty = mainTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (titleBarLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        return;
+    }
+    auto titleVal = JsonUtil::Create(true);
+    titleVal->Put("titlePrimaryColor",
+        textLayoutProperty->GetTextColorValue(Color()).ColorToString().c_str());
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    titleVal->Put("miniMinFontSize", theme->GetTitleFontSizeMin().ToString().c_str());
+    titleVal->Put("fullMinFontSize", theme->GetTitleFontSize().ToString().c_str());
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    titleVal->Put("titleBarHeight", frameSize.Height());
+    json->PutExtAttr("titleFont", titleVal, filter);
+}
+
+void TitleBarNode::SetMenuJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    CHECK_NULL_VOID(menu_);
+    auto parent = AceType::DynamicCast<NavDestinationNodeBase>(GetParent());
+
+    CHECK_NULL_VOID(parent);
+    if (parent->GetPrevMenuIsCustomValue(false)) {
+        return;
+    }
+    auto info = JsonUtil::Create(true);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    info->Put("iconBorderWidth", theme->GetIconBorderWidth().ToString().c_str());
+    info->Put("iconBorderColor", theme->GetIconBorderColor().ColorToString().c_str());
+    info->Put("focusPadding", theme->GetMenuItemFocusPadding().ToString().c_str());
+    info->Put("focusBlendBgColor",
+        theme->GetNavigationFocusBlendBgColor().ColorToString().c_str());
+    json->PutExtAttr("menuIcon", info, filter);
 }
 } // namespace OHOS::Ace::NG

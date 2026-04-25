@@ -28,8 +28,8 @@
 
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "mock/mock_bundle_mgr_interface.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
@@ -320,6 +320,15 @@ HWTEST_F(PluginPatternTestNg, GetPackagePathTestNg1, TestSize.Level1)
     pluginInfo.pluginName = "/data/bundle/assets/js/plugin/index.js";
     packagePathStr = pattern->GetPackagePath(AceType::WeakClaim(AceType::RawPtr(pattern)), pluginInfo);
     EXPECT_EQ(packagePathStr, "/data/bundle/");
+    EXPECT_EQ(pluginInfo.abilityName, "plugin");
+    EXPECT_EQ(pluginInfo.source, "/index.js");
+
+    /**
+     * @tc.desc: Test GetPackagePath empty pluginName in Plugin Pattern.
+     */
+    pluginInfo.pluginName = "";
+    packagePathStr = pattern->GetPackagePath(AceType::WeakClaim(AceType::RawPtr(pattern)), pluginInfo);
+    EXPECT_TRUE(packagePathStr.empty());
     EXPECT_EQ(pluginInfo.abilityName, "plugin");
     EXPECT_EQ(pluginInfo.source, "/index.js");
 }

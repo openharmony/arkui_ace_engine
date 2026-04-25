@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/picker/picker_column_element.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "compatible/components/picker/render_picker_column.h"
 
@@ -94,7 +95,7 @@ bool PickerColumnElement::OnKeyEvent(const KeyEvent& keyEvent)
         }
     }
 
-    if (keyEvent.action == KeyAction::UP) {
+    if (keyEvent.action == KeyAction::UP || keyEvent.action == KeyAction::CANCEL) {
         if (keyEvent.code == KeyCode::KEY_ESCAPE || keyEvent.code == KeyCode::KEY_BACK ||
             keyEvent.code == KeyCode::TV_CONTROL_BACK) {
             return render->HandleFinished(false);

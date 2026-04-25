@@ -21,6 +21,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
+namespace OHOS::Ace {
+struct Font;
+}
+
 namespace OHOS::Ace::Framework {
 
 class JSSpan : public JSContainerBase {
@@ -32,6 +36,7 @@ public:
     static void SetFontWeight(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetTextShadow(const JSCallbackInfo& info);
+    static void SetFontVariations(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);

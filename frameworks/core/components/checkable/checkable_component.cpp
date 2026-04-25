@@ -17,6 +17,7 @@
 
 #include "compatible/components/switch/modifier/switch_modifier.h"
 
+#include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/checkable/checkable_element.h"
 #include "core/components/checkable/render_checkbox.h"

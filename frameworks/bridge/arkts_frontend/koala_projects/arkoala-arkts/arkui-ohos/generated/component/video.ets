@@ -127,7 +127,7 @@ export class VideoController implements MaterializedBase {
     }
 }
 export class ArkVideoPeer extends ArkCommonMethodPeer {
-    attributeSet?: VideoModifier;
+    videoAttributeSet?: VideoModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

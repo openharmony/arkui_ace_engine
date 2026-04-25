@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class RelativeContainerModifier extends ArkRelativeContainerComponent implements AttributeModifier<RelativeContainerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

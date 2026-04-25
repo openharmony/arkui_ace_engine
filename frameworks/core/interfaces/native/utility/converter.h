@@ -59,22 +59,34 @@ namespace OHOS::Ace {
 class DrawableDescriptor;
 class SpanBase;
 class ResponseRegion;
+enum class AutoCapitalizationMode;
 enum class CanvasUnit;
+enum class CancelButtonStyle;
 enum class ChainEdgeEffect;
 enum class CheckBoxStyle;
+enum class CleanNodeStyle;
 enum class EffectLayer;
 enum class GestureFocusMode;
 enum class ImageAnalyzerType;
+enum class InputStyle;
 enum class LayoutStyle;
 enum class LineCapStyle;
 enum class LineJoinStyle;
+enum class MenuPolicy;
 enum class NavigationType;
 enum class ParticleDisturbanceShapeType : uint32_t;
 enum class TabsCacheMode;
+enum class TextDeleteDirection;
+enum class TextInputAction;
+enum class TextInputType;
 enum class UndoStyle;
+struct Font;
 struct PickerIndicatorStyle;
+struct PreviewText;
+struct SelectionOptions;
 struct TextDetectConfig;
 struct TextMetrics;
+struct UserUnderlineColor;
 struct RenderingContextOptions;
 struct UpdateParagraphStyle;
 
@@ -89,8 +101,12 @@ enum class LaunchMode;
 enum class NavDestinationMode;
 enum class NavToolbarItemStatus;
 enum class PickerIndicatorType;
+enum class SelectionMenuType;
 enum class SessionType : int32_t;
 enum class SubMenuExpandingMode;
+enum class TextContentType;
+enum class TextResponseType;
+enum class TextSpanType;
 enum class ToggleType;
 struct BarItem;
 struct KeyboardOptions;
@@ -102,6 +118,8 @@ struct NavigationOptions;
 struct NavigationTitlebarOptions;
 struct NavigationTransition;
 struct PreviewBadge;
+struct PreviewMenuOptions;
+struct SelectMenuParam;
 struct KeyboardAppearanceConfig;
 struct UnionEffectContainerOptions;
 
@@ -831,6 +849,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
+    template<> void AssignCast(std::optional<ScrollbarLayoutPolicy>& dst, const Ark_ScrollbarLayoutPolicy& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src);
     template<> void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src);
@@ -1049,6 +1068,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src);
     template<> void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src);
     template<> void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGroupStyle& src);
+    template<>
+    void AssignCast(
+        std::optional<V2::ListItemGroupHeaderFooterStyle>& dst, const Ark_ListItemGroupHeaderFooterStyle& src);
     template<> void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& src);
     template<> void AssignCast(std::optional<V2::ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src);
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
@@ -1061,6 +1083,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<WebDarkMode>& dst, const Ark_WebDarkMode& src);
     template<> void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& src);
     template<> void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardAvoidMode& src);
+    template<> void AssignCast(std::optional<WebKeyboardAppearanceMode>& dst, const Ark_WebKeyboardAppearanceMode& src);
     template<> void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src);
     template<> void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);

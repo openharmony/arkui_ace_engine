@@ -327,6 +327,15 @@ void JSNavDestination::SetHideBackButton(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetHideBackButton(isHide);
 }
 
+void JSNavDestination::SetFullScreenOverlay(const JSCallbackInfo& info)
+{
+    std::optional<bool> fullScreenOverlay = std::nullopt;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        fullScreenOverlay = info[0]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetFullScreenOverlay(fullScreenOverlay);
+}
+
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
 {
     // Resource and string type.
@@ -810,6 +819,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
     JSClass<JSNavDestination>::StaticMethod("hideTitleBar", &JSNavDestination::SetHideTitleBar);
     JSClass<JSNavDestination>::StaticMethod("hideBackButton", &JSNavDestination::SetHideBackButton);
+    JSClass<JSNavDestination>::StaticMethod("fullScreenOverlay", &JSNavDestination::SetFullScreenOverlay);
     JSClass<JSNavDestination>::StaticMethod("backButtonIcon", &JSNavDestination::SetBackButtonIcon);
     JSClass<JSNavDestination>::StaticMethod("backgroundColor", &JSNavDestination::SetBackgroundColor);
     JSClass<JSNavDestination>::StaticMethod("freeze", &JSNavDestination::SetFreeze);

@@ -22,9 +22,9 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -83,6 +83,7 @@ void AppBarTestNg::TearDownTestSuite()
     MockContainer::Current()->pipelineContext_ = nullptr;
     MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -500,7 +501,16 @@ HWTEST_F(AppBarTestNg, TestOnMenuClick019, TestSize.Level1)
     EXPECT_NE(pipeline, nullptr);
     auto theme = pipeline->GetTheme<AppBarTheme>();
     EXPECT_NE(theme, nullptr);
-    appBar->OnMenuClick();
+    std::map<std::string, std::string> params = {
+        {"bundleName", "com.hmos.asde"},
+        {"abilityName", "MainAbility"},
+        {"module", "entry"},
+        {"pageName", "DETAIL"},
+        {"ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel"},
+        {"TopNavPathInfo", ""},
+        {"ohos.extra.menubar.param.key.showMode", "1"},
+    };
+    appBar->OnMenuClick(params);
     EXPECT_NE(appBar, nullptr);
 }
 
@@ -1061,7 +1071,7 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
     bool callbackCalled = false;
     std::string callbackName;
     std::string callbackValue;
-    
+
     auto callback =
         [&callbackCalled, &callbackName, &callbackValue](const std::string& name, const std::string& value) mutable {
         callbackCalled = true;

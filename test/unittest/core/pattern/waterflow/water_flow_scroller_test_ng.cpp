@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
 
+#include "core/animation/velocity_motion.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"

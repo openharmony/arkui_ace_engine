@@ -30,9 +30,9 @@ if (globalThis.WithTheme !== undefined) {
         }
 
         // keep for backward compatibility
-        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
+        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId, !!cloneTheme?.darkColors);
         // new approach to apply theme in native side
-        ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy);
+        ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy, !!cloneTheme?.darkColors);
 
         ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions ?? {}, theme);
     }
@@ -41,6 +41,7 @@ if (globalThis.WithTheme !== undefined) {
         if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
             const prebuildFunc: PrebuildFunc = () => {
                 ArkThemeScopeManager.getInstance().setIsFirstRender(true);
+                // @ts-ignore
                 globalThis.WithTheme.pop();
             };
             PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -24,6 +25,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {

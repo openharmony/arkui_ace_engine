@@ -1405,6 +1405,7 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
         .target = Converter::ArkValue<Ark_EventTarget>(touchEventInfo.GetTarget()),
         .timeStamp = Converter::ArkValue<Ark_Int64>(
             static_cast<int64_t>(touchEventInfo.GetTimeStamp().time_since_epoch().count())),
+        .source = Converter::ArkValue<Ark_SourceType>(touchEventInfo.GetSourceDevice()),
         .pressure = Converter::ArkValue<Ark_Float64>(touchEventInfo.GetForce()),
         .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchEventInfo.GetTiltX().value_or(0))),
         .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchEventInfo.GetTiltY().value_or(0))),
@@ -1637,6 +1638,16 @@ void OnMicrophoneCaptureStateChange(const CallbackHelper<OnMicrophoneCaptureStat
     parameter.originalState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetOriginalMicrophoneCaptureState());
     parameter.newState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetNewMicrophoneCaptureState());
     arkCallback.InvokeSync(parameter);
+}
+
+void OnInputmethodAttached(const CallbackHelper<OnInputmethodAttachedCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    arkCallback.InvokeSync();
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED

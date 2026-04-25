@@ -823,21 +823,31 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
 
 void UiSessionManagerOhos::SendCommand(const std::string& command)
 {
-    if (sendCommandFunction_) {
-        auto json = InspectorJsonUtil::ParseJsonString(command);
-        if (!json || json->IsNull()) {
-            LOGW("SendCommand ParseJsonString failed");
-            return;
-        }
+    auto json = InspectorJsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        LOGW("SendCommand ParseJsonString failed");
+        return;
+    }
 
-        int32_t value = json->GetInt("cmd");
-        sendCommandFunction_(value);
+    auto value = json->GetValue("cmd");
+    if (sendCommandFunction_ && value && value->IsNumber()) {
+        int32_t cmdNumber = value->GetInt();
+        sendCommandFunction_(cmdNumber);
+    } else if (relaxedCommandFunction_) {
+        relaxedCommandFunction_(command);
+    } else {
+        LOGW("SendCommand failed");
     }
 }
 
 void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& function)
 {
     sendCommandFunction_ = std::move(function);
+}
+
+void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& function)
+{
+    relaxedCommandFunction_ = std::move(function);
 }
 
 void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(

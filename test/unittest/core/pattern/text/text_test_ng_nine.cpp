@@ -14,15 +14,17 @@
  */
 
 #include "text_base.h"
+#include "core/accessibility/accessibility_manager.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 
 namespace OHOS::Ace::NG {
@@ -1405,6 +1407,43 @@ HWTEST_F(TextTestNgNine, HandleClickAISpanEvent, TestSize.Level1)
     pattern->HandleClickAISpanEvent(textOffset);
     EXPECT_TRUE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
     pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: BindPreviewMenu001
+ * @tc.desc: test BindPreviewMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    auto textController = pattern->GetTextController();
+    textController->CloseSelectionMenu();
+    
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+    SelectMenuParam menuParam;
+    pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    EXPECT_TRUE(static_cast<bool>(pattern->oneStepDragController_));
 }
 
 /**

@@ -23,18 +23,21 @@
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/pattern/overlay/level_mode.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_event.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
+class UiMaterial;
 class Component;
 class Gesture;
 
 namespace NG {
-    class ClickEvent;
     class UINode;
     class FrameNode;
     class ChainedTransitionEffect;
@@ -112,11 +115,6 @@ enum class DialogButtonDirection {
 enum class KeyboardAvoidMode {
     DEFAULT = 0,
     NONE,
-};
-
-enum class LevelMode {
-    OVERLAY = 0,
-    EMBEDDED,
 };
 
 enum class ImmersiveMode {
@@ -335,6 +333,7 @@ struct DialogProperties {
     WeakPtr<NG::UINode> customCNode;
     std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
     DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
+    RefPtr<UiMaterial> systemMaterial;
 };
 
 struct PromptDialogAttr {
@@ -388,6 +387,7 @@ struct PromptDialogAttr {
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
     DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
+    RefPtr<UiMaterial> systemMaterial;
 };
 
 enum class PromptActionCommonState {

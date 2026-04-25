@@ -19,11 +19,13 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/accessibility/accessibility_constants.h"
+#include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_manager_ng.h"
 #include "frameworks/core/components_ng/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"

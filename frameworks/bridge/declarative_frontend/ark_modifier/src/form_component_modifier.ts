@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class FormComponentModifier extends ArkFormComponentComponent implements AttributeModifier<FormComponentAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

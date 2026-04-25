@@ -21,7 +21,6 @@
 #include "ui/properties/tabs_effect_node_option.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
@@ -94,7 +93,9 @@ public:
                 divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
                 divider->Put("color", propDivider_.value().color.ColorToString().c_str());
             } else {
-                TabsItemDivider emptyDivider;
+                auto host = GetHost();
+                int32_t id = host ? host->GetThemeScopeId() : TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+                TabsItemDivider emptyDivider(id);
                 emptyDivider.strokeWidth.Reset();
                 emptyDivider.startMargin.Reset();
                 emptyDivider.endMargin.Reset();

@@ -39,6 +39,7 @@ public:
         auto value = MakeRefPtr<ListItemGroupLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propSpace_ = CloneSpace();
+        value->propSpaceWidth_ = CloneSpaceWidth();
         value->propDivider_ = CloneDivider();
         return value;
     }
@@ -47,6 +48,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetSpace();
+        ResetSpaceWidth();
         ResetDivider();
     }
 
@@ -58,6 +60,8 @@ public:
             return;
         }
         json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr(
+            "spaceWidth", propSpaceWidth_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);
             divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
@@ -68,6 +72,14 @@ public:
         } else {
             auto divider = JsonUtil::Create(true);
             json->PutExtAttr("divider", divider, filter);
+        }
+        if (propHeaderStyle_.has_value()) {
+            json->PutExtAttr("headerStyle",
+                propHeaderStyle_.value() == V2::ListItemGroupHeaderFooterStyle::FLOATING ? "FLOATING" : "NONE", filter);
+        }
+        if (propFooterStyle_.has_value()) {
+            json->PutExtAttr("footerStyle",
+                propFooterStyle_.value() == V2::ListItemGroupHeaderFooterStyle::FLOATING ? "FLOATING" : "NONE", filter);
         }
     }
 
@@ -116,8 +128,11 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SpaceWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HeaderStyle, V2::ListItemGroupHeaderFooterStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FooterStyle, V2::ListItemGroupHeaderFooterStyle, PROPERTY_UPDATE_MEASURE);
 
 private:
     std::optional<int32_t> listLanes_;

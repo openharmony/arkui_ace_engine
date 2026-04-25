@@ -14,6 +14,7 @@
  */
 
 #include <string>
+#include "core/accessibility/accessibility_manager.h"
 
 #include "gtest/gtest.h"
 
@@ -41,7 +42,7 @@
 #include "compatible/components/svg/svg_rect_declaration.h"
 #include "compatible/components/svg/svg_stop_declaration.h"
 #include "include/core/SkStream.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"

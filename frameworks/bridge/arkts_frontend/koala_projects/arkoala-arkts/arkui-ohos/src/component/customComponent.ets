@@ -460,6 +460,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         const manager = GlobalStateManager.instance;
         manager.syncChanges();
         manager.updateSnapshot();
+        this.reuseForceAddRefFlag = !this.reuseForceAddRefFlag;
         // should it contain BuilderNode and LazyItems
         const peer = this.getPeerNode() as ArkCustomComponentRootPeer | undefined;
         peer?.recompute();

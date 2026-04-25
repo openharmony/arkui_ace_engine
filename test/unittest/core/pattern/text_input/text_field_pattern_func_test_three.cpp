@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "text_input_base.h"
 
 #include "frameworks/core/components_ng/pattern/text_field/text_field_layout_property.h"

@@ -21,6 +21,7 @@ build_component_ng("menu_pattern_ng") {
 
   sources = [
     "menu_accessibility_property.cpp",
+    "menu_avoid_algorithm.cpp",
     "menu_layout_algorithm.cpp",
     "menu_layout_property.cpp",
     "menu_manager.cpp",
@@ -69,8 +70,13 @@ build_component_ng("menu_pattern_ng") {
     "preview/menu_preview_layout_algorithm.cpp",
     "preview/menu_preview_pattern.cpp",
   ]
-  
+
   ark_sources = [
+    "bridge/inner_modifier/menu_inner_modifier.cpp",
+    "bridge/inner_modifier/menu_item_group_inner_modifier.cpp",
+    "bridge/inner_modifier/menu_item_inner_modifier.cpp",
+    "bridge/inner_modifier/menu_manager_inner_modifier.cpp",
+    "bridge/inner_modifier/menu_view_inner_modifier.cpp",
     "bridge/menu/arkts_native_menu_bridge.cpp",
     "bridge/menu/menu_dynamic_modifier.cpp",
     "bridge/menu/menu_dynamic_module.cpp",
@@ -80,36 +86,27 @@ build_component_ng("menu_pattern_ng") {
     "bridge/menu_item_group/arkts_native_menu_item_group_bridge.cpp",
     "bridge/menu_item_group/menu_item_group_dynamic_modifier.cpp",
     "bridge/menu_item_group/menu_item_group_dynamic_module.cpp",
-    "bridge/inner_modifier/menu_inner_modifier.cpp",
-    "bridge/inner_modifier/menu_view_inner_modifier.cpp",
-    "bridge/inner_modifier/menu_manager_inner_modifier.cpp",
-    "bridge/inner_modifier/menu_item_inner_modifier.cpp",
-    "bridge/inner_modifier/menu_item_group_inner_modifier.cpp",
   ]
 
   if (!ace_engine_feature_wearable) {
     ark_sources += [
-      "bridge/menu/menu_static_modifier.cpp",
       "bridge/menu/menu_static_context_menu_accessor.cpp",
-      "bridge/menu_item/menu_item_static_modifier.cpp",
+      "bridge/menu/menu_static_modifier.cpp",
       "bridge/menu_item/menu_item_static_configuration_accessor.cpp",
+      "bridge/menu_item/menu_item_static_modifier.cpp",
       "bridge/menu_item_group/menu_item_group_static_modifier.cpp",
     ]
   }
 
   if (!build_ohos_sdk) {
     if (!is_arkui_x) {
-      deps = [
-        "${ace_root}/interfaces/inner_api/ui_session:ui_session",
-      ]
+      deps = [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
     }
     if (is_ohos_standard_system) {
       external_deps = [
-        "accessibility:accessibility_common",
         "ability_base:want",
-        ]
+        "accessibility:accessibility_common",
+      ]
     }
   }
 }
-
-

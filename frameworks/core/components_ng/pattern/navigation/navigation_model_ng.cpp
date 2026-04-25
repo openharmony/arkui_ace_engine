@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
@@ -57,6 +58,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH_VALUE = 240;
+constexpr int32_t NAVIGATION_OVERLAY_ZINDEX = 2;
 
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
@@ -406,6 +408,28 @@ bool NavigationModelNG::CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNo
     return true;
 }
 
+Color NavigationModelNG::GetDividerNodeColor(const RefPtr<NavigationGroupNode>& navigationGroupNode,
+    RefPtr<FrameNode> dividerNode)
+{
+    auto context = navigationGroupNode->GetContext();
+    CHECK_NULL_RETURN(context, Color());
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, Color());
+    auto themeColor = theme->GetNavigationDividerColor();
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, themeColor);
+    if (forceSplitMgr->IsForceSplitEnable(false)) {
+        auto splitColor = forceSplitMgr->GetSplitDividerColor();
+        if (context->GetColorMode() == ColorMode::LIGHT && splitColor.first.has_value()) {
+            return splitColor.first.value();
+        }
+        if (context->GetColorMode() == ColorMode::DARK && splitColor.second.has_value()) {
+            return splitColor.second.value();
+        }
+    }
+    return themeColor;
+}
+
 bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
 {
     if (!navigationGroupNode->GetDividerNode()) {
@@ -428,10 +452,9 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         dividerLayoutProperty->UpdateVertical(true);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_RETURN(dividerRenderProperty, false);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_RETURN(theme, false);
         dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
-        dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+        dividerNode->GetRenderContext()->
+            UpdateBackgroundColor(GetDividerNodeColor(navigationGroupNode, dividerNode));
         dividerNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
 
@@ -489,6 +512,7 @@ bool NavigationModelNG::ParseCommonTitle(
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
             textLayoutProperty->UpdateContent(title);
+            NavigationTitleUtil::InitTextProperty(textLayoutProperty);
             break;
         }
         // create and init main title
@@ -910,6 +934,7 @@ bool NavigationModelNG::UpdateBackButtonProperty(const RefPtr<FrameNode>& backBu
         CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));
     renderContext->UpdateBackgroundColor(backButtonColor);
+    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     PaddingProperty padding;
     padding.SetEdges(CalcLength(backButtonPadding));
     backButtonLayoutProperty->UpdatePadding(padding);
@@ -2832,6 +2857,13 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
             HitTestMode::HTMTRANSPARENT_SELF);
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
+    }
+
+    auto overlayNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetOverlayNode());
+    if (overlayNode) {
+        auto overlayRenderContext = overlayNode->GetRenderContext();
+        CHECK_NULL_RETURN(overlayRenderContext, nullptr);
+        overlayRenderContext->UpdateZIndex(NAVIGATION_OVERLAY_ZINDEX);
     }
 
     // divider node

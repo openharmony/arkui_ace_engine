@@ -25,7 +25,8 @@
         "SectionOptions",
         "LengthMetrics",
         "ColorMetrics",
-        "CustomSpan"
+        "CustomSpan",
+        "TouchEvent"
     ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
@@ -54,8 +55,16 @@
             "to": "arkui.component.idlize.ColorMetricsExt"
         },
         {
+            "from": "ohos.base.RecordData",
+            "to": "(Object or undefined)"
+        },
+        {
             "from": "arkui.component.styledString.CustomSpan",
             "to": "arkui.component.idlize.CustomSpanWrapper"
+        },
+        {
+            "from": "arkui.component.styledString.CustomSpanMeasureInfo",
+            "to": "arkui.component.idlize.CustomSpanMeasureInfoProxy"
         },
         {
             "from": "arkui.component.common.TouchEvent",
@@ -691,7 +700,8 @@
             "WithTheme",
             "SaveButton",
             "PasteButton",
-            "CustomSpan"
+            "CustomSpan",
+            "TouchEvent"
         ],
         "ignoreEntry": [
             "Optional",
@@ -1196,6 +1206,8 @@
         "arkui.component.navigation.NavigationAttribute.title",
         "arkui.component.navigation.NavigationAttribute.menus",
         "arkui.component.navigation.NavigationAttribute.toolbarConfiguration",
+        "arkui.component.navigation.NavigationAttribute.setNavigationOptions",
+        "arkui.component.navigation.NavigationInterface.invoke",
         "arkui.component.navigation.NavPathStack.pushPath",
         "arkui.component.navigation.NavPathStack.pushDestination",
         "arkui.component.navigation.NavPathStack.pushPathByName",
@@ -1220,7 +1232,8 @@
         "arkui.component.scroll.Scroller.isAtEnd",
         "arkui.component.scroll.Scroller.getItemRect",
         "arkui.component.scroll.Scroller.getItemIndex",
-        "arkui.component.scroll.Scroller.contentSize"
+        "arkui.component.scroll.Scroller.contentSize",
+        "arkui.component.grid.GridInterface.invoke"
     ],
     "constants": {
         "TouchTestInfo.rect": "{ x: 0, y: 0, width: 0, height: 0 }",

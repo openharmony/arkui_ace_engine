@@ -61,32 +61,73 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public enabled: boolean
-    public contentModifier: ContentModifier<MenuItemConfiguration>
-    public value: ResourceStr
-    public icon?: ResourceStr | undefined
-    public symbolIcon?: SymbolGlyphModifier | undefined
-    public selected: boolean
-    public index: int32
+    // instructive change begin
+    get enabled(): boolean {
+        return this.getEnabled()
+    }
+    set enabled(enabled: boolean) {
+        this.setEnabled(enabled)
+    }
+    get contentModifier(): ContentModifier<MenuItemConfiguration> {
+        return this.getContentModifier()
+    }
+    set contentModifier(contentModifier: ContentModifier<MenuItemConfiguration>) {
+        this.setContentModifier(contentModifier)
+    }
+    get value(): ResourceStr {
+        return this.getValue()
+    }
+    set value(value: ResourceStr) {
+        this.setValue(value)
+    }
+    get icon(): ResourceStr | undefined {
+        return this.getIcon()
+    }
+    set icon(icon: ResourceStr | undefined) {
+        this.setIcon(icon)
+    }
+    get symbolIcon(): SymbolGlyphModifier | undefined {
+        return this.getSymbolIcon()
+    }
+    set symbolIcon(symbolIcon: SymbolGlyphModifier | undefined) {
+        this.setSymbolIcon(symbolIcon)
+    }
+    get selected(): boolean {
+        return this.getSelected()
+    }
+    set selected(selected: boolean) {
+        this.setSelected(selected)
+    }
+    get index(): int32 {
+        return this.getIndex()
+    }
+    set index(index: int32) {
+        this.setIndex(index)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, MenuItemConfigurationInternal.getFinalizer())
-        this.enabled = this.getEnabled()
-        this.contentModifier = this.getContentModifier()
-        this.value = this.getValue()
-        this.icon = this.getIcon()
-        this.symbolIcon = this.getSymbolIcon()
-        this.selected = this.getSelected()
-        this.index = this.getIndex()
+        // instructive change begin
+        // this.enabled = this.getEnabled()
+        // this.contentModifier = this.getContentModifier()
+        // this.value = this.getValue()
+        // this.icon = this.getIcon()
+        // this.symbolIcon = this.getSymbolIcon()
+        // this.selected = this.getSelected()
+        // this.index = this.getIndex()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, MenuItemConfigurationInternal.construct())
-        this.enabled = this.getEnabled()
-        this.contentModifier = this.getContentModifier()
-        this.value = this.getValue()
-        this.icon = this.getIcon()
-        this.symbolIcon = this.getSymbolIcon()
-        this.selected = this.getSelected()
-        this.index = this.getIndex()
+        // instructive change begin
+        // this.enabled = this.getEnabled()
+        // this.contentModifier = this.getContentModifier()
+        // this.value = this.getValue()
+        // this.icon = this.getIcon()
+        // this.symbolIcon = this.getSymbolIcon()
+        // this.selected = this.getSelected()
+        // this.index = this.getIndex()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_construct()
@@ -174,6 +215,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
         const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getContentModifier(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: ContentModifier<MenuItemConfiguration> = (retvalDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setContentModifier_serialize(contentModifier: ContentModifier<MenuItemConfiguration>): void {
@@ -195,6 +237,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
             throw new Error('One of the branches for buffer has to be chosen through deserialisation.')
         }
         const returnResult: ResourceStr = (buffer as string | arkui_component_units_Resource)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setValue_serialize(value: ResourceStr): void {
@@ -229,6 +272,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
             buffer = (bufferOpt as string | arkui_component_units_Resource)
         }
         const returnResult: ResourceStr | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setIcon_serialize(icon: ResourceStr | undefined): void {
@@ -260,6 +304,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
             buffer = (SymbolGlyphModifier_serializer.read(retvalDeserializer) as SymbolGlyphModifier)
         }
         const returnResult: SymbolGlyphModifier | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setSymbolIcon_serialize(symbolIcon: SymbolGlyphModifier | undefined): void {
@@ -290,7 +335,7 @@ export class MenuItemConfigurationInternal implements MaterializedBase,CommonCon
     }
 }
 export class ArkSelectPeer extends ArkCommonMethodPeer {
-    attributeSet?: SelectModifier;
+    selectAttributeSet?: SelectModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

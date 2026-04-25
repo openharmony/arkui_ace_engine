@@ -85,11 +85,10 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
 
         // Update ObservedObjectRegistry registration
         this.updateObservedObjectRegistration(oldValue, value);
-
+        this.execWatchFuncs();
         if (this.setProxyValue) {
             this.setProxyValue!(value);
         }
-        this.execWatchFuncs();
     }
 
     update(newValue: T): void {

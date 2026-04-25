@@ -55,6 +55,16 @@ public:
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(inspectorId_)));
     }
 
+    void SetUniqueId(int32_t uniqueId)
+    {
+        uniqueId_ = uniqueId;
+    }
+
+    void GetUniqueId(const JSCallbackInfo& args)
+    {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(uniqueId_)));
+    }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -71,6 +81,7 @@ private:
     }
 
     std::string inspectorId_;
+    int32_t uniqueId_ = -1;
 };
 
 class JSScrollableTargetInfo : public JSEventTargetInfo {
@@ -147,6 +158,8 @@ public:
     void GetRefereeState(const JSCallbackInfo& args);
 
     void IsValid(const JSCallbackInfo& args);
+
+    void IsHostBelongsTo(const JSCallbackInfo& args);
 
     static GestureRecognizerState ConvertRefereeState(NG::RefereeState state)
     {
@@ -420,6 +433,7 @@ public:
     
     void GetEventTargetInfo(const JSCallbackInfo& args);
     void CancelTouch(const JSCallbackInfo& args);
+    void IsHostBelongsTo(const JSCallbackInfo& args);
     void SetTouchData(const WeakPtr<TouchEventTarget>& target, const std::unordered_set<int32_t>& fingerIds)
     {
         target_ = std::move(target);

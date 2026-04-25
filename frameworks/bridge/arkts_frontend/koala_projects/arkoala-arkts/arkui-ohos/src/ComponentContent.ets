@@ -155,11 +155,19 @@ export class ReactiveComponentContent implements ComponentContentBase {
     private parentWeak_?: WeakRef<FrameNode>;
     private attachedNodeRef_?:pointer;
     private isDisposed_: boolean = false;
+    private instanceId_: int32;
+
+    constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
+        this.builderNode_ = new ReactiveBuilderNode(uiContext, nodePtr, frameNodePtr);
+        this.instanceId_ = (uiContext as UIContext).instanceId_;
+    }
+
     //@ts-ignore
     constructor(uiContext: UIContext, builder: CustomBuilder, options?: BuildOptions) {
         let builderNode = new ReactiveBuilderNode(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, options);
+        this.instanceId_ = (uiContext as UIContext).instanceId_;
     }
 
     getNodePtr(): KPointer | undefined {
@@ -168,6 +176,12 @@ export class ReactiveComponentContent implements ComponentContentBase {
     }
     getFrameNode(): FrameNode | null | undefined {
         return this.builderNode_.getFrameNodeWithoutCheck();
+    }
+    getBuilderRootNode(): KPointer | undefined {
+        return this.builderNode_.getBuilderRootNode();
+    }
+    getInstanceId(): int32 {
+        return this.instanceId_;
     }
     reuse(param?: RecordData): void {
         this.builderNode_.reuse(param);

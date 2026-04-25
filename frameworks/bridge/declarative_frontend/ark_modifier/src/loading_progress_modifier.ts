@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class LoadingProgressModifier extends ArkLoadingProgressComponent implements AttributeModifier<LoadingProgressAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

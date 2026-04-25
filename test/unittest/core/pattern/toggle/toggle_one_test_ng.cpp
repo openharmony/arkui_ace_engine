@@ -31,11 +31,11 @@
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;

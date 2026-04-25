@@ -14,7 +14,9 @@
  */
 
 #include "test/unittest/core/event/drag_event_test_ng.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+
+#include "core/components/common/properties/border_image.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -883,7 +885,9 @@ HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest001, TestSize.Level1)
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::ACTION_DETECTING_STATUS)).WillOnce(Return());
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION)).WillOnce(Return());
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LIFT_STARTED)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LIFT_FINISHED)).WillOnce(Return());
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LANDING_STARTED)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LANDING_FINISHED)).WillOnce(Return());
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG)).WillOnce(Return());
     std::function<void(const PreDragStatus&)> mockOnPreDragFunc = mockOnPreFunction.AsStdFunction();
 

@@ -181,6 +181,10 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_Acti
     if (dialogImmersiveMode) {
         dialogProps.dialogImmersiveMode = dialogImmersiveMode.value();
     }
+    auto systemMaterial = Converter::OptConvert<UiMaterial*>(options.systemMaterial).value_or(nullptr);
+    if (systemMaterial) {
+        dialogProps.systemMaterial = systemMaterial->Copy();
+    }
 }
 void ShowImpl(const Ark_ActionSheetOptions* value)
 {

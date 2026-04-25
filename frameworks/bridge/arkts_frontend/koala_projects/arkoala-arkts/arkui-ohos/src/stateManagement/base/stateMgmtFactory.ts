@@ -553,7 +553,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IStoragePropRefDecoratedVariable<T> {
-        const ref = AppStorage.setAndRef<T>(propName, uiUtils.makeV1Observed(initValue));
+        const ref = AppStorage.__makeStoragePropRef<T>(propName, '@StoragePropRef', uiUtils.makeV1Observed(initValue));
         if (ref === undefined) {
             throw new TypeError(`@StoragePropRef('${propName}') ${varName} failed to makeStoragePropRef`);
         }
@@ -574,7 +574,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T> {
-        const ref = owningView.__getLocalStorage__Internal().setAndRef<T>(propName, uiUtils.makeV1Observed(initValue));
+        const ref = owningView.__getLocalStorage__Internal().__makeStoragePropRef<T>(
+            propName, '@LocalStoragePropRef', uiUtils.makeV1Observed(initValue));
         if (ref === undefined) {
             throw new TypeError(`@LocalStoragePropRef('${propName}') ${varName} makeLocalStoragePropRef`);
         }

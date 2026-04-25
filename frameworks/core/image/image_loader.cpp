@@ -16,6 +16,7 @@
 #include "core/image/image_loader.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#include "utils/data.h"
 #ifdef USE_NEW_SKIA
 #include "src/base/SkBase64.h"
 #else
@@ -39,6 +40,7 @@
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {

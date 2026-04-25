@@ -34,6 +34,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
@@ -41,8 +42,8 @@
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -456,7 +457,7 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
 {
     auto pipeline = host->GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(host->GetId());
+        ImagePerf::GetPerfMonitor()->CompleteLoadComponent(host->GetId());
     }
 }
 
@@ -736,6 +737,98 @@ void ImagePattern::SetExternalDecodeFormat(PixelFormat externalDecodeFormat)
         default:
             externalDecodeFormat_ = PixelFormat::UNKNOWN;
     }
+}
+
+void ImagePattern::SetImageQuality(AIImageQuality imageQuality)
+{
+    isImageReloadNeeded_ = isImageReloadNeeded_ | (imageQuality_ != imageQuality);
+    imageQuality_ = imageQuality;
+}
+
+void ImagePattern::SetOrientation(ImageRotateOrientation orientation)
+{
+    isOrientationChange_ = (userOrientation_ != orientation);
+    userOrientation_ = orientation;
+}
+
+ImageRotateOrientation ImagePattern::GetOrientation()
+{
+    return userOrientation_;
+}
+
+AIImageQuality ImagePattern::GetImageQuality()
+{
+    return imageQuality_;
+}
+
+void ImagePattern::SetCopyOption(CopyOptions value)
+{
+    copyOption_ = value;
+}
+
+CopyOptions ImagePattern::GetCopyOption()
+{
+    return copyOption_;
+}
+
+void ImagePattern::SetSyncLoad(bool value)
+{
+    syncLoad_ = value;
+}
+
+bool ImagePattern::GetSyncLoad() const
+{
+    return syncLoad_;
+}
+
+void ImagePattern::SetNeedBorderRadius(bool needBorderRadius)
+{
+    needBorderRadius_ = needBorderRadius;
+}
+
+bool ImagePattern::IsAtomicNode() const
+{
+    return true;
+}
+
+void ImagePattern::SetImageAnimator(bool isImageAnimator)
+{
+    isImageAnimator_ = isImageAnimator;
+}
+
+bool ImagePattern::GetNeedLoadAlt()
+{
+    return needLoadAlt_;
+}
+
+void ImagePattern::SetNeedLoadAlt(bool needLoadAlt)
+{
+    needLoadAlt_ = needLoadAlt;
+}
+
+bool ImagePattern::GetDefaultAutoResize()
+{
+    return autoResizeDefault_;
+}
+
+ImageInterpolation ImagePattern::GetDefaultInterpolation()
+{
+    return interpolationDefault_;
+}
+
+void ImagePattern::SetIsComponentSnapshotNode(bool isComponentSnapshotNode)
+{
+    isComponentSnapshotNode_ = isComponentSnapshotNode;
+}
+
+void ImagePattern::SetRenderedImageInfo(const RenderedImageInfo& renderedImageInfo)
+{
+    renderedImageInfo_ = renderedImageInfo;
+}
+
+PixelFormat ImagePattern::GetExternalDecodeFormat()
+{
+    return externalDecodeFormat_;
 }
 
 void ImagePattern::StartDecoding(const SizeF& dstSize)
@@ -1031,7 +1124,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         if (pipeline && host->GetId() != INVALID_ID && src.IsValid()) {
-            pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
+            ImagePerf::GetPerfMonitor()->AddLoadComponent(host->GetId());
         }
     }
     ClearReloadFlagsAfterLoad();
@@ -1513,6 +1606,15 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     return;
 }
 
+void ImagePattern::SetIsBackground(bool isBackground)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->SetIsBackground(isBackground);
+}
+
 // when recycle image component, release the pixelmap resource
 void ImagePattern::OnRecycle()
 {
@@ -1678,7 +1780,7 @@ void ImagePattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     if (pipeline) {
-        pipeline->GetLoadCompleteManager()->DeleteLoadComponent(host->GetId());
+        ImagePerf::GetPerfMonitor()->DeleteLoadComponent(host->GetId());
     }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     if (isNeedReset_) {
@@ -2526,6 +2628,11 @@ bool ImagePattern::hasSceneChanged()
     return true;
 }
 
+void ImagePattern::TriggerThemeUpdate(int32_t themeScopeId)
+{
+    OnThemeScopeUpdate(themeScopeId);
+}
+
 void ImagePattern::SetOnProgressCallback(
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
 {
@@ -2948,4 +3055,48 @@ void ImagePattern::ResetAltImageError()
         imagePaintMethod_ = nullptr;
     }
 }
+
+SizeF ImagePattern::GetRawImageSize()
+{
+    if (!loadingCtx_) {
+        return SizeF(-1.0, -1.0);
+    }
+    return loadingCtx_->GetImageSize();
+}
+
+WeakPtr<ImageLoadingContext> ImagePattern::GetImageLoadingContext()
+{
+    return WeakClaim(AceType::RawPtr(loadingCtx_));
+}
+
+WeakPtr<ImageLoadingContext> ImagePattern::GetAltImageLoadingContext()
+{
+    return WeakClaim(AceType::RawPtr(altLoadingCtx_));
+}
+
+std::optional<RenderContext::ContextParam> ImagePattern::GetContextParam() const
+{
+    return RenderContext::ContextParam { .type = RenderContext::ContextType::CANVAS, .surfaceName = std::nullopt };
+}
+
+const RefPtr<CanvasImage>& ImagePattern::GetCanvasImage()
+{
+    return image_;
+}
+
+const RefPtr<CanvasImage>& ImagePattern::GetAltCanvasImage()
+{
+    return altImage_;
+}
+
+RefPtr<FrameNode> ImagePattern::GetClientHost() const
+{
+    return GetHost();
+}
+
+bool ImagePattern::IsEnableMatchParent()
+{
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

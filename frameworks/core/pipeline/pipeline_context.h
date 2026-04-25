@@ -28,7 +28,6 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
@@ -38,19 +37,16 @@
 #include "core/animation/flush_event.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/schedule_task.h"
-#include "core/common/event_manager.h"
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_res_register.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
-#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/visible_ratio_callback.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"
-#include "core/image/image_cache.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/factories/render_factory.h"
 #include "core/pipeline/pipeline_base.h"
@@ -58,16 +54,17 @@
 #include "core/event/multimodal/multimodal_manager.h"
 #include "core/event/multimodal/multimodal_subscriber.h"
 #endif
-#include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Rosen {
 class RSUIDirector;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+struct CrownEvent;
 
 class CardTransitionController;
 class ComposedElement;
+class FocusNode;
 class FontManager;
 class OverlayElement;
 class RenderNode;
@@ -78,6 +75,8 @@ class StageElement;
 class StackElement;
 class Window;
 class Animator;
+class PixelMap;
+class TextOverlayManager;
 class ManagerInterface;
 class AccessibilityManager;
 class RenderContext;
@@ -744,15 +743,9 @@ public:
 
     void SetShortcutKey(const KeyEvent& event);
 
-    void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
-    {
-        textOverlayManager_ = textOverlayManager;
-    }
+    void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager);
 
-    RefPtr<TextOverlayManager> GetTextOverlayManager() const
-    {
-        return textOverlayManager_;
-    }
+    RefPtr<TextOverlayManager> GetTextOverlayManager() const;
 
     void SubscribeCtrlA(SubscribeCtrlACallback callback)
     {
@@ -797,11 +790,8 @@ public:
         return onShow_;
     }
 
-    void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
-        OutOfRectMouseCallback& mouseCallback)
-    {
-        rectCallbackList_.emplace_back(RectCallback(getRectCallback, touchCallback, mouseCallback));
-    }
+    void AddRectCallback(std::function<void(std::vector<Rect>&)>& getRectCallback,
+        std::function<void()>& touchCallback, std::function<void()>& mouseCallback);
 
     void SetRootRect(double width, double height, double offset = 0.0) override
     {
@@ -1037,7 +1027,6 @@ private:
 
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
-    std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
     std::function<void()> vsyncListener_;
     std::function<bool(const std::string& args)> crownEventMonitorCallback_;

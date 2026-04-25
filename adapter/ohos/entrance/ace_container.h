@@ -49,6 +49,7 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Accessibility {
@@ -63,6 +64,12 @@ class UIEventTracker;
 namespace OHOS::AppExecFwk {
 class FormAshmem;
 }
+
+namespace OHOS::Ace::NG {
+enum class UIContentBusinessCode : uint32_t;
+enum class BusinessDataSendType : uint32_t;
+}
+
 namespace OHOS::Ace::Platform {
 class HighContrastObserver;
 
@@ -565,8 +572,8 @@ public:
     static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
     static void SetView(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
-    static UIContentErrorCode SetViewNew(
-        const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow);
+    static UIContentErrorCode SetViewNew(const RefPtr<AceView>& view, double density, float width, float height,
+        sptr<OHOS::Rosen::Window> rsWindow, sptr<IRemoteObject> connectToRender = nullptr);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -954,8 +961,7 @@ public:
         }
     }
     void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override;
-    void TerminateUIExtensionInner() override;
-
+    void TerminateUIExtensionInner(int32_t code) override;
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -1005,9 +1011,6 @@ private:
     void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange);
-
-    void LoadCompleteManagerStartCollect(const std::string& url) override;
-    void LoadCompleteManagerStopCollect() override;
 
     void InitForceSplitManager();
 

@@ -15,7 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1608,7 +1608,7 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo003, TestSize.Lev
 HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize text input and get focus
+     * @tc.steps: step1. Initialize text input
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::TEXT);
@@ -1616,7 +1616,14 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo004, TestSize.Lev
     });
     frameNode_->MarkModifyDone();
 
+    /*
+     * @tc.steps: step2. Get focus
+     */
     GetFocus();
+
+    /*
+     * @tc.steps: step3. Init Theme
+     */
     auto textFieldTheme = pattern_->GetTheme();
     ASSERT_NE(textFieldTheme, nullptr);
     pattern_->textSelector_.Update(0, 0);
@@ -1627,7 +1634,7 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo004, TestSize.Lev
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
-     * @tc.steps: step2. Do OnUpdateMenuInfo
+     * @tc.steps: step4. Do OnUpdateMenuInfo
      */
     SelectMenuInfo menuInfo;
     textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);

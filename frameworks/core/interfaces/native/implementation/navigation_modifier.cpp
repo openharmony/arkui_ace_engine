@@ -64,7 +64,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 } // namespace NavigationModifier
 
 namespace NavigationInterfaceModifier {
-void SetNavigationOptions0Impl(Ark_NativePointer node,
+void SetNavigationOptions0Impl(Ark_VMContext vmContext,
+                               Ark_NativePointer node,
                                const Opt_NavPathStack* pathInfos,
                                const Opt_NavigationModuleInfo* moduleInfo)
 {
@@ -82,7 +83,8 @@ void SetNavigationOptions0Impl(Ark_NativePointer node,
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
 }
-void SetNavigationOptions1Impl(Ark_NativePointer node,
+void SetNavigationOptions1Impl(Ark_VMContext vmContext,
+                               Ark_NativePointer node,
                                const Opt_NavPathStack* pathInfos,
                                const Opt_HomePathInfo* homeDestination,
                                const Opt_NavigationModuleInfo* moduleInfo)
@@ -453,7 +455,8 @@ void SetBackButtonIconImpl(Ark_NativePointer node,
     NavigationModelStatic::SetBackButtonIcon(
         frameNode, iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
-void SetTitleImpl(Ark_NativePointer node,
+void SetTitleImpl(Ark_VMContext vmContext,
+                  Ark_NativePointer node,
                   const Opt_Union_ResourceStr_CustomNodeBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
                   const Opt_NavigationTitleOptions* options)
 {
@@ -552,7 +555,8 @@ void SetHideTitleBar1Impl(Ark_NativePointer node,
     auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(false);
     NavigationModelStatic::SetHideTitleBar(frameNode, isHide, isAnimated);
 }
-void SetMenusImpl(Ark_NativePointer node,
+void SetMenusImpl(Ark_VMContext vmContext,
+                  Ark_NativePointer node,
                   const Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder* items,
                   const Opt_NavigationMenuOptions* options)
 {
@@ -583,7 +587,8 @@ void SetMenusImpl(Ark_NativePointer node,
     }
     NavigationModelStatic::SetMenuOptions(frameNode, std::move(menuOptions));
 }
-void SetToolbarConfigurationImpl(Ark_NativePointer node,
+void SetToolbarConfigurationImpl(Ark_VMContext vmContext,
+                                 Ark_NativePointer node,
                                  const Opt_Union_Array_ToolbarItem_CustomNodeBuilder* value,
                                  const Opt_NavigationToolbarOptions* options)
 {

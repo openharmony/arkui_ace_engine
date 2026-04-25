@@ -112,6 +112,12 @@ public:
 
     UIContentErrorCode RunPageByNamedRouter(const std::string& name, const std::string& params) override;
 
+    UIContentErrorCode RunIntentPage() override;
+    void CallRunIntentPageFromNative(const std::string& url, const std::string& paramStr) override;
+
+    UIContentErrorCode SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+        const std::function<void()>&& loadPageCallback) override;
+
     void ReplacePage(const std::string& url, const std::string& params) override {}
 
     void PushPage(const std::string& url, const std::string& params) override {}
@@ -293,14 +299,18 @@ public:
         if (taskExecutor_ == nullptr) {
             return;
         }
-        for (auto&& observer : iter->second) {
-            taskExecutor_->PostTask(
-                [observer, childIds] {
+        auto observers = iter->second;
+        taskExecutor_->PostTask(
+            [observers = std::move(observers), childIds] {
+                for (auto&& observer : observers) {
+                    if (!observer) {
+                        continue;
+                    }
                     (*observer)(childIds);
                     (*observer)();
-                    }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted"
-            );
-        }
+                }
+            }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted"
+        );
     }
 
     void DumpFrontend() const override {}

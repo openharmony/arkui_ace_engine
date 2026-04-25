@@ -14,8 +14,8 @@
  */
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_style.h"
 #include "test/unittest/capi/stubs/mock_date_picker_dialog.h"
 
 #include "core/components_ng/pattern/picker/picker_model.h"

@@ -19,17 +19,19 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_canvas_image.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
 #include "ui/properties/ui_material.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/node_container/node_container_layout_algorithm.h"
@@ -48,6 +50,8 @@ namespace {
 const std::string CHILD_NODE = "ChildNode";
 const std::string RENDER_NODE = "RenderNode";
 const double EPS = 1e-6;
+const std::string NODE_TAG = "node";
+const std::string CHILD_TAG = "child";
 
 class MockNodeContainerPattern : public NodeContainerPattern {
 public:
@@ -461,8 +465,8 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetMakeFunction001, TestSize.L
     NodeContainerModelNG modelNg;
     modelNg.Create();
     auto builderFunc = []() -> RefPtr<UINode> {
-        auto node = FrameNode::CreateFrameNode("node", 0, AceType::MakeRefPtr<Pattern>(), true);
-        auto childNode = FrameNode::CreateFrameNode("child", 1, AceType::MakeRefPtr<Pattern>(), true);
+        auto node = FrameNode::CreateFrameNode(NODE_TAG, 0, AceType::MakeRefPtr<Pattern>(), true);
+        auto childNode = FrameNode::CreateFrameNode(CHILD_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
         node->AddChild(childNode);
         return node;
     };
@@ -654,7 +658,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap001, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);
@@ -686,7 +690,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap002, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);
@@ -719,12 +723,12 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap003, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper = node->CreateLayoutWrapper(true, true);
-    auto child = AceType::MakeRefPtr<FrameNode>("child", -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(CHILD_TAG, -1, AceType::MakeRefPtr<Pattern>());
     node->AddChild(child);
     RefPtr<FrameNode> parent =
         FrameNode::CreateFrameNode(V2::NODE_CONTAINER_ETS_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
@@ -754,12 +758,12 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap004, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper = node->CreateLayoutWrapper(true, true);
-    auto child = AceType::MakeRefPtr<FrameNode>("child", -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(CHILD_TAG, -1, AceType::MakeRefPtr<Pattern>());
     node->AddChild(child);
     RefPtr<FrameNode> parent =
         FrameNode::CreateFrameNode(V2::NODE_CONTAINER_ETS_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
@@ -794,12 +798,12 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap005, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper = node->CreateLayoutWrapper(true, true);
-    auto child = AceType::MakeRefPtr<FrameNode>("child", -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(CHILD_TAG, -1, AceType::MakeRefPtr<Pattern>());
     node->AddChild(child);
     RefPtr<FrameNode> parent =
         FrameNode::CreateFrameNode(V2::NODE_CONTAINER_ETS_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
@@ -834,12 +838,12 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap006, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper = node->CreateLayoutWrapper(true, true);
-    auto child = AceType::MakeRefPtr<FrameNode>("child", -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(CHILD_TAG, -1, AceType::MakeRefPtr<Pattern>());
     node->AddChild(child);
     RefPtr<FrameNode> parent =
         FrameNode::CreateFrameNode(V2::NODE_CONTAINER_ETS_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
@@ -872,12 +876,12 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap007, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper = node->CreateLayoutWrapper(true, true);
-    auto child = AceType::MakeRefPtr<FrameNode>("child", -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(CHILD_TAG, -1, AceType::MakeRefPtr<Pattern>());
     node->AddChild(child);
     RefPtr<FrameNode> parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<NodeContainerPattern>());
     parent->AddChild(node);
@@ -909,12 +913,12 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap008, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper = node->CreateLayoutWrapper(true, true);
-    auto child = AceType::MakeRefPtr<FrameNode>("child", -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(CHILD_TAG, -1, AceType::MakeRefPtr<Pattern>());
     node->AddChild(child);
     child->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
     child->exportTextureInfo_->curRenderType_ = NodeRenderType::RENDER_TYPE_TEXTURE;
@@ -944,7 +948,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternOnDirtyLayoutWrapperSwap009, T
     /**
      * @tc.steps: step1: create node and get pattern.
      */
-    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<NodeContainerPattern>());
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode(NODE_TAG, 1, AceType::MakeRefPtr<NodeContainerPattern>());
     ASSERT_NE(node, nullptr);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(node->GetPattern());
     ASSERT_NE(pattern, nullptr);

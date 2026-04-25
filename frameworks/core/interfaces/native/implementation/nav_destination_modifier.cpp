@@ -421,7 +421,8 @@ void EnableNavigationIndicatorImpl(Ark_NativePointer node,
     }
     NavDestinationModelStatic::SetEnableNavigationIndicator(frameNode, navigationIndicator);
 }
-void SetTitleImpl(Ark_NativePointer node,
+void SetTitleImpl(Ark_VMContext vmContext,
+    Ark_NativePointer node,
     const Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
     const Opt_NavigationTitleOptions* options)
 {
@@ -584,7 +585,8 @@ void SetBackButtonIconImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetBackButtonIcon(
         frameNode, iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
-void SetMenusImpl(Ark_NativePointer node,
+void SetMenusImpl(Ark_VMContext vmContext,
+                  Ark_NativePointer node,
                   const Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder* items,
                   const Opt_NavigationMenuOptions* options)
 {
@@ -617,7 +619,8 @@ void SetMenusImpl(Ark_NativePointer node,
     }
     NavDestinationModelStatic::SetMenuOptions(frameNode, std::move(menuOptions));
 }
-void SetToolbarConfigurationImpl(Ark_NativePointer node,
+void SetToolbarConfigurationImpl(Ark_VMContext vmContext,
+                                 Ark_NativePointer node,
                                  const Opt_Union_Array_ToolbarItem_CustomNodeBuilder* toolbarParam,
                                  const Opt_NavigationToolbarOptions* options)
 {

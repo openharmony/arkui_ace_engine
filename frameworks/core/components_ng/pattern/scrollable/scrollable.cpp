@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #include "base/log/jank_frame_report.h"
+#include "core/animation/scroll_motion.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
@@ -23,6 +24,7 @@
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/event_report.h"
 #include "core/pipeline/base/constants.h"
@@ -497,7 +499,8 @@ void Scrollable::SetAxis(Axis axis)
 
 void Scrollable::HandleTouchDown(bool fromcrown)
 {
-    if ((state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) || isScrollBarDragging_) {
+    if ((state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) || isScrollBarDragging_ ||
+        isSmartGestureFling_) {
         isTouchStopAnimation_ = true;
     } else {
         isTouchStopAnimation_ = false;
@@ -517,7 +520,7 @@ void Scrollable::HandleTouchDown(bool fromcrown)
 
 void Scrollable::CheckStopFlingInTouchUp()
 {
-    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
+    if (!isDragging_ && !isScrollBarDragging_ && !isSmartGestureFling_ && isTouchStopAnimation_) {
         isUserFling_ = false;
         if (onDidStopFlingCallback_) {
             onDidStopFlingCallback_();
@@ -833,7 +836,19 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
     velocityScale = !NearZero(ret) ? ret : defaultVelocityScale;
     velocityScale = isScrollFromTouchPad ? velocityScale * touchPadVelocityScaleRate_ : velocityScale;
     double gain = GetGain(GetDragOffset());
-    if (isReverseCallback_ && isReverseCallback_()) {
+    bool isReverse = isReverseCallback_ && isReverseCallback_();
+    if (GreatNotEqualCustomPrecision(gain, 1.0f, 0.01f)) {
+        if ((isReverse && gestureVelocity > 0) || (!isReverse && gestureVelocity < 0)) {
+            auto node = weakHost_.Upgrade();
+            if (node) {
+                auto nodeStr = node->GetTag() + std::to_string(static_cast<uint64_t>(node->GetId()));
+                TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+                    "LayoutDirectionEst %{public}s, gain: %{public}f, velocity: %{public}f, reverse: %{public}d",
+                    nodeStr.c_str(), gain, gestureVelocity, isReverse);
+            }
+        }
+    }
+    if (isReverse) {
         currentVelocity_ = -gestureVelocity * velocityScale * gain;
     } else {
         currentVelocity_ = gestureVelocity * velocityScale * gain;

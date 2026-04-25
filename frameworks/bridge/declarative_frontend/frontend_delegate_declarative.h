@@ -328,6 +328,8 @@ public:
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         const NG::SnapshotOptions& options) override;
 
+    NG::SnapshotSizeLimitation GetSizeLimitation() override;
+
     void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector, const NG::SnapshotParam& param) override;
@@ -335,6 +337,8 @@ public:
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
     void AddFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder) override;
+    void OpenOrderOverlay(const RefPtr<NG::FrameNode>& node, const NG::OrderOverlayOptions& options,
+        std::function<void(int32_t)>&& callback) override;
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
@@ -420,6 +424,8 @@ public:
     }
 
     std::string GetPagePathByUrl(const std::string& url) const;
+
+    bool IsPageInStack(const RefPtr<NG::FrameNode>& page) const;
 
     void* CreateDynamicPage(int32_t pageId, const std::string& url, const std::string& params, bool recoverable);
 

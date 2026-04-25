@@ -93,29 +93,23 @@ function deepCopyStaticProxy(
             copy.add(recursiveCopy(setValue));
         });
     } else {
-        const toJSON: Function | undefined = globalThis.Panda?.STValue?.toJSON;
-        const err: Error = new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
-        if (typeof toJSON === 'function') {
-            const json: string = toJSON(obj);
-            if (typeof json === 'string') {
-                const jsonObj: Object = JSON.parse(json);
-                if (typeof jsonObj === 'object' && jsonObj !== null) {
-                    copy = {};
-                    copiedObjects.set(obj, copy);
-                    Object.keys(jsonObj).forEach((objKey: any) => {
-                        copy[objKey] = recursiveCopy(obj[objKey]);
-                    });
-                } else {
-                    throw err;
-                }
-            } else {
-                throw err;
+        try {
+            if (InteropExtractorModule.isCloneableObject?.(obj)) {
+                copy = InteropExtractorModule.cloneCloneableObject?.(obj);
+                copiedObjects.set(obj, copy);
+                return copy;
             }
-        } else {
-            throw err;
+            copy = {};
+            copiedObjects.set(obj, copy);
+            Object.keys(JSON.parse(globalThis.Panda?.STValue?.toJSON?.(obj))).forEach(
+                (objKey: any) => {
+                    copy[objKey] = recursiveCopy(obj[objKey]);
+                }
+            );
+        } catch (e) {
+            throw new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
         }
     }
-
     return copy;
 }
 
@@ -274,6 +268,40 @@ function createObservedObject(value: Object): Object {
     return value;
 }
 
+function createV2ObservedObject(value: Object): Object {
+    if (!ObserveV2.IsObservedObjectV2(value) && !ObserveV2.IsMakeObserved(value) && !ObserveV2.IsProxiedObservedV2(value)) {
+        value = ObserveV2.autoProxyObject({ interopV2Value: value }, 'interopV2Value');
+    }
+    return value;
+}
+
 function invokeObserveFireChange(target: Object, key: string): void {
     ObserveV2.getObserve().fireChange(RefInfo.get(UIUtilsImpl.instance().getTarget(target)), key);
+}
+
+function createMutableBinding(getter: () => Object, setter: (newValue: Object) => void): MutableBinding<Object> {
+    return UIUtilsImpl.instance().makeBinding(getter, setter);
+}
+
+function createBinding(getter: () => Object): Binding<Object> {
+    return UIUtilsImpl.instance().makeBinding(getter);
+}
+
+function tryGetInteropObservedValue(target: Object, key: string | symbol, val: any): any | undefined {
+    if (!val || typeof val !== 'object') {
+        return undefined;
+    }
+    val = ObserveV2.setStaticCompatibleFuncInVal(target, val);
+    if (isStaticProxy(val) && typeof key === 'string' && key.startsWith(ObserveV2.OB_PREFIX)) {
+        const propertyKey = key.substring(ObserveV2.OB_PREFIX.length);
+        val = InteropExtractorModule.getV2InteropObservedObject(
+            val,
+            target,
+            propertyKey,
+            '__autoProxyStaticWatch_'
+        );
+        target[key] = val;
+        return val;
+    }
+    return undefined;
 }

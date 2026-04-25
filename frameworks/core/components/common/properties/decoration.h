@@ -18,13 +18,11 @@
 
 #include <memory>
 #include <optional>
-#include <regex>
 #include <vector>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
-#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
@@ -34,20 +32,17 @@
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/border.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/outline_style.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/theme/theme_utils.h"
-#include "core/components_ng/base/inspector_filter.h"
 
 namespace OHOS::Ace {
 
+class BorderImage;
 class PipelineContext;
 
 constexpr double CENTER_OFFSET = 50.0;
@@ -571,8 +566,8 @@ class Decoration final : public AceType {
     DECLARE_ACE_TYPE(Decoration, AceType);
 
 public:
-    Decoration() = default;
-    ~Decoration() override = default;
+    ACE_FORCE_EXPORT Decoration();
+    ACE_FORCE_EXPORT ~Decoration() override;
 
     ACE_FORCE_EXPORT void SetContextAndCallback(
         const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
@@ -608,10 +603,7 @@ public:
         image_ = image;
     }
 
-    void SetBorderImage(const RefPtr<BorderImage>& borderImage)
-    {
-        borderImage_ = borderImage;
-    }
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage);
 
     void SetHasBorderImageSource(const bool tag)
     {

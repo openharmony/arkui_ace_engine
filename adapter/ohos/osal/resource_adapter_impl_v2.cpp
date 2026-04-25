@@ -54,12 +54,12 @@ const std::unordered_set<std::string> PATTERN_NOT_SYNC_LOAD_SET = { THEME_PATTER
     THEME_PATTERN_ADVANCED_PATTERN, THEME_PATTERN_SECURITY_COMPONENT, THEME_PATTERN_FORM, THEME_PATTERN_SIDE_BAR,
     THEME_PATTERN_PATTERN_LOCK, THEME_PATTERN_GAUGE, THEME_PATTERN_SHEET, THEME_PATTERN_AGING_ADAPATION_DIALOG,
     THEME_BLUR_STYLE_COMMON, THEME_PATTERN_SHADOW, THEME_PATTERN_SCROLLABLE,
-    THEME_PATTERN_APP, THEME_PATTERN_CONTAINER_PICKER };
+    THEME_PATTERN_APP, THEME_PATTERN_CONTAINER_PICKER, THEME_PATTERN_CORNER_MARK };
 
 const std::unordered_set<std::string> PATTERN_SYNC_LOAD_SET = { THEME_PATTERN_BUTTON, THEME_PATTERN_CAMERA,
     THEME_PATTERN_LIST_ITEM, THEME_PATTERN_ARC_LIST, THEME_PATTERN_ARC_LIST_ITEM, THEME_PATTERN_PICKER,
     THEME_PATTERN_PROGRESS, THEME_PATTERN_SELECT, THEME_PATTERN_STEPPER, THEME_PATTERN_TEXT, THEME_PATTERN_TEXTFIELD,
-    THEME_PATTERN_TEXT_OVERLAY, THEME_PATTERN_CONTAINER_MODAL, THEME_PATTERN_CORNER_MARK };
+    THEME_PATTERN_TEXT_OVERLAY, THEME_PATTERN_CONTAINER_MODAL };
 
 const std::string PATTERN_ASYNC_LOAD_LIST[] = { THEME_BLUR_STYLE_COMMON, THEME_PATTERN_ICON, THEME_PATTERN_SHADOW };
 constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
@@ -388,7 +388,9 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
             state = manager->GetPatternById(id, attrMap);
         }
         if (state != Global::Resource::SUCCESS) {
-            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "Get pattern by name error, name=%{public}s, bundleName: %{public}s, moduleName: %{public}s",
+                patternName.c_str(), GetBundleName().c_str(), GetModuleName().c_str());
             if (patternNameFound) {
                 state = manager->GetPatternById(id, attrMap);
             } else {
@@ -400,10 +402,14 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
                 ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId() : -1,
                     patternName, "Pattern", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
             } else if (attrMap.empty()) {
-                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternName.c_str());
+                TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                    "Get pattern %{public}s empty!, bundleName: %{public}s, moduleName: %{public}s",
+                    patternName.c_str(), GetBundleName().c_str(), GetModuleName().c_str());
             }
         } else if (attrMap.empty()) {
-            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternName.c_str());
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "Get pattern %{public}s empty!, bundleName: %{public}s, moduleName: %{public}s", patternName.c_str(),
+                GetBundleName().c_str(), GetModuleName().c_str());
         }
         patternStyle->rawAttrs_ = attrMap;
         patternStyle->ParseContent();
@@ -459,8 +465,10 @@ Color ResourceAdapterImplV2::GetColorByName(const std::string& resName)
     CHECK_NULL_RETURN(manager, Color(result));
     auto state = manager->GetColorByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get color by name error, name=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get color by name error, name=%{public}s, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -478,8 +486,9 @@ Dimension ResourceAdapterImplV2::GetDimension(uint32_t resId)
     if (manager) {
         auto state = manager->GetFloatById(resId, dimensionFloat, unit);
         if (state != Global::Resource::SUCCESS) {
-            TAG_LOGW(AceLogTag::ACE_RESOURCE, "NG Get dimension by id error, id=%{public}u, errorCode=%{public}d",
-                resId, state);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "NG Get dimension by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, "
+                "moduleName: %{public}s", resId, state, GetBundleName().c_str(), GetModuleName().c_str());
             auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
             ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
                 std::to_string(resId), "Dimension", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -493,8 +502,9 @@ Dimension ResourceAdapterImplV2::GetDimension(uint32_t resId)
         if (manager) {
             auto state = manager->GetFloatById(resId, dimensionFloat, unit);
             if (state != Global::Resource::SUCCESS) {
-                TAG_LOGW(AceLogTag::ACE_RESOURCE, "NG: Get dimension by id error, id=%{public}u, errorCode=%{public}d",
-                    resId, state);
+                TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                    "NG: Get dimension by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, "
+                    "moduleName: %{public}s", resId, state, GetBundleName().c_str(), GetModuleName().c_str());
                 auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
                 ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
                     std::to_string(resId), "Dimension", host ? host->GetTag().c_str() : "",
@@ -508,8 +518,9 @@ Dimension ResourceAdapterImplV2::GetDimension(uint32_t resId)
     CHECK_NULL_RETURN(manager, Dimension(static_cast<double>(dimensionFloat)));
     auto state = manager->GetFloatById(resId, dimensionFloat);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(
-            AceLogTag::ACE_RESOURCE, "Get dimension by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get dimension by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s", resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "Dimension", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -527,8 +538,10 @@ Dimension ResourceAdapterImplV2::GetDimensionByName(const std::string& resName)
     std::string unit;
     auto state = manager->GetFloatByName(actualResName.c_str(), dimensionFloat, unit);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get dimension by name error, resName=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get dimension by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Dimension", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -562,8 +575,10 @@ std::string ResourceAdapterImplV2::GetStringByName(const std::string& resName)
     CHECK_NULL_RETURN(manager, strResult);
     auto state = manager->GetStringByName(actualResName.c_str(), strResult);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get string by name error, resName=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get string by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "String", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -581,8 +596,10 @@ std::string ResourceAdapterImplV2::GetStringFormatByName(const char* resName, ..
     auto state = manager->GetStringFormatByName(strResult, resName, args);
     va_end(args);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get format string by name error, resName=%{public}s, errorCode=%{public}d",
-            resName, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get format string by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resName, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId() : -1, resName,
             "String", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -597,8 +614,10 @@ std::string ResourceAdapterImplV2::GetPluralString(uint32_t resId, int quantity)
     CHECK_NULL_RETURN(manager, strResult);
     auto state = manager->GetPluralStringById(resId, quantity, strResult);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get plural string by id error, id=%{public}u, errorCode=%{public}d", resId,
-            state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get plural string by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "PluralString", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -614,8 +633,10 @@ std::string ResourceAdapterImplV2::GetPluralStringByName(const std::string& resN
     CHECK_NULL_RETURN(manager, strResult);
     auto state = manager->GetPluralStringByName(actualResName.c_str(), quantity, strResult);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get plural string by name error, resName=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get plural string by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "PluralString", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -630,8 +651,10 @@ std::vector<std::string> ResourceAdapterImplV2::GetStringArray(uint32_t resId) c
     CHECK_NULL_RETURN(manager, strResults);
     auto state = manager->GetStringArrayById(resId, strResults);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(
-            AceLogTag::ACE_RESOURCE, "Get stringArray by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get stringArray by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "StringArray", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -647,8 +670,10 @@ std::vector<std::string> ResourceAdapterImplV2::GetStringArrayByName(const std::
     CHECK_NULL_RETURN(manager, strResults);
     auto state = manager->GetStringArrayByName(actualResName.c_str(), strResults);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get stringArray by name error, resName=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get stringArray by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "StringArray", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -663,7 +688,10 @@ double ResourceAdapterImplV2::GetDouble(uint32_t resId)
     CHECK_NULL_RETURN(manager, static_cast<double>(result));
     auto state = manager->GetFloatById(resId, result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get double by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get double by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "Double", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -679,8 +707,10 @@ double ResourceAdapterImplV2::GetDoubleByName(const std::string& resName)
     CHECK_NULL_RETURN(manager, static_cast<double>(result));
     auto state = manager->GetFloatByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get double by name error, resName=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get double by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Double", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -695,7 +725,9 @@ int32_t ResourceAdapterImplV2::GetInt(uint32_t resId)
     CHECK_NULL_RETURN(manager, result);
     auto state = manager->GetIntegerById(resId, result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get int by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get int by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, moduleName: %{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "Int", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -711,8 +743,10 @@ int32_t ResourceAdapterImplV2::GetIntByName(const std::string& resName)
     CHECK_NULL_RETURN(manager, result);
     auto state = manager->GetIntegerByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get int by name error, resName=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get int by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Int", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -728,8 +762,10 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArray(uint32_t resId) const
         if (manager) {
             auto state = manager->GetIntArrayById(resId, intVectorResult);
             if (state != Global::Resource::SUCCESS) {
-                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get intArray by id error, id=%{public}u, errorCode=%{public}d",
-                    resId, state);
+                TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                    "Get intArray by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, "
+                    "moduleName: %{public}s",
+                    resId, state, GetBundleName().c_str(), GetModuleName().c_str());
                 auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
                 ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
                     std::to_string(resId), "IntArray", host ? host->GetTag().c_str() : "",
@@ -752,8 +788,10 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArrayByName(const std::string
     CHECK_NULL_RETURN(manager, {});
     auto state = manager->GetIntArrayByName(actualResName.c_str(), intVectorResult);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get intArray by name error, resName=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get intArray by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "IntArray", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -772,7 +810,10 @@ bool ResourceAdapterImplV2::GetBoolean(uint32_t resId) const
     CHECK_NULL_RETURN(manager, result);
     auto state = manager->GetBooleanById(resId, result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get boolean by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get boolean by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "Boolean", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -788,8 +829,10 @@ bool ResourceAdapterImplV2::GetBooleanByName(const std::string& resName) const
     CHECK_NULL_RETURN(manager, result);
     auto state = manager->GetBooleanByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get boolean by name error, resName=%{public}s, errorCode=%{public}d",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get boolean by name error, resName=%{public}s, errorCode=%{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Boolean", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -807,8 +850,10 @@ std::shared_ptr<Media::PixelMap> ResourceAdapterImplV2::GetPixelMap(uint32_t res
     auto drawableDescriptor =
         Napi::DrawableDescriptorFactory::Create(resId, sysResourceManager_, state, drawableType, 0);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Failed to Create drawableDescriptor by %{public}d, errorCode=%{public}d",
-            resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Failed to Create drawableDescriptor by %{public}d, errorCode=%{public}d, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "PixelMap", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -825,7 +870,10 @@ std::string ResourceAdapterImplV2::GetMediaPath(uint32_t resId)
     CHECK_NULL_RETURN(manager, "");
     auto state = manager->GetMediaById(resId, mediaPath);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media by id error, id=%{public}u, errorCode=%{public}u", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get media by id error, id=%{public}u, errorCode=%{public}u, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "MediaPath", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -850,8 +898,10 @@ std::string ResourceAdapterImplV2::GetMediaPathByName(const std::string& resName
         CHECK_NULL_RETURN(manager, "");
         auto state = manager->GetMediaByName(actualResName.c_str(), mediaPath);
         if (state != Global::Resource::SUCCESS) {
-            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media path by name error, resName=%{public}s, errorCode=%{public}u",
-                resName.c_str(), state);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "Get media path by name error, resName=%{public}s, errorCode=%{public}u, bundleName: %{public}s, "
+                "moduleName: %{public}s",
+                resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
             auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
             ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
                 resName, "MediaPath", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -885,8 +935,10 @@ std::string ResourceAdapterImplV2::GetRawfile(const std::string& fileName)
         }
         auto state = manager->GetRawFilePathByName(newFileName, outPath);
         if (state != Global::Resource::SUCCESS) {
-            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get rawFile error, filename:%{public}s, error:%{public}u",
-                fileName.c_str(), state);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "Get rawFile error, filename:%{public}s, error:%{public}u, bundleName: %{public}s, moduleName: "
+                "%{public}s",
+                fileName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
             auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
             ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
                 fileName, "RawFile", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -909,8 +961,10 @@ bool ResourceAdapterImplV2::GetRawFileData(const std::string& rawFile, size_t& l
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetRawFileFromHap(rawFile, len, dest);
     if (state != Global::Resource::SUCCESS || !dest) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get rawFile from hap error, raw filename:%{public}s, error:%{public}u",
-            rawFile.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get rawFile from hap error, raw filename:%{public}s, error:%{public}u, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            rawFile.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             rawFile, "RawFile", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -944,7 +998,10 @@ bool ResourceAdapterImplV2::GetMediaData(uint32_t resId, size_t& len, std::uniqu
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaDataById(resId, len, dest);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media data by id error, id:%{public}u, error:%{public}u", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get media data by id error, id:%{public}u, error:%{public}u, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "MediaData", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -977,8 +1034,10 @@ bool ResourceAdapterImplV2::GetMediaData(const std::string& resName, size_t& len
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaDataByName(resName.c_str(), len, dest);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media data by name error, resName:%{public}s, error:%{public}u",
-            resName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get media data by name error, resName:%{public}s, error:%{public}u, bundleName: %{public}s, "
+            "moduleName: %{public}s",
+            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "MediaData", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -1014,8 +1073,11 @@ bool ResourceAdapterImplV2::GetRawFileDescription(
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetRawFileDescriptorFromHap(rawfileName, descriptor);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get raw file description error, rawFileName:%{public}s, error:%{public}u",
-            rawfileName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get raw file description error, rawFileName:%{public}s, error:%{public}u, bundleName: %{public}s, "
+            "moduleName: "
+            "%{public}s",
+            rawfileName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             rawfileName, "RawFileDescription", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -1033,7 +1095,9 @@ bool ResourceAdapterImplV2::CloseRawFileDescription(const std::string &rawfileNa
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->CloseRawFileDescriptor(rawfileName);
     if (state != Global::Resource::SUCCESS) {
-        LOGE("Close RawFile Description error, error:%{public}u", state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Close RawFile Description error, error:%{public}u, bundleName: %{public}s, moduleName: %{public}s", state,
+            GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             rawfileName, "RawFileDescription", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -1049,8 +1113,10 @@ bool ResourceAdapterImplV2::GetRawFD(const std::string& rawfileName, RawfileDesc
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetRawFdNdkFromHap(rawfileName, descriptor);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get raw fd(no cache) error, rawFileName:%{public}s, error:%{public}u",
-            rawfileName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get raw fd(no cache) error, rawFileName:%{public}s, error:%{public}u, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            rawfileName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         return false;
     }
     rawfileDescription.fd = descriptor.fd;
@@ -1065,7 +1131,9 @@ bool ResourceAdapterImplV2::GetMediaById(const int32_t& resId, std::string& medi
     CHECK_NULL_RETURN(manager, false);
     auto state = manager->GetMediaById(resId, mediaPath);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media by id error, resId:%{public}d, error:%{public}u", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get media by id error, resId:%{public}d, error:%{public}u, bundleName: %{public}s, moduleName: %{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "Media", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -1098,8 +1166,10 @@ uint32_t ResourceAdapterImplV2::GetSymbolByName(const char* resName) const
     CHECK_NULL_RETURN(manager, -1);
     auto state = manager->GetSymbolByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get symbol by name error, name=%{public}s, errorCode=%{public}d",
-            resName, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get symbol by name error, name=%{public}s, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resName, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Symbol", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -1159,7 +1229,11 @@ RefPtr<ResourceAdapter> ResourceAdapterImplV2::GetOverrideResourceAdapter(
         overrideResConfig->SetScreenDensity(config.GetDensity());
     }
     auto overrideResMgr = sysResourceManager_->GetOverrideResourceManager(overrideResConfig);
-    return AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
+    auto adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
+    adapter->resConfig_ = overrideResConfig;
+    adapter->SetAppHasDarkRes(appHasDarkRes_);
+    adapter->packagePathStr_ = packagePathStr_;
+    return adapter;
 }
 
 bool ResourceAdapterImplV2::ExistDarkResById(const std::string& resourceId)
@@ -1249,8 +1323,9 @@ uint32_t ResourceAdapterImplV2::GetResId(const std::string &resTypeName) const
     CHECK_NULL_RETURN(manager, INVALID_RESOURCE_ID);
     auto state = manager->GetResId(resTypeName, resId);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get resId by name error, name=%s, errorCode=%{public}d",
-            resTypeName.c_str(), state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get resId by name error, name=%s, errorCode=%{public}d, bundleName: %{public}s, moduleName: %{public}s",
+            resTypeName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
         return INVALID_RESOURCE_ID;
     }
     return resId;

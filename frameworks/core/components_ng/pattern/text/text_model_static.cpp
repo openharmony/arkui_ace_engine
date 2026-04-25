@@ -18,7 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -85,6 +85,16 @@ void TextModelStatic::SetEnableVariableFontWeight(FrameNode* frameNode, const st
         TextModelNG::SetEnableVariableFontWeight(frameNode, value.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, frameNode);
+    }
+}
+
+void TextModelStatic::SetFontVariations(FrameNode* frameNode, const std::optional<FONT_VARIATIONS_LIST>& value)
+{
+    if (value.has_value()) {
+        TextModelNG::SetFontVariations(frameNode, value.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty, FontVariations, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -381,6 +391,25 @@ void TextModelStatic::BindSelectionMenu(FrameNode* frameNode, TextSpanType& span
     auto pattern = frameNode->GetPattern<TextPattern>();
     if (pattern) {
         pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam);
+    }
+}
+
+void TextModelStatic::BindPreviewMenu(FrameNode* frameNode, TextSpanType& spanType,
+    std::function<void()>&& buildFunc, SelectMenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->BindPreviewMenu(spanType, buildFunc, menuParam);
+    }
+}
+
+void TextModelStatic::UnBindPreviewMenu(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->UnBindPreviewMenu();
     }
 }
 

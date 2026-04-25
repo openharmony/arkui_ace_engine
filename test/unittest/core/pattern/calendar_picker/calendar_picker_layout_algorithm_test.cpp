@@ -16,10 +16,10 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 #undef private
 #undef protected

@@ -28,7 +28,6 @@ import { ResourceColor, Resource as arkui_component_units_Resource } from './uni
 import { Color as arkui_component_enums_Color } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { AttributeModifier, hookBlankAttributeModifier, AttributeUpdater } from '#handwritten'
-import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -37,7 +36,7 @@ import { BlankModifier } from './../BlankModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkBlankPeer extends ArkCommonMethodPeer {
-    attributeSet?: BlankModifier;
+    blankAttributeSet?: BlankModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

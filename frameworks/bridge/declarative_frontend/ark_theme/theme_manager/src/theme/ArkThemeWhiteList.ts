@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,19 +20,26 @@ class ArkThemeWhiteList {
     // add to list only names of built-in components which support ArkTheme
     // strongly recommended to use alphabetical order
     private static whiteList: Array<string> = [
-        'AlphabetIndexer',
         'Badge',
         'Button',
-        'DataPanel',
-        'Menu',
-        'MenuItem',
-        'PatternLock',
-        'QRCode',
-        'Radio',
+        'DatePicker',
+        'JSAlphabetIndexer',
+        'JSCounter',
+        'JSDataPanel',
+        'JSMenu',
+        'JSMenuItem',
+        'JSPatternLock',
+        'JSQRCode',
+        'JSRadio',
+        'JSTextClock',
+        'JSTimePicker',
+        'LoadingProgress',
+        'Progress',
         'Scroll',
+        'JSSearch',
         'Swiper',
         'Text',
-        'TextClock',
+        'TextPicker',
     ];
 
     /**

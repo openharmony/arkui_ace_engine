@@ -30,7 +30,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
@@ -183,12 +183,10 @@ void AssignArkValue(Ark_MarqueeState& dst, int32_t src, ConvContext *ctx)
     const int32_t START = 0;
     const int32_t BOUNCE = 1;
     const int32_t FINISH = 2;
-    const int32_t STOP = 3;
     switch (src) {
         case START: dst = ARK_MARQUEE_STATE_START; break;
         case BOUNCE: dst = ARK_MARQUEE_STATE_BOUNCE; break;
         case FINISH: dst = ARK_MARQUEE_STATE_FINISH; break;
-        case STOP: dst = ARK_MARQUEE_STATE_STOP; break;
         default:
             dst = static_cast<Ark_MarqueeState>(-1);
             LOGE("Unexpected enum value in Ark_MarqueeState: %{public}d", src);
@@ -489,6 +487,24 @@ void SetOnCopyImpl(Ark_NativePointer node,
     };
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
+}
+void SetOnWillCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TextModelNG::SetOnWillCopy(frameNode, nullptr);
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)] (const std::u16string& value) -> bool {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(textArkString);
+        return Converter::Convert<bool>(result);
+    };
+    TextModelNG::SetOnWillCopy(frameNode, std::move(onCallback));
 }
 void SetCaretColorImpl(Ark_NativePointer node,
                        const Opt_ResourceColor* value)
@@ -948,14 +964,43 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
     } else {
         convMenuParam = NG::SelectMenuParam();
     }
-
+    std::optional<SelectionMenuType> menuType;
+    CHECK_NULL_VOID(options);
+    if (!options) {
+        Converter::AssignCast(menuType, options->value.menuType.value);
+    }
     CallbackHelper(*optContent).BuildAsync([frameNode, spanType = optSpanType.value(), convResponseType,
-        menuParam = convMenuParam.value()](const RefPtr<UINode>& uiNode) mutable {
+        menuParam = convMenuParam.value(), menuType](const RefPtr<UINode>& uiNode) mutable {
         auto builder = [uiNode]() {
             NG::ViewStackProcessor::GetInstance()->Push(uiNode);
         };
-        TextModelStatic::BindSelectionMenu(frameNode, spanType, *convResponseType, std::move(builder), menuParam);
+        if (menuType.has_value() && menuType.value() == SelectionMenuType::PREVIEW_MENU) {
+            TextModelStatic::BindPreviewMenu(frameNode, spanType, std::move(builder), menuParam);
+        } else {
+            TextModelStatic::UnBindPreviewMenu(frameNode);
+            TextModelStatic::BindSelectionMenu(frameNode, spanType, *convResponseType, std::move(builder), menuParam);
+        }
         }, node);
+}
+void SetFontVariationsImpl(Ark_NativePointer node, const Opt_Array_text_FontVariation* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<FONT_VARIATIONS_LIST> fontVariations = std::nullopt;
+    auto optValue = Converter::GetOptPtr(value);
+    if (optValue.has_value() && optValue->length != 0) {
+        fontVariations = FONT_VARIATIONS_LIST {};
+        fontVariations->reserve(optValue->length);
+        for (Ark_Int32 i = 0; i < optValue->length; ++i) {
+            const auto& item = optValue->array[i];
+            fontVariations->push_back({
+                Converter::Convert<std::string>(item.axis),
+                static_cast<float>(item.value),
+                Converter::OptConvert<bool>(item.isNormalized)
+            });
+        }
+    }
+    TextModelStatic::SetFontVariations(frameNode, fontVariations);
 }
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()
@@ -987,6 +1032,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetWordBreakImpl,
         TextAttributeModifier::SetLineBreakStrategyImpl,
         TextAttributeModifier::SetOnCopyImpl,
+        TextAttributeModifier::SetOnWillCopyImpl,
         TextAttributeModifier::SetCaretColorImpl,
         TextAttributeModifier::SetSelectedBackgroundColorImpl,
         TextAttributeModifier::SetEllipsisModeImpl,
@@ -1017,12 +1063,13 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetCompressLeadingPunctuationImpl,
         TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextAttributeModifier::SetTextDirectionImpl,
+        TextAttributeModifier::SetOrphanCharOptimizationImpl,
+        TextAttributeModifier::SetFontVariationsImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetSelectionImpl,
         TextAttributeModifier::SetBindSelectionMenuImpl,
-        TextAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextModifierImpl;
 }

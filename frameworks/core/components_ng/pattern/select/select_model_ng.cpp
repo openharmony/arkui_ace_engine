@@ -20,8 +20,11 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_layout_property.h"
+#include "core/components_ng/pattern/select/select_paint_property.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -56,19 +59,10 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
     ViewStackProcessor::GetInstance()->Push(select);
 
     InitSelect(AceType::RawPtr(select), params);
-    auto props = select->GetPaintProperty<SelectPaintProperty>();
-    if (props) {
-        props->ResetFontColorSetByUser();
-        props->ResetSelectedOptionBgColorSetByUser();
-        props->ResetOptionBgColorSetByUser();
-        props->ResetSelectedOptionFontColorSetByUser();
-        props->ResetOptionFontColorSetByUser();
-        props->ResetBackgroundColorSetByUser();
-        props->ResetMenuBackgroundColorSetByUser();
-        props->ResetTextModifierSetByUser();
-        props->ResetOptionTextModifierSetByUser();
-        props->ResetSelectedOptionTextModifierSetByUser();
-        props->ResetArrowModifierSetByUser();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && MaterialUtils::IsMaterialEnabled()) {
+        auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THIN);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(material));
     }
 }
 
@@ -1064,11 +1058,17 @@ void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::s
     pattern->SetItemSelected(index, value);
 }
 
-void SelectModelNG::SetMenuBackgroundColor(FrameNode* frameNode, const Color& color)
+void SelectModelNG::SetMenuBackgroundColor(FrameNode* frameNode, const Color& color, bool isJsView)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuBackgroundColor(color);
+    auto menuNode = pattern->GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetIsSelectMenuBackgroundColorJsview(isJsView);
 }
 
 void SelectModelNG::SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle)

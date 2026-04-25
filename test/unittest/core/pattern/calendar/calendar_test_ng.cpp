@@ -44,12 +44,16 @@
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/render/drawing_mock.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "core/components/theme/icon_theme.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #undef private
 #undef protected
 
@@ -97,6 +101,19 @@ const Dimension GREGORIAN_DAY_OFFSET = 4.0_vp;
 // Lunar YAxis Offset and Height.
 const Dimension LUNAR_DAY_HEIGHT = 10.0_vp;
 const Dimension LUNAR_DAY_OFFSET = 2.0_vp;
+
+RefPtr<Theme> GetThemeByType(ThemeType type)
+{
+    if (type == CalendarTheme::TypeId()) {
+        return AceType::MakeRefPtr<CalendarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else {
+        return AceType::MakeRefPtr<ShadowTheme>();
+    }
+}
 } // namespace
 
 class CalendarTestNg : public testing::Test {
@@ -111,10 +128,19 @@ protected:
 void CalendarTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetThemeByType(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {return GetThemeByType(type); });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void CalendarTestNg::TearDownTestCase()
 {
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineContext::TearDown();
 }
 
@@ -628,6 +654,7 @@ HWTEST_F(CalendarTestNg, CalendarTest008, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     // Today style.
     TodayStyle todayStyle;

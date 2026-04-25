@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
 #include "base/log/log.h"

@@ -14,8 +14,22 @@
  */
 
 #include "compatible/components/refresh/render_refresh.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/i18n/localization.h"
+#include "base/utils/system_properties.h"
+#include "compatible/components/refresh/refresh_component.h"
+#include "core/animation/animation.h"
+#include "core/animation/animator.h"
+#include "core/components/box/box_component.h"
+#include "core/components/box/render_box.h"
+#include "core/components/display/render_display.h"
+#include "core/components/progress/loading_progress_component.h"
+#include "core/components/progress/render_loading_progress.h"
+#include "core/components/scroll/scrollable.h"
+#include "core/components/text/render_text.h"
+#include "core/components/text/text_component.h"
+#include "core/gestures/drag_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -67,6 +81,14 @@ RenderRefresh::RenderRefresh()
     time_ = AceType::DynamicCast<RenderText>(timeComponent_->CreateRenderNode());
     display_->AddChild(timeBox_);
     timeBox_->AddChild(time_);
+}
+
+RenderRefresh::~RenderRefresh() = default;
+
+bool RenderRefresh::IsWatch() const
+{
+    return SystemProperties::GetDeviceType() == DeviceType::WATCH ||
+           SystemProperties::GetDeviceType() == DeviceType::WEARABLE;
 }
 
 void RenderRefresh::Update(const RefPtr<Component>& component)

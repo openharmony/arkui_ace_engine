@@ -20,8 +20,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "core/animation/svg_animate.h"
-#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/svg_context.h"

@@ -54,12 +54,18 @@ struct ArkUI_GestureInterruptInfo {
     ArkUIGestureInterruptInfo interruptData;
 };
 
+struct ArkUI_GestureCollectInterceptInfo {
+    ArkUIGestureCollectInterceptInfo interceptData;
+};
+
 struct ArkUI_ParallelInnerGestureEvent {
     ArkUIGestureRecognizer* current = nullptr;
     ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
     void* userData = nullptr;
     int32_t count;
 };
+
+struct ArkUI_ParallelGestureEvent : public ArkUI_ParallelInnerGestureEvent {};
 
 #endif
 
@@ -108,6 +114,9 @@ int32_t SetGestureInterrupterToNodeWithUserData(ArkUI_NodeHandle node, void* use
 
 int32_t SetInnerGestureParallelTo(ArkUI_NodeHandle node, void* userData,
     ArkUI_GestureRecognizer* (*parallelInnerGesture)(ArkUI_ParallelInnerGestureEvent* event));
+
+ArkUI_ErrorCode SetGestureParallelTo(ArkUI_NodeHandle node, void* userData,
+    ArkUI_GestureRecognizer* (*parallelGesture)(ArkUI_ParallelGestureEvent* event));
 
 }; // namespace OHOS::Ace::GestureModel
 #endif // INTERFACES_NATIVE_NODE_GESTURE_IMPL_H

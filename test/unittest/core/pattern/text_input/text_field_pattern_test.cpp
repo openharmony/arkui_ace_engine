@@ -15,9 +15,10 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -2006,7 +2007,13 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     touchLocationInfo.touchType_ = TouchType::CANCEL;
     touchEventInfo.touches_.clear();
     touchEventInfo.changedTouches_.clear();
+    /**
+     * @tc.step: step7. AddTouchLocationInfo
+     */
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    /**
+     * @tc.step: step8. AddChangedTouchLocationInfo
+     */
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(controller->GetShowMagnifier());
@@ -2034,16 +2041,21 @@ HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest001, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    /**
+     * @tc.steps: step3. call GetMagnifierController
+     */
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->isShowMagnifier_ = true;
+    /**
+     * @tc.steps: step4. call GetShowMagnifier
+     */
     auto result = controller->GetShowMagnifier();
     EXPECT_EQ(result, true);
 
 
     /**
-     * @tc.steps: step3. GetMagnifierController
+     * @tc.steps: step5. GetMagnifierController
      *
      */
     result = controller->GetShowMagnifier();
@@ -2072,10 +2084,15 @@ HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest002, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    /**
+     * @tc.steps: step3. call GetMagnifierController
+     */
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->isShowMagnifier_ = false;
+    /**
+     * @tc.steps: step4. call GetShowMagnifier
+     */
     auto result = controller->GetShowMagnifier();
     EXPECT_EQ(result, false);
 }
@@ -2175,13 +2192,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern086, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    /**
+     * @tc.steps: step2. AddTouchLocationInfo
+     */
     TouchEventInfo touchEventInfo("onTouch");
     TouchLocationInfo touchLocationInfo(0);
     touchLocationInfo.touchType_ = TouchType::MOVE;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-
+    /**
+     * @tc.steps: step3. UpdateCaretByTouchMove
+     */
     pattern->hasPreviewText_ = true;
     pattern->UpdateCaretByTouchMove(touchLocationInfo);
 }

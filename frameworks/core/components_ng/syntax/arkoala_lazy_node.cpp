@@ -14,8 +14,10 @@
  */
 
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkoalaLazyNode::ArkoalaLazyNode(int32_t nodeId, bool isRepeat) : ForEachBaseNode(
@@ -81,14 +83,48 @@ void ArkoalaLazyNode::RebuildCache()
         }
     }
 
-    node4Index_.RemoveIf([weak = WeakClaim(this)](const uint32_t& k, const auto& _) {
-        auto arkoalaLazyNode = weak.Upgrade();
-        CHECK_NULL_RETURN(arkoalaLazyNode, false);
-        const auto indexMapped = arkoalaLazyNode->ConvertFromToIndexRevert(static_cast<int32_t>(k));
-        return !arkoalaLazyNode->IsInCacheRange(indexMapped, arkoalaLazyNode->activeRangeParam_);
-    });
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "RebuildCache DONE. Cache nodes count: %{public}zu", node4Index_.Size());
     RequestSyncTree(); // order a resync from layout
+}
+
+void ArkoalaLazyNode::PurgeNode()
+{
+    std::vector<int32_t> removingIndex;
+    for (const auto& [index, node] : node4Index_) {
+        const auto indexMapped = ConvertFromToIndexRevert(index);
+        if (!IsInCacheRange(indexMapped, activeRangeParam_)) {
+            removingIndex.emplace_back(index);
+            if (!isRepeat_ && options_.releaseStrategy == LazyForEachReleaseStrategy::PROGRESSIVE) {
+                removingNodeList_.push_back(node);
+            }
+        }
+    }
+    for (auto i: removingIndex) {
+        node4Index_.Remove(i);
+    }
+}
+
+void ArkoalaLazyNode::RemovingExpiringItem(int64_t deadline)
+{
+    // step 1: check removingNodeList_ if empty
+    if (removingNodeList_.empty()) {
+        return;
+    }
+    // step 2: release nodes while enough time for average release
+    int64_t startTimeStamp = 0;
+    int64_t endTimeStamp = 0;
+    int64_t averageTime = 0;
+    int64_t totalTime = 0;
+    int32_t count = 0;
+    do {
+        startTimeStamp = GetSysTimestamp();
+        auto ite = removingNodeList_.begin();
+        removingNodeList_.erase(ite);
+        endTimeStamp = GetSysTimestamp();
+        count++;
+        totalTime += endTimeStamp - startTimeStamp;
+        averageTime = totalTime / count;
+    } while (!removingNodeList_.empty() && deadline - endTimeStamp > averageTime);
 }
 
 void ArkoalaLazyNode::UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger)
@@ -153,7 +189,13 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndexImpl(
         child->SetJSViewActive(false, !isRepeat_);
         if (!isRepeat_) {
             child->SetParent(WeakClaim(this));
-            return child->GetFrameChildByIndex(0, needBuild);
+            bool enableCustomComponentFreeze = LazyForEachUtils::GetEnableCustomComponentFreeze();
+            if (options_.customComponentFreezeMode == LazyForEachCustomComponentFreezeMode::DISABLED) {
+                enableCustomComponentFreeze = false;
+            } else if (options_.customComponentFreezeMode == LazyForEachCustomComponentFreezeMode::ENABLED) {
+                enableCustomComponentFreeze = true;
+            }
+            return child->GetFrameChildByIndex(0, needBuild, enableCustomComponentFreeze);
         }
     } else if (addToRenderTree) {
         child->SetActive(true);
@@ -290,13 +332,18 @@ void ArkoalaLazyNode::PostIdleTask()
     CHECK_NULL_VOID(context);
 
     context->AddPredictTask(
-        [weak = AceType::WeakClaim(this)](int64_t /* deadline */, bool /* canUseLongPredictTask */) {
+        [weak = AceType::WeakClaim(this)](int64_t deadline, bool /* canUseLongPredictTask */) {
         ACE_SCOPED_TRACE("ArkoalaLazyNode.IdleTask");
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->postUpdateTaskHasBeenScheduled_ = false;
         TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "idle task calls GetChildren");
         node->GetChildren();
+        node->PurgeNode();
+        node->RemovingExpiringItem(deadline);
+        if (!node->removingNodeList_.empty()) {
+            node->PostIdleTask();
+        }
     });
 }
 
@@ -329,7 +376,7 @@ void ArkoalaLazyNode::SetItemDragEvent(std::function<void(int32_t)>&& onLongPres
     }
 }
 
-void ArkoalaLazyNode::MoveData(int32_t from, int32_t to)
+void ArkoalaLazyNode::MoveData(int32_t from, int32_t to, bool isNeedUpdate)
 {
     if (from == to) {
         return;
@@ -363,6 +410,11 @@ void ArkoalaLazyNode::MoveData(int32_t from, int32_t to)
     onMoveFromTo_(from, to);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    if (isNeedUpdate) {
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(std::min(from, to));
+        }
+    }
 }
 
 int32_t ArkoalaLazyNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool /*isExpanded*/)
@@ -477,19 +529,25 @@ void ArkoalaLazyNode::InitDragManager(const RefPtr<FrameNode>& child)
     CHECK_NULL_VOID(child);
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
-    auto pattern = child->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->InitDragManager(AceType::Claim(this));
+    if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+        auto pattern = child->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+        auto pattern = child->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    }
 }
 
 void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
 {
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
     for (const auto& [index, child] : node4Index_) {
@@ -497,19 +555,31 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
             continue;
         }
         auto childNode = child->GetFrameChildByIndex(0, false);
-        auto listItem = AceType::DynamicCast<FrameNode>(childNode);
-        if (!listItem) {
+        auto item = AceType::DynamicCast<FrameNode>(childNode);
+        if (!item) {
             continue;
         }
 
-        auto pattern = listItem->GetPattern<ListItemPattern>();
-        if (!pattern) {
-            continue;
-        }
-        if (init) {
-            pattern->InitDragManager(AceType::Claim(this));
-        } else {
-            pattern->DeInitDragManager();
+        if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+            auto pattern = item->GetPattern<ListItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
+        } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+            auto pattern = item->GetPattern<GridItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
         }
     }
 }

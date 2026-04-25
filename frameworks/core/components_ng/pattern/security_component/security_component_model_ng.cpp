@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -117,7 +117,7 @@ void SecurityComponentModelNG::InitChildNode(FrameNode* frameNode, const Securit
     if (style.symbolIcon && style.symbolIcon != static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)) {
         auto symbolIcon = FrameNode::CreateFrameNode(
             V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        SetDefaultSymbolIconStyle(symbolIcon, style.symbolIcon, isButtonVisible);
+        SetDefaultSymbolIconStyle(symbolIcon, NG::SymbolSourceInfo(style.symbolIcon), isButtonVisible);
         frameNode->AddChild(symbolIcon);
     } else if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
         auto imageIcon = FrameNode::CreateFrameNode(
@@ -202,7 +202,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::InitChild(const std::string& tag, in
             }
             auto symbolIcon = FrameNode::CreateFrameNode(
                 V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            SetDefaultSymbolIconStyle(symbolIcon, style.symbolIcon, isButtonVisible);
+            SetDefaultSymbolIconStyle(symbolIcon, NG::SymbolSourceInfo(style.symbolIcon), isButtonVisible);
             frameNode->AddChild(symbolIcon);
         } else if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
             auto imageIcon = FrameNode::CreateFrameNode(
@@ -259,6 +259,10 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     textLayoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+        textLayoutProperty->UpdateWordBreak(WordBreak::HYPHENATION);
+    }
 
     if (isButtonVisible) {
         textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColor());
@@ -290,14 +294,13 @@ void SecurityComponentModelNG::SetDefaultIconStyle(const RefPtr<FrameNode>& imag
 }
 
 void SecurityComponentModelNG::SetDefaultSymbolIconStyle(
-    const RefPtr<FrameNode> &symbolNode, uint32_t symbolId, bool isButtonVisible)
+    const RefPtr<FrameNode> &symbolNode, const SymbolSourceInfo& symbolSourceInfo, bool isButtonVisible)
 {
     CHECK_NULL_VOID(symbolNode);
     auto secCompTheme = GetTheme();
     CHECK_NULL_VOID(secCompTheme);
     auto iconProp = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(iconProp);
-    SymbolSourceInfo symbolSourceInfo(symbolId);
     if (isButtonVisible) {
         iconProp->UpdateSymbolColorList({secCompTheme->GetDefaultSymbolIconColor()});
     } else {
@@ -342,6 +345,7 @@ void SecurityComponentModelNG::SetInvisibleBackgroundButton(const RefPtr<FrameNo
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
 }
 
@@ -492,34 +496,42 @@ void SecurityComponentModelNG::SetIcon(const ImageSourceInfo& value)
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
     auto hasPermission = prop->GetHasCustomPermissionForSecComp();
-    if (hasPermission.value_or(false)) {
-        auto secCompTheme = GetTheme();
-        CHECK_NULL_VOID(secCompTheme);
-        bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
-        RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
-        if (iconNode == nullptr) {
-            iconNode = FrameNode::CreateFrameNode(
-                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-            iconNode->SetInternal();
-            InternalResource::ResourceId iconId;
-            int32_t iconStyle = static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED);
-            if (SaveButtonModelNG::GetInstance()->GetIconResource(iconStyle, iconId)) {
-                SetDefaultIconStyle(iconNode, iconId, isButtonVisible);
-            }
-            CHECK_NULL_VOID(iconNode);
-            frameNode->AddChild(iconNode);
-
-            prop->UpdateIconStyle(iconStyle);
-        }
-
-        ImageSourceInfo imageSourceInfo = value;
-        if (isButtonVisible) {
-            imageSourceInfo.SetFillColor(secCompTheme->GetIconColor());
-        } else {
-            imageSourceInfo.SetFillColor(secCompTheme->GetIconColorNoBg());
-        }
-        ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, ImageSourceInfo, imageSourceInfo);
+    if (!hasPermission.value_or(false)) {
+        SC_LOG_ERROR("Has no permission to set icon");
+        return;
     }
+    auto secCompTheme = GetTheme();
+    CHECK_NULL_VOID(secCompTheme);
+    bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+    RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    if (iconNode == nullptr) {
+        iconNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        iconNode->SetInternal();
+        InternalResource::ResourceId iconId;
+        int32_t iconStyle = static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED);
+        if (SaveButtonModelNG::GetInstance()->GetIconResource(iconStyle, iconId)) {
+            SetDefaultIconStyle(iconNode, iconId, isButtonVisible);
+        }
+        CHECK_NULL_VOID(iconNode);
+        frameNode->AddChild(iconNode);
+
+        prop->UpdateIconStyle(iconStyle);
+    }
+
+    RefPtr<FrameNode> symbolNode = GetSecCompChildNode(frameNode, V2::SYMBOL_ETS_TAG);
+    if (symbolNode != nullptr) {
+        frameNode->RemoveChild(symbolNode);
+        SC_LOG_INFO("Image icon and symbol icon cannot exist at same time. Remove symbol icon");
+    }
+
+    ImageSourceInfo imageSourceInfo = value;
+    if (isButtonVisible) {
+        imageSourceInfo.SetFillColor(secCompTheme->GetIconColor());
+    } else {
+        imageSourceInfo.SetFillColor(secCompTheme->GetIconColorNoBg());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, ImageSourceInfo, imageSourceInfo);
 }
 
 void SecurityComponentModelNG::SetIcon(FrameNode* frameNode, const std::optional<ImageSourceInfo>& value)
@@ -528,34 +540,43 @@ void SecurityComponentModelNG::SetIcon(FrameNode* frameNode, const std::optional
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(prop);
     auto hasPermission = prop->GetHasCustomPermissionForSecComp();
-    if (hasPermission.value_or(false) && value.has_value()) {
-        auto secCompTheme = GetTheme();
-        CHECK_NULL_VOID(secCompTheme);
-        bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
-        RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
-        if (iconNode == nullptr) {
-            iconNode = FrameNode::CreateFrameNode(
-                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-            iconNode->SetInternal();
-            InternalResource::ResourceId iconId;
-            int32_t iconStyle = static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED);
-            if (SaveButtonModelNG::GetInstance()->GetIconResource(iconStyle, iconId)) {
-                SetDefaultIconStyle(iconNode, iconId, isButtonVisible);
-            }
-            CHECK_NULL_VOID(iconNode);
-            frameNode->AddChild(iconNode);
-
-            prop->UpdateIconStyle(iconStyle);
-        }
-
-        ImageSourceInfo imageSourceInfo = value.value();
-        if (isButtonVisible) {
-            imageSourceInfo.SetFillColor(secCompTheme->GetIconColor());
-        } else {
-            imageSourceInfo.SetFillColor(secCompTheme->GetIconColorNoBg());
-        }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, ImageSourceInfo, imageSourceInfo, frameNode);
+    if (!hasPermission.value_or(false) || !value.has_value()) {
+        SC_LOG_ERROR("Has no permission to set icon");
+        return;
     }
+    
+    auto secCompTheme = GetTheme();
+    CHECK_NULL_VOID(secCompTheme);
+    bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+    RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    if (iconNode == nullptr) {
+        iconNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        iconNode->SetInternal();
+        InternalResource::ResourceId iconId;
+        int32_t iconStyle = static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED);
+        if (SaveButtonModelNG::GetInstance()->GetIconResource(iconStyle, iconId)) {
+            SetDefaultIconStyle(iconNode, iconId, isButtonVisible);
+        }
+        CHECK_NULL_VOID(iconNode);
+        frameNode->AddChild(iconNode);
+
+        prop->UpdateIconStyle(iconStyle);
+    }
+
+    RefPtr<FrameNode> symbolNode = GetSecCompChildNode(frameNode, V2::SYMBOL_ETS_TAG);
+    if (symbolNode != nullptr) {
+        frameNode->RemoveChild(symbolNode);
+        SC_LOG_INFO("Image icon and symbol icon cannot exist at same time. Remove symbol icon");
+    }
+
+    ImageSourceInfo imageSourceInfo = value.value();
+    if (isButtonVisible) {
+        imageSourceInfo.SetFillColor(secCompTheme->GetIconColor());
+    } else {
+        imageSourceInfo.SetFillColor(secCompTheme->GetIconColorNoBg());
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, ImageSourceInfo, imageSourceInfo, frameNode);
 }
 
 void SecurityComponentModelNG::SetText(const std::string& value)
@@ -1187,5 +1208,66 @@ void SecurityComponentModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode,
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, HeightAdaptivePolicy, frameNode);
     }
+}
+
+void SecurityComponentModelNG::SetIcon(std::uint32_t value)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (!hasPermission.value_or(false)) {
+        SC_LOG_ERROR("Has no permission to set icon");
+        return;
+    }
+    bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+    RefPtr<FrameNode> symbolNode = GetSecCompChildNode(frameNode, V2::SYMBOL_ETS_TAG);
+    if (symbolNode == nullptr) {
+        symbolNode = FrameNode::CreateFrameNode(
+            V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        SetDefaultSymbolIconStyle(symbolNode, SymbolSourceInfo(value), isButtonVisible);
+        frameNode->AddChild(symbolNode);
+    }
+
+    RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    if (iconNode != nullptr) {
+        frameNode->RemoveChild(iconNode);
+        SC_LOG_INFO("Image icon and symbol icon cannot exist at same time. Remove image icon");
+    }
+
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolSourceInfo, SymbolSourceInfo(value));
+}
+
+void SecurityComponentModelNG::SetIcon(FrameNode* frameNode, std::uint32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    auto hasPermission = prop->GetHasCustomPermissionForSecComp();
+    if (!hasPermission.value_or(false)) {
+        SC_LOG_ERROR("Has no permission to set icon");
+        return;
+    }
+    bool isButtonVisible = (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+    RefPtr<FrameNode> symbolNode = GetSecCompChildNode(frameNode, V2::SYMBOL_ETS_TAG);
+    if (symbolNode == nullptr) {
+        symbolNode = FrameNode::CreateFrameNode(
+            V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        SetDefaultSymbolIconStyle(symbolNode, SymbolSourceInfo(value), isButtonVisible);
+
+        frameNode->AddChild(symbolNode);
+    }
+
+    RefPtr<FrameNode> iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    if (iconNode != nullptr) {
+        frameNode->RemoveChild(iconNode);
+        SC_LOG_INFO("Image icon and symbol icon cannot exist at same time. Remove image icon");
+    }
+
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolSourceInfo,
+        SymbolSourceInfo(value), frameNode);
 }
 } // namespace OHOS::Ace::NG

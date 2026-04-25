@@ -52,6 +52,14 @@ std::string IndexerAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto layoutProperty = frameNode->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
+    auto pattern = frameNode->GetPattern<IndexerPattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    if (pattern->IsAutoCollapse() && pattern->IsCollapsedItem(pattern->GetSelected())) {
+        auto text = pattern->GetCollapsedItemText(pattern->GetSelected());
+        if (!text.empty()) {
+            return text;
+        }
+    }
     if (layoutProperty->GetActualArrayValue().has_value()) {
         auto arrayValue = layoutProperty->GetActualArrayValue().value();
         auto selectIndex = GetCurrentIndex();
@@ -60,5 +68,17 @@ std::string IndexerAccessibilityProperty::GetText() const
         }
     }
     return "";
+}
+
+void IndexerAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto currentIndex = GetCurrentIndex();
+    auto endIndex = GetEndIndex();
+    if (currentIndex > 0) {
+        AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+    }
+    if (currentIndex < endIndex) {
+        AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    }
 }
 } // namespace OHOS::Ace::NG

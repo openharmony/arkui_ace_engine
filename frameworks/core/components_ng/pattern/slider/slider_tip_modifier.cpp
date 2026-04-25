@@ -22,6 +22,7 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/slider/slider_theme.h"
+#include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 

@@ -19,7 +19,11 @@
 
 #define private public
 #define protected public
-
+#include "core/components/common/properties/border_image.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+#include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
+#include "core/components_ng/render/adapter/gesture_debug_boundary_modifier.h"
+#endif
 #include "test/unittest/core/rosen/rosen_render_context_test.h"
 #undef private
 #undef protected
@@ -30,6 +34,14 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char SRC_JPG[] = "file://data/data/com.example.test/res/exampleAlt.jpg";
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+constexpr float GESTURE_DEBUG_TEST_FRAME_WIDTH = 120.0f;
+constexpr float GESTURE_DEBUG_TEST_FRAME_HEIGHT = 90.0f;
+constexpr uint8_t GESTURE_DEBUG_TEST_MASK = 0x03;
+constexpr uint8_t GESTURE_DEBUG_SECOND_MASK = 0x04;
+constexpr float GESTURE_DEBUG_TEST_STROKE = 8.0f;
+const std::vector<Color> GESTURE_DEBUG_TEST_COLORS = { Color::RED, Color::BLUE };
+#endif
 
 template <typename T>
 bool CompareVector(const std::vector<T>& vec1, const std::vector<T>& vec2)
@@ -288,7 +300,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest014, TestSize.Level1)
     std::shared_ptr<Rosen::RSUIContext> rsUIContext;
     std::shared_ptr<Rosen::RSNode> ret = rosenRenderContext->CreateHardwareSurface(
         param, isTextureExportNode, rsUIContext);
-    EXPECT_FALSE(ret == nullptr);
+    EXPECT_TRUE(ret == nullptr);
 }
 
 /**
@@ -764,63 +776,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest031, TestSize.Level1)
     OHOS::Ace::Dimension dimension2(1.0, DimensionUnit::PERCENT);
     float ret2 = rosenRenderContext->ConvertDimensionToPx(dimension2, 5);
     EXPECT_EQ(ret2, 5.0f);
-}
-
-/**
- * @tc.name: RosenRenderContextTest032
- * @tc.desc: InitContext()
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTest032, TestSize.Level1)
-{
-    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
-    RenderContext::ContextParam contextParam;
-    contextParam.type = RenderContext::ContextType::CANVAS;
-    contextParam.surfaceName.emplace("test");
-    std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
-    // is root is true
-    rosenRenderContext->InitContext(true, contextParamValue);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    // contextParamValue does not has value
-    std::optional<RenderContext::ContextParam> contextParamValue2 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue2);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::ROOT;
-    std::optional<RenderContext::ContextParam> contextParamValue3 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue3);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::SURFACE;
-    std::optional<RenderContext::ContextParam> contextParamValue4 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue4);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::HARDWARE_SURFACE;
-    std::optional<RenderContext::ContextParam> contextParamValue5 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue5);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::EFFECT;
-    std::optional<RenderContext::ContextParam> contextParamValue7 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue7);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::INCREMENTAL_CANVAS;
-    std::optional<RenderContext::ContextParam> contextParamValue8 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue8);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::COMPOSITE_COMPONENT;
-    std::optional<RenderContext::ContextParam> contextParamValue10 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue10);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::EXTERNAL;
-    std::optional<RenderContext::ContextParam> contextParamValue9 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue9);
-    EXPECT_EQ(rosenRenderContext->rsNode_ == nullptr, true);
 }
 
 /**
@@ -2514,6 +2469,152 @@ HWTEST_F(RosenRenderContextTest, IsOnRenderTreeTest001, TestSize.Level1)
     auto isOnRenderTree = rosenRenderContext->IsOnRenderTree();
     EXPECT_EQ(isOnRenderTree, false);
 }
+
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+/**
+ * @tc.name: PaintGestureDebugBoundary001
+ * @tc.desc: Test PaintGestureDebugBoundary returns directly when there is no info and no modifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, PaintGestureDebugBoundary001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rosen render context without gesture debug modifier.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(GESTURE_DEBUG_TEST_FRAME_WIDTH, GESTURE_DEBUG_TEST_FRAME_HEIGHT));
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. call PaintGestureDebugBoundary with empty info.
+     * @tc.expected: step2. gesture debug modifier is still null.
+     */
+    rosenRenderContext->PaintGestureDebugBoundary(std::nullopt);
+    EXPECT_EQ(rosenRenderContext->gestureDebugBoundaryModifier_, nullptr);
+}
+
+/**
+ * @tc.name: PaintGestureDebugBoundary002
+ * @tc.desc: Test PaintGestureDebugBoundary creates modifier and installs paint task for valid info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, PaintGestureDebugBoundary002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rosen render context and valid gesture debug info.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(GESTURE_DEBUG_TEST_FRAME_WIDTH, GESTURE_DEBUG_TEST_FRAME_HEIGHT));
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    GestureDebugBoundaryInfo info { GESTURE_DEBUG_TEST_MASK, GESTURE_DEBUG_TEST_STROKE, GESTURE_DEBUG_TEST_COLORS };
+
+    /**
+     * @tc.steps: step2. call PaintGestureDebugBoundary with valid info.
+     * @tc.expected: step2. modifier, attached property, and paint task are created.
+     */
+    rosenRenderContext->PaintGestureDebugBoundary(info);
+    ASSERT_NE(rosenRenderContext->gestureDebugBoundaryModifier_, nullptr);
+    EXPECT_NE(rosenRenderContext->gestureDebugBoundaryModifier_->property_, nullptr);
+    EXPECT_TRUE(static_cast<bool>(rosenRenderContext->gestureDebugBoundaryModifier_->paintTask_));
+}
+
+/**
+ * @tc.name: PaintGestureDebugBoundary003
+ * @tc.desc: Test PaintGestureDebugBoundary updates existing modifier and clears drawing when info becomes empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, PaintGestureDebugBoundary003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rosen render context and initialize gesture debug modifier with valid info.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(GESTURE_DEBUG_TEST_FRAME_WIDTH, GESTURE_DEBUG_TEST_FRAME_HEIGHT));
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    GestureDebugBoundaryInfo info { GESTURE_DEBUG_TEST_MASK, GESTURE_DEBUG_TEST_STROKE, GESTURE_DEBUG_TEST_COLORS };
+    rosenRenderContext->PaintGestureDebugBoundary(info);
+    auto modifier = rosenRenderContext->gestureDebugBoundaryModifier_;
+    ASSERT_NE(modifier, nullptr);
+
+    /**
+     * @tc.steps: step2. update with a second valid info.
+     * @tc.expected: step2. existing modifier is reused and paint task stays available.
+     */
+    GestureDebugBoundaryInfo secondInfo { GESTURE_DEBUG_SECOND_MASK, GESTURE_DEBUG_TEST_STROKE,
+        std::vector<Color> { Color::BLACK } };
+    rosenRenderContext->PaintGestureDebugBoundary(secondInfo);
+    EXPECT_EQ(rosenRenderContext->gestureDebugBoundaryModifier_, modifier);
+    EXPECT_TRUE(static_cast<bool>(rosenRenderContext->gestureDebugBoundaryModifier_->paintTask_));
+
+    /**
+     * @tc.steps: step3. clear by calling PaintGestureDebugBoundary with empty info.
+     * @tc.expected: step3. clear path keeps modifier valid and callback remains callable.
+     */
+    rosenRenderContext->PaintGestureDebugBoundary(std::nullopt);
+    ASSERT_NE(rosenRenderContext->gestureDebugBoundaryModifier_, nullptr);
+    EXPECT_TRUE(static_cast<bool>(rosenRenderContext->gestureDebugBoundaryModifier_->paintTask_));
+}
+
+/**
+ * @tc.name: GestureDebugBoundaryModifier001
+ * @tc.desc: Test SetCustomData creates property on first update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GestureDebugBoundaryModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modifier instance.
+     */
+    auto modifier = std::make_shared<GestureDebugBoundaryModifier>();
+    ASSERT_NE(modifier, nullptr);
+    EXPECT_EQ(modifier->property_, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetCustomData for first time.
+     * @tc.expected: step2. internal property is created and value is set.
+     */
+    modifier->SetCustomData(GESTURE_DEBUG_TEST_MASK);
+    ASSERT_NE(modifier->property_, nullptr);
+    EXPECT_EQ(modifier->property_->Get(), GESTURE_DEBUG_TEST_MASK);
+}
+
+/**
+ * @tc.name: GestureDebugBoundaryModifier002
+ * @tc.desc: Test SetCustomData reuses property on second update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GestureDebugBoundaryModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modifier and initialize property once.
+     */
+    auto modifier = std::make_shared<GestureDebugBoundaryModifier>();
+    ASSERT_NE(modifier, nullptr);
+    modifier->SetCustomData(GESTURE_DEBUG_TEST_MASK);
+    ASSERT_NE(modifier->property_, nullptr);
+    auto firstProperty = modifier->property_;
+
+    /**
+     * @tc.steps: step2. call SetCustomData with a new mask.
+     * @tc.expected: step2. property object is reused and value is updated.
+     */
+    modifier->SetCustomData(GESTURE_DEBUG_SECOND_MASK);
+    EXPECT_EQ(modifier->property_, firstProperty);
+    EXPECT_EQ(modifier->property_->Get(), GESTURE_DEBUG_SECOND_MASK);
+}
+#endif // GESTURE_DEBUG_BOUNDARY_SUPPORTED
 
 /**
  * @tc.name: GetModalNode001

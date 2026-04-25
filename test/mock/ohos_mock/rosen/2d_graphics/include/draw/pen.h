@@ -18,6 +18,7 @@
 
 #include "draw/brush.h"
 #include "draw/color.h"
+#include "effect/color_space.h"
 #include "effect/filter.h"
 #include "effect/path_effect.h"
 #include "utils/rect.h"
@@ -49,6 +50,8 @@ public:
     virtual void SetWidth(float width) {}
     virtual void SetCapStyle(CapStyle cap) {}
     virtual void SetColor(const Color& color) {}
+    virtual void SetColor(const Color4f& color, std::shared_ptr<ColorSpace> colorSpace) {}
+    virtual void SetUIColor(const UIColor& color, std::shared_ptr<ColorSpace> colorSpace) {}
     virtual void SetColor(int color) {}
     virtual void SetFilter(const Filter& filter) {}
     virtual void SetShaderEffect(std::shared_ptr<ShaderEffect> /* effect */) {}

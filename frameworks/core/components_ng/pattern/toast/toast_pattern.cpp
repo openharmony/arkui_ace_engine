@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
@@ -21,10 +22,13 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

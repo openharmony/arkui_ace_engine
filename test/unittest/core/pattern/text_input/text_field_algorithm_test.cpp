@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 

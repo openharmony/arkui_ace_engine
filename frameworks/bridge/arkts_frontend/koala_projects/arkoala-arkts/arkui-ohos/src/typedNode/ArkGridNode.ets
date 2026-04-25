@@ -90,7 +90,13 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
     }
     scrollBarWidth(value: double | string | undefined): this {
         const value_casted = value as (double | string | undefined)
-        this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+        this.getPeer()?.setScrollBarWidth0Attribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    scrollBarWidth(value: Resource | undefined): this {
+        const value_casted = value as (Resource | undefined)
+        this.getPeer()?.setScrollBarWidth1Attribute(value_casted)
         this.markDirty()
         return this
     }

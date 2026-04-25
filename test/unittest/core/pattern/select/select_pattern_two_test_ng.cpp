@@ -23,9 +23,9 @@
 #define protected public
 #define private public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
@@ -676,6 +676,31 @@ HWTEST_F(SelectPatternTwoTestNg, FontColorByUser001, TestSize.Level1)
     auto context = selectPattern->text_->GetRenderContext();
     ASSERT_NE(context, nullptr);
     ASSERT_EQ(context->GetForegroundColor(), selectTheme->GetFontColor());
+}
+
+HWTEST_F(SelectPatternTwoTestNg, SelectTextProperty001, TestSize.Level1)
+{
+    auto backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, "" } };
+    selectModelInstance.Create(params);
+    auto select = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(select, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    selectPattern->SetModifierByUser(selectTheme, props);
+    ASSERT_NE(selectPattern->text_, nullptr);
+    auto textProps = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProps, nullptr);
+    EXPECT_TRUE(textProps->GetEnableSmallLanguageTruncationValue(false));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**

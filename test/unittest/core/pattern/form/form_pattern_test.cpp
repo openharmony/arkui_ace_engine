@@ -25,11 +25,11 @@
 #include "mock/mock_form_utils.h"
 #include "mock/mock_pixel_map.h"
 #include "mock/mock_sub_container.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+
 
 #include "base/utils/utils.h"
 #include "base/want/want_wrap.h"
@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/form/form_snapshot_check.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

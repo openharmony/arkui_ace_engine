@@ -37,6 +37,13 @@ interface SizeTLengthMetrics {
     attribute LengthMetrics height;
 };
 
+[Entity=Interface]
+interface FrameNodeCreateInfo {
+   attribute pointer frameNodePeer;
+   attribute pointer renderNodePeer;
+   attribute i32 id;
+};
+
 [Entity=Class]
 interface FrameNodeExtender {
   static pointer constructorFrameNode(boolean supportMultiThread);
@@ -70,8 +77,10 @@ interface FrameNodeExtender {
   static void disposeTree(FrameNode peer);
   static void addSupportedUIStates(FrameNode peer, i32 uiStates, UIStatesChangeHandler statesChangeHandler, boolean excludeInner);
   static void removeSupportedUIStates(FrameNode peer, i32 uiStates);
-  static boolean setCrossLanguageOptions(FrameNode peer, boolean options);
+  static boolean setCrossLanguageOptions(FrameNode peer, boolean options, (boolean or undefined) treeOperating);
   static boolean getCrossLanguageOptions(FrameNode peer);
+  static boolean getCrossLanguageTreeOperating(FrameNode peer);
+  static boolean checkIfCanCrossLanguageTreeOperating(FrameNode peer);
   static void setMeasuredSize(FrameNode peer, Size size);
   static void setLayoutPosition(FrameNode peer, Vector2 position);
   static void measure(FrameNode peer, LayoutConstraint constraint);
@@ -114,9 +123,7 @@ interface FrameNodeExtender {
   static sequence<f64> convertPositionToWindow(FrameNode peer, NodePosition positionByLocal);
   static sequence<f64> convertPositionFromWindow(FrameNode peer, NodePosition positionByWindow);
   static void applyAttributesFinish(FrameNode peer);
-  static sequence<pointer> createFrameNodes(i32 count);
-  static sequence<pointer> getRenderNodeByFrameNodes(sequence<pointer> ptrs);
-  static sequence<i32> getIdByFrameNodes(sequence<pointer> ptrs);
   static pointer getFrameNodeById(FrameNode peer, String id);
   static pointer getFrameNodeByUniqueId(FrameNode peer, i32 id);
+  static sequence<FrameNodeCreateInfo> getFrameNodeCreateInfoArray(i32 count);
 };

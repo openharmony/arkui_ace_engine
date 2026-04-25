@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,19 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
+#include "base/utils/string_utils.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -93,9 +100,6 @@ RefPtr<FrameNode> MenuWrapperPattern::GetHoverImageCustomPreview()
 
 RefPtr<FrameNode> MenuWrapperPattern::GetPreview()
 {
-    if (GetPreviewMode() == MenuPreviewMode::NONE) {
-        return nullptr;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
@@ -249,7 +253,7 @@ void MenuWrapperPattern::ChangeCurMenuItemBgColor()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     CHECK_NULL_VOID(menuItemModifier);
@@ -515,7 +519,7 @@ void MenuWrapperPattern::ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& 
     CHECK_NULL_VOID(subMenu);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     if (theme->GetMenuAnimationDuration()) {
         auto animationOption = AnimationOption();
@@ -929,7 +933,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, false);
     auto expandDisplay = theme->GetExpandDisplay();
     auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
@@ -961,7 +965,7 @@ bool MenuWrapperPattern::IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWr
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, false);
     bool menuNotNeedsHotAreas = (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
                                 !((theme->GetExpandDisplay() || isOpenMenu_) && isShowInSubWindow_);
@@ -1073,7 +1077,7 @@ void MenuWrapperPattern::StartShowAnimation()
     CHECK_NULL_VOID(context);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     if (GetPreviewMode() == MenuPreviewMode::NONE) {
         context->UpdateOffset(GetAnimationOffset());
@@ -1126,7 +1130,7 @@ OffsetT<Dimension> MenuWrapperPattern::GetAnimationOffset()
     CHECK_NULL_RETURN(host, offset);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, offset);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, offset);
     auto animationOffset = theme->GetMenuAnimationOffset();
 
@@ -1263,6 +1267,24 @@ void MenuWrapperPattern::RequestPathRender()
     flag++;
     paintProperty->UpdateRenderFlag(flag);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool MenuWrapperPattern::IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const
+{
+    if (GetPreviewMode() == MenuPreviewMode::NONE) {
+        return false;
+    }
+
+    CHECK_NULL_RETURN(frameNode, false);
+    auto tag = frameNode->GetTag();
+    auto isPreviewTag = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    CHECK_NULL_RETURN(isPreviewTag, false);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto preview = host->GetChildAtIndex(1);
+    CHECK_NULL_RETURN(preview, false);
+    return preview->GetId() == frameNode->GetId();
 }
 
 void MenuWrapperPattern::DumpInfo()

@@ -21,7 +21,6 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -175,6 +174,7 @@ public:
     int32_t OnInjectionEvent(const std::string& command) override;
     void OnColorConfigurationUpdate() override;
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
 
 private:

@@ -16,12 +16,12 @@
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_CANVAS_MOCK_CANVAS_PAINT_H
 
 #include "gmock/gmock.h"
-#include "test/mock/core/rosen/testing_brush.h"
-#include "test/mock/core/rosen/testing_filter.h"
-#include "test/mock/core/rosen/testing_matrix.h"
-#include "test/mock/core/rosen/testing_path.h"
-#include "test/mock/core/rosen/testing_pen.h"
-#include "test/mock/core/rosen/testing_typography.h"
+#include "test/mock/frameworks/core/rosen/testing_brush.h"
+#include "test/mock/frameworks/core/rosen/testing_filter.h"
+#include "test/mock/frameworks/core/rosen/testing_matrix.h"
+#include "test/mock/frameworks/core/rosen/testing_path.h"
+#include "test/mock/frameworks/core/rosen/testing_pen.h"
+#include "test/mock/frameworks/core/rosen/testing_typography.h"
 
 namespace OHOS::Ace::Testing {
 class MockPen : public TestingPen {

@@ -206,8 +206,12 @@ public:
         Dimension distanceThreshold) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
+    void SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func) override {}
     void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
+    {}
+    void SetShouldRecognizerParallelWith(
+        NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc) override
     {}
     void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
@@ -253,7 +257,7 @@ public:
         const std::vector<double>& ratioList, int32_t expectedUpdateInterval, bool measureFromViewport) override {};
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
-            onAreaChanged) override;
+            onAreaChanged, int32_t minInterval = 0) override;
     void SetOnSizeChanged(
         std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) override {};
 
@@ -261,6 +265,8 @@ public:
         const std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
         override {};
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) override {}
+    void ResetSmartGestureShortcut() override {}
     void SetEnabled(bool enabled) override;
     void SetTouchable(bool touchable) override;
     void SetFocusable(bool focusable) override;

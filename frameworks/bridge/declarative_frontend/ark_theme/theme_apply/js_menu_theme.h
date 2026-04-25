@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,9 @@ public:
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
         CHECK_NULL_VOID(frameNode);
         NG::MenuModelNG::SetFontColor(frameNode, themeColors.value().FontPrimary());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            NG::MenuModelNG::UpdateFontColorSetByUser(false);
+        }
     }
 };
 } // namespace OHOS::Ace::Framework

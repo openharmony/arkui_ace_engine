@@ -287,9 +287,7 @@ void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& 
         frameNode);  // call ProcessDefaultStyleAndBehaviorsMultiThread() by multi thread
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
+    auto textFieldTheme = frameNode->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
@@ -474,6 +472,17 @@ void TextFieldModelNG::SetCaretPosition(const int32_t& value)
 void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value);
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColorFlagByUser, true);
+    }
+}
+
+void TextFieldModelNG::ResetSelectedBackgroundColor()
+{
+    ACE_RESET_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor);
+    ACE_RESET_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColorFlagByUser);
 }
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)
@@ -675,11 +684,25 @@ void TextFieldModelNG::SetOnContentScroll(std::function<void(float, float)>&& fu
     eventHub->SetOnScrollChangeEvent(std::move(func));
 }
 
+void TextFieldModelNG::SetOnWillCopy(std::function<bool(const std::u16string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
+}
+
 void TextFieldModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillCut(std::function<bool(const std::u16string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCut(std::move(func));
 }
 
 void TextFieldModelNG::SetOnCut(std::function<void(const std::u16string&)>&& func)
@@ -845,11 +868,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
     if (tmp) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
-        auto pipeline = frameNode->GetContextRefPtr();
-        CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto theme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
+        auto theme = frameNode->GetTheme<TextFieldTheme>(true);
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
     }
@@ -1319,6 +1338,15 @@ void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const PasswordIcon&
 void TextFieldModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value, frameNode);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColorFlagByUser, true, frameNode);
+    }
+}
+
+void TextFieldModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColorFlagByUser, frameNode);
 }
 
 void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, uint32_t value)
@@ -1784,6 +1812,14 @@ void TextFieldModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(int3
     eventHub->SetOnSubmit(std::move(func));
 }
 
+void TextFieldModelNG::SetOnWillCut(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCut(std::move(func));
+}
+
 void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2242,6 +2278,14 @@ void TextFieldModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<vo
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
 }
 
 void TextFieldModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)

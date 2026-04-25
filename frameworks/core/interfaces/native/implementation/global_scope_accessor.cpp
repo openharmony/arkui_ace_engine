@@ -79,10 +79,6 @@ Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
 {
     return {};
 }
-void PostCardActionImpl(const Ark_Object* component,
-                        const Ark_Object* action)
-{
-}
 void Profiler_registerVsyncCallbackImpl(const Callback_String* callback_)
 {
     CHECK_NULL_VOID(callback_);
@@ -119,7 +115,6 @@ const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
         GlobalScopeAccessor::CursorControl_setCursorImpl,
         GlobalScopeAccessor::FocusControl_requestFocusImpl,
         GlobalScopeAccessor::GetRectangleByIdImpl,
-        GlobalScopeAccessor::PostCardActionImpl,
         GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
         GlobalScopeAccessor::Profiler_unregisterVsyncCallbackImpl,
         GlobalScopeAccessor::SetAppBgColorImpl,

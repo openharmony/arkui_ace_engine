@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class PathModifier extends ArkPathComponent implements AttributeModifier<PathAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

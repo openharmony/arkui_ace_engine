@@ -126,11 +126,13 @@ void GetlistDivider(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int
     option->endMargin = divider.endMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
-void SetListItemGroupSpace(ArkUINodeHandle node, ArkUI_Float64 space)
+void SetListItemGroupSpace(ArkUINodeHandle node, ArkUI_Float64 space, ArkUI_Uint32 unit, ArkUI_VoidPtr resObjRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListItemGroupModelNG::SetSpace(frameNode, Dimension(space, DimensionUnit::VP));
+    ListItemGroupModelNG::SetSpace(frameNode, Dimension(space, static_cast<DimensionUnit>(unit)));
+    ListItemGroupModelNG::CreateWithResourceObjSpace(
+        frameNode, AceType::Claim(static_cast<ResourceObject*>(resObjRawPtr)));
 }
 
 void ResetListItemGroupSpace(ArkUINodeHandle node)
@@ -138,6 +140,7 @@ void ResetListItemGroupSpace(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemGroupModelNG::SetSpace(frameNode, Dimension(0.0, DimensionUnit::VP));
+    ListItemGroupModelNG::CreateWithResourceObjSpace(frameNode, nullptr);
 }
 
 void SetListItemGroupStyle(ArkUINodeHandle node, ArkUI_Uint32 style)
@@ -152,6 +155,34 @@ void ResetListItemGroupStyle(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemGroupModelNG::SetStyle(frameNode, V2::ListItemGroupStyle::NONE);
+}
+
+void SetListItemGroupHeaderStyle(ArkUINodeHandle node, ArkUI_Uint32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetHeaderStyle(frameNode, static_cast<V2::ListItemGroupHeaderFooterStyle>(style));
+}
+
+void ResetListItemGroupHeaderStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetHeaderStyle(frameNode, V2::ListItemGroupHeaderFooterStyle::NONE);
+}
+
+void SetListItemGroupFooterStyle(ArkUINodeHandle node, ArkUI_Uint32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetFooterStyle(frameNode, static_cast<V2::ListItemGroupHeaderFooterStyle>(style));
+}
+
+void ResetListItemGroupFooterStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetFooterStyle(frameNode, V2::ListItemGroupHeaderFooterStyle::NONE);
 }
 
 ArkUI_Int32 SetListItemGroupNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
@@ -232,6 +263,10 @@ const ArkUIListItemGroupModifier* GetListItemGroupModifier()
         .resetListItemGroupSpace = ResetListItemGroupSpace,
         .setListItemGroupStyle = SetListItemGroupStyle,
         .resetListItemGroupStyle = ResetListItemGroupStyle,
+        .setListItemGroupHeaderStyle = SetListItemGroupHeaderStyle,
+        .resetListItemGroupHeaderStyle = ResetListItemGroupHeaderStyle,
+        .setListItemGroupFooterStyle = SetListItemGroupFooterStyle,
+        .resetListItemGroupFooterStyle = ResetListItemGroupFooterStyle,
         .setListItemGroupNodeAdapter = SetListItemGroupNodeAdapter,
         .resetListItemGroupNodeAdapter = ResetListItemGroupNodeAdapter,
         .getListItemGroupNodeAdapter = GetListItemGroupNodeAdapter,

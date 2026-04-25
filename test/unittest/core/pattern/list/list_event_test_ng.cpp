@@ -14,11 +14,12 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #undef private
@@ -1712,6 +1713,44 @@ HWTEST_F(ListEventTestNg, ListScrollBarOverDrag002, TestSize.Level1)
     scrollBarPattern->scrollBar_->HandleDragEnd(info);
     FlushUITasks();
     EXPECT_TRUE(isStop);
+}
+
+/**
+ * @tc.name: ListScrollToIndexTopToTopWithExternalScrollBar001
+ * @tc.desc: Test external scrollbar keeps hidden when calling scrollToIndex(0, false) at top.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ListScrollToIndexTopToTopWithExternalScrollBar001, TestSize.Level1)
+{
+    StackModelNG stackModel;
+    stackModel.Create();
+
+    ListModelNG model = CreateList();
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    CreateListItems(5);
+
+    ScrollBarModelNG scrollBarModel;
+    scrollBarModel.Create(
+        pattern_->GetScrollBarProxy(), true, true, static_cast<int>(Axis::VERTICAL),
+        static_cast<int>(DisplayMode::AUTO));
+    auto scrollBarPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+
+    CreateDone();
+    ASSERT_TRUE(pattern_->IsAtTop());
+    auto host = scrollBarPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto renderContext = host->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    scrollBarPattern->SetOpacity(0);
+    EXPECT_EQ(renderContext->GetOpacityValue(), 0);
+
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_EQ(renderContext->GetOpacityValue(), 0);
 }
 
 /**

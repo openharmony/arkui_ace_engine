@@ -16,6 +16,7 @@
 #include "base/memory/memory_monitor.h"
 namespace OHOS::Ace {
 
+#ifdef ACE_DEBUG
 bool MemoryMonitor::isEnable_ = false;
 
 class MemoryMonitorImpl : public MemoryMonitor {
@@ -34,5 +35,6 @@ MemoryMonitor& MemoryMonitor::GetInstance()
     static MemoryMonitorImpl instance;
     return instance;
 }
+#endif
 
 } // namespace OHOS::Ace

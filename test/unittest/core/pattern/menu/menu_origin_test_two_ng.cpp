@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/button/button_theme.h"
@@ -64,6 +64,8 @@
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
+#include "core/components/theme/icon_theme.h"
+#include "core/components/common/properties/placement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -149,6 +151,19 @@ void MenuTestTwoNg::MockPipelineContextGetTheme()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
@@ -370,7 +385,7 @@ HWTEST_F(MenuTestTwoNg, MenuViewTestNgTextMaxLines001, TestSize.Level1)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -491,8 +506,10 @@ HWTEST_F(MenuTestTwoNg, MenuViewTestNg003, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(menuTheme));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
     RefPtr<SelectTheme> selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
 
     auto gestureHub = customNode->GetOrCreateGestureEventHub();

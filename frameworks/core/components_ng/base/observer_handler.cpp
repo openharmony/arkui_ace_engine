@@ -487,7 +487,8 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(c
         CHECK_NULL_CONTINUE(parent);
         const auto& parentTag = parent->GetTag();
         // NavDestination in stack or home NavDestination in forceSplit mode.
-        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG ||
+            parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
             break;
         }
         if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {
@@ -516,7 +517,8 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(c
         CHECK_NULL_CONTINUE(parent);
         const auto& parentTag = parent->GetTag();
         // NavDestination in stack or home NavDestination in forceSplit mode.
-        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG ||
+            parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
             break;
         }
         if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {
@@ -656,14 +658,19 @@ void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
 
 void UIObserverHandler::NotifySwiperContentUpdate(const SwiperContentInfo& info)
 {
-    CHECK_NULL_VOID(swiperContentUpdateHandleFunc_);
-    swiperContentUpdateHandleFunc_(info);
+    if (swiperContentUpdateHandleFunc_) {
+        swiperContentUpdateHandleFunc_(info);
+    }
+    if (swiperContentUpdateHandleFuncForAni_) {
+        swiperContentUpdateHandleFuncForAni_(info);
+    }
 }
 
 bool UIObserverHandler::IsSwiperContentObserverEmpty()
 {
-    CHECK_NULL_RETURN(swiperContentObservrEmptyFunc_, true);
-    return swiperContentObservrEmptyFunc_();
+    auto dynamicSwiperContentObservrEmpty =
+        swiperContentObservrEmptyFunc_ == nullptr || swiperContentObservrEmptyFunc_();
+    return dynamicSwiperContentObservrEmpty && swiperContentUpdateHandleFuncForAni_ == nullptr;
 }
 
 void UIObserverHandler::NotifyWinSizeLayoutBreakpointChangeFunc(
@@ -825,6 +832,11 @@ void UIObserverHandler::SetHandleTextChangeEventFuncForAni(TextChangeEventHandle
 void UIObserverHandler::SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func)
 {
     swiperContentUpdateHandleFunc_ = std::move(func);
+}
+
+void UIObserverHandler::SetHandleSwiperContentUpdateFuncForAni(SwiperContentUpdateHandleFuncForAni&& func)
+{
+    swiperContentUpdateHandleFuncForAni_ = std::move(func);
 }
 
 void UIObserverHandler::SetSwiperContentObservrEmptyFunc(SwiperContentObservrEmptyFunc&& func)

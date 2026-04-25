@@ -24,7 +24,7 @@
 #undef private
 #undef protected
 #include "mock_rosen.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/pipeline/base/render_node.h"

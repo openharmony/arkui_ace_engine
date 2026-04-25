@@ -18,12 +18,15 @@
 
 #include <functional>
 
+#include <string>
+
+#include "base/log/log_wrapper.h"
 #include "core/animation/curve.h"
 #include "core/components/scroll/scroll_controller.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+
+using ComposeId = std::string;
 
 using OnScrollFunc = std::function<void(const std::string&)>;
 

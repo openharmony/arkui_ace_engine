@@ -155,6 +155,12 @@ void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, Tou
 {
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
     SetLastSourceType(sourceType);
+
+    if (IsTouchUp(sourceType, touchType) &&
+        GetClearPolicy() == TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH) {
+        OnResetTextSelection();
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    }
 }
 
 void TextFieldSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)
@@ -649,10 +655,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto startIndex = selectController->GetStartIndex();
     auto endIndex = selectController->GetEndIndex();
-    auto value = pattern->GetTextContentController()->GetTextValue();
-    auto valueStr = value.substr(static_cast<int32_t>(startIndex),
-        static_cast<int32_t>(endIndex - startIndex));
-    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", valueStr, startIndex, endIndex);
+    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", startIndex, endIndex);
 }
 
 void TextFieldSelectOverlay::UpdateHandlesPosition(RefPtr<TextSelectController> selectController, bool isFirst)

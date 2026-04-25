@@ -18,6 +18,7 @@
 #include "node_extened.h"
 #include "node_model.h"
 
+#include "interfaces/native/native_error_message_macros.h"
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
@@ -28,35 +29,72 @@ extern "C" {
 int32_t OH_ArkUI_PostAsyncUITask(ArkUI_ContextHandle context,
     void* asyncUITaskData, void (*asyncUITask)(void* asyncUITaskData), void(*onFinish)(void* asyncUITaskData))
 {
-    if (!context || !asyncUITask) {
+    if (!context) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "Context parameter is null");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!asyncUITask) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "Async UI task callback is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* contextPtr = reinterpret_cast<ArkUI_Context*>(context);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
-    return impl->getMultiThreadManagerAPI()->postAsyncUITask(contextPtr->id, asyncUITaskData, asyncUITask, onFinish);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
+    auto result =
+        impl->getMultiThreadManagerAPI()->postAsyncUITask(contextPtr->id, asyncUITaskData, asyncUITask, onFinish);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(result, __FUNCTION__, "Failed to post async UI task");
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_PostUITask(ArkUI_ContextHandle context, void* taskData, void(*task)(void* taskData))
 {
-    if (!context || !task) {
+    if (!context) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "Context parameter is null");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!task) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "UI task callback is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* contextPtr = reinterpret_cast<ArkUI_Context*>(context);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
-    return impl->getMultiThreadManagerAPI()->postUITask(contextPtr->id, taskData, task);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
+    auto result = impl->getMultiThreadManagerAPI()->postUITask(contextPtr->id, taskData, task);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(result, __FUNCTION__, "Failed to post UI task");
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_PostUITaskAndWait(ArkUI_ContextHandle context, void* taskData, void(*task)(void* taskData))
 {
-    if (!context || !task) {
+    if (!context) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "Context parameter is null");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!task) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "UI task callback is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* contextPtr = reinterpret_cast<ArkUI_Context*>(context);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
-    return impl->getMultiThreadManagerAPI()->postUITaskAndWait(contextPtr->id, taskData, task);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
+    auto result = impl->getMultiThreadManagerAPI()->postUITaskAndWait(contextPtr->id, taskData, task);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(result, __FUNCTION__, "Failed to post UI task and wait");
+    }
+    return result;
 }
 #ifdef __cplusplus
 };

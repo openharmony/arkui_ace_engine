@@ -19,16 +19,13 @@
 #include <string>
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/components_ng/pattern/list/list_properties.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class FrameNode;
 
 enum class SubMenuExpandingMode { SIDE, EMBEDDED, STACK };
 
@@ -152,6 +149,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowDefaultSelectedIcon, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE)
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuTargetSpace, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetMenuSize, SizeF, PROPERTY_UPDATE_LAYOUT);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void BindToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

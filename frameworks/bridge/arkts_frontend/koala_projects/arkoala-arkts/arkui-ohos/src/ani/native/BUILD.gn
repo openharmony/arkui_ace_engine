@@ -52,7 +52,7 @@ ohos_shared_library("arkoala_native_ani") {
     ":ani_utils_common",
     "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
   ]
-  if (!build_ohos_sdk) {
+  if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
     deps += [ "$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark" ]
   }
 

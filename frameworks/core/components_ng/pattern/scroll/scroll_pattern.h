@@ -155,6 +155,10 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom(bool considerRepeat = false) const override;
+    bool IsScrollAble(SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    void PerformScroll(const ScrollingConfig& config) override;
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
@@ -190,6 +194,7 @@ public:
     bool ScrollPageCheck(float delta, int32_t source);
     void AdjustOffset(float& delta, int32_t source) override;
     Rect GetItemRect(int32_t index) const override;
+    double GetDefaultScrollRatio() const;
 
     // scrollSnap
     std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f,

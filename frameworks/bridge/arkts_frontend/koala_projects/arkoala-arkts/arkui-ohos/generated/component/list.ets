@@ -38,7 +38,7 @@ import { ListModifier } from './../ListModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkListPeer extends ArkScrollableCommonMethodPeer {
-    attributeSet?: ListModifier;
+    listAttributeSet?: ListModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -286,6 +286,18 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ListAttribute_setScrollSnapAnimationSpeed(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBackPressBehaviorAttribute(value: ListBackPressBehavior | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            ListBackPressBehavior_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setBackPressBehavior(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnScrollIndexAttribute(value: ((start: int32,end: int32,center: int32) => void) | undefined): void {
@@ -540,11 +552,15 @@ export interface VisibleListContentInfo {
     itemGroupArea?: ListItemGroupArea;
     itemIndexInGroup?: int32;
 }
+export interface ListBackPressBehavior {
+    closeSwipeAction?: boolean;
+}
 export type OnScrollVisibleContentChangeCallback = (start: VisibleListContentInfo, end: VisibleListContentInfo) => void;
 export type OnListScrollIndexCallback = (start: int32, end: int32, center: int32) => void;
 export interface ListOptions {
     initialIndex?: int32;
     space?: double | string;
+    spaceWidth?: Dimension;
     scroller?: Scroller;
 }
 export enum ScrollSnapAnimationSpeed {
@@ -613,6 +629,9 @@ export interface ListAttribute extends ScrollableCommonMethod {
     }
     scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
         throw new Error('Unimplemented method scrollSnapAnimationSpeed')
+    }
+    backPressBehavior(value: ListBackPressBehavior | undefined): this {
+        throw new Error('Unimplemented method backPressBehavior')
     }
     onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
         throw new Error('Unimplemented method onScrollIndex')
@@ -762,6 +781,11 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         this.getPeer()?.setScrollSnapAnimationSpeedAttribute(value_casted)
         return this
     }
+    public backPressBehavior(value: ListBackPressBehavior | undefined): this {
+        const value_casted = value as (ListBackPressBehavior | undefined)
+        this.getPeer()?.setBackPressBehaviorAttribute(value_casted)
+        return this
+    }
     public onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
         const value_casted = value as (((start: int32,end: int32,center: int32) => void) | undefined)
         this.getPeer()?.setOnScrollIndexAttribute(value_casted)
@@ -882,72 +906,27 @@ export class UIListEvent_serializer {
         return UIListEventInternal.fromPtr(ptr)
     }
 }
-export class ListOptions_serializer {
-    public static write(buffer: SerializerBase, value: ListOptions): void {
+export class ListBackPressBehavior_serializer {
+    public static write(buffer: SerializerBase, value: ListBackPressBehavior): void {
         let valueSerializer: SerializerBase = buffer
-        const valueHolderForInitialIndex = value.initialIndex
-        if (valueHolderForInitialIndex !== undefined) {
+        const valueHolderForCloseSwipeAction = value.closeSwipeAction
+        if (valueHolderForCloseSwipeAction !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForInitialIndexTmpValue = valueHolderForInitialIndex!
-            valueSerializer.writeInt32(valueHolderForInitialIndexTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForSpace = value.space
-        if (valueHolderForSpace !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSpaceTmpValue = valueHolderForSpace!
-            if (valueHolderForSpaceTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForSpaceTmpValueForIdx0 = valueHolderForSpaceTmpValue as double
-                valueSerializer.writeFloat64(valueHolderForSpaceTmpValueForIdx0)
-            } else if (valueHolderForSpaceTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSpaceTmpValueForIdx1 = valueHolderForSpaceTmpValue as string
-                valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForScroller = value.scroller
-        if (valueHolderForScroller !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForScrollerTmpValue = valueHolderForScroller!
-            Scroller_serializer.write(valueSerializer, valueHolderForScrollerTmpValue)
+            const valueHolderForCloseSwipeActionTmpValue = valueHolderForCloseSwipeAction!
+            valueSerializer.writeBoolean(valueHolderForCloseSwipeActionTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
-    public static read(buffer: DeserializerBase): ListOptions {
+    public static read(buffer: DeserializerBase): ListBackPressBehavior {
         let valueDeserializer: DeserializerBase = buffer
-        const initialIndexTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let initialIndexTmpBuf: int32 | undefined = undefined
-        if ((initialIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            initialIndexTmpBuf = valueDeserializer.readInt32()
+        const closeSwipeActionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let closeSwipeActionTmpBuf: boolean | undefined = undefined
+        if ((closeSwipeActionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            closeSwipeActionTmpBuf = valueDeserializer.readBoolean()
         }
-        const initialIndexTmpResult: int32 | undefined = initialIndexTmpBuf
-        const spaceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let spaceTmpBuf: double | string | undefined = undefined
-        if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const spaceTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
-            let spaceTmpBufOpt: double | string | undefined
-            if (spaceTmpBufOptUnionSelector == (0).toByte()) {
-                spaceTmpBufOpt = valueDeserializer.readFloat64()
-            } else if (spaceTmpBufOptUnionSelector == (1).toByte()) {
-                spaceTmpBufOpt = (valueDeserializer.readString() as string)
-            } else {
-                throw new Error('One of the branches for spaceTmpBufOpt has to be chosen through deserialisation.')
-            }
-            spaceTmpBuf = (spaceTmpBufOpt as double | string)
-        }
-        const spaceTmpResult: double | string | undefined = spaceTmpBuf
-        const scrollerTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let scrollerTmpBuf: Scroller | undefined = undefined
-        if ((scrollerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scrollerTmpBuf = (Scroller_serializer.read(valueDeserializer) as Scroller)
-        }
-        const scrollerTmpResult: Scroller | undefined = scrollerTmpBuf
-        let value: ListOptions = ({initialIndex: initialIndexTmpResult, space: spaceTmpResult, scroller: scrollerTmpResult} as ListOptions)
+        const closeSwipeActionTmpResult: boolean | undefined = closeSwipeActionTmpBuf
+        let value: ListBackPressBehavior = ({closeSwipeAction: closeSwipeActionTmpResult} as ListBackPressBehavior)
         return value
     }
 }
@@ -1314,6 +1293,112 @@ export class ListDividerOptions_serializer {
         return value
     }
 }
+export class ListOptions_serializer {
+    public static write(buffer: SerializerBase, value: ListOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForInitialIndex = value.initialIndex
+        if (valueHolderForInitialIndex !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForInitialIndexTmpValue = valueHolderForInitialIndex!
+            valueSerializer.writeInt32(valueHolderForInitialIndexTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSpace = value.space
+        if (valueHolderForSpace !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceTmpValue = valueHolderForSpace!
+            if (valueHolderForSpaceTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForSpaceTmpValueForIdx0 = valueHolderForSpaceTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForSpaceTmpValueForIdx0)
+            } else if (valueHolderForSpaceTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForSpaceTmpValueForIdx1 = valueHolderForSpaceTmpValue as string
+                valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSpaceWidth = value.spaceWidth
+        if (valueHolderForSpaceWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceWidthTmpValue = valueHolderForSpaceWidth!
+            if (valueHolderForSpaceWidthTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForSpaceWidthTmpValueForIdx0 = valueHolderForSpaceWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForSpaceWidthTmpValueForIdx0)
+            } else if (valueHolderForSpaceWidthTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForSpaceWidthTmpValueForIdx1 = valueHolderForSpaceWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForSpaceWidthTmpValueForIdx1)
+            } else if (valueHolderForSpaceWidthTmpValue instanceof global_resource_Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForSpaceWidthTmpValueForIdx2 = valueHolderForSpaceWidthTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSpaceWidthTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForScroller = value.scroller
+        if (valueHolderForScroller !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScrollerTmpValue = valueHolderForScroller!
+            Scroller_serializer.write(valueSerializer, valueHolderForScrollerTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ListOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const initialIndexTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let initialIndexTmpBuf: int32 | undefined = undefined
+        if ((initialIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            initialIndexTmpBuf = valueDeserializer.readInt32()
+        }
+        const initialIndexTmpResult: int32 | undefined = initialIndexTmpBuf
+        const spaceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let spaceTmpBuf: double | string | undefined = undefined
+        if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const spaceTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let spaceTmpBufOpt: double | string | undefined
+            if (spaceTmpBufOptUnionSelector == (0).toByte()) {
+                spaceTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (spaceTmpBufOptUnionSelector == (1).toByte()) {
+                spaceTmpBufOpt = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error('One of the branches for spaceTmpBufOpt has to be chosen through deserialisation.')
+            }
+            spaceTmpBuf = (spaceTmpBufOpt as double | string)
+        }
+        const spaceTmpResult: double | string | undefined = spaceTmpBuf
+        const spaceWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let spaceWidthTmpBuf: Dimension | undefined = undefined
+        if ((spaceWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const spaceWidthTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let spaceWidthTmpBufOpt: string | number | global_resource_Resource | undefined
+            if (spaceWidthTmpBufOptUnionSelector == (0).toByte()) {
+                spaceWidthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (spaceWidthTmpBufOptUnionSelector == (1).toByte()) {
+                spaceWidthTmpBufOpt = (valueDeserializer.readNumber() as number)
+            } else if (spaceWidthTmpBufOptUnionSelector == (2).toByte()) {
+                spaceWidthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for spaceWidthTmpBufOpt has to be chosen through deserialisation.')
+            }
+            spaceWidthTmpBuf = (spaceWidthTmpBufOpt as string | number | global_resource_Resource)
+        }
+        const spaceWidthTmpResult: Dimension | undefined = spaceWidthTmpBuf
+        const scrollerTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let scrollerTmpBuf: Scroller | undefined = undefined
+        if ((scrollerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scrollerTmpBuf = (Scroller_serializer.read(valueDeserializer) as Scroller)
+        }
+        const scrollerTmpResult: Scroller | undefined = scrollerTmpBuf
+        let value: ListOptions = ({initialIndex: initialIndexTmpResult, space: spaceTmpResult, spaceWidth: spaceWidthTmpResult, scroller: scrollerTmpResult} as ListOptions)
+        return value
+    }
+}
 export class ListScrollerInternal {
     public static fromPtr(ptr: KPointer): ListScroller {
         return new ListScroller(MaterializedBaseTag.NOP, ptr)
@@ -1360,7 +1445,8 @@ export class ListScroller extends Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ListScroller_getItemRectInGroup(this.peer!.ptr, index, indexInGroup)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: RectResult = RectResult_serializer.read(retvalDeserializer)
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as RectResult)
     }
     private scrollToItemInGroup_serialize(index: int32, indexInGroup: int32, smooth?: boolean, align?: ScrollAlign): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1397,7 +1483,8 @@ export class ListScroller extends Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ListScroller_getVisibleListContentInfo(this.peer!.ptr, x, y)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: VisibleListContentInfo = VisibleListContentInfo_serializer.read(retvalDeserializer)
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as VisibleListContentInfo)
     }
 }
 export interface UIListEvent extends UIScrollableCommonEvent {

@@ -19,7 +19,7 @@
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { SizeOptions_serializer, BorderRadiuses_serializer, Resource as arkui_component_units_Resource, Dimension, SizeOptions, BorderRadiuses } from './units'
+import { SizeOptions_serializer, BorderRadiuses_serializer, Resource as arkui_component_units_Resource, Dimension, SizeOptions, BorderRadiuses, ResourceColor } from './units'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -29,6 +29,8 @@ import { ClickEvent, CommonMethod } from './common'
 import { extractors, hookSaveButtonOnClickImpl, hookSaveButtonAttributeModifier, AttributeModifier, AttributeUpdater } from '#handwritten'
 import { BusinessError } from '@ohos.base'
 import { Resource as global_resource_Resource } from 'global.resource'
+import { Color as arkui_component_enums_Color, FontWeight } from './enums'
+import { SymbolRenderingStrategy } from './symbolglyph'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -38,7 +40,7 @@ import { SaveButtonModifier } from './../SaveButtonModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
-    attributeSet?: SaveButtonModifier;
+    saveButtonAttributeSet?: SaveButtonModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -194,6 +196,78 @@ export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
         ArkUIGeneratedNativeModule._SaveButtonAttribute_setUserCancelEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSymbolIconColorAttribute(value: Array<ResourceColor> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement: ResourceColor = valueTmpValue[valueTmpValueCounterI]
+                if (valueTmpValueTmpElement instanceof arkui_component_enums_Color) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueTmpElementForIdx0 = valueTmpValueTmpElement as arkui_component_enums_Color
+                    thisSerializer.writeInt32((valueTmpValueTmpElementForIdx0.getOrdinal()) % (12))
+                } else if (valueTmpValueTmpElement instanceof int32) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueTmpElementForIdx1 = valueTmpValueTmpElement as int32
+                    thisSerializer.writeInt32(valueTmpValueTmpElementForIdx1)
+                } else if (valueTmpValueTmpElement instanceof string) {
+                    thisSerializer.writeInt8((2).toByte())
+                    const valueTmpValueTmpElementForIdx2 = valueTmpValueTmpElement as string
+                    thisSerializer.writeString(valueTmpValueTmpElementForIdx2)
+                } else if (valueTmpValueTmpElement instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((3).toByte())
+                    const valueTmpValueTmpElementForIdx3 = valueTmpValueTmpElement as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx3)
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SaveButtonAttribute_setSymbolIconColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSymbolRenderingStrategyAttribute(value: SymbolRenderingStrategy | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as SymbolRenderingStrategy)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SaveButtonAttribute_setSymbolRenderingStrategy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSymbolFontWeightAttribute(value: int32 | FontWeight | string | arkui_component_units_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof FontWeight) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as FontWeight
+                thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SaveButtonAttribute_setSymbolFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SaveIconStyle {
     FULL_FILLED = 0,
@@ -251,6 +325,15 @@ export interface SaveButtonAttribute extends SecurityComponentMethod {
     userCancelEvent(value: boolean | undefined): this {
         throw new Error('Unimplemented method userCancelEvent')
     }
+    symbolIconColor(value: Array<ResourceColor> | undefined): this {
+        throw new Error('Unimplemented method symbolIconColor')
+    }
+    symbolRenderingStrategy(value: SymbolRenderingStrategy | undefined): this {
+        throw new Error('Unimplemented method symbolRenderingStrategy')
+    }
+    symbolFontWeight(value: int32 | FontWeight | string | arkui_component_units_Resource | undefined): this {
+        throw new Error('Unimplemented method symbolFontWeight')
+    }
     attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }
@@ -300,6 +383,21 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
     public userCancelEvent(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setUserCancelEventAttribute(value_casted)
+        return this
+    }
+    public symbolIconColor(value: Array<ResourceColor> | undefined): this {
+        const value_casted = value as (Array<ResourceColor> | undefined)
+        this.getPeer()?.setSymbolIconColorAttribute(value_casted)
+        return this
+    }
+    public symbolRenderingStrategy(value: SymbolRenderingStrategy | undefined): this {
+        const value_casted = value as (SymbolRenderingStrategy | undefined)
+        this.getPeer()?.setSymbolRenderingStrategyAttribute(value_casted)
+        return this
+    }
+    public symbolFontWeight(value: int32 | FontWeight | string | arkui_component_units_Resource | undefined): this {
+        const value_casted = value as (int32 | FontWeight | string | arkui_component_units_Resource | undefined)
+        this.getPeer()?.setSymbolFontWeightAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {

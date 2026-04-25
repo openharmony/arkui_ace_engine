@@ -21,7 +21,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -63,7 +63,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenuTest001, TestSize.Level1)
      */
     int32_t targetId = menuNode->GetId();
     auto result = ViewAbstract::OpenMenu(menuParam, selectNode, targetId);
-    EXPECT_TRUE(result >= ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(result, ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE);
 }
 
 /**

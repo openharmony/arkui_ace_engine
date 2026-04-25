@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/osal/page_viewport_config_ohos.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/ng/size_t.h"

@@ -33,6 +33,7 @@
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/external/ability/stage/stage_context.h"
 #include "adapter/preview/inspector/inspector_client.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/resource/resource_configuration.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -336,7 +337,7 @@ void AceAbility::InitEnv()
     UIEnvCallback callback = [window, id = ACE_INSTANCE_ID](const OHOS::Ace::RefPtr<PipelineContext>& context) mutable {
         CHECK_NULL_VOID(context);
         CHECK_NULL_VOID(window);
-        auto director = OHOS::Rosen::RSUIDirector::Create();
+        auto director = window->GetRSUIDirector();
         CHECK_NULL_VOID(director);
         director->SetRSSurfaceNode(window->GetSurfaceNode());
         auto container = AceContainer::GetContainerInstance(id);
@@ -349,7 +350,6 @@ void AceAbility::InitEnv()
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
         };
         director->SetUITaskRunner(func, id);
-        director->Init();
         context->SetRSUIDirector(director);
     };
 

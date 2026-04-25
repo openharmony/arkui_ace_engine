@@ -51,7 +51,7 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridRowsGapModifier.identity, GridRowsGapModifier, value);
     return this;
   }
-  scrollBarWidth(value: string | number): this {
+  scrollBarWidth(value: string | number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, GridScrollBarWidthModifier.identity, GridScrollBarWidthModifier, value);
     return this;
   }
@@ -306,8 +306,8 @@ class GridRowsGapModifier extends ModifierWithKey<Length> {
   }
 }
 
-class GridScrollBarWidthModifier extends ModifierWithKey<string | number> {
-  constructor(value: string | number) {
+class GridScrollBarWidthModifier extends ModifierWithKey<string | number | Resource> {
+  constructor(value: string | number | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('gridScrollBarWidth');

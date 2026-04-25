@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
 struct MockReplace {
@@ -227,6 +227,7 @@ public:
     void ResetIsForceSetFlag(int32_t index);
     bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex);
     void SetRecoveryFromReplaceDestination(int32_t index, bool value);
+    void CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo) override;
 
     MOCK_METHOD2(CreateHomeDestination, bool(const WeakPtr<UINode>& customNode, RefPtr<UINode>& node));
 
@@ -240,6 +241,7 @@ private:
     MockReplace *mockReplace_ = new MockReplace();
     std::vector<RefPtr<MockNavPathInfo>> mockPathArray_;
     std::vector<RefPtr<MockNavPathInfo>> mockPopArray_;
+    std::vector<NavdestinationRecoveryInfo> recoveryPushCalls_;
     std::map<int32_t, bool> mockIsEntryMap_;
     int32_t size_ = 0;
 };

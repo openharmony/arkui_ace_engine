@@ -15,19 +15,21 @@
 
 #include "gtest/gtest.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
 #define private public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"

@@ -158,8 +158,11 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    std::string GetFontWeightConfigs() const;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
+    void UpdateEnableSmallLanguageTruncation(const bool& value);
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -170,6 +173,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, VariableFontWeight, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FontFeaturesList, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontVariations, FONT_VARIATIONS_LIST, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, TextDecoration, std::vector<TextDecoration>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);
@@ -179,6 +183,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LetterSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, EnableVariableFontWeight, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, EnableDeviceFontWeightCategory, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LineThicknessScale, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
         FontForegroudGradiantColor, FontForegroudGradiantColor, PROPERTY_UPDATE_MEASURE);
@@ -223,6 +228,7 @@ public:
         TextMarqueeOptions, TextMarqueeSpacing, CalcDimension, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(EnableSmallLanguageTruncation, bool);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
 
@@ -364,6 +370,8 @@ protected:
     }
 
 private:
+    void OnEnableSmallLanguageTruncationUpdate(bool value);
+
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
 
     bool isLoopAnimation_ = false;

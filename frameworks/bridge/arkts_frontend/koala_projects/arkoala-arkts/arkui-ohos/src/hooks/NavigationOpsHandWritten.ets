@@ -15,7 +15,7 @@
 
 import { SerializerBase, runtimeType, RuntimeType, InteropNativeModule, KPointer } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, ArkNavigationPeer, NavPathStack_serializer, NavigationModuleInfo_serializer, HomePathInfo_serializer, HomePathInfo } from "../component/navigation"
+import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, ArkNavigationPeer, NavPathStack_serializer, NavigationModuleInfo_serializer, HomePathInfo_serializer, HomePathInfo, NavPathStackInternal, NavPathInfo } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { NavExtender, ArkComponentRootPeer } from "../component/idlize"
 import { int32 } from "@koalaui/common"
@@ -130,6 +130,22 @@ export class NavigationOpsHandWritten {
                 return 0;
             }
             return node.peer.ptr;
+        })
+        NavExtender.setPushDestinationInnerCallback(info, (pathStack: KPointer, name: string, params: string, needTransition: boolean) => {
+            let navPathStack = NavPathStackInternal.fromPtr(pathStack);
+            let objParam: Object | undefined = undefined;
+            if (params.length != 0 && params != "{}") {
+                try {
+                    let tempObj: Object | null | undefined = JSON.parse<Object>(params, Class.from<Object>());
+                    if (tempObj != null && tempObj != undefined) {
+                        objParam = tempObj!;
+                    }
+                } catch (e) {
+                    InteropNativeModule._NativeLog(`AceNavigation: pushInnerDestination failed to parse params: ${params}`);
+                }
+            }
+            let navPathInfo = new NavPathInfo(name, objParam ?? null);
+            navPathStack.pushPath(navPathInfo, needTransition);
         })
     }
     static hookSetNavDestinationImpl(peer: ArkNavigationPeer, value: PageMapBuilder | undefined) {

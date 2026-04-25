@@ -1,1 +1,4 @@
-out
+# Ignore dist directory
+dist/
+# Ignore node_modules
+node_modules/

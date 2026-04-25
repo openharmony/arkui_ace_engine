@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -86,6 +87,11 @@ enum class MenuKeyboardAvoidMode {
     TRANSLATE_AND_RESIZE = 1,
 };
 
+enum class AnchoredColorMode {
+    FOLLOW_SYSTEM = 0,
+    FOLLOW_TARGET = 1,
+};
+
 struct ACE_FORCE_EXPORT MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -139,12 +145,16 @@ struct ACE_FORCE_EXPORT MenuParam {
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
     std::optional<MenuKeyboardAvoidMode> keyboardAvoidMode;
     std::optional<Dimension> minKeyboardAvoidDistance;
+    std::optional<Dimension> targetSpace;
+    std::optional<OffsetF> targetOffset;
+    std::optional<SizeF> targetSize;
     RefPtr<UiMaterial> systemMaterial;
     std::optional<DisplayMode> scrollBar;
     std::optional<Dimension> maxHeight;
     bool isDarkMode = false;
     bool isWithTheme = false;
     bool reuse = true;
+    bool isColorModeFollowTarget = true;
     struct resourceUpdater {
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, MenuParam&)> updateFunc;

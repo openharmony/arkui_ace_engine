@@ -28,21 +28,17 @@ import { ResourceColor, Resource as arkui_component_units_Resource, Length, Leng
 import { Color as arkui_component_enums_Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, FontWeight } from './component/enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { DecorationStyleInterface } from './component/styledString'
-import { TextDataDetectorConfig, EditMenuOptions, ShaderStyle, TextVerticalAlign, ContentTransition, TextContentAlign, SelectedDragPreviewStyle, TextDirection, FontSettingOptions, LineSpacingOptions } from './component/textCommon'
+import { TextDataDetectorConfig, EditMenuOptions, ShaderStyle, TextVerticalAlign, ContentTransition, TextContentAlign, SelectedDragPreviewStyle, TextDirection, FontVariation, FontSettingOptions, LineSpacingOptions } from './component/textCommon'
 import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { default as text } from '@ohos.graphics.text'
 import { CustomBuilder } from './component/builder'
 import { SelectionMenuOptions } from './component/richEditor'
 export class TextModifier extends CommonMethodModifier implements TextAttribute,AttributeModifier<TextAttribute> {
-    _instanceId: number = -1;
-    _state: ModifierState = new ModifierState;
-    _addr: ArrayBuffer = new ArrayBuffer(4096);
-    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    private _Text_addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _Text_flagArray: Uint8Array = new Uint8Array(this._Text_addr);
     constructor() {
         super();
-        this._flagArray.fill(0);
-    }
-    setInstanceId(instanceId: number): void {
-        this._instanceId = instanceId
+        this._Text_flagArray.fill(0);
     }
     isUpdater: () => boolean = () => false
     applyNormalAttribute(instance: TextAttribute): void { }
@@ -50,87 +46,90 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     applyFocusedAttribute(instance: TextAttribute): void { }
     applyDisabledAttribute(instance: TextAttribute): void { }
     applySelectedAttribute(instance: TextAttribute): void { }
-    public _fontColor_0_0value?: ResourceColor | undefined
-    public _fontSize_0_0value?: double | string | arkui_component_units_Resource | undefined
-    public _minFontSize_0_0value?: double | string | arkui_component_units_Resource | undefined
-    public _maxFontSize_0_0value?: double | string | arkui_component_units_Resource | undefined
-    public _minFontScale_0_0value?: double | arkui_component_units_Resource | undefined
-    public _maxFontScale_0_0value?: double | arkui_component_units_Resource | undefined
-    public _fontStyle_0_0value?: FontStyle | undefined
-    public _textAlign_0_0value?: TextAlign | undefined
-    public _lineHeight_0_0value?: double | string | arkui_component_units_Resource | undefined
-    public _textOverflow_0_0value?: TextOverflowOptions | undefined
-    public _fontFamily_0_0value?: string | arkui_component_units_Resource | undefined
-    public _maxLines_0_0value?: int32 | undefined
-    public _decoration_0_0value?: DecorationStyleInterface | undefined
-    public _letterSpacing_0_0value?: double | string | undefined
-    public _textCase_0_0value?: TextCase | undefined
-    public _baselineOffset_0_0value?: double | string | undefined
-    public _copyOption_0_0value?: CopyOptions | undefined
-    public _draggable_0_0value?: boolean | undefined
-    public _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
-    public _heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
-    public _textIndent_0_0value?: Length | undefined
-    public _wordBreak_0_0value?: WordBreak | undefined
-    public _lineBreakStrategy_0_0value?: LineBreakStrategy | undefined
-    public _onCopy_0_0value?: ((breakpoints: string) => void) | undefined
-    public _caretColor_0_0value?: ResourceColor | undefined
-    public _selectedBackgroundColor_0_0value?: ResourceColor | undefined
-    public _ellipsisMode_0_0value?: EllipsisMode | undefined
-    public _enableDataDetector_0_0value?: boolean | undefined
-    public _dataDetectorConfig_0_0value?: TextDataDetectorConfig | undefined
-    public _onTextSelectionChange_0_0value?: ((first: int32,last: int32) => void) | undefined
-    public _fontFeature_0_0value?: string | undefined
-    public _marqueeOptions_0_0value?: TextMarqueeOptions | undefined
-    public _onMarqueeStateChange_0_0value?: arkui_component_common_Callback<MarqueeState, void> | undefined
-    public _privacySensitive_0_0value?: boolean | undefined
-    public _textSelectable_0_0value?: TextSelectableMode | undefined
-    public _editMenuOptions_0_0value?: EditMenuOptions | undefined
-    public _halfLeading_0_0value?: boolean | undefined
-    public _enableHapticFeedback_0_0value?: boolean | undefined
-    public _includeFontPadding_0_0value?: boolean | undefined
-    public _fallbackLineSpacing_0_0value?: boolean | undefined
-    public _optimizeTrailingSpace_0_0value?: boolean | undefined
-    public _shaderStyle_0_0value?: ShaderStyle | undefined
-    public _enableAutoSpacing_0_0value?: boolean | undefined
-    public _textVerticalAlign_0_0value?: TextVerticalAlign | undefined
-    public _contentTransition_0_0value?: ContentTransition | undefined
-    public _textContentAlign_0_0value?: TextContentAlign | undefined
-    public _minLines_0_0value?: int32 | undefined
-    public _minLineHeight_0_0value?: arkui_component_units_LengthMetrics | undefined
-    public _maxLineHeight_0_0value?: arkui_component_units_LengthMetrics | undefined
-    public _lineHeightMultiple_0_0value?: double | undefined
-    public _enableSelectedDataDetector_0_0value?: boolean | undefined
-    public _compressLeadingPunctuation_0_0value?: boolean | undefined
-    public _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
-    public _textDirection_0_0value?: TextDirection | undefined
-    public _orphanCharOptimization_0_0value?: boolean | undefined
-    public _font_0_0value?: arkui_component_units_Font | undefined
-    public _font_0_1value?: FontSettingOptions | undefined
-    public _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
-    public _fontWeight_0_1value?: FontSettingOptions | undefined
-    public _lineSpacing_0_0value?: arkui_component_units_LengthMetrics | undefined
-    public _lineSpacing_0_1value?: LineSpacingOptions | undefined
-    public _selection_0_0value?: int32 | undefined
-    public _selection_0_1value?: int32 | undefined
-    public _bindSelectionMenu_0_0value?: TextSpanType | undefined
-    public _bindSelectionMenu_0_1value?: CustomBuilder | undefined
-    public _bindSelectionMenu_0_2value?: TextResponseType | undefined
-    public _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
+    public _Text_fontColor_0_0value?: ResourceColor | undefined
+    public _Text_fontSize_0_0value?: double | string | arkui_component_units_Resource | undefined
+    public _Text_minFontSize_0_0value?: double | string | arkui_component_units_Resource | undefined
+    public _Text_maxFontSize_0_0value?: double | string | arkui_component_units_Resource | undefined
+    public _Text_minFontScale_0_0value?: double | arkui_component_units_Resource | undefined
+    public _Text_maxFontScale_0_0value?: double | arkui_component_units_Resource | undefined
+    public _Text_fontStyle_0_0value?: FontStyle | undefined
+    public _Text_textAlign_0_0value?: TextAlign | undefined
+    public _Text_lineHeight_0_0value?: double | string | arkui_component_units_Resource | undefined
+    public _Text_textOverflow_0_0value?: TextOverflowOptions | undefined
+    public _Text_fontFamily_0_0value?: string | arkui_component_units_Resource | undefined
+    public _Text_maxLines_0_0value?: int32 | undefined
+    public _Text_decoration_0_0value?: DecorationStyleInterface | undefined
+    public _Text_letterSpacing_0_0value?: double | string | undefined
+    public _Text_textCase_0_0value?: TextCase | undefined
+    public _Text_baselineOffset_0_0value?: double | string | undefined
+    public _Text_copyOption_0_0value?: CopyOptions | undefined
+    public _Text_draggable_0_0value?: boolean | undefined
+    public _Text_textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
+    public _Text_heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
+    public _Text_textIndent_0_0value?: Length | undefined
+    public _Text_wordBreak_0_0value?: WordBreak | undefined
+    public _Text_lineBreakStrategy_0_0value?: LineBreakStrategy | undefined
+    public _Text_onCopy_0_0value?: ((breakpoints: string) => void) | undefined
+    public _Text_onWillCopy_0_0value?: arkui_component_common_Callback<string, boolean> | undefined
+    public _Text_caretColor_0_0value?: ResourceColor | undefined
+    public _Text_selectedBackgroundColor_0_0value?: ResourceColor | undefined
+    public _Text_ellipsisMode_0_0value?: EllipsisMode | undefined
+    public _Text_enableDataDetector_0_0value?: boolean | undefined
+    public _Text_dataDetectorConfig_0_0value?: TextDataDetectorConfig | undefined
+    public _Text_onTextSelectionChange_0_0value?: ((first: int32,last: int32) => void) | undefined
+    public _Text_fontFeature_0_0value?: string | undefined
+    public _Text_marqueeOptions_0_0value?: TextMarqueeOptions | undefined
+    public _Text_onMarqueeStateChange_0_0value?: arkui_component_common_Callback<MarqueeState, void> | undefined
+    public _Text_privacySensitive_0_0value?: boolean | undefined
+    public _Text_textSelectable_0_0value?: TextSelectableMode | undefined
+    public _Text_editMenuOptions_0_0value?: EditMenuOptions | undefined
+    public _Text_halfLeading_0_0value?: boolean | undefined
+    public _Text_enableHapticFeedback_0_0value?: boolean | undefined
+    public _Text_includeFontPadding_0_0value?: boolean | undefined
+    public _Text_fallbackLineSpacing_0_0value?: boolean | undefined
+    public _Text_optimizeTrailingSpace_0_0value?: boolean | undefined
+    public _Text_shaderStyle_0_0value?: ShaderStyle | undefined
+    public _Text_enableAutoSpacing_0_0value?: boolean | undefined
+    public _Text_textVerticalAlign_0_0value?: TextVerticalAlign | undefined
+    public _Text_contentTransition_0_0value?: ContentTransition | undefined
+    public _Text_textContentAlign_0_0value?: TextContentAlign | undefined
+    public _Text_minLines_0_0value?: int32 | undefined
+    public _Text_minLineHeight_0_0value?: arkui_component_units_LengthMetrics | undefined
+    public _Text_maxLineHeight_0_0value?: arkui_component_units_LengthMetrics | undefined
+    public _Text_lineHeightMultiple_0_0value?: double | undefined
+    public _Text_enableSelectedDataDetector_0_0value?: boolean | undefined
+    public _Text_compressLeadingPunctuation_0_0value?: boolean | undefined
+    public _Text_selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
+    public _Text_textDirection_0_0value?: TextDirection | undefined
+    public _Text_orphanCharOptimization_0_0value?: boolean | undefined
+    public _Text_fontVariations_0_0value?: Array<FontVariation> | undefined
+    public _Text_font_0_0value?: arkui_component_units_Font | undefined
+    public _Text_font_0_1value?: FontSettingOptions | undefined
+    public _Text_fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
+    public _Text_fontWeight_0_1value?: FontSettingOptions | undefined
+    public _Text_lineSpacing_0_0value?: arkui_component_units_LengthMetrics | undefined
+    public _Text_lineSpacing_0_1value?: LineSpacingOptions | undefined
+    public _Text_selection_0_0value?: int32 | undefined
+    public _Text_selection_0_1value?: int32 | undefined
+    public _Text_bindSelectionMenu_0_0value?: TextSpanType | undefined
+    public _Text_bindSelectionMenu_0_1value?: CustomBuilder | undefined
+    public _Text_bindSelectionMenu_0_2value?: TextResponseType | undefined
+    public _Text_bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
         const peer = node as ArkTextPeer;
-        const flagArray = this._flagArray;
+        const flagArray = this._Text_flagArray;
         this.applyModifierPatch0(peer, flagArray);
         this.applyModifierPatch1(peer, flagArray);
         this.applyModifierPatch2(peer, flagArray);
+        this.applyModifierPatch3(peer, flagArray);
     }
     applyModifierPatch0(peer: ArkTextPeer, flagArray: Uint8Array): void {
         if (flagArray[0] != 0) {
             switch (flagArray[0]) {
                 case 1: {
-                    peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
+                    peer.setFontColorAttribute((this._Text_fontColor_0_0value as ResourceColor | undefined));
                     flagArray[0] = 2;
                     break;
                 }
@@ -147,7 +146,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[1] != 0) {
             switch (flagArray[1]) {
                 case 1: {
-                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
+                    peer.setFontSizeAttribute((this._Text_fontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
                     flagArray[1] = 2;
                     break;
                 }
@@ -164,7 +163,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[2] != 0) {
             switch (flagArray[2]) {
                 case 1: {
-                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
+                    peer.setMinFontSizeAttribute((this._Text_minFontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
                     flagArray[2] = 2;
                     break;
                 }
@@ -181,7 +180,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[3] != 0) {
             switch (flagArray[3]) {
                 case 1: {
-                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
+                    peer.setMaxFontSizeAttribute((this._Text_maxFontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
                     flagArray[3] = 2;
                     break;
                 }
@@ -198,7 +197,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[4] != 0) {
             switch (flagArray[4]) {
                 case 1: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | arkui_component_units_Resource | undefined));
+                    peer.setMinFontScaleAttribute((this._Text_minFontScale_0_0value as double | arkui_component_units_Resource | undefined));
                     flagArray[4] = 2;
                     break;
                 }
@@ -215,7 +214,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[5] != 0) {
             switch (flagArray[5]) {
                 case 1: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | arkui_component_units_Resource | undefined));
+                    peer.setMaxFontScaleAttribute((this._Text_maxFontScale_0_0value as double | arkui_component_units_Resource | undefined));
                     flagArray[5] = 2;
                     break;
                 }
@@ -232,7 +231,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[6] != 0) {
             switch (flagArray[6]) {
                 case 1: {
-                    peer.setFontStyleAttribute((this._fontStyle_0_0value as FontStyle | undefined));
+                    peer.setFontStyleAttribute((this._Text_fontStyle_0_0value as FontStyle | undefined));
                     flagArray[6] = 2;
                     break;
                 }
@@ -249,7 +248,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[7] != 0) {
             switch (flagArray[7]) {
                 case 1: {
-                    peer.setTextAlignAttribute((this._textAlign_0_0value as TextAlign | undefined));
+                    peer.setTextAlignAttribute((this._Text_textAlign_0_0value as TextAlign | undefined));
                     flagArray[7] = 2;
                     break;
                 }
@@ -266,7 +265,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[8] != 0) {
             switch (flagArray[8]) {
                 case 1: {
-                    peer.setLineHeightAttribute((this._lineHeight_0_0value as double | string | arkui_component_units_Resource | undefined));
+                    peer.setLineHeightAttribute((this._Text_lineHeight_0_0value as double | string | arkui_component_units_Resource | undefined));
                     flagArray[8] = 2;
                     break;
                 }
@@ -283,7 +282,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[9] != 0) {
             switch (flagArray[9]) {
                 case 1: {
-                    peer.setTextOverflowAttribute((this._textOverflow_0_0value as TextOverflowOptions | undefined));
+                    peer.setTextOverflowAttribute((this._Text_textOverflow_0_0value as TextOverflowOptions | undefined));
                     flagArray[9] = 2;
                     break;
                 }
@@ -300,7 +299,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[10] != 0) {
             switch (flagArray[10]) {
                 case 1: {
-                    peer.setFontFamilyAttribute((this._fontFamily_0_0value as string | arkui_component_units_Resource | undefined));
+                    peer.setFontFamilyAttribute((this._Text_fontFamily_0_0value as string | arkui_component_units_Resource | undefined));
                     flagArray[10] = 2;
                     break;
                 }
@@ -317,7 +316,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[11] != 0) {
             switch (flagArray[11]) {
                 case 1: {
-                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
+                    peer.setMaxLinesAttribute((this._Text_maxLines_0_0value as int32 | undefined));
                     flagArray[11] = 2;
                     break;
                 }
@@ -334,7 +333,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[12] != 0) {
             switch (flagArray[12]) {
                 case 1: {
-                    peer.setDecorationAttribute((this._decoration_0_0value as DecorationStyleInterface | undefined));
+                    peer.setDecorationAttribute((this._Text_decoration_0_0value as DecorationStyleInterface | undefined));
                     flagArray[12] = 2;
                     break;
                 }
@@ -351,7 +350,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[13] != 0) {
             switch (flagArray[13]) {
                 case 1: {
-                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | undefined));
+                    peer.setLetterSpacingAttribute((this._Text_letterSpacing_0_0value as double | string | undefined));
                     flagArray[13] = 2;
                     break;
                 }
@@ -368,7 +367,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[14] != 0) {
             switch (flagArray[14]) {
                 case 1: {
-                    peer.setTextCaseAttribute((this._textCase_0_0value as TextCase | undefined));
+                    peer.setTextCaseAttribute((this._Text_textCase_0_0value as TextCase | undefined));
                     flagArray[14] = 2;
                     break;
                 }
@@ -385,7 +384,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[15] != 0) {
             switch (flagArray[15]) {
                 case 1: {
-                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as double | string | undefined));
+                    peer.setBaselineOffsetAttribute((this._Text_baselineOffset_0_0value as double | string | undefined));
                     flagArray[15] = 2;
                     break;
                 }
@@ -402,7 +401,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[16] != 0) {
             switch (flagArray[16]) {
                 case 1: {
-                    peer.setCopyOptionAttribute((this._copyOption_0_0value as CopyOptions | undefined));
+                    peer.setCopyOptionAttribute((this._Text_copyOption_0_0value as CopyOptions | undefined));
                     flagArray[16] = 2;
                     break;
                 }
@@ -419,7 +418,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[17] != 0) {
             switch (flagArray[17]) {
                 case 1: {
-                    peer.setDraggableAttribute((this._draggable_0_0value as boolean | undefined));
+                    peer.setDraggableAttribute((this._Text_draggable_0_0value as boolean | undefined));
                     flagArray[17] = 2;
                     break;
                 }
@@ -436,7 +435,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[18] != 0) {
             switch (flagArray[18]) {
                 case 1: {
-                    peer.setTextShadowAttribute((this._textShadow_0_0value as ShadowOptions | Array<ShadowOptions> | undefined));
+                    peer.setTextShadowAttribute((this._Text_textShadow_0_0value as ShadowOptions | Array<ShadowOptions> | undefined));
                     flagArray[18] = 2;
                     break;
                 }
@@ -453,7 +452,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[19] != 0) {
             switch (flagArray[19]) {
                 case 1: {
-                    peer.setHeightAdaptivePolicyAttribute((this._heightAdaptivePolicy_0_0value as TextHeightAdaptivePolicy | undefined));
+                    peer.setHeightAdaptivePolicyAttribute((this._Text_heightAdaptivePolicy_0_0value as TextHeightAdaptivePolicy | undefined));
                     flagArray[19] = 2;
                     break;
                 }
@@ -472,7 +471,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[20] != 0) {
             switch (flagArray[20]) {
                 case 1: {
-                    peer.setTextIndentAttribute((this._textIndent_0_0value as Length | undefined));
+                    peer.setTextIndentAttribute((this._Text_textIndent_0_0value as Length | undefined));
                     flagArray[20] = 2;
                     break;
                 }
@@ -489,7 +488,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[21] != 0) {
             switch (flagArray[21]) {
                 case 1: {
-                    peer.setWordBreakAttribute((this._wordBreak_0_0value as WordBreak | undefined));
+                    peer.setWordBreakAttribute((this._Text_wordBreak_0_0value as WordBreak | undefined));
                     flagArray[21] = 2;
                     break;
                 }
@@ -506,7 +505,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[22] != 0) {
             switch (flagArray[22]) {
                 case 1: {
-                    peer.setLineBreakStrategyAttribute((this._lineBreakStrategy_0_0value as LineBreakStrategy | undefined));
+                    peer.setLineBreakStrategyAttribute((this._Text_lineBreakStrategy_0_0value as LineBreakStrategy | undefined));
                     flagArray[22] = 2;
                     break;
                 }
@@ -523,7 +522,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[23] != 0) {
             switch (flagArray[23]) {
                 case 1: {
-                    peer.setOnCopyAttribute((this._onCopy_0_0value as ((breakpoints: string) => void) | undefined));
+                    peer.setOnCopyAttribute((this._Text_onCopy_0_0value as ((breakpoints: string) => void) | undefined));
                     flagArray[23] = 2;
                     break;
                 }
@@ -540,7 +539,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[24] != 0) {
             switch (flagArray[24]) {
                 case 1: {
-                    peer.setCaretColorAttribute((this._caretColor_0_0value as ResourceColor | undefined));
+                    peer.setOnWillCopyAttribute((this._Text_onWillCopy_0_0value as arkui_component_common_Callback<string, boolean> | undefined));
                     flagArray[24] = 2;
                     break;
                 }
@@ -550,14 +549,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[24] = 0;
-                    peer.setCaretColorAttribute((undefined as ResourceColor | undefined));
+                    peer.setOnWillCopyAttribute((undefined as arkui_component_common_Callback<string, boolean> | undefined));
                 }
             }
         }
         if (flagArray[25] != 0) {
             switch (flagArray[25]) {
                 case 1: {
-                    peer.setSelectedBackgroundColorAttribute((this._selectedBackgroundColor_0_0value as ResourceColor | undefined));
+                    peer.setCaretColorAttribute((this._Text_caretColor_0_0value as ResourceColor | undefined));
                     flagArray[25] = 2;
                     break;
                 }
@@ -567,14 +566,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[25] = 0;
-                    peer.setSelectedBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                    peer.setCaretColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
         if (flagArray[26] != 0) {
             switch (flagArray[26]) {
                 case 1: {
-                    peer.setEllipsisModeAttribute((this._ellipsisMode_0_0value as EllipsisMode | undefined));
+                    peer.setSelectedBackgroundColorAttribute((this._Text_selectedBackgroundColor_0_0value as ResourceColor | undefined));
                     flagArray[26] = 2;
                     break;
                 }
@@ -584,14 +583,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[26] = 0;
-                    peer.setEllipsisModeAttribute((undefined as EllipsisMode | undefined));
+                    peer.setSelectedBackgroundColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
         if (flagArray[27] != 0) {
             switch (flagArray[27]) {
                 case 1: {
-                    peer.setEnableDataDetectorAttribute((this._enableDataDetector_0_0value as boolean | undefined));
+                    peer.setEllipsisModeAttribute((this._Text_ellipsisMode_0_0value as EllipsisMode | undefined));
                     flagArray[27] = 2;
                     break;
                 }
@@ -601,14 +600,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[27] = 0;
-                    peer.setEnableDataDetectorAttribute((undefined as boolean | undefined));
+                    peer.setEllipsisModeAttribute((undefined as EllipsisMode | undefined));
                 }
             }
         }
         if (flagArray[28] != 0) {
             switch (flagArray[28]) {
                 case 1: {
-                    peer.setDataDetectorConfigAttribute((this._dataDetectorConfig_0_0value as TextDataDetectorConfig | undefined));
+                    peer.setEnableDataDetectorAttribute((this._Text_enableDataDetector_0_0value as boolean | undefined));
                     flagArray[28] = 2;
                     break;
                 }
@@ -618,14 +617,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[28] = 0;
-                    peer.setDataDetectorConfigAttribute((undefined as TextDataDetectorConfig | undefined));
+                    peer.setEnableDataDetectorAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[29] != 0) {
             switch (flagArray[29]) {
                 case 1: {
-                    peer.setOnTextSelectionChangeAttribute((this._onTextSelectionChange_0_0value as ((first: int32,last: int32) => void) | undefined));
+                    peer.setDataDetectorConfigAttribute((this._Text_dataDetectorConfig_0_0value as TextDataDetectorConfig | undefined));
                     flagArray[29] = 2;
                     break;
                 }
@@ -635,14 +634,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[29] = 0;
-                    peer.setOnTextSelectionChangeAttribute((undefined as ((first: int32,last: int32) => void) | undefined));
+                    peer.setDataDetectorConfigAttribute((undefined as TextDataDetectorConfig | undefined));
                 }
             }
         }
         if (flagArray[30] != 0) {
             switch (flagArray[30]) {
                 case 1: {
-                    peer.setFontFeatureAttribute((this._fontFeature_0_0value as string | undefined));
+                    peer.setOnTextSelectionChangeAttribute((this._Text_onTextSelectionChange_0_0value as ((first: int32,last: int32) => void) | undefined));
                     flagArray[30] = 2;
                     break;
                 }
@@ -652,14 +651,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[30] = 0;
-                    peer.setFontFeatureAttribute((undefined as string | undefined));
+                    peer.setOnTextSelectionChangeAttribute((undefined as ((first: int32,last: int32) => void) | undefined));
                 }
             }
         }
         if (flagArray[31] != 0) {
             switch (flagArray[31]) {
                 case 1: {
-                    peer.setMarqueeOptionsAttribute((this._marqueeOptions_0_0value as TextMarqueeOptions | undefined));
+                    peer.setFontFeatureAttribute((this._Text_fontFeature_0_0value as string | undefined));
                     flagArray[31] = 2;
                     break;
                 }
@@ -669,14 +668,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[31] = 0;
-                    peer.setMarqueeOptionsAttribute((undefined as TextMarqueeOptions | undefined));
+                    peer.setFontFeatureAttribute((undefined as string | undefined));
                 }
             }
         }
         if (flagArray[32] != 0) {
             switch (flagArray[32]) {
                 case 1: {
-                    peer.setOnMarqueeStateChangeAttribute((this._onMarqueeStateChange_0_0value as arkui_component_common_Callback<MarqueeState, void> | undefined));
+                    peer.setMarqueeOptionsAttribute((this._Text_marqueeOptions_0_0value as TextMarqueeOptions | undefined));
                     flagArray[32] = 2;
                     break;
                 }
@@ -686,14 +685,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[32] = 0;
-                    peer.setOnMarqueeStateChangeAttribute((undefined as arkui_component_common_Callback<MarqueeState, void> | undefined));
+                    peer.setMarqueeOptionsAttribute((undefined as TextMarqueeOptions | undefined));
                 }
             }
         }
         if (flagArray[33] != 0) {
             switch (flagArray[33]) {
                 case 1: {
-                    peer.setPrivacySensitiveAttribute((this._privacySensitive_0_0value as boolean | undefined));
+                    peer.setOnMarqueeStateChangeAttribute((this._Text_onMarqueeStateChange_0_0value as arkui_component_common_Callback<MarqueeState, void> | undefined));
                     flagArray[33] = 2;
                     break;
                 }
@@ -703,14 +702,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[33] = 0;
-                    peer.setPrivacySensitiveAttribute((undefined as boolean | undefined));
+                    peer.setOnMarqueeStateChangeAttribute((undefined as arkui_component_common_Callback<MarqueeState, void> | undefined));
                 }
             }
         }
         if (flagArray[34] != 0) {
             switch (flagArray[34]) {
                 case 1: {
-                    peer.setTextSelectableAttribute((this._textSelectable_0_0value as TextSelectableMode | undefined));
+                    peer.setPrivacySensitiveAttribute((this._Text_privacySensitive_0_0value as boolean | undefined));
                     flagArray[34] = 2;
                     break;
                 }
@@ -720,14 +719,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[34] = 0;
-                    peer.setTextSelectableAttribute((undefined as TextSelectableMode | undefined));
+                    peer.setPrivacySensitiveAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[35] != 0) {
             switch (flagArray[35]) {
                 case 1: {
-                    peer.setEditMenuOptionsAttribute((this._editMenuOptions_0_0value as EditMenuOptions | undefined));
+                    peer.setTextSelectableAttribute((this._Text_textSelectable_0_0value as TextSelectableMode | undefined));
                     flagArray[35] = 2;
                     break;
                 }
@@ -737,14 +736,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[35] = 0;
-                    peer.setEditMenuOptionsAttribute((undefined as EditMenuOptions | undefined));
+                    peer.setTextSelectableAttribute((undefined as TextSelectableMode | undefined));
                 }
             }
         }
         if (flagArray[36] != 0) {
             switch (flagArray[36]) {
                 case 1: {
-                    peer.setHalfLeadingAttribute((this._halfLeading_0_0value as boolean | undefined));
+                    peer.setEditMenuOptionsAttribute((this._Text_editMenuOptions_0_0value as EditMenuOptions | undefined));
                     flagArray[36] = 2;
                     break;
                 }
@@ -754,14 +753,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[36] = 0;
-                    peer.setHalfLeadingAttribute((undefined as boolean | undefined));
+                    peer.setEditMenuOptionsAttribute((undefined as EditMenuOptions | undefined));
                 }
             }
         }
         if (flagArray[37] != 0) {
             switch (flagArray[37]) {
                 case 1: {
-                    peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
+                    peer.setHalfLeadingAttribute((this._Text_halfLeading_0_0value as boolean | undefined));
                     flagArray[37] = 2;
                     break;
                 }
@@ -771,14 +770,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[37] = 0;
-                    peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
+                    peer.setHalfLeadingAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[38] != 0) {
             switch (flagArray[38]) {
                 case 1: {
-                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
+                    peer.setEnableHapticFeedbackAttribute((this._Text_enableHapticFeedback_0_0value as boolean | undefined));
                     flagArray[38] = 2;
                     break;
                 }
@@ -788,14 +787,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[38] = 0;
-                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
+                    peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[39] != 0) {
             switch (flagArray[39]) {
                 case 1: {
-                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
+                    peer.setIncludeFontPaddingAttribute((this._Text_includeFontPadding_0_0value as boolean | undefined));
                     flagArray[39] = 2;
                     break;
                 }
@@ -805,7 +804,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[39] = 0;
-                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -814,7 +813,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         if (flagArray[40] != 0) {
             switch (flagArray[40]) {
                 case 1: {
-                    peer.setOptimizeTrailingSpaceAttribute((this._optimizeTrailingSpace_0_0value as boolean | undefined));
+                    peer.setFallbackLineSpacingAttribute((this._Text_fallbackLineSpacing_0_0value as boolean | undefined));
                     flagArray[40] = 2;
                     break;
                 }
@@ -824,14 +823,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[40] = 0;
-                    peer.setOptimizeTrailingSpaceAttribute((undefined as boolean | undefined));
+                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[41] != 0) {
             switch (flagArray[41]) {
                 case 1: {
-                    peer.setShaderStyleAttribute((this._shaderStyle_0_0value as ShaderStyle | undefined));
+                    peer.setOptimizeTrailingSpaceAttribute((this._Text_optimizeTrailingSpace_0_0value as boolean | undefined));
                     flagArray[41] = 2;
                     break;
                 }
@@ -841,14 +840,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[41] = 0;
-                    peer.setShaderStyleAttribute((undefined as ShaderStyle | undefined));
+                    peer.setOptimizeTrailingSpaceAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[42] != 0) {
             switch (flagArray[42]) {
                 case 1: {
-                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
+                    peer.setShaderStyleAttribute((this._Text_shaderStyle_0_0value as ShaderStyle | undefined));
                     flagArray[42] = 2;
                     break;
                 }
@@ -858,14 +857,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[42] = 0;
-                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
+                    peer.setShaderStyleAttribute((undefined as ShaderStyle | undefined));
                 }
             }
         }
         if (flagArray[43] != 0) {
             switch (flagArray[43]) {
                 case 1: {
-                    peer.setTextVerticalAlignAttribute((this._textVerticalAlign_0_0value as TextVerticalAlign | undefined));
+                    peer.setEnableAutoSpacingAttribute((this._Text_enableAutoSpacing_0_0value as boolean | undefined));
                     flagArray[43] = 2;
                     break;
                 }
@@ -875,14 +874,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[43] = 0;
-                    peer.setTextVerticalAlignAttribute((undefined as TextVerticalAlign | undefined));
+                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[44] != 0) {
             switch (flagArray[44]) {
                 case 1: {
-                    peer.setContentTransitionAttribute((this._contentTransition_0_0value as ContentTransition | undefined));
+                    peer.setTextVerticalAlignAttribute((this._Text_textVerticalAlign_0_0value as TextVerticalAlign | undefined));
                     flagArray[44] = 2;
                     break;
                 }
@@ -892,14 +891,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[44] = 0;
-                    peer.setContentTransitionAttribute((undefined as ContentTransition | undefined));
+                    peer.setTextVerticalAlignAttribute((undefined as TextVerticalAlign | undefined));
                 }
             }
         }
         if (flagArray[45] != 0) {
             switch (flagArray[45]) {
                 case 1: {
-                    peer.setTextContentAlignAttribute((this._textContentAlign_0_0value as TextContentAlign | undefined));
+                    peer.setContentTransitionAttribute((this._Text_contentTransition_0_0value as ContentTransition | undefined));
                     flagArray[45] = 2;
                     break;
                 }
@@ -909,14 +908,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[45] = 0;
-                    peer.setTextContentAlignAttribute((undefined as TextContentAlign | undefined));
+                    peer.setContentTransitionAttribute((undefined as ContentTransition | undefined));
                 }
             }
         }
         if (flagArray[46] != 0) {
             switch (flagArray[46]) {
                 case 1: {
-                    peer.setMinLinesAttribute((this._minLines_0_0value as int32 | undefined));
+                    peer.setTextContentAlignAttribute((this._Text_textContentAlign_0_0value as TextContentAlign | undefined));
                     flagArray[46] = 2;
                     break;
                 }
@@ -926,14 +925,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[46] = 0;
-                    peer.setMinLinesAttribute((undefined as int32 | undefined));
+                    peer.setTextContentAlignAttribute((undefined as TextContentAlign | undefined));
                 }
             }
         }
         if (flagArray[47] != 0) {
             switch (flagArray[47]) {
                 case 1: {
-                    peer.setMinLineHeightAttribute((this._minLineHeight_0_0value as arkui_component_units_LengthMetrics | undefined));
+                    peer.setMinLinesAttribute((this._Text_minLines_0_0value as int32 | undefined));
                     flagArray[47] = 2;
                     break;
                 }
@@ -943,14 +942,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[47] = 0;
-                    peer.setMinLineHeightAttribute((undefined as arkui_component_units_LengthMetrics | undefined));
+                    peer.setMinLinesAttribute((undefined as int32 | undefined));
                 }
             }
         }
         if (flagArray[48] != 0) {
             switch (flagArray[48]) {
                 case 1: {
-                    peer.setMaxLineHeightAttribute((this._maxLineHeight_0_0value as arkui_component_units_LengthMetrics | undefined));
+                    peer.setMinLineHeightAttribute((this._Text_minLineHeight_0_0value as arkui_component_units_LengthMetrics | undefined));
                     flagArray[48] = 2;
                     break;
                 }
@@ -960,14 +959,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[48] = 0;
-                    peer.setMaxLineHeightAttribute((undefined as arkui_component_units_LengthMetrics | undefined));
+                    peer.setMinLineHeightAttribute((undefined as arkui_component_units_LengthMetrics | undefined));
                 }
             }
         }
         if (flagArray[49] != 0) {
             switch (flagArray[49]) {
                 case 1: {
-                    peer.setLineHeightMultipleAttribute((this._lineHeightMultiple_0_0value as double | undefined));
+                    peer.setMaxLineHeightAttribute((this._Text_maxLineHeight_0_0value as arkui_component_units_LengthMetrics | undefined));
                     flagArray[49] = 2;
                     break;
                 }
@@ -977,14 +976,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[49] = 0;
-                    peer.setLineHeightMultipleAttribute((undefined as double | undefined));
+                    peer.setMaxLineHeightAttribute((undefined as arkui_component_units_LengthMetrics | undefined));
                 }
             }
         }
         if (flagArray[50] != 0) {
             switch (flagArray[50]) {
                 case 1: {
-                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
+                    peer.setLineHeightMultipleAttribute((this._Text_lineHeightMultiple_0_0value as double | undefined));
                     flagArray[50] = 2;
                     break;
                 }
@@ -994,14 +993,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[50] = 0;
-                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
+                    peer.setLineHeightMultipleAttribute((undefined as double | undefined));
                 }
             }
         }
         if (flagArray[51] != 0) {
             switch (flagArray[51]) {
                 case 1: {
-                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    peer.setEnableSelectedDataDetectorAttribute((this._Text_enableSelectedDataDetector_0_0value as boolean | undefined));
                     flagArray[51] = 2;
                     break;
                 }
@@ -1011,14 +1010,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[51] = 0;
-                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
+                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[52] != 0) {
             switch (flagArray[52]) {
                 case 1: {
-                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    peer.setCompressLeadingPunctuationAttribute((this._Text_compressLeadingPunctuation_0_0value as boolean | undefined));
                     flagArray[52] = 2;
                     break;
                 }
@@ -1028,14 +1027,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[52] = 0;
-                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
+                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[53] != 0) {
             switch (flagArray[53]) {
                 case 1: {
-                    peer.setTextDirectionAttribute((this._textDirection_0_0value as TextDirection | undefined));
+                    peer.setSelectedDragPreviewStyleAttribute((this._Text_selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
                     flagArray[53] = 2;
                     break;
                 }
@@ -1045,14 +1044,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[53] = 0;
-                    peer.setTextDirectionAttribute((undefined as TextDirection | undefined));
+                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
                 }
             }
         }
         if (flagArray[54] != 0) {
             switch (flagArray[54]) {
                 case 1: {
-                    peer.setFontAttribute((this._font_0_0value as arkui_component_units_Font | undefined), (this._font_0_1value as FontSettingOptions | undefined | undefined));
+                    peer.setTextDirectionAttribute((this._Text_textDirection_0_0value as TextDirection | undefined));
                     flagArray[54] = 2;
                     break;
                 }
@@ -1062,14 +1061,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[54] = 0;
-                    peer.setFontAttribute((undefined as arkui_component_units_Font | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                    peer.setTextDirectionAttribute((undefined as TextDirection | undefined));
                 }
             }
         }
         if (flagArray[55] != 0) {
             switch (flagArray[55]) {
                 case 1: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined), (this._fontWeight_0_1value as FontSettingOptions | undefined | undefined));
+                    peer.setOrphanCharOptimizationAttribute((this._Text_orphanCharOptimization_0_0value as boolean | undefined));
                     flagArray[55] = 2;
                     break;
                 }
@@ -1079,14 +1078,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[55] = 0;
-                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                    peer.setOrphanCharOptimizationAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[56] != 0) {
             switch (flagArray[56]) {
                 case 1: {
-                    peer.setLineSpacingAttribute((this._lineSpacing_0_0value as arkui_component_units_LengthMetrics | undefined), (this._lineSpacing_0_1value as LineSpacingOptions | undefined));
+                    peer.setFontVariationsAttribute((this._Text_fontVariations_0_0value as Array<FontVariation> | undefined));
                     flagArray[56] = 2;
                     break;
                 }
@@ -1096,14 +1095,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[56] = 0;
-                    peer.setLineSpacingAttribute((undefined as arkui_component_units_LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined));
+                    peer.setFontVariationsAttribute((undefined as Array<FontVariation> | undefined));
                 }
             }
         }
         if (flagArray[57] != 0) {
             switch (flagArray[57]) {
                 case 1: {
-                    peer.setSelectionAttribute((this._selection_0_0value as int32 | undefined), (this._selection_0_1value as int32 | undefined));
+                    peer.setFontAttribute((this._Text_font_0_0value as arkui_component_units_Font | undefined), (this._Text_font_0_1value as FontSettingOptions | undefined | undefined));
                     flagArray[57] = 2;
                     break;
                 }
@@ -1113,14 +1112,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[57] = 0;
-                    peer.setSelectionAttribute((undefined as int32 | undefined), (undefined as int32 | undefined));
+                    peer.setFontAttribute((undefined as arkui_component_units_Font | undefined), (undefined as FontSettingOptions | undefined | undefined));
                 }
             }
         }
         if (flagArray[58] != 0) {
             switch (flagArray[58]) {
                 case 1: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as TextSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as TextResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined | undefined));
+                    peer.setFontWeightAttribute((this._Text_fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined), (this._Text_fontWeight_0_1value as FontSettingOptions | undefined | undefined));
                     flagArray[58] = 2;
                     break;
                 }
@@ -1130,15 +1129,14 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[58] = 0;
-                    peer.setBindSelectionMenuAttribute((undefined as TextSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as TextResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontSettingOptions | undefined | undefined));
                 }
             }
         }
-        if (flagArray[59] != 0)
-        {
+        if (flagArray[59] != 0) {
             switch (flagArray[59]) {
                 case 1: {
-                    peer.setOrphanCharOptimizationAttribute((this._orphanCharOptimization_0_0value as boolean | undefined));
+                    peer.setLineSpacingAttribute((this._Text_lineSpacing_0_0value as arkui_component_units_LengthMetrics | undefined), (this._Text_lineSpacing_0_1value as LineSpacingOptions | undefined));
                     flagArray[59] = 2;
                     break;
                 }
@@ -1148,7 +1146,43 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     flagArray[59] = 0;
-                    peer.setOrphanCharOptimizationAttribute((undefined as boolean | undefined));
+                    peer.setLineSpacingAttribute((undefined as arkui_component_units_LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined));
+                }
+            }
+        }
+    }
+    applyModifierPatch3(peer: ArkTextPeer, flagArray: Uint8Array): void {
+        if (flagArray[60] != 0) {
+            switch (flagArray[60]) {
+                case 1: {
+                    peer.setSelectionAttribute((this._Text_selection_0_0value as int32 | undefined), (this._Text_selection_0_1value as int32 | undefined));
+                    flagArray[60] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[60] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[60] = 0;
+                    peer.setSelectionAttribute((undefined as int32 | undefined), (undefined as int32 | undefined));
+                }
+            }
+        }
+        if (flagArray[61] != 0) {
+            switch (flagArray[61]) {
+                case 1: {
+                    peer.setBindSelectionMenuAttribute((this._Text_bindSelectionMenu_0_0value as TextSpanType | undefined), (this._Text_bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._Text_bindSelectionMenu_0_2value as TextResponseType | undefined), (this._Text_bindSelectionMenu_0_3value as SelectionMenuOptions | undefined | undefined));
+                    flagArray[61] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[61] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[61] = 0;
+                    peer.setBindSelectionMenuAttribute((undefined as TextSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as TextResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
                 }
             }
         }
@@ -1156,17 +1190,18 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     mergeModifier(modifier: TextModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        const flagArray = modifier._flagArray;
+        const flagArray = modifier._Text_flagArray;
         this.mergeModifier0(modifier, flagArray);
         this.mergeModifier1(modifier, flagArray);
         this.mergeModifier2(modifier, flagArray);
+        this.mergeModifier3(modifier, flagArray);
     }
     mergeModifier0(modifier: TextModifier, flagArray: Uint8Array): void {
         if (flagArray[0] != 0) {
             switch (flagArray[0]) {
                 case 1:
                 case 3: {
-                    this.fontColor((modifier._fontColor_0_0value as ResourceColor | undefined));
+                    this.fontColor((modifier._Text_fontColor_0_0value as ResourceColor | undefined));
                     break;
                 }
                 default: {
@@ -1178,7 +1213,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[1]) {
                 case 1:
                 case 3: {
-                    this.fontSize((modifier._fontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
+                    this.fontSize((modifier._Text_fontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
@@ -1190,7 +1225,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[2]) {
                 case 1:
                 case 3: {
-                    this.minFontSize((modifier._minFontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
+                    this.minFontSize((modifier._Text_minFontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
@@ -1202,7 +1237,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[3]) {
                 case 1:
                 case 3: {
-                    this.maxFontSize((modifier._maxFontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
+                    this.maxFontSize((modifier._Text_maxFontSize_0_0value as double | string | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
@@ -1214,7 +1249,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[4]) {
                 case 1:
                 case 3: {
-                    this.minFontScale((modifier._minFontScale_0_0value as double | arkui_component_units_Resource | undefined));
+                    this.minFontScale((modifier._Text_minFontScale_0_0value as double | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
@@ -1226,7 +1261,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[5]) {
                 case 1:
                 case 3: {
-                    this.maxFontScale((modifier._maxFontScale_0_0value as double | arkui_component_units_Resource | undefined));
+                    this.maxFontScale((modifier._Text_maxFontScale_0_0value as double | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
@@ -1238,7 +1273,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[6]) {
                 case 1:
                 case 3: {
-                    this.fontStyle((modifier._fontStyle_0_0value as FontStyle | undefined));
+                    this.fontStyle((modifier._Text_fontStyle_0_0value as FontStyle | undefined));
                     break;
                 }
                 default: {
@@ -1250,7 +1285,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[7]) {
                 case 1:
                 case 3: {
-                    this.textAlign((modifier._textAlign_0_0value as TextAlign | undefined));
+                    this.textAlign((modifier._Text_textAlign_0_0value as TextAlign | undefined));
                     break;
                 }
                 default: {
@@ -1262,7 +1297,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[8]) {
                 case 1:
                 case 3: {
-                    this.lineHeight((modifier._lineHeight_0_0value as double | string | arkui_component_units_Resource | undefined));
+                    this.lineHeight((modifier._Text_lineHeight_0_0value as double | string | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
@@ -1274,7 +1309,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[9]) {
                 case 1:
                 case 3: {
-                    this.textOverflow((modifier._textOverflow_0_0value as TextOverflowOptions | undefined));
+                    this.textOverflow((modifier._Text_textOverflow_0_0value as TextOverflowOptions | undefined));
                     break;
                 }
                 default: {
@@ -1286,7 +1321,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[10]) {
                 case 1:
                 case 3: {
-                    this.fontFamily((modifier._fontFamily_0_0value as string | arkui_component_units_Resource | undefined));
+                    this.fontFamily((modifier._Text_fontFamily_0_0value as string | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
@@ -1298,7 +1333,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[11]) {
                 case 1:
                 case 3: {
-                    this.maxLines((modifier._maxLines_0_0value as int32 | undefined));
+                    this.maxLines((modifier._Text_maxLines_0_0value as int32 | undefined));
                     break;
                 }
                 default: {
@@ -1310,7 +1345,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[12]) {
                 case 1:
                 case 3: {
-                    this.decoration((modifier._decoration_0_0value as DecorationStyleInterface | undefined));
+                    this.decoration((modifier._Text_decoration_0_0value as DecorationStyleInterface | undefined));
                     break;
                 }
                 default: {
@@ -1322,7 +1357,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[13]) {
                 case 1:
                 case 3: {
-                    this.letterSpacing((modifier._letterSpacing_0_0value as double | string | undefined));
+                    this.letterSpacing((modifier._Text_letterSpacing_0_0value as double | string | undefined));
                     break;
                 }
                 default: {
@@ -1334,7 +1369,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[14]) {
                 case 1:
                 case 3: {
-                    this.textCase((modifier._textCase_0_0value as TextCase | undefined));
+                    this.textCase((modifier._Text_textCase_0_0value as TextCase | undefined));
                     break;
                 }
                 default: {
@@ -1346,7 +1381,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[15]) {
                 case 1:
                 case 3: {
-                    this.baselineOffset((modifier._baselineOffset_0_0value as double | string | undefined));
+                    this.baselineOffset((modifier._Text_baselineOffset_0_0value as double | string | undefined));
                     break;
                 }
                 default: {
@@ -1358,7 +1393,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[16]) {
                 case 1:
                 case 3: {
-                    this.copyOption((modifier._copyOption_0_0value as CopyOptions | undefined));
+                    this.copyOption((modifier._Text_copyOption_0_0value as CopyOptions | undefined));
                     break;
                 }
                 default: {
@@ -1370,7 +1405,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[17]) {
                 case 1:
                 case 3: {
-                    this.draggable((modifier._draggable_0_0value as boolean | undefined));
+                    this.draggable((modifier._Text_draggable_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1382,7 +1417,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[18]) {
                 case 1:
                 case 3: {
-                    this.textShadow((modifier._textShadow_0_0value as ShadowOptions | Array<ShadowOptions> | undefined));
+                    this.textShadow((modifier._Text_textShadow_0_0value as ShadowOptions | Array<ShadowOptions> | undefined));
                     break;
                 }
                 default: {
@@ -1394,7 +1429,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[19]) {
                 case 1:
                 case 3: {
-                    this.heightAdaptivePolicy((modifier._heightAdaptivePolicy_0_0value as TextHeightAdaptivePolicy | undefined));
+                    this.heightAdaptivePolicy((modifier._Text_heightAdaptivePolicy_0_0value as TextHeightAdaptivePolicy | undefined));
                     break;
                 }
                 default: {
@@ -1408,7 +1443,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[20]) {
                 case 1:
                 case 3: {
-                    this.textIndent((modifier._textIndent_0_0value as Length | undefined));
+                    this.textIndent((modifier._Text_textIndent_0_0value as Length | undefined));
                     break;
                 }
                 default: {
@@ -1420,7 +1455,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[21]) {
                 case 1:
                 case 3: {
-                    this.wordBreak((modifier._wordBreak_0_0value as WordBreak | undefined));
+                    this.wordBreak((modifier._Text_wordBreak_0_0value as WordBreak | undefined));
                     break;
                 }
                 default: {
@@ -1432,7 +1467,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[22]) {
                 case 1:
                 case 3: {
-                    this.lineBreakStrategy((modifier._lineBreakStrategy_0_0value as LineBreakStrategy | undefined));
+                    this.lineBreakStrategy((modifier._Text_lineBreakStrategy_0_0value as LineBreakStrategy | undefined));
                     break;
                 }
                 default: {
@@ -1444,7 +1479,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[23]) {
                 case 1:
                 case 3: {
-                    this.onCopy((modifier._onCopy_0_0value as ((breakpoints: string) => void) | undefined));
+                    this.onCopy((modifier._Text_onCopy_0_0value as ((breakpoints: string) => void) | undefined));
                     break;
                 }
                 default: {
@@ -1456,11 +1491,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[24]) {
                 case 1:
                 case 3: {
-                    this.caretColor((modifier._caretColor_0_0value as ResourceColor | undefined));
+                    this.onWillCopy((modifier._Text_onWillCopy_0_0value as arkui_component_common_Callback<string, boolean> | undefined));
                     break;
                 }
                 default: {
-                    this.caretColor((undefined as ResourceColor | undefined));
+                    this.onWillCopy((undefined as arkui_component_common_Callback<string, boolean> | undefined));
                 }
             }
         }
@@ -1468,11 +1503,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[25]) {
                 case 1:
                 case 3: {
-                    this.selectedBackgroundColor((modifier._selectedBackgroundColor_0_0value as ResourceColor | undefined));
+                    this.caretColor((modifier._Text_caretColor_0_0value as ResourceColor | undefined));
                     break;
                 }
                 default: {
-                    this.selectedBackgroundColor((undefined as ResourceColor | undefined));
+                    this.caretColor((undefined as ResourceColor | undefined));
                 }
             }
         }
@@ -1480,11 +1515,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[26]) {
                 case 1:
                 case 3: {
-                    this.ellipsisMode((modifier._ellipsisMode_0_0value as EllipsisMode | undefined));
+                    this.selectedBackgroundColor((modifier._Text_selectedBackgroundColor_0_0value as ResourceColor | undefined));
                     break;
                 }
                 default: {
-                    this.ellipsisMode((undefined as EllipsisMode | undefined));
+                    this.selectedBackgroundColor((undefined as ResourceColor | undefined));
                 }
             }
         }
@@ -1492,11 +1527,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[27]) {
                 case 1:
                 case 3: {
-                    this.enableDataDetector((modifier._enableDataDetector_0_0value as boolean | undefined));
+                    this.ellipsisMode((modifier._Text_ellipsisMode_0_0value as EllipsisMode | undefined));
                     break;
                 }
                 default: {
-                    this.enableDataDetector((undefined as boolean | undefined));
+                    this.ellipsisMode((undefined as EllipsisMode | undefined));
                 }
             }
         }
@@ -1504,11 +1539,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[28]) {
                 case 1:
                 case 3: {
-                    this.dataDetectorConfig((modifier._dataDetectorConfig_0_0value as TextDataDetectorConfig | undefined));
+                    this.enableDataDetector((modifier._Text_enableDataDetector_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.dataDetectorConfig((undefined as TextDataDetectorConfig | undefined));
+                    this.enableDataDetector((undefined as boolean | undefined));
                 }
             }
         }
@@ -1516,11 +1551,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[29]) {
                 case 1:
                 case 3: {
-                    this.onTextSelectionChange((modifier._onTextSelectionChange_0_0value as ((first: int32,last: int32) => void) | undefined));
+                    this.dataDetectorConfig((modifier._Text_dataDetectorConfig_0_0value as TextDataDetectorConfig | undefined));
                     break;
                 }
                 default: {
-                    this.onTextSelectionChange((undefined as ((first: int32,last: int32) => void) | undefined));
+                    this.dataDetectorConfig((undefined as TextDataDetectorConfig | undefined));
                 }
             }
         }
@@ -1528,11 +1563,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[30]) {
                 case 1:
                 case 3: {
-                    this.fontFeature((modifier._fontFeature_0_0value as string | undefined));
+                    this.onTextSelectionChange((modifier._Text_onTextSelectionChange_0_0value as ((first: int32,last: int32) => void) | undefined));
                     break;
                 }
                 default: {
-                    this.fontFeature((undefined as string | undefined));
+                    this.onTextSelectionChange((undefined as ((first: int32,last: int32) => void) | undefined));
                 }
             }
         }
@@ -1540,11 +1575,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[31]) {
                 case 1:
                 case 3: {
-                    this.marqueeOptions((modifier._marqueeOptions_0_0value as TextMarqueeOptions | undefined));
+                    this.fontFeature((modifier._Text_fontFeature_0_0value as string | undefined));
                     break;
                 }
                 default: {
-                    this.marqueeOptions((undefined as TextMarqueeOptions | undefined));
+                    this.fontFeature((undefined as string | undefined));
                 }
             }
         }
@@ -1552,11 +1587,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[32]) {
                 case 1:
                 case 3: {
-                    this.onMarqueeStateChange((modifier._onMarqueeStateChange_0_0value as arkui_component_common_Callback<MarqueeState, void> | undefined));
+                    this.marqueeOptions((modifier._Text_marqueeOptions_0_0value as TextMarqueeOptions | undefined));
                     break;
                 }
                 default: {
-                    this.onMarqueeStateChange((undefined as arkui_component_common_Callback<MarqueeState, void> | undefined));
+                    this.marqueeOptions((undefined as TextMarqueeOptions | undefined));
                 }
             }
         }
@@ -1564,11 +1599,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[33]) {
                 case 1:
                 case 3: {
-                    this.privacySensitive((modifier._privacySensitive_0_0value as boolean | undefined));
+                    this.onMarqueeStateChange((modifier._Text_onMarqueeStateChange_0_0value as arkui_component_common_Callback<MarqueeState, void> | undefined));
                     break;
                 }
                 default: {
-                    this.privacySensitive((undefined as boolean | undefined));
+                    this.onMarqueeStateChange((undefined as arkui_component_common_Callback<MarqueeState, void> | undefined));
                 }
             }
         }
@@ -1576,11 +1611,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[34]) {
                 case 1:
                 case 3: {
-                    this.textSelectable((modifier._textSelectable_0_0value as TextSelectableMode | undefined));
+                    this.privacySensitive((modifier._Text_privacySensitive_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.textSelectable((undefined as TextSelectableMode | undefined));
+                    this.privacySensitive((undefined as boolean | undefined));
                 }
             }
         }
@@ -1588,11 +1623,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[35]) {
                 case 1:
                 case 3: {
-                    this.editMenuOptions((modifier._editMenuOptions_0_0value as EditMenuOptions | undefined));
+                    this.textSelectable((modifier._Text_textSelectable_0_0value as TextSelectableMode | undefined));
                     break;
                 }
                 default: {
-                    this.editMenuOptions((undefined as EditMenuOptions | undefined));
+                    this.textSelectable((undefined as TextSelectableMode | undefined));
                 }
             }
         }
@@ -1600,11 +1635,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[36]) {
                 case 1:
                 case 3: {
-                    this.halfLeading((modifier._halfLeading_0_0value as boolean | undefined));
+                    this.editMenuOptions((modifier._Text_editMenuOptions_0_0value as EditMenuOptions | undefined));
                     break;
                 }
                 default: {
-                    this.halfLeading((undefined as boolean | undefined));
+                    this.editMenuOptions((undefined as EditMenuOptions | undefined));
                 }
             }
         }
@@ -1612,11 +1647,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[37]) {
                 case 1:
                 case 3: {
-                    this.enableHapticFeedback((modifier._enableHapticFeedback_0_0value as boolean | undefined));
+                    this.halfLeading((modifier._Text_halfLeading_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.enableHapticFeedback((undefined as boolean | undefined));
+                    this.halfLeading((undefined as boolean | undefined));
                 }
             }
         }
@@ -1624,11 +1659,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[38]) {
                 case 1:
                 case 3: {
-                    this.includeFontPadding((modifier._includeFontPadding_0_0value as boolean | undefined));
+                    this.enableHapticFeedback((modifier._Text_enableHapticFeedback_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.includeFontPadding((undefined as boolean | undefined));
+                    this.enableHapticFeedback((undefined as boolean | undefined));
                 }
             }
         }
@@ -1636,11 +1671,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[39]) {
                 case 1:
                 case 3: {
-                    this.fallbackLineSpacing((modifier._fallbackLineSpacing_0_0value as boolean | undefined));
+                    this.includeFontPadding((modifier._Text_includeFontPadding_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.fallbackLineSpacing((undefined as boolean | undefined));
+                    this.includeFontPadding((undefined as boolean | undefined));
                 }
             }
         }
@@ -1650,11 +1685,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[40]) {
                 case 1:
                 case 3: {
-                    this.optimizeTrailingSpace((modifier._optimizeTrailingSpace_0_0value as boolean | undefined));
+                    this.fallbackLineSpacing((modifier._Text_fallbackLineSpacing_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.optimizeTrailingSpace((undefined as boolean | undefined));
+                    this.fallbackLineSpacing((undefined as boolean | undefined));
                 }
             }
         }
@@ -1662,11 +1697,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[41]) {
                 case 1:
                 case 3: {
-                    this.shaderStyle((modifier._shaderStyle_0_0value as ShaderStyle | undefined));
+                    this.optimizeTrailingSpace((modifier._Text_optimizeTrailingSpace_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.shaderStyle((undefined as ShaderStyle | undefined));
+                    this.optimizeTrailingSpace((undefined as boolean | undefined));
                 }
             }
         }
@@ -1674,11 +1709,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[42]) {
                 case 1:
                 case 3: {
-                    this.enableAutoSpacing((modifier._enableAutoSpacing_0_0value as boolean | undefined));
+                    this.shaderStyle((modifier._Text_shaderStyle_0_0value as ShaderStyle | undefined));
                     break;
                 }
                 default: {
-                    this.enableAutoSpacing((undefined as boolean | undefined));
+                    this.shaderStyle((undefined as ShaderStyle | undefined));
                 }
             }
         }
@@ -1686,11 +1721,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[43]) {
                 case 1:
                 case 3: {
-                    this.textVerticalAlign((modifier._textVerticalAlign_0_0value as TextVerticalAlign | undefined));
+                    this.enableAutoSpacing((modifier._Text_enableAutoSpacing_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.textVerticalAlign((undefined as TextVerticalAlign | undefined));
+                    this.enableAutoSpacing((undefined as boolean | undefined));
                 }
             }
         }
@@ -1698,11 +1733,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[44]) {
                 case 1:
                 case 3: {
-                    this.contentTransition((modifier._contentTransition_0_0value as ContentTransition | undefined));
+                    this.textVerticalAlign((modifier._Text_textVerticalAlign_0_0value as TextVerticalAlign | undefined));
                     break;
                 }
                 default: {
-                    this.contentTransition((undefined as ContentTransition | undefined));
+                    this.textVerticalAlign((undefined as TextVerticalAlign | undefined));
                 }
             }
         }
@@ -1710,11 +1745,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[45]) {
                 case 1:
                 case 3: {
-                    this.textContentAlign((modifier._textContentAlign_0_0value as TextContentAlign | undefined));
+                    this.contentTransition((modifier._Text_contentTransition_0_0value as ContentTransition | undefined));
                     break;
                 }
                 default: {
-                    this.textContentAlign((undefined as TextContentAlign | undefined));
+                    this.contentTransition((undefined as ContentTransition | undefined));
                 }
             }
         }
@@ -1722,11 +1757,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[46]) {
                 case 1:
                 case 3: {
-                    this.minLines((modifier._minLines_0_0value as int32 | undefined));
+                    this.textContentAlign((modifier._Text_textContentAlign_0_0value as TextContentAlign | undefined));
                     break;
                 }
                 default: {
-                    this.minLines((undefined as int32 | undefined));
+                    this.textContentAlign((undefined as TextContentAlign | undefined));
                 }
             }
         }
@@ -1734,11 +1769,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[47]) {
                 case 1:
                 case 3: {
-                    this.minLineHeight((modifier._minLineHeight_0_0value as arkui_component_units_LengthMetrics | undefined));
+                    this.minLines((modifier._Text_minLines_0_0value as int32 | undefined));
                     break;
                 }
                 default: {
-                    this.minLineHeight((undefined as arkui_component_units_LengthMetrics | undefined));
+                    this.minLines((undefined as int32 | undefined));
                 }
             }
         }
@@ -1746,11 +1781,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[48]) {
                 case 1:
                 case 3: {
-                    this.maxLineHeight((modifier._maxLineHeight_0_0value as arkui_component_units_LengthMetrics | undefined));
+                    this.minLineHeight((modifier._Text_minLineHeight_0_0value as arkui_component_units_LengthMetrics | undefined));
                     break;
                 }
                 default: {
-                    this.maxLineHeight((undefined as arkui_component_units_LengthMetrics | undefined));
+                    this.minLineHeight((undefined as arkui_component_units_LengthMetrics | undefined));
                 }
             }
         }
@@ -1758,11 +1793,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[49]) {
                 case 1:
                 case 3: {
-                    this.lineHeightMultiple((modifier._lineHeightMultiple_0_0value as double | undefined));
+                    this.maxLineHeight((modifier._Text_maxLineHeight_0_0value as arkui_component_units_LengthMetrics | undefined));
                     break;
                 }
                 default: {
-                    this.lineHeightMultiple((undefined as double | undefined));
+                    this.maxLineHeight((undefined as arkui_component_units_LengthMetrics | undefined));
                 }
             }
         }
@@ -1770,11 +1805,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[50]) {
                 case 1:
                 case 3: {
-                    this.enableSelectedDataDetector((modifier._enableSelectedDataDetector_0_0value as boolean | undefined));
+                    this.lineHeightMultiple((modifier._Text_lineHeightMultiple_0_0value as double | undefined));
                     break;
                 }
                 default: {
-                    this.enableSelectedDataDetector((undefined as boolean | undefined));
+                    this.lineHeightMultiple((undefined as double | undefined));
                 }
             }
         }
@@ -1782,11 +1817,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[51]) {
                 case 1:
                 case 3: {
-                    this.compressLeadingPunctuation((modifier._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    this.enableSelectedDataDetector((modifier._Text_enableSelectedDataDetector_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.compressLeadingPunctuation((undefined as boolean | undefined));
+                    this.enableSelectedDataDetector((undefined as boolean | undefined));
                 }
             }
         }
@@ -1794,11 +1829,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[52]) {
                 case 1:
                 case 3: {
-                    this.selectedDragPreviewStyle((modifier._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    this.compressLeadingPunctuation((modifier._Text_compressLeadingPunctuation_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
-                    this.selectedDragPreviewStyle((undefined as SelectedDragPreviewStyle | undefined));
+                    this.compressLeadingPunctuation((undefined as boolean | undefined));
                 }
             }
         }
@@ -1806,11 +1841,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[53]) {
                 case 1:
                 case 3: {
-                    this.textDirection((modifier._textDirection_0_0value as TextDirection | undefined));
+                    this.selectedDragPreviewStyle((modifier._Text_selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
                     break;
                 }
                 default: {
-                    this.textDirection((undefined as TextDirection | undefined));
+                    this.selectedDragPreviewStyle((undefined as SelectedDragPreviewStyle | undefined));
                 }
             }
         }
@@ -1818,11 +1853,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[54]) {
                 case 1:
                 case 3: {
-                    this.font((modifier._font_0_0value as arkui_component_units_Font | undefined), (modifier._font_0_1value as FontSettingOptions | undefined));
+                    this.textDirection((modifier._Text_textDirection_0_0value as TextDirection | undefined));
                     break;
                 }
                 default: {
-                    this.font((undefined as arkui_component_units_Font | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                    this.textDirection((undefined as TextDirection | undefined));
                 }
             }
         }
@@ -1830,56 +1865,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (flagArray[55]) {
                 case 1:
                 case 3: {
-                    this.fontWeight((modifier._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined), (modifier._fontWeight_0_1value as FontSettingOptions | undefined));
-                    break;
-                }
-                default: {
-                    this.fontWeight((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontSettingOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[56] != 0) {
-            switch (flagArray[56]) {
-                case 1:
-                case 3: {
-                    this.lineSpacing((modifier._lineSpacing_0_0value as arkui_component_units_LengthMetrics | undefined), (modifier._lineSpacing_0_1value as LineSpacingOptions | undefined));
-                    break;
-                }
-                default: {
-                    this.lineSpacing((undefined as arkui_component_units_LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[57] != 0) {
-            switch (flagArray[57]) {
-                case 1:
-                case 3: {
-                    this.selection((modifier._selection_0_0value as int32 | undefined), (modifier._selection_0_1value as int32 | undefined));
-                    break;
-                }
-                default: {
-                    this.selection((undefined as int32 | undefined), (undefined as int32 | undefined));
-                }
-            }
-        }
-        if (flagArray[58] != 0) {
-            switch (flagArray[58]) {
-                case 1:
-                case 3: {
-                    this.bindSelectionMenu((modifier._bindSelectionMenu_0_0value as TextSpanType | undefined), (modifier._bindSelectionMenu_0_1value as CustomBuilder | undefined), (modifier._bindSelectionMenu_0_2value as TextResponseType | undefined), (modifier._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined));
-                    break;
-                }
-                default: {
-                    this.bindSelectionMenu((undefined as TextSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as TextResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[59] != 0)
-        {
-            switch (flagArray[59]) {
-                case 1:
-                case 3: {
-                    this.orphanCharOptimization(modifier._orphanCharOptimization_0_0value);
+                    this.orphanCharOptimization((modifier._Text_orphanCharOptimization_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1887,613 +1873,705 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (flagArray[56] != 0) {
+            switch (flagArray[56]) {
+                case 1:
+                case 3: {
+                    this.fontVariations((modifier._Text_fontVariations_0_0value as Array<FontVariation> | undefined));
+                    break;
+                }
+                default: {
+                    this.fontVariations((undefined as Array<FontVariation> | undefined));
+                }
+            }
+        }
+        if (flagArray[57] != 0) {
+            switch (flagArray[57]) {
+                case 1:
+                case 3: {
+                    this.font((modifier._Text_font_0_0value as arkui_component_units_Font | undefined), (modifier._Text_font_0_1value as FontSettingOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.font((undefined as arkui_component_units_Font | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[58] != 0) {
+            switch (flagArray[58]) {
+                case 1:
+                case 3: {
+                    this.fontWeight((modifier._Text_fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined), (modifier._Text_fontWeight_0_1value as FontSettingOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.fontWeight((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[59] != 0) {
+            switch (flagArray[59]) {
+                case 1:
+                case 3: {
+                    this.lineSpacing((modifier._Text_lineSpacing_0_0value as arkui_component_units_LengthMetrics | undefined), (modifier._Text_lineSpacing_0_1value as LineSpacingOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.lineSpacing((undefined as arkui_component_units_LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined));
+                }
+            }
+        }
+    }
+    mergeModifier3(modifier: TextModifier, flagArray: Uint8Array): void {
+        if (flagArray[60] != 0) {
+            switch (flagArray[60]) {
+                case 1:
+                case 3: {
+                    this.selection((modifier._Text_selection_0_0value as int32 | undefined), (modifier._Text_selection_0_1value as int32 | undefined));
+                    break;
+                }
+                default: {
+                    this.selection((undefined as int32 | undefined), (undefined as int32 | undefined));
+                }
+            }
+        }
+        if (flagArray[61] != 0) {
+            switch (flagArray[61]) {
+                case 1:
+                case 3: {
+                    this.bindSelectionMenu((modifier._Text_bindSelectionMenu_0_0value as TextSpanType | undefined), (modifier._Text_bindSelectionMenu_0_1value as CustomBuilder | undefined), (modifier._Text_bindSelectionMenu_0_2value as TextResponseType | undefined), (modifier._Text_bindSelectionMenu_0_3value as SelectionMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindSelectionMenu((undefined as TextSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as TextResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
+                }
+            }
+        }
     }
     fontColor(value: ResourceColor | undefined): this {
-        if (((this._flagArray[0]) == (0)) || (true)) {
-            this._flagArray[0] = 1
-            this._fontColor_0_0value = value
+        if (((this._Text_flagArray[0]) == (0)) || (true)) {
+            this._Text_flagArray[0] = 1
+            this._Text_fontColor_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[0] = 3
+            this._Text_flagArray[0] = 3
         }
         return this
     }
     fontSize(value: double | string | arkui_component_units_Resource | undefined): this {
-        if (((this._flagArray[1]) == (0)) || (true)) {
-            this._flagArray[1] = 1
-            this._fontSize_0_0value = value
+        if (((this._Text_flagArray[1]) == (0)) || (true)) {
+            this._Text_flagArray[1] = 1
+            this._Text_fontSize_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[1] = 3
+            this._Text_flagArray[1] = 3
         }
         return this
     }
     minFontSize(value: double | string | arkui_component_units_Resource | undefined): this {
-        if (((this._flagArray[2]) == (0)) || (true)) {
-            this._flagArray[2] = 1
-            this._minFontSize_0_0value = value
+        if (((this._Text_flagArray[2]) == (0)) || (true)) {
+            this._Text_flagArray[2] = 1
+            this._Text_minFontSize_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[2] = 3
+            this._Text_flagArray[2] = 3
         }
         return this
     }
     maxFontSize(value: double | string | arkui_component_units_Resource | undefined): this {
-        if (((this._flagArray[3]) == (0)) || (true)) {
-            this._flagArray[3] = 1
-            this._maxFontSize_0_0value = value
+        if (((this._Text_flagArray[3]) == (0)) || (true)) {
+            this._Text_flagArray[3] = 1
+            this._Text_maxFontSize_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[3] = 3
+            this._Text_flagArray[3] = 3
         }
         return this
     }
     minFontScale(value: double | arkui_component_units_Resource | undefined): this {
-        if (((this._flagArray[4]) == (0)) || (true)) {
-            this._flagArray[4] = 1
-            this._minFontScale_0_0value = value
+        if (((this._Text_flagArray[4]) == (0)) || (true)) {
+            this._Text_flagArray[4] = 1
+            this._Text_minFontScale_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[4] = 3
+            this._Text_flagArray[4] = 3
         }
         return this
     }
     maxFontScale(value: double | arkui_component_units_Resource | undefined): this {
-        if (((this._flagArray[5]) == (0)) || (true)) {
-            this._flagArray[5] = 1
-            this._maxFontScale_0_0value = value
+        if (((this._Text_flagArray[5]) == (0)) || (true)) {
+            this._Text_flagArray[5] = 1
+            this._Text_maxFontScale_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[5] = 3
+            this._Text_flagArray[5] = 3
         }
         return this
     }
     fontStyle(value: FontStyle | undefined): this {
-        if (((this._flagArray[6]) == (0)) || (true)) {
-            this._flagArray[6] = 1
-            this._fontStyle_0_0value = value
+        if (((this._Text_flagArray[6]) == (0)) || (true)) {
+            this._Text_flagArray[6] = 1
+            this._Text_fontStyle_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[6] = 3
+            this._Text_flagArray[6] = 3
         }
         return this
     }
     textAlign(value: TextAlign | undefined): this {
-        if (((this._flagArray[7]) == (0)) || (true)) {
-            this._flagArray[7] = 1
-            this._textAlign_0_0value = value
+        if (((this._Text_flagArray[7]) == (0)) || (true)) {
+            this._Text_flagArray[7] = 1
+            this._Text_textAlign_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[7] = 3
+            this._Text_flagArray[7] = 3
         }
         return this
     }
     lineHeight(value: double | string | arkui_component_units_Resource | undefined): this {
-        if (((this._flagArray[8]) == (0)) || (true)) {
-            this._flagArray[8] = 1
-            this._lineHeight_0_0value = value
+        if (((this._Text_flagArray[8]) == (0)) || (true)) {
+            this._Text_flagArray[8] = 1
+            this._Text_lineHeight_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[8] = 3
+            this._Text_flagArray[8] = 3
         }
         return this
     }
     textOverflow(value: TextOverflowOptions | undefined): this {
-        if (((this._flagArray[9]) == (0)) || (true)) {
-            this._flagArray[9] = 1
-            this._textOverflow_0_0value = value
+        if (((this._Text_flagArray[9]) == (0)) || (true)) {
+            this._Text_flagArray[9] = 1
+            this._Text_textOverflow_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[9] = 3
+            this._Text_flagArray[9] = 3
         }
         return this
     }
     fontFamily(value: string | arkui_component_units_Resource | undefined): this {
-        if (((this._flagArray[10]) == (0)) || (true)) {
-            this._flagArray[10] = 1
-            this._fontFamily_0_0value = value
+        if (((this._Text_flagArray[10]) == (0)) || (true)) {
+            this._Text_flagArray[10] = 1
+            this._Text_fontFamily_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[10] = 3
+            this._Text_flagArray[10] = 3
         }
         return this
     }
     maxLines(value: int32 | undefined): this {
-        if (((this._flagArray[11]) == (0)) || ((this._maxLines_0_0value) !== (value))) {
-            this._flagArray[11] = 1
-            this._maxLines_0_0value = value
+        if (((this._Text_flagArray[11]) == (0)) || ((this._Text_maxLines_0_0value) !== (value))) {
+            this._Text_flagArray[11] = 1
+            this._Text_maxLines_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[11] = 3
+            this._Text_flagArray[11] = 3
         }
         return this
     }
     decoration(value: DecorationStyleInterface | undefined): this {
-        if (((this._flagArray[12]) == (0)) || (true)) {
-            this._flagArray[12] = 1
-            this._decoration_0_0value = value
+        if (((this._Text_flagArray[12]) == (0)) || (true)) {
+            this._Text_flagArray[12] = 1
+            this._Text_decoration_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[12] = 3
+            this._Text_flagArray[12] = 3
         }
         return this
     }
     letterSpacing(value: double | string | undefined): this {
-        if (((this._flagArray[13]) == (0)) || ((this._letterSpacing_0_0value) !== (value))) {
-            this._flagArray[13] = 1
-            this._letterSpacing_0_0value = value
+        if (((this._Text_flagArray[13]) == (0)) || ((this._Text_letterSpacing_0_0value) !== (value))) {
+            this._Text_flagArray[13] = 1
+            this._Text_letterSpacing_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[13] = 3
+            this._Text_flagArray[13] = 3
         }
         return this
     }
     textCase(value: TextCase | undefined): this {
-        if (((this._flagArray[14]) == (0)) || (true)) {
-            this._flagArray[14] = 1
-            this._textCase_0_0value = value
+        if (((this._Text_flagArray[14]) == (0)) || (true)) {
+            this._Text_flagArray[14] = 1
+            this._Text_textCase_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[14] = 3
+            this._Text_flagArray[14] = 3
         }
         return this
     }
     baselineOffset(value: double | string | undefined): this {
-        if (((this._flagArray[15]) == (0)) || ((this._baselineOffset_0_0value) !== (value))) {
-            this._flagArray[15] = 1
-            this._baselineOffset_0_0value = value
+        if (((this._Text_flagArray[15]) == (0)) || ((this._Text_baselineOffset_0_0value) !== (value))) {
+            this._Text_flagArray[15] = 1
+            this._Text_baselineOffset_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[15] = 3
+            this._Text_flagArray[15] = 3
         }
         return this
     }
     copyOption(value: CopyOptions | undefined): this {
-        if (((this._flagArray[16]) == (0)) || (true)) {
-            this._flagArray[16] = 1
-            this._copyOption_0_0value = value
+        if (((this._Text_flagArray[16]) == (0)) || (true)) {
+            this._Text_flagArray[16] = 1
+            this._Text_copyOption_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[16] = 3
+            this._Text_flagArray[16] = 3
         }
         return this
     }
     draggable(value: boolean | undefined): this {
-        if (((this._flagArray[17]) == (0)) || ((this._draggable_0_0value) !== (value))) {
-            this._flagArray[17] = 1
-            this._draggable_0_0value = value
+        if (((this._Text_flagArray[17]) == (0)) || ((this._Text_draggable_0_0value) !== (value))) {
+            this._Text_flagArray[17] = 1
+            this._Text_draggable_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[17] = 3
+            this._Text_flagArray[17] = 3
         }
         return this
     }
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
-        if (((this._flagArray[18]) == (0)) || (true)) {
-            this._flagArray[18] = 1
-            this._textShadow_0_0value = value
+        if (((this._Text_flagArray[18]) == (0)) || (true)) {
+            this._Text_flagArray[18] = 1
+            this._Text_textShadow_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[18] = 3
+            this._Text_flagArray[18] = 3
         }
         return this
     }
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
-        if (((this._flagArray[19]) == (0)) || (true)) {
-            this._flagArray[19] = 1
-            this._heightAdaptivePolicy_0_0value = value
+        if (((this._Text_flagArray[19]) == (0)) || (true)) {
+            this._Text_flagArray[19] = 1
+            this._Text_heightAdaptivePolicy_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[19] = 3
+            this._Text_flagArray[19] = 3
         }
         return this
     }
     textIndent(value: Length | undefined): this {
-        if (((this._flagArray[20]) == (0)) || (true)) {
-            this._flagArray[20] = 1
-            this._textIndent_0_0value = value
+        if (((this._Text_flagArray[20]) == (0)) || (true)) {
+            this._Text_flagArray[20] = 1
+            this._Text_textIndent_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[20] = 3
+            this._Text_flagArray[20] = 3
         }
         return this
     }
     wordBreak(value: WordBreak | undefined): this {
-        if (((this._flagArray[21]) == (0)) || (true)) {
-            this._flagArray[21] = 1
-            this._wordBreak_0_0value = value
+        if (((this._Text_flagArray[21]) == (0)) || (true)) {
+            this._Text_flagArray[21] = 1
+            this._Text_wordBreak_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[21] = 3
+            this._Text_flagArray[21] = 3
         }
         return this
     }
     lineBreakStrategy(value: LineBreakStrategy | undefined): this {
-        if (((this._flagArray[22]) == (0)) || (true)) {
-            this._flagArray[22] = 1
-            this._lineBreakStrategy_0_0value = value
+        if (((this._Text_flagArray[22]) == (0)) || (true)) {
+            this._Text_flagArray[22] = 1
+            this._Text_lineBreakStrategy_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[22] = 3
+            this._Text_flagArray[22] = 3
         }
         return this
     }
     onCopy(value: ((breakpoints: string) => void) | undefined): this {
-        if (((this._flagArray[23]) == (0)) || (true)) {
-            this._flagArray[23] = 1
-            this._onCopy_0_0value = value
+        if (((this._Text_flagArray[23]) == (0)) || (true)) {
+            this._Text_flagArray[23] = 1
+            this._Text_onCopy_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[23] = 3
+            this._Text_flagArray[23] = 3
+        }
+        return this
+    }
+    onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        if (((this._Text_flagArray[24]) == (0)) || (true)) {
+            this._Text_flagArray[24] = 1
+            this._Text_onWillCopy_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._Text_flagArray[24] = 3
         }
         return this
     }
     caretColor(value: ResourceColor | undefined): this {
-        if (((this._flagArray[24]) == (0)) || (true)) {
-            this._flagArray[24] = 1
-            this._caretColor_0_0value = value
+        if (((this._Text_flagArray[25]) == (0)) || (true)) {
+            this._Text_flagArray[25] = 1
+            this._Text_caretColor_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[24] = 3
+            this._Text_flagArray[25] = 3
         }
         return this
     }
     selectedBackgroundColor(value: ResourceColor | undefined): this {
-        if (((this._flagArray[25]) == (0)) || (true)) {
-            this._flagArray[25] = 1
-            this._selectedBackgroundColor_0_0value = value
+        if (((this._Text_flagArray[26]) == (0)) || (true)) {
+            this._Text_flagArray[26] = 1
+            this._Text_selectedBackgroundColor_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[25] = 3
+            this._Text_flagArray[26] = 3
         }
         return this
     }
     ellipsisMode(value: EllipsisMode | undefined): this {
-        if (((this._flagArray[26]) == (0)) || (true)) {
-            this._flagArray[26] = 1
-            this._ellipsisMode_0_0value = value
+        if (((this._Text_flagArray[27]) == (0)) || (true)) {
+            this._Text_flagArray[27] = 1
+            this._Text_ellipsisMode_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[26] = 3
+            this._Text_flagArray[27] = 3
         }
         return this
     }
     enableDataDetector(value: boolean | undefined): this {
-        if (((this._flagArray[27]) == (0)) || ((this._enableDataDetector_0_0value) !== (value))) {
-            this._flagArray[27] = 1
-            this._enableDataDetector_0_0value = value
+        if (((this._Text_flagArray[28]) == (0)) || ((this._Text_enableDataDetector_0_0value) !== (value))) {
+            this._Text_flagArray[28] = 1
+            this._Text_enableDataDetector_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[27] = 3
+            this._Text_flagArray[28] = 3
         }
         return this
     }
     dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
-        if (((this._flagArray[28]) == (0)) || (true)) {
-            this._flagArray[28] = 1
-            this._dataDetectorConfig_0_0value = value
+        if (((this._Text_flagArray[29]) == (0)) || (true)) {
+            this._Text_flagArray[29] = 1
+            this._Text_dataDetectorConfig_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[28] = 3
+            this._Text_flagArray[29] = 3
         }
         return this
     }
     onTextSelectionChange(value: ((first: int32,last: int32) => void) | undefined): this {
-        if (((this._flagArray[29]) == (0)) || (true)) {
-            this._flagArray[29] = 1
-            this._onTextSelectionChange_0_0value = value
+        if (((this._Text_flagArray[30]) == (0)) || (true)) {
+            this._Text_flagArray[30] = 1
+            this._Text_onTextSelectionChange_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[29] = 3
+            this._Text_flagArray[30] = 3
         }
         return this
     }
     fontFeature(value: string | undefined): this {
-        if (((this._flagArray[30]) == (0)) || ((this._fontFeature_0_0value) !== (value))) {
-            this._flagArray[30] = 1
-            this._fontFeature_0_0value = value
+        if (((this._Text_flagArray[31]) == (0)) || ((this._Text_fontFeature_0_0value) !== (value))) {
+            this._Text_flagArray[31] = 1
+            this._Text_fontFeature_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[30] = 3
+            this._Text_flagArray[31] = 3
         }
         return this
     }
     marqueeOptions(value: TextMarqueeOptions | undefined): this {
-        if (((this._flagArray[31]) == (0)) || (true)) {
-            this._flagArray[31] = 1
-            this._marqueeOptions_0_0value = value
+        if (((this._Text_flagArray[32]) == (0)) || (true)) {
+            this._Text_flagArray[32] = 1
+            this._Text_marqueeOptions_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[31] = 3
+            this._Text_flagArray[32] = 3
         }
         return this
     }
     onMarqueeStateChange(value: arkui_component_common_Callback<MarqueeState, void> | undefined): this {
-        if (((this._flagArray[32]) == (0)) || (true)) {
-            this._flagArray[32] = 1
-            this._onMarqueeStateChange_0_0value = value
+        if (((this._Text_flagArray[33]) == (0)) || (true)) {
+            this._Text_flagArray[33] = 1
+            this._Text_onMarqueeStateChange_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[32] = 3
+            this._Text_flagArray[33] = 3
         }
         return this
     }
     privacySensitive(value: boolean | undefined): this {
-        if (((this._flagArray[33]) == (0)) || ((this._privacySensitive_0_0value) !== (value))) {
-            this._flagArray[33] = 1
-            this._privacySensitive_0_0value = value
+        if (((this._Text_flagArray[34]) == (0)) || ((this._Text_privacySensitive_0_0value) !== (value))) {
+            this._Text_flagArray[34] = 1
+            this._Text_privacySensitive_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[33] = 3
+            this._Text_flagArray[34] = 3
         }
         return this
     }
     textSelectable(value: TextSelectableMode | undefined): this {
-        if (((this._flagArray[34]) == (0)) || (true)) {
-            this._flagArray[34] = 1
-            this._textSelectable_0_0value = value
+        if (((this._Text_flagArray[35]) == (0)) || (true)) {
+            this._Text_flagArray[35] = 1
+            this._Text_textSelectable_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[34] = 3
+            this._Text_flagArray[35] = 3
         }
         return this
     }
     editMenuOptions(value: EditMenuOptions | undefined): this {
-        if (((this._flagArray[35]) == (0)) || (true)) {
-            this._flagArray[35] = 1
-            this._editMenuOptions_0_0value = value
+        if (((this._Text_flagArray[36]) == (0)) || (true)) {
+            this._Text_flagArray[36] = 1
+            this._Text_editMenuOptions_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[35] = 3
+            this._Text_flagArray[36] = 3
         }
         return this
     }
     halfLeading(value: boolean | undefined): this {
-        if (((this._flagArray[36]) == (0)) || ((this._halfLeading_0_0value) !== (value))) {
-            this._flagArray[36] = 1
-            this._halfLeading_0_0value = value
+        if (((this._Text_flagArray[37]) == (0)) || ((this._Text_halfLeading_0_0value) !== (value))) {
+            this._Text_flagArray[37] = 1
+            this._Text_halfLeading_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[36] = 3
+            this._Text_flagArray[37] = 3
         }
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        if (((this._flagArray[37]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value))) {
-            this._flagArray[37] = 1
-            this._enableHapticFeedback_0_0value = value
+        if (((this._Text_flagArray[38]) == (0)) || ((this._Text_enableHapticFeedback_0_0value) !== (value))) {
+            this._Text_flagArray[38] = 1
+            this._Text_enableHapticFeedback_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[37] = 3
+            this._Text_flagArray[38] = 3
         }
         return this
     }
     includeFontPadding(value: boolean | undefined): this {
-        if (((this._flagArray[38]) == (0)) || ((this._includeFontPadding_0_0value) !== (value))) {
-            this._flagArray[38] = 1
-            this._includeFontPadding_0_0value = value
+        if (((this._Text_flagArray[39]) == (0)) || ((this._Text_includeFontPadding_0_0value) !== (value))) {
+            this._Text_flagArray[39] = 1
+            this._Text_includeFontPadding_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[38] = 3
+            this._Text_flagArray[39] = 3
         }
         return this
     }
     fallbackLineSpacing(value: boolean | undefined): this {
-        if (((this._flagArray[39]) == (0)) || ((this._fallbackLineSpacing_0_0value) !== (value))) {
-            this._flagArray[39] = 1
-            this._fallbackLineSpacing_0_0value = value
+        if (((this._Text_flagArray[40]) == (0)) || ((this._Text_fallbackLineSpacing_0_0value) !== (value))) {
+            this._Text_flagArray[40] = 1
+            this._Text_fallbackLineSpacing_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[39] = 3
+            this._Text_flagArray[40] = 3
         }
         return this
     }
     optimizeTrailingSpace(value: boolean | undefined): this {
-        if (((this._flagArray[40]) == (0)) || ((this._optimizeTrailingSpace_0_0value) !== (value))) {
-            this._flagArray[40] = 1
-            this._optimizeTrailingSpace_0_0value = value
+        if (((this._Text_flagArray[41]) == (0)) || ((this._Text_optimizeTrailingSpace_0_0value) !== (value))) {
+            this._Text_flagArray[41] = 1
+            this._Text_optimizeTrailingSpace_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[40] = 3
+            this._Text_flagArray[41] = 3
         }
         return this
     }
     shaderStyle(value: ShaderStyle | undefined): this {
-        if (((this._flagArray[41]) == (0)) || (true)) {
-            this._flagArray[41] = 1
-            this._shaderStyle_0_0value = value
+        if (((this._Text_flagArray[42]) == (0)) || (true)) {
+            this._Text_flagArray[42] = 1
+            this._Text_shaderStyle_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[41] = 3
+            this._Text_flagArray[42] = 3
         }
         return this
     }
     enableAutoSpacing(value: boolean | undefined): this {
-        if (((this._flagArray[42]) == (0)) || ((this._enableAutoSpacing_0_0value) !== (value))) {
-            this._flagArray[42] = 1
-            this._enableAutoSpacing_0_0value = value
+        if (((this._Text_flagArray[43]) == (0)) || ((this._Text_enableAutoSpacing_0_0value) !== (value))) {
+            this._Text_flagArray[43] = 1
+            this._Text_enableAutoSpacing_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[42] = 3
+            this._Text_flagArray[43] = 3
         }
         return this
     }
     textVerticalAlign(value: TextVerticalAlign | undefined): this {
-        if (((this._flagArray[43]) == (0)) || (true)) {
-            this._flagArray[43] = 1
-            this._textVerticalAlign_0_0value = value
+        if (((this._Text_flagArray[44]) == (0)) || (true)) {
+            this._Text_flagArray[44] = 1
+            this._Text_textVerticalAlign_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[43] = 3
+            this._Text_flagArray[44] = 3
         }
         return this
     }
     contentTransition(value: ContentTransition | undefined): this {
-        if (((this._flagArray[44]) == (0)) || (true)) {
-            this._flagArray[44] = 1
-            this._contentTransition_0_0value = value
+        if (((this._Text_flagArray[45]) == (0)) || (true)) {
+            this._Text_flagArray[45] = 1
+            this._Text_contentTransition_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[44] = 3
+            this._Text_flagArray[45] = 3
         }
         return this
     }
     textContentAlign(value: TextContentAlign | undefined): this {
-        if (((this._flagArray[45]) == (0)) || (true)) {
-            this._flagArray[45] = 1
-            this._textContentAlign_0_0value = value
+        if (((this._Text_flagArray[46]) == (0)) || (true)) {
+            this._Text_flagArray[46] = 1
+            this._Text_textContentAlign_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[45] = 3
+            this._Text_flagArray[46] = 3
         }
         return this
     }
     minLines(value: int32 | undefined): this {
-        if (((this._flagArray[46]) == (0)) || ((this._minLines_0_0value) !== (value))) {
-            this._flagArray[46] = 1
-            this._minLines_0_0value = value
+        if (((this._Text_flagArray[47]) == (0)) || ((this._Text_minLines_0_0value) !== (value))) {
+            this._Text_flagArray[47] = 1
+            this._Text_minLines_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[46] = 3
+            this._Text_flagArray[47] = 3
         }
         return this
     }
     minLineHeight(value: arkui_component_units_LengthMetrics | undefined): this {
-        if (((this._flagArray[47]) == (0)) || (true)) {
-            this._flagArray[47] = 1
-            this._minLineHeight_0_0value = value
+        if (((this._Text_flagArray[48]) == (0)) || (true)) {
+            this._Text_flagArray[48] = 1
+            this._Text_minLineHeight_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[47] = 3
+            this._Text_flagArray[48] = 3
         }
         return this
     }
     maxLineHeight(value: arkui_component_units_LengthMetrics | undefined): this {
-        if (((this._flagArray[48]) == (0)) || (true)) {
-            this._flagArray[48] = 1
-            this._maxLineHeight_0_0value = value
+        if (((this._Text_flagArray[49]) == (0)) || (true)) {
+            this._Text_flagArray[49] = 1
+            this._Text_maxLineHeight_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[48] = 3
+            this._Text_flagArray[49] = 3
         }
         return this
     }
     lineHeightMultiple(value: double | undefined): this {
-        if (((this._flagArray[49]) == (0)) || ((this._lineHeightMultiple_0_0value) !== (value))) {
-            this._flagArray[49] = 1
-            this._lineHeightMultiple_0_0value = value
+        if (((this._Text_flagArray[50]) == (0)) || ((this._Text_lineHeightMultiple_0_0value) !== (value))) {
+            this._Text_flagArray[50] = 1
+            this._Text_lineHeightMultiple_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[49] = 3
+            this._Text_flagArray[50] = 3
         }
         return this
     }
     enableSelectedDataDetector(value: boolean | undefined): this {
-        if (((this._flagArray[50]) == (0)) || ((this._enableSelectedDataDetector_0_0value) !== (value))) {
-            this._flagArray[50] = 1
-            this._enableSelectedDataDetector_0_0value = value
+        if (((this._Text_flagArray[51]) == (0)) || ((this._Text_enableSelectedDataDetector_0_0value) !== (value))) {
+            this._Text_flagArray[51] = 1
+            this._Text_enableSelectedDataDetector_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[50] = 3
+            this._Text_flagArray[51] = 3
         }
         return this
     }
     compressLeadingPunctuation(value: boolean | undefined): this {
-        if (((this._flagArray[51]) == (0)) || ((this._compressLeadingPunctuation_0_0value) !== (value))) {
-            this._flagArray[51] = 1
-            this._compressLeadingPunctuation_0_0value = value
+        if (((this._Text_flagArray[52]) == (0)) || ((this._Text_compressLeadingPunctuation_0_0value) !== (value))) {
+            this._Text_flagArray[52] = 1
+            this._Text_compressLeadingPunctuation_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[51] = 3
+            this._Text_flagArray[52] = 3
         }
         return this
     }
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
-        if (((this._flagArray[52]) == (0)) || (true)) {
-            this._flagArray[52] = 1
-            this._selectedDragPreviewStyle_0_0value = value
+        if (((this._Text_flagArray[53]) == (0)) || (true)) {
+            this._Text_flagArray[53] = 1
+            this._Text_selectedDragPreviewStyle_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[52] = 3
+            this._Text_flagArray[53] = 3
         }
         return this
     }
     textDirection(value: TextDirection | undefined): this {
-        if (((this._flagArray[53]) == (0)) || (true)) {
-            this._flagArray[53] = 1
-            this._textDirection_0_0value = value
+        if (((this._Text_flagArray[54]) == (0)) || (true)) {
+            this._Text_flagArray[54] = 1
+            this._Text_textDirection_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[53] = 3
-        }
-        return this
-    }
-    font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {
-        if (((this._flagArray[54]) == (0)) || (true) || (true)) {
-            this._flagArray[54] = 1
-            this._font_0_0value = fontValue
-            this._font_0_1value = options
-            this._state.fireChange()
-        } else {
-            this._flagArray[54] = 3
-        }
-        return this
-    }
-    fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): this {
-        if (((this._flagArray[55]) == (0)) || (true) || (true)) {
-            this._flagArray[55] = 1
-            this._fontWeight_0_0value = weight
-            this._fontWeight_0_1value = options
-            this._state.fireChange()
-        } else {
-            this._flagArray[55] = 3
-        }
-        return this
-    }
-    lineSpacing(value: arkui_component_units_LengthMetrics | undefined, options?: LineSpacingOptions): this {
-        if (((this._flagArray[56]) == (0)) || (true) || (true)) {
-            this._flagArray[56] = 1
-            this._lineSpacing_0_0value = value
-            this._lineSpacing_0_1value = options
-            this._state.fireChange()
-        } else {
-            this._flagArray[56] = 3
-        }
-        return this
-    }
-    selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
-        if (((this._flagArray[57]) == (0)) || ((this._selection_0_0value) !== (selectionStart)) || ((this._selection_0_1value) !== (selectionEnd))) {
-            this._flagArray[57] = 1
-            this._selection_0_0value = selectionStart
-            this._selection_0_1value = selectionEnd
-            this._state.fireChange()
-        } else {
-            this._flagArray[57] = 3
-        }
-        return this
-    }
-    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
-        if (((this._flagArray[58]) == (0)) || (true) || (true) || (true) || (true)) {
-            this._flagArray[58] = 1
-            this._bindSelectionMenu_0_0value = spanType
-            this._bindSelectionMenu_0_1value = content
-            this._bindSelectionMenu_0_2value = responseType
-            this._bindSelectionMenu_0_3value = options
-            this._state.fireChange()
-        } else {
-            this._flagArray[58] = 3
+            this._Text_flagArray[54] = 3
         }
         return this
     }
     orphanCharOptimization(value: boolean | undefined): this {
-        if (((this._flagArray[59]) == (0)) || ((this._orphanCharOptimization_0_0value) !== (value)))
-        {
-            this._flagArray[59] = 1
-            this._orphanCharOptimization_0_0value = value
+        if (((this._Text_flagArray[55]) == (0)) || ((this._Text_orphanCharOptimization_0_0value) !== (value))) {
+            this._Text_flagArray[55] = 1
+            this._Text_orphanCharOptimization_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._flagArray[59] = 3
+        } else {
+            this._Text_flagArray[55] = 3
+        }
+        return this
+    }
+    fontVariations(value: Array<FontVariation> | undefined): this {
+        if (((this._Text_flagArray[56]) == (0)) || (true)) {
+            this._Text_flagArray[56] = 1
+            this._Text_fontVariations_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._Text_flagArray[56] = 3
+        }
+        return this
+    }
+    font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {
+        if (((this._Text_flagArray[57]) == (0)) || (true) || (true)) {
+            this._Text_flagArray[57] = 1
+            this._Text_font_0_0value = fontValue
+            this._Text_font_0_1value = options
+            this._state.fireChange()
+        } else {
+            this._Text_flagArray[57] = 3
+        }
+        return this
+    }
+    fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): this {
+        if (((this._Text_flagArray[58]) == (0)) || (true) || (true)) {
+            this._Text_flagArray[58] = 1
+            this._Text_fontWeight_0_0value = weight
+            this._Text_fontWeight_0_1value = options
+            this._state.fireChange()
+        } else {
+            this._Text_flagArray[58] = 3
+        }
+        return this
+    }
+    lineSpacing(value: arkui_component_units_LengthMetrics | undefined, options?: LineSpacingOptions): this {
+        if (((this._Text_flagArray[59]) == (0)) || (true) || (true)) {
+            this._Text_flagArray[59] = 1
+            this._Text_lineSpacing_0_0value = value
+            this._Text_lineSpacing_0_1value = options
+            this._state.fireChange()
+        } else {
+            this._Text_flagArray[59] = 3
+        }
+        return this
+    }
+    selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
+        if (((this._Text_flagArray[60]) == (0)) || ((this._Text_selection_0_0value) !== (selectionStart)) || ((this._Text_selection_0_1value) !== (selectionEnd))) {
+            this._Text_flagArray[60] = 1
+            this._Text_selection_0_0value = selectionStart
+            this._Text_selection_0_1value = selectionEnd
+            this._state.fireChange()
+        } else {
+            this._Text_flagArray[60] = 3
+        }
+        return this
+    }
+    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
+        if (((this._Text_flagArray[61]) == (0)) || (true) || (true) || (true) || (true)) {
+            this._Text_flagArray[61] = 1
+            this._Text_bindSelectionMenu_0_0value = spanType
+            this._Text_bindSelectionMenu_0_1value = content
+            this._Text_bindSelectionMenu_0_2value = responseType
+            this._Text_bindSelectionMenu_0_3value = options
+            this._state.fireChange()
+        } else {
+            this._Text_flagArray[61] = 3
         }
         return this
     }

@@ -16,9 +16,9 @@
 #include "gmock/gmock.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
@@ -319,14 +319,14 @@ HWTEST_F(ScrollModifierTest, setScrollBarWidthTestSetWidth, testing::ext::TestSi
     auto testNumber = Converter::ArkValue<Ark_Float64>(testValue.ConvertToVp());
     auto arkVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(testNumber);
 
-    modifier_->setScrollBarWidth(node_, &arkVal);
+    modifier_->setScrollBarWidth0(node_, &arkVal);
     auto setVal = GetAttrValue<std::string>(node_, jsonKey);
     EXPECT_THAT(setVal, Eq(testValue.ToString()));
 
     auto strVal = std::string("222.99px");
     arkVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(strVal);
 
-    modifier_->setScrollBarWidth(node_, &arkVal);
+    modifier_->setScrollBarWidth0(node_, &arkVal);
     setVal = GetAttrValue<std::string>(node_, jsonKey);
     EXPECT_THAT(setVal, Eq(strVal));
 }
@@ -341,28 +341,28 @@ HWTEST_F(ScrollModifierTest, DISABLED_setScrollBarWidthTestSetDefectiveWidth, te
     std::string jsonKey = "scrollBarWidth";
     auto defaultVal = GetAttrValue<std::string>(node_, jsonKey);
 
-    modifier_->setScrollBarWidth(node_, nullptr);
+    modifier_->setScrollBarWidth0(node_, nullptr);
 
     auto testVal = GetAttrValue<std::string>(node_, jsonKey);
     EXPECT_THAT(testVal, Eq(defaultVal));
 
     Ark_String str = Converter::ArkValue<Ark_String>("");
     auto emptyString = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(str);
-    modifier_->setScrollBarWidth(node_, &emptyString);
+    modifier_->setScrollBarWidth0(node_, &emptyString);
 
     testVal = GetAttrValue<std::string>(node_, jsonKey);
     EXPECT_THAT(testVal, Eq(defaultVal));
 
     auto testNumber = Converter::ArkValue<Ark_Float64>(-1.0);
     auto defectiveNumber = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(testNumber);
-    modifier_->setScrollBarWidth(node_, &defectiveNumber);
+    modifier_->setScrollBarWidth0(node_, &defectiveNumber);
 
     testVal = GetAttrValue<std::string>(node_, jsonKey);
     EXPECT_THAT(testVal, Eq(defaultVal));
 
     auto testStr = Converter::ArkValue<Ark_String>("33%");
     defectiveNumber = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(testStr);
-    modifier_->setScrollBarWidth(node_, &defectiveNumber);
+    modifier_->setScrollBarWidth0(node_, &defectiveNumber);
 
     testVal = GetAttrValue<std::string>(node_, jsonKey);
     EXPECT_THAT(testVal, Eq(defaultVal));

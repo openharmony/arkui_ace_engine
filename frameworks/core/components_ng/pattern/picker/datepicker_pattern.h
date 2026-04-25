@@ -23,8 +23,6 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
@@ -32,11 +30,19 @@
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern_fwd.h"
+
+namespace OHOS::Ace {
+class PickerTheme;
+class DialogTheme;
+}
 
 namespace OHOS::Ace::NG {
+using OHOS::Ace::PickerTheme;
+using OHOS::Ace::DialogTheme;
+
 class InspectorFilter;
+constexpr int32_t COLUMNS_SIZE = 3;
 namespace {
 const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
@@ -67,10 +73,7 @@ public:
         return true;
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<DatePickerEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
@@ -135,11 +138,13 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
     void SetChangeCallback(ColumnChangeCallback&& value);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
 
-    void InitColumnsOrder(RefPtr<FrameNode>* columns) const;
+    void InitColumnsOrder(RefPtr<FrameNode> (*columns)[COLUMNS_SIZE]) const;
 
     void SolarColumnsBuilding(const PickerDate& current);
 
@@ -728,6 +733,11 @@ public:
         return hasUserDefinedSelectedFontFamily_;
     }
 
+    bool IsWindowFullscreen() const
+    {
+        return isWindowFullscreen_;
+    }
+
     void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
     {
         closeDialogEvent_ = closeDialogEvent;
@@ -852,6 +862,7 @@ private:
     bool HandleDirectionKey(KeyCode code);
     void InitFocusEvent();
     void InitSelectorProps();
+    void InitFocusAndSelector();
     void HandleFocusEvent();
     void HandleBlurEvent();
     void AddIsFocusActiveUpdateEvent();
@@ -994,6 +1005,7 @@ private:
     bool isFocus_ = true;
     bool isEnableHaptic_ = true;
     bool isHapticChanged_ = true;
+    bool isWindowFullscreen_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
     std::string selectedColumnId_;

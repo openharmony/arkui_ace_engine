@@ -18,6 +18,7 @@
 
 #include "base/thread/background_task_executor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace {
 namespace {

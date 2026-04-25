@@ -26,6 +26,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -337,6 +338,8 @@ bool ImageLoadingContext::MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoR
     }
     if (!res && hasValidSlice) {
         dstSize_ = dstSize;
+        // to keep srcRect/dstRect in sync with the current component size.
+        ResizableCalcDstSize();
     }
     CHECK_NULL_RETURN(res, res);
     if (stateManager_->GetCurrentState() == ImageLoadingState::MAKE_CANVAS_IMAGE) {

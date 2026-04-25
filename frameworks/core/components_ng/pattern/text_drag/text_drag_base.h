@@ -16,12 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_DRAG_TEXT_DRAG_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_DRAG_TEXT_DRAG_BASE_H
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 enum class AIResetSelectionReason : int;
+class Paragraph;
 } // namespace OHOS::Ace::NG
 
 constexpr uint32_t DRAGGED_TEXT_OPACITY = 0x66;

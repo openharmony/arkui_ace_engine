@@ -22,8 +22,9 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -83,6 +84,7 @@ protected:
 void ButtonStaticTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -119,6 +121,7 @@ void ButtonStaticTestNg::SetUpTestCase()
 void ButtonStaticTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -243,6 +246,25 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg004, TestSize.Level1)
      */
     ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
     EXPECT_EQ(layoutProperty->GetLabelValue(), BUTTON_LABEL);
+}
+
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTextProperty001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetOrphanCharOptimizationValue(false));
+    EXPECT_EQ(textLayoutProperty->GetWordBreak(), WordBreak::HYPHENATION);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -717,7 +739,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg018, TestSize.Level1)
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
-        AIWriteAdapter::MakeRefPtr<TextPattern>());
+        AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
     frameNode->AddChild(textNode, 0);
     /**
@@ -726,7 +748,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg018, TestSize.Level1)
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
-        AIWriteAdapter::MakeRefPtr<StagePattern>());
+        AceType::MakeRefPtr<StagePattern>());
     frameNode->AddChild(stageNode);
     /**
      * @tc.steps: step4. test ResetButtonTextFontSize.

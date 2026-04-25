@@ -20,6 +20,7 @@
 #include "styled_string.h"
 
 #include "base/utils/utils.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -1255,9 +1256,10 @@ void OH_ArkUI_PositionEdges_SetTop(ArkUI_PositionEdges* edges, float value)
 
 int32_t OH_ArkUI_PositionEdges_GetTop(ArkUI_PositionEdges* edges, float* value)
 {
-    if (!edges || !edges->top.isSet) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        edges, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PositionEdges_GetTop", "Parameter edges is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        edges->top.isSet, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PositionEdges_GetTop", "Top edge is not set");
     *value = edges->top.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1270,9 +1272,10 @@ void OH_ArkUI_PositionEdges_SetLeft(ArkUI_PositionEdges* edges, float value)
 
 int32_t OH_ArkUI_PositionEdges_GetLeft(ArkUI_PositionEdges* edges, float* value)
 {
-    if (!edges || !edges->left.isSet) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        edges, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PositionEdges_GetLeft", "Parameter edges is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        edges->left.isSet, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PositionEdges_GetLeft", "Left edge is not set");
     *value = edges->left.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1285,9 +1288,10 @@ void OH_ArkUI_PositionEdges_SetBottom(ArkUI_PositionEdges* edges, float value)
 
 int32_t OH_ArkUI_PositionEdges_GetBottom(ArkUI_PositionEdges* edges, float* value)
 {
-    if (!edges || !edges->bottom.isSet) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        edges, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PositionEdges_GetBottom", "Parameter edges is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(edges->bottom.isSet, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_PositionEdges_GetBottom", "Bottom edge is not set");
     *value = edges->bottom.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1300,9 +1304,10 @@ void OH_ArkUI_PositionEdges_SetRight(ArkUI_PositionEdges* edges, float value)
 
 int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value)
 {
-    if (!edges || !edges->right.isSet) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        edges, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PositionEdges_GetRight", "Parameter edges is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        edges->right.isSet, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PositionEdges_GetRight", "Right edge is not set");
     *value = edges->right.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1329,9 +1334,10 @@ void OH_ArkUI_PixelRoundPolicy_SetTop(ArkUI_PixelRoundPolicy* policy, ArkUI_Pixe
 
 int32_t OH_ArkUI_PixelRoundPolicy_GetTop(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
 {
-    if (!policy || !policy->top.isSet) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        policy, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PixelRoundPolicy_GetTop", "Parameter policy is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(policy->top.isSet, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_PixelRoundPolicy_GetTop", "Top PixelRoundPolicy is not set");
     *value = policy->top.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1344,9 +1350,10 @@ void OH_ArkUI_PixelRoundPolicy_SetStart(ArkUI_PixelRoundPolicy* policy, ArkUI_Pi
 
 int32_t OH_ArkUI_PixelRoundPolicy_GetStart(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
 {
-    if (!policy || !policy->start.isSet) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        policy, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PixelRoundPolicy_GetStart", "Parameter policy is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(policy->start.isSet, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_PixelRoundPolicy_GetStart", "Start PixelRoundPolicy is not set");
     *value = policy->start.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1359,9 +1366,10 @@ void OH_ArkUI_PixelRoundPolicy_SetBottom(ArkUI_PixelRoundPolicy* policy, ArkUI_P
 
 int32_t OH_ArkUI_PixelRoundPolicy_GetBottom(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
 {
-    if (!policy || !policy->bottom.isSet) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        policy, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PixelRoundPolicy_GetBottom", "Parameter policy is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(policy->bottom.isSet, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_PixelRoundPolicy_GetBottom", "Bottom PixelRoundPolicy is not set");
     *value = policy->bottom.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1374,9 +1382,10 @@ void OH_ArkUI_PixelRoundPolicy_SetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_Pixe
 
 int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
 {
-    if (!policy || !policy->end.isSet) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        policy, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PixelRoundPolicy_GetEnd", "Parameter policy is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(policy->end.isSet, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_PixelRoundPolicy_GetEnd", "End PixelRoundPolicy is not set");
     *value = policy->end.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1963,8 +1972,10 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
             node->uiNodeHandle, start, end, &range);
     }
     ArkUI_Boundary* glyphRange = new (std::nothrow) ArkUI_Boundary(range.glyphStart, range.glyphEnd);
+    CHECK_NULL_RETURN(glyphRange, ARKUI_ERROR_CODE_PARAM_INVALID);
     *outGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
     ArkUI_Boundary* actualCharRange = new (std::nothrow) ArkUI_Boundary(range.charStart, range.charEnd);
+    CHECK_NULL_RETURN(actualCharRange, ARKUI_ERROR_CODE_PARAM_INVALID);
     *outActualCharRange = reinterpret_cast<OH_Drawing_Range*>(actualCharRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1987,8 +1998,10 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
             node->uiNodeHandle, start, end, &range);
     }
     ArkUI_Boundary* charRange = new (std::nothrow) ArkUI_Boundary(range.charStart, range.charEnd);
+    CHECK_NULL_RETURN(charRange, ARKUI_ERROR_CODE_PARAM_INVALID);
     *outCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
     ArkUI_Boundary* actualGlyphRange = new (std::nothrow) ArkUI_Boundary(range.glyphStart, range.glyphEnd);
+    CHECK_NULL_RETURN(actualGlyphRange, ARKUI_ERROR_CODE_PARAM_INVALID);
     *outActualGlyphRange = reinterpret_cast<OH_Drawing_Range*>(actualGlyphRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

@@ -29,13 +29,16 @@
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/symbol_span_model.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
 std::unique_ptr<SymbolSpanModel> SymbolSpanModel::instance_ = nullptr;
@@ -77,9 +80,80 @@ void JSSymbolSpan::SetFontSize(const JSCallbackInfo& info)
     SymbolSpanModel::GetInstance()->SetFontSize(fontSize);
 }
 
-void JSSymbolSpan::SetFontWeight(const std::string& value)
+void JSSymbolSpan::SetFontWeight(const JSCallbackInfo& info)
 {
-    SymbolSpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+    if (info.Length() < NUM_1) {
+        ResetFontWeightConfigs();
+        return;
+    }
+    FontWeight fontWeightValue = FontWeight::NORMAL;
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    std::string fontWeight;
+    JSRef<JSVal> args = info[0];
+    if (args->IsNumber()) {
+        variableFontWeight = args->ToNumber<int32_t>();
+        fontWeight = args->ToString();
+        fontWeightValue = ConvertStrToFontWeight(fontWeight);
+    } else {
+        ParseJsString(args, fontWeight);
+        auto parseResult = ParseFontWeight(fontWeight);
+        fontWeightValue = parseResult.second;
+        if (parseResult.first) {
+            variableFontWeight = GetFontWeightNumericValue(fontWeightValue);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(fontWeight) ?
+                StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+    }
+    SymbolSpanModel::GetInstance()->SetFontWeight(fontWeightValue);
+
+    if (info.Length() < NUM_2) {
+        ResetFontWeightConfigs();
+        return;
+    }
+    auto tmpInfo = info[1];
+    if (tmpInfo->IsNull() || tmpInfo->IsUndefined() || !tmpInfo->IsObject()) {
+        ResetFontWeightConfigs();
+        return;
+    }
+    SymbolSpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+    auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
+    ProcessFontWeightConfigObject(paramObject);
+}
+
+void JSSymbolSpan::ResetFontWeightConfigs()
+{
+    SymbolSpanModel::GetInstance()->ResetVariableFontWeight();
+    SymbolSpanModel::GetInstance()->ResetEnableVariableFontWeight();
+    SymbolSpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+}
+
+void JSSymbolSpan::ProcessFontWeightConfigObject(const JSRef<JSObject>& paramObject)
+{
+    if (paramObject->HasProperty("enableVariableFontWeight")) {
+        auto enableVariableFontWeight = paramObject->GetProperty("enableVariableFontWeight");
+        if (!enableVariableFontWeight->IsNull() && !enableVariableFontWeight->IsUndefined() &&
+            enableVariableFontWeight->IsBoolean()) {
+            SymbolSpanModel::GetInstance()->SetEnableVariableFontWeight(enableVariableFontWeight->ToBoolean());
+        } else {
+            SymbolSpanModel::GetInstance()->SetEnableVariableFontWeight(false);
+        }
+    } else {
+        SymbolSpanModel::GetInstance()->SetEnableVariableFontWeight(false);
+    }
+
+    if (paramObject->HasProperty("enableDeviceFontWeightCategory")) {
+        auto enableDeviceFontWeightCategory = paramObject->GetProperty("enableDeviceFontWeightCategory");
+        if (!enableDeviceFontWeightCategory->IsNull() && !enableDeviceFontWeightCategory->IsUndefined() &&
+            enableDeviceFontWeightCategory->IsBoolean()) {
+            SymbolSpanModel::GetInstance()->SetEnableDeviceFontWeightCategory(
+                enableDeviceFontWeightCategory->ToBoolean());
+        } else {
+            SymbolSpanModel::GetInstance()->SetEnableDeviceFontWeightCategory(true);
+        }
+    } else {
+        SymbolSpanModel::GetInstance()->SetEnableDeviceFontWeightCategory(true);
+    }
 }
 
 void JSSymbolSpan::SetFontColor(const JSCallbackInfo& info)

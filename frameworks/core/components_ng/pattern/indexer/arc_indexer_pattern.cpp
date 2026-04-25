@@ -14,10 +14,10 @@
  */
 
 #include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/pipeline/base/constants.h"

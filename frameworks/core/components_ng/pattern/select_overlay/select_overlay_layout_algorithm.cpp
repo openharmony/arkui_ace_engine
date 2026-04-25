@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cmath>
 #include <optional>
@@ -856,6 +857,8 @@ uint32_t SelectOverlayLayoutAlgorithm::GetSafeAreaTop()
     uint32_t topArea = 0;
     if (safeAreaManager) {
         topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+        auto cutoutLen = safeAreaManager->GetCutoutSafeAreaWithoutProcess().top_.Length();
+        topArea = std::max(topArea, cutoutLen);
     }
     auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
     if (avoidInfoMgr && avoidInfoMgr->NeedAvoidContainerModal()) {

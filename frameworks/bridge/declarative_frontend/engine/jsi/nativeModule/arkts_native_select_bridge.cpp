@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -915,7 +916,7 @@ ArkUINativeModuleValue SelectBridge::ResetMenuBackgroundColor(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getSelectModifier()->resetMenuBgColor(nativeNode);
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuBgColor(nativeNode, false);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1375,7 +1376,6 @@ ArkUINativeModuleValue SelectBridge::SetMenuOutline(ArkUIRuntimeCallInfo* runtim
     outlineArgs.color = color.data();
     outlineArgs.colorSize = static_cast<ArkUI_Int32>(color.size());
     outlineArgs.resObjs = outlineResObjs.data();
-    outlineArgs.unitSize = static_cast<ArkUI_Int32>(outlineResObjs.size());
     GetArkUINodeModifiers()->getSelectModifier()->setMenuOutline(nativeNode, &outlineArgs);
     return panda::JSValueRef::Undefined(vm);
 }

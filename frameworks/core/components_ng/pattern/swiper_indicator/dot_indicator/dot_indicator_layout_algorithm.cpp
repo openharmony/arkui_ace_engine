@@ -82,9 +82,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto paintProperty = frameNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto theme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(theme);
 
     // Diameter of a single indicator circle, item or selected-item width and height

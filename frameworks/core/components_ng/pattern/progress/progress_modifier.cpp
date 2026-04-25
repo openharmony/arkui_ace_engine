@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,9 +112,9 @@ ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
     AttachProperty(progressUpdate_);
     AttachProperty(capsuleBorderRadius_);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>();
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto theme = frameNode->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
 
     pressBlendColor_ = theme->GetClickEffect();
@@ -708,7 +708,7 @@ void ProgressModifier::SetValue(float value)
     CHECK_NULL_VOID(value_);
     AnimationOption option = AnimationOption();
     if (smoothEffect_->Get()) {
-        if (isVisible_) {
+        if (inVisibleArea_) {
             auto motion =
                 AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
             option.SetCurve(motion);
@@ -1136,9 +1136,9 @@ std::vector<GradientColor> ProgressModifier::GetRingProgressGradientColors() con
     // Fault protection processing, if gradientColors is empty, set to default colors.
 
     if (gradientColors.empty()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, gradientColors);
-        auto theme = pipeline->GetTheme<ProgressTheme>();
+        auto host = host_.Upgrade();
+        CHECK_NULL_RETURN(host, gradientColors);
+        auto theme = host->GetTheme<ProgressTheme>(true);
         CHECK_NULL_RETURN(theme, gradientColors);
         GradientColor endColor;
         GradientColor beginColor;

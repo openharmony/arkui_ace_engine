@@ -42,7 +42,7 @@ export interface ObservedResult {
 }
 
 export class UIUtils {
-    static makeObserved<T>(source: T): T {
+    static makeObserved<T extends object | null | undefined>(source: T): T {
         return uiUtils.makeObserved(source) as T;
     }
     static getTarget<T>(source: T): T {

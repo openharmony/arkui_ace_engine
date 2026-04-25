@@ -15,8 +15,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_MODEL_STATIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_MODEL_STATIC_H
 
-#include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/text_style.h"
+#include "base/geometry/dimension.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 

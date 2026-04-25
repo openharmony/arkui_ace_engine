@@ -511,6 +511,12 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
         textPattern->ResetSelection();
     }
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
+
+    if (IsTouchUp(sourceType, touchType) &&
+        GetClearPolicy() == TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH) {
+        textPattern->ResetSelection();
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    }
 }
 
 void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)

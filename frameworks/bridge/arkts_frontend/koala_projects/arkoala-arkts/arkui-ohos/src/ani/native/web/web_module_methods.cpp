@@ -62,20 +62,20 @@ static void GetCommonFunc(ani_vm* vm, ani_ref savePtr,
     webviewControllerPeer->releaseRefFunc = std::move(releaseRefFunc);
 }
 
-static bool GetObjectFromPtr(ani_env* env, const char* classDesc, ani_object* obj, void* args)
+static bool GetObjectFromPtr(ani_env* env, std::string classDesc, ani_ref* obj, void* args)
 {
     ani_class cls;
-    if (env->FindClass(classDesc, &cls) != ANI_OK) {
-        HILOGE("FindClass fail: %{public}s", classDesc);
+    if (env->FindClass((classDesc + "Internal").c_str(), &cls) != ANI_OK) {
+        HILOGE("FindClass fail: %{public}s", (classDesc + "Internal").c_str());
         return false;
     }
-    ani_method ctor;
-    if (env->Class_FindMethod(cls, "<ctor>", "l:", &ctor) != ANI_OK) {
-        HILOGE("Class_FindMethod fail, <ctor> in %{public}s", classDesc);
+    ani_static_method fromPtr;
+    if (env->Class_FindStaticMethod(cls, "fromPtr", ("l:C{" + classDesc + "}").c_str(), &fromPtr) != ANI_OK) {
+        HILOGE("Class_FindStaticMethod fail, fromPtr in %{public}s", (classDesc + "Internal").c_str());
         return false;
     }
-    if (env->Object_New(cls, ctor, obj, args) != ANI_OK) {
-        HILOGE("Object_New fail: %{public}s", classDesc);
+    if (env->Class_CallStaticMethod_Ref(cls, fromPtr, obj, args) != ANI_OK) {
+        HILOGE("Class_CallStaticMethod_Ref fail: %{public}s", classDesc.c_str());
         return false;
     }
     return true;
@@ -91,13 +91,13 @@ static void DefaultOnShowFileSelector(ani_vm* vm, void* paramPeer, void* resultP
         release(resultPeer);
         return;
     }
-    ani_object paramObj;
+    ani_ref paramObj;
     if (!GetObjectFromPtr(env, "arkui.component.web.FileSelectorParam", &paramObj, paramPeer)) {
         release(paramPeer);
         release(resultPeer);
         return;
     }
-    ani_object resultObj;
+    ani_ref resultObj;
     if (!GetObjectFromPtr(env, "arkui.component.web.FileSelectorResult", &resultObj, resultPeer)) {
         release(resultPeer);
         return;
@@ -139,7 +139,7 @@ static void DefaultPermissionClipboard(ani_vm* vm, void* peer, std::function<voi
         release();
         return;
     }
-    ani_object obj;
+    ani_ref obj;
     if (!GetObjectFromPtr(env, "arkui.component.web.PermissionRequest", &obj, peer)) {
         release();
         return;

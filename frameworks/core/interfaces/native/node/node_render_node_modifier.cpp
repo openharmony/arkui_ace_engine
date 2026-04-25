@@ -28,7 +28,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/matrix4.h"
 #include "frameworks/core/components_ng/render/adapter/rosen_modifier_property.h"
-
+#include "core/interfaces/native/utility/error_message_macros.h"
 namespace OHOS::Ace::NG {
 using OHOS::Rosen::RSNode;
 constexpr int NUM_0 = 0;
@@ -111,29 +111,52 @@ bool CheckChildCanBeAdopted(ArkUINodeHandle node)
     return childNode->IsCNode() || childNode->IsArkTsFrameNode() || childNode->GetIsRootBuilderNode();
 }
 
+inline void SetRenderNodeFromAdoptedFrameError();
+inline void SetRenderChildInvalidFrameError();
+
 ArkUI_Int32 AddRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
 {
     ViewAbstract::CheckMainThread();
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (frameNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Frame node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (frameNode->TotalChildCount() > 0) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_CHILD_EXISTED, "Render child already exists");
         return ERROR_CODE_CHILD_EXISTED;
     }
     auto childFrameNode = GetFrameNodeFromRenderNodeHandle(child);
     if (IsGetFromAdoptedFrameNode(child) && (childFrameNode == nullptr || !childFrameNode->IsAdopted())) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+            ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE, "Render child has invalid frame node");
         return ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE;
     }
-    CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_PARAM_INVALID);
+    if (!frameNode->GetRenderContext()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render context is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto rsContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
-    CHECK_NULL_RETURN(rsContext, ERROR_CODE_PARAM_INVALID);
+    if (!rsContext) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render context is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto rsNode = rsContext->GetRSNode();
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (rsNode->GetChildren().size() > 0) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_CHILD_EXISTED, "Render child already exists");
         return ERROR_CODE_CHILD_EXISTED;
     }
     auto childNodePtr = GetRsNodeFromStruct(child);
-    CHECK_NULL_RETURN(childNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!childNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render child node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNodePtr->GetParent()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_RENDER_PARENT_EXISTED, "Render child already has a parent");
         return ERROR_CODE_RENDER_PARENT_EXISTED;
     }
     rsNode->AddChild(childNodePtr, -1);
@@ -147,14 +170,29 @@ ArkUI_Int32 RemoveRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
 {
     ViewAbstract::CheckMainThread();
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_PARAM_INVALID);
+    if (!frameNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Frame node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!frameNode->GetRenderContext()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render context is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto rsContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
-    CHECK_NULL_RETURN(rsContext, ERROR_CODE_PARAM_INVALID);
+    if (!rsContext) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render context is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto rsNode = rsContext->GetRSNode();
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto childNodePtr = GetRsNodeFromStruct(child);
-    CHECK_NULL_RETURN(childNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!childNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render child node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->RemoveChild(childNodePtr);
     return ERROR_CODE_NO_ERROR;
 }
@@ -163,10 +201,19 @@ ArkUI_Int32 ClearRenderNodeChildren(ArkUINodeHandle node)
 {
     ViewAbstract::CheckMainThread();
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_PARAM_INVALID);
+    if (!frameNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Frame node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!frameNode->GetRenderContext()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render context is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto rsContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
-    CHECK_NULL_RETURN(rsContext, ERROR_CODE_PARAM_INVALID);
+    if (!rsContext) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render context is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto rsNode = rsContext->GetRSNode();
     rsNode->ClearChildren();
     return ERROR_CODE_NO_ERROR;
@@ -193,16 +240,24 @@ ArkUI_Int32 AddChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto childFrameNode = GetFrameNodeFromRenderNodeHandle(child);
     if (IsGetFromAdoptedFrameNode(child) && (childFrameNode == nullptr || !childFrameNode->IsAdopted())) {
+        SetRenderChildInvalidFrameError();
         return ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE;
     }
     auto parentNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!parentNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto childNodePtr = GetRsNodeFromStruct(child);
-    CHECK_NULL_RETURN(childNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!childNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render child node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     parentNodePtr->AddChild(childNodePtr, -1);
     return ERROR_CODE_NO_ERROR;
 }
@@ -232,22 +287,46 @@ int32_t GetRSNodeChildCount(std::shared_ptr<RSNode> node)
     return node->GetChildren().size();
 }
 
-ArkUI_Int32 InsertChildAfter(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child, ArkUIRenderNodeHandle sibling)
+inline void SetRenderNodeFromAdoptedFrameError()
+{
+    SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE, "Render node is from adopted frame node");
+}
+
+inline void SetRenderChildInvalidFrameError()
+{
+    SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+        ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE, "Render child has invalid frame node");
+}
+
+ArkUI_Int32 InsertChildAfter(
+    ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child, ArkUIRenderNodeHandle sibling)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto childFrameNode = GetFrameNodeFromRenderNodeHandle(child);
     if (IsGetFromAdoptedFrameNode(child) && (childFrameNode == nullptr || !childFrameNode->IsAdopted())) {
+        SetRenderChildInvalidFrameError();
         return ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE;
     }
     auto parentNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!parentNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto childNodePtr = GetRsNodeFromStruct(child);
-    CHECK_NULL_RETURN(childNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!childNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render child node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto siblingPtr = GetRsNodeFromStruct(sibling);
-    CHECK_NULL_RETURN(siblingPtr, ERROR_CODE_PARAM_INVALID);
+    if (!siblingPtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render sibling node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto index = GetChildIndex(parentNodePtr, siblingPtr);
     if (index == -1) {
         parentNodePtr->AddChild(childNodePtr, -1);
@@ -261,12 +340,19 @@ ArkUI_Int32 RemoveChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto parentNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!parentNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto childNodePtr = GetRsNodeFromStruct(child);
-    CHECK_NULL_RETURN(childNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!childNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render child node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     parentNodePtr->RemoveChild(childNodePtr);
     return ERROR_CODE_NO_ERROR;
 }
@@ -275,10 +361,14 @@ ArkUI_Int32 ClearChildren(ArkUIRenderNodeHandle node)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNodePtr->ClearChildren();
     return ERROR_CODE_NO_ERROR;
 }
@@ -286,28 +376,41 @@ ArkUI_Int32 ClearChildren(ArkUIRenderNodeHandle node)
 ArkUI_Int32 GetChild(ArkUIRenderNodeHandle node, int32_t index, ArkUIRenderNodeHandle* child, int32_t* childId)
 {
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto renderNode = rsNodePtr->GetChildByIndex(index);
-    CHECK_NULL_RETURN(renderNode, ERROR_CODE_CHILD_RENDER_NOT_EXIST);
+    if (!renderNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_CHILD_RENDER_NOT_EXIST, "Child render node does not exist");
+        return ERROR_CODE_CHILD_RENDER_NOT_EXIST;
+    }
     RenderNodeStruct* nodeStruct = new RenderNodeStruct { .rsNode = renderNode, .nodeId = renderNode->GetId() };
     *child = reinterpret_cast<ArkUIRenderNodeHandle>(nodeStruct);
     *childId = renderNode->GetId();
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 GetChildren(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, uint32_t** childId, int32_t* count)
+ArkUI_Int32 GetChildren(
+    ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, uint32_t** childId, int32_t* count)
 {
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto childCount = GetRSNodeChildCount(rsNodePtr);
     int32_t index = 0;
     if (childCount <= 0) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render child does not exist");
         return ERROR_CODE_PARAM_INVALID;
     }
     ArkUIRenderNodeHandle* childList = new ArkUIRenderNodeHandle[childCount];
@@ -328,69 +431,106 @@ ArkUI_Int32 GetChildren(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** chil
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 GetFirstChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* child, int32_t* childId)
+ArkUI_Int32 GetFirstChild(
+    ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* child, int32_t* childId)
 {
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto count = GetRSNodeChildCount(rsNodePtr);
     if (count > 0) {
         auto renderNode = rsNodePtr->GetChildByIndex(0);
-        CHECK_NULL_RETURN(renderNode, ERROR_CODE_PARAM_INVALID);
+        if (!renderNode) {
+            SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "First child render node is invalid");
+            return ERROR_CODE_PARAM_INVALID;
+        }
         RenderNodeStruct* nodeStruct = new RenderNodeStruct { .rsNode = renderNode, .nodeId = renderNode->GetId() };
         *child = reinterpret_cast<ArkUIRenderNodeHandle>(nodeStruct);
         *childId = renderNode->GetId();
         return ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_CHILD_RENDER_NOT_EXIST, "First child render node does not exist");
     return ERROR_CODE_CHILD_RENDER_NOT_EXIST;
 }
 
-ArkUI_Int32 GetNextSibling(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, int32_t* childId)
+ArkUI_Int32 GetNextSibling(
+    ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, int32_t* childId)
 {
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto parentNodePtr = rsNodePtr->GetParent();
-    CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!parentNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Parent render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     int32_t childIndex = GetChildIndex(parentNodePtr, rsNodePtr);
     int32_t childCount = GetRSNodeChildCount(parentNodePtr);
     if (childIndex != -1 && childCount - 1 > childIndex) {
         auto slibingNode = parentNodePtr->GetChildByIndex(childIndex + 1);
-        CHECK_NULL_RETURN(slibingNode, ERROR_CODE_PARAM_INVALID);
+        if (!slibingNode) {
+            SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Next sibling render node is invalid");
+            return ERROR_CODE_PARAM_INVALID;
+        }
         RenderNodeStruct* nodeStruct = new RenderNodeStruct { .rsNode = slibingNode, .nodeId = slibingNode->GetId() };
         *slibing = reinterpret_cast<ArkUIRenderNodeHandle>(nodeStruct);
         *childId = slibingNode->GetId();
         return ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_CHILD_RENDER_NOT_EXIST, "Next sibling render node does not exist");
     return ERROR_CODE_CHILD_RENDER_NOT_EXIST;
 }
 
-ArkUI_Int32 GetPreviousSibling(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, int32_t* childId)
+ArkUI_Int32 GetPreviousSibling(
+    ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, int32_t* childId)
 {
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto parentNodePtr = rsNodePtr->GetParent();
-    CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!parentNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Parent render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     int32_t childIndex = GetChildIndex(parentNodePtr, rsNodePtr);
     if (childIndex > 0) {
         auto slibingNode = parentNodePtr->GetChildByIndex(childIndex - 1);
-        CHECK_NULL_RETURN(slibingNode, ERROR_CODE_PARAM_INVALID);
+        if (!slibingNode) {
+            SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+                ERROR_CODE_PARAM_INVALID, "Previous sibling render node is invalid");
+            return ERROR_CODE_PARAM_INVALID;
+        }
         RenderNodeStruct* nodeStruct = new RenderNodeStruct { .rsNode = slibingNode, .nodeId = slibingNode->GetId() };
         *slibing = reinterpret_cast<ArkUIRenderNodeHandle>(nodeStruct);
         *childId = slibingNode->GetId();
         return ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+        ERROR_CODE_CHILD_RENDER_NOT_EXIST, "Previous sibling render node does not exist");
     return ERROR_CODE_CHILD_RENDER_NOT_EXIST;
 }
 
 ArkUI_Int32 GetChildrenCount(ArkUIRenderNodeHandle node, int32_t* count)
 {
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *count = GetRSNodeChildCount(rsNodePtr);
     return ERROR_CODE_NO_ERROR;
 }
@@ -399,10 +539,14 @@ ArkUI_Int32 SetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t background
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetBackgroundColor(backgroundColor);
     return ERROR_CODE_NO_ERROR;
 }
@@ -410,10 +554,14 @@ ArkUI_Int32 SetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t background
 int32_t GetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t* color)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *color = rsNode->GetStagingProperties().GetBackgroundColor().AsArgbInt();
     return ERROR_CODE_NO_ERROR;
 }
@@ -422,10 +570,14 @@ int32_t SetOpacity(ArkUIRenderNodeHandle handle, float opacity)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetAlpha(opacity);
     return ERROR_CODE_NO_ERROR;
 }
@@ -433,10 +585,14 @@ int32_t SetOpacity(ArkUIRenderNodeHandle handle, float opacity)
 int32_t GetOpacity(ArkUIRenderNodeHandle handle, float* opacity)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *opacity = rsNode->GetStagingProperties().GetAlpha();
     return ERROR_CODE_NO_ERROR;
 }
@@ -445,10 +601,14 @@ int32_t SetSize(ArkUIRenderNodeHandle handle, int32_t width, int32_t height)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetBoundsWidth(width);
     rsNode->SetBoundsHeight(height);
     auto vector4f = rsNode->GetStagingProperties().GetFrame();
@@ -459,10 +619,14 @@ int32_t SetSize(ArkUIRenderNodeHandle handle, int32_t width, int32_t height)
 int32_t GetSize(ArkUIRenderNodeHandle handle, int32_t* width, int32_t* height)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector4f = rsNode->GetStagingProperties().GetBounds();
     *width = vector4f.z_;
     *height = vector4f.w_;
@@ -473,10 +637,14 @@ int32_t SetPosition(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector4f = rsNode->GetStagingProperties().GetBounds();
     vector4f.x_ = x;
     vector4f.y_ = y;
@@ -488,10 +656,14 @@ int32_t SetPosition(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 int32_t GetPosition(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector4f = rsNode->GetStagingProperties().GetFrame();
     *x = vector4f.x_;
     *y = vector4f.y_;
@@ -502,10 +674,14 @@ int32_t SetPivot(ArkUIRenderNodeHandle handle, float x, float y)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetPivot(x, y);
     return ERROR_CODE_NO_ERROR;
 }
@@ -513,10 +689,14 @@ int32_t SetPivot(ArkUIRenderNodeHandle handle, float x, float y)
 int32_t GetPivot(ArkUIRenderNodeHandle handle, float* x, float* y)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector2f = rsNode->GetStagingProperties().GetPivot();
     *x = vector2f.x_;
     *y = vector2f.y_;
@@ -527,10 +707,14 @@ int32_t SetScale(ArkUIRenderNodeHandle handle, float x, float y)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetScale(x, y);
     return ERROR_CODE_NO_ERROR;
 }
@@ -538,10 +722,14 @@ int32_t SetScale(ArkUIRenderNodeHandle handle, float x, float y)
 int32_t GetScale(ArkUIRenderNodeHandle handle, float* x, float* y)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector2f = rsNode->GetStagingProperties().GetScale();
     *x = vector2f.x_;
     *y = vector2f.y_;
@@ -552,10 +740,14 @@ int32_t SetTranslation(ArkUIRenderNodeHandle handle, float x, float y)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     OHOS::Rosen::Vector2f translate = { x, y };
     rsNode->SetTranslate(translate);
     return ERROR_CODE_NO_ERROR;
@@ -564,10 +756,14 @@ int32_t SetTranslation(ArkUIRenderNodeHandle handle, float x, float y)
 int32_t GetTranslation(ArkUIRenderNodeHandle handle, float* x, float* y)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector2f = rsNode->GetStagingProperties().GetTranslate();
     *x = vector2f.x_;
     *y = vector2f.y_;
@@ -578,10 +774,14 @@ int32_t SetRotation(ArkUIRenderNodeHandle handle, float x, float y, float z)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetRotation(x, y, z);
     return ERROR_CODE_NO_ERROR;
 }
@@ -589,10 +789,14 @@ int32_t SetRotation(ArkUIRenderNodeHandle handle, float x, float y, float z)
 int32_t GetRotation(ArkUIRenderNodeHandle handle, float* x, float* y, float* z)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *z = rsNode->GetStagingProperties().GetRotation();
     *x = rsNode->GetStagingProperties().GetRotationX();
     *y = rsNode->GetStagingProperties().GetRotationY();
@@ -616,10 +820,14 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
 
     auto matrix4 = Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
         matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14], matrix[NUM_3],
@@ -627,6 +835,7 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
 
     DecomposedTransform transform;
     if (!TransformUtil::DecomposeTransform(transform, matrix4)) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Transform matrix is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
 
@@ -661,10 +870,14 @@ int32_t SetShadowColor(ArkUIRenderNodeHandle handle, uint32_t color)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetShadowColor(color);
     return ERROR_CODE_NO_ERROR;
 }
@@ -672,10 +885,14 @@ int32_t SetShadowColor(ArkUIRenderNodeHandle handle, uint32_t color)
 int32_t GetShadowColor(ArkUIRenderNodeHandle handle, uint32_t* color)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *color = rsNode->GetStagingProperties().GetShadowColor().AsArgbInt();
     return ERROR_CODE_NO_ERROR;
 }
@@ -684,10 +901,14 @@ int32_t SetShadowOffset(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetShadowOffset(static_cast<float>(x), static_cast<float>(y));
     return ERROR_CODE_NO_ERROR;
 }
@@ -695,10 +916,14 @@ int32_t SetShadowOffset(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 int32_t GetShadowOffset(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *x = rsNode->GetStagingProperties().GetShadowOffsetX();
     *y = rsNode->GetStagingProperties().GetShadowOffsetY();
     return ERROR_CODE_NO_ERROR;
@@ -708,10 +933,14 @@ int32_t SetShadowAlpha(ArkUIRenderNodeHandle handle, float alpha)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetShadowAlpha(alpha);
     return ERROR_CODE_NO_ERROR;
 }
@@ -719,10 +948,14 @@ int32_t SetShadowAlpha(ArkUIRenderNodeHandle handle, float alpha)
 int32_t GetShadowAlpha(ArkUIRenderNodeHandle handle, float* alpha)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *alpha = rsNode->GetStagingProperties().GetShadowAlpha();
     return ERROR_CODE_NO_ERROR;
 }
@@ -731,10 +964,14 @@ int32_t SetShadowElevation(ArkUIRenderNodeHandle handle, float elevation)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetShadowElevation(elevation);
     return ERROR_CODE_NO_ERROR;
 }
@@ -742,10 +979,14 @@ int32_t SetShadowElevation(ArkUIRenderNodeHandle handle, float elevation)
 int32_t GetShadowElevation(ArkUIRenderNodeHandle handle, float* elevation)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *elevation = rsNode->GetStagingProperties().GetShadowElevation();
     return ERROR_CODE_NO_ERROR;
 }
@@ -754,33 +995,54 @@ int32_t SetShadowRadius(ArkUIRenderNodeHandle handle, float radius)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
-    rsNode->SetShadowRadius(radius);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (radius >= 0.0f) {
+        rsNode->SetShadowRadius(radius);
+        return ERROR_CODE_NO_ERROR;
+    }
+    rsNode->SetShadowRadius(
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0.0f : radius);
     return ERROR_CODE_NO_ERROR;
 }
 
 int32_t GetShadowRadius(ArkUIRenderNodeHandle handle, float* radius)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *radius = rsNode->GetStagingProperties().GetShadowRadius();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        *radius = std::max(*radius, 0.0f);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
+int32_t SetBorderStyle(
+    ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetBorderStyle(left, top, right, bottom);
     return ERROR_CODE_NO_ERROR;
 }
@@ -788,10 +1050,14 @@ int32_t SetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top
 int32_t GetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* top, uint32_t* right, uint32_t* bottom)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector4 = rsNode->GetStagingProperties().GetBorderStyle();
     *left = vector4.x_;
     *top = vector4.y_;
@@ -800,25 +1066,35 @@ int32_t GetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* t
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetBorderWidth(ArkUIRenderNodeHandle handle, float left, float top, float right, float bottom)
+int32_t SetBorderWidth(
+    ArkUIRenderNodeHandle handle, float left, float top, float right, float bottom)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetBorderWidth(left, top, right, bottom);
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t GetBorderWidth(ArkUIRenderNodeHandle handle, float* left, float* top, float* right, float* bottom)
+int32_t GetBorderWidth(
+    ArkUIRenderNodeHandle handle, float* left, float* top, float* right, float* bottom)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector4 = rsNode->GetStagingProperties().GetBorderWidth();
     *left = vector4.x_;
     *top = vector4.y_;
@@ -827,14 +1103,19 @@ int32_t GetBorderWidth(ArkUIRenderNodeHandle handle, float* left, float* top, fl
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetBorderColor(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
+int32_t SetBorderColor(
+    ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetBorderColor(left, top, right, bottom);
     return ERROR_CODE_NO_ERROR;
 }
@@ -842,10 +1123,14 @@ int32_t SetBorderColor(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top
 int32_t GetBorderColor(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* top, uint32_t* right, uint32_t* bottom)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector4 = rsNode->GetStagingProperties().GetBorderColor();
     *left = vector4.x_.AsArgbInt();
     *top = vector4.y_.AsArgbInt();
@@ -859,10 +1144,14 @@ int32_t SetBorderRadius(ArkUIRenderNodeHandle handle,
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     OHOS::Rosen::Vector4f vector4f;
     vector4f.x_ = topLeft;
     vector4f.y_ = topRight;
@@ -873,13 +1162,17 @@ int32_t SetBorderRadius(ArkUIRenderNodeHandle handle,
 }
 
 int32_t GetBorderRadius(ArkUIRenderNodeHandle handle,
-   float* topLeft, float* topRight, float* bottomLeft, float* bottomRight)
+    float* topLeft, float* topRight, float* bottomLeft, float* bottomRight)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector4 = rsNode->GetStagingProperties().GetCornerRadius();
     *topLeft = vector4.x_;
     *topRight = vector4.y_;
@@ -892,22 +1185,31 @@ int32_t SetMarkNodeGroup(ArkUIRenderNodeHandle handle, int32_t markNodeGroup)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->MarkNodeGroup(markNodeGroup);
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetBounds(ArkUIRenderNodeHandle handle, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+int32_t SetBounds(
+    ArkUIRenderNodeHandle handle, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetBounds(x, y, width, height);
     rsNode->SetFrame(x, y, width, height);
     return ERROR_CODE_NO_ERROR;
@@ -916,10 +1218,14 @@ int32_t SetBounds(ArkUIRenderNodeHandle handle, uint32_t x, uint32_t y, uint32_t
 int32_t GetBounds(ArkUIRenderNodeHandle handle, uint32_t* x, uint32_t* y, uint32_t* width, uint32_t* height)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto vector4 = rsNode->GetStagingProperties().GetBounds();
     *x = vector4.x_;
     *y = vector4.y_;
@@ -932,10 +1238,14 @@ int32_t SetDrawRegion(ArkUIRenderNodeHandle handle, float x, float y, float w, f
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(x, y, w, h);
     rsNode->SetDrawRegion(drawRect);
     return ERROR_CODE_NO_ERROR;
@@ -945,10 +1255,14 @@ int32_t SetClipToFrame(ArkUIRenderNodeHandle handle, int32_t clipToFrame)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetClipToFrame(static_cast<bool>(clipToFrame));
     return ERROR_CODE_NO_ERROR;
 }
@@ -956,10 +1270,14 @@ int32_t SetClipToFrame(ArkUIRenderNodeHandle handle, int32_t clipToFrame)
 int32_t GetClipToFrame(ArkUIRenderNodeHandle handle, int32_t* clipToFrame)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *clipToFrame = static_cast<int32_t>(rsNode->GetStagingProperties().GetClipToFrame());
     return ERROR_CODE_NO_ERROR;
 }
@@ -967,10 +1285,14 @@ int32_t GetClipToFrame(ArkUIRenderNodeHandle handle, int32_t* clipToFrame)
 int32_t GetClipToBounds(ArkUIRenderNodeHandle handle, int32_t* clipToBounds)
 {
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     *clipToBounds = static_cast<int32_t>(rsNode->GetStagingProperties().GetClipToBounds());
     return ERROR_CODE_NO_ERROR;
 }
@@ -979,10 +1301,14 @@ int32_t SetClipToBounds(ArkUIRenderNodeHandle handle, int32_t clipToBounds)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNode = GetRsNodeFromStruct(handle);
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     rsNode->SetClipToBounds(static_cast<bool>(clipToBounds));
     return ERROR_CODE_NO_ERROR;
 }
@@ -991,12 +1317,19 @@ int32_t AttachModifier(ArkUIRenderNodeHandle node, ArkUIRenderModifierHandle mod
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* modifierStruct = reinterpret_cast<RenderModifierStruct*>(modifier);
-    CHECK_NULL_RETURN(modifierStruct, ERROR_CODE_PARAM_INVALID);
+    if (!modifierStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render modifier is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto modifierAdapter = ConvertContentModifier(modifierStruct->modifier);
     rsNodePtr->AddModifier(modifierAdapter);
     return ERROR_CODE_NO_ERROR;
@@ -1018,11 +1351,20 @@ int32_t AttachProperty(ArkUIRenderModifierHandle modifier, ArkUIPropertyHandle p
 {
     ViewAbstract::CheckMainThread();
     auto modifierStruct = reinterpret_cast<RenderModifierStruct*>(modifier);
-    CHECK_NULL_RETURN(modifier, ERROR_CODE_PARAM_INVALID);
+    if (!modifier) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render modifier is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto modifierPtr = ConvertContentModifier(modifierStruct->modifier);
-    CHECK_NULL_RETURN(modifierPtr, ERROR_CODE_PARAM_INVALID);
+    if (!modifierPtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Content modifier is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(property, ERROR_CODE_PARAM_INVALID);
+    if (!property) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     switch (propertyStruct->propertyType) {
         case ArkUIPropertyType::PROPERTY_FLOAT:
             modifierPtr->AttachProperty(propertyStruct->floatProperty);
@@ -1043,6 +1385,7 @@ int32_t AttachProperty(ArkUIRenderModifierHandle modifier, ArkUIPropertyHandle p
             modifierPtr->AttachProperty(propertyStruct->colorAnimatableProperty);
             break;
         default:
+            SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render property type is invalid");
             return ERROR_CODE_PARAM_INVALID;
     }
     return ERROR_CODE_NO_ERROR;
@@ -1053,9 +1396,15 @@ ArkUI_Int32 SetModifierOnDraw(ArkUIRenderModifierHandle modifier, void* userData
 {
     ViewAbstract::CheckMainThread();
     auto modifierStruct = reinterpret_cast<RenderModifierStruct*>(modifier);
-    CHECK_NULL_RETURN(modifierStruct, ERROR_CODE_PARAM_INVALID);
+    if (!modifierStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render modifier is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto renderContentModifier = modifierStruct->modifier;
-    CHECK_NULL_RETURN(renderContentModifier, ERROR_CODE_PARAM_INVALID);
+    if (!renderContentModifier) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Content modifier is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto onContentDraw = [userData, customRenderDrawFunc](DrawingContext context) {
         ArkUIDrawingContext drawContext;
         drawContext.canvas = reinterpret_cast<ArkUICanvasHandle>(&context.canvas);
@@ -1087,8 +1436,12 @@ int32_t SetFloatProperty(ArkUIPropertyHandle property, float value)
 {
     ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Float property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_FLOAT) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not float");
         return ERROR_CODE_PARAM_INVALID;
     }
     propertyStruct->floatProperty->Set(value);
@@ -1098,8 +1451,12 @@ int32_t SetFloatProperty(ArkUIPropertyHandle property, float value)
 int32_t GetFloatProperty(ArkUIPropertyHandle property, float* value)
 {
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Float property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_FLOAT) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not float");
         return ERROR_CODE_PARAM_INVALID;
     }
     *value = propertyStruct->floatProperty->Get();
@@ -1119,8 +1476,12 @@ ArkUI_Int32 SetVector2Property(ArkUIPropertyHandle property, float x, float y)
 {
     ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Vector2 property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_VECTOR2) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not vector2");
         return ERROR_CODE_PARAM_INVALID;
     }
     propertyStruct->vector2Property->Set(Rosen::Vector2f(x, y));
@@ -1130,8 +1491,12 @@ ArkUI_Int32 SetVector2Property(ArkUIPropertyHandle property, float x, float y)
 ArkUI_Int32 GetVector2Property(ArkUIPropertyHandle property, float* x, float* y)
 {
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Vector2 property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_VECTOR2) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not vector2");
         return ERROR_CODE_PARAM_INVALID;
     }
     Rosen::Vector2f value = propertyStruct->vector2Property->Get();
@@ -1153,8 +1518,12 @@ ArkUI_Int32 SetColorProperty(ArkUIPropertyHandle property, uint32_t color)
 {
     ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Color property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_COLOR) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not color");
         return ERROR_CODE_PARAM_INVALID;
     }
     propertyStruct->colorProperty->Set(Rosen::RSColor::FromArgbInt(color));
@@ -1164,8 +1533,12 @@ ArkUI_Int32 SetColorProperty(ArkUIPropertyHandle property, uint32_t color)
 ArkUI_Int32 GetColorProperty(ArkUIPropertyHandle property, uint32_t* color)
 {
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Color property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_COLOR) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not color");
         return ERROR_CODE_PARAM_INVALID;
     }
     *color = propertyStruct->colorProperty->Get().AsArgbInt();
@@ -1185,8 +1558,12 @@ int32_t SetFloatAnimatableProperty(ArkUIPropertyHandle property, float value)
 {
     ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Float animatable property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_FLOAT) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not float animatable");
         return ERROR_CODE_PARAM_INVALID;
     }
     propertyStruct->floatAnimatableProperty->Set(value);
@@ -1196,8 +1573,12 @@ int32_t SetFloatAnimatableProperty(ArkUIPropertyHandle property, float value)
 int32_t GetFloatAnimatableProperty(ArkUIPropertyHandle property, float* value)
 {
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Float animatable property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_FLOAT) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not float animatable");
         return ERROR_CODE_PARAM_INVALID;
     }
     *value = propertyStruct->floatAnimatableProperty->Get();
@@ -1217,8 +1598,12 @@ ArkUI_Int32 SetVector2AnimatableProperty(ArkUIPropertyHandle property, float x, 
 {
     ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Vector2 animatable property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_VECTOR2) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not vector2 animatable");
         return ERROR_CODE_PARAM_INVALID;
     }
     propertyStruct->vector2AnimatableProperty->Set(Rosen::Vector2f(x, y));
@@ -1228,8 +1613,12 @@ ArkUI_Int32 SetVector2AnimatableProperty(ArkUIPropertyHandle property, float x, 
 ArkUI_Int32 GetVector2AnimatableProperty(ArkUIPropertyHandle property, float* x, float* y)
 {
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Vector2 animatable property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_VECTOR2) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not vector2 animatable");
         return ERROR_CODE_PARAM_INVALID;
     }
     Rosen::Vector2f value = propertyStruct->vector2AnimatableProperty->Get();
@@ -1251,8 +1640,12 @@ ArkUI_Int32 SetColorAnimatableProperty(ArkUIPropertyHandle property, uint32_t co
 {
     ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Color animatable property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_COLOR) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not color animatable");
         return ERROR_CODE_PARAM_INVALID;
     }
     propertyStruct->colorAnimatableProperty->Set(Rosen::RSColor::FromArgbInt(color));
@@ -1262,8 +1655,12 @@ ArkUI_Int32 SetColorAnimatableProperty(ArkUIPropertyHandle property, uint32_t co
 ArkUI_Int32 GetColorAnimatableProperty(ArkUIPropertyHandle property, uint32_t* color)
 {
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
-    CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
+    if (!propertyStruct) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Color animatable property is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_COLOR) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Property type is not color animatable");
         return ERROR_CODE_PARAM_INVALID;
     }
     *color = propertyStruct->colorAnimatableProperty->Get().AsArgbInt();
@@ -1303,10 +1700,14 @@ ArkUI_Int32 SetRectMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIM
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RSPath path;
     path.AddRect(shape.left, shape.top, shape.right, shape.bottom);
 
@@ -1318,14 +1719,19 @@ ArkUI_Int32 SetRectMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIM
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetCircleMask(ArkUIRenderNodeHandle node, ArkUICircleShape shape, ArkUIMaskFill fill)
+ArkUI_Int32 SetCircleMask(
+    ArkUIRenderNodeHandle node, ArkUICircleShape shape, ArkUIMaskFill fill)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RSPath path;
     path.AddCircle(shape.centerX, shape.centerY, shape.radius);
 
@@ -1337,14 +1743,19 @@ ArkUI_Int32 SetCircleMask(ArkUIRenderNodeHandle node, ArkUICircleShape shape, Ar
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetRoundRectMask(ArkUIRenderNodeHandle node, ArkUIRoundRectShape shape, ArkUIMaskFill fill)
+ArkUI_Int32 SetRoundRectMask(
+    ArkUIRenderNodeHandle node, ArkUIRoundRectShape shape, ArkUIMaskFill fill)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RSRoundRect rsRoundRect;
 
     RSRect rsRect(shape.left, shape.top, shape.right, shape.bottom);
@@ -1370,10 +1781,14 @@ ArkUI_Int32 SetOvalMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIM
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RSRect rsRect(shape.left, shape.top, shape.right, shape.bottom);
     RSPath path;
     path.AddOval(rsRect);
@@ -1386,14 +1801,19 @@ ArkUI_Int32 SetOvalMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIM
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetCommandPathMask(ArkUIRenderNodeHandle node, ArkUI_CharPtr commands, ArkUIMaskFill fill)
+ArkUI_Int32 SetCommandPathMask(
+    ArkUIRenderNodeHandle node, ArkUI_CharPtr commands, ArkUIMaskFill fill)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RSPath path;
     path.BuildFromSVGString(commands);
 
@@ -1409,10 +1829,14 @@ ArkUI_Int32 SetRectClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RectF rectF(shape.left, shape.top, shape.right, shape.bottom);
     RSRecordingPath rsPath;
     rsPath.AddRect({ rectF.GetX(), rectF.GetY(), rectF.Width(), rectF.Height() });
@@ -1424,10 +1848,14 @@ ArkUI_Int32 SetCircleClip(ArkUIRenderNodeHandle node, ArkUICircleShape shape)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RSRecordingPath rsPath;
     rsPath.AddCircle(shape.centerX, shape.centerY, shape.radius);
     rsNodePtr->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
@@ -1438,10 +1866,14 @@ ArkUI_Int32 SetRoundRectClip(ArkUIRenderNodeHandle node, ArkUIRoundRectShape sha
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RSRoundRect rsRoundRect;
 
     RSRect rsRect(shape.left, shape.top, shape.right, shape.bottom);
@@ -1462,10 +1894,14 @@ ArkUI_Int32 SetOvalClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RectF rectF(shape.left, shape.top, shape.right, shape.bottom);
     RSRecordingPath rsPath;
     rsPath.AddOval({ rectF.GetX(), rectF.GetY(), rectF.Width(), rectF.Height() });
@@ -1477,10 +1913,14 @@ ArkUI_Int32 SetCommandPathClip(ArkUIRenderNodeHandle node, ArkUI_CharPtr command
 {
     ViewAbstract::CheckMainThread();
     if (IsGetFromAdoptedFrameNode(node)) {
+        SetRenderNodeFromAdoptedFrameError();
         return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
     }
     auto rsNodePtr = GetRsNodeFromStruct(node);
-    CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (!rsNodePtr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     RSRecordingPath rsPath;
     rsPath.BuildFromSVGString(commands);
     rsNodePtr->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
@@ -1494,13 +1934,16 @@ ArkUI_Int32 AdoptChild(ArkUINodeHandle node, ArkUINodeHandle child)
     auto childNode = reinterpret_cast<FrameNode*>(child);
     bool parentCanAdopt = CheckParentCanAdopt(node);
     if (!parentNode || !parentCanAdopt) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, "Parent node can not adopt child");
         return ERROR_CODE_NODE_CAN_NOT_ADOPT_TO;
     }
     bool childCanBeAdopted = CheckChildCanBeAdopted(child);
     if (!childNode || !childCanBeAdopted) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED, "Child node can not be adopted");
         return ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED;
     }
     if (childNode->GetParent()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_HAS_PARENT, "Child node already has a parent");
         return ERROR_CODE_NODE_HAS_PARENT;
     }
     auto childRef = Referenced::Claim<FrameNode>(childNode);
@@ -1508,20 +1951,37 @@ ArkUI_Int32 AdoptChild(ArkUINodeHandle node, ArkUINodeHandle child)
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 GetRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId)
+ArkUI_Int32 GetRenderNode(
+    ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId)
 {
     ViewAbstract::CheckMainThread();
-    CHECK_NULL_RETURN(renderNode && renderNodeId, ERROR_CODE_PARAM_INVALID);
+    if (!(renderNode && renderNodeId)) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node handle or render node id is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
-    if (!frameNode->IsAdopted()) {
+    if (!frameNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_RENDER_NOT_ADOPTED_NODE, "Node is not an adopted node");
         return ERROR_CODE_RENDER_NOT_ADOPTED_NODE;
     }
-    CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_CAPI_INIT_ERROR);
+    if (!frameNode->IsAdopted()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_RENDER_NOT_ADOPTED_NODE, "Node is not an adopted node");
+        return ERROR_CODE_RENDER_NOT_ADOPTED_NODE;
+    }
+    if (!frameNode->GetRenderContext()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_CAPI_INIT_ERROR, "Render context is invalid");
+        return ERROR_CODE_CAPI_INIT_ERROR;
+    }
     auto rsContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
-    CHECK_NULL_RETURN(rsContext, ERROR_CODE_CAPI_INIT_ERROR);
+    if (!rsContext) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_CAPI_INIT_ERROR, "Render context is invalid");
+        return ERROR_CODE_CAPI_INIT_ERROR;
+    }
     auto rsNode = rsContext->GetRSNode();
-    CHECK_NULL_RETURN(rsNode, ERROR_CODE_CAPI_INIT_ERROR);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_CAPI_INIT_ERROR, "Render node is invalid");
+        return ERROR_CODE_CAPI_INIT_ERROR;
+    }
     RenderNodeStruct* nodeStruct = new RenderNodeStruct {
         .rsNode = rsNode,
         .nodeId = rsNode->GetId(),
@@ -1550,16 +2010,29 @@ ArkUI_Int32 RemoveAdoptedChild(ArkUINodeHandle node, ArkUINodeHandle child)
     ViewAbstract::CheckMainThread();
     auto parentFrameNode = reinterpret_cast<FrameNode*>(node);
     auto childFrameNode = reinterpret_cast<FrameNode*>(child);
-    CHECK_NULL_RETURN(parentFrameNode && childFrameNode, ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    if (!(parentFrameNode && childFrameNode)) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+            ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "Parent node or child node is null");
+        return ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
+    }
     if (!childFrameNode->IsAdopted()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "Child node is not adopted");
         return ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
     }
     auto adoptParent = childFrameNode->GetAdoptParent();
-    CHECK_NULL_RETURN(adoptParent, ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    if (!adoptParent) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+            ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "Child node does not have an adopt parent");
+        return ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
+    }
     if (adoptParent->GetId() != parentFrameNode->GetId()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+            ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "Child node is not in the parent's adopted children");
         return ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
     }
     if (!parentFrameNode->RemoveAdoptedChild(Referenced::Claim<FrameNode>(childFrameNode))) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
+            "Failed to remove child node from the parent's adopted children");
         return ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
     }
     DetachRsNode(childFrameNode);

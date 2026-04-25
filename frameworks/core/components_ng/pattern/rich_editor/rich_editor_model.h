@@ -21,7 +21,6 @@
 #include <optional>
 #include <string>
 
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/components/common/layout/constants.h"
@@ -452,6 +451,8 @@ public:
     virtual void ResetSingleLine() {};
     virtual void SetSelectedDragPreviewStyle(const Color& value) {};
     virtual void ResetSelectedDragPreviewStyle() {};
+    virtual void SetHorizontalScrolling(bool enabled) {};
+    virtual void ResetHorizontalScrolling() {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

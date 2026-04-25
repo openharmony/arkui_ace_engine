@@ -102,6 +102,27 @@ int32_t GetAlignContent(ArkUINodeHandle node)
     auto currentAlignment = StackModelNG::GetAlignment(frameNode);
     return findAlignmentIndex(currentAlignment);
 }
+
+void SetSyncLoad(ArkUINodeHandle node, ArkUI_Bool enabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    StackModelNG::SetSyncLoad(frameNode, enabled);
+}
+
+void ResetSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    StackModelNG::SetSyncLoad(frameNode, true);
+}
+
+ArkUI_Bool GetSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return StackModelNG::GetSyncLoad(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIStackModifier* GetStackModifier()
@@ -111,6 +132,9 @@ const ArkUIStackModifier* GetStackModifier()
         .setAlignContent = SetAlignContent,
         .resetAlignContent = ResetAlignContent,
         .getAlignContent = GetAlignContent,
+        .setSyncLoad = SetSyncLoad,
+        .resetSyncLoad = ResetSyncLoad,
+        .getSyncLoad = GetSyncLoad,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

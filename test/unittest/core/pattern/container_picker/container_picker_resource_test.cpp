@@ -16,18 +16,20 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -647,6 +649,32 @@ HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest003, TestSize.Level1)
     auto selectionIndicator = jsonValue->GetObject("selectionIndicator");
     ASSERT_NE(selectionIndicator, nullptr);
     EXPECT_EQ(selectionIndicator->GetString("type"), "PickerIndicatorType.BACKGROUND");
+}
+
+/**
+ * @tc.name: ToJsonValueTest004
+ * @tc.desc: selectionIndicator strokeWidth and dividerColor match host GetTheme PickerTheme defaults
+ *           (node-scoped theme).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest004, TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto property = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    auto pickerTheme = frameNode->GetTheme<PickerTheme>(true);
+    ASSERT_NE(pickerTheme, nullptr);
+
+    const InspectorFilter filter;
+    auto jsonValue = JsonUtil::Create(true);
+    property->ToJsonValue(jsonValue, filter);
+    auto selectionIndicator = jsonValue->GetObject("selectionIndicator");
+    ASSERT_NE(selectionIndicator, nullptr);
+    EXPECT_EQ(selectionIndicator->GetString("strokeWidth"), pickerTheme->GetDividerThickness().ToString());
+    EXPECT_EQ(selectionIndicator->GetString("dividerColor"), pickerTheme->GetDividerColor().ColorToString());
 }
 
 } // namespace OHOS::Ace::NG

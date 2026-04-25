@@ -14,7 +14,7 @@
  */
 
 class InteropExtractorModule {
-    static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: ObservedPropertyPU<T>): T {
+    static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: ObservedPropertyAbstractPU<T>): T {
         const isStaBuiltin =
           globalThis.Panda.STValue.isSTArray(newValue) ||
           globalThis.Panda.STValue.isSTSet(newValue) ||
@@ -34,6 +34,32 @@ class InteropExtractorModule {
             };
             if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
                 owningProperty.staticWatchFunc = InteropExtractorModule.createWatchFunc(callback, newValue);
+            }
+        }
+        return newValue;
+    }
+
+    static getV2InteropObservedObject<T extends Object>(newValue: T, owningProperty: object, propertyKey: string, watchKeyPrefix: string): T {
+        const isStaBuiltin =
+          globalThis.Panda.STValue.isSTArray(newValue) ||
+          globalThis.Panda.STValue.isSTSet(newValue) ||
+          globalThis.Panda.STValue.isSTMap(newValue) ||
+          newValue instanceof Date;
+        if (
+          isStaBuiltin &&
+          !('addWatchSubscriber' in newValue) &&
+          typeof InteropExtractorModule.makeObserved !== undefined &&
+          typeof InteropExtractorModule.makeObserved === 'function'
+        ) {
+          newValue = InteropExtractorModule.makeObserved(newValue) as T;
+        }
+        if ('addWatchSubscriber' in newValue && typeof (newValue as any).addWatchSubscriber === 'function') {
+            const callback = () => {
+                ObserveV2.getObserve().fireChange(owningProperty, propertyKey);
+            };
+            if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
+                const watchStoreKey = `${watchKeyPrefix}${propertyKey}`;
+                owningProperty[watchStoreKey] = InteropExtractorModule.createWatchFunc(callback, newValue);
             }
         }
         return newValue;
@@ -61,6 +87,8 @@ class InteropExtractorModule {
     static createCompatibleStaticState?: (value: Object) => Object;
     static transferCompatibleUpdatableBuilder?: (builder: (...args: any[]) => void) => (...args: any[]) => void;
     static localStorageSetProxy?: (storage: Object, proxy: Object) => void;
+    static isCloneableObject?: (obj: Object) => boolean;
+    static cloneCloneableObject?: (obj: Object) => Object | null | undefined;
 }
 
 class StaticInteropHook {
@@ -115,4 +143,12 @@ function registerTransferCompatibleUpdatableBuilderCallback(callback: (builder: 
 
 function registerLocalStorageSetProxy(callback: (storage: Object, proxy: Object) => void): void {
      InteropExtractorModule.localStorageSetProxy = callback;
+}
+
+function __Interop_RegisterIsCloneableObject_internal_(callback: (obj: Object) => boolean): void {
+    InteropExtractorModule.isCloneableObject = callback;
+}
+
+function __Interop_RegisterCloneCloneableObject_internal_(callback: (obj: Object) => Object | null | undefined): void {
+    InteropExtractorModule.cloneCloneableObject = callback;
 }

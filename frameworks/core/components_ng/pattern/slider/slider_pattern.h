@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 
+namespace OHOS::Ace {
+class AccessibilitySAObserverCallback;
+}
+
 namespace OHOS::Ace::NG {
 class SliderPattern : public Pattern {
     DECLARE_ACE_TYPE(SliderPattern, Pattern);

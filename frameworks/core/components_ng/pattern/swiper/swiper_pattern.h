@@ -235,6 +235,10 @@ public:
     ACE_FORCE_EXPORT int32_t TotalCount() const;
 
     Axis GetDirection() const;
+    bool IsScrollAble(SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    void PerformScroll(const ScrollingConfig& config) override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -850,6 +854,7 @@ public:
     void NotifyDataChange(int32_t index, int32_t count) override;
 
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void ResetOnForceMeasure();
 
     std::optional<int32_t> GetTargetIndex() const
@@ -903,6 +908,11 @@ public:
     bool GetCachedCountIndependent()
     {
         return independent_;
+    }
+
+    void SetCustomAnimationPrevIndex(int32_t prevIndex)
+    {
+        customAnimationPrevIndex_ = prevIndex;
     }
 
 protected:
@@ -1386,12 +1396,12 @@ private:
     void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
     friend class SwiperUISessionAdapter;
-    void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect(bool needSwiperChangeEnd = true);
 
     bool FakeDragCheckAtStart(float& offset);
     bool FakeDragCheckAtEnd(float& offset);
     void CheckOffsetAfterLyout(float offset);
+    void ShowNextWithStep(bool needCheckWillScroll, std::optional<int32_t> step);
+    void ShowPreviousWithStep(bool needCheckWillScroll, std::optional<int32_t> step);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

@@ -22,11 +22,13 @@
 #include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
+#include "core/components_ng/pattern/symbol/constants.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 
 using OHOS::Ace::NG::SaveButtonModelNG;
 using OHOS::Ace::NG::SecurityComponentModelNG;
@@ -34,6 +36,8 @@ using OHOS::Ace::NG::SecurityComponentTheme;
 
 namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
+constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0xFFFFF;
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
 bool JSSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
     SaveButtonSaveDescription& text, SaveButtonIconStyle& icon, int32_t& bg)
@@ -177,6 +181,24 @@ void JSSaveButton::SetIcon(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+
+    uint32_t symbolId;
+    RefPtr<ResourceObject> resourceObject;
+    if (ParseJsSymbolId(info[0], symbolId, resourceObject)) {
+        SecurityComponentModelNG::SetIcon(symbolId);
+        std::vector<std::string> familyNames;
+        if (symbolId > SYSTEM_SYMBOL_BOUNDARY) {
+            ParseJsSymbolCustomFamilyNames(familyNames, info[0]);
+            SaveButtonModelNG::SetSymbolFontFamilies(familyNames);
+            SaveButtonModelNG::SetSymbolType(SymbolType::CUSTOM);
+        } else {
+            familyNames.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+            SaveButtonModelNG::SetSymbolFontFamilies(familyNames);
+            SaveButtonModelNG::SetSymbolType(SymbolType::SYSTEM);
+        }
+        return;
+    }
+
     std::string bundleName;
     std::string moduleName;
     std::string src;
@@ -281,6 +303,52 @@ void JSSaveButton::SetUserCancelEvent(const JSCallbackInfo& info)
     SecurityComponentModelNG::SetUserCancelEvent(userCancelEvent);
 }
 
+void JSSaveButton::SetSymbolIconColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    std::vector<Color> colors;
+    auto theme = GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
+
+    Color color;
+    if (ParseJsSymbolColor(info[0], colors) && !colors.empty()) {
+        SaveButtonModelNG::SetSymbolIconColor(colors);
+        return;
+    }
+    color = theme->GetIconColor();
+    colors.emplace_back(color);
+    SaveButtonModelNG::SetSymbolIconColor(colors);
+}
+
+void JSSaveButton::SetSymbolRenderingStrategy(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        return;
+    }
+    uint32_t strategy = 0;
+    ParseJsInteger(info[0], strategy);
+    SaveButtonModelNG::SetSymbolRenderingStrategy(strategy);
+}
+
+void JSSaveButton::SetSymbolFontWeight(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || !(info[0]->IsString() || info[0]->IsNumber() || info[0]->IsObject())) {
+        return;
+    }
+    std::string value;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToString();
+    } else {
+        if (!ParseJsString(info[0], value)) {
+            return;
+        }
+    }
+
+    SaveButtonModelNG::SetSymbolFontWeight(ConvertStrToFontWeight(value));
+}
+
 void JSSaveButton::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSaveButton>::Declare("SaveButton");
@@ -330,6 +398,9 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
     JSClass<JSSaveButton>::StaticMethod("userCancelEvent", &JSSaveButton::SetUserCancelEvent);
     JSClass<JSSaveButton>::StaticMethod("focusBox", &JSSecButtonBase::SetFocusBox);
+    JSClass<JSSaveButton>::StaticMethod("symbolIconColor", &JSSaveButton::SetSymbolIconColor);
+    JSClass<JSSaveButton>::StaticMethod("symbolRenderingStrategy", &JSSaveButton::SetSymbolRenderingStrategy);
+    JSClass<JSSaveButton>::StaticMethod("symbolFontWeight", &JSSaveButton::SetSymbolFontWeight);
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "flex_new_test_common.h"
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

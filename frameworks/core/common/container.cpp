@@ -14,6 +14,7 @@
  */
 
 #include "core/common/container.h"
+#include "core/common/container_handler.h"
 
 #include <dirent.h>
 #include "iremote_object.h"
@@ -25,10 +26,35 @@
 #include "core/common/plugin_manager.h"
 #endif
 
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+
+Container::Container() = default;
+
+Container::~Container() = default;
+
+void Container::SetAppBar(const RefPtr<NG::AppBarView>& appBar)
+{
+    appBar_ = appBar;
+}
+
+RefPtr<NG::AppBarView> Container::GetAppBar() const
+{
+    return appBar_;
+}
+
+void Container::RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
+{
+    containerHandler_ = containerHandler;
+}
+
+RefPtr<ContainerHandler> Container::GetContainerHandler()
+{
+    return containerHandler_;
+}
 
 int32_t Container::CurrentId()
 {
@@ -121,6 +147,21 @@ RefPtr<Container> Container::GetFocused()
 {
     RefPtr<Container> focusContainer;
     AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && pipeline->IsWindowFocused()) {
+            focusContainer = container;
+        }
+    });
+    return focusContainer;
+}
+
+RefPtr<Container> Container::GetNormalFocused()
+{
+    RefPtr<Container> focusContainer;
+    AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
+        if (container->IsUIExtensionWindow() || container->IsDynamicRender()) {
+            return;
+        }
         auto pipeline = container->GetPipelineContext();
         if (pipeline && pipeline->IsWindowFocused()) {
             focusContainer = container;

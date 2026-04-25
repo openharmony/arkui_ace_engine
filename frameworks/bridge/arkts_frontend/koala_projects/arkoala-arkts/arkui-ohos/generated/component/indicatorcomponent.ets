@@ -96,7 +96,7 @@ export class IndicatorComponentController implements MaterializedBase {
     }
 }
 export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
-    attributeSet?: IndicatorComponentModifier;
+    indicatorComponentAttributeSet?: IndicatorComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

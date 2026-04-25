@@ -131,36 +131,38 @@ void GridScrollWithOptionsLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
 std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartAndSpan(
     const GridLayoutOptions& options, int32_t itemIndex)
 {
+    int32_t lookupIndex = info_.GetOriginalIndex(itemIndex);
+
     if (options.irregularIndexes.empty()) {
         return std::make_pair(-1, 1);
     }
 
     auto firstIrregularIndex = *(options.irregularIndexes.begin());
-    if (itemIndex < firstIrregularIndex) {
-        return std::make_pair(itemIndex % info_.crossCount_, 1);
+    if (lookupIndex < firstIrregularIndex) {
+        return std::make_pair(lookupIndex % info_.crossCount_, 1);
     }
 
     // without function
     if (!options.getSizeByIndex) {
-        if (options.irregularIndexes.find(itemIndex) != options.irregularIndexes.end()) {
+        if (options.irregularIndexes.find(lookupIndex) != options.irregularIndexes.end()) {
             return std::make_pair(0, info_.crossCount_);
         }
         int32_t crossStart = -1;
-        auto iter = options.irregularIndexes.upper_bound(itemIndex);
+        auto iter = options.irregularIndexes.upper_bound(lookupIndex);
         auto crossCount = info_.crossCount_;
         if (iter == options.irregularIndexes.end()) {
-            crossStart = (itemIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount;
+            crossStart = (lookupIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount;
         } else {
             if (iter != options.irregularIndexes.begin()) {
-                crossStart = (itemIndex - (*(--iter) + 1)) % crossCount;
+                crossStart = (lookupIndex - (*(--iter) + 1)) % crossCount;
             } else {
-                crossStart = itemIndex % crossCount;
+                crossStart = lookupIndex % crossCount;
             }
         }
         return std::make_pair(crossStart, 1);
     }
 
-    return GetCrossStartAndSpanWithUserFunction(itemIndex, options, firstIrregularIndex);
+    return GetCrossStartAndSpanWithUserFunction(lookupIndex, options, firstIrregularIndex);
 }
 
 static void JumpToLastIrregularItem(

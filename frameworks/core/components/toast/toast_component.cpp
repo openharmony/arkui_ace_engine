@@ -15,6 +15,9 @@
 
 #include "core/components/toast/toast_component.h"
 
+#include "core/components/box/box_component.h"
+#include "core/components/text/text_component.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/components/align/align_component.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"

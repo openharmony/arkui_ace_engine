@@ -24,13 +24,14 @@
 
 #include "mock/mock_form_utils.h"
 #include "mock/mock_sub_container.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/common/event_manager.h"
 #include "core/pipeline/pipeline_base.h"
 
 using namespace testing;

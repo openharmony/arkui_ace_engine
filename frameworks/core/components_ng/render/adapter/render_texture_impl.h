@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,8 @@ public:
     }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
+    std::shared_ptr<Media::PixelMap> SurfaceCapture() override;
+
     void GetTextureIsVideo(int32_t& type);
 
     void SetPatternType(int type)
@@ -87,15 +89,24 @@ public:
             patternType_ = type;
         }
     }
+
+    void AddInitTypeCallBack(int32_t& type);
 #endif
 private:
     WeakPtr<NG::RenderContext> renderContext_;
     RefPtr<ExtTexture> extTexture_;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallback_;
     int64_t textureId_ = -1;
+    int32_t surfaceWidth_ = 0;
+    int32_t surfaceHeight_ = 0;
 #ifdef RENDER_EXTRACT_SUPPORTED
     void* nativeWindow_ = nullptr;
     int patternType_ = 0;
+    bool hasPendingBounds_ = false;
+    int32_t pendingLeft_ = 0;
+    int32_t pendingTop_ = 0;
+    int32_t pendingWidth_ = 0;
+    int32_t pendingHeight_ = 0;
 #endif
 };
 } // namespace OHOS::Ace::NG

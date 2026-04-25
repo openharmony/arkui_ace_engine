@@ -23,7 +23,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -45,7 +44,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<PopupTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -59,7 +58,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<PopupTheme>& theme) const
         {
             if (!theme) {
@@ -502,6 +501,8 @@ public:
 
 protected:
     PopupTheme() = default;
+    Color fontPrimaryColor_;
+    Color buttonFontColor_;
 
 private:
     Edge padding_;
@@ -554,8 +555,6 @@ private:
     float opacityEnd_ = 1.0f;
     float opacityHover_ = 0.05f;
     float opacityPress_ = 0.1f;
-    Color buttonFontColor_;
-    Color fontPrimaryColor_;
     Color fontSecondaryColor_;
     ShadowStyle popupShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int popupBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);

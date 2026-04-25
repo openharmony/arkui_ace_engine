@@ -15,13 +15,14 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -156,12 +157,18 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level0)
  */
 HWTEST_F(RichEditorScrollTestOneNg, CheckScrollable, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. init richTextRect and contentRect
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
     richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
 
+    /**
+     * @tc.steps: step2. check scrollable
+     */
     richEditorPattern->CheckScrollable();
     EXPECT_FALSE(richEditorPattern->scrollable_);
 

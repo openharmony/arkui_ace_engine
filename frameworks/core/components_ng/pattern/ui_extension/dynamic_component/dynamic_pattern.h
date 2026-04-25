@@ -23,6 +23,11 @@
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/surface_proxy_node.h"
 
+namespace OHOS::Ace {
+class AccessibilityChildTreeCallback;
+class AccessibilitySAObserverCallback;
+}
+
 namespace OHOS::Ace::NG {
 enum DCResultCode : int32_t {
     DC_NO_ERRORS = 0,
@@ -90,6 +95,17 @@ public:
 
     bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
+    std::shared_ptr<UIContent> GetUIContent() const;
+    void SetAllowOccupied(bool allowOccupied)
+    {
+        allowOccupied_ = allowOccupied;
+    }
+
+    bool GetAllowOccupied() const
+    {
+        return allowOccupied_;
+    }
+
 protected:
     void InitializeRender(void* runtime);
     DCResultCode CheckConstraint();
@@ -135,6 +151,7 @@ protected:
 
     static int32_t dynamicGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(DynamicPattern);
+    bool allowOccupied_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_DYNAMIC_PATTERN_H

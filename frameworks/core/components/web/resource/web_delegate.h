@@ -950,6 +950,138 @@ private:
     std::vector<int32_t> pressedCodes_ {};
 };
 
+enum class WebCommandResult : int32_t {
+    SUCCESS = 10,
+    // environment error
+    FAILED = 11,
+    DELEGATE_NULL = 102,
+    CONTEXT_NULL = 103,
+    TASK_EXECUTOR_NULL = 104,
+    // json error
+    JSON_IS_INVALID = 110,
+    JSON_MISSING_EVENT_TYPE = 111,
+    JSON_INVALID_EVENT_TYPE = 112,
+    JSON_VALUE_ERROR_EVENT_TYPE = 113,
+    JSON_MISSING_XPATH = 114,
+    JSON_INVALID_XPATH = 115,
+    JSON_MISSING_DURATION = 116,
+    JSON_INVALID_DURATION = 117,
+    JSON_MISSING_ALIGN = 118,
+    JSON_INVALID_ALIGN = 119,
+    JSON_VALUE_ERROR_ALIGN = 120,
+    JSON_MISSING_OFFSET = 121,
+    JSON_INVALID_OFFSET = 122,
+    // runtime error
+    WEB_EXECUTE_TIMEOUT = 130,
+    ELEMENT_NOT_FOUND = 131,
+    WEB_NWEB_NULL = 132,
+    // common execution error (160-199)
+    PAGE_NOT_READY = 160,
+    ELEMENT_TYPE_MISMATCH = 161,
+    // input command error (200-249)
+    JSON_INVALID_INPUT_XPATH = 200,
+    JSON_INVALID_INPUT_VALUE = 201,
+    INPUT_TYPE_INVALID = 202,
+    INPUT_VALUE_FORMAT_INVALID = 203,
+    INPUT_EVENT_TYPE_MISMATCH = 204,
+    // select command error (250-299)
+    JSON_INVALID_SELECT_XPATH = 250,
+    JSON_INVALID_SELECT_OPTIONS = 251,
+    SELECT_INDEX_OUT_OF_RANGE = 252,
+    SELECT_VALUE_NOT_FOUND = 253,
+    SELECT_NOT_MULTIPLE = 254,
+    SELECT_OPTION_DISABLED = 255,
+    SELECT_EMPTY_OPTIONS = 256,
+};
+class NWebCommandActionImpl : public OHOS::NWeb::NWebCommandAction {
+public:
+    NWebCommandActionImpl(
+        const std::string &type, const std::string &path, int32_t dur, const std::string &al, int32_t off)
+        : event_type(type), XPath(path), duration(dur), align(al), offset(off)
+    {}
+
+    std::string GetEventType() override
+    {
+        return event_type;
+    }
+
+    std::string GetXPath() override
+    {
+        return XPath;
+    }
+
+    int32_t GetDuration() override
+    {
+        return duration;
+    }
+
+    std::string GetAlign() override
+    {
+        return align;
+    }
+
+    int32_t GetOffset() override
+    {
+        return offset;
+    }
+
+private:
+    std::string event_type = "";
+    std::string XPath = "";
+    int32_t duration = 0;
+    std::string align = "";
+    int32_t offset = 0;
+};
+
+class NWebCommandActionInfoImpl : public OHOS::NWeb::NWebCommandActionInfo {
+public:
+    static std::shared_ptr<NWebCommandActionInfoImpl> CreateInputInfo(
+        const std::string& event_type,
+        const std::string& value,
+        const std::string& xpath)
+    {
+        return std::shared_ptr<NWebCommandActionInfoImpl>(
+            new NWebCommandActionInfoImpl(event_type, value, xpath));
+    }
+
+    static std::shared_ptr<NWebCommandActionInfoImpl> CreateSelectInfo(
+        const std::string& event_type,
+        const std::vector<std::string>& values,
+        const std::string& xpath,
+        const std::vector<int32_t>& indexes)
+    {
+        return std::shared_ptr<NWebCommandActionInfoImpl>(
+            new NWebCommandActionInfoImpl(event_type, values, xpath, indexes));
+    }
+
+    ~NWebCommandActionInfoImpl() override = default;
+
+    std::string GetEventType() const override { return event_type_; }
+    std::string GetXPath() const override { return xpath_; }
+    std::string GetInputValue() const override { return input_value_; }
+    std::vector<std::string> GetOptionValues() const override { return option_values_; }
+    std::vector<int32_t> GetOptionIndexes() const override { return indexes_; }
+
+private:
+    NWebCommandActionInfoImpl(const std::string& event_type,
+                              const std::string& value,
+                              const std::string& xpath)
+        : event_type_(event_type), input_value_(value), xpath_(xpath) {}
+
+    NWebCommandActionInfoImpl(const std::string& event_type,
+                              const std::vector<std::string>& values,
+                              const std::string& xpath,
+                              const std::vector<int32_t>& indexes)
+        : event_type_(event_type), xpath_(xpath),
+          option_values_(values), indexes_(indexes) {}
+
+    std::string event_type_ = "";
+    std::string input_value_ = "";
+    std::string xpath_ = "";
+    std::vector<std::string> option_values_;
+    std::vector<int32_t> indexes_;
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -1313,6 +1445,8 @@ public:
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    bool OnNestedScrollV2(float& x, float& y);
+    bool OnNestedFling(float& xVelocity, float& yVelocity);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1393,6 +1527,7 @@ public:
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnCameraCaptureStateChanged(int originalState, int newState);
     void OnMicrophoneCaptureStateChanged(int originalState, int newState);
+    void OnInputMethodAttached();
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     std::string GetWebInfoType();
@@ -1464,6 +1599,8 @@ public:
 
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
+    void UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode);
+
     std::string GetCurrentLanguage();
     void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
         std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
@@ -1493,6 +1630,7 @@ public:
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
+    void SetEnableDrag(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
     void CallBlanklessCallback(int32_t state, const std::string& reason);
 
@@ -1527,6 +1665,8 @@ public:
     void OnPdfLoadEvent(int32_t result, const std::string& url);
     void OnMediaCastEnter();
     void SetImeShow(bool visible);
+    int SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& simulatedAction);
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> GetNWebCommandActionManager();
     void OnRequestAutofill(int32_t menuType);
 
     bool HasOnNativeEmbedGestureEventV2()
@@ -1549,6 +1689,9 @@ public:
     void UnRegisterDisplayInfoChange();
     void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
+    void FetchCloudControlWebAutoLayoutConfig();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1718,6 +1861,7 @@ private:
     EventCallbackV2 onSafeBrowsingCheckFinishV2_;
     EventCallbackV2 onCameraCaptureStateChangedV2_;
     EventCallbackV2 onMicrophoneCaptureStateChangedV2_;
+    EventCallbackV2 onInputMethodAttachedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;

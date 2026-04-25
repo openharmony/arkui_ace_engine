@@ -20,8 +20,8 @@
 #define protected public
 #define private public
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "test/unittest/core/pattern/test_ng.h"
 #include "base/log/ace_trace.h"
@@ -407,20 +407,21 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level0)
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::PAGE_ETS_TAG, NODE_ID_0);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(), 0.0f);
+    auto host = layoutWrapper->GetHostNode();
+    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(host), 0.0f);
 
     auto [pageNode, layoutWrapper1] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
     EXPECT_FALSE(layoutWrapper1 == nullptr);
     pipeline->stageManager_ = AceType::MakeRefPtr<StageManager>(pageNode);
-    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(), 0.0f);
+    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(host), 0.0f);
     auto [child, childWrapper] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_2);
     child->MountToParent(pageNode);
-    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(), 0.0f);
+    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(host), 0.0f);
 
     pipeline->safeAreaManager_->SetIsFullScreen(true);
     pipeline->safeAreaManager_->SetIsAtomicService(true);
-    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(), 0.0f);
-    EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(), 0.0f);
+    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(host), 0.0f);
+    EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(pageNode), 0.0f);
     pipeline->safeAreaManager_->SetIsAtomicService(false);
     pipeline->safeAreaManager_->UpdateCutoutSafeArea(
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
@@ -428,8 +429,8 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level0)
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
     pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
-    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(), -70.0f);
-    EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(), -70.0f);
+    EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(host), -70.0f);
+    EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(pageNode), -70.0f);
 }
 
 /**
@@ -461,25 +462,26 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest007, TestSize.Level0)
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
     pipeline->safeAreaManager_->UpdateKeyboardOffset(50.0f);
 
-    EXPECT_EQ(parent->ExpandIntoKeyboard(), OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(child0->ExpandIntoKeyboard(), OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(child1->ExpandIntoKeyboard(), OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(child2->ExpandIntoKeyboard(), OffsetF(0.0f, 0.0f));
+    auto parentParent = parent->GetAncestorNodeOfFrame(false);
+    EXPECT_EQ(parent->ExpandIntoKeyboard(parent, parentParent), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(child0->ExpandIntoKeyboard(child0, parent), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(child1->ExpandIntoKeyboard(child1, child0), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(child2->ExpandIntoKeyboard(child2, child1), OffsetF(0.0f, 0.0f));
 
     pipeline->stageManager_ = AceType::MakeRefPtr<StageManager>(parent);
     pageRenderContext->GetOrCreatePositionProperty();
     pipeline->safeAreaManager_->SetIsAtomicService(false);
 
-    EXPECT_EQ(parent->ExpandIntoKeyboard(), OffsetF(0.0f, -50.0f));
-    EXPECT_EQ(child0->ExpandIntoKeyboard(), OffsetF(0.0f, -50.0f));
-    EXPECT_EQ(child1->ExpandIntoKeyboard(), OffsetF(0.0f, -50.0f));
-    EXPECT_EQ(child2->ExpandIntoKeyboard(), OffsetF(0.0f, -50.0f));
+    EXPECT_EQ(parent->ExpandIntoKeyboard(parent, parentParent), OffsetF(0.0f, -50.0f));
+    EXPECT_EQ(child0->ExpandIntoKeyboard(child0, parent), OffsetF(0.0f, -50.0f));
+    EXPECT_EQ(child1->ExpandIntoKeyboard(child1, child0), OffsetF(0.0f, -50.0f));
+    EXPECT_EQ(child2->ExpandIntoKeyboard(child2, child1), OffsetF(0.0f, -50.0f));
     parent->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
     child0->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
     child1->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
-    EXPECT_EQ(parent->ExpandIntoKeyboard(), OffsetF(0.0f, -50.0f));
-    EXPECT_EQ(child0->ExpandIntoKeyboard(), OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(child1->ExpandIntoKeyboard(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(parent->ExpandIntoKeyboard(parent, parentParent), OffsetF(0.0f, -50.0f));
+    EXPECT_EQ(child0->ExpandIntoKeyboard(child0, child1), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(child1->ExpandIntoKeyboard(child1, child2), OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -738,26 +740,26 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest018, TestSize.Level0)
     auto gn = node->GetGeometryNode();
     gn->frame_.rect_ = RectF{10.0f, 20.0f, 30.0f, 40.0f};
     RectF frame = tmpFrame;
-    layoutWrapper->ExpandHelper(opts, frame);
+    layoutWrapper->ExpandHelper(node, opts, frame);
     EXPECT_EQ(frame, tmpFrame);
     frame = tmpFrame;
 
     opts = std::make_unique<SafeAreaExpandOpts>();
-    layoutWrapper->ExpandHelper(opts, frame);
+    layoutWrapper->ExpandHelper(node, opts, frame);
     EXPECT_EQ(frame, tmpFrame);
     frame = tmpFrame;
     opts->edges |= SAFE_AREA_EDGE_START;
     opts->edges |= SAFE_AREA_EDGE_TOP;
     opts->edges |= SAFE_AREA_EDGE_END;
     opts->edges |= SAFE_AREA_EDGE_BOTTOM;
-    layoutWrapper->ExpandHelper(opts, frame);
+    layoutWrapper->ExpandHelper(node, opts, frame);
     EXPECT_EQ(frame, tmpFrame);
 
     opts->type |= SAFE_AREA_TYPE_SYSTEM;
     pipeline->safeAreaManager_->SetIsFullScreen(true);
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
-    layoutWrapper->ExpandHelper(opts, frame);
+    layoutWrapper->ExpandHelper(node, opts, frame);
     EXPECT_EQ(frame, RectF(10.0f, 20.0f, 700.0f, 1240.0f));
 }
 
@@ -804,8 +806,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest019, TestSize.Level0)
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level0)
 {
     auto [parent0, layoutWrapper0] = CreateNodeAndWrapper(V2::JS_VIEW_ETS_TAG, NODE_ID_0);
-    layoutWrapper0->hostNode_ = nullptr;
-    layoutWrapper0->AdjustChildren(OffsetF(), false);
+    layoutWrapper0->AdjustChildren(parent0, OffsetF(), false);
 
     auto [parent1, layoutWrapper1] = CreateNodeAndWrapper(V2::JS_VIEW_ETS_TAG, NODE_ID_0);
     for (const auto& childUI : parent1->GetChildren()) {
@@ -813,7 +814,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level0)
         auto geometryNode = child->GetGeometryNode();
         geometryNode->parentAdjust_.SetRect(0, 0, 10, 10);
     }
-    layoutWrapper1->AdjustChildren(OffsetF(), false);
+    layoutWrapper1->AdjustChildren(parent1, OffsetF(), false);
     for (const auto& childUI : parent1->GetChildren()) {
         auto child = AceType::DynamicCast<FrameNode>(childUI);
         auto geometryNode = child->GetGeometryNode();
@@ -826,7 +827,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level0)
         auto geometryNode = child->GetGeometryNode();
         geometryNode->parentAdjust_.SetRect(0, 0, 10, 10);
     }
-    layoutWrapper2->AdjustChildren(OffsetF(), false);
+    layoutWrapper2->AdjustChildren(parent2, OffsetF(), false);
     for (const auto& childUI : parent2->GetChildren()) {
         auto child = AceType::DynamicCast<FrameNode>(childUI);
         auto geometryNode = child->GetGeometryNode();
@@ -839,7 +840,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level0)
         auto geometryNode = child->GetGeometryNode();
         geometryNode->parentAdjust_.SetRect(0, 0, 10, 10);
     }
-    layoutWrapper3->AdjustChildren(OffsetF(), false);
+    layoutWrapper3->AdjustChildren(parent3, OffsetF(), false);
     for (const auto& childUI : parent3->GetChildren()) {
         auto child = AceType::DynamicCast<FrameNode>(childUI);
         auto geometryNode = child->GetGeometryNode();

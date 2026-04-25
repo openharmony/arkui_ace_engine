@@ -22,7 +22,9 @@
 #include <mutex>
 #include <shared_mutex>
 #include <string>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -51,6 +53,8 @@ class ACE_FORCE_EXPORT ResourceManager final : public AceType {
     DECLARE_ACE_TYPE(ResourceManager, AceType);
 
 public:
+    using ResourceAdapterMap = std::unordered_map<std::string, RefPtr<ResourceAdapter>>;
+
     ~ResourceManager() = default;
 
     static ResourceManager& GetInstance();
@@ -69,16 +73,7 @@ public:
         RefPtr<ResourceAdapter>& resourceAdapter, bool replace = false)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        if (bundleName.empty() && moduleName.empty()) {
-            resourceAdapters_[std::to_string(instanceId)] = resourceAdapter;
-        } else {
-            auto key = MakeCacheKey(bundleName, moduleName, instanceId);
-            if (replace) {
-                CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
-            }
-            CountLimitLRU::CacheWithCountLimitLRU<RefPtr<ResourceAdapter>>(
-                key, resourceAdapter, cacheList_, cache_, capacity_);
-        }
+        AddResourceAdapterLocked(bundleName, moduleName, instanceId, resourceAdapter, replace);
     }
 
     void UpdateMainResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
@@ -95,6 +90,10 @@ public:
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+        auto overrideAdapters = GetOverrideResourceAdapterLocked(key, instanceId);
+        if (overrideAdapters) {
+            return true;
+        }
         if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
             return true;
         }
@@ -113,6 +112,10 @@ public:
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+        auto overrideAdapter = GetOverrideResourceAdapterLocked(key, instanceId);
+        if (overrideAdapter) {
+            return overrideAdapter;
+        }
         auto mapIter = resourceAdapters_.find(key);
         if (mapIter != resourceAdapters_.end()) {
             if (instanceId == -1) {
@@ -138,6 +141,10 @@ public:
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         auto key = MakeCacheKey("", "", instanceId);
+        auto overrideAdapter = GetOverrideResourceAdapterLocked(key, instanceId);
+        if (overrideAdapter) {
+            return overrideAdapter;
+        }
         if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
             return resourceAdapters_.at(key);
         }
@@ -170,6 +177,11 @@ public:
     void UpdateColorMode(
         const std::string& /*bundleName*/, const std::string& /*moduleName*/, int32_t instanceId, ColorMode colorMode);
 
+    void PushOverrideColorMode(
+        const std::string& /*bundleName*/, const std::string& /*moduleName*/, int32_t instanceId, ColorMode colorMode);
+
+    void PopOverrideColorMode(int32_t instanceId);
+
     void RegisterMainResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
         const RefPtr<ResourceAdapter>& resAdapter);
 
@@ -193,10 +205,23 @@ public:
     }
 
 private:
+    struct OverrideResourceRecord {
+        ColorMode colorMode = ColorMode::COLOR_MODE_UNDEFINED;
+        ResourceAdapterMap adapters;
+    };
+
     ResourceManager() = default;
+
+    RefPtr<ResourceAdapter> GetOverrideResourceAdapterLocked(const std::string& key, int32_t instanceId);
+    ResourceAdapterMap GetBaseResourceAdaptersForInstanceLocked(int32_t instanceId);
+    void AddResourceAdapterLocked(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
+        RefPtr<ResourceAdapter>& resourceAdapter, bool replace = false);
+    RefPtr<ResourceAdapter> AddOverrideResourceAdapterForNewBaseLocked(
+        const std::string& key, int32_t instanceId, const RefPtr<ResourceAdapter>& resourceAdapter);
 
     static const size_t MAX_DUMP_LIST_SIZE = 100;
     std::unordered_map<std::string, RefPtr<ResourceAdapter>> resourceAdapters_;
+    std::unordered_map<int32_t, std::vector<OverrideResourceRecord>> overrideResourceAdapters_;
     std::shared_mutex mutex_;
 
     std::atomic<size_t> capacity_ = 3;

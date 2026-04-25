@@ -34,7 +34,7 @@ import { RowModifier } from './../RowModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkRowPeer extends ArkCommonMethodPeer {
-    attributeSet?: RowModifier;
+    rowAttributeSet?: RowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

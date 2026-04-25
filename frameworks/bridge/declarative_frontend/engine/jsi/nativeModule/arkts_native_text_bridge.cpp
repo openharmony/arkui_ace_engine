@@ -53,6 +53,40 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
+
+bool ParseFontVariations(EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vector<std::string>& axisValues,
+    std::vector<ArkUIFontVariation>& fontVariations)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !jsValue->IsArray(vm)) {
+        return false;
+    }
+    auto array = Local<panda::ArrayRef>(jsValue);
+    auto length = array->Length(vm);
+    axisValues.reserve(length);
+    fontVariations.reserve(length);
+    for (uint32_t i = 0; i < length; i++) {
+        auto item = array->GetValueAt(vm, jsValue, i);
+        if (item->IsNull() || item->IsUndefined() || !item->IsObject(vm)) {
+            continue;
+        }
+        auto object = item->ToObject(vm);
+        auto axis = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "axis"));
+        auto value = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+        auto isNormalized = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "isNormalized"));
+        if (!axis->IsString(vm) || !value->IsNumber()) {
+            continue;
+        }
+        axisValues.emplace_back(axis->ToString(vm)->ToString(vm));
+        ArkUIOptionalBool normalized = { 0, false };
+        if (isNormalized->IsBoolean()) {
+            normalized.isSet = 1;
+            normalized.value = isNormalized->ToBoolean(vm)->Value();
+        }
+        fontVariations.push_back(
+            { axisValues.back().c_str(), static_cast<float>(value->ToNumber(vm)->Value()), normalized });
+    }
+    return !fontVariations.empty();
+}
 } // namespace
 
 ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1372,6 +1406,36 @@ ArkUINativeModuleValue TextBridge::ResetFontFeature(ArkUIRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TextBridge::SetFontVariations(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::vector<std::string> axisValues;
+    std::vector<ArkUIFontVariation> fontVariations;
+    if (!ParseFontVariations(vm, secondArg, axisValues, fontVariations)) {
+        GetArkUINodeModifiers()->getTextModifier()->resetFontVariations(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getTextModifier()->setFontVariations(
+        nativeNode, fontVariations.data(), fontVariations.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetFontVariations(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetFontVariations(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextBridge::SetLineSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1698,6 +1762,49 @@ ArkUINativeModuleValue TextBridge::ResetDataDetectorConfig(ArkUIRuntimeCallInfo*
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextModifier()->
         resetTextDataDetectorConfigWithEvent(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::SetOnWillCopy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextModifier()->resetTextOnWillCopy(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<bool(const std::u16string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& value) -> bool {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+                panda::StringRef::NewFromUtf16(vm, value.c_str()) };
+        auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean(vm)->Value();
+        }
+        return true;
+    };
+    GetArkUINodeModifiers()->getTextModifier()->setTextOnWillCopy(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetOnWillCopy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetTextOnWillCopy(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -15,10 +15,47 @@
 
 #include <cstdint>
 
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/syntax/arkoala_lazy_node.h"
+
+namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+void AssignCast(std::optional<LazyForEachReleaseStrategy>& dst, const Ark_LazyForEachReleaseStrategy& src)
+{
+    switch (src) {
+        case ARK_LAZY_FOR_EACH_RELEASE_STRATEGY_BATCH:
+            dst = LazyForEachReleaseStrategy::BATCH;
+            break;
+        case ARK_LAZY_FOR_EACH_RELEASE_STRATEGY_PROGRESSIVE:
+            dst = LazyForEachReleaseStrategy::PROGRESSIVE;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_LazyForEachReleaseStrategy: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<LazyForEachCustomComponentFreezeMode>& dst,
+    const Ark_LazyForEachCustomComponentFreezeMode& src)
+{
+    switch (src) {
+        case ARK_LAZY_FOR_EACH_CUSTOM_COMPONENT_FREEZE_MODE_AUTO:
+            dst = LazyForEachCustomComponentFreezeMode::AUTO;
+            break;
+        case ARK_LAZY_FOR_EACH_CUSTOM_COMPONENT_FREEZE_MODE_DISABLED:
+            dst = LazyForEachCustomComponentFreezeMode::DISABLED;
+            break;
+        case ARK_LAZY_FOR_EACH_CUSTOM_COMPONENT_FREEZE_MODE_ENABLED:
+            dst = LazyForEachCustomComponentFreezeMode::ENABLED;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_LazyForEachCustomComponentFreezeMode: %{public}d", src);
+    }
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
@@ -126,6 +163,18 @@ void SyncOnMoveOpsImpl(Ark_NativePointer node,
     // set drag event callback
     SyncItemDragEvent(lazyNode, onMoveDragEventOps);
 }
+void SetOptionsImpl(Ark_NativePointer node, const Ark_LazyForEachOptions* options)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    ArkoalaLazyNode* lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
+    CHECK_NULL_VOID(lazyNode);
+    auto optFreezeMode =
+        Converter::OptConvert<LazyForEachCustomComponentFreezeMode>(options->customComponentFreezeMode);
+    auto optReleaseStrategy = Converter::OptConvert<LazyForEachReleaseStrategy>(options->releaseStrategy);
+    lazyNode->SetOptions({ optFreezeMode.value_or(LazyForEachCustomComponentFreezeMode::AUTO),
+        optReleaseStrategy.value_or(LazyForEachReleaseStrategy::BATCH) });
+}
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
@@ -133,6 +182,7 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
         LazyForEachOpsAccessor::NotifyChangeImpl,
         LazyForEachOpsAccessor::SyncImpl,
         LazyForEachOpsAccessor::SyncOnMoveOpsImpl,
+        LazyForEachOpsAccessor::SetOptionsImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }

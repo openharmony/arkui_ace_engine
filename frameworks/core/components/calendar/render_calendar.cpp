@@ -15,6 +15,8 @@
 
 #include "core/components/calendar/render_calendar.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "core/common/font_manager.h"

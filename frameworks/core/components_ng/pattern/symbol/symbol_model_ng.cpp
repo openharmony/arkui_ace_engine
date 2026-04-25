@@ -73,6 +73,36 @@ void SymbolModelNG::SetSymbolType(SymbolType value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, value);
 }
 
+void SymbolModelNG::SetVariableFontWeight(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, value);
+}
+
+void SymbolModelNG::ResetVariableFontWeight()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight);
+}
+
+void SymbolModelNG::SetEnableVariableFontWeight(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value);
+}
+
+void SymbolModelNG::ResetEnableVariableFontWeight()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight);
+}
+
+void SymbolModelNG::SetEnableDeviceFontWeightCategory(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableDeviceFontWeightCategory, value);
+}
+
+void SymbolModelNG::ResetEnableDeviceFontWeightCategory()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, EnableDeviceFontWeightCategory);
+}
+
 void SymbolModelNG::SetSymbolGlyphType(SymbolType value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, value);
@@ -206,6 +236,36 @@ void SymbolModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 void SymbolModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
+}
+
+void SymbolModelNG::SetVariableFontWeight(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, value, frameNode);
+}
+
+void SymbolModelNG::ResetVariableFontWeight(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, frameNode);
+}
+
+void SymbolModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value, frameNode);
+}
+
+void SymbolModelNG::ResetEnableVariableFontWeight(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, frameNode);
+}
+
+void SymbolModelNG::SetEnableDeviceFontWeightCategory(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableDeviceFontWeightCategory, value, frameNode);
+}
+
+void SymbolModelNG::ResetEnableDeviceFontWeightCategory(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableDeviceFontWeightCategory, frameNode);
 }
 
 void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::uint32_t renderingStrategy)

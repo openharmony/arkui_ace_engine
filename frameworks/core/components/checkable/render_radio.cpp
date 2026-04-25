@@ -15,7 +15,10 @@
 
 #include "core/components/checkable/render_radio.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/event_report.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 namespace {

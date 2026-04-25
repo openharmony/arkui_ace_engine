@@ -56,8 +56,11 @@ public:
 
     static void CalcSingleSideMarginFrame(
         MarginPropertyF& margin, const OptionalSizeF& singleSideFrame, float& maxWidth, float& maxHeight);
+
+    virtual bool IsAsyncLoadAvailable(LayoutWrapper* layoutWrapper);
 protected:
     std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;
+    bool measureInNextFrame_ = false;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BoxLayoutAlgorithm);

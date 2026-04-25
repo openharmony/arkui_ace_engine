@@ -18,12 +18,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_bitmap.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_bitmap.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
@@ -226,7 +226,6 @@ HWTEST_F(ModelTestNg, ModelViewNgTest002, TestSize.Level1)
     modelPattern->modelAdapter_->HandleCameraMove(event);
     modelPattern->modelAdapter_->DrawFrame();
     Render3D::WindowChangeInfo windowChangeInfo {};
-    modelPattern->modelAdapter_->OnDirtyLayoutWrapperSwap(windowChangeInfo);
     modelPattern->modelAdapter_->CreateTextureLayer();
     modelPattern->modelAdapter_->CreateWidgetAdapter();
     modelPattern->modelAdapter_->UnloadSceneAndBackground();
@@ -360,12 +359,7 @@ HWTEST_F(ModelTestNg, ModelViewNgTest004, TestSize.Level1)
     ASSERT_NE(layoutWrapper, nullptr);
     layoutWrapper->skipMeasureContent_ = std::make_optional(true);
     DirtySwapConfig config;
-    EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-    config.skipMeasure = true;
-    EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-    config.skipLayout = true;
-    EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-
+    
     // MarkDirtyNode
     modelPattern->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 

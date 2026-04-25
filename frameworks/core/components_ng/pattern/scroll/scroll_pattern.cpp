@@ -14,12 +14,15 @@
  */
 
 #include "core/components/common/layout/grid_column_info.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
+#include "base/log/dump_log.h"
+#include "core/common/vibrator/vibrator_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "base/log/dump_log.h"
-#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -344,6 +347,49 @@ bool ScrollPattern::IsAtBottom(bool considerRepeat) const
         return LessOrEqual(currentOffset_, 0.0);
     }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
+}
+
+bool ScrollPattern::IsScrollAble(SmartGestureDirection direction) const
+{
+    if (!IsScrollable()) {
+        return false;
+    }
+    if (direction == SmartGestureDirection::FORWARD) {
+        return !IsAtBottom();
+    }
+    if (direction == SmartGestureDirection::BACKWARD) {
+        return !IsAtTop();
+    }
+    return false;
+}
+
+std::optional<ScrollingConfig> ScrollPattern::GetDefaultScrollingConfig(SmartGestureDirection direction) const
+{
+    if (!IsScrollAble(direction)) {
+        return std::nullopt;
+    }
+    auto distance = GetDefaultScrollRatio() * viewPortLength_;
+    if (LessOrEqual(distance, 0.0)) {
+        return std::nullopt;
+    }
+    return ScrollingConfig { .distance = distance, .direction = direction };
+}
+
+void ScrollPattern::PerformScroll(const ScrollingConfig& config)
+{
+    if (!config.distance.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("Scroll PerformScroll direction:%d, requestDistance:%f, id:%d, tag:%s",
+        static_cast<int32_t>(config.direction), static_cast<float>(config.distance.value()),
+        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    auto distance = static_cast<float>(config.direction == SmartGestureDirection::FORWARD ?
+        -config.distance.value() : config.distance.value());
+    auto position = currentOffset_ + distance;
+    SetIsOverScroll(false);
+    SmartGesturePerformScroll(-position);
 }
 
 OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
@@ -1307,6 +1353,15 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
         auto size = itemGeometry->GetFrameSize() * scale;
         return Rect(left, top, size.Width(), size.Height());
     }
+}
+
+double ScrollPattern::GetDefaultScrollRatio() const
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, 0.0);
+    auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+    CHECK_NULL_RETURN(scrollableTheme, 0.0);
+    return scrollableTheme->GetDefaultScrollingDistance();
 }
 
 float ScrollPattern::GetSelectScrollWidth()

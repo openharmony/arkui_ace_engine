@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/common/container.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_constants.h"
@@ -36,6 +37,7 @@ class ContainerPickerTheme : public virtual Theme {
 
 public:
     ~ContainerPickerTheme() = default;
+    ContainerPickerTheme() = default;
 
     class Builder {
     public:
@@ -44,12 +46,18 @@ public:
         RefPtr<ContainerPickerTheme> Build(const RefPtr<ThemeConstants>& themeConstants)
         {
             RefPtr<ContainerPickerTheme> theme = AceType::MakeRefPtr<ContainerPickerTheme>();
+            InitTheme(theme, themeConstants);
+            return theme;
+        }
+
+    protected:
+        void InitTheme(const RefPtr<ContainerPickerTheme>& theme, const RefPtr<ThemeConstants>& themeConstants) const
+        {
             if (!themeConstants) {
                 TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "Build ContainerPickerTheme error, themeConstants is null!");
-                return theme;
+                return;
             }
             ParsePattern(themeConstants, theme);
-            return theme;
         }
     };
 
@@ -93,8 +101,28 @@ public:
         return focusBorderWidth_;
     }
 
+protected:
+    void SetIndicatorBackgroundColor(const Color& color)
+    {
+        indicatorBackgroundColor_ = color;
+    }
+
+    void SetIndicatorDividerColor(const Color& color)
+    {
+        indicatorDividerColor_ = color;
+    }
+
+    void SetFontColor(const Color& color)
+    {
+        fontColor_ = color;
+    }
+
+    void SetFocusBorderColor(const Color& color)
+    {
+        focusBorderColor_ = color;
+    }
+
 private:
-    ContainerPickerTheme() = default;
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ContainerPickerTheme>& theme)
     {
         RefPtr<ThemeStyle> containerPickerPattern = themeConstants->GetPatternByName(THEME_PATTERN_CONTAINER_PICKER);

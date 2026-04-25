@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/list/render_list_item.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "compatible/components/list/render_list_item_group.h"

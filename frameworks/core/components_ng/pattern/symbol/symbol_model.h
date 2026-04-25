@@ -51,6 +51,12 @@ public:
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetFontFamilies(std::vector<std::string>& familyNames) = 0;
     virtual void SetSymbolType(SymbolType value) = 0;
+    virtual void SetVariableFontWeight(int32_t value) = 0;
+    virtual void ResetVariableFontWeight() = 0;
+    virtual void SetEnableVariableFontWeight(bool value) = 0;
+    virtual void ResetEnableVariableFontWeight() = 0;
+    virtual void SetEnableDeviceFontWeightCategory(bool value) = 0;
+    virtual void ResetEnableDeviceFontWeightCategory() = 0;
     virtual void SetSymbolShadow(const SymbolShadow& symbolShadow) = 0;
     virtual void SetShaderStyle(const std::vector<SymbolGradient>& style) = 0;
     virtual void ResetShaderStyle() = 0;

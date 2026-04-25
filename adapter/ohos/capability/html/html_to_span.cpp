@@ -14,11 +14,13 @@
  */
 
 #include "html_to_span.h"
+#include <cmath>
 #include <sstream>
 
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
+constexpr double SMALL_FONT_SIZE_RATIO = 0.8;
 constexpr int ONE_PARAM = 1;
 constexpr int TWO_PARAM = 2;
 constexpr int THREE_PARAM = 3;
@@ -34,6 +36,21 @@ constexpr int THIRD_PARAM = 2;
 constexpr int FOURTH_PARAM = 3;
 
 constexpr int MAX_STYLE_FORMAT_NUMBER = 3;
+
+const std::unordered_map<std::string, std::pair<int, int>> HEADING_STYLES = {
+    { "h1", { 30, 40 } }, { "h2", { 24, 32 } }, { "h3", { 20, 27 } },
+    { "h4", { 16, 21 } }, { "h5", { 14, 19 } }, { "h6", { 12, 16 } }
+};
+
+bool IsHeadingTag(const std::string& element)
+{
+    return HEADING_STYLES.find(element) != HEADING_STYLES.end();
+}
+
+bool EndsWithLineBreak(const std::string& content)
+{
+    return !content.empty() && content.back() == '\n';
+}
 
 void ToLowerCase(std::string& str)
 {
@@ -963,9 +980,25 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
     return styleValues;
 }
 
+void HtmlToSpan::AddHeadingStyleSpan(const std::string& element, SpanInfo& info)
+{
+    std::map<std::string, StyleValue> styles;
+    auto headingIt = HEADING_STYLES.find(element);
+    if (headingIt == HEADING_STYLES.end()) {
+        return;
+    }
+    InitFont("font-weight", "bold", "font", styles);
+    InitFont("font-size", std::to_string(headingIt->second.first) + "fp", "font", styles);
+    InitLineHeight("line-height", std::to_string(headingIt->second.second) + "fp", styles);
+    for (auto [key, value] : styles) {
+        info.values.emplace_back(value);
+    }
+}
+
 void HtmlToSpan::AddStyleSpan(const std::string& element, SpanInfo& info)
 {
     std::map<std::string, StyleValue> styles;
+
     if (element == "strong" || element == "b") {
         InitFont("font-weight", "bold", "font", styles);
     } else if (element == "sup") {
@@ -976,8 +1009,14 @@ void HtmlToSpan::AddStyleSpan(const std::string& element, SpanInfo& info)
         InitDecoration("text-decoration-line", "line-through", "decoration", styles);
     } else if (element == "u") {
         InitDecoration("text-decoration-line", "underline", "decoration", styles);
-    } else if (element == "i" || element == "em") {
+    } else if (element == "i" || element == "em" || element == "cite" || element == "dfn") {
         InitFont("font-style", "italic", "font", styles);
+    } else if (element == "small" && smallDepth_ > 0) {
+        auto [ret, styleValue] = GetStyleValue<Font>("font", styles);
+        Font* font = ret ? Get<Font>(styleValue) : nullptr;
+        if (font) {
+            font->fontSizeScale = std::pow(SMALL_FONT_SIZE_RATIO, smallDepth_);
+        }
     }
 
     for (auto [key, value] : styles) {
@@ -1004,6 +1043,24 @@ void HtmlToSpan::ToTextSpan(
     }
     if (info.values.empty()) {
         return;
+    }
+    spanInfos.emplace_back(std::move(info));
+}
+
+void HtmlToSpan::ToHeadingSpan(
+    const std::string& element, xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
+{
+    SpanInfo info;
+    info.type = HtmlType::TEXT;
+    info.start = pos;
+    info.end = pos + len;
+    AddHeadingStyleSpan(element, info);
+    xmlAttrPtr curNode = node->properties;
+    for (; curNode; curNode = curNode->next) {
+        auto styles = ToTextSpanStyle(curNode);
+        for (auto [key, value] : styles) {
+            info.values.emplace_back(value);
+        }
     }
     spanInfos.emplace_back(std::move(info));
 }
@@ -1073,6 +1130,13 @@ void HtmlToSpan::ToSpan(
     xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
     bool isNeedLoadPixelMap)
 {
+    std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
+    bool isHeading = (curNode->type == XML_ELEMENT_NODE && IsHeadingTag(htmlTag));
+    if (isHeading && !allContent.empty() && !EndsWithLineBreak(allContent)) {
+        allContent += "\n";
+        pos++;
+    }
+
     size_t curNodeLen = 0;
     if (curNode->content) {
         std::string curNodeContent = reinterpret_cast<const char*>(curNode->content);
@@ -1080,8 +1144,11 @@ void HtmlToSpan::ToSpan(
         curNodeLen = StringUtils::ToWstring(curNodeContent).length();
     }
 
-    std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
     size_t childPos = pos + curNodeLen;
+    bool isSmall = (curNode->type == XML_ELEMENT_NODE && htmlTag == "small");
+    if (isSmall) {
+        smallDepth_++;
+    }
     ParseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
     if (curNode->type == XML_ELEMENT_NODE) {
         if (htmlTag == "p") {
@@ -1100,9 +1167,18 @@ void HtmlToSpan::ToSpan(
         } else if (htmlTag == "br") {
             allContent += "\n";
             childPos++;
+        } else if (isHeading) {
+            ToHeadingSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
+            if (!EndsWithLineBreak(allContent)) {
+                allContent += "\n";
+                childPos++;
+            }
         } else {
             ToTextSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
         }
+    }
+    if (isSmall) {
+        smallDepth_--;
     }
     pos = childPos;
 }
@@ -1275,6 +1351,7 @@ RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
 
 RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html, const bool isNeedLoadPixelMap)
 {
+    smallDepth_ = 0;
     htmlDocPtr doc = htmlReadMemory(html.c_str(), html.length(), nullptr, "UTF-8", 0);
     if (doc == nullptr) {
         return nullptr;

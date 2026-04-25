@@ -19,7 +19,7 @@
 #include <optional>
 
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace::NG {

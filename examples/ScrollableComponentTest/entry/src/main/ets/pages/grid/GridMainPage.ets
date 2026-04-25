@@ -55,6 +55,9 @@ struct WaterFlowMainPage {
     new TextList(26, 'PageGridDragEvent', 'pages/grid/PageGridDragEvent'),
     new TextList(27, 'BindControllerDeclare', 'pages/grid/bindController/GridDeclare'),
     new TextList(28, 'BindControllerCommand', 'pages/grid/bindController/GridCommand'),
+    new TextList(29, 'GridEventReport', 'pages/grid/GridEventReport'),
+    new TextList(30, 'GridEventReportNestedScroll', 'pages/grid/GridEventReportNestedScroll'),
+    new TextList(31, 'GridEmptyBranch', 'pages/grid/GridEmptyBranch'),
   ]
   @State fontSize: Resource | undefined = undefined
 

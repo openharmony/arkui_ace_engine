@@ -28,9 +28,9 @@ import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } fro
 import { MarqueeDynamicSyncScene, MarqueeDynamicSyncSceneType } from '@ohos/arkui/UIContext';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
-    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo,
-    CustomKeyboardContinueFeature, Magnifier } from '@ohos/arkui/UIContext';
+    MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, OrderOverlayOptions, DragController, TargetInfo,
+    CustomBuilderWithId, KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType,
+    PageInfo, CustomKeyboardContinueFeature, Magnifier } from '@ohos/arkui/UIContext';
 import { ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode, GlobalUIStateManager } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -365,6 +365,13 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         let pixmap = componentSnapshot.getWithRange(start, end, isStartRect, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
+    }
+
+    public getSizeLimitation(): componentSnapshot.SnapshotSizeLimitation {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let limitation = componentSnapshot.getSizeLimitation();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return limitation;
     }
 }
 
@@ -944,6 +951,22 @@ export class OverlayManagerImpl extends OverlayManager {
         overlayManager.hideAllComponentContents();
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+
+    openOrderOverlay(content: ComponentContent<Object>, options?: OrderOverlayOptions): Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0;
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer);
+        }
+        let optionsInternal: overlayManager.OrderOverlayOptionsInternal = {};
+        const levelOrder = options?.levelOrder?.getOrder?.();
+        if (levelOrder !== undefined) {
+            optionsInternal.levelOrder = levelOrder as number;
+        }
+        const retval = overlayManager.openOrderOverlay(ptr, options, optionsInternal);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
 }
 
 export class PromptActionImpl extends PromptAction {
@@ -959,13 +982,23 @@ export class PromptActionImpl extends PromptAction {
 
     showToast(options: promptAction.ShowToastOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        promptAction.showToast(options);
+        let optionsInternal: promptAction.ShowToastOptionsInternal = {};
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
+        }
+        promptAction.showToast(options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     openToast(options: promptAction.ShowToastOptions): Promise<int32> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let promise = promptAction.openToast(options);
+        let optionsInternal: promptAction.ShowToastOptionsInternal = {};
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
+        }
+        let promise = promptAction.openToast(options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return promise;
     }
@@ -985,6 +1018,10 @@ export class PromptActionImpl extends PromptAction {
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
         }
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
+        }
         promptAction.showDialog1(options, callback, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
@@ -997,6 +1034,10 @@ export class PromptActionImpl extends PromptAction {
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
         }
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
+        }
         const retval = promptAction.showDialog(options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
@@ -1006,14 +1047,24 @@ export class PromptActionImpl extends PromptAction {
     showActionMenu(options: promptAction.ActionMenuOptions,
         callback: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        promptAction.showActionMenu1(options, callback);
+        let optionsInternal: promptAction.ActionMenuOptionsInternal = {};
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
+        }
+        promptAction.showActionMenu1(options, callback, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     //@ts-ignore
     showActionMenu(options: promptAction.ActionMenuOptions): Promise<promptAction.ActionMenuSuccessResponse> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const retval = promptAction.showActionMenu(options);
+        let optionsInternal: promptAction.ActionMenuOptionsInternal = {};
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
+        }
+        const retval = promptAction.showActionMenu(options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
@@ -1042,6 +1093,10 @@ export class PromptActionImpl extends PromptAction {
         const levelOrder = options?.levelOrder?.getOrder?.();
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
+        }
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
         }
         const retval = promptAction.openCustomDialog1(contentPtr, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1076,6 +1131,10 @@ export class PromptActionImpl extends PromptAction {
         const levelOrder = options?.levelOrder?.getOrder?.();
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
+        }
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
         }
         const retval = promptAction.openCustomDialog(builderOptions, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1137,6 +1196,10 @@ export class PromptActionImpl extends PromptAction {
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
         }
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
+        }
         const retval = promptAction.openCustomDialogWithController(contentPtr, controller, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
@@ -1179,6 +1242,10 @@ export class PromptActionImpl extends PromptAction {
         const levelOrder = options?.levelOrder?.getOrder?.();
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
+        }
+        const materialPtr = options?.systemMaterial?.getNativeObject();
+        if (materialPtr !== undefined) {
+            optionsInternal.systemMaterial = materialPtr as KPointer;
         }
         const retval = promptAction.presentCustomDialog(builderOptions, controller, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1271,6 +1338,12 @@ export class CursorControllerImpl extends CursorController {
 
     public setCursor(value: PointerStyle): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public setCustomCursor(value: PixelMap, focusX?: int32, focusY?: int32): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.setCustomCursor(value, focusX, focusY);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 }

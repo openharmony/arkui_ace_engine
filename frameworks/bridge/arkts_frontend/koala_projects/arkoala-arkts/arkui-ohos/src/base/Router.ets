@@ -693,7 +693,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -782,7 +786,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -1123,7 +1131,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -1211,7 +1223,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -1666,6 +1682,57 @@ export class RouterUtil {
             console.log(`AceRouter: getState error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return undefined;
+        }
+    }
+
+    static runIntentPage(instanceId: int32, url: string, param: Object | undefined): void {
+        let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+        let routerInfo = context.getRouter();
+        let routerImpl = routerInfo.getRouter() as RouterImpl;
+        if (!routerImpl) {
+            console.log(`AceRouter: failed to getRouter in runIntentPage with instanceId: ${instanceId}`);
+            return;
+        }
+        let options: router.RouterOptions = { url: url, params: param };
+        try {
+            routerImpl.push(options, router.RouterMode.Single);
+        } catch (e) {
+            console.log(`AceRouter: runIntentPage push failed, name: ${e.name} message: ${e.message}`);
+            console.log(e.stack);
+        }
+    }
+
+    static runIntentPageFromNative(instanceId: int32, url: string, paramStr: string, linker?: RuntimeLinker): void {
+        let objParam: Object | undefined = undefined;
+        if (paramStr.length != 0 && paramStr != "{}") {
+            try {
+                let tempObj: Object | null | undefined = JSON.parse<Object>(paramStr, Class.from<Object>());
+                if (tempObj != null && tempObj != undefined) {
+                    objParam = tempObj!;
+                }
+            } catch (e) {
+                InteropNativeModule._NativeLog(`AceRouter: runIntentPage failed to parse params: ${paramStr} error: ` + e);
+            }
+        }
+        let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+        let router = context.getRouter();
+        let routerImpl = router.getRouter() as RouterImpl;
+        if (!routerImpl) {
+            console.log(`AceRouter: failed to getRouter in runIntentPageFromNative with instanceId: ${instanceId}`);
+            return;
+        }
+        if (linker != undefined) {
+            let backupLinker = routerImpl.GetRuntimeLinker();
+            routerImpl.SetRuntimeLinker(linker);
+            try {
+                RouterUtil.runIntentPage(instanceId, url, objParam);
+            } catch (e) {
+                console.log(`AceRouter: runIntentPage failed, name: ${e.name} message: ${e.message}`);
+                console.log(e.stack);
+            }
+            routerImpl.SetRuntimeLinker(backupLinker);
+        } else {
+            RouterUtil.runIntentPage(instanceId, url, objParam);
         }
     }
 }

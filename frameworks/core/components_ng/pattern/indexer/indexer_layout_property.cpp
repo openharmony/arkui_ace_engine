@@ -58,9 +58,9 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("font", ToJsonObjectValue(propFont_.value_or(defaultFont)), filter);
     json->PutExtAttr("selectedFont", ToJsonObjectValue(propSelectedFont_.value_or(defaultFont)), filter);
     json->PutExtAttr("popupFont", ToJsonObjectValue(propPopupFont_.value_or(defaultFont)), filter);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto indexerTheme = host->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     auto defaultFontSize = indexerTheme->GetPopupTextStyle().GetFontSize();
     auto defaultFontWeight = indexerTheme->GetPopupTextStyle().GetFontWeight();

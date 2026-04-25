@@ -22,8 +22,8 @@ ace_unittest("window_scene_test") {
     "$ace_root/adapter/ohos/entrance/ace_view_ohos.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_container.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_extra_input_data.cpp",
     "$ace_root/test/unittest/core/pattern/window_scene/mock/mock_mmi_event_convertor.cpp",
     "$ace_root/test/unittest/core/pattern/window_scene/mock/mock_rosen_render_context.cpp",
 

@@ -14,6 +14,7 @@
  */
 
 #include <gmock/gmock.h>
+#include "core/accessibility/accessibility_manager.h"
 
 #include "gtest/gtest.h"
 
@@ -23,6 +24,7 @@
 #include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/ani/web_model_static.h"
 #undef protected
 #undef private

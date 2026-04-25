@@ -31,6 +31,8 @@
 #include "securec.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/interfaces/ani/ani_api.h"
 #include "arkoala-arkts/framework/native/src/resource_color_helper.h"
 #ifndef __linux__
@@ -1956,7 +1958,7 @@ ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
     status = env->FindClass("std.core.Int", &intCls);
     status = env->Class_FindMethod(intCls, "<ctor>","i:", &intCtor);
     ani_object result {};
-    for (int i = 0; i < arraySize; ++i) {
+    for (size_t i = 0; i < arraySize; ++i) {
         status = env->Object_New(intCls, intCtor, &result, ani_int(instance[i]));
         status = env->Array_Set(resultArray, i, result);
     }

@@ -17,11 +17,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -93,6 +93,14 @@ void DialogModelTestNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else {
+                return nullptr;
+            }
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1233,6 +1241,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg024, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     ASSERT_NE(dialogTheme, nullptr);
 
@@ -1259,6 +1268,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg026, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     ASSERT_NE(dialogTheme, nullptr);
 
@@ -1313,6 +1323,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg027, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     ASSERT_NE(dialogTheme, nullptr);
 
@@ -1352,6 +1363,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg028, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     ASSERT_NE(dialogTheme, nullptr);
 
@@ -1425,6 +1437,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg031, TestSize.Level1)
     CHECK_NULL_VOID(pipeline);
     auto layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->dialogTheme_ = AceType::MakeRefPtr<DialogTheme>();
     auto manager = pipeline->GetSafeAreaManager();
     manager->keyboardInset_ = KEYBOARD_INSET;
     auto topLeftOffset = OffsetF(0.f, CHILD_SIZE);

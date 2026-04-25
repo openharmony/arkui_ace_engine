@@ -98,7 +98,7 @@ void WebContextMenuOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOve
     } else {
         menuInfo.showPaste = false;
     }
-    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_SELECT_ALL)) {
+    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_SELECT_ALL) || !isEdit_) {
         menuInfo.showCopyAll = true;
     } else {
         menuInfo.showCopyAll = false;

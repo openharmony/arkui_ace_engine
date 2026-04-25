@@ -16,6 +16,47 @@
 #include "base/geometry/matrix4.h"
 #include "core/pipeline/base/constants.h"
 
+#if defined(__aarch64__) && defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif
+
+namespace {
+#if defined(__aarch64__) && defined(__ARM_NEON)
+using Matrix4 = OHOS::Ace::Matrix4;
+using Mtx4 = double[Matrix4::DIMENSION * Matrix4::DIMENSION];
+
+// precondition: &a != &b
+void Matrix4Multiply(Mtx4 a, const Mtx4 b)
+{
+    for (int i = 0; i < Matrix4::DIMENSION; i += 2) { // load 2 double each time
+        float64x2_t a0 = vld1q_f64(&a[i]);
+        float64x2_t a1 = vld1q_f64(&a[Matrix4::DIMENSION + i]);
+        float64x2_t a2 = vld1q_f64(&a[Matrix4::DIMENSION * 2 + i]); // 2: the third row
+        float64x2_t a3 = vld1q_f64(&a[Matrix4::DIMENSION * 3 + i]); // 3: the forth row
+
+        for (int j = 0; j < Matrix4::DIMENSION; j++) {
+            float64x2_t res = {.0, .0};
+            res = vfmaq_n_f64(res, a0, b[Matrix4::DIMENSION * j]);
+            res = vfmaq_n_f64(res, a1, b[Matrix4::DIMENSION * j + 1]); // 1: the second col
+            res = vfmaq_n_f64(res, a2, b[Matrix4::DIMENSION * j + 2]); // 2: the third col
+            res = vfmaq_n_f64(res, a3, b[Matrix4::DIMENSION * j + 3]); // 3: the forth col
+
+            vst1q_f64(&a[Matrix4::DIMENSION * j + i], res);
+        }
+    }
+}
+
+void Matrix4Multiply(Mtx4 a, const double& d)
+{
+    float64x2_t b = vld1q_dup_f64(&d);
+    for (int i = 0; i < Matrix4::DIMENSION * Matrix4::DIMENSION; i += 2) { // load 2 double each time
+        float64x2_t ai = vld1q_f64(&a[i]);
+        vst1q_f64(&a[i], vmulq_f64(ai, b));
+    }
+}
+#endif
+}
+
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t MATRIX_LENGTH = Matrix4::DIMENSION * Matrix4::DIMENSION;
@@ -104,12 +145,11 @@ Matrix4 Matrix4::Invert(const Matrix4& matrix)
     double determinant = matrix(0, 0) * inverted(0, 0) + matrix(0, 1) * inverted(1, 0) + matrix(0, 2) * inverted(2, 0) +
                          matrix(0, 3) * inverted(3, 0);
     if (!NearZero(determinant, 1e-7f)) {
-        inverted = inverted * (1.0f / determinant);
+        inverted *= 1.0f / determinant;
+        return inverted;
     } else {
-        inverted = CreateIdentity();
+        return CreateIdentity();
     }
-
-    return inverted;
 }
 
 Matrix4 Matrix4::QuaternionToMatrix(double x, double y, double z, double w)
@@ -271,8 +311,23 @@ void Matrix4::CopyMatrix(double (&matrix)[4][4])
     std::copy_n(&matrix4x4_[0][0], MATRIX_LENGTH, &matrix[0][0]);
 }
 
+Matrix4& Matrix4::operator*=(double num)
+{
+#if defined(__aarch64__) && defined(__ARM_NEON)
+    Matrix4Multiply(&this->matrix4x4_[0][0], num);
+#else
+    *this = *this * num;
+#endif
+    return *this;
+}
+
 Matrix4 Matrix4::operator*(double num)
 {
+#if defined(__aarch64__) && defined(__ARM_NEON)
+    Matrix4 ret(*this);
+    Matrix4Multiply(&ret.matrix4x4_[0][0], num);
+    return ret;
+#else
     Matrix4 ret(*this);
     auto function = [num](double& v) { v *= num; };
     auto it = &ret.matrix4x4_[0][0];
@@ -280,10 +335,36 @@ Matrix4 Matrix4::operator*(double num)
         function(*it);
     }
     return ret;
+#endif
+}
+
+Matrix4& Matrix4::MatrixMultiply(const Matrix4& matrix)
+{
+#if defined(__aarch64__) && defined(__ARM_NEON)
+    if (ACE_LIKELY(this != &matrix)) {
+        Matrix4Multiply(&this->matrix4x4_[0][0], &matrix.matrix4x4_[0][0]);
+    } else {
+        Matrix4 m(*this);
+        Matrix4Multiply(&this->matrix4x4_[0][0], &m.matrix4x4_[0][0]);
+    }
+#else
+    *this = *this * matrix;
+#endif
+    return *this;
+}
+
+Matrix4& Matrix4::operator*=(const Matrix4& matrix)
+{
+    return MatrixMultiply(matrix);
 }
 
 Matrix4 Matrix4::operator*(const Matrix4& matrix)
 {
+#if defined(__aarch64__) && defined(__ARM_NEON)
+    Matrix4 ret(*this);
+    Matrix4Multiply(&ret.matrix4x4_[0][0], &matrix.matrix4x4_[0][0]);
+    return ret;
+#else
     return Matrix4(
         matrix4x4_[0][0] * matrix(0, 0) + matrix4x4_[1][0] * matrix(0, 1) + matrix4x4_[2][0] * matrix(0, 2) +
             matrix4x4_[3][0] * matrix(0, 3),
@@ -317,6 +398,7 @@ Matrix4 Matrix4::operator*(const Matrix4& matrix)
             matrix4x4_[3][3] * matrix(2, 3),
         matrix4x4_[0][3] * matrix(3, 0) + matrix4x4_[1][3] * matrix(3, 1) + matrix4x4_[2][3] * matrix(3, 2) +
             matrix4x4_[3][3] * matrix(3, 3));
+#endif
 }
 
 Matrix4N Matrix4::operator*(const Matrix4N& matrix) const
@@ -337,10 +419,21 @@ Matrix4N Matrix4::operator*(const Matrix4N& matrix) const
 
 Point Matrix4::operator*(const Point& point)
 {
+#if defined(__aarch64__) && defined(__ARM_NEON)
+    alignas(16) double p[2] = {point.GetX(), point.GetY()}; // 16: align as 2 double
+    float64x2_t a = vld1q_f64(&matrix4x4_[0][0]);
+    float64x2_t b = vld1q_f64(&matrix4x4_[1][0]);
+    float64x2_t res = vld1q_f64(&matrix4x4_[3][0]);
+    res = vfmaq_n_f64(res, a, p[0]);
+    res = vfmaq_n_f64(res, b, p[1]);
+    vst1q_f64(&p[0], res);
+    return Point(p[0], p[1]);
+#else
     double x = point.GetX();
     double y = point.GetY();
     return Point(matrix4x4_[0][0] * x + matrix4x4_[1][0] * y + matrix4x4_[3][0],
         matrix4x4_[0][1] * x + matrix4x4_[1][1] * y + matrix4x4_[3][1]);
+#endif
 }
 
 Point Matrix4::TransformPoint(const Point& point)

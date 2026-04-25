@@ -81,6 +81,15 @@ enum class RootNodeType : int32_t {
     WINDOW_SCENE_ETS_TAG = 2
 };
 
+enum class TreeOperatingStatus : int32_t {
+    // Tree operating status for cross-language attribute setting
+    // Values must match ArkUITreeOperatingStatus and OH_ArkUI_CrossLanguageOperatingStatus
+    // UNDEFINED=0, ENABLE=1, DISABLE=2
+    UNDEFINED = 0,
+    ENABLE = 1,
+    DISABLE = 2
+};
+
 struct InteractionEventBindingInfo  {
     bool baseEventRegistered = false;
     bool nodeEventRegistered = false;
@@ -110,6 +119,11 @@ struct InteractionEventBindingInfo  {
 class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
+
+enum class UINodeType {
+    FRAME_NODE,
+    OTHER
+};
 
 // UINode is the base class of FrameNode and SyntaxNode.
 class ACE_FORCE_EXPORT UINode : public virtual AceType {
@@ -1062,6 +1076,16 @@ public:
         isCrossLanguageAttributeSetting_ = isCrossLanguageAttributeSetting;
     }
 
+    TreeOperatingStatus GetTreeOperatingStatus() const
+    {
+        return treeOperatingStatus_;
+    }
+
+    void SetTreeOperatingStatus(TreeOperatingStatus treeOperatingStatus)
+    {
+        treeOperatingStatus_ = treeOperatingStatus;
+    }
+
     /**
      * flag used by Repeat virtual scroll
      * to mark a child UINode of RepeatVirtualScroll as either allowing or not allowing
@@ -1072,10 +1096,6 @@ public:
     bool IsAllowReusableV2Descendant() const;
 
     bool HasSkipNode();
-    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
-    {
-        isDestroyingState_ = isDestroying;
-    }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 
     /**
@@ -1252,6 +1272,14 @@ public:
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);
 
+    UINodeType GetNodeType() const
+    {
+        return uiNodeType_;
+    }
+
+private:
+    bool uiNodeGcEnable_ = false;
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1305,6 +1333,7 @@ protected:
 
     virtual void OnOffscreenProcessResource() {}
 
+    UINodeType uiNodeType_ = UINodeType::OTHER;
     bool isRemoving_ = false;
 
     virtual bool RemoveImmediately() const;
@@ -1352,7 +1381,6 @@ protected:
     int32_t themeScopeId_ = 0;
     int32_t subtreeIgnoreCount_ = 0;
     std::list<RefPtr<FrameNode>> adoptedChildren_;
-
 private:
     void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
         ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker);
@@ -1455,6 +1483,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;
     bool isCrossLanguageAttributeSetting_ = false;
+    TreeOperatingStatus treeOperatingStatus_ = TreeOperatingStatus::UNDEFINED;
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
@@ -1464,7 +1493,6 @@ private:
     bool needSetInActiveAfterTransitionOut_ = false;
 
     bool isStaticNode_ = false;
-    bool uiNodeGcEnable_ = false;
     bool isAdopted_ = false;
 };
 

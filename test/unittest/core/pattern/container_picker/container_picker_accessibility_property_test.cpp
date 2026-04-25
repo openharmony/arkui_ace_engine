@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -1260,7 +1260,9 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount005, TestSize.Level1)
     model.SetSpace(Dimension(SPACE));
     CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
         ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::NONE);
+        V2::ListItemGroupOptions groupOptions;
+        groupOptions.style = V2::ListItemGroupStyle::NONE;
+        groupModel.Create(groupOptions);
         CreateListItems(1, V2::ListItemStyle::NONE);
         ViewStackProcessor::GetInstance()->Pop();
     });

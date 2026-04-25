@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SVG2 Mask and Pattern Test File -->
+<!-- Tests SVG2 enhanced mask coordinate system and pattern tile rendering -->
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- SVG2 mask with maskUnits="objectBoundingBox" -->
+    <mask id="mask1" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+      <rect x="0" y="0" width="1" height="1" fill="white"/>
+      <circle cx="0.5" cy="0.5" r="0.3" fill="black"/>
+    </mask>
+    
+    <!-- SVG2 mask with maskUnits="userSpaceOnUse" -->
+    <mask id="mask2" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="150" height="150" fill="white"/>
+      <ellipse cx="75" cy="75" rx="40" ry="60" fill="black"/>
+    </mask>
+    
+    <!-- SVG2 pattern with patternUnits="objectBoundingBox" -->
+    <pattern id="pattern1" patternUnits="objectBoundingBox" width="0.2" height="0.2">
+      <rect width="10" height="10" fill="#4CAF50"/>
+      <circle cx="5" cy="5" r="3" fill="#FFEB3B"/>
+    </pattern>
+    
+    <!-- SVG2 pattern with patternUnits="userSpaceOnUse" -->
+    <pattern id="pattern2" patternUnits="userSpaceOnUse" width="30" height="30" patternTransform="rotate(15)">
+      <rect width="15" height="15" fill="#2196F3"/>
+      <rect x="15" y="15" width="15" height="15" fill="#FF5722"/>
+    </pattern>
+    
+    <!-- SVG2 pattern with gradient -->
+    <linearGradient id="gradInPattern" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E91E63"/>
+      <stop offset="100%" stop-color="#9C27B0"/>
+    </linearGradient>
+    <pattern id="pattern3" width="20" height="20">
+      <rect width="20" height="20" fill="url(#gradInPattern)"/>
+    </pattern>
+    
+    <!-- SVG2 mask with gradient -->
+    <linearGradient id="maskGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="white"/>
+      <stop offset="100%" stop-color="black"/>
+    </linearGradient>
+    <mask id="gradientMask">
+      <rect width="200" height="200" fill="url(#maskGradient)"/>
+    </mask>
+    
+    <!-- SVG2 combined mask and pattern -->
+    <mask id="combinedMask">
+      <rect width="200" height="200" fill="url(#pattern3)"/>
+    </mask>
+  </defs>
+  
+  <!-- Mask with objectBoundingBox -->
+  <rect x="10" y="10" width="150" height="150" fill="#FF9800" mask="url(#mask1)"/>
+  <text x="85" y="85" fill="white" font-size="10" text-anchor="middle">Mask BBox</text>
+  
+  <!-- Mask with userSpaceOnUse -->
+  <circle cx="250" cy="85" r="75" fill="#3F51B5" mask="url(#mask2)"/>
+  <text x="250" y="85" fill="white" font-size="10" text-anchor="middle">Mask UserSpace</text>
+  
+  <!-- Pattern with objectBoundingBox -->
+  <rect x="10" y="180" width="150" height="150" fill="url(#pattern1)" stroke="#333" stroke-width="2"/>
+  <text x="85" y="255" fill="black" font-size="10" text-anchor="middle">Pattern BBox</text>
+  
+  <!-- Pattern with userSpaceOnUse -->
+  <rect x="180" y="180" width="200" height="150" fill="url(#pattern2)" stroke="#333" stroke-width="2"/>
+  <text x="280" y="255" fill="white" font-size="10" text-anchor="middle">Pattern UserSpace</text>
+  
+  <!-- Gradient mask -->
+  <rect x="10" y="350" width="200" height="40" fill="#E91E63" mask="url(#gradientMask)"/>
+  <text x="110" y="370" fill="white" font-size="10" text-anchor="middle">Gradient Mask</text>
+  
+  <!-- Combined mask and pattern -->
+  <rect x="230" y="350" width="150" height="40" fill="#00BCD4" mask="url(#combinedMask)"/>
+  <text x="305" y="370" fill="white" font-size="10" text-anchor="middle">Mask+Pattern</text>
+</svg>

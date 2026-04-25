@@ -17,6 +17,11 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/pattern/select/select_model.h"
+
+namespace OHOS::Ace::NG {
+struct OptionParam;
+}
+
 namespace OHOS::Ace::Framework {
 class JSViewPopups {
 public:
@@ -76,6 +81,7 @@ private:
     static void ParseBackgroundParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuAvoidKeyboard(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuMaxHeight(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuAnchoredColorMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuLifeCycleParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuAboutToAppearLifeCycleParam(
@@ -89,6 +95,7 @@ private:
     static void ParseTransitionParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseAnchorPositionParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuTargetSpace(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::Framework
 

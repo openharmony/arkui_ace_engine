@@ -46,6 +46,11 @@ enum class TouchPassMode: int32_t {
     ACCELERATE,
 };
 
+enum class MousePassMode: int32_t {
+    DEFAULT = 0,
+    PASS_THROUGH,
+};
+
 struct TextMenuInfo {
     uint32_t disableFlags = 0;
     std::function<bool()> menuOnChangeCallback;
@@ -255,6 +260,22 @@ public:
         return touchPassMode_;
     }
 
+    void SetMouseEventPassMode(MousePassMode mode)
+    {
+        std::unique_lock<std::shared_mutex> lock(mousePassMutex_);
+        mousePassMode_ = mode;
+    }
+
+    MousePassMode GetMouseEventPassMode() const
+    {
+        std::shared_lock<std::shared_mutex> lock(mousePassMutex_);
+        return mousePassMode_;
+    }
+
+    virtual void UpdateTouchPassthroughForPipelines(bool enabled, const std::string& bundleName);
+
+    virtual void UpdateMousePassthroughForPipelines(bool enabled, const std::string& bundleName);
+
     void SetReusedNodeSkipMeasure(bool reusedNodeSkipMeasure)
     {
         reusedNodeSkipMeasure_= reusedNodeSkipMeasure;
@@ -315,6 +336,26 @@ public:
         return enableCustomComponentCrossAbility_;
     }
 
+    void SetUIMaterialState(const std::string& state)
+    {
+        uiMaterialState_ = state;
+    }
+
+    const std::string& GetUIMaterialState() const
+    {
+        return uiMaterialState_;
+    }
+
+    void SetUIMaterialType(const std::string& type)
+    {
+        uiMaterialType_ = type;
+    }
+
+    const std::string& GetUIMaterialType() const
+    {
+        return uiMaterialType_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -349,10 +390,14 @@ protected:
     int32_t missionId_ = -1;
     mutable std::shared_mutex eventsPassMutex_;
     TouchPassMode touchPassMode_ = TouchPassMode::ACCELERATE;
+    mutable std::shared_mutex mousePassMutex_;
+    MousePassMode mousePassMode_ = MousePassMode::DEFAULT;
     bool reusedNodeSkipMeasure_ = false;
     bool mouseTransformEnable_ = false;
     bool touchPadIdChanged_ = false;
     bool enableCustomComponentCrossAbility_ = false;
+    std::string uiMaterialState_;
+    std::string uiMaterialType_;
     TextMenuInfo textMenuInfo_;
 };
 

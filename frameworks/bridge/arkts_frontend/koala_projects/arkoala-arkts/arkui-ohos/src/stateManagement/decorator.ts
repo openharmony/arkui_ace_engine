@@ -134,6 +134,9 @@ export interface IObserve {
     renderingId: RenderIdType | undefined;
     shouldAddRef(iObjectsRenderId: RenderIdType): boolean;
 }
+export interface IObservedAnyProp {
+    addRefAnyProp(): void;
+}
 
 export const OBSERVE: IObserve = ObserveSingleton.instance;
 

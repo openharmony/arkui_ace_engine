@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ class ListItemGroupInitializeModifier extends ModifierWithKey<ListItemGroupParam
       getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
     } else {
       getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style,
-        this.value?.headerComponent, this.value?.footerComponent);
+        this.value?.headerComponent, this.value?.footerComponent, this.value?.spaceWidth);
     }
   }
 }
@@ -69,6 +69,7 @@ class ListItemGroupChildrenMainSizeModifier extends ModifierWithKey<ChildrenMain
 
 interface ListItemGroupParam {
   space: string | number;
+  spaceWidth: Dimension;
   style: ListItemGroupStyle;
   headerComponent: ComponentContent;
   footerComponent: ComponentContent;

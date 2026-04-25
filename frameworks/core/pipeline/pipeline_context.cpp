@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline/pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
 #include <cstdlib>
 #include "base/utils/utils.h"
 
@@ -34,7 +35,13 @@
 #include "base/ressched/ressched_report.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
+#include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/event_manager.h"
+#include "core/event/crown_event.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/common/font_manager.h"
+#include "core/image/image_cache.h"
+#include "core/focus/focus_node.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/text_field_manager.h"
@@ -169,6 +176,16 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     ProcessPostFlush();
     ClearDeactivateElements();
     FlushMessages();
+}
+
+void PipelineContext::AddRectCallback(std::function<void(std::vector<Rect>&)>& getRectCallback,
+    std::function<void()>& touchCallback, std::function<void()>& mouseCallback)
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->AddRectCallback(
+        std::function<void(std::vector<Rect>&)>(getRectCallback),
+        std::function<void()>(touchCallback),
+        std::function<void()>(mouseCallback));
 }
 
 void PipelineContext::FlushMessages(std::function<void()> callback)
@@ -1570,8 +1587,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     ReportConfig config;
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
     if (scalePoint.type == TouchType::DOWN) {
-        eventManager_->HandleOutOfRectCallback(
-            { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
+        eventManager_->HandleOutOfRectCallbacks(
+            { scalePoint.x, scalePoint.y, scalePoint.sourceType });
         eventManager_->HandleGlobalEvent(scalePoint, textOverlayManager_);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
@@ -1859,8 +1876,8 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     CHECK_NULL_VOID(rootElement_);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     if (event.action == MouseAction::PRESS && event.button != MouseButton::LEFT_BUTTON) {
-        eventManager_->HandleOutOfRectCallback(
-            { scaleEvent.x, scaleEvent.y, scaleEvent.sourceType }, rectCallbackList_);
+        eventManager_->HandleOutOfRectCallbacks(
+            { scaleEvent.x, scaleEvent.y, scaleEvent.sourceType });
     }
     eventManager_->MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_->DispatchMouseEvent(scaleEvent);
@@ -2545,7 +2562,7 @@ void PipelineContext::Destroy()
     explicitAnimators_.clear();
     preTargetRenderNode_.Reset();
     sharedImageManager_.Reset();
-    rectCallbackList_.clear();
+    eventManager_->ClearRectCallbacks();
     PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");
 }
@@ -3693,6 +3710,16 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     auto containerModalElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     CHECK_NULL_VOID(containerModalElement);
     containerModalElement->SetAppIcon(icon);
+}
+
+void PipelineContext::SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
+{
+    textOverlayManager_ = textOverlayManager;
+}
+
+RefPtr<TextOverlayManager> PipelineContext::GetTextOverlayManager() const
+{
+    return textOverlayManager_;
 }
 
 } // namespace OHOS::Ace

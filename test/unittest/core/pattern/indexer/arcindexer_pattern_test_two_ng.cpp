@@ -15,15 +15,16 @@
 
 #include <optional>
 
+#include "core/accessibility/accessibility_manager.h"
 #include "gtest/gtest.h"
 
 #include "base/geometry/dimension.h"
 
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/memory/ace_type.h"
@@ -238,7 +239,8 @@ HWTEST_F(ArcindexerPatternTestTwoNg, UpdateBubbleView001, TestSize.Level1)
     EXPECT_EQ(textRenderContext->GetBorderRadius()->radiusBottomLeft, borderRadius);
     EXPECT_EQ(textRenderContext->GetBorderRadius()->radiusTopLeft, borderRadius);
     EXPECT_EQ(textRenderContext->GetBorderRadius()->radiusTopRight, borderRadius);
-    EXPECT_EQ(textRenderContext->GetBackShadow()->GetBlurRadius(), 0);
+    EXPECT_EQ(textRenderContext->GetBackShadow()->GetBlurRadius(),
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0 : -1);
     EXPECT_EQ(textRenderContext->GetBackShadow()->GetOffset().GetX(), 0);
     EXPECT_EQ(textRenderContext->GetBackShadow()->GetOffset().GetY(), 10);
     EXPECT_EQ(textRenderContext->GetBackShadow()->GetColor(), Color(0x26000000));

@@ -34,7 +34,7 @@ class ButtonModelStaticTestCore : public ButtonTestBase {};
 class ButtonFunctionTwoTestCore : public ButtonTestBase {};
 
 // Placeholder test to ensure compilation
-HWTEST_F(ButtonFunctionTestCore, ButtonTestPlaceholder, TestSize.Level1)
+HWTEST_F(ButtonFunctionTestCore, ButtonTestPlaceholder, TestSize.Level0)
 {
     EXPECT_TRUE(true);
 }

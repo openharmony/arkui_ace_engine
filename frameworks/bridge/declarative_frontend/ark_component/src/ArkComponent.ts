@@ -2292,8 +2292,8 @@ class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
 }
 
 declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void;
-class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
-  constructor(value: AreaChangeEventCallback) {
+class OnAreaChangeModifier extends ModifierWithKey<ArkOnAreaChange> {
+  constructor(value: ArkOnAreaChange) {
     super(value);
   }
   static identity: Symbol = Symbol('onAreaChange');
@@ -2301,7 +2301,12 @@ class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
     if (reset) {
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
-      getUINativeModule().common.setOnAreaChange(node, this.value);
+      if (!this.value.hasOptionsArg) {
+        getUINativeModule().common.setOnAreaChange(node, this.value.event);
+      } else {
+        getUINativeModule().common.setOnAreaChangeWithInterval(
+          node, this.value.event, this.value.expectedUpdateInterval);
+      }
     }
   }
 }
@@ -2352,6 +2357,22 @@ class OnTouchTestDoneModifier extends ModifierWithKey<TouchTestDoneCallback> {
   }
 }
 
+declare type GestureCollectInterceptCallback = (recognizers: Array<GestureRecognizer>,
+  touchRecognizers?: Array<TouchRecognizer>) => GestureCollectIntervention;
+class OnGestureCollectInterceptModifier extends ModifierWithKey<GestureCollectInterceptCallback> {
+  constructor(value: GestureCollectInterceptCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onGestureCollectIntercept');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnGestureCollectIntercept(node);
+    } else {
+      getUINativeModule().common.setOnGestureCollectIntercept(node, this.value);
+    }
+  }
+}
+
 declare type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<ShouldBuiltInRecognizerParallelWithCallback> {
   constructor(value: ShouldBuiltInRecognizerParallelWithCallback) {
@@ -2363,6 +2384,21 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
       getUINativeModule().common.resetShouldBuiltInRecognizerParallelWith(node);
     } else {
       getUINativeModule().common.setShouldBuiltInRecognizerParallelWith(node, this.value);
+    }
+  }
+}
+
+declare type ShouldRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
+class ShouldRecognizerParallelWithModifier extends ModifierWithKey<ShouldRecognizerParallelWithCallback> {
+  constructor(value: ShouldRecognizerParallelWithCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('shouldRecognizerParallelWith');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetShouldRecognizerParallelWith(node);
+    } else {
+      getUINativeModule().common.setShouldRecognizerParallelWith(node, this.value);
     }
   }
 }
@@ -4083,6 +4119,20 @@ class AccessibilityActionOptionsModifier extends ModifierWithKey<object> {
     }
   }
 }
+
+class SmartGestureShortcutModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('smartGestureShortcut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSmartGestureShortcut(node);
+    } else {
+      getUINativeModule().common.setSmartGestureShortcut(node, this.value);
+    }
+  }
+}
 class FreezeModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -4287,7 +4337,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
   private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
   private _onTouchTestDone: TouchTestDoneCallback = null;
+  private _onGestureCollectIntercept: GestureCollectInterceptCallback = null;
   private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
+  private _shouldRecognizerParallelWith: ShouldRecognizerParallelWithCallback = null;
   private _onFocusAxisEvent: FocusAxisEventCallback = null;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -4306,10 +4358,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         if (this._instanceId !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
-        value.applyStageImmediately(this.nativePtr, this);
-        getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
-        if (this._instanceId !== -1) {
-          __JSScopeUtil__.restoreInstanceId();
+        try {
+          value.applyStageImmediately(this.nativePtr, this);
+          getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+        } finally {
+          if (this._instanceId !== -1) {
+            __JSScopeUtil__.restoreInstanceId();
+          }
         }
       });
       (this._modifiersWithKeys as ObservedMap).setFrameNode(true);
@@ -4395,9 +4450,21 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
     return this;
   }
+  onGestureCollectIntercept(callback: (recognizers: Array<GestureRecognizer>,
+    touchRecognizers?: Array<TouchRecognizer>) => GestureCollectIntervention): this {
+    this._onGestureCollectIntercept = callback;
+    modifierWithKey(this._modifiersWithKeys, OnGestureCollectInterceptModifier.identity,
+      OnGestureCollectInterceptModifier, callback);
+    return this;
+  }
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
     this._shouldBuiltInRecognizerParallelWith = callback;
     modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
+    return this;
+  }
+  shouldRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
+    this._shouldRecognizerParallelWith = callback;
+    modifierWithKey(this._modifiersWithKeys, ShouldRecognizerParallelWithModifier.identity, ShouldRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback: (oldValue: SizeOptions, newValue: SizeOptions) => void): this {
@@ -5308,9 +5375,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
-  onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
+  onAreaChange(event: (oldValue: Area, newValue: Area) => void,
+    options?: { expectedUpdateInterval?: int32 }): this {
     this._onAreaChange = event;
-    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
+    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier,
+      new ArkOnAreaChange(event, options?.expectedUpdateInterval, arguments.length > 1));
     return this;
   }
 
@@ -5994,6 +6063,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   accessibilityActionOptions(value: object): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityActionOptionsModifier.identity, AccessibilityActionOptionsModifier, value);
+    return this;
+  }
+
+  smartGestureShortcut(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, SmartGestureShortcutModifier.identity, SmartGestureShortcutModifier, value);
     return this;
   }
 

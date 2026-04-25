@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -1417,6 +1418,13 @@ std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
         return "";
     }
     return delegate_->GetPagePathByUrl(url);
+}
+
+bool DeclarativeFrontend::IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+{
+    CHECK_NULL_RETURN(page, false);
+    CHECK_NULL_RETURN(delegate_, false);
+    return delegate_->IsPageInStack(page);
 }
 
 void* DeclarativeFrontend::CreateDynamicPage(

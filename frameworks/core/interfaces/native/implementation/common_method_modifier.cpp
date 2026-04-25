@@ -70,6 +70,7 @@
 #include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/finger_info_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
@@ -90,6 +91,7 @@
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/text_field_modifier.h"
+#include "core/interfaces/native/implementation/search_modifier_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -99,6 +101,10 @@
 
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
+#include "core/common/event_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components/common/properties/placement.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -484,9 +490,49 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (keyboardAvoidMode.has_value()) {
         popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
     }
+
+    // Parse lifecycle callbacks
+    auto arkOnWillAppear = GetOpt(src.onWillAppear);
+    if (arkOnWillAppear.has_value()) {
+        auto onWillAppearCallback = [arkCallback = CallbackHelper(*arkOnWillAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillAppear(std::move(onWillAppearCallback));
+    }
+
+    auto arkOnDidAppear = GetOpt(src.onDidAppear);
+    if (arkOnDidAppear.has_value()) {
+        auto onDidAppearCallback = [arkCallback = CallbackHelper(*arkOnDidAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidAppear(std::move(onDidAppearCallback));
+    }
+
+    auto arkOnWillDisappear = GetOpt(src.onWillDisappear);
+    if (arkOnWillDisappear.has_value()) {
+        auto onWillDisappearCallback = [arkCallback = CallbackHelper(*arkOnWillDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillDisappear(std::move(onWillDisappearCallback));
+    }
+
+    auto arkOnDidDisappear = GetOpt(src.onDidDisappear);
+    if (arkOnDidDisappear.has_value()) {
+        auto onDidDisappearCallback = [arkCallback = CallbackHelper(*arkOnDidDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
+    }
+
     auto material = OptConvert<UiMaterial*>(src.systemMaterial);
     if (material.has_value()) {
         popupParam->SetSystemMaterial(material.value()->Copy());
+    }
+    auto colorModeOpt = GetOpt(src.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            popupParam->SetColorMode(false);
+        }
     }
 };
 
@@ -833,9 +879,18 @@ auto g_bindMenuOptionsParam = [](
     if (scrollBarOpt.has_value()) {
         menuParam.scrollBar = scrollBarOpt.value();
     }
+    auto tarGetValue = OptConvert<Dimension>(menuOptions.targetSpace);
+    Validator::ValidateNonNegative(tarGetValue);
+    menuParam.targetSpace = tarGetValue;
     auto maxHeightOpt = OptConvert<Dimension>(menuOptions.maxHeight);
     Validator::ValidateNonNegative(maxHeightOpt);
     menuParam.maxHeight = maxHeightOpt;
+    auto colorModeOpt = GetOpt(menuOptions.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            menuParam.isColorModeFollowTarget = false;
+        }
+    }
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
@@ -2009,6 +2064,10 @@ RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
     if (showAtAnchorOpt.has_value()) {
         popupParam->SetAnchorType(showAtAnchorOpt.value());
     }
+    auto material = OptConvert<UiMaterial*>(src.systemMaterial);
+    if (material.has_value()) {
+        popupParam->SetSystemMaterial(material.value()->Copy());
+    }
     return popupParam;
 }
 
@@ -2199,19 +2258,12 @@ void AssignCast(std::optional<GestureJudgeResult> &dst, const Ark_GestureJudgeRe
 
 void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
 {
-    dst.id = ArkValue<Ark_Int32>(src.fingerId_);
-    dst.globalX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetX()));
-    dst.globalY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetY()));
-    dst.localX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
-    dst.localY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
-    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetX()));
-    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetY()));
-    // Handle globalDisplayX/Y
-    dst.globalDisplayX =
-        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
-    dst.globalDisplayY =
-        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
-    dst.hand = ArkValue<Opt_InteractionHand>(static_cast<Ark_InteractionHand>(src.operatingHand_));
+    if (!dst) {
+        dst = PeerUtils::CreatePeer<FingerInfoPeer>();
+    }
+    CHECK_NULL_VOID(dst);
+
+    dst->SetHandler(src);
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -2302,6 +2354,7 @@ void SetWidthImpl(Ark_NativePointer node,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
             SetWidthInternal(frameNode, result);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, true);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             auto result = Converter::OptConvert<LayoutCalPolicy>(src);
@@ -2310,6 +2363,7 @@ void SetWidthImpl(Ark_NativePointer node,
         },
         [frameNode]() {
             SetWidthInternal(frameNode, std::nullopt);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, true);
         });
 }
 void SetHeightInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
@@ -2359,6 +2413,7 @@ void SetHeightImpl(Ark_NativePointer node,
             auto result = Converter::OptConvert<CalcDimension>(src);
             SetHeightInternal(frameNode, result);
             SetBlankHeight(frameNode, result);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, false);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             auto result = Converter::OptConvert<LayoutCalPolicy>(src);
@@ -2367,6 +2422,7 @@ void SetHeightImpl(Ark_NativePointer node,
         },
         [frameNode]() {
             SetHeightInternal(frameNode, std::nullopt);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, false);
         });
 }
 void SetDrawModifierImpl(Ark_NativePointer node,
@@ -2407,6 +2463,9 @@ void SetResponseRegionImpl(Ark_NativePointer node,
             pattern->SetIsUserSetResponseRegion(true);
         }
     } else {
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->MarkTouchResponseRegionConfigured();
         ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
     }
 }
@@ -2589,6 +2648,8 @@ void SetMarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetMarginImpl(node, value);
+    } else if (frameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        SearchModifier::SetMarginImpl(node, value);
     } else {
         ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
     }
@@ -3284,6 +3345,7 @@ void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
             .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
             .timeStamp = Converter::ArkValue<Ark_Int64>(
                 static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice()),
             .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
             .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
             .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
@@ -3347,6 +3409,7 @@ void SetOnTouchImpl(Ark_NativePointer node,
             .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
             .timeStamp = Converter::ArkValue<Ark_Int64>(
                 static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice()),
             .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
             .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
             .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
@@ -4040,8 +4103,7 @@ void SetOnDetachImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
-void SetOnAreaChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Area_Area_Void* value)
+void SetOnAreaChange0Impl(Ark_NativePointer node, const Opt_Callback_Area_Area_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4093,6 +4155,63 @@ void SetOnAreaChangeImpl(Ark_NativePointer node,
             Offset(origin.GetX(), origin.GetY()));
     };
     ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
+}
+void SetOnAreaChange1Impl(Ark_NativePointer node,
+                          const AreaChangeCallback* event,
+                          const Opt_AreaChangeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(event);
+    auto onEvent = [arkCallback = CallbackHelper(*event), weakNode = AceType::WeakClaim(frameNode)](
+                       const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
+        ConvContext ctx;
+        PipelineContext::SetCallBackNode(weakNode);
+
+        auto previousOffset = oldRect.GetOffset();
+        Ark_Area previous;
+        previous.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Width()), &ctx);
+        previous.height = Converter::ArkValue<Ark_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(oldRect.Height()), &ctx);
+        previous.position.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX()), &ctx);
+        previous.position.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY()), &ctx);
+        previous.globalPosition.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX() + oldOrigin.GetX()), &ctx);
+        previous.globalPosition.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY() + oldOrigin.GetY()), &ctx);
+
+        auto currentOffset = rect.GetOffset();
+        Ark_Area current;
+        current.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Width()), &ctx);
+        current.height = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Height()), &ctx);
+        current.position.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX()), &ctx);
+        current.position.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY()), &ctx);
+        current.globalPosition.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX() + origin.GetX()), &ctx);
+        current.globalPosition.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY() + origin.GetY()), &ctx);
+
+        arkCallback.InvokeSync(previous, current);
+    };
+
+    auto areaChangeCallback = [areaChangeFunc = std::move(onEvent)](const RectF& oldRect,
+                                  const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+            Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
+            Offset(origin.GetX(), origin.GetY()));
+    };
+
+    int32_t expectedUpdateInterval = (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED)
+        ? Converter::GetOpt(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION)
+        : DEFAULT_DURATION;
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
+    ViewAbstract::SetOnAreaChangedWithInterval(frameNode, std::move(areaChangeCallback), expectedUpdateInterval);
 }
 void SetVisibilityImpl(Ark_NativePointer node,
                        const Opt_Visibility* value)
@@ -4852,6 +4971,32 @@ void SetLightUpEffectImpl(Ark_NativePointer node,
     Validator::ValidateByRange(convValue, LIGHTUPEFFECT_MIN, LIGHTUPEFFECT_MAX);
     ViewAbstractModelStatic::SetLightUpEffect(frameNode, convValue);
 }
+void SetSpatialEffectImpl(Ark_NativePointer node,
+                          const Opt_SpatialEffectParams* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        ViewAbstractModelStatic::SetSpatialEffect(frameNode, std::nullopt);
+        return;
+    }
+    const auto& src = value->value;
+    auto toVec3 = [](const Ark_DepthVector3& v) -> DepthVector3 {
+        return { static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z) };
+    };
+    SpatialEffectParams effectParams;
+    effectParams.position = DepthPosition {
+        .leftTop = toVec3(src.position.leftTop),
+        .rightTop = toVec3(src.position.rightTop),
+        .leftBottom = toVec3(src.position.leftBottom),
+        .rightBottom = toVec3(src.position.rightBottom),
+    };
+    if (src.occlusionWeight.tag != INTEROP_TAG_UNDEFINED) {
+        effectParams.occlusionWeight = static_cast<float>(src.occlusionWeight.value);
+    }
+    ViewAbstractModelStatic::SetSpatialEffect(frameNode, effectParams);
+}
 void SetPixelStretchEffectImpl(Ark_NativePointer node,
                                const Opt_PixelStretchEffectOptions* value)
 {
@@ -5198,6 +5343,29 @@ void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
+void SetShouldRecognizerParallelWithImpl(Ark_NativePointer node,
+                                         const ShouldRecognizerParallelWithCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || !CallbackHelper(*value).IsValid()) {
+        ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*value), node = weakNode](
+        const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
+    ) -> RefPtr<NG::NGGestureRecognizer> {
+        PipelineContext::SetCallBackNode(node);
+
+        auto arkValCurrent = CreateArkGestureRecognizer(current);
+        auto arkValOthers = CreateArkGestureRecognizerArray(others);
+        auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
+            Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
+        return resultOpt.value_or(nullptr);
+    };
+    ViewAbstract::SetShouldRecognizerParallelWith(frameNode, std::move(shouldRecognizerParallelWithFunc));
+}
 void SetMonopolizeEventsImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)
 {
@@ -5227,6 +5395,7 @@ void SetOnTouchInterceptImpl(Ark_NativePointer node,
             .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
             .timeStamp = Converter::ArkValue<Ark_Int64>(
                 static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice()),
             .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
             .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
             .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
@@ -5311,6 +5480,55 @@ void SetOnTouchTestDoneImpl(Ark_NativePointer node,
         callback.InvokeSync(basePeer, arkValOthers);
     };
     ViewAbstract::SetOnTouchTestDone(frameNode, std::move(onTouchTestDoneFunc));
+}
+void SetOnGestureCollectInterceptImpl(Ark_NativePointer node,
+                                      const GestureCollectInterceptCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || !CallbackHelper(*value).IsValid()) {
+        ViewAbstract::SetOnGestureCollectIntercept(frameNode, nullptr);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onGestureCollectInterceptFunc = [callback = CallbackHelper(*value), node = weakNode](
+                                            const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+                                            const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers)
+        -> GestureCollectIntervention {
+        PipelineContext::SetCallBackNode(node);
+        auto arkValRecognizers = CreateArkGestureRecognizerArray(recognizers);
+        std::vector<Ark_TouchRecognizer> arkTouchRecognizers;
+        arkTouchRecognizers.reserve(touchRecognizers.size());
+        for (const auto& touchRecognizer : touchRecognizers) {
+            if (!touchRecognizer) {
+                continue;
+            }
+            auto touchRecognizerPeer = PeerUtils::CreatePeer<TouchRecognizerPeer>();
+            if (!touchRecognizerPeer) {
+                continue;
+            }
+            touchRecognizerPeer->SetTouchData(WeakPtr<TouchEventTarget>(touchRecognizer), {});
+            arkTouchRecognizers.push_back(touchRecognizerPeer);
+        }
+        auto arkValTouchRecognizers =
+            Converter::ArkValue<Opt_Array_TouchRecognizer>(arkTouchRecognizers, Converter::FC);
+        auto result = callback.InvokeWithObtainResult<Ark_GestureCollectIntervention,
+            Callback_GestureCollectIntervention_Void>(arkValRecognizers, arkValTouchRecognizers);
+        switch (result) {
+            case ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER:
+                return GestureCollectIntervention::DISCARD_LOWER;
+            case ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_HIGHER:
+                return GestureCollectIntervention::DISCARD_HIGHER;
+            case ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_SELF:
+                return GestureCollectIntervention::DISCARD_SELF;
+            case ARK_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER_PRIORITY_SIBLINGS:
+                return GestureCollectIntervention::DISCARD_LOWER_PRIORITY_SIBLINGS;
+            case ARK_GESTURE_COLLECT_INTERVENTION_CONTINUE:
+            default:
+                return GestureCollectIntervention::CONTINUE;
+        }
+    };
+    ViewAbstract::SetOnGestureCollectIntercept(frameNode, std::move(onGestureCollectInterceptFunc));
 }
 void SetSystemMaterialImpl(Ark_NativePointer node, const Opt_uiMaterial_Material* value)
 {
@@ -5904,6 +6122,9 @@ void SetAdvancedBlendModeImpl(Ark_NativePointer node,
                 },
                 [frameNode](const Ark_uiEffect_HdrBrightnessBlender& blender) {
                     LOGE("SetAdvancedBlendModeImpl is not implemented for Ark_uiEffect_HdrBrightnessBlender");
+                },
+                [frameNode](const Ark_uiEffect_HdrDarkenBlender& blender) {
+                    LOGE("SetAdvancedBlendModeImpl is not implemented for Ark_uiEffect_HdrDarkenBlender");
                 },
                 [frameNode]() {
                     ViewAbstractModelStatic::SetBlendMode(frameNode, BlendMode::NONE);
@@ -6795,7 +7016,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDisAppearImpl,
         CommonMethodModifier::SetOnAttachImpl,
         CommonMethodModifier::SetOnDetachImpl,
-        CommonMethodModifier::SetOnAreaChangeImpl,
+        CommonMethodModifier::SetOnAreaChange0Impl,
         CommonMethodModifier::SetVisibilityImpl,
         CommonMethodModifier::SetFlexGrowImpl,
         CommonMethodModifier::SetFlexShrinkImpl,
@@ -6837,6 +7058,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetRestoreIdImpl,
         CommonMethodModifier::SetSphericalEffectImpl,
         CommonMethodModifier::SetLightUpEffectImpl,
+        CommonMethodModifier::SetSpatialEffectImpl,
         CommonMethodModifier::SetPixelStretchEffectImpl,
         CommonMethodModifier::SetAccessibilityNextFocusIdImpl,
         CommonMethodModifier::SetAccessibilityDefaultFocusImpl,
@@ -6860,11 +7082,13 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnGestureJudgeBeginImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin0Impl,
         CommonMethodModifier::SetShouldBuiltInRecognizerParallelWithImpl,
+        CommonMethodModifier::SetShouldRecognizerParallelWithImpl,
         CommonMethodModifier::SetMonopolizeEventsImpl,
         CommonMethodModifier::SetOnTouchInterceptImpl,
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
         CommonMethodModifier::SetOnTouchTestDoneImpl,
+        CommonMethodModifier::SetOnGestureCollectInterceptImpl,
         CommonMethodModifier::SetSystemMaterialImpl,
         CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
@@ -6887,6 +7111,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSystemBarEffectImpl,
         CommonMethodModifier::SetUseEffect1Impl,
         CommonMethodModifier::SetBackdropBlurImpl,
+        CommonMethodModifier::SetOnAreaChange1Impl,
         CommonMethodModifier::SetSharedTransitionImpl,
         CommonMethodModifier::SetChainModeImpl,
         CommonMethodModifier::SetOnDrop1Impl,

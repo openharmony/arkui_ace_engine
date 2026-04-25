@@ -26,7 +26,6 @@
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -93,6 +92,13 @@ enum class WebKeyboardAvoidMode : int32_t {
     DEFAULT
 };
 
+enum class  WebKeyboardAppearanceMode : int32_t {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+};
+
 enum class WebElementType : int32_t {
     IMAGE = 1,
     LINK = 2,
@@ -125,6 +131,11 @@ enum class WebRotateEffect : int32_t {
 enum class ScrollDirectionalLockType : int32_t {
     ALL = 0,
     NESTED_SCROLL = 1
+};
+
+enum class ScrollbarLayoutPolicy : int32_t {
+    CONTENT = 0,
+    SYSTEM = 1
 };
 
 struct WebPreviewSelectionMenuParam {

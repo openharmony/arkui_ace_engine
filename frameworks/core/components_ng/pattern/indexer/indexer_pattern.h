@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_accessibility_property.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
@@ -109,6 +108,34 @@ public:
         return selected_;
     }
 
+    int32_t GetCollapsedIndex() const
+    {
+        return collapsedIndex_;
+    }
+
+    bool IsAutoCollapse() const
+    {
+        return autoCollapse_;
+    }
+
+    bool IsCollapsedItem(int32_t index) const
+    {
+        if (index < 0 || index >= static_cast<int32_t>(arrayValue_.size())) {
+            return false;
+        }
+        return arrayValue_[index].second;
+    }
+
+    int32_t GetCollapsedItemCount(int32_t index) const
+    {
+        if (index < 0 || index >= static_cast<int32_t>(collapsedItemNums_.size())) {
+            return 1;
+        }
+        return collapsedItemNums_[index];
+    }
+
+    std::string GetCollapsedItemText(int32_t displayIndex) const;
+
     bool IsMeasureBoundary() const override;
     void UpdateChildBoundary(RefPtr<FrameNode>& frameNode);
     void ReportInjectionEvent(bool result, std::string reson);
@@ -118,6 +145,7 @@ public:
 protected:
     void SetAccessibilityAction();
     bool MoveIndexByStep(int32_t step);
+    bool MoveAccessibilityIndexByStep(int32_t step);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void RemoveBubble();
     void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
@@ -140,6 +168,7 @@ private:
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void BuildArrayValueItems();
@@ -226,6 +255,7 @@ private:
     void ReportSelectEvent();
     void ReportPoupSelectEvent();
     void UpdateThemeColor();
+    void ApplyPopupSystemMaterial();
     void ReportSelectChangeData(int32_t nodeId, int32_t currentIndex);
     std::vector<int32_t> collapsedItemNums_;
     int32_t collapsedIndex_ = 0;

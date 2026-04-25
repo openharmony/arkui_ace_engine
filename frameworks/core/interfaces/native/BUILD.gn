@@ -146,6 +146,7 @@ template("ace_core_interfaces_native_node") {
       "node/video_modifier.cpp",
       "node/view_model.cpp",
       "node/view_model_multi_thread.cpp",
+      "utility/error_message_manager.cpp",
       "node/water_flow_modifier.cpp",
       "node/styled_string_impl.cpp",
       "runtime/runtime_init.cpp"
@@ -229,6 +230,7 @@ template("ace_core_interfaces_native_node") {
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform",
+      "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen",
     ]
     if (defined(config.web_components_support) &&
         config.web_components_support) {

@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Accessibility {
 }

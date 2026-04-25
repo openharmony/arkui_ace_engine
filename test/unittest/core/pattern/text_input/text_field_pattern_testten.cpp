@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 
 #include "base/memory/ace_type.h"
@@ -917,7 +917,7 @@ HWTEST_F(TextFieldPatternTestten, HandleTouchUp001, TestSize.Level1)
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
     textFieldPattern->magnifierController_ =
-        AIWriteAdapter::MakeRefPtr<MagnifierController>(AIWriteAdapter::WeakClaim(AceType::RawPtr(textFieldPattern)));
+        AceType::MakeRefPtr<MagnifierController>(AceType::WeakClaim(AceType::RawPtr(textFieldPattern)));
     textFieldPattern->HandleTouchUp();
     EXPECT_EQ(textFieldPattern->magnifierController_->magnifierNodeExist_, false);
 }

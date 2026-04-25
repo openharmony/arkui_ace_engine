@@ -14,13 +14,26 @@
  */
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
+#include "base/geometry/dimension_offset.h"
+#include "base/geometry/ng/vector.h"
+#include "base/geometry/offset.h"
+#include "base/geometry/rect.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/event_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/components/common/layout/position_param.h"
+#include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/border_image.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -39,9 +52,19 @@
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/overlay_property.h"
+#include "core/image/image_source_info.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
-
+#include "frameworks/core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#include "frameworks/core/components_ng/property/smart_gesture_property.h"
+#include "core/components/common/properties/placement.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
@@ -132,6 +155,18 @@ void ViewAbstractModelNG::BindMenuGesture(
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
     BindMenuTouch(targetNode, gestureHub);
+}
+
+void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto manager = eventManager->GetOrCreateSmartGestureManager();
+    CHECK_NULL_VOID(manager);
+    manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
 }
 
 void ViewAbstractModelNG::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
@@ -1772,6 +1807,24 @@ void ViewAbstractModelNG::ResetAccessibilityActionOptions(FrameNode* frameNode)
     accessibilityProperty->ResetAccessibilityActionOptions();
 }
 
+void ViewAbstractModelNG::SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->SetSmartGestureShortcut(config);
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
+void ViewAbstractModelNG::ResetSmartGestureShortcut(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->ResetSmartGestureShortcut();
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
 void ViewAbstractModelNG::SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1785,4 +1838,124 @@ void ViewAbstractModelNG::ResetAccessibilityActionOptions()
     CHECK_NULL_VOID(frameNode);
     ResetAccessibilityActionOptions(frameNode);
 }
+
+void ViewAbstractModelNG::ResetKeyboardShortcutAll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearSingleKeyboardShortcutAll();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+}
+
+void ViewAbstractModelNG::UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
+    }
+}
+
+void ViewAbstractModelNG::SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset)
+{
+    CHECK_NULL_VOID(borderImage);
+    if (bitset & BorderImage::SOURCE_BIT) {
+        ViewAbstract::SetBorderImageSource(
+            borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
+    }
+    if (bitset & BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(true);
+    }
+    if (bitset & BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(true);
+    }
+    if (bitset & BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(true);
+    }
+    if (bitset & BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(true);
+    }
+    ViewAbstract::SetBorderImage(borderImage);
+}
+
+void ViewAbstractModelNG::SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
+}
+
+void ViewAbstractModelNG::SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
+}
+
+void ViewAbstractModelNG::SetOnAreaChanged(
+    std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
+        onAreaChanged,
+    int32_t minInterval)
+{
+    auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
+                                  const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+            Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
+            Offset(origin.GetX(), origin.GetY()));
+    };
+    if (minInterval > 0) {
+        ViewAbstract::SetOnAreaChangedWithInterval(std::move(areaChangeCallback), minInterval);
+    } else {
+        ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+    }
+}
+
+void ViewAbstractModelNG::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+{
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+}
+
+void ViewAbstractModelNG::BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& spanString)
+{
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
+}
+
+void ViewAbstractModelNG::DisableOnKeyPreIme()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnKeyPreIme();
+}
+
+void ViewAbstractModelNG::DisableOnKeyPreIme(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnKeyPreIme();
+}
+
+void ViewAbstractModelNG::SetPaddings(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+    ViewAbstract::SetPadding(paddings);
+}
+
+void ViewAbstractModelNG::SetSafeAreaPaddings(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+    ViewAbstract::SetSafeAreaPadding(paddings);
+}
+
 } // namespace OHOS::Ace::NG

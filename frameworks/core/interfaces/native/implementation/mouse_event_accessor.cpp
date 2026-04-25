@@ -73,6 +73,17 @@ void StopPropagationImpl(Ark_MouseEvent peer)
     CHECK_NULL_VOID(info);
     info->SetStopPropagation(true);
 }
+Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_MouseEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Coordinate2D>(Offset{});
+    CHECK_NULL_RETURN(peer, errValue);
+    const auto* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    const auto& localLocation = info->GetCurrentLocalLocation();
+    const auto x = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+    const auto y = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+    return Converter::ArkValue<Ark_Coordinate2D>(Offset{x, y});
+}
 Opt_Array_MouseHistoricalPoint GetHistoricalPointsImpl(Ark_MouseEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
@@ -365,6 +376,14 @@ void SetGlobalDisplayYImpl(Ark_MouseEvent peer,
     globalDisplayLocation.SetY(yConvert, animation);
     info->SetGlobalDisplayLocation(globalDisplayLocation);
 }
+Opt_Int32 GetEventHandleIdImpl(Ark_MouseEvent peer)
+{
+    return {};
+}
+void SetEventHandleIdImpl(Ark_MouseEvent peer,
+                          const Opt_Int32* eventHandleId)
+{
+}
 } // MouseEventAccessor
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
 {
@@ -373,6 +392,7 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::ConstructImpl,
         MouseEventAccessor::GetFinalizerImpl,
         MouseEventAccessor::StopPropagationImpl,
+        MouseEventAccessor::GetCurrentLocalPositionImpl,
         MouseEventAccessor::GetHistoricalPointsImpl,
         MouseEventAccessor::GetButtonImpl,
         MouseEventAccessor::SetButtonImpl,
@@ -400,6 +420,8 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetGlobalDisplayXImpl,
         MouseEventAccessor::GetGlobalDisplayYImpl,
         MouseEventAccessor::SetGlobalDisplayYImpl,
+        MouseEventAccessor::GetEventHandleIdImpl,
+        MouseEventAccessor::SetEventHandleIdImpl,
     };
     return &MouseEventAccessorImpl;
 }

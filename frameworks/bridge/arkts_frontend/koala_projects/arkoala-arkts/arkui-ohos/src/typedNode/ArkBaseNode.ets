@@ -14,7 +14,7 @@
  */
 
 import { ComponentBase } from "./../ComponentBase";
-import { AccessibilityCallback, AccessibilityRoleType, AlignRuleOption, AnimatableArithmetic, AnimateParam, AttributeModifier } from '../component/common';
+import { AccessibilityCallback, AccessibilityRoleType, AlignRuleOption, AnimatableArithmetic, AnimateParam, AttributeModifier, AreaChangeCallback, AreaChangeOptions } from '../component/common';
 import { Bindable, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType } from '../component/common';
 import { BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions } from '../component/common';
 import { ContextMenuOptions, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo } from '../component/common';
@@ -24,9 +24,9 @@ import { GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBegin
 import { LinearGradientBlurOptions, BackgroundOptions } from '../component/common';
 import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions } from '../component/common';
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../component/common';
-import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
+import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, RotateAngleOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
 import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult } from '../component/common';
-import { TouchTestInfo, TouchTestDoneCallback, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
+import { TouchTestInfo, TouchTestDoneCallback, GestureCollectInterceptCallback, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
 import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer } from '../component/common';
 import { SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions } from '../component/common';
 import { OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode } from '../component/common';
@@ -230,6 +230,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setOnTouchTestDoneAttribute(value);
         return this
     }
+    public onGestureCollectIntercept(value: GestureCollectInterceptCallback): this {
+        this.getPeer().setOnGestureCollectInterceptAttribute(value);
+        return this
+    }
     public onKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this {
         this.getPeer().setOnKeyEventAttribute(value);
         return this
@@ -358,7 +362,8 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public gridOffset(value: number | undefined): this {
         return this
     }
-    public rotate(value: RotateOptions | undefined): this {
+    public rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
+        this.getPeer()?.setRotateAttribute(value);
         return this
     }
     public transform(value: Object | undefined): this {
@@ -381,7 +386,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onAreaChange(value: ((oldValue: Area, newValue: Area) => void) | undefined): this {
-        this.getPeer().setOnAreaChangeAttribute(value);
+        this.getPeer().setOnAreaChange0Attribute(value);
         return this
     }
     public visibility(value: Visibility | undefined): this {
@@ -430,6 +435,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     public enabled(value: boolean | undefined): this {
         this.getPeer().setEnabledAttribute(value);
+        this.markDirty();
         return this
     }
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {
@@ -696,6 +702,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        return this
+    }
+    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        this.getPeer().setOnAreaChange1Attribute(event, options);
         return this
     }
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {

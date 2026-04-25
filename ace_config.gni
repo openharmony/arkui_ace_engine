@@ -14,6 +14,7 @@
 import("//build/config/clang/clang.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
+import("./idlize_config.gni")
 
 # Config args
 declare_args() {
@@ -376,7 +377,7 @@ if (ace_engine_feature_enable_form_size_change_animation) {
 }
 
 # Enable full test suite compilation for TDD
-ace_enable_full_test_suite = false
+ace_enable_full_test_suite = true
 
 # Enable ArkUI static instructive code
 ace_engine_feature_enable_static_instructive_code = false

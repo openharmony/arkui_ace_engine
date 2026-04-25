@@ -51,6 +51,7 @@ public:
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    void ResetSelectedBackgroundColor() override;
     void SetMaxLength(uint32_t value) override;
     void SetMaxLines(uint32_t value) override;
     void SetFontSize(const Dimension& value) override;
@@ -75,7 +76,9 @@ public:
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override;
     void SetOnContentScroll(std::function<void(float, float)>&& func) override;
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnWillCut(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCut(std::function<void(const std::u16string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::u16string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override;
@@ -215,6 +218,7 @@ public:
     static void SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode value);
     static void SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetMinLines(FrameNode* frameNode, uint32_t value);
@@ -260,6 +264,7 @@ public:
     static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::u16string& placeholder);
     static void StopTextFieldEditing(FrameNode* frameNode);
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func);
+    static void SetOnWillCut(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
         std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
@@ -323,6 +328,7 @@ public:
     static void SetInputFilter(FrameNode* frameNode, const std::string& value,
         const std::function<void(const std::u16string&)>& onError);
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
+    static void SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetCustomKeyboard(

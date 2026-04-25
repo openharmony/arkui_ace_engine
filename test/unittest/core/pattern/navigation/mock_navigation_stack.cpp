@@ -349,6 +349,11 @@ int32_t MockNavigationStack::GetRecoveredDestinationMode(int32_t index)
     return mockPathArray_[index]->mode;
 }
 
+void MockNavigationStack::CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo)
+{
+    recoveryPushCalls_.push_back(navdestinationsInfo);
+}
+
 uint64_t MockNavigationStack::GetNavDestinationIdInt(int32_t index)
 {
     if (!CheckIndexValid(index, mockPathArray_.size())) {

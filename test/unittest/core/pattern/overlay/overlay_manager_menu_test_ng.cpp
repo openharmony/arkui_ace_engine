@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <mutex>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 
@@ -20,11 +21,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_frontend.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -60,6 +61,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -77,6 +79,29 @@ const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 constexpr int32_t EXPECT_CALL_TWICE_TIMES = 2;
 constexpr int32_t EXPECT_CALL_THREE_TIMES = 3;
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class MockAccessibilityManager : public AccessibilityManager {
@@ -129,6 +154,7 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    static RefPtr<Theme> CreateTheme(ThemeType type);
     int32_t minPlatformVersion_ = 0;
 };
 
@@ -142,6 +168,29 @@ void OverlayManagerMenuTestNg::TearDown()
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion_);
 }
 
+RefPtr<Theme> OverlayManagerMenuTestNg::CreateTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
+
 void OverlayManagerMenuTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
@@ -153,27 +202,14 @@ void OverlayManagerMenuTestNg::SetUpTestCase()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
-        } else {
-            return nullptr;
-        }
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerMenuTestNg::TearDownTestCase()
@@ -858,6 +894,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest012, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->menuAnimationDuration_ = 100;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
     overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);

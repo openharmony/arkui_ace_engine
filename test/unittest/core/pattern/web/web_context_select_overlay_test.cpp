@@ -24,11 +24,11 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #define private public
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #undef private
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

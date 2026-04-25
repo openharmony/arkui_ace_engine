@@ -19,9 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
@@ -830,6 +828,16 @@ public:
     int32_t GetPickerMaxSlidingDistance()
     {
         return pickerMaxSlidingDistance_;
+    }
+
+    void SetDividerColor(const Color& color)
+    {
+        dividerColor_ = color;
+    }
+
+    void SetSelectedBackgroundColor(const Color& color)
+    {
+        selectedBackgroundColor_ = color;
     }
 
 private:

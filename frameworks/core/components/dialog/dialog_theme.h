@@ -20,17 +20,16 @@
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/dialog/dialog_properties.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components_ng/property/measure_type.h"
 
 namespace OHOS::Ace {
+enum class DialogAlignment;
 namespace {
 constexpr double PRIMARY_RGBA_OPACITY = 0.9f;
 constexpr double SECONDARY_RGBA_OPACITY = 0.6f;
@@ -59,7 +58,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<DialogTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -605,13 +604,22 @@ public:
 
 protected:
     DialogTheme() = default;
-
-private:
-    Radius radius_;
     Color backgroundColor_;
     TextStyle titleTextStyle_;
     TextStyle subtitleTextStyle_;
     TextStyle contentTextStyle_;
+    Color buttonBackgroundColor_;
+    Color buttonClickedColor_;
+    Color commonButtonBgColor_;
+    Color emphasizeButtonBgColor_;
+    Color emphasizeButtonTextColor_;
+    Color buttonDefaultFontColor_;
+    Color buttonHighlightBgColor_;
+    Color dividerColor_;
+    Color buttonHighlightFontColor_;
+
+private:
+    Radius radius_;
     Dimension titleMinFontSize_;
     Dimension contentMinFontSize_;
     Dimension buttonBottomTopMargin_;
@@ -632,13 +640,7 @@ private:
     Dimension dividerLength_;
     Dimension dividerBetweenButtonWidth_;
     Dimension dialogLandscapeHeightBoundary_;
-    Color buttonBackgroundColor_;
-    Color buttonClickedColor_;
-    Color buttonHighlightBgColor_;
-    Color buttonHighlightFontColor_;
     Color buttonDefaultBgColor_;
-    Color buttonDefaultFontColor_;
-    Color emphasizeButtonTextColor_;
     Dimension translateValue_;
     double frameStart_ = 0.0;
     double frameEnd_ = 1.0;
@@ -658,10 +660,7 @@ private:
     int32_t animationDurationOut_ = 250;
     Color maskColorStart_;
     Color maskColorEnd_;
-    Color dividerColor_;
-    Color commonButtonBgColor_;
     Color commonButtonTextColor_;
-    Color emphasizeButtonBgColor_;
     Dimension dividerWidth_;
     Dimension dividerHeight_;
     Edge dividerPadding_;

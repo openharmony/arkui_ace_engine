@@ -23,6 +23,7 @@
 #include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace {
+struct TextDetectConfig;
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
 using ScriptRegexItems = std::map<std::string, std::vector<std::pair<std::string, std::string>>>;
 using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
@@ -220,6 +221,7 @@ public:
     virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
     virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
+    virtual void SetKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode) {};
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
                                     const NG::OnMenuItemClickCallback&& onMenuItemClick,
                                     const NG::OnPrepareMenuCallback&& onPrepareMenuCallback = nullptr) {};
@@ -242,6 +244,7 @@ public:
     virtual void SetOnFirstScreenPaint(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetEnableImageAnalyzer(bool isEnabled) {}
     virtual void SetEnableAutoFill(bool isEnabled) {}
+    virtual void SetEnableDrag(bool isEnabled) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetForceEnableZoom(bool isEnabled) {}
@@ -255,6 +258,8 @@ public:
     virtual void SetOnTextSelectionChange(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetEnableDefaultContextMenu(bool isEnabled) {}
     virtual void SetEnableScrollDirectionalLock(bool enabled, int32_t type) {}
+    virtual void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy layoutPolicy) {}
+    virtual void SetInputMethodAttachedId(std::function<void()> && jsCallback) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

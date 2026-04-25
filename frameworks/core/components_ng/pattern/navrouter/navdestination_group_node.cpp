@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
+#include <algorithm>
+
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -83,6 +85,62 @@ AnimationOption BuildAnimationOption(const RefPtr<Curve>& curve, std::function<v
     option.SetDelay(delay);
     option.SetOnFinishEvent(std::move(onFinishEvent));
     return option;
+}
+
+PageTransitionType GetSplitPushTransitionType(ForceSplitTransitionType type)
+{
+    switch (type) {
+        case ForceSplitTransitionType::TRANSITION_IN:
+            return PageTransitionType::ENTER_PUSH;
+        case ForceSplitTransitionType::TRANSITION_OUT:
+            return PageTransitionType::EXIT_PUSH;
+        case ForceSplitTransitionType::TRANSITION_MOVE:
+            return PageTransitionType::MOVE_PUSH;
+        default:
+            return PageTransitionType::NONE;
+    }
+}
+
+PageTransitionType GetSplitPopTransitionType(ForceSplitTransitionType type)
+{
+    switch (type) {
+        case ForceSplitTransitionType::TRANSITION_IN:
+            return PageTransitionType::ENTER_POP;
+        case ForceSplitTransitionType::TRANSITION_OUT:
+            return PageTransitionType::EXIT_POP;
+        case ForceSplitTransitionType::TRANSITION_MOVE:
+            return PageTransitionType::MOVE_POP;
+        default:
+            return PageTransitionType::NONE;
+    }
+}
+
+bool IsNodeInCurrentNavigationStack(const RefPtr<NavDestinationGroupNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(node->GetNavigationNode());
+    CHECK_NULL_RETURN(navigationNode, node->GetInCurrentStack());
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(pattern && frameNode, node->GetInCurrentStack());
+    return pattern->FindInCurStack(frameNode);
+}
+
+bool ShouldKeepNodeVisibleAfterSplitTransitionFinish(const RefPtr<NavDestinationGroupNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(node->GetNavigationNode());
+    CHECK_NULL_RETURN(navigationNode, !node->HasStandardBefore());
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, !node->HasStandardBefore());
+    if (pattern->IsForceSplitSuccess()) {
+        auto state = pattern->BuildForceSplitDisplayStateFromLogicalStacks();
+        return std::any_of(state.shownPages.begin(), state.shownPages.end(),
+            [&node](const RefPtr<NavDestinationGroupNode>& shownNode) {
+                return shownNode == node;
+            });
+    }
+    return !node->HasStandardBefore();
 }
 }
 
@@ -251,6 +309,13 @@ void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
     context->SetMode(mode);
 }
 
+std::optional<bool> NavDestinationGroupNode::GetUserSetFullScreenOverlay() const
+{
+    auto layoutProperty = GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetFullScreenOverlay();
+}
+
 void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     FrameNode::ToJsonValue(json, filter);
@@ -264,6 +329,7 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
         json->PutExtAttr("title", title.c_str(), filter);
         json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+        titleBarNode->UpdateJsonValue(json, filter);
     }
     auto navBarPattern = GetPattern<NavDestinationPatternBase>();
     if (navBarPattern) {
@@ -276,6 +342,7 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
     json->PutExtAttr("systemTransition", TransitionTypeToString(systemTransitionType_), filter);
+    json->PutExtAttr("fullScreenOverlay", isFullScreenOverlay_, filter);
 }
 
 void NavDestinationGroupNode::SystemTransitionPushStart(bool transitionIn)
@@ -897,6 +964,11 @@ int32_t NavDestinationGroupNode::DoTransition(NavigationOperation operation, boo
 int32_t NavDestinationGroupNode::DoSystemTransition(NavigationOperation operation, bool isEnter)
 {
     auto noneSystemTransition = NavigationSystemTransitionType::NONE;
+    // fullscreen-overlay standard pages reuse the page-style horizontal slide even when the
+    // destination keeps the DEFAULT transition type, matching Navigation's overlay UX spec.
+    if (isFullScreenOverlay_ && systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+        return DoSystemSlideTransition(operation, isEnter);
+    }
     if ((systemTransitionType_ & NavigationSystemTransitionType::FADE) != noneSystemTransition) {
         return DoSystemFadeTransition(isEnter);
     }
@@ -940,6 +1012,12 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
         // translate animation
         bool isRight = (systemTransitionType_ & NavigationSystemTransitionType::SLIDE_RIGHT)
             != NavigationSystemTransitionType::NONE;
+        // Overlay standard pages always use a horizontal slide so entering/leaving fullscreen
+        // coverage feels like page navigation rather than dialog presentation.
+        if (isFullScreenOverlay_ && mode_ == NavDestinationMode::STANDARD &&
+            systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+            isRight = true;
+        }
         std::function<void()> translateEvent = [weak = WeakClaim(this), isEnter, isRight, operation]() {
             auto navDestination = weak.Upgrade();
             CHECK_NULL_VOID(navDestination);
@@ -1209,6 +1287,10 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 navDestination->SetJSViewActive(false);
             }
+            auto navigation = AceType::DynamicCast<NavigationGroupNode>(destinationPattern->GetNavigationNode());
+            if (navigation) {
+                navigation->UpdateVisibilityAfterOverlayTransition(navDestination);
+            }
             navDestination->SetIsOnAnimation(false);
             if (needReport) {
                 navDestination->ContentChangeReport();
@@ -1233,6 +1315,186 @@ std::function<void()> NavDestinationGroupNode::BuildEmptyFinishCallback()
         node->OnFinishOneTransitionAnimation();
     };
     return finish;
+}
+
+void NavDestinationGroupNode::SplitTransitionPushStart(ForceSplitTransitionType type)
+{
+    // Split right-push-left reuses the same page node but with a different role than ordinary push/pop.
+    // Record a dedicated page transition type here so later visibility cleanup can distinguish
+    // EXIT/ENTER pages from the page that only moves between the two logical columns.
+    SetTransitionType(GetSplitPushTransitionType(type));
+    SetIsOnAnimation(true);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (type == ForceSplitTransitionType::TRANSITION_OUT) {
+        auto eventHub = GetEventHub<EventHub>();
+        if (eventHub) {
+            eventHub->SetEnabledInternal(false);
+        }
+        renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_MOVE) {
+        auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+        CHECK_NULL_VOID(navNode);
+        float offsetX = 0.0f;
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            offsetX -= navNode->GetSecondaryPartitionWidth() + navNode->GetDividerWidth();
+        } else {
+            offsetX += navNode->GetPrimaryPartitionWidth() + navNode->GetDividerWidth();
+        }
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_IN) {
+        auto geometryNode = GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+        float width = frameSizeWithSafeArea.Width();
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? -width : width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
+    }
+}
+
+void NavDestinationGroupNode::SplitTransitionPushEnd(ForceSplitTransitionType type)
+{
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (type == ForceSplitTransitionType::TRANSITION_OUT) {
+        auto geometryNode = GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+        float width = frameSizeWithSafeArea.Width();
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? width : -width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_IN || type == ForceSplitTransitionType::TRANSITION_MOVE) {
+        renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    }
+}
+
+void NavDestinationGroupNode::SplitTransitionPushFinish(int32_t animationId)
+{
+    if (animationId != animationId_) {
+        return;
+    }
+    SetIsOnAnimation(false);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    if (GetTransitionType() != PageTransitionType::EXIT_PUSH) {
+        return;
+    }
+    auto eventHub = GetEventHub<EventHub>();
+    if (!IsNodeInCurrentNavigationStack(Claim(this))) {
+        CleanContent(false, true);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
+        parent->RemoveChild(Claim(this));
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    if (!ShouldKeepNodeVisibleAfterSplitTransitionFinish(Claim(this))) {
+        auto property = GetLayoutProperty();
+        CHECK_NULL_VOID(property);
+        property->UpdateVisibility(VisibleType::INVISIBLE);
+        SetJSViewActive(false);
+        return;
+    }
+    if (eventHub) {
+        eventHub->SetEnabledInternal(true);
+    }
+}
+
+void NavDestinationGroupNode::SplitTransitionPopStart(ForceSplitTransitionType type)
+{
+    // Reverse-right-push-left also has a dedicated moving page, so keep the transition type aligned
+    // with the split role before the spring starts.
+    SetTransitionType(GetSplitPopTransitionType(type));
+    SetIsOnAnimation(true);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (type == ForceSplitTransitionType::TRANSITION_IN) {
+        // The page re-entering the left column may have been hidden by a previous right-push-left push.
+        // Make it visible again before starting the reverse split pop spring.
+        auto property = GetLayoutProperty();
+        CHECK_NULL_VOID(property);
+        property->UpdateVisibility(VisibleType::VISIBLE);
+        SetJSViewActive(true);
+        auto eventHub = GetEventHub<EventHub>();
+        if (eventHub) {
+            eventHub->SetEnabledInternal(true);
+        }
+        auto geometryNode = GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+        float width = frameSizeWithSafeArea.Width();
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? width : -width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_OUT) {
+        auto eventHub = GetEventHub<EventHub>();
+        if (eventHub) {
+            eventHub->SetEnabledInternal(false);
+        }
+        renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_MOVE) {
+        auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+        CHECK_NULL_VOID(navNode);
+        float offsetX = navNode->GetDividerWidth();
+        bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRTL) {
+            offsetX += navNode->GetSecondaryPartitionWidth();
+        } else {
+            offsetX += navNode->GetPrimaryPartitionWidth();
+        }
+        renderContext->UpdateTranslateInXY(OffsetF(isRTL ? offsetX : -offsetX, 0.0f));
+    }
+}
+
+void NavDestinationGroupNode::SplitTransitionPopEnd(ForceSplitTransitionType type)
+{
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (type == ForceSplitTransitionType::TRANSITION_OUT) {
+        auto geometryNode = GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+        float width = frameSizeWithSafeArea.Width();
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? -width : width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_IN || type == ForceSplitTransitionType::TRANSITION_MOVE) {
+        renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    }
+}
+
+void NavDestinationGroupNode::SplitTransitionPopFinish(int32_t animationId)
+{
+    if (animationId != animationId_) {
+        return;
+    }
+    SetIsOnAnimation(false);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    if (GetTransitionType() != PageTransitionType::EXIT_POP) {
+        return;
+    }
+    auto eventHub = GetEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabledInternal(true);
+    }
+    // Reverse-right-push-left uses a dedicated split spring instead of the ordinary page transition callback.
+    // The exiting right page must therefore finish its own final cleanup here, otherwise it stays visible
+    // after the spring ends because no generic transition-finish hook will hide/remove it for us.
+    if (!IsNodeInCurrentNavigationStack(Claim(this))) {
+        CleanContent(false, true);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
+        parent->RemoveChild(Claim(this));
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    if (!ShouldKeepNodeVisibleAfterSplitTransitionFinish(Claim(this))) {
+        auto property = GetLayoutProperty();
+        CHECK_NULL_VOID(property);
+        property->UpdateVisibility(VisibleType::INVISIBLE);
+        SetJSViewActive(false);
+    }
 }
 
 bool NavDestinationGroupNode::HasStandardBefore() const

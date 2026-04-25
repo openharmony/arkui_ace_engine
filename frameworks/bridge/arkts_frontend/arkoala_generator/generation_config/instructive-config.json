@@ -1,16 +1,53 @@
 {
-    "ignore": [
-        "CommonMethodModifier.ets",
-        "ImageModifier.ets",
-        "MarqueeModifier.ets",
-        "SliderModifier.ets",
-        "SwiperModifier.ets",
-        "SymbolGlyphModifier.ets",
-        "WebModifier.ets",
-        "TextAreaModifier.ets",
-        "TextInputModifier.ets",
-        "TextModifier.ets",
-        "RichEditorModifier.ets",
-        "SearchModifier.ets"
+    "managed": {
+        "ignore": [
+            "CommonMethodModifier.ets",
+            "FormLinkModifier.ets",
+            "ImageModifier.ets",
+            "RichEditorModifier.ets",
+            "SwiperModifier.ets",
+            "SymbolGlyphModifier.ets",
+            "WebModifier.ets",
+            "component/actionSheet.ets",
+            "component/checkboxgroup.ets",
+            "component/common.ets",
+            "component/containerSpan.ets",
+            "component/contentSlot.ets",
+            "component/gesture.ets",
+            "component/idlize.ets",
+            "component/lazyGridLayout.ets",
+            "component/navDestination.ets",
+            "component/navigation.ets",
+            "component/pluginComponent.ets",
+            "component/select.ets",
+            "component/styledString.ets",
+            "component/swiper.ets",
+            "component/tabs.ets",
+            "component/textInput.ets",
+            "component/uiExtensionComponent.ets",
+            "component/video.ets",
+            "component/waterFlow.ets",
+            "component/withTheme.ets",
+            "component/xcomponent.ets",
+            "component/depthComponent.ets",
+            "framework/ohos.arkui.theme.ets",
+            "framework/stdlib.ets",
+            "framework/index.ets",
+            "#handwritten.ets"
+        ]
+    },
+    "native": [
+        {
+            "from": "sig/arkoala-arkts/framework/native/src/generated/arkoala_api_generated.h",
+            "to": "../../../../core/interfaces/native/generated/interface/arkoala_api_generated.h"
+        },
+        {
+            "from": "libace/utility/generated/converter_generated.h",
+            "to": "../../../../core/interfaces/native/utility/generated/converter_generated.h"
+        },
+        {
+            "from": "sig/arkoala-arkts/framework/native/src/generated/callback_kind.h",
+            "to": "../../koala_projects/arkoala-arkts/framework/native/src/generated/callback_kind.h"
+        }
     ]
 }

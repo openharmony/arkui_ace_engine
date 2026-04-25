@@ -17,6 +17,8 @@
 #include <cstdint>
 #include <ctime>
 
+#include "core/components_ng/render/drawing.h"
+
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
@@ -85,6 +87,9 @@ void TimePickerRowPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool TimePickerRowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -134,6 +139,7 @@ void TimePickerRowPattern::SetButtonIdeaSize()
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
         } else {
             auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
             UpdateFocusStyles(buttonLayoutProperty, timePickerColumnNode, height, isFocusButton);
@@ -494,6 +500,14 @@ void TimePickerRowPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
+    isWindowFullscreen_ = (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN);
+
     isForceUpdate_ = isForceUpdate_ ||
         (loop_ != pickerProperty->GetLoopValue(true)) ||
         (hour24_ != pickerProperty->GetIsUseMilitaryTimeValue(false));
@@ -620,6 +634,7 @@ void TimePickerRowPattern::CreateAmPmNode()
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(height - PRESS_INTERVAL)));
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -1448,11 +1463,15 @@ void TimePickerRowPattern::FlushColumn()
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
         hourColumnPattern->FlushCurrentOptions();
+        hourColumn->MarkModifyDone();
+        hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else if (amPmColumn) {
         auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(amPmColumnPattern);
         amPmColumnPattern->SetShowCount(AM_PM_COUNT);
         amPmColumnPattern->FlushCurrentOptions();
+        amPmColumn->MarkModifyDone();
+        amPmColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
@@ -1460,6 +1479,8 @@ void TimePickerRowPattern::FlushColumn()
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
         hourColumnPattern->FlushCurrentOptions();
+        hourColumn->MarkModifyDone();
+        hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
     auto minuteColumn = allChildNode_["minute"].Upgrade();
@@ -1468,6 +1489,8 @@ void TimePickerRowPattern::FlushColumn()
     CHECK_NULL_VOID(minuteColumnPattern);
     minuteColumnPattern->SetShowCount(GetShowCount());
     minuteColumnPattern->FlushCurrentOptions();
+    minuteColumn->MarkModifyDone();
+    minuteColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     if (hasSecond_) {
         auto secondColumn = allChildNode_["second"].Upgrade();
         CHECK_NULL_VOID(secondColumn);
@@ -1476,6 +1499,8 @@ void TimePickerRowPattern::FlushColumn()
         secondColumnPattern->SetOptions(GetOptionsCount());
         secondColumnPattern->SetShowCount(GetShowCount());
         secondColumnPattern->FlushCurrentOptions();
+        secondColumn->MarkModifyDone();
+        secondColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -2276,7 +2301,7 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
@@ -2334,12 +2359,15 @@ bool TimePickerRowPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     host->SetNeedCallChildrenUpdate(false);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_RETURN(pickerProperty, result);
     // The following three attributes will be affected by withTheme.
-    // If they are setted by user, then use the value by user set; Otherwise use the value from withTheme
-    // When the "result" is true, mean to notify the framework to Re-render
+    // If they are setted by user, then use value by user set; Otherwise use value from withTheme
+    // When "result" is true, mean to notify framework to Re-render
     if ((!pickerProperty->HasColor()) || (!pickerProperty->HasDisappearColor()) ||
         (!pickerProperty->HasSelectedColor())) {
         result = true;
@@ -2347,6 +2375,30 @@ bool TimePickerRowPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     FREE_NODE_CHECK(host, OnThemeScopeUpdate);
     OnModifyDone();
     return result;
+}
+
+void TimePickerRowPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    bool oldFullscreen = isWindowFullscreen_;
+    switch (type) {
+        case WindowSizeChangeReason::SPLIT_TO_FULL:
+        case WindowSizeChangeReason::FLOATING_TO_FULL:
+            isWindowFullscreen_ = true;
+            break;
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::FULL_TO_FLOATING:
+            isWindowFullscreen_ = false;
+            break;
+        default:
+            break;
+    }
+    if (oldFullscreen != isWindowFullscreen_) {
+        for (auto& column : timePickerColumns_) {
+            auto columnNode = column.Upgrade();
+            CHECK_NULL_VOID(columnNode);
+            columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 bool TimePickerRowPattern::NeedAdaptForAging()

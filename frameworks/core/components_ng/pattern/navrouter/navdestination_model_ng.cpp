@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,6 +77,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
+            NavigationTitleUtil::InitTextProperty(textLayoutProperty);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
                     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
@@ -421,6 +422,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         padding.SetEdges(CalcLength(BUTTON_PADDING));
         backButtonLayoutProperty->UpdatePadding(padding);
     }
+    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         SystemProperties::IsNeedSymbol()) {
@@ -1572,6 +1574,12 @@ void NavDestinationModelNG::SetHideToolBar(bool hideToolBar, bool animated)
     navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
+void NavDestinationModelNG::SetFullScreenOverlay(std::optional<bool> fullScreenOverlay)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetFullScreenOverlay(frameNode, fullScreenOverlay);
+}
+
 void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1581,6 +1589,26 @@ void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBa
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
     navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
+}
+
+void NavDestinationModelNG::SetFullScreenOverlay(FrameNode* frameNode, std::optional<bool> fullScreenOverlay)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    // Persist the request on the destination itself, then notify Navigation so it can recompute
+    // inherited overlay state and remount pages between content/overlay containers immediately.
+    auto previousRequest = navDestinationLayoutProperty->GetFullScreenOverlay();
+    if (fullScreenOverlay.has_value()) {
+        navDestinationLayoutProperty->UpdateFullScreenOverlay(fullScreenOverlay.value());
+    } else {
+        navDestinationLayoutProperty->ResetFullScreenOverlay();
+    }
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->NotifyFullScreenOverlayRequestChange(previousRequest, fullScreenOverlay);
 }
 
 void NavDestinationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt)

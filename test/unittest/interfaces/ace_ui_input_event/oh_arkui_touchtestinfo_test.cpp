@@ -383,7 +383,6 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfoItem_GetChildRect002, TestSize.
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
-     * @tc.steps: step3. call functions when childRect is nullptr.
      * @tc.expected: result is ARKUI_ERROR_CODE_PARAM_INVALID.
      */
     auto ret2 = OH_ArkUI_TouchTestInfoItem_GetChildRect(info, nullptr);
@@ -437,14 +436,12 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfoItem_GetChildId002, TestSize.Le
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
-     * @tc.steps: step3. call functions when buffer is nullptr.
      * @tc.expected: result is ARKUI_ERROR_CODE_PARAM_INVALID.
      */
     auto ret2 = OH_ArkUI_TouchTestInfoItem_GetChildId(info, nullptr, 20);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
-     * @tc.steps: step4. call functions when bufferSize <= 0.
      * @tc.expected: result is ARKUI_ERROR_CODE_PARAM_INVALID.
      */
     auto ret3 = OH_ArkUI_TouchTestInfoItem_GetChildId(info, buffer, 0);
@@ -525,7 +522,6 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfo_SetTouchResultStrategy002, Tes
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
-     * @tc.steps: step3. call functions when Strategy is invalid.
      * @tc.expected: result is ARKUI_ERROR_CODE_PARAM_INVALID.
      */
     auto ret2 = OH_ArkUI_TouchTestInfo_SetTouchResultStrategy(info, static_cast<ArkUI_TouchTestStrategy>(100));
@@ -587,7 +583,6 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_TouchTestInfo_SetTouchResultId002, TestSize.
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
 
     /**
-     * @tc.steps: step3. call functions when id is nullptr.
      * @tc.expected: Return ARKUI_ERROR_CODE_PARAM_INVALID.
      */
     auto ret2 = OH_ArkUI_TouchTestInfo_SetTouchResultId(info, nullptr);

@@ -20,7 +20,7 @@
 #include "core/interfaces/native/node/node_content_modifier.h"
 #define private public
 #include "interfaces/native/native_node.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/ui_node.h"
@@ -158,7 +158,8 @@ HWTEST_F(ContentSlotSyntaxTestNg, ContentSlotSyntaxTest002, TestSize.Level1)
             contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData);
         }
     };
-    contentModifier->registerEvent(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), nullptr, std::move(callback));
+    contentModifier->registerEvent(
+        reinterpret_cast<ArkUINodeContentHandle>(nodeContent), nullptr, std::move(callback));
     nodeContent->OnAttachToMainTree();
     EXPECT_TRUE(nodeContent->onMainTree_);
     nodeContent->OnDetachFromMainTree();
@@ -464,5 +465,42 @@ HWTEST_F(ContentSlotSyntaxTestNg, OnDetachFromMainTreeDuplicate001, TestSize.Lev
     nodeContent->OnDetachFromMainTree();
     EXPECT_EQ(detachCallbackCount, 1);
     EXPECT_FALSE(nodeContent->onMainTree_);
+}
+
+/**
+ * @tc.name: AttachNodeContentReattach001
+ * @tc.desc: Test for ContentSlotNode::AttachNodeContent when content is already attached to another slot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentSlotSyntaxTestNg, AttachNodeContentReattach001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create first contentSlotNode and attach content
+     * @tc.expected: content attached successfully
+     */
+    auto nodeContent = AceType::RawPtr(nodeContentPtr_);
+    ASSERT_NE(nodeContent, nullptr);
+    ContentSlotModel::Create(nodeContent);
+    auto firstSlotNode = AceType::DynamicCast<ContentSlotNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(firstSlotNode, nullptr);
+    EXPECT_EQ(firstSlotNode->GetTag(), V2::JS_NODE_SLOT_ETS_TAG);
+
+    firstSlotNode->AttachNodeContent(nodeContent);
+    auto firstContentSlot = nodeContent->GetContentSlot().Upgrade();
+    EXPECT_EQ(firstContentSlot, firstSlotNode);
+
+    /**
+     * @tc.steps: step2. Create second contentSlotNode and attach the same content
+     * @tc.expected: content detached from first slot and attached to second slot
+     */
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto secondSlotNode = ContentSlotNode::GetOrCreateContentSlot(nodeId);
+    ASSERT_NE(secondSlotNode, nullptr);
+    EXPECT_NE(secondSlotNode, firstSlotNode);
+
+    secondSlotNode->AttachNodeContent(nodeContent);
+    auto secondContentSlot = nodeContent->GetContentSlot().Upgrade();
+    EXPECT_EQ(secondContentSlot, secondSlotNode);
+    EXPECT_NE(secondContentSlot, firstSlotNode);
 }
 } // namespace OHOS::Ace::NG

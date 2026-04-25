@@ -153,6 +153,8 @@ public:
     static ArkUINativeModuleValue SetClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelectDetectConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetHorizontalScrolling(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetHorizontalScrolling(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     static void ParseAIEntityColor(

@@ -653,7 +653,7 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
     CalcDimension dividerStrokeWidth;
     CalcDimension dividerStartMargin;
     CalcDimension dividerEndMargin;
-    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(tabTheme);
     RefPtr<ResourceObject> widthResObj;
     RefPtr<ResourceObject> colorResObj;
@@ -1077,4 +1077,12 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
+int32_t JSTabs::GetThemeScopeId()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode || !frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+    }
+    return frameNode->GetThemeScopeId();
+}
 } // namespace OHOS::Ace::Framework

@@ -26,6 +26,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
@@ -50,8 +51,9 @@ enum class DismissReason {
     TOUCH_OUTSIDE,
     CLOSE_BUTTON,
 };
-class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
-    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
+class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder,
+                      public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder, IAvoidInfoListener);
 
 public:
     BubblePattern() = default;
@@ -82,7 +84,7 @@ public:
         CHECK_NULL_RETURN(host, bubbleMethod);
         auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
-        auto theme = pipeline->GetTheme<PopupTheme>();
+        auto theme = popupTheme_;
         CHECK_NULL_RETURN(theme, bubbleMethod);
         bubbleMethod->SetOuterBorderWidth(theme->GetPopupOuterBorderWidth());
         bubbleMethod->SetInnerBorderWidth(theme->GetPopupInnerBorderWidth());
@@ -426,6 +428,11 @@ public:
         return isUserSetMaterial_;
     }
 
+    void UpdatePopupTheme(bool colorMode);
+    RefPtr<PopupTheme> GetPopupTheme();
+    ThemeColorMode GetStyleOptionColorMode();
+    NG::RectF GetWindowButtonRect(const RefPtr<FrameNode>& frameNode);
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -444,6 +451,9 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<PipelineContext>& pipeline);
+    void UnRegisterAvoidInfoChangeListener(FrameNode* hostNode);
     void OnAttachToMainTree() override;
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;
@@ -451,7 +461,6 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     RefPtr<FrameNode> GetButtonRowNode();
-    RefPtr<PopupTheme> GetPopupTheme();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& clickPosition);
@@ -538,6 +547,8 @@ private:
     std::optional<Dimension> innerBorderWidth_;
     PopupLinearGradientProperties outlineLinearGradient_;
     PopupLinearGradientProperties innerBorderLinearGradient_;
+    RefPtr<PopupTheme> popupTheme_;
+    bool isColorModeFollowTarget_ = true;
 };
 } // namespace OHOS::Ace::NG
 

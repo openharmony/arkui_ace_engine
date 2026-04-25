@@ -83,6 +83,17 @@ Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
     CHECK_NULL_RETURN(event, false);
     return Converter::ArkValue<Ark_Boolean>(event->HasAxis(static_cast<AxisType>(axisType)));
 }
+Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_AxisEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Coordinate2D>(Offset{});
+    CHECK_NULL_RETURN(peer, errValue);
+    const auto* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    const auto& localLocation = info->GetCurrentLocalLocation();
+    const auto x = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+    const auto y = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+    return Converter::ArkValue<Ark_Coordinate2D>(Offset{x, y});
+}
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_AxisAction>(AxisAction::NONE);
@@ -255,6 +266,14 @@ void SetScrollStepImpl(Ark_AxisEvent peer,
         info->SetScrollStep(value.value());
     }
 }
+Opt_Int32 GetEventHandleIdImpl(Ark_AxisEvent peer)
+{
+    return {};
+}
+void SetEventHandleIdImpl(Ark_AxisEvent peer,
+                          const Opt_Int32* eventHandleId)
+{
+}
 void PropagationImpl(Ark_AxisEvent peer)
 {
     CHECK_NULL_VOID(peer);
@@ -318,6 +337,7 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::GetVerticalAxisValueImpl,
         AxisEventAccessor::GetPinchAxisScaleValueImpl,
         AxisEventAccessor::HasAxisImpl,
+        AxisEventAccessor::GetCurrentLocalPositionImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
         AxisEventAccessor::GetDisplayXImpl,
@@ -334,6 +354,8 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::SetYImpl,
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
+        AxisEventAccessor::GetEventHandleIdImpl,
+        AxisEventAccessor::SetEventHandleIdImpl,
         AxisEventAccessor::GetGlobalDisplayXImpl,
         AxisEventAccessor::SetGlobalDisplayXImpl,
         AxisEventAccessor::GetGlobalDisplayYImpl,

@@ -28,7 +28,7 @@ ohos_unittest("ui_content_test") {
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/interfaces/inner_api/ace/ui_content.cpp",
-    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/frameworks/base/utils/mock_lifecycle_checkable.cpp",
     "ui_content_test.cpp",
   ]
 
@@ -46,6 +46,7 @@ ohos_unittest("ui_content_test") {
     "googletest:gmock_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "image_framework:image",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -65,7 +66,7 @@ ohos_unittest("ui_content_tdd_test") {
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",                                                                                                                           
     "$ace_root/interfaces/inner_api/ace/ui_content.cpp",                                                                                                                              
-    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",                                                                                                                          
+    "$ace_root/test/mock/frameworks/base/utils/mock_lifecycle_checkable.cpp",                                                                                                                          
     "ui_content_tdd_test.cpp",                                                                                                                                                        
   ]                                                                                                                                                                                   
   deps = [
@@ -77,20 +78,21 @@ ohos_unittest("ui_content_tdd_test") {
   ]                                                                                                                                                                                   
  
   external_deps = [
-    "ability_runtime:abilitykit_native",                                                                                                                                              
-    "cJSON:cjson",                                                                                                                                                                    
-    "googletest:gmock_main",                                                                                                                                                          
-    "graphic_2d:librender_service_base",                                                                                                                                              
-    "graphic_2d:librender_service_client",                                                                                                                                            
-    "image_framework:image",                                                                                                                                                          
-    "input:libmmi-client",                                                                                                                                                            
-    "ipc:ipc_single",                                                                                                                                                                 
-    "window_manager:libdm",                                                                                                                                                           
-    "window_manager:libwm",                                                                                                                                                           
-    "window_manager:scene_session",                                                                                                                                                   
-    "window_manager:scene_session_manager",                                                                                                                                           
-  ]                                                                                                                                                                                   
- 
+    "ability_runtime:abilitykit_native",
+    "cJSON:cjson",
+    "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+  ]
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 } 
 
@@ -235,6 +237,8 @@ ohos_unittest("node_component_snapshot_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -294,6 +298,8 @@ ohos_unittest("native_node_napi_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/core/interfaces/native/utility/error_message_manager.cpp",
+    "$ace_root/interfaces/native/native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/container_picker_option.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
@@ -381,6 +387,8 @@ ohos_unittest("native_key_event_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -445,6 +453,8 @@ ohos_unittest("ui_input_event_test_coverage") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -515,6 +525,8 @@ ohos_unittest("drag_and_drop_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
@@ -574,7 +586,7 @@ ohos_unittest("node_transition_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
@@ -587,10 +599,12 @@ ohos_unittest("node_transition_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_log_wrapper.cpp",
     "node_transition_test.cpp",
   ]
 
@@ -628,7 +642,7 @@ ohos_unittest("animate_impl_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
@@ -640,10 +654,12 @@ ohos_unittest("animate_impl_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_log_wrapper.cpp",
     "animate_impl_test.cpp",
   ]
 
@@ -682,7 +698,7 @@ ohos_unittest("dialog_model_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
@@ -694,10 +710,12 @@ ohos_unittest("dialog_model_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_log_wrapper.cpp",
     "dialog_model_test.cpp",
   ]
 
@@ -736,7 +754,7 @@ ohos_unittest("node_extened_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
@@ -749,10 +767,12 @@ ohos_unittest("node_extened_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_log_wrapper.cpp",
     "node_extened_test.cpp",
   ]
 
@@ -791,9 +811,10 @@ ohos_unittest("node_animate_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
@@ -805,10 +826,12 @@ ohos_unittest("node_animate_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_log_wrapper.cpp",
     "node_animate_test.cpp",
   ]
 
@@ -942,6 +965,8 @@ ohos_unittest("native_render_node_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_utils.cpp",
@@ -1014,6 +1039,8 @@ ohos_unittest("native_render_node_property_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_utils.cpp",
@@ -1075,9 +1102,10 @@ ohos_unittest("node_model_safely_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
@@ -1089,10 +1117,12 @@ ohos_unittest("node_model_safely_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_log_wrapper.cpp",
     "node_model_safely_test.cpp",
   ]
 
@@ -1139,6 +1169,8 @@ ohos_unittest("node_style_modifier_test") {
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_model_safely.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",

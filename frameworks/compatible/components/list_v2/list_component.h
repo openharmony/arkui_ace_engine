@@ -23,6 +23,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/scroll_bar.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_v2/common/common_def.h"
 #include "compatible/components/list_v2/list_item_group_component.h"

@@ -14,6 +14,7 @@
  */
 #include "focus_event_handler.h"
 
+#include "core/common/event_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components/theme/app_theme.h"

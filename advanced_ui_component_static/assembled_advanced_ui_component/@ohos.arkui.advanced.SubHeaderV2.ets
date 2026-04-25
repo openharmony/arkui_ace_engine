@@ -18,7 +18,7 @@ import {
   Text, LocalizedPadding, applyStyles, Length, Flex, FontWeight, Select, Margin, Column, HorizontalAlign, KeyEvent, Row,
   ClickEvent, TouchType, GeometryInfo, SymbolGlyph, Measurable, ConstraintSizeOptions, SizeResult, Button, Stack,
   ButtonType, ButtonOptions, VerticalAlign, TouchEvent, FlexAlign, ForEach, HoverEffect, LoadingProgress, Padding,
-  Rectangle, Layoutable, Component, MeasureResult, CustomLayout, AccessibilityRoleType
+  Rectangle, Layoutable, Component, MeasureResult, CustomLayout, AccessibilityRoleType, WordBreak, TextAttribute
 } from '@ohos.arkui.component';
 import {
   ObservedV2, Trace, Param, Local, Provider, Monitor, IMonitor, IMonitorValue, Require, Event, Consumer
@@ -230,24 +230,30 @@ export class SubHeaderTheme {
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
-function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
-  this.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`)
-  this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'))
-  this.fontWeight(fontStyle?.fontWeight)
-  this.maxLines(fontStyle?.maxLines)
-  this.textOverflow({ overflow: TextOverflow.Ellipsis })
-  this.align(fontStyle?.alignment)
-  return this
+function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAttribute {
+  this.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`);
+  this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'));
+  this.fontWeight(fontStyle?.fontWeight);
+  this.maxLines(fontStyle?.maxLines);
+  this.textOverflow({ overflow: TextOverflow.Ellipsis });
+  this.align(fontStyle?.alignment);
+  this.fallbackLineSpacing(true);
+  this.wordBreak(WordBreak.HYPHENATION);
+  this.orphanCharOptimization(true);
+  return this;
 }
 
-function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
-  this.fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`)
-  this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'))
-  this.fontWeight(fontStyle?.fontWeight)
-  this.maxLines(fontStyle?.maxLines)
-  this.textOverflow({ overflow: TextOverflow.Ellipsis })
-  this.align(fontStyle?.alignment)
-  return this
+function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAttribute {
+  this.fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`);
+  this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'));
+  this.fontWeight(fontStyle?.fontWeight);
+  this.maxLines(fontStyle?.maxLines);
+  this.textOverflow({ overflow: TextOverflow.Ellipsis });
+  this.align(fontStyle?.alignment);
+  this.fallbackLineSpacing(true);
+  this.wordBreak(WordBreak.HYPHENATION);
+  this.orphanCharOptimization(true);
+  return this;
 }
 
 function pressedStyle(instance: CommonMethod) {

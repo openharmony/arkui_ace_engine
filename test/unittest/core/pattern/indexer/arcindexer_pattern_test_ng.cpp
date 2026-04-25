@@ -14,6 +14,8 @@
  */
 
 #include <optional>
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 
 #include "gtest/gtest.h"
 
@@ -21,9 +23,9 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "ui/properties/ui_material.h"
 
@@ -31,6 +33,7 @@
 #include "core/common/container.h"
 #include "base/memory/memory_monitor_def.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"

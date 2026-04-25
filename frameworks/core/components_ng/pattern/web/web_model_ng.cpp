@@ -1475,11 +1475,26 @@ void WebModelNG::SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode)
     webPattern->UpdateKeyboardAvoidMode(mode);
 }
 
+void WebModelNG::SetKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateKeyboardAppearanceMode(mode);
+}
+
 void WebModelNG::SetEnabledHapticFeedback(bool isEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateEnabledHapticFeedback(isEnabled);
+}
+
+void WebModelNG::SetKeyboardAppearanceMode(FrameNode* frameNode, const WebKeyboardAppearanceMode& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateKeyboardAppearanceMode(mode);
 }
 
 void WebModelNG::SetOptimizeParserBudgetEnabled(bool enable)
@@ -2686,6 +2701,21 @@ void WebModelNG::SetEnableAutoFill(FrameNode* frameNode, bool isEnabled)
     webPattern->UpdateEnableAutoFill(isEnabled);
 }
 
+void WebModelNG::SetEnableDrag(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableDrag(isEnabled);
+}
+ 	 
+void WebModelNG::SetEnableDrag(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableDrag(isEnabled);
+}
+
 void WebModelNG::SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
     const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold)
 {
@@ -2891,6 +2921,18 @@ void WebModelNG::SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnable
     webPattern->UpdateEnableDefaultContextMenu(isEnabled);
 }
 
+void WebModelNG::SetAiSessionOptions(FrameNode* frameNode, uint32_t type, AISessionCallback&& onCreateAISession,
+    AISessionCallback&& onExecuteAIAction, AISessionCallback&& onDestroyAISession)
+{
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
+        std::move(onExecuteAIAction), std::move(onDestroyAISession));
+#endif
+}
+
 void WebModelNG::SetEnableScrollDirectionalLock(bool enabled, int32_t type)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -2904,5 +2946,40 @@ void WebModelNG::SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabl
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->EnableScrollDirectionalLock(enabled, static_cast<ScrollDirectionalLockType>(type));
+}
+
+void WebModelNG::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy layoutPolicy)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateScrollbarLayoutPolicy(layoutPolicy);
+}
+
+void WebModelNG::SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy layoutPolicy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateScrollbarLayoutPolicy(layoutPolicy);
+}
+
+void WebModelNG::SetInputMethodAttachedId(std::function<void()>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>&) { func(); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetInputMethodAttachedId(
+    FrameNode* frameNode, std::function<void()>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>&) { func(); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

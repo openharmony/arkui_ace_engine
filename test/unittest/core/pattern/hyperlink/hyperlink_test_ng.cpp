@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -27,12 +28,13 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #undef private
 #undef protected
 
@@ -58,6 +60,7 @@ public:
 void HyperlinkTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     HyperlinkModelNG hyperlinkModelNG;
@@ -68,6 +71,7 @@ void HyperlinkTestNg::SetUpTestSuite()
 void HyperlinkTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void HyperlinkTestNg::SetThemeInCreate()
@@ -79,6 +83,26 @@ void HyperlinkTestNg::SetThemeInCreate()
         }
         return AceType::MakeRefPtr<HyperlinkTheme>();
     });
+}
+
+/**
+ * @tc.name: HyperlinkModelNGTextProperty001
+ * @tc.desc: Verify hyperlink text layout default multi-language properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTextProperty001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    HyperlinkModelNG hyperlinkModelNG;
+    hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetOrphanCharOptimizationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -738,6 +762,9 @@ HWTEST_F(HyperlinkTestNg, OnInjectionEvent001, TestSize.Level1)
     result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
     EXPECT_EQ(result, RET_FAILED);
     jsonCommand = R"({")";
+    result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+    jsonCommand = "";
     result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
     EXPECT_EQ(result, RET_FAILED);
 }

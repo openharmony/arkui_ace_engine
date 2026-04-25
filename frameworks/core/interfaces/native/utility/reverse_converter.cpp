@@ -26,6 +26,7 @@
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
+#include "core/interfaces/native/implementation/event_location_info_peer.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
@@ -40,6 +41,7 @@
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/line_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/nav_destination_context_peer.h"
 #include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
@@ -49,6 +51,7 @@
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_peer.h"
+#include "core/interfaces/native/implementation/touch_object_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
 #include "core/interfaces/native/implementation/user_data_span_holder.h"
 #include "core/interfaces/native/utility/peer_utils.h"
@@ -259,6 +262,12 @@ ACE_FORCE_EXPORT void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemPa
     dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon, ctx);
     dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
     dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo, ctx);
+}
+
+void AssignArkValue(Ark_Coordinate2D& dst, const Offset& src)
+{
+    dst.x = Converter::ArkValue<Ark_Float64>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
 }
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
@@ -665,6 +674,9 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
         case Ace::SpanType::LineHeight:
             CreateStylePeer<LineHeightStylePeer, OHOS::Ace::LineHeightSpan>(dst, src);
             break;
+        case Ace::SpanType::LineSpacing:
+            CreateStylePeer<LineSpacingStylePeer, OHOS::Ace::LineSpacingSpan>(dst, src);
+            break;
         case Ace::SpanType::BackgroundColor:
             CreateStylePeer<BackgroundColorStylePeer, OHOS::Ace::BackgroundColorSpan>(dst, src);
             break;
@@ -729,39 +741,13 @@ void AssignArkValue(Ark_TextRange& dst, const SelectionInfo& src)
 
 void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src)
 {
-    Offset globalOffset = src.GetGlobalLocation();
-    Offset localOffset = src.GetLocalLocation();
-    Offset screenOffset = src.GetScreenLocation();
-
-    dst.displayX = ArkValue<Ark_Float64>(
-        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    dst.displayY = ArkValue<Ark_Float64>(
-        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-
-    dst.id = ArkValue<Ark_Int32>(src.GetFingerId());
-
-    dst.type = ArkValue<Ark_TouchType>(src.GetTouchType());
-
-    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    dst.y = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
-    // Handle globalDisplayX/Y
-    Offset globalDisplayOffset = src.GetGlobalDisplayLocation();
-    dst.globalDisplayX = ArkValue<Opt_Float64>(
-        PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
-    dst.globalDisplayY = ArkValue<Opt_Float64>(
-        PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
-
-    dst.pressedTime = ArkValue<Opt_Int64>(static_cast<int64_t>(src.GetPressedTime().time_since_epoch().count()));
-    dst.pressure = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
-
-    dst.width = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
-    dst.height = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
-
-    dst.hand = ArkValue<Opt_InteractionHand>(static_cast<ArkUI_InteractionHand>(src.GetOperatingHand()));
+    if (!dst) {
+        dst = PeerUtils::CreatePeer<TouchObjectPeer>();
+    }
+    CHECK_NULL_VOID(dst);
+    dst->eventInfo->object = src;
+    dst->SetEventInfo(&dst->eventInfo->object.value());
+    auto info = dst->GetEventInfo();
 }
 
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
@@ -1167,16 +1153,22 @@ void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& s
 
 void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src)
 {
-    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
-    dst.y =  ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
-    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetX()));
-    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetY()));
-    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.displayLocation_.GetX()));
-    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.displayLocation_.GetY()));
-    dst.globalDisplayX =
-        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
-    dst.globalDisplayY =
-        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
+    if (!dst) {
+        dst = PeerUtils::CreatePeer<EventLocationInfoPeer>();
+    }
+    CHECK_NULL_VOID(dst);
+
+    dst->SetHandler(src);
+}
+
+void AssignArkValue(Ark_EventLocationInfo& dst, const FingerInfo& src)
+{
+    if (!dst) {
+        dst = PeerUtils::CreatePeer<EventLocationInfoPeer>();
+    }
+    CHECK_NULL_VOID(dst);
+
+    dst->SetHandler(src);
 }
 
 // Helper function to create Ark_GestureRecognizer from NG::NGGestureRecognizer

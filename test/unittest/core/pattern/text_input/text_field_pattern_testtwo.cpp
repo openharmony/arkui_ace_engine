@@ -15,11 +15,11 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 
@@ -1543,5 +1543,82 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateFocusOffsetIfNeed001, TestSize.Level0)
     RoundRect paintRect;
     pattern->UpdateFocusOffsetIfNeed(paintRect);
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x, 0.0f);
+}
+
+/**
+ * @tc.name: onWillCopy
+ * @tc.desc: test onWillCopy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, onWillCopy, TestSize.Level0)
+{
+    TextFieldModelNG textFieldModelNG;
+
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->onWillCopy_, nullptr);
+    std::u16string expected = u"Hello";
+    EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
+    std::u16string value = u"";
+    bool result = false;
+    auto onWillCopyResult = [&value, &result](const std::u16string& param) -> bool {
+        value = param;
+        return result;
+    };
+    textFieldModelNG.SetOnWillCopy(AceType::RawPtr(textFieldNode), onWillCopyResult);
+    EXPECT_FALSE(eventHub->FireOnWillCopy(expected));
+    EXPECT_EQ(expected, value);
+    result = true;
+    EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
+}
+
+/**
+ * @tc.name: onWillCut
+ * @tc.desc: test onWillCut
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, onWillCut, TestSize.Level0)
+{
+    TextFieldModelNG textFieldModelNG;
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->onWillCopy_, nullptr);
+    std::u16string expected = u"Hello";
+    EXPECT_TRUE(eventHub->FireOnWillCut(expected));
+    std::u16string value = u"";
+    bool result = false;
+    auto onWillCutResult = [&value, &result](const std::u16string& param) -> bool {
+        value = param;
+        return result;
+    };
+    textFieldModelNG.SetOnWillCut(AceType::RawPtr(textFieldNode), onWillCutResult);
+    EXPECT_FALSE(eventHub->FireOnWillCut(expected));
+    EXPECT_EQ(expected, value);
+    result = true;
+    EXPECT_TRUE(eventHub->FireOnWillCut(expected));
+}
+
+/**
+ * @tc.name: IsCloseKeyboard
+ * @tc.desc: test IsCloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, IsCloseKeyboard001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = pattern->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    EXPECT_FALSE(pattern->IsCloseKeyboard(textFieldManager));
 }
 } // namespace OHOS::Ace::NG

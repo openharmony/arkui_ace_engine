@@ -78,7 +78,7 @@ class UIUtilsImpl {
         stateMgmtConsole.applicationError(message);
         throw new BusinessError(ADD_MONITOR_FAIL_FUNC_ILLEGAL, message);
       }
-      ObserveV2.getObserve().AddMonitorPath(target, path, monitorFunc, options);
+      ObserveV2.getObserve().AddMonitorPath(target, path, monitorFunc, options?.isSynchronous === true, options?.enableWildcard === true);
     }
         
     public clearMonitor(target: object, path: string | string[], monitorFunc: MonitorCallback): void {
@@ -111,6 +111,17 @@ class UIUtilsImpl {
 
     public flushUIUpdates(): void {
       ObserveV2.getObserve().flushUIUpdates();
+    }
+
+    // Returns the custom component context if the target is a recognized view instance
+    public getCustomComponentContext(target: PUV2ViewBase): PUV2ViewBase | undefined {
+      if (!target || typeof target !== 'object') {
+        return undefined;
+      }
+      if (target instanceof ViewPU || target instanceof ViewV2) {
+        return target as PUV2ViewBase;
+      }
+      return undefined;
     }
 
     public static instance(): UIUtilsImpl {

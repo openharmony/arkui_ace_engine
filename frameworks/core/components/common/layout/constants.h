@@ -211,7 +211,6 @@ enum class TextMarqueeState {
     START = 0,
     BOUNCE,
     FINISH,
-    STOP,
 };
 
 enum class MarqueeStartPolicy {
@@ -688,7 +687,7 @@ enum class CalendarType {
     SIMPLE,
 };
 
-enum class SideBarContainerType { EMBED, OVERLAY, AUTO };
+enum class SideBarContainerType { EMBED, OVERLAY, AUTO, DISPLACE };
 
 enum class SideBarPosition { START, END };
 

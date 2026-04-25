@@ -38,7 +38,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ArkMarqueePeer extends ArkCommonMethodPeer {
-    attributeSet?: MarqueeModifier;
+    marqueeAttributeSet?: MarqueeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -234,11 +234,11 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
     }
 }
 export interface MarqueeOptions {
-    start: boolean | undefined;
+    start?: boolean | undefined;
     step?: double;
     loop?: int32;
     fromStart?: boolean;
-    src: string | undefined;
+    src?: string | undefined;
     spacing?: arkui_component_units_LengthMetrics;
     delay?: int32;
 }

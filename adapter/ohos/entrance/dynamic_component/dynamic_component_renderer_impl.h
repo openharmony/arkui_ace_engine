@@ -112,6 +112,10 @@ public:
         return animationOption;
     }
 
+    std::shared_ptr<UIContent> GetUIContent() const
+    {
+        return uiContent_;
+    }
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
@@ -147,6 +151,8 @@ private:
         const OffsetF& offset);
 
     int32_t GetSCBOrientation(const RefPtr<FrameNode>& windowSceneNode);
+
+    sptr<IRemoteObject> GetconnectToRender();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;

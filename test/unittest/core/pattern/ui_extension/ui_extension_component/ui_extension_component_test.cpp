@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 
+#include "core/common/event_manager.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -28,6 +29,8 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/property/accessibility_property.h"
+#include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
@@ -45,12 +48,12 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+
 #include "test/unittest/core/pattern/ui_extension/mock/mock_accessibility_child_tree_callback.h"
 
 using namespace testing;
@@ -67,6 +70,13 @@ namespace {
     constexpr double SHOW_START = 0.0;
     constexpr double SHOW_FULL = 1.0;
 } // namespace
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class UIExtensionComponentTestNg : public testing::Test {
 public:
@@ -2231,5 +2241,26 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentUpdateWMSUIExtPropertyT
     pattern->UpdateWMSUIExtProperty(code, data, id);
     SUCCEED();
 #endif
+}
+
+/**
+ * @tc.name: UIExtensionProxyTest001
+ * @tc.desc: Test UIExtensionProxy SendData
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionProxyTest001, TestSize.Level1)
+{
+    int32_t instanceId = 1;
+    auto pattern = AceType::MakeRefPtr<UIExtensionPattern>();
+    auto sessionWrapper = AceType::MakeRefPtr<SessionWrapperImpl>(pattern, instanceId,
+        1, SessionType::UI_EXTENSION_ABILITY);
+    auto proxy = AceType::MakeRefPtr<UIExtensionProxy>(sessionWrapper, pattern);
+    
+    AAFwk::WantParams wantParams;
+    proxy->SendData(wantParams);
+    
+    AAFwk::WantParams reWantParams;
+    EXPECT_EQ(proxy->SendDataSync(wantParams, reWantParams), 1);
+    EXPECT_NE(proxy->GetPattern(), nullptr);
 }
 } // namespace OHOS::Ace::NG

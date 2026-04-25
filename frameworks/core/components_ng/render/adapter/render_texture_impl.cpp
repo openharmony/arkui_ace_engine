@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 
 #include "core/components_ng/render/adapter/render_texture_impl.h"
 
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/components_ng/render/adapter/render_capture_utils.h"
+#endif
+
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
@@ -23,7 +27,11 @@
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/common/ace_view.h"
 #include "cross_platform/surface_utils.h"
+#ifdef RS_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
 #endif
+#endif
+#include "pixel_map.h"
 
 namespace OHOS::Ace::NG {
 RenderTextureImpl::~RenderTextureImpl()
@@ -56,6 +64,11 @@ void RenderTextureImpl::InitSurface()
         CHECK_NULL_VOID(surface);
         surface->SetTextureId(id);
     });
+#if defined(RS_ENABLE_VK) && defined(ANDROID_PLATFORM)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() && hasPendingBounds_) {
+        SetExtSurfaceBounds(pendingLeft_, pendingTop_, pendingWidth_, pendingHeight_);
+    }
+#endif
     extTexture_->SetTextureFreshCallback([weak = WeakClaim(this)](int32_t instanceId, int64_t textureId) {
         auto surfaceImpl = weak.Upgrade();
         CHECK_NULL_VOID(surfaceImpl);
@@ -123,6 +136,12 @@ std::string RenderTextureImpl::GetUniqueId() const
 
 bool RenderTextureImpl::SetExtSurfaceBoundsSync(int32_t left, int32_t top, int32_t width, int32_t height)
 {
+#if defined(RS_ENABLE_VK) && defined(ANDROID_PLATFORM)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() && extTexture_ != nullptr) {
+        extTexture_->SetSizeSync(textureId_, width, height, left, top);
+        return true;
+    }
+#endif
     return false;
 }
 
@@ -130,6 +149,22 @@ void RenderTextureImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
 {
     LOGI("RenderTextureImpl::SetExtSurfaceBounds (%{public}d, %{public}d) - (%{public}d x %{public}d)", left, top,
         width, height);
+    surfaceHeight_ = height;
+    surfaceWidth_ = width;
+#if defined(RS_ENABLE_VK) && defined(ANDROID_PLATFORM)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+        if (extTexture_ == nullptr) {
+            hasPendingBounds_ = true;
+            pendingLeft_ = left;
+            pendingTop_ = top;
+            pendingWidth_ = width;
+            pendingHeight_ = height;
+            LOGI("RenderTextureImpl::SetExtSurfaceBounds deferred, extTexture_ not ready");
+            return;
+        }
+        hasPendingBounds_ = false;
+    }
+#endif
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -170,5 +205,22 @@ void RenderTextureImpl::GetTextureIsVideo(int32_t& type)
     CHECK_NULL_VOID(extTexture_);
     extTexture_->GetTextureIsVideo(type);
 }
+
+void RenderTextureImpl::AddInitTypeCallBack(int32_t& textureId)
+{
+    if (extTexture_) {
+        extTexture_->GetTextureId(textureId);
+    }
+}
+
+std::shared_ptr<Media::PixelMap> RenderTextureImpl::SurfaceCapture()
+{
+    CHECK_NULL_RETURN(extTexture_, nullptr);
+    return CapturePixelMap(surfaceWidth_, surfaceHeight_, "RenderTextureImpl::SurfaceCapture",
+        [texture = extTexture_](uintptr_t pointerVal, int32_t width, int32_t height) {
+            return texture->SurfaceCapture(pointerVal, width, height);
+        });
+}
+
 #endif
 } // namespace OHOS::Ace::NG

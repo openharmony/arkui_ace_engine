@@ -14,12 +14,14 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
 #include "accessibility_element_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/common/window.h"
@@ -31,10 +33,10 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "frameworks/core/event/pointer_event.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_frontend.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -80,6 +82,13 @@ std::shared_ptr<MMI::PointerEvent> CreatePointerEvent(int32_t action, int32_t so
     return pointerEvent;
 }
 }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class DynamicPatternTestNgThree : public testing::Test {
 public:

@@ -28,6 +28,7 @@
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/clipboard/clipboard_impl.h"
 #include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
+#include "frameworks/core/common/clipboard/clipboard_proxy.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/external/multimodalinput/axis_event.h"
@@ -40,6 +41,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 #include "frameworks/core/common/ace_engine.h"
+#include "frameworks/core/components_ng/pattern/app_bar/app_bar_view.h"
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
 #endif
@@ -428,7 +430,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
                                  const OHOS::Ace::RefPtr<PipelineContext>& context) mutable {
         CHECK_NULL_VOID(context);
         CHECK_NULL_VOID(window);
-        auto director = OHOS::Rosen::RSUIDirector::Create();
+        auto director = window->GetRSUIDirector();
         CHECK_NULL_VOID(director);
         director->SetRSSurfaceNode(window->GetSurfaceNode());
         auto container = AceContainer::GetContainerInstance(id);
@@ -441,7 +443,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
         };
         director->SetUITaskRunner(func, id);
-        director->Init();
         context->SetRSUIDirector(director);
     };
     AceContainer::SetView(view, rsWindow_, deviceConfig_.density, deviceWidth_, deviceHeight_, callback);

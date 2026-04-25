@@ -78,7 +78,9 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
     JSClass<JSTextArea>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);
+    JSClass<JSTextArea>::StaticMethod("onWillCopy", &JSTextField::SetOnWillCopy);
     JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
+    JSClass<JSTextArea>::StaticMethod("onWillCut", &JSTextField::SetOnWillCut);
     JSClass<JSTextArea>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextArea>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
     JSClass<JSTextArea>::StaticMethod("onClick", &JSTextField::SetOnClick);

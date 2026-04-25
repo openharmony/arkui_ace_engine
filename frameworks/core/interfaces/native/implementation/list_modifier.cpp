@@ -38,6 +38,7 @@ namespace OHOS::Ace::NG::Converter {
     struct ListOptions {
         std::optional<int> initialIndex;
         std::optional<Dimension> space;
+        std::optional<Dimension> spaceWidth;
         std::optional<Ark_Scroller> scroller;
     };
 
@@ -133,6 +134,7 @@ namespace OHOS::Ace::NG::Converter {
         return {
             .initialIndex = OptConvert<int>(src.initialIndex),
             .space = OptConvert<Dimension>(src.space),
+            .spaceWidth = OptConvert<Dimension>(src.spaceWidth),
             .scroller = OptConvert<Ark_Scroller>(src.scroller)
         };
     }
@@ -186,7 +188,9 @@ void SetListOptionsImpl(Ark_NativePointer node,
 
     auto initialIndex = optionsOpt.value().initialIndex;
     ListModelStatic::SetInitialIndex(frameNode, initialIndex);
+    auto spaceWidth = optionsOpt.value().spaceWidth;
     auto space = optionsOpt.value().space;
+    ListModelStatic::SetListSpaceWidth(frameNode, spaceWidth);
     ListModelStatic::SetListSpace(frameNode, space);
 
     auto abstPeerPtrOpt = optionsOpt.value().scroller;
@@ -414,6 +418,18 @@ void SetScrollSnapAnimationSpeedImpl(Ark_NativePointer node,
         speed = static_cast<int32_t>(ScrollSnapAnimationSpeed::NORMAL);
     }
     ListModelStatic::SetScrollSnapAnimationSpeed(frameNode, static_cast<ScrollSnapAnimationSpeed>(speed));
+}
+void SetBackPressBehaviorImpl(Ark_NativePointer node,
+                              const Opt_ListBackPressBehavior* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto behavior = Converter::GetOptPtr(value);
+    bool closeSwipeAction = true;
+    if (behavior.has_value()) {
+        closeSwipeAction = Converter::GetOpt(behavior->closeSwipeAction).value_or(true);
+    }
+    ListModelNG::SetBackPressCloseSwipeAction(frameNode, closeSwipeAction);
 }
 void SetOnScrollIndexImpl(Ark_NativePointer node,
                           const Opt_Callback_I32_I32_I32_Void* value)
@@ -720,6 +736,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetFocusWrapModeImpl,
         ListAttributeModifier::SetSyncLoadImpl,
         ListAttributeModifier::SetScrollSnapAnimationSpeedImpl,
+        ListAttributeModifier::SetBackPressBehaviorImpl,
         ListAttributeModifier::SetOnScrollIndexImpl,
         ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
         ListAttributeModifier::SetOnItemMoveImpl,

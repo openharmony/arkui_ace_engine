@@ -28,6 +28,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "arkweb_net_error_list.h"
+#include "base/utils/feature_param.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -36,6 +37,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -1118,7 +1120,15 @@ WebDelegate::~WebDelegate()
     OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
-        OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
+        if (surfaceRsNode_ != nullptr && surfaceRsNode_->GetRSUIContext() != nullptr) {
+            surfaceRsNode_->GetRSUIContext()->GetRSRenderInterface()->UnRegisterSurfaceOcclusionChangeCallback(
+                surfaceNodeId_);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WEB,
+                "WebDelegate surfaceRsNode_ is nullptr:%{public}d"
+                "RSUIContex is nullptr %{public}d",
+                surfaceRsNode_ == nullptr, ((surfaceRsNode_ == nullptr) ? true : false));
+        }
     }
     UnRegisterDisplayInfoChange();
     if (nweb_) {
@@ -2446,6 +2456,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onMicrophoneCaptureStateChangedV2_ = useNewPipe ? eventHub->GetOnMicrophoneCaptureStateChangedEvent()
                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetMicrophoneCaptureStateChangedId(), oldContext);
+        onInputMethodAttachedV2_ = useNewPipe ? eventHub->GetOnInputMethodAttachedEvent() : nullptr;
     }
     return true;
 }
@@ -2574,6 +2585,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 #endif
         }
     }
+    FetchCloudControlWebAutoLayoutConfig();
 }
 void WebDelegate::RegisterOHOSWebEventAndMethord()
 {
@@ -3073,6 +3085,7 @@ void WebDelegate::InitWebViewWithWindow()
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
             std::string app_path = GetDataPath();
             if (!app_path.empty()) {
+                initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(app_path));
                 initArgs->AddArg(std::string("--user-data-dir=").append(app_path));
             }
 
@@ -3456,22 +3469,32 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     std::vector<float> partitionPoints;
     TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
     SetPartitionPoints(partitionPoints);
-    auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
-        surfaceNodeId_,
-        [weak = WeakClaim(this)](float visibleRatio) {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            auto context = delegate->context_.Upgrade();
-            CHECK_NULL_VOID(context);
-            context->GetTaskExecutor()->PostTask(
-                [weakDelegate = weak, webVisibleRatio = visibleRatio]() {
-                    auto delegate = weakDelegate.Upgrade();
-                    CHECK_NULL_VOID(delegate);
-                    delegate->SurfaceOcclusionCallback(webVisibleRatio);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIWebOcclusionChange");
-        },
-        partitionPoints);
+     int32_t ret = Rosen::StatusCode::IPC_ERROR;
+     if (surfaceRsNode_ != nullptr && surfaceRsNode_->GetRSUIContext() != nullptr) {
+         ret = surfaceRsNode_->GetRSUIContext()->GetRSRenderInterface()->RegisterSurfaceOcclusionChangeCallback(
+             surfaceNodeId_,
+             [weak = WeakClaim(this)](float visibleRatio) {
+                 auto delegate = weak.Upgrade();
+                 CHECK_NULL_VOID(delegate);
+                 auto context = delegate->context_.Upgrade();
+                 CHECK_NULL_VOID(context);
+                 context->GetTaskExecutor()->PostTask(
+                     [weakDelegate = weak, webVisibleRatio = visibleRatio]() {
+                         auto delegate = weakDelegate.Upgrade();
+                         CHECK_NULL_VOID(delegate);
+                         delegate->SurfaceOcclusionCallback(webVisibleRatio);
+                     },
+                     TaskExecutor::TaskType::UI, "ArkUIWebOcclusionChange");
+             },
+             partitionPoints);
+     } else {
+         TAG_LOGE(AceLogTag::ACE_WEB,
+             "RegisterSurfaceOcclusionChangeFun surfaceRsNode_ is nullptr:%{public}d"
+             "RSUIContex is nullptr %{public}d",
+             surfaceRsNode_ == nullptr, ((surfaceRsNode_ == nullptr) ? true : false));
+         return;
+     }
+
     if (ret != Rosen::StatusCode::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_WEB,
             "RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
@@ -3616,6 +3639,7 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(delegate);
             std::shared_ptr<OHOS::NWeb::NWebEngineInitArgsImpl> initArgs =
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
+            initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--user-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             initArgs->AddArg(std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
@@ -4928,6 +4952,57 @@ void WebDelegate::LoadUrl()
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadSrcUrl");
+}
+
+int WebDelegate::SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& commandAction)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "SendCommandActionToNWeb Context upgrade failed");
+        return static_cast<int>(WebCommandResult::CONTEXT_NULL);
+    }
+    auto taskExecutor = context->GetTaskExecutor();
+    if (!taskExecutor) {
+        return static_cast<int>(WebCommandResult::TASK_EXECUTOR_NULL);
+    }
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
+        if (!nweb_) {
+            return static_cast<int>(WebCommandResult::WEB_NWEB_NULL);
+        }
+        return nweb_->SendCommandAction(commandAction);
+    }
+
+    auto promise = std::make_shared<std::promise<int>>();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), commandAction, promise]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                promise->set_value(static_cast<int>(WebCommandResult::DELEGATE_NULL));
+                return;
+            }
+            if (!delegate->nweb_) {
+                promise->set_value(static_cast<int>(WebCommandResult::WEB_NWEB_NULL));
+                return;
+            }
+            promise->set_value(delegate->nweb_->SendCommandAction(commandAction));
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSendCommandAction");
+
+    auto future = promise->get_future();
+    if (future.wait_for(std::chrono::milliseconds(1000)) == std::future_status::ready) {
+        return future.get();
+    }
+
+    return static_cast<int>(WebCommandResult::WEB_EXECUTE_TIMEOUT);
+}
+
+std::shared_ptr<OHOS::NWeb::NWebCommandActionManager>
+WebDelegate::GetNWebCommandActionManager()
+{
+    if (!nweb_) {
+        return nullptr;
+    }
+    return nweb_->GetCommandActionManager();
 }
 
 void WebDelegate::OnInactive()
@@ -9610,6 +9685,20 @@ bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yV
     return webPattern->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
 }
 
+bool WebDelegate::OnNestedScrollV2(float& x, float& y)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->OnNestedScrollV2(x, y);
+}
+
+bool WebDelegate::OnNestedFling(float& xVelocity, float& yVelocity)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->OnNestedFling(xVelocity, yVelocity);
+}
+
 void WebDelegate::OnStatusBarClick()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnStatusBarClick");
@@ -9766,6 +9855,18 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
         borderRadiusTopLeft, borderRadiusTopRight, borderRadiusBottomLeft, borderRadiusBottomRight);
 }
 
+void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetScrollbarLayoutPolicy(static_cast<int32_t>(policy));
+}
+
+void WebDelegate::SetIsSystemRtlEnable(bool enable)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetIsSystemRtlEnable(enable);
+}
+
 void WebDelegate::SetViewportScaleState()
 {
     CHECK_NULL_VOID(nweb_);
@@ -9910,6 +10011,25 @@ void WebDelegate::SetEnableAutoFill(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebEnableAutoFill");
 }
 
+void WebDelegate::SetEnableDrag(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                auto preference = delegate->nweb_->GetPreference();
+                if (preference) {
+                    preference->SetEnableDrag(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebEnableDrag");
+}
+
 void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -9958,7 +10078,7 @@ void WebDelegate::OnMediaCastEnter()
 void WebDelegate::SetForceEnableZoom(bool isEnabled)
 {
     CHECK_NULL_VOID(nweb_);
-    nweb_->SetForceEnableZoom(isEnabled);
+    nweb_->SetForceEnableZoomPublic(isEnabled);
 }
 
 void WebDelegate::OnExtensionDisconnect(int32_t connectId)
@@ -10148,6 +10268,21 @@ void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newStat
         TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
 }
 
+void WebDelegate::OnInputMethodAttached()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onInputMethodAttachedV2 = delegate->onInputMethodAttachedV2_;
+            if (onInputMethodAttachedV2) {
+                onInputMethodAttachedV2(std::make_shared<InputMethodAttachedEvent>());
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebInputMethodAttached");
+}
+
 void WebDelegate::SetOfflineWebActiveStatus(bool isActive)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus");
@@ -10204,4 +10339,40 @@ void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::st
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonString");
 }
+
+void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetKeyboardImmersiveMode(static_cast<int32_t>(mode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebKeyboardAppearnaceMode");
+}
+
+void WebDelegate::FetchCloudControlWebAutoLayoutConfig()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->SetWebAutoLayoutConfig(FeatureParam::GetArkWebAutoLayoutConfig());
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebFetchCloudControlWebAutoLayoutConfig");
+}
+
 } // namespace OHOS::Ace

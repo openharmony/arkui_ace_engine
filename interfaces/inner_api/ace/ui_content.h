@@ -137,7 +137,10 @@ public:
     static int32_t GetUIContentWindowID(int32_t instanceId);
     static bool SetXComponentCompensationAngle(const std::string& configStr);
     static const std::string& GetXComponentCompensationAngle();
+    static const std::string& GetUICorrectionConfig();
+    static bool SetUICorrectionConfig(const std::string& configStr);
     virtual ~UIContent() = default;
+    virtual OHOS::Rosen::Window* GetUIContentWindow() { return nullptr; };
 
     // UI content life-cycles
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
@@ -152,7 +155,8 @@ public:
                                                 napi_value storage) = 0;
     virtual void InitializeByName(OHOS::Rosen::Window *window,
         const std::string &name, napi_value storage, uint32_t focusWindowId) {};
-    virtual void InitializeDynamic(const DynamicInitialConfig& config) {};
+    virtual void InitializeDynamic(
+        const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender = nullptr) {};
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
@@ -242,7 +246,8 @@ public:
     virtual void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
 
     // ArkTS Form
-    virtual void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage,
+        sptr<IRemoteObject> connectToRender = nullptr) = 0;
     virtual void PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage) {};
     virtual void RunFormPage() = 0;
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() = 0;
@@ -518,7 +523,7 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport = false) {}
+    virtual void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport = false) {}
 
     virtual void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
                                      const std::optional<AppForceSplitConfig>& appConfig) {}
@@ -658,10 +663,18 @@ public:
         return nullptr;
     }
 
+    virtual void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback) {};
+    virtual void UnregisterTouchTimingCallback() {};
+
 private:
     static std::atomic<bool> successFlag_;
     static std::mutex mtx_;
     static std::string angleConfigJson_;
+    static std::atomic<bool> setUICorrectionConfigSuccessFlag_;
+    static std::mutex setUICorrectionConfigMutex_;
+    static std::string uiCorrectionConfigJson_;
 };
 
 } // namespace OHOS::Ace

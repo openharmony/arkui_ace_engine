@@ -20,6 +20,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"

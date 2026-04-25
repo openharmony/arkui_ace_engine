@@ -24,8 +24,15 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/syntax/lazy_for_each_builder.h"
 
 namespace OHOS::Ace::NG {
+
+
+struct LazyForEachOptions {
+    LazyForEachCustomComponentFreezeMode customComponentFreezeMode;
+    LazyForEachReleaseStrategy releaseStrategy;
+};
 
 struct ActiveRangeParam {
     int32_t start;
@@ -65,7 +72,7 @@ public:
         updateRange_ = std::move(update);
     }
 
-    void MoveData(int32_t from, int32_t to) final;
+    void MoveData(int32_t from, int32_t to, bool isNeedUpdate = false) final;
 
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
 
@@ -92,6 +99,11 @@ public:
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
+    }
+
+    void SetOptions(LazyForEachOptions options)
+    {
+        options_ = options;
     }
 
     /**
@@ -162,6 +174,16 @@ private:
         needBuildAll_ = needBuildAll;
     }
 
+    /**
+     * Check if the node at given index should be purged from cache.
+     * Returns true if the node is not in the cache range and should be removed.
+     */
+    void PurgeNode();
+
+    void RemovingExpiringItem(int64_t deadline);
+
+    std::list<RefPtr<UINode>> removingNodeList_;
+
     // false if in LazyForEach, true if in Repeat
     bool isRepeat_ = false;
     // ArkoalaLazyNode is not instance of FrameNode, needs to propagate active state to all items inside
@@ -189,6 +211,7 @@ private:
     std::function<void(int32_t, int32_t)> onMoveFromTo_;
     // record (from, to), only valid during dragging item.
     std::optional<std::pair<int32_t, int32_t>> moveFromTo_;
+    LazyForEachOptions options_ = { LazyForEachCustomComponentFreezeMode::AUTO, LazyForEachReleaseStrategy::BATCH };
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_LAZY_NODE_H

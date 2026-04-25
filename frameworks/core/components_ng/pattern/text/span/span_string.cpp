@@ -758,6 +758,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<ParagraphStyleSpan>();
         case SpanType::LineHeight:
             return MakeRefPtr<LineHeightSpan>();
+        case SpanType::LineSpacing:
+            return MakeRefPtr<LineSpacingSpan>();
         case SpanType::ExtSpan:
             return MakeRefPtr<ExtSpan>();
         case SpanType::BackgroundColor:
@@ -1335,6 +1337,7 @@ void SpanString::UpdateSpansMap()
                 ToGestureSpan(spanItem, start, end),
                 ToParagraphStyleSpan(spanItem, start, end),
                 ToLineHeightSpan(spanItem, start, end),
+                ToLineSpacingSpan(spanItem, start, end),
                 ToBackgroundColorSpan(spanItem, start, end),
                 ToUrlSpan(spanItem, start, end) };
         for (auto& spanBase : spanBases) {
@@ -1383,6 +1386,7 @@ RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, in
     font.variableFontWeight = spanItem->fontStyle->GetVariableFontWeight();
     font.enableVariableFontWeight = spanItem->fontStyle->GetEnableVariableFontWeight();
     font.enableDeviceFontWeightCategory = spanItem->fontStyle->GetEnableDeviceFontWeightCategory();
+    font.fontSizeScale = spanItem->fontStyle->GetFontSizeScale();
     return AceType::MakeRefPtr<FontSpan>(font, start, end);
 }
 
@@ -1472,7 +1476,27 @@ RefPtr<LineHeightSpan> SpanString::ToLineHeightSpan(const RefPtr<NG::SpanItem>& 
     if (spanItem->textLineStyle->GetLineHeight().has_value()) {
         lineHeight.SetValue(spanItem->textLineStyle->GetLineHeightValue().ConvertToVp());
     }
-    return AceType::MakeRefPtr<LineHeightSpan>(lineHeight, start, end);
+    std::optional<double> lineHeightMultiple;
+    if (spanItem->textLineStyle->GetLineHeightMultiply().has_value()) {
+        lineHeightMultiple = spanItem->textLineStyle->GetLineHeightMultiplyValue();
+    }
+    return AceType::MakeRefPtr<LineHeightSpan>(lineHeight, lineHeightMultiple, start, end);
+}
+
+RefPtr<LineSpacingSpan> SpanString::ToLineSpacingSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
+    Dimension lineSpacing;
+    if (spanItem->textLineStyle->GetLineSpacing().has_value()) {
+        lineSpacing.SetValue(spanItem->textLineStyle->GetLineSpacingValue().ConvertToVp());
+    }
+    std::optional<LineSpacingOptions> options;
+    if (spanItem->textLineStyle->GetIsOnlyBetweenLines().has_value()) {
+        LineSpacingOptions optionObject;
+        optionObject.onlyBetweenLines = spanItem->textLineStyle->GetIsOnlyBetweenLinesValue();
+        options = optionObject;
+    }
+    return AceType::MakeRefPtr<LineSpacingSpan>(lineSpacing, options, start, end);
 }
 
 RefPtr<BackgroundColorSpan> SpanString::ToBackgroundColorSpan(

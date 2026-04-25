@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_VIDEO_ROSEN_RENDER_TEXTURE_H
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/decoration.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "surface.h"
 #endif

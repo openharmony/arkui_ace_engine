@@ -18,7 +18,7 @@ import { KPointer, nullptr } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
 import { ColorMetricsExt, TouchEventProxy, TouchEventHandwritten } from '#generated'
-import { TouchEvent } from '../component/common'
+import { TouchEvent, LayoutPolicy, LayoutPolicyInternal } from '../component/common'
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
@@ -27,6 +27,7 @@ import { default as drawing } from "@ohos.graphics.drawing";
 import { default as uiEffect } from "@ohos.graphics.uiEffect";
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel";
 import { default as webview } from "@ohos.web.webview";
+import { RecordData } from "@ohos.base";
 import { default as Want } from "@ohos.app.ability.Want";
 import { Configuration } from "@ohos.app.ability.Configuration";
 import { default as window } from "@ohos.window";
@@ -107,7 +108,7 @@ import { CustomBuilderT, CustomNodeBuilderT, ResponseType } from '#generated'
 import { CommonModifier } from '#generated'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInternal} from '@ohos.arkui.ArcSwiper'
-import { CustomSpan } from "#generated";
+import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMeasureInfoProxy } from "#generated";
 import { CustomSpanWrapper } from "#generated";
 import { default as text } from '@ohos.graphics.text'
 
@@ -740,6 +741,45 @@ export namespace extractors {
     return proxy;
   }
 
+  export function normalizeLayoutPolicyByPtr(
+    peerPtr: KPointer | undefined,
+    fallback?: LayoutPolicy,
+  ): LayoutPolicy | undefined {
+    if (peerPtr === undefined || peerPtr == nullptr) {
+      return fallback;
+    }
+    if (peerPtr == LayoutPolicy.matchParent.getPeer()?.ptr) {
+      return LayoutPolicy.matchParent;
+    }
+    if (peerPtr == LayoutPolicy.wrapContent.getPeer()?.ptr) {
+      return LayoutPolicy.wrapContent;
+    }
+    if (peerPtr == LayoutPolicy.fixAtIdealSize.getPeer()?.ptr) {
+      return LayoutPolicy.fixAtIdealSize;
+    }
+    return fallback ?? LayoutPolicyInternal.fromPtr(peerPtr);
+  }
+
+  export function transform_Ark_CustomSpanMeasureInfo_to_Ark_CustomSpanMeasureInfoProxy(
+    value: CustomSpanMeasureInfo
+  ): CustomSpanMeasureInfoProxy {
+    return {
+      fontSize: value.fontSize,
+      maxWidth: value.maxWidth,
+      layoutPolicyPtr: value.layoutPolicy?.getPeer()?.ptr,
+    } as CustomSpanMeasureInfoProxy
+  }
+
+  export function transform_Ark_CustomSpanMeasureInfoProxy_to_Ark_CustomSpanMeasureInfo(
+    value: CustomSpanMeasureInfoProxy
+  ): CustomSpanMeasureInfo {
+    return {
+      fontSize: value.fontSize,
+      maxWidth: value.maxWidth,
+      layoutPolicy: normalizeLayoutPolicyByPtr(value.layoutPolicyPtr),
+    } as CustomSpanMeasureInfo
+  }
+
   export function transform_Ark_BusinessError_Void_to_Ark_BusinessErrorInterface_Void(from: BusinessError<void>): BusinessErrorInterface<void> {
         return {
             name: from.name,
@@ -789,5 +829,11 @@ export namespace extractors {
         throw new Error("Invalid managed object type in CustomSpanWrapper");
       }
       return value.managed as CustomSpan
+  }
+  export function transform_Ark_RecordData_to_Opt_Object(value: RecordData): Object | undefined {
+      return value as Object
+  }
+  export function transform_Opt_Object_to_Ark_RecordData(value: Object | undefined): RecordData {
+      return value as RecordData
   }
 }

@@ -1033,6 +1033,7 @@ void DragAnimationHelper::InitImageNodeProperties(const RefPtr<FrameNode>& image
     CHECK_NULL_VOID(renderProps);
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto targetSize = CalcSize(NG::CalcLength(pixelMap->GetWidth()), NG::CalcLength(pixelMap->GetHeight()));

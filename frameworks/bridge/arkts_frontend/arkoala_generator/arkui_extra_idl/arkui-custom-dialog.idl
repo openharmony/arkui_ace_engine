@@ -31,6 +31,7 @@ import arkui.component.common.ShadowStyle as ShadowStyle;
 import arkui.component.common.KeyboardAvoidMode as KeyboardAvoidMode;
 import arkui.component.common.BlurStyle as BlurStyle;
 import arkui.component.common.HoverModeAreaType as HoverModeAreaType;
+import arkui.component.common.SystemUiMaterial as SystemUiMaterial;
 import arkui.component.common.DismissReason as DismissReason;
 import arkui.component.common.BackgroundBlurStyleOptions as BackgroundBlurStyleOptions;
 import arkui.component.common.BackgroundEffectOptions as BackgroundEffectOptions;
@@ -174,6 +175,8 @@ interface CustomDialogControllerOptionsExtender {
   attribute LevelOrderExtender levelOrderExtender;
   [Optional]
   attribute boolean focusable;
+  [Optional]
+  attribute SystemUiMaterial systemMaterial;
 };
 
 interface CustomDialogControllerExternalOptionsExtender {

@@ -22,6 +22,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -42,9 +43,25 @@ namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
 namespace {
 template <bool isReverse>
-bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefPtr<FocusHub>&)>& operation)
+__attribute__((noinline)) bool AnyOfUINodeInner(const std::list<RefPtr<UINode>>& children,
+    const std::function<bool(const RefPtr<FocusHub>&)>& operation);
+
+template <bool isReverse>
+bool AnyOfUINode(const RefPtr<UINode>& node,
+    const std::function<bool(const RefPtr<FocusHub>&)>& operation)
 {
     const auto& children = node->GetChildren(true);
+    if (children.empty()) {
+        return false;
+    }
+
+    return AnyOfUINodeInner<isReverse>(children, operation);
+}
+
+template <bool isReverse>
+__attribute__((noinline)) bool AnyOfUINodeInner(const std::list<RefPtr<UINode>>& children,
+    const std::function<bool(const RefPtr<FocusHub>&)>& operation)
+{
     using IterType = std::conditional_t<isReverse, decltype(children.crbegin()), decltype(children.cbegin())>;
     IterType begin, end;
     if constexpr (isReverse) {
@@ -59,9 +76,9 @@ bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefP
         if (!uiChild || !uiChild->IsOnMainTree()) {
             continue;
         }
-        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
+        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
         if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
-            const auto focusHub = frameChild->GetFocusHub();
+            const auto& focusHub = frameChild->GetFocusHub();
             if (focusHub && operation(focusHub)) {
                 return true;
             }
@@ -666,6 +683,17 @@ bool FocusHub::IsFocusable()
     return false;
 }
 
+bool FocusHub::IsChildFocusable()
+{
+    if (focusType_ == FocusType::NODE) {
+        return IsChildFocusableNode();
+    }
+    if (focusType_ == FocusType::SCOPE) {
+        return IsChildFocusableScope();
+    }
+    return false;
+}
+
 bool FocusHub::IsFocusableScope()
 {
     if (!IsFocusableNode()) {
@@ -675,12 +703,98 @@ bool FocusHub::IsFocusableScope()
         return true;
     }
 
-    return AnyChildFocusHub([](const RefPtr<FocusHub>& focusHub) { return focusHub->IsFocusable(); });
+    // no need to check parent again, check child node is enough
+    return AnyChildFocusHub([](const RefPtr<FocusHub>& focusHub) { return focusHub->IsChildFocusable(); });
+}
+
+bool FocusHub::IsChildFocusableScope()
+{
+    if (!IsChildFocusableNode()) {
+        return false;
+    }
+    if (focusDepend_ == FocusDependence::SELF || focusDepend_ == FocusDependence::AUTO) {
+        return true;
+    }
+
+    return AnyChildFocusHub([](const RefPtr<FocusHub>& focusHub) { return focusHub->IsChildFocusable(); });
 }
 
 bool FocusHub::IsFocusableNode()
 {
-    return IsEnabled() && IsShow() && focusable_ && parentFocusable_;
+    if (!focusable_ || !parentFocusable_) {
+        return false;
+    }
+
+    auto frameNode = frameNode_.Upgrade();
+    if (frameNode) {
+        // IsShow
+        if (!frameNode->IsVisible()) {
+            return false;
+        }
+
+        // IsEnable
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        if (eventHub && !eventHub->IsEnabled()) {
+            return false;
+        }
+    } else {
+        // IsEnable
+        auto eventHub = eventHub_.Upgrade();
+        if (eventHub) {
+            if (!eventHub->IsEnabled()) {
+                return false;
+            }
+            frameNode = eventHub->GetFrameNode();
+        }
+        // IsShow
+        if (!frameNode) {
+            return true;
+        }
+        if (!frameNode->IsVisible()) {
+            return false;
+        }
+    }
+
+    // IsShow for parent
+    auto uiNode = frameNode->GetParent();
+    while (uiNode) {
+        auto frameNodePtr = AceType::DynamicCast<FrameNode>(uiNode.GetRawPtr());
+        if (frameNodePtr && !frameNodePtr->IsVisible()) {
+            return false;
+        }
+        uiNode = uiNode->GetParent();
+    }
+    return true;
+}
+
+bool FocusHub::IsChildFocusableNode()
+{
+    if (!focusable_ || !parentFocusable_) {
+        return false;
+    }
+
+    auto frameNode = frameNode_.Upgrade();
+    if (frameNode) {
+        // IsShow
+        if (!frameNode->IsVisible()) {
+            return false;
+        }
+
+        // IsEnable
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        return !eventHub || eventHub->IsEnabled();
+    }
+
+    auto eventHub = eventHub_.Upgrade();
+    if (eventHub) {
+        // IsEnable
+        if (!eventHub->IsEnabled()) {
+            return false;
+        }
+        frameNode = eventHub->GetFrameNode();
+    }
+    // IsShow
+    return !frameNode || frameNode->IsVisible();
 }
 
 void FocusHub::SetFocusable(bool focusable, bool isExplicit)
@@ -775,7 +889,7 @@ bool FocusHub::IsShow() const
 {
     bool curIsVisible = true;
     for (RefPtr<UINode> node = GetFrameNode(); curIsVisible && node; node = node->GetParent()) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        auto frameNode = AceType::DynamicCast<FrameNode>(node.GetRawPtr());
         if (frameNode && !frameNode->IsVisible()) {
             curIsVisible = false;
         }

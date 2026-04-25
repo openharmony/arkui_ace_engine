@@ -23,9 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -33,19 +31,19 @@
 #include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "interfaces/inner_api/ui_session/ui_session_json_util.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 }
 
 namespace OHOS::Ace {
+class IconTheme;
 class SelectTheme;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class TextLayoutProperty;
 
 class SelectPattern : public Pattern {
     DECLARE_ACE_TYPE(SelectPattern, Pattern);
@@ -175,6 +173,10 @@ public:
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
     FocusPattern GetFocusPattern() const override;
+
+    bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
 
     // update selected option props
     void UpdateSelectedProps(int32_t index);

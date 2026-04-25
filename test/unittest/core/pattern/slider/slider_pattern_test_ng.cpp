@@ -14,15 +14,16 @@
  */
 
 #include <optional>
+#include "core/accessibility/accessibility_manager.h"
 #include <type_traits>
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -50,10 +51,10 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/drawing_mock.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;
@@ -1465,6 +1466,25 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
             EXPECT_EQ(pointAccessibilityProperty->GetAccessibilityDescription(), description);
         }
     }
+}
+
+HWTEST_F(SliderPatternTestNg, SliderTextProperty001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    RefPtr<FrameNode> frameNode;
+    auto sliderPattern = AccessibilityInit(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->AddStepPointsAccessibilityVirtualNode();
+    sliderPattern->UpdateStepAccessibilityVirtualNode();
+    for (const auto& node : sliderPattern->pointAccessibilityNodeVec_) {
+        ASSERT_NE(node, nullptr);
+        auto pointNodeProperty = node->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(pointNodeProperty, nullptr);
+        EXPECT_TRUE(pointNodeProperty->GetEnableSmallLanguageTruncationValue(false));
+    }
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

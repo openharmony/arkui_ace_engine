@@ -76,6 +76,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -85,14 +86,19 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
+#include "core/components/progress/progress_theme.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/event/key_event.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
@@ -155,6 +161,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr int32_t SMART_GESTURE_SHORTCUT_PRIMARY = 0;
 constexpr int32_t SECOND_INDEX = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
@@ -353,6 +360,29 @@ bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
     option.SetEnd(static_cast<float>(to));
     option.SetRotate(jsObj->GetPropertyValue<bool>("rotatable", false));
     return true;
+}
+
+int32_t NormalizeAreaChangeExpectedUpdateInterval(double expectedUpdateInterval)
+{
+    constexpr int32_t expectedUpdateIntervalMax = std::numeric_limits<int32_t>::max();
+    if (IsNaN(expectedUpdateInterval)) {
+        return DEFAULT_DURATION;
+    }
+    if (IsInfinity(expectedUpdateInterval)) {
+        return expectedUpdateInterval > 0 ? expectedUpdateIntervalMax : DEFAULT_DURATION;
+    }
+    if (expectedUpdateInterval < 0.0) {
+        return DEFAULT_DURATION;
+    }
+    if (expectedUpdateInterval > static_cast<double>(expectedUpdateIntervalMax)) {
+        return expectedUpdateIntervalMax;
+    }
+    return static_cast<int32_t>(expectedUpdateInterval);
+}
+
+int32_t ParseAreaChangeExpectedUpdateInterval(const JSRef<JSVal>& jsValue)
+{
+    return NormalizeAreaChangeExpectedUpdateInterval(jsValue->ToNumber<double>());
 }
 
 void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
@@ -1630,6 +1660,53 @@ void RegisterRadiusRes(NG::BorderRadiusProperty& radius,
         radius.AddResource("radius.bottomEnd", bottomEndResObj, std::move(updateFunc));
     } else {
         radius.RemoveResource("radius.bottomEnd");
+    }
+}
+
+void ParseEdgeLightParam(const JSRef<JSObject>& jsObj, NG::EdgeLightParam& param)
+{
+    auto length = jsObj->GetProperty("length");
+    CalcDimension edgeLightLength;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(length, edgeLightLength, false)) {
+        edgeLightLength.Reset();
+    }
+    param.length = edgeLightLength;
+
+    auto intensity = jsObj->GetProperty("intensity");
+    auto edgeLightIntensity = 1.0;
+    if (JSViewAbstract::ParseJsDouble(intensity, edgeLightIntensity)) {
+        if (LessNotEqual(edgeLightIntensity, 0.0)) {
+            edgeLightIntensity = 0.0;
+        } else if (GreatNotEqual(edgeLightIntensity, 1.0)) {
+            edgeLightIntensity = 1.0;
+        }
+    }
+    param.intensity = edgeLightIntensity;
+
+    auto thickness = jsObj->GetProperty("thickness");
+    CalcDimension edgeLightThickness;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(thickness, edgeLightThickness, true)) {
+        edgeLightThickness.Reset();
+    }
+    param.thickness = edgeLightThickness;
+
+    auto position = jsObj->GetProperty("position");
+    auto edgeLightPosition = NG::EdgeLightPosition::TOP_LEFT;
+    if (position->IsNumber()) {
+        int32_t posValue = position->ToNumber<int32_t>();
+        if (posValue >= static_cast<int32_t>(NG::EdgeLightPosition::TOP_LEFT) &&
+            posValue <= static_cast<int32_t>(NG::EdgeLightPosition::RIGHT)) {
+            edgeLightPosition = static_cast<NG::EdgeLightPosition>(posValue);
+        }
+    }
+    param.edgeLightPosition = edgeLightPosition;
+
+    auto color = jsObj->GetProperty("color");
+    Color edgeLightColor = Color::WHITE;
+    if (JSViewAbstract::ParseJsColor(color, edgeLightColor)) {
+        param.color = edgeLightColor;
+    } else {
+        param.color = Color::WHITE;
     }
 }
 } // namespace
@@ -3881,6 +3958,73 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         radio = info[0]->ToNumber<double>();
     }
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
+}
+
+void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsUndefined() || info[0]->IsNull()) {
+        ViewAbstractModel::GetInstance()->SetSpatialEffect(std::nullopt);
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    SpatialEffectParams params;
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
+    auto positionValue = jsObject->GetProperty("position");
+    if (positionValue->IsObject()) {
+        DepthPosition position;
+        auto positionObject = JSRef<JSObject>::Cast(positionValue);
+        auto leftTopValue = positionObject->GetProperty("leftTop");
+        if (leftTopValue->IsObject()) {
+            position.leftTop = ParseDepthVector3(leftTopValue);
+        }
+        auto rightTopValue = positionObject->GetProperty("rightTop");
+        if (rightTopValue->IsObject()) {
+            position.rightTop = ParseDepthVector3(rightTopValue);
+        }
+        auto leftBottomValue = positionObject->GetProperty("leftBottom");
+        if (leftBottomValue->IsObject()) {
+            position.leftBottom = ParseDepthVector3(leftBottomValue);
+        }
+        auto rightBottomValue = positionObject->GetProperty("rightBottom");
+        if (rightBottomValue->IsObject()) {
+            position.rightBottom = ParseDepthVector3(rightBottomValue);
+        }
+        params.position = position;
+    }
+
+    auto occlusionWeightValue = jsObject->GetProperty("occlusionWeight");
+    if (occlusionWeightValue->IsNumber()) {
+        params.occlusionWeight = occlusionWeightValue->ToNumber<float>();
+    }
+    ViewAbstractModel::GetInstance()->SetSpatialEffect(params);
+}
+
+DepthVector3 JSViewAbstract::ParseDepthVector3(const JSRef<JSVal>& vectorValue)
+{
+    if (!vectorValue->IsObject()) {
+        return DepthVector3();
+    }
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
+    DepthVector3 vector;
+    auto xValue = vectorObj->GetProperty("x");
+    if (xValue->IsNumber()) {
+        vector.x = xValue->ToNumber<float>();
+    }
+
+    auto yValue = vectorObj->GetProperty("y");
+    if (yValue->IsNumber()) {
+        vector.y = yValue->ToNumber<float>();
+    }
+
+    auto zValue = vectorObj->GetProperty("z");
+    if (zValue->IsNumber()) {
+        vector.z = zValue->ToNumber<float>();
+    }
+    return vector;
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
@@ -6135,6 +6279,25 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::JSEdgeLight(const JSCallbackInfo& info)
+{
+    auto jsVal = info[0];
+    if (!jsVal->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetEdgeLightParam(std::nullopt);
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
+    NG::EdgeLightParam param {
+        .edgeLightPosition = NG::EdgeLightPosition::TOP_LEFT,
+        .length = CalcDimension(),
+        .intensity = 1.0f,
+        .thickness = CalcDimension(),
+        .color = Color::WHITE 
+    };
+    ParseEdgeLightParam(jsObj, param);
+    ViewAbstractModel::GetInstance()->SetEdgeLightParam(param);
+}
+
 bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
     std::string& resName, bool isParseType)
 {
@@ -6184,14 +6347,16 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
     int32_t resId = -1;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSVal> resIdJsValue;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
+    bool hasGetter = false;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue, hasGetter);
 }
 
 void JSViewAbstract::CompleteResourceObjectWithBundleName(JSRef<JSObject>& jsObj, std::string& bundleName,
     std::string& moduleName, int32_t& resId, JSRef<JSVal>& resIdJsValue)
 {
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
+    bool hasGetter = false;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue, hasGetter);
 }
 
 void JSViewAbstract::CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType)
@@ -6199,7 +6364,17 @@ void JSViewAbstract::CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj,
     std::string bundleName;
     std::string moduleName;
     JSRef<JSVal> resIdJsValue;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
+    bool hasGetter = false;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue, hasGetter);
+}
+
+void JSViewAbstract::CompleteResourceObjectWithResIdTypeGetter(
+    JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType, bool& hasGetter)
+{
+    std::string bundleName;
+    std::string moduleName;
+    JSRef<JSVal> resIdJsValue;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue, hasGetter);
 }
 
 void JSViewAbstract::GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<JSVal>& type, int32_t& resTypeValue)
@@ -6213,7 +6388,7 @@ void JSViewAbstract::GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<J
 }
 
 void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName,
-    std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId)
+    std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId, bool& hasGetter)
 {
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
@@ -6222,7 +6397,8 @@ void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::st
     std::string targetModule;
     std::string resName;
     JSRef<JSVal> type;
-    if (jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID))) {
+    hasGetter = jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID));
+    if (hasGetter) {
         resIdValue = UNKNOWN_RESOURCE_ID;
         GetResourceObjectType(jsObj, type, resTypeValue);
         CompleteResourceObjectFromParams(resIdValue, resTypeValue, jsObj, targetModule, resType, resName);
@@ -6283,12 +6459,13 @@ bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimensi
         int32_t resIdNum = UNKNOWN_RESOURCE_ID;
         int32_t resType = UNKNOWN_RESOURCE_TYPE;
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+        bool hasGetter = false;
+        CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
         if (resType == UNKNOWN_RESOURCE_TYPE) {
             return false;
         }
-        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-            GetResourceObjectByBundleAndModule(jsObj);
+        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                         : GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
         if (!resourceWrapper) {
             return false;
@@ -6438,9 +6615,10 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -6583,8 +6761,10 @@ bool JSViewAbstract::ParseColorMetricsToColor(
         resObj = JSViewAbstract::GetResourceObject(jsResObj);
     }
     if (toNumericProp->IsFunction() && colorSpaceProp->IsFunction()) {
-        auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
-        result.SetValue(colorVal->ToNumber<uint32_t>());
+        if (!ParseHDRColorToColor(colorObj, result)) {
+            auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
+            result.SetValue(colorVal->ToNumber<uint32_t>());
+        }
 
         auto resourceIdProp = colorObj->GetProperty("getResourceId");
         if (resourceIdProp->IsFunction()) {
@@ -6593,14 +6773,51 @@ bool JSViewAbstract::ParseColorMetricsToColor(
         }
 
         auto colorSpaceVal = JSRef<JSFunc>::Cast(colorSpaceProp)->Call(colorObj, 0, nullptr);
-        if (colorSpaceVal->IsNumber() &&
-            colorSpaceVal->ToNumber<uint32_t>() == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
-            result.SetColorSpace(ColorSpace::DISPLAY_P3);
+        if (colorSpaceVal->IsNumber()) {
+            uint32_t colorSpaceValue = colorSpaceVal->ToNumber<uint32_t>();
+            if (colorSpaceValue == static_cast<uint32_t>(ColorSpace::DISPLAY_P3)) {
+                result.SetColorSpace(ColorSpace::DISPLAY_P3);
+            } else if (colorSpaceValue == static_cast<uint32_t>(ColorSpace::BT2020)) {
+                result.SetColorSpace(ColorSpace::BT2020);
+            } else {
+                result.SetColorSpace(ColorSpace::SRGB);
+            }
         } else {
             result.SetColorSpace(ColorSpace::SRGB);
         }
 
         return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseHDRColorToColor(const JSRef<JSObject>& colorObj, Color& result)
+{
+    auto isHDRProp = colorObj->GetProperty("isHDR");
+    auto getColorSpace = colorObj->GetProperty("getColorSpace");
+    if (!isHDRProp->IsFunction() || !getColorSpace->IsFunction()) {
+        return false;
+    }
+    auto isHDRVal = JSRef<JSFunc>::Cast(isHDRProp)->Call(colorObj, 0, nullptr);
+    auto colorSpaceVal = JSRef<JSFunc>::Cast(getColorSpace)->Call(colorObj, 0, nullptr);
+    uint32_t colorSpaceValue = colorSpaceVal->ToNumber<uint32_t>();
+    if ((isHDRVal->IsBoolean() && isHDRVal->ToBoolean()) ||
+        colorSpaceValue == static_cast<uint32_t>(ColorSpace::BT2020)) {
+        auto redProp = colorObj->GetProperty("redValue_");
+        auto greenProp = colorObj->GetProperty("greenValue_");
+        auto blueProp = colorObj->GetProperty("blueValue_");
+        auto headRoomProp = colorObj->GetProperty("headRoom_");
+        auto alphaProp = colorObj->GetProperty("alpha_");
+        if (redProp->IsNumber() && greenProp->IsNumber() && blueProp->IsNumber() &&
+            headRoomProp->IsNumber() && alphaProp->IsNumber()) {
+            auto redValue = redProp->ToNumber<double>();
+            auto greenValue = greenProp->ToNumber<double>();
+            auto blueValue = blueProp->ToNumber<double>();
+            auto headRoomValue = headRoomProp->ToNumber<double>();
+            auto alphaValue = alphaProp->ToNumber<double>();
+            result = Color::FromFloat(redValue, greenValue, blueValue, alphaValue, headRoomValue);
+            return true;
+        }
     }
     return false;
 }
@@ -6663,7 +6880,8 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
     if (jsObj->IsEmpty()) {
         return false;
     }
@@ -6671,13 +6889,12 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         return false;
     }
 
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
-
     if (resIdNum == -1) {
         return ParseResourceToDoubleByName(jsObj, resType, resourceWrapper, result);
     }
@@ -6801,9 +7018,10 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, type, hasGetter);
 
-    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type);
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type, hasGetter);
     if (ok) {
         JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
         if (jsOpacityRatio->IsNumber()) {
@@ -6823,9 +7041,10 @@ bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, type, hasGetter);
 
-    auto ok = JSViewAbstract::ParseJsObjColorFromResourceForMaterial(jsObj, result, resObj, resIdNum, type);
+    auto ok = JSViewAbstract::ParseJsObjColorFromResourceForMaterial(jsObj, result, resObj, resIdNum, type, hasGetter);
     if (ok) {
         JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
         if (jsOpacityRatio->IsNumber()) {
@@ -6838,15 +7057,14 @@ bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
     return ok;
 }
 
-bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
-    RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
+bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject>& jsObj, Color& result,
+    RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type, bool& hasGetter)
 {
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
+    if (!jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::ID))) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -6897,15 +7115,14 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     return false;
 }
 
-bool JSViewAbstract::ParseJsObjColorFromResourceForMaterial(
-    const JSRef<JSObject>& jsObj, Color& result, RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
+bool JSViewAbstract::ParseJsObjColorFromResourceForMaterial(const JSRef<JSObject>& jsObj, Color& result,
+    RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type, bool& hasGetter)
 {
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
+    if (!jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::ID))) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7156,8 +7373,9 @@ void JSViewAbstract::ParseJsSymbolCustomFamilyNames(std::vector<std::string>& cu
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
-    auto resourceObject = GetResourceObject(jsObj);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
+    auto resourceObject = GetResourceObjectWithId(jsObj, hasGetter);
     CHECK_NULL_VOID(resourceObject);
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
@@ -7206,8 +7424,9 @@ bool JSViewAbstract::ParseJsSymbolId(
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
-    auto resourceObject = GetResourceObject(jsObj);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, type, hasGetter);
+    auto resourceObject = GetResourceObjectWithId(jsObj, hasGetter);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     symbolResourceObject = resourceObject;
     if (type == static_cast<int32_t>(ResourceType::STRING) && CheckCustomSymbolId(resourceWrapper, resIdNum, symbolId)) {
@@ -7261,7 +7480,14 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
         } else if (value->IsString()) {
             Color::ParseColorString(value->ToString(), color);
         } else {
-            ParseJsColorFromResource(value, color, resObj);
+            auto obj = JSRef<JSObject>::Cast(value);
+            auto toNumericProp = obj->GetProperty("toNumeric");
+            auto colorSpaceProp = obj->GetProperty("getColorSpace");
+            if (toNumericProp->IsFunction() && colorSpaceProp->IsFunction()) {
+                ParseColorMetricsToColor(value, color, resObj);
+            } else {
+                ParseJsColorFromResource(value, color, resObj);
+            }
         }
 
         result.emplace_back(color);
@@ -7294,10 +7520,11 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
 
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7329,7 +7556,8 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t type = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, type, hasGetter);
     if (type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -7337,8 +7565,8 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
     if (!args->IsArray()) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7610,13 +7838,14 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result,
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7701,12 +7930,13 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -7779,12 +8009,13 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     int32_t resIdNum = UNKNOWN_RESOURCE_ID;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+    bool hasGetter = false;
+    CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
     if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
-    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-        GetResourceObjectByBundleAndModule(jsObj);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                     : GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
@@ -8308,17 +8539,31 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
         return;
     }
     auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(jsVal));
+    int32_t minInterval = 0;
+    if (info.Length() > 1) {
+        minInterval = DEFAULT_DURATION;
+        if (info[1]->IsNumber()) {
+            minInterval = ParseAreaChangeExpectedUpdateInterval(info[1]);
+        } else if (info[1]->IsObject()) {
+            auto options = JSRef<JSObject>::Cast(info[1]);
+            auto intervalVal = options->GetProperty("expectedUpdateInterval");
+            if (intervalVal->IsNumber()) {
+                minInterval = ParseAreaChangeExpectedUpdateInterval(intervalVal);
+            }
+        }
+    }
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    WeakPtr<NG::FrameNode> weakFrameNode = AceType::WeakClaim(frameNode);
     auto onAreaChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction),
-                             node = frameNode](
+                             node = weakFrameNode](
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAreaChange");
         PipelineContext::SetCallBackNode(node);
         func->Execute(oldRect, oldOrigin, rect, origin);
     };
-    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
+    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged), minInterval);
 }
 
 void JSViewAbstract::JsOnSizeChange(const JSCallbackInfo& info)
@@ -9830,6 +10075,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
     JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
+    JSClass<JSViewAbstract>::StaticMethod("spatialEffect", &JSViewAbstract::JsSpatialEffect);
     JSClass<JSViewAbstract>::StaticMethod("outline", &JSViewAbstract::JsOutline);
     JSClass<JSViewAbstract>::StaticMethod("outlineWidth", &JSViewAbstract::JsOutlineWidth);
     JSClass<JSViewAbstract>::StaticMethod("outlineStyle", &JSViewAbstract::JsOutlineStyle);
@@ -9964,7 +10210,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);
     JSClass<JSViewAbstract>::StaticMethod(
+        "onGestureCollectIntercept", &JSViewAbstract::JsOnGestureCollectIntercept);
+    JSClass<JSViewAbstract>::StaticMethod(
         "shouldBuiltInRecognizerParallelWith", &JSViewAbstract::JsShouldBuiltInRecognizerParallelWith);
+    JSClass<JSViewAbstract>::StaticMethod(
+        "shouldRecognizerParallelWith", &JSViewAbstract::JsShouldRecognizerParallelWith);
     JSClass<JSViewAbstract>::StaticMethod(
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchTestDone", &JSViewAbstract::JsOnTouchTestDone);
@@ -10008,6 +10258,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod(
         "onVisibleAreaApproximateChange", &JSViewAbstract::JsOnVisibleAreaApproximateChange);
+    JSClass<JSViewAbstract>::StaticMethod("smartGestureShortcut", &JSViewAbstract::JsSmartGestureShortcut);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
@@ -10055,6 +10306,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("allowForceDark", &JSViewAbstract::JSAllowForceDark);
     JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
+
+    JSClass<JSViewAbstract>::StaticMethod("edgeLight", &JSViewAbstract::JSEdgeLight);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -10633,11 +10886,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -10656,11 +10906,8 @@ bool JSViewAbstract::ParseShadowProps(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    double radius = 0.0;
+    double radius = -1.0;
     ParseShadowPropsUpdate(jsObj, radius, shadow);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(jsObj, shadow);
 
@@ -11399,6 +11646,34 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnTouchIntercept(std::move(onTouchInterceptfunc));
 }
 
+void JSViewAbstract::JsOnGestureCollectIntercept(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnGestureCollectIntercept(nullptr);
+        return;
+    }
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnGestureCollectInterceptFunc = JSRef<JSFunc>::Cast(info[0]);
+    if (jsOnGestureCollectInterceptFunc->IsEmpty()) {
+        return;
+    }
+    auto jsFuncLocalHandle = jsOnGestureCollectInterceptFunc->GetLocalHandle();
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onGestureCollectInterceptFunc =
+        [vm, execCtx = info.GetExecutionContext(),
+            func = panda::CopyableGlobal(vm, jsFuncLocalHandle), node = frameNode](
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+            const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers) -> NG::GestureCollectIntervention {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::GestureCollectIntervention::CONTINUE);
+        ACE_SCORING_EVENT("onGestureCollectIntercept");
+        PipelineContext::SetCallBackNode(node);
+        return NG::CommonBridge::ProcessOnGestureCollectIntercept(vm, func.ToLocal(), recognizers, touchRecognizers);
+    };
+    ViewAbstractModel::GetInstance()->SetOnGestureCollectIntercept(std::move(onGestureCollectInterceptFunc));
+}
+
 void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
@@ -11420,6 +11695,28 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
     };
     ViewAbstractModel::GetInstance()->SetShouldBuiltInRecognizerParallelWith(
         std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
+void JSViewAbstract::JsShouldRecognizerParallelWith(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetShouldRecognizerParallelWith(nullptr);
+        return;
+    }
+
+    auto jsParallelGestureToFunc =
+        AceType::MakeRefPtr<JsShouldBuiltInRecognizerParallelWithFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto shouldRecognizerParallelWithFunc =
+        [execCtx = info.GetExecutionContext(), func = jsParallelGestureToFunc, node = frameNode](
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        ACE_SCORING_EVENT("shouldRecognizerParallelWith");
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(current, others);
+    };
+    ViewAbstractModel::GetInstance()->SetShouldRecognizerParallelWith(std::move(shouldRecognizerParallelWithFunc));
 }
 
 void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
@@ -11629,6 +11926,41 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
     };
     ViewAbstractModel::GetInstance()->SetOnVisibleAreaApproximateChange(
         std::move(onVisibleChange), ratioVec, expectedUpdateInterval, measureFromViewport);
+}
+
+void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
+{
+    if (info.Length() != PARAMETER_LENGTH_FIRST) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    auto options = JSRef<JSObject>::Cast(info[0]);
+    auto actionValue = options->GetProperty("action");
+    auto enabledValue = options->GetProperty("enabled");
+    if (!actionValue->IsNumber() || !enabledValue->IsBoolean()) {
+        return;
+    }
+
+    int32_t action = actionValue->ToNumber<int32_t>();
+    if (action != SMART_GESTURE_SHORTCUT_PRIMARY) {
+        return;
+    }
+    bool enabled = enabledValue->ToBoolean();
+    bool selectable = false;
+    auto selectableValue = options->GetProperty("selectable");
+    if (selectableValue->IsBoolean()) {
+        selectable = selectableValue->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetSmartGestureShortcut(action, enabled, selectable);
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
@@ -11954,6 +12286,19 @@ void JSViewAbstract::JSUseUnion(const JSCallbackInfo& info)
     if (argUnion->IsBoolean()) {
         useUnion = argUnion->ToBoolean();
     }
+    JSRef<JSVal> jsVal = info[1];
+    NG::CenterGravityOptions param {
+        .gravityCenter = false,
+        .gravityIntensity = 0.0f
+    };
+    auto intensity = 0.0;
+    if (jsVal->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
+        ParseJsBool(jsObj->GetProperty("gravityCenter"), param.gravityCenter);
+        ParseJsDouble(jsObj->GetProperty("gravityIntensity"), intensity);
+        param.gravityIntensity = intensity;
+    }
+    ViewAbstractModel::GetInstance()->SetCenterGravityOptions(param);
     ViewAbstractModel::GetInstance()->SetUseUnion(useUnion);
 }
 

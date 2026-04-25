@@ -23,7 +23,7 @@ import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
-import { AttributeModifier, hookFormLinkAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, hookFormLinkAttributeModifier, AttributeUpdater, extractors } from '#handwritten'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
@@ -34,7 +34,7 @@ import { FormLinkModifier } from './../FormLinkModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkFormLinkPeer extends ArkCommonMethodPeer {
-    attributeSet?: FormLinkModifier;
+    formLinkAttributeSet?: FormLinkModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -152,7 +152,14 @@ export class FormLinkOptions_serializer {
         if (valueHolderForParams !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForParamsTmpValue = valueHolderForParams!
-            valueSerializer.holdAndWriteObject(valueHolderForParamsTmpValue)
+            const valueHolderForParamsTmpValueTransformed: Object | undefined = extractors.transform_Ark_RecordData_to_Opt_Object(valueHolderForParamsTmpValue)
+            if (valueHolderForParamsTmpValueTransformed !== undefined) {
+                valueSerializer.writeInt8(RuntimeType.OBJECT)
+                const valueHolderForParamsTmpValueTransformedTmpValue = valueHolderForParamsTmpValueTransformed!
+                valueSerializer.holdAndWriteObject(valueHolderForParamsTmpValueTransformedTmpValue)
+            } else {
+                valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+            }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -187,7 +194,13 @@ export class FormLinkOptions_serializer {
         const paramsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let paramsTmpBuf: RecordData | undefined = undefined
         if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paramsTmpBuf = (valueDeserializer.readObject() as object)
+            const paramsTmpBufOptD_runtimeType = valueDeserializer.readInt8()!.toInt()
+            let paramsTmpBufOptD: Object | undefined = undefined
+            if ((paramsTmpBufOptD_runtimeType) != (RuntimeType.UNDEFINED)) {
+                paramsTmpBufOptD = (valueDeserializer.readObject() as object)
+            }
+            const paramsTmpBufOptDeserialized: Object | undefined = paramsTmpBufOptD
+            paramsTmpBuf = extractors.transform_Opt_Object_to_Ark_RecordData(paramsTmpBufOptDeserialized)
         }
         const paramsTmpResult: RecordData | undefined = paramsTmpBuf
         let value: FormLinkOptions = ({action: actionTmpResult, moduleName: moduleNameTmpResult, bundleName: bundleNameTmpResult, abilityName: abilityNameTmpResult, uri: uriTmpResult, params: paramsTmpResult} as FormLinkOptions)

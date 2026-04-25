@@ -40,6 +40,48 @@ struct TestingColor4f {
     scalar alphaF_ = 0;
 };
 
+struct TestingUIColor {
+    typedef float scalar;
+    scalar redF_ = 0;
+    scalar greenF_ = 0;
+    scalar blueF_ = 0;
+    scalar alphaF_ = 1;
+    scalar headRoom_ = 1;
+
+    TestingUIColor() = default;
+    TestingUIColor(scalar red, scalar green, scalar blue, scalar alpha)
+        : redF_(red), greenF_(green), blueF_(blue), alphaF_(alpha)
+    {}
+    TestingUIColor(scalar red, scalar green, scalar blue, scalar alpha, scalar headRoom)
+        : redF_(red), greenF_(green), blueF_(blue), alphaF_(alpha), headRoom_(headRoom)
+    {}
+
+    scalar GetRed() const
+    {
+        return redF_;
+    }
+
+    scalar GetGreen() const
+    {
+        return greenF_;
+    }
+
+    scalar GetBlue() const
+    {
+        return blueF_;
+    }
+
+    scalar GetAlpha() const
+    {
+        return alphaF_;
+    }
+
+    scalar GetHeadRoom() const
+    {
+        return headRoom_;
+    }
+};
+
 enum TestingColorPlaceholder : uint8_t {
     NONE = 0
 };

@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/unittest/core/common/clipboard/mock_clip_board.h"
 #include "text_base.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"

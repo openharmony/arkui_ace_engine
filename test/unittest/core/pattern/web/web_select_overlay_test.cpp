@@ -19,7 +19,7 @@
 #define protected public
 #include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"
 #include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ai/image_analyzer.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_ng/pattern/web/web_select_overlay.h"
@@ -27,12 +27,13 @@
 #undef private
 #include "nweb.h"
 #include "nweb_handler.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #include "arkweb_utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -1111,17 +1112,6 @@ protected:
 
 private:
     void OnScrollEndCallback() override {};
-
-    void MultiSelectWithoutKeyboard(const RectF& selectedZone) override {}
-    void ClearMultiSelect() override {}
-    bool IsItemSelected(float xOffset, float yOffset)
-    {
-        return false;
-    }
-    float GetOffsetWithLimit(float offset) const override
-    {
-        return 0.0f;
-    }
 };
 
 class NWebQuickMenuParamsNeMockFirst : public OHOS::NWeb::NWebQuickMenuParams {

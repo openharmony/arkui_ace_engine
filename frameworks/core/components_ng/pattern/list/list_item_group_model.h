@@ -35,11 +35,14 @@ public:
     static ListItemGroupModel* GetInstance();
     virtual ~ListItemGroupModel() = default;
 
-    virtual void Create(V2::ListItemGroupStyle listItemGroupStyle) = 0;
+    virtual void Create(const V2::ListItemGroupOptions& options) = 0;
     virtual void SetSpace(const Dimension& space) = 0;
+    virtual void SetSpaceWidth(const Dimension& spaceWidth) {};
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetHeader(std::function<void()>&& header) = 0;
     virtual void SetFooter(std::function<void()>&& footer) = 0;
+    virtual void SetHeaderStyle(V2::ListItemGroupHeaderFooterStyle style) {};
+    virtual void SetFooterStyle(V2::ListItemGroupHeaderFooterStyle style) {};
     virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize(NG::FrameNode* node = nullptr)
     {
         return nullptr;
@@ -65,6 +68,9 @@ public:
     virtual void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetDividerColorByUser(bool isByUser) = 0;
+    virtual void CreateWithResourceObjSpace(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ResetSpace() {};
+    virtual void ResetSpaceWidth() {};
 
 private:
     static std::unique_ptr<ListItemGroupModel> instance_;

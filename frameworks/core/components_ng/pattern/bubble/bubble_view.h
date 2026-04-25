@@ -26,9 +26,11 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components/popup/popup_theme.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -39,27 +41,44 @@ public:
         const RefPtr<SpanString>& spanString = nullptr);
     static RefPtr<FrameNode> CreateCustomBubbleNode(const std::string& targetTag, int32_t targetId,
         const RefPtr<UINode>& customNode, const RefPtr<PopupParam>& param);
-    static RefPtr<FrameNode> CreateMessage(const std::string& message, bool isUseCustom);
+    static RefPtr<FrameNode> CreateMessage(const std::string& message, bool isUseCustom,
+        const RefPtr<PopupTheme>& popupTheme = nullptr);
     static RefPtr<FrameNode> CreateCombinedChild(
         const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId, const RefPtr<FrameNode>& bubbleNode);
-    static RefPtr<FrameNode> CreateButtons(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId);
+    static RefPtr<FrameNode> CreateButtons(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId,
+        const RefPtr<PopupTheme>& popupTheme = nullptr);
     static RefPtr<FrameNode> CreateButton(
         ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param,
-         const int32_t buttonNumber = 1);
+        const RefPtr<PopupTheme>& popupTheme = nullptr, const int32_t buttonNumber = 1);
     static void UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
     static void UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param, bool custom = true);
     static void ResetBubbleProperty(int32_t popupId);
     static void GetPopupMaxWidthAndHeight(
-        const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight, int32_t popupId);
+        const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight, int32_t popupId,
+        const RefPtr<PopupTheme>& popupTheme = nullptr);
     static void UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const RefPtr<PopupParam>& param);
     static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
     static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
     static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
+    static bool SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, const RefPtr<PopupParam>& param);
 
 private:
-    static bool IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow, bool isTips = false);
+    static bool IsSupportBlurStyle(
+        const RefPtr<RenderContext>& renderContext, bool isShowInSubWindow, bool isTips = false);
+    static bool ShouldUpdateShadow(const RefPtr<PopupParam>& param);
+    static void UpdateBubbleBackgroundAndBlur(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<BubbleRenderProperty>& paintProp,
+        const RefPtr<PopupTheme>& theme,
+        const RefPtr<PopupParam>& param,
+        const RefPtr<BubblePattern>& pattern,
+        bool isUserSetMaterial);
+    static void UpdateBubbleShadow(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<PopupParam>& param,
+        const RefPtr<FrameNode>& popupNode);
 };
 } // namespace OHOS::Ace::NG
 

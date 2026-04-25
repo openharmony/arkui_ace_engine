@@ -37,7 +37,7 @@ import { CommonMethod } from './common'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkSymbolSpanPeer extends PeerNode {
-    attributeSet?: SymbolSpanModifier;
+    symbolSpanAttributeSet?: SymbolSpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -184,15 +184,15 @@ export class ArkSymbolSpanPeer extends PeerNode {
         thisSerializer.release()
     }
     setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (moduleName !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const moduleNameTmpValue  = moduleName!
+            const moduleNameTmpValue = moduleName!
             thisSerializer.writeString(moduleNameTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolSpanAttribute_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -221,11 +221,11 @@ export interface SymbolSpanAttribute {
     id(value: string | undefined): this {
         throw new Error('Unimplemented method id')
     }
-    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
-        throw new Error('Unimplemented method attributeModifier')
-    }
     debugLine(sourceLine: string, moduleName?: string): this {
         throw new Error('Unimplemented method debugLine')
+    }
+    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
@@ -274,6 +274,12 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
         this.getPeer()?.setIdAttribute(value_casted)
         return this
     }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        const sourceLine_casted = sourceLine as (string)
+        const moduleName_casted = moduleName as (string | undefined)
+        this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
+        return this
+    }
     public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookSymbolSpanAttributeModifier(this, value);
@@ -286,15 +292,6 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
-    }
-    public debugLine(sourceLine: string, moduleName?: string): this {
-        if (this.checkPriority("debugLine")) {
-            const sourceLine_casted = sourceLine as (string)
-            const moduleName_casted = moduleName as (string | undefined)
-            this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
-            return this
-        }
-        return this
     }
 }
 

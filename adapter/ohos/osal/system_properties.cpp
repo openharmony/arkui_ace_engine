@@ -29,6 +29,7 @@
 
 #include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/ui_material.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -48,6 +49,9 @@ constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.boundary.enabled";
+#endif
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
@@ -82,6 +86,7 @@ constexpr int32_t FOLD_TYPE_TWO = 2;
 constexpr int32_t FOLD_TYPE_FOUR = 4;
 constexpr int32_t FOLD_TYPE_SEVEN = 7;
 constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
 
 bool IsOpIncEnabled()
 {
@@ -108,6 +113,15 @@ bool IsDebugOffsetLogEnabled()
 bool IsDebugBoundaryEnabled()
 {
     return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
+}
+
+bool IsGestureDebugBoundaryEnabled()
+{
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+    return system::GetParameter(ENABLE_GESTURE_DEBUG_BOUNDARY_KEY, "false") == "true";
+#else
+    return false;
+#endif
 }
 
 bool IsDownloadByNetworkDisabled()
@@ -210,6 +224,11 @@ bool IsFocusCanBeActive()
     return system::GetParameter("persist.gesture.smart_gesture_enable", "1") != "0";
 }
 
+bool IsSmartGestureEnabled()
+{
+    return system::GetBoolParameter("persist.ace.gesture.smart_gesture_enabled", true);
+}
+
 bool IsCacheNavigationNodeEnable()
 {
     return system::GetParameter("persist.ace.navigation.groupnode.cached", "true") == "true";
@@ -310,7 +329,7 @@ bool IsContainerDeleteFlag()
 
 bool IsMultiInstanceEnabled()
 {
-    return (system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "0") != "0");
+    return (system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "1") != "0");
 }
 
 bool IsLayoutDetectEnabled()
@@ -422,18 +441,6 @@ int32_t GetImageFileCacheConvertAstcThresholdProp()
 bool IsUseMemoryMonitor()
 {
     return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
-}
-
-int32_t ReadComponentLoadNumber()
-{
-    return system::GetIntParameter(
-        "persist.ace.componentload.number", 1); // Number of components loaded in 100 milliseconds.
-}
-
-int32_t ReadStopCollectTimeWait()
-{
-    return system::GetIntParameter(
-        "persist.ace.stopCollect.timeWait", 800); // 800 : Stop collecting asynchronous task waiting time.
 }
 
 bool IsExtSurfaceEnabled()
@@ -557,10 +564,19 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
-int32_t ReadPageLoadTimeThreshold()
+UiMaterialLevel ReadUiMaterialLevel()
 {
-    return system::GetIntParameter(
-        "const.arkui.pageload.timethreshold", 1500); // page load max timethreshold is 1500ms.
+    UiMaterialLevel result = UiMaterialLevel::DEFAULT;
+    if (MaterialUtils::GetGlobalMaterialLevel(result)) {
+        return result;
+    }
+    int32_t level =
+        system::GetIntParameter("const.immersive_material_level", static_cast<int32_t>(UiMaterialLevel::DEFAULT));
+    if (level >= static_cast<int32_t>(UiMaterialLevel::EXQUISITE) &&
+        level <= static_cast<int32_t>(UiMaterialLevel::MAX)) {
+        result = static_cast<UiMaterialLevel>(level);
+    }
+    return result;
 }
 
 bool IsAscending(const std::vector<double>& nums)
@@ -741,6 +757,7 @@ std::atomic<bool> SystemProperties::unZipHap_(true);
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled() && developerModeOn_);
+bool SystemProperties::gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnabled();
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
@@ -776,6 +793,7 @@ float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 std::atomic<bool> SystemProperties::focusCanBeActive_(IsFocusCanBeActive());
+bool SystemProperties::smartGestureEnabled_ = IsSmartGestureEnabled();
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
@@ -789,7 +807,6 @@ double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
-int32_t SystemProperties::pageLoadTimethreshold_ = ReadPageLoadTimeThreshold();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -962,6 +979,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         canvasDebugMode_ = ReadCanvasDebugMode();
         safeRefactorMode_ = ReadSafeRefactorMode();
         isHookModeEnabled_ = IsHookModeEnabled();
+        gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnabled();
         debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
         debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
         downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
@@ -1121,18 +1139,6 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
     return isUseMemoryMonitor;
-}
-
-ACE_WEAK_SYM int32_t SystemProperties::GetComponentLoadNumber()
-{
-    static int32_t componentLoadNumber = ReadComponentLoadNumber();
-    return componentLoadNumber;
-}
-
-ACE_WEAK_SYM int32_t SystemProperties::GetStopCollectTimeWait()
-{
-    static int32_t stopCollectTimeWait = ReadStopCollectTimeWait();
-    return stopCollectTimeWait;
 }
 
 bool SystemProperties::IsFormAnimationLimited()
@@ -1472,11 +1478,6 @@ int32_t SystemProperties::GetTouchAccelarate()
     return touchAccelarate_;
 }
 
-int32_t SystemProperties::GetPageLoadTimethreshold()
-{
-    return pageLoadTimethreshold_;
-}
-
 bool SystemProperties::IsSuperFoldDisplayDevice()
 {
     InitFoldScreenTypeBySystemProperty();
@@ -1593,5 +1594,18 @@ void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
 void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 {
     faultInjectEnabled_ = faultInjectEnable;
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    static auto uiMaterialLevel = ReadUiMaterialLevel();
+    return uiMaterialLevel;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    static auto formTaskPriority = system::GetIntParameter<int32_t>("const.form.task_priority",
+	                                                                DEFAULT_FORM_TASK_PRIORITY);
+    return formTaskPriority;
 }
 } // namespace OHOS::Ace

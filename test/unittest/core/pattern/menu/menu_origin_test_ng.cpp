@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/button/button_theme.h"
@@ -64,6 +64,9 @@
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
+#include "core/common/ace_engine.h"
+#include "core/components/theme/icon_theme.h"
+#include "core/components/common/properties/placement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -138,6 +141,7 @@ void MenuTestNg::SetUp()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MockContainer::SetUp();
 }
@@ -160,6 +164,19 @@ void MenuTestNg::MockPipelineContextGetTheme()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
@@ -533,6 +550,29 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate002, TestSize.Level1)
     ASSERT_NE(textProperty, nullptr);
     EXPECT_TRUE(textProperty->GetContent().has_value());
     EXPECT_EQ(textProperty->GetContent().value(), u"Title");
+}
+
+HWTEST_F(MenuTestNg, MenuViewTitleTextProperty001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    std::vector<OptionParam> params { OptionParam("content", std::function<void()>()) };
+    MenuParam menuParam;
+    menuParam.title = "Title";
+    auto wrapperNode = MenuView::Create(std::move(params), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetFirstChild());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto column = menuPattern->GetMenuColumn();
+    ASSERT_NE(column, nullptr);
+    auto titleChild = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    ASSERT_NE(titleChild, nullptr);
+    auto textProperty = titleChild->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    EXPECT_TRUE(textProperty->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**

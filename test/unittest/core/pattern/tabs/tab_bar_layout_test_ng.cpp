@@ -15,7 +15,7 @@
 
 #include "tabs_test_ng.h"
 
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"

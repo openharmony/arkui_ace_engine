@@ -28,6 +28,11 @@ ohos_shared_library("ace_container_scope") {
   public_configs = [ ":container_scope_config" ]
 
   configs = [ "$ace_root:ace_config" ]
+  if (!build_ohos_sdk) {
+    defines = [
+      "NAPI_SCOPE_ERROR_HIVEW_REPORT"
+    ]
+  }
 
   sources = [ "$ace_root/frameworks/core/common/container_scope.cpp" ]
 
@@ -136,6 +141,7 @@ template("ace_core_source_set") {
       "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
+      "common/back_press_handler_manager.cpp",
       "common/builder_util.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
@@ -148,6 +154,7 @@ template("ace_core_source_set") {
       "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
+      "common/input_event_monitor_manager.cpp",
       "common/interaction/interaction_data.cpp",
       "common/font_manager.cpp",
       "common/frontend.cpp",
@@ -171,6 +178,7 @@ template("ace_core_source_set") {
       "common/thread_container.cpp",
       "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
+      "common/visual_effect/transparency_utils.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
 
@@ -285,6 +293,35 @@ template("ace_core_source_set") {
       # refresh
       "components/refresh/render_refresh_target.cpp",
     ]
+
+    if (defined(config.relaxed_interaction_support) && config.relaxed_interaction_support) {
+      sources += [
+        # relaxed interaction
+        "components_ng/relaxed_interaction/base_executor.cpp",
+        "components_ng/relaxed_interaction/executor_choreographer.cpp",
+        "components_ng/relaxed_interaction/executor_generator.cpp",
+        "components_ng/relaxed_interaction/executors/backpress_executor.cpp",
+        "components_ng/relaxed_interaction/executors/fallback_executor.cpp",
+        "components_ng/relaxed_interaction/executors/scroll_simulating_executor.cpp",
+        "components_ng/relaxed_interaction/executors/scroll_touch_executor.cpp",
+        "components_ng/relaxed_interaction/executors/simulate_touch_executor.cpp",
+        "components_ng/relaxed_interaction/executors/strict_click_executor.cpp",
+        "components_ng/relaxed_interaction/executors/strict_content_switch_executor.cpp",
+        "components_ng/relaxed_interaction/frame_node_finder.cpp",
+        "components_ng/relaxed_interaction/parsers/backpress_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/click_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/content_switch_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/fallback_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/scroll_command_parser.cpp",
+        "components_ng/relaxed_interaction/relaxed_interaction_manager.cpp",
+        "components_ng/relaxed_interaction/utils/json_utils.cpp",
+        "components_ng/relaxed_interaction/utils/relaxed_event_factory.cpp",
+        "components_ng/relaxed_interaction/utils/workflow_dumper.cpp",
+        "components_ng/relaxed_interaction/executors/smart_gesture_executor.cpp",
+        "components_ng/relaxed_interaction/parsers/slide_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/tap_command_parser.cpp",
+      ]
+    }
 
     if (platform == "ohos" || platform == "ohos_ng") {
       sources -= [ "common/anr_thread.cpp" ]
@@ -714,6 +751,7 @@ template("ace_core_ng_source_set") {
       "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
+      "common/back_press_handler_manager.cpp",
       "common/builder_util.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
@@ -726,6 +764,7 @@ template("ace_core_ng_source_set") {
       "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
+      "common/input_event_monitor_manager.cpp",
       "common/interaction/interaction_data.cpp",
       "common/font_manager.cpp",
       "common/frontend.cpp",
@@ -749,6 +788,7 @@ template("ace_core_ng_source_set") {
       "common/thread_container.cpp",
       "common/thread_model_impl.cpp",
       "common/vibrator/vibrator_proxy.cpp",
+      "common/visual_effect/transparency_utils.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
 
@@ -841,6 +881,7 @@ template("ace_core_ng_source_set") {
       "components/common/properties/motion_path_evaluator.cpp",
       "components/common/properties/shadow.cpp",
       "components/common/properties/shadow_config.cpp",
+      "components/common/properties/text_enums.cpp",
       "components/common/properties/text_style.cpp",
       "components/common/properties/text_style_parser.cpp",
       "components/common/properties/ui_material.cpp",
@@ -877,6 +918,10 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_manager_multi_thread.cpp",
       "components/theme/theme_utils.cpp",
       "components/theme/ui_material_theme.cpp",
+      "components/button/button_theme.cpp",
+      "components/rating/rating_theme.cpp",
+      "components/slider/slider_theme.cpp",
+      "components/toggle/toggle_theme.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",
@@ -909,6 +954,35 @@ template("ace_core_ng_source_set") {
       "drawable/layered_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
     ]
+
+    if (defined(config.relaxed_interaction_support) && config.relaxed_interaction_support) {
+      sources += [
+        # relaxed interaction
+        "components_ng/relaxed_interaction/base_executor.cpp",
+        "components_ng/relaxed_interaction/executor_choreographer.cpp",
+        "components_ng/relaxed_interaction/executor_generator.cpp",
+        "components_ng/relaxed_interaction/executors/backpress_executor.cpp",
+        "components_ng/relaxed_interaction/executors/fallback_executor.cpp",
+        "components_ng/relaxed_interaction/executors/scroll_simulating_executor.cpp",
+        "components_ng/relaxed_interaction/executors/scroll_touch_executor.cpp",
+        "components_ng/relaxed_interaction/executors/simulate_touch_executor.cpp",
+        "components_ng/relaxed_interaction/executors/strict_click_executor.cpp",
+        "components_ng/relaxed_interaction/executors/strict_content_switch_executor.cpp",
+        "components_ng/relaxed_interaction/frame_node_finder.cpp",
+        "components_ng/relaxed_interaction/parsers/backpress_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/click_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/content_switch_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/fallback_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/scroll_command_parser.cpp",
+        "components_ng/relaxed_interaction/relaxed_interaction_manager.cpp",
+        "components_ng/relaxed_interaction/utils/json_utils.cpp",
+        "components_ng/relaxed_interaction/utils/relaxed_event_factory.cpp",
+        "components_ng/relaxed_interaction/utils/workflow_dumper.cpp",
+        "components_ng/relaxed_interaction/executors/smart_gesture_executor.cpp",
+        "components_ng/relaxed_interaction/parsers/slide_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/tap_command_parser.cpp",
+      ]
+    }
 
     include_dirs = [ "$ace_root" ]
     if (is_arkui_x) {

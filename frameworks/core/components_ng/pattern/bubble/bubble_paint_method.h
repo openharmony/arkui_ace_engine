@@ -25,9 +25,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/shadow_config.h"
 #include "core/components/popup/popup_theme.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
@@ -46,9 +44,7 @@ public:
             auto bubble = weak.Upgrade();
             if (bubble) {
                 bubble->PaintMask(canvas, paintWrapper);
-                if (!bubble->IsUserSetMaterial()) {
-                    bubble->ClipBubble(paintWrapper);
-                }
+                bubble->ClipBubble(paintWrapper);
                 bubble->PaintBorder(canvas, paintWrapper);
             }
         };

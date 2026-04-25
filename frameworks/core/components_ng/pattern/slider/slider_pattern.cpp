@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -25,6 +26,7 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -572,6 +574,7 @@ void SliderPattern::SetStepPointAccessibilityVirtualNode(
     ACE_UINODE_TRACE(pointNode);
     auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(pointNodeProperty);
+    pointNodeProperty->UpdateEnableSmallLanguageTruncation(true);
     pointNodeProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(size.Width()), CalcLength(size.Height())));
     pointNodeProperty->UpdateContent(txt);
     auto pointNodeContext = pointNode->GetRenderContext();

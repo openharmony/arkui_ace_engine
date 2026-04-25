@@ -15,13 +15,14 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/geometry/ng/offset_t.h"
 
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/common/back_press_handler_manager.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -1799,4 +1800,175 @@ HWTEST_F(ListModelTestNg, ScrollToItemInGroup002, TestSize.Level1)
     EXPECT_EQ(pattern->scrollAlign_, ScrollAlign::END);
     CreateDone();
 }
+
+/**
+ * @tc.name: BackPressCloseSwipeAction001
+ * @tc.desc: Test default value of BackPressCloseSwipeAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct list node.
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Verify default value is true.
+     * @tc.expected: BackPressCloseSwipeAction is true by default.
+     */
+    EXPECT_TRUE(ListModelNG::GetBackPressCloseSwipeAction(listNode));
+    CreateDone();
+}
+
+/**
+ * @tc.name: BackPressCloseSwipeAction002
+ * @tc.desc: Test two SetBackPressCloseSwipeAction overloads.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct list node.
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set by FrameNode* overload and verify false.
+     * @tc.expected: BackPressCloseSwipeAction is false.
+     */
+    ListModelNG::SetBackPressCloseSwipeAction(listNode, false);
+    EXPECT_FALSE(ListModelNG::GetBackPressCloseSwipeAction(listNode));
+
+    /**
+     * @tc.steps: step3. Set by stack-frame overload and verify true.
+     * @tc.expected: BackPressCloseSwipeAction is true.
+     */
+    model.SetBackPressCloseSwipeAction(true);
+    EXPECT_TRUE(ListModelNG::GetBackPressCloseSwipeAction(listNode));
+    CreateDone();
+}
+
+/**
+ * @tc.name: BackPressCloseSwipeAction003
+ * @tc.desc: Test null FrameNode safety for BackPressCloseSwipeAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call API with null frameNode.
+     * @tc.expected: No crash and get API returns default true.
+     */
+    ListModelNG::SetBackPressCloseSwipeAction(nullptr, false);
+    EXPECT_TRUE(ListModelNG::GetBackPressCloseSwipeAction(nullptr));
+}
+
+/**
+ * @tc.name: BackPressCloseSwipeAction004
+ * @tc.desc: Test HandleBackPressed consumes event when callback returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction004, TestSize.Level1)
+{
+    BackPressHandlerManager manager;
+
+    int32_t callCount = 0;
+    auto listNode = FrameNode::GetOrCreateFrameNode("listBackPressTest", ElementRegister::GetInstance()->MakeUniqueId(),
+        nullptr);
+    manager.AddBackPressHandler(
+        AceType::WeakClaim(AceType::RawPtr(listNode)),
+        [&callCount]() -> bool {
+            callCount++;
+            return true;
+        });
+
+    EXPECT_TRUE(manager.HandleBackPressed());
+    EXPECT_FALSE(manager.HandleBackPressed());
+    EXPECT_EQ(callCount, 1);
+}
+
+/**
+ * @tc.name: BackPressCloseSwipeAction005
+ * @tc.desc: Test HandleBackPressed does not consume event when callback returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction005, TestSize.Level1)
+{
+    BackPressHandlerManager manager;
+
+    auto listNode = FrameNode::GetOrCreateFrameNode("listBackPressTest", ElementRegister::GetInstance()->MakeUniqueId(),
+        nullptr);
+    manager.AddBackPressHandler(
+        AceType::WeakClaim(AceType::RawPtr(listNode)),
+        []() -> bool { return false; });
+
+    EXPECT_FALSE(manager.HandleBackPressed());
+    EXPECT_FALSE(manager.HandleBackPressed());
+}
+
+/**
+ * @tc.name: BackPressCloseSwipeAction006
+ * @tc.desc: Test second HandleBackPressed call is not consumed after first handling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction006, TestSize.Level1)
+{
+    BackPressHandlerManager manager;
+
+    int32_t callCount = 0;
+    auto listNode = FrameNode::GetOrCreateFrameNode("listBackPressTest", ElementRegister::GetInstance()->MakeUniqueId(),
+        nullptr);
+    manager.AddBackPressHandler(
+        AceType::WeakClaim(AceType::RawPtr(listNode)),
+        [&callCount]() -> bool {
+            callCount++;
+            return true;
+        });
+
+    EXPECT_TRUE(manager.HandleBackPressed());
+    EXPECT_FALSE(manager.HandleBackPressed());
+    EXPECT_EQ(callCount, 1);
+}
+
+/**
+ * @tc.name: BackPressCloseSwipeAction007
+ * @tc.desc: Test multi-list handlers with one invalid callback and one valid consumer callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction007, TestSize.Level1)
+{
+    BackPressHandlerManager manager;
+
+    auto firstListNode = FrameNode::GetOrCreateFrameNode(
+        "listBackPressTest", ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto secondListNode = FrameNode::GetOrCreateFrameNode(
+        "listBackPressTest", ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto invalidItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
+    auto weakInvalidItem = AceType::WeakClaim(AceType::RawPtr(invalidItemPattern));
+
+    manager.AddBackPressHandler(
+        AceType::WeakClaim(AceType::RawPtr(firstListNode)),
+        [weakInvalidItem]() -> bool {
+            auto itemPattern = weakInvalidItem.Upgrade();
+            if (!itemPattern) {
+                return false;
+            }
+            // Host is null here. CloseSwipeAction should skip and this callback should not consume event.
+            return !itemPattern->CloseSwipeAction(nullptr);
+        });
+    manager.AddBackPressHandler(
+        AceType::WeakClaim(AceType::RawPtr(secondListNode)),
+        []() -> bool { return true; });
+
+    EXPECT_TRUE(manager.HandleBackPressed());
+    EXPECT_FALSE(manager.HandleBackPressed());
+}
+
 } // namespace OHOS::Ace::NG

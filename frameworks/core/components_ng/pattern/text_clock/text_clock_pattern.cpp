@@ -122,10 +122,47 @@ void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
+void TextClockPattern::SetFontColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    auto textNode = GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColorByRender(value);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UpdateFontColor(value);
+}
+
+bool TextClockPattern::UpdateThemeFontColor(RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) ||
+        !SystemProperties::ConfigChangePerform()) {
+        return false;
+    }
+    auto theme = host->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto pops = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_RETURN(pops, false);
+    if (!(pops->HasTextColorSetByUser() && pops->GetTextColorSetByUserValue())) {
+        Color value = theme->GetTextClockFontColor();
+        SetFontColor(AceType::RawPtr(host), value);
+        return true;
+    }
+    return false;
+}
+
 void TextClockPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UpdateThemeFontColor(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
@@ -139,6 +176,7 @@ void TextClockPattern::OnDetachFromMainTree()
 void TextClockPattern::UpdateTextLayoutProperty(
     RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     if (layoutProperty->GetFontSize().has_value()) {
         textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
     }
@@ -160,6 +198,13 @@ void TextClockPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetFontFeature().has_value()) {
         textLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
     }
+}
+
+bool TextClockPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return UpdateThemeFontColor(host);
 }
 
 void TextClockPattern::OnModifyDone()
@@ -888,15 +933,13 @@ void TextClockPattern::OnColorConfigurationUpdate()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextTheme>();
+    auto theme = host->GetTheme<TextTheme>(true);
     CHECK_NULL_VOID(theme);
     auto pops = host->GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_VOID(pops);
     
     if (!pops->HasTextColorSetByUser() || (pops->HasTextColorSetByUser() && !pops->GetTextColorSetByUserValue())) {
-        UpdateTextClockColor(theme->GetTextStyle().GetTextColor(), false);
+        UpdateTextClockColor(theme->GetTextClockFontColor(), false);
     }
 }
 

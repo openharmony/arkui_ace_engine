@@ -14,6 +14,7 @@
  */
 
 #include "gmock/gmock.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "gtest/gtest.h"
 
 #define private public
@@ -21,15 +22,17 @@
 #include "accessibility_system_ability_client.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/log/dump_log.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "js_accessibility_manager_test.h"
 
@@ -1957,6 +1960,104 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen006, TestSize.Leve
     EXPECT_EQ(frameNode->GetNodeName(), "Click");
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen007
+ * @tc.desc: Test accessibility focus action with SwipeFocus argument
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen007, TestSize.Level1)
+{
+    int64_t elementId = 1001LL;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("focusNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    std::map<std::string, std::string> actionArguments;
+    actionArguments["ActAccessibilityFocus"] =
+        std::to_string(static_cast<int32_t>(Framework::AccessibilityFocusActionType::SWIPE_FOCUS));
+    auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, frameNode->GetAccessibilityId());
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen008
+ * @tc.desc: Test accessibility focus action with invalid focus action argument
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen008, TestSize.Level1)
+{
+    int64_t elementId = 1002LL;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("focusNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    std::map<std::string, std::string> actionArguments;
+    actionArguments["ActAccessibilityFocus"] =
+        std::to_string(static_cast<int32_t>(Framework::AccessibilityFocusActionType::HOVER_FOCUS));
+    auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, frameNode->GetAccessibilityId());
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen009
+ * @tc.desc: Test accessibility focus action with SCROLL_FOCUS enum value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen009, TestSize.Level1)
+{
+    int64_t elementId = 1003LL;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("focusNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    std::map<std::string, std::string> actionArguments;
+    actionArguments["ActAccessibilityFocus"] =
+        std::to_string(static_cast<int32_t>(Framework::AccessibilityFocusActionType::SCROLL_FOCUS));
+    auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, frameNode->GetAccessibilityId());
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen010
+ * @tc.desc: Test accessibility focus action with empty actionArguments (not focus move)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen010, TestSize.Level1)
+{
+    int64_t elementId = 1004LL;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("focusNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    std::map<std::string, std::string> actionArguments;
+    auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, frameNode->GetAccessibilityId());
 }
 
 /**
@@ -5234,5 +5335,238 @@ HWTEST_F(JsAccessibilityManagerTest, DeregisterInteractionOperationAsChildTree00
     jsAccessibilityManager->DeregisterInteractionOperationAsChildTree();
     EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
     EXPECT_EQ(jsAccessibilityManager->lastElementId_, -1);
+}
+
+
+/**
+ * @tc.name: DumpExecuteActionTest001
+ * @tc.desc: Test DumpExecuteActionTest with invalid params (no --execute-action)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpExecuteActionTest001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    std::vector<std::string> params = {"-inspector"};
+    jsAccessibilityManager->DumpExecuteActionTest(params);
+}
+
+/**
+ * @tc.name: DumpExecuteActionTest002
+ * @tc.desc: Test DumpExecuteActionTest with missing actionType
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpExecuteActionTest002, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    std::vector<std::string> params = {"-inspector", "--execute-action", "100"};
+    jsAccessibilityManager->DumpExecuteActionTest(params);
+}
+
+/**
+ * @tc.name: DumpExecuteActionTest003
+ * @tc.desc: Test DumpExecuteActionTest with valid params but null pipeline
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpExecuteActionTest003, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(nullptr);
+
+    std::vector<std::string> params = {"-inspector", "--execute-action", "100", "16"};
+    jsAccessibilityManager->DumpExecuteActionTest(params);
+}
+
+/**
+ * @tc.name: DumpExecuteActionTest004
+ * @tc.desc: Test DumpExecuteActionTest with valid params, valid pipeline and click action
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpExecuteActionTest004, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    int64_t nodeId = frameNode->GetAccessibilityId();
+    std::vector<std::string> params = {"-inspector", "--execute-action",
+        std::to_string(nodeId), "16"};
+
+    jsAccessibilityManager->DumpExecuteActionTest(params);
+}
+
+/**
+ * @tc.name: DumpExecuteActionTest005
+ * @tc.desc: Test DumpExecuteActionTest with key-value arguments
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpExecuteActionTest005, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    int64_t nodeId = frameNode->GetAccessibilityId();
+    std::vector<std::string> params = {"-inspector", "--execute-action",
+        std::to_string(nodeId), "16", "ActAccessibilityFocus",
+        std::to_string(static_cast<int32_t>(Framework::AccessibilityFocusActionType::SWIPE_FOCUS))};
+
+    jsAccessibilityManager->DumpExecuteActionTest(params);
+}
+
+/**
+ * @tc.name: DumpExecuteActionTest006
+ * @tc.desc: Test DumpExecuteActionTest with multiple key-value pairs
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpExecuteActionTest006, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 3, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    int64_t nodeId = frameNode->GetAccessibilityId();
+    std::vector<std::string> params = {"-inspector", "--execute-action",
+        std::to_string(nodeId), "16", "key0", "value0", "key1", "value1"};
+
+    jsAccessibilityManager->DumpExecuteActionTest(params);
+}
+
+/**
+ * @tc.name: DumpExecuteActionTest007
+ * @tc.desc: Test DumpExecuteActionTest with key without value (invalid)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpExecuteActionTest007, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    std::vector<std::string> params = {"-inspector", "--execute-action", "100", "16", "key0"};
+    jsAccessibilityManager->DumpExecuteActionTest(params);
+}
+
+/**
+ * @tc.name: OnDumpInfoNGExecuteActionTest001
+ * @tc.desc: Test OnDumpInfoNG routes to EXECUTE_ACTION_TEST mode correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, OnDumpInfoNGExecuteActionTest001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    std::vector<std::string> params = {"-inspector", "--execute-action"};
+    jsAccessibilityManager->OnDumpInfoNG(params, 0, false);
+}
+
+/**
+ * @tc.name: OnDumpInfoNGExecuteActionTest002
+ * @tc.desc: Test OnDumpInfoNG with invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, OnDumpInfoNGExecuteActionTest002, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    std::vector<std::string> params = {"-invalid"};
+    jsAccessibilityManager->OnDumpInfoNG(params, 0, false);
+}
+
+/**
+ * @tc.name: OnDumpInfoNGExecuteActionTest003
+ * @tc.desc: Test OnDumpInfoNG with empty params
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, OnDumpInfoNGExecuteActionTest003, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    std::vector<std::string> params = {};
+    jsAccessibilityManager->OnDumpInfoNG(params, 0, false);
+}
+
+/**
+ * @tc.name: OnDumpInfoNGExecuteActionTest004
+ * @tc.desc: Test OnDumpInfoNG with valid execute-action and action arguments
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, OnDumpInfoNGExecuteActionTest004, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 4, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    int64_t nodeId = frameNode->GetAccessibilityId();
+    std::vector<std::string> params = {"-inspector", "--execute-action",
+        std::to_string(nodeId), "16", "testKey", "testValue"};
+
+    jsAccessibilityManager->OnDumpInfoNG(params, 0, false);
+}
+
+/**
+ * @tc.name: OnDumpInfoNGExecuteActionTest005
+ * @tc.desc: Test OnDumpInfoNG with -accessibility prefix and execute-action
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, OnDumpInfoNGExecuteActionTest005, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 5, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    int64_t nodeId = frameNode->GetAccessibilityId();
+    std::vector<std::string> params = {"-accessibility", "--execute-action",
+        std::to_string(nodeId), "16"};
+
+    jsAccessibilityManager->OnDumpInfoNG(params, 0, false);
 }
 } // namespace OHOS::Ace::NG

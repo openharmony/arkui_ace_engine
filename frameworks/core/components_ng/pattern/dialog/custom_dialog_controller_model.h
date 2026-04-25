@@ -17,12 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_H
 
 #include <mutex>
+#include <functional>
+#include <list>
+#include <vector>
 
-#include "core/common/ace_engine.h"
-#include "core/common/container.h"
+#include "base/memory/ace_type.h"
 #include "core/components/dialog/dialog_properties.h"
+
 namespace OHOS::Ace {
 struct DialogProperties;
+enum class PromptActionCommonState;
 enum class DialogOperation {
     DIALOG_OPEN = 0,
     DIALOG_CLOSE,

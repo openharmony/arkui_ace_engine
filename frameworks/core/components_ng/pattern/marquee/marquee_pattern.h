@@ -150,6 +150,7 @@ private:
     void ChangeSecondChildVisibility(bool stopAndStart);
     void UpdateTextTranslateXY(float offsetX, bool cancel = false, bool isFirstTextNode = true);
     void PropertyCancelAnimationFinish();
+    bool AnimationParamChange();
     bool OnlyPlayStatusChange();
     void ChangeAnimationPlayStatus();
     void StoreProperties();
@@ -159,6 +160,7 @@ private:
     float CalculateStart();
     float CalculateEnd();
     float GetTextOffset();
+    float GetTextOffsetOnly();
     std::pair<float, float> GetDoubleTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
@@ -201,10 +203,13 @@ private:
     int32_t secondAnimationId_ = 0;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::shared_ptr<AnimationUtils::Animation> secondAnimation_;
+    double lastAnimationStart_ = 0.0;
+    double lastSecondAnimationStart_ = 0.0;
     bool playStatus_ = false;
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
+    int32_t delay_ = 0;
     TextDirection currentTextDirection_ = TextDirection::LTR;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
     int32_t lastWindowHeight_ = 0.0;

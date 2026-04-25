@@ -18,12 +18,21 @@
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 class JSScrollTheme {
 public:
     static void ApplyTheme()
     {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto theme = frameNode->GetTheme<ScrollBarTheme>(true);
+            CHECK_NULL_VOID(theme);
+            NG::ScrollModelNG::SetScrollBarColor(frameNode, theme->GetForegroundColor());
+            return;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             // no need to apply custom theme colors

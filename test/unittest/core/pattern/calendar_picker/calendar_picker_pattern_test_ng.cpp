@@ -21,12 +21,12 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -94,7 +94,7 @@ void CalendarPickerPatternTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    auto getThemeByType = [](ThemeType type) -> RefPtr<Theme> {
         if (type == CalendarTheme::TypeId()) {
             return AceType::MakeRefPtr<CalendarTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -104,7 +104,13 @@ void CalendarPickerPatternTestNg::SetUpTestCase()
         } else {
             return AceType::MakeRefPtr<PickerTheme>();
         }
-    });
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getThemeByType));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getThemeByType](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)themeScopeId;
+            return getThemeByType(type);
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1394,5 +1400,140 @@ HWTEST_F(CalendarPickerPatternTestNg, UpdateEdgeAlign002, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(offset, layoutProperty->GetDialogOffset().value());
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_OnModifyDone_UpdateHostEntryBorderColor001
+ * @tc.desc: Verify host border color is not overridden when API target is below 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnModifyDone_UpdateHostEntryBorderColor001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto theme = frameNode->GetTheme<CalendarTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(Color::RED);
+    renderContext->UpdateBorderColor(borderColor);
+
+    pickerPattern->OnModifyDone();
+    auto resultBorderColor = renderContext->GetBorderColor().value_or(BorderColorProperty());
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        EXPECT_EQ(resultBorderColor.leftColor.value_or(Color::TRANSPARENT), theme->GetEntryBorderColor());
+    } else {
+        EXPECT_EQ(resultBorderColor.leftColor.value_or(Color::TRANSPARENT), Color::RED);
+    }
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_OnModifyDone_UpdateHostEntryBorderColor002
+ * @tc.desc: Verify host border color uses CalendarTheme entry border color when API target is 26 or above.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnModifyDone_UpdateHostEntryBorderColor002, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto theme = frameNode->GetTheme<CalendarTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    BorderColorProperty borderColor;
+    borderColor.SetColor(Color::RED);
+    renderContext->UpdateBorderColor(borderColor);
+
+    pickerPattern->OnModifyDone();
+    auto resultBorderColor = renderContext->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_EQ(resultBorderColor.leftColor.value_or(Color::TRANSPARENT), theme->GetEntryBorderColor());
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_OnThemeScopeUpdate_ApiTargetTwentyFour001
+ * @tc.desc: OnThemeScopeUpdate returns false when API target is below 25 (node-scoped version check).
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnThemeScopeUpdate_ApiTargetTwentyFour001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FOUR));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FOUR));
+
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    const bool updateResult = pickerPattern->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(updateResult);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_OnThemeScopeUpdate_ApiTargetTwentySix001
+ * @tc.desc: OnThemeScopeUpdate proceeds when API target is 26 or above.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnThemeScopeUpdate_ApiTargetTwentySix001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    const bool updateResult = pickerPattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(updateResult);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
 }
 } // namespace OHOS::Ace::NG

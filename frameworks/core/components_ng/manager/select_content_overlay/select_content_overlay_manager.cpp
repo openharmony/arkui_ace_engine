@@ -529,7 +529,9 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
 void SelectContentOverlayManager::MarkSelectOverlayDirty(PropertyChangeFlag changeFlag)
 {
     CHECK_NULL_VOID(IsOpen());
-    selectOverlayNode_.Upgrade()->MarkDirtyNode(changeFlag);
+    auto selectOverlayNode = selectOverlayNode_.Upgrade();
+    CHECK_NULL_VOID(selectOverlayNode);
+    selectOverlayNode->MarkDirtyNode(changeFlag);
 }
 
 void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
@@ -1165,6 +1167,15 @@ void SelectContentOverlayManager::SetTextSelectionHolderId(int32_t id)
         return;
     }
     textSelectHolderId_ = id;
+}
+
+void SelectContentOverlayManager::SetTextSelectionClearPolicy(TextSelectionClearPolicy policy)
+{
+    textSelectionClearPolicy_ = policy;
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_VOID(callback);
+    callback->SetTextSelectionClearPolicy(policy);
 }
 
 void SelectContentOverlayManager::RemoveHoldSelectionCallback(int32_t id)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,11 +31,9 @@
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
@@ -276,6 +274,16 @@ public:
     bool IsSelectMenu() const
     {
         return isSelectMenu_;
+    }
+
+    void SetIsSelectMenuBackgroundColorJsview(bool isSelectMenuBackgroundColorJsview)
+    {
+        isSelectMenuBackgroundColorJsview_ = isSelectMenuBackgroundColorJsview;
+    }
+
+    bool IsSelectMenuBackgroundColorJsview() const
+    {
+        return isSelectMenuBackgroundColorJsview_;
     }
 
     void SetHasOptionWidth(bool hasOptionWidth)
@@ -554,6 +562,11 @@ public:
 
     void UpdateSelectIndex(int32_t index);
 
+    bool TextMenuOnThemeScopeUpdate(int32_t themeScopeId)
+    {
+        return OnThemeScopeUpdate(themeScopeId);
+    }
+
     void SetSelectProperties(const std::vector<SelectParam>& params)
     {
         auto list = selectProperties_;
@@ -683,6 +696,8 @@ public:
     RefPtr<FrameNode> GetFirstMenuItem();
     RefPtr<FrameNode> GetLastMenuItem();
     std::pair<float, float> GetPreviewPositionY();
+    bool UpdateMenuBackBlurStyle(bool userSetBgColor);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     float GetTranslateYForStack()
     {
@@ -753,6 +768,11 @@ public:
         return scrollBar_;
     }
 
+    void SetColorMode(bool isColorModeFollowTarget)
+    {
+        isColorModeFollowTarget_ = isColorModeFollowTarget;
+    }
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -784,7 +804,6 @@ private:
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
@@ -860,6 +879,7 @@ private:
     std::optional<int32_t> halfFoldHoverCallbackId_;
 
     bool isSelectMenu_ = false;
+    bool isSelectMenuBackgroundColorJsview_ = true;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isShowHoverImage_ = false;
@@ -903,6 +923,7 @@ private:
     bool buildDividerTaskAdded_ = false;
     OffsetF subMenuOriginOffset_ = OffsetF();
     std::optional<DisplayMode> scrollBar_;
+    bool isColorModeFollowTarget_ = true;
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;

@@ -27,10 +27,12 @@ function ReusableV2<T extends Constructor>(BaseClass: T): T {
     Reflect.defineProperty(BaseClass.prototype, 'isReusable_', {
         get: () => {
           return true;
-        }
+        },
+        configurable: true
       });
     return BaseClass;
 }
+type ViewV2Constructor = {new (...args: unknown[]): ViewV2; pop?: () => void;};
 
 /**
  *
@@ -48,12 +50,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
     private monitorIdsDelayedUpdate__?: Set<number>;
-    private monitorIdsDelayedUpdateForAddMonitor__?: Set<number>;
+    private monitorIdsDelayedUpdateForAddMonitorBased__?: Set<number>;
     private computedIdsDelayedUpdate__?: Set<number>;
 
     public defaultConsumerV2__?: Map<string, string>;
     public connectConsumerV2__?: Map<string, string>;
 
+    private myReusePool__ : __ReusePool_Internal__  | undefined;
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
 
     public hasBeenRecycled_: boolean = false;
@@ -83,15 +86,15 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         return this.monitorIdsDelayedUpdate__;
     }
 
-    get monitorIdsDelayedUpdateForAddMonitor_(): Set<number> | undefined {
-        return this.monitorIdsDelayedUpdateForAddMonitor__;
+    private get monitorIdsDelayedUpdateForAddMonitorBased_(): Set<number> | undefined {
+        return this.monitorIdsDelayedUpdateForAddMonitorBased__;
     }
 
     getOrCreateMonitorIdsDelayedUpdateForAddMonitor(): Set<number> {
-        if (!this.monitorIdsDelayedUpdateForAddMonitor__) {
-            this.monitorIdsDelayedUpdateForAddMonitor__ = new Set<number>();
+        if (!this.monitorIdsDelayedUpdateForAddMonitorBased__) {
+            this.monitorIdsDelayedUpdateForAddMonitorBased__ = new Set<number>();
         }
-        return this.monitorIdsDelayedUpdateForAddMonitor__;
+        return this.monitorIdsDelayedUpdateForAddMonitorBased__;
     }
 
     get computedIdsDelayedUpdate(): Set<number> | undefined {
@@ -139,6 +142,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         try {
             ObserveV2.getObserve().constructComputed(this, this.constructor.name);
             ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
+            ObserveV2.getObserve().constructMonitorsWithOptions(this, this.constructor.name);
             ObserveV2.getObserve().constructSyncMonitors(this, this.constructor.name);
         } catch (error) {
             stateMgmtConsole.applicationError(`Exception occurred when constructor @Computed or @Monitor`, error.message);
@@ -151,6 +155,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         // set to true if freeze parameter set for this @ComponentV2 to true
         // otherwise inherit from its parentComponent (if it exists).
         this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+        this.__isGlobalPoolActive = !!this.___reusePool || this.getParent()?.__isGlobalPoolActive;
         stateMgmtConsole.debug(`${this.debugInfo__()}: @ComponentV2 freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
 
         this.__customComponentExecuteInit__Internal();
@@ -173,13 +178,21 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
      * - If the JSView object is managed by the RecycleManager, the CustomNode is reused.
      *
      * @param {string} reuseId - The ID used for recycling the component.
-     */
+    */
     public recycleSelf(reuseId: string): void {
         stateMgmtConsole.debug(`${this.debugInfo__()}:  reuseId: ${reuseId}`);
+        const parent = this.getParent() as ViewV2;
+        const ctor = this.constructor as new (...args: ViewV2[]) => ViewV2;
+        const globalPool = this.myReusePool__;
 
-        if (this.getParent() && this.getParent() instanceof ViewV2 && !(this.getParent() as ViewV2).isDeleting_) {
-            const parentV2: ViewV2 = this.getParent() as ViewV2;
-            parentV2.getOrCreateRecyclePool().pushRecycleV2Component(reuseId, this);
+        // Legacy Reuse — push to parent's local recycle pool
+        if (!globalPool && parent && !(parent as ViewV2).isDeleting_) {
+            parent.getOrCreateRecyclePool().pushRecycleV2Component(reuseId, this);
+            this.hasBeenRecycled_ = true;
+        } else if (globalPool && globalPool.isActive()) {
+            // Global Reuse — return to the global pool
+            globalPool.push(reuseId, this, ctor);
+	        parent?.removeChild(this);
             this.hasBeenRecycled_ = true;
         } else {
             // Native function call to restore the custom node for the JSView object
@@ -229,7 +242,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                     this.__getLifecycle__Internal()?.handleEvent(LifeCycleEvent.ON_REUSE);
                 }
             }
-        }, 'aboutToReuseInternal', this.constructor.name);
+        }, 'aboutToReuseInternal', this.constructor.name, this.id__());
         ObserveV2.getObserve().updateDirty2(true, true);
         ObserveV2.getObserve().setCurrentReuseId(ObserveV2.NO_REUSE);
         this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
@@ -264,6 +277,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // Freezes the component when it is moved to the recycle pool to prevent elementId updates
     private freezeRecycledComponent(): void {
         this.activeCount_--;
+        if (this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+            this.__customComponentExecuteInactive__Internal();
+        }
         ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
     }
 
@@ -283,6 +299,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             });
         }
         this.elmtIdsDelayedUpdate.clear();
+        if (this.activeCount_ === 1 && this.__needToActiveOrInactiveLifecycle__Internal) {
+            this.__customComponentExecuteActive__Internal();
+        }
         ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
     }
 
@@ -369,7 +388,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         stateMgmtConsole.debug(`${this.debugInfo__()}: aboutToBeDeletedInternal`);
         // if this isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
         // to set and resursively set its children any more
-        if (!this.isDeleting_) {
+        if (!this.isDeleting_ && this.shouldDeleteRecursively()) {
             this.isDeleting_ = true;
             this.setDeleteStatusRecursively();
         }
@@ -415,6 +434,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             this.parent_.removeChild(this);
         }
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
+
+        if (this.__anonymousEnvMonitorFuncMap__Internal) {
+          this.__anonymousEnvMonitorFuncMap__Internal.forEach((entry, key) => {
+            ObserveV2.getObserve().clearMonitorPath(entry.envValue, simpleEnvMetaMap[key].prop, entry.anonymousMonitorFunc);
+          });
+          this.__anonymousEnvMonitorFuncMap__Internal.clear();
+        }
         // if memory watch register the callback func, then report such information to memory watch
         // when custom node destroyed
         if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
@@ -424,15 +450,15 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
         this.defaultConsumerV2_?.clear();
         this.connectConsumerV2_?.clear();
+
+        // Detach this instance from the reusePool on component deletion
+        if(this.___reusePool) {
+            this.___reusePool.removeOwner(this);
+        }
     }
 
     public initialRenderView(): void {
         stateMgmtProfiler.begin(`ViewV2: initialRenderView`);
-        // Register callback for instanceId changes
-        // Only register when enableSwitchInstance is true which set in config.json5
-        if (getEnableSwitchInstance()) {
-          this.__registerUpdateJSInstanceCallback__Internal(this.__onJSInstanceIdUpdate__Internal.bind(this));
-        }
         if (this.isReusable_ === true) {
             const isReusableAllowed = this.allowReusableV2Descendant();
             if (!isReusableAllowed) {
@@ -455,7 +481,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     public resetMonitorsOnReuse(): void {
         // Clear the monitorIds set for delayed updates, if any
         this.monitorIdsDelayedUpdate?.clear();
-        this.monitorIdsDelayedUpdateForAddMonitor_?.clear()
+        this.monitorIdsDelayedUpdateForAddMonitorBased_?.clear()
         ObserveV2.getObserve().resetMonitorValues();
 
         this.resetAllMonitorsOnReuse();
@@ -477,7 +503,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // because this would be an incompatible change its currently only added for @SyncMonitor 
     // for @Monitor, from addMonitor API remain to be done (in OH 7.0 release?!)
     public resetAllMonitorsOnReuse(): void {
-        const refs = this[ObserveV2.SYNC_MONITOR_REFS] as object | undefined;
+        const refs = this[ObserveV2.MONITOR_WITH_OPTIONS_OR_SYNC_MONITOR_REFS] as object | undefined;
         if (refs === undefined) {
             return;
         }
@@ -523,7 +549,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     }
 
     // Resets the consumer value when the component is reinitialized on reuse
-     public resetConsumer<T>(varName: string, consumerVal: T): void {
+    public resetConsumer<T>(varName: string, consumerVal: T): void {
         const info = ObserveV2.getObserve().getDecoratorInfo(this, varName);
         if (!info.startsWith('@Consumer')) {
             stateMgmtConsole.warn('Should use resetConsumer only to reset @Consumer');
@@ -531,12 +557,19 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         }
         const aliasName = info.substring(/** '@Consumer(' */10, info.length - 1); // @Consumer(aliasName)
         let providerInfo = ProviderConsumerUtilV2.findProvider(this, aliasName);
-        if (!providerInfo) {
-          ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, consumerVal);
-          ObserveV2.getObserve().fireChange(this, varName);
+
+        if (!providerInfo || providerInfo.length < 2) {
+            ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, consumerVal);
+            this.getOrCreateDefaultConsumerV2().set(varName, aliasName);
+            ObserveV2.getObserve().fireChange(this, varName);
+        } else {
+            const [providerView, providerVarName] = providerInfo;
+            ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerView, providerVarName);
+            this.getOrCreateConnectConsumerV2().set(varName, aliasName);
+            ObserveV2.getObserve().fireChange(this, varName);
         }
         stateMgmtConsole.debug(`resetConsumer value: ${consumerVal} for ${varName}`);
-     }
+    }
 
     public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
         if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
@@ -547,6 +580,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             ViewStackProcessor.PushPrebuildCompCmd();
             return;
         }
+        // Register this instance as an owner in the reuse pool
+        if (this.___reusePool) {
+            this.___reusePool.addOwner(this);
+        }
         if (this.isDeleting_) {
             stateMgmtConsole.error(`@ComponentV2 ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
             return;
@@ -555,34 +592,37 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
         const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
             this.syncInstanceId();
-            stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
-            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
-            ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            ObserveV2.getObserve().startRecordDependencies(this, elmtId);
+            try {
+                stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
+                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+                ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+                ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
-            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+                compilerAssignedUpdateFunc(elmtId, isFirstRender);
 
-            // After first render, new bindings (pending) need to be recorded
-            // immediately, as they may fire changes before the next idle time,
-            // e.g. in the onAreaChange handler
-            if (isFirstRender) {
-                ObserveV2.getObserve().runIdleTasks();
+                // After first render, new bindings (pending) need to be recorded
+                // immediately, as they may fire changes before the next idle time,
+                // e.g. in the onAreaChange handler
+                if (isFirstRender) {
+                    ObserveV2.getObserve().runIdleTasks();
+                }
+
+                if (!isFirstRender) {
+                    _popFunc();
+                }
+
+                let node = this.getNodeById(elmtId);
+                if (node !== undefined) {
+                    (node as ArkComponent).cleanStageValue();
+                }
+
+                ObserveV2.getObserve().stopRecordDependencies();
+                ViewStackProcessor.StopGetAccessRecording();
+                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
+                stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
+            } finally {
+                this.restoreInstanceId();
             }
-
-            if (!isFirstRender) {
-                _popFunc();
-            }
-
-            let node = this.getNodeById(elmtId);
-            if (node !== undefined) {
-                (node as ArkComponent).cleanStageValue();
-            }
-
-            ObserveV2.getObserve().stopRecordDependencies();
-            ViewStackProcessor.StopGetAccessRecording();
-            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
-            this.restoreInstanceId();
         };
 
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -664,8 +704,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             // mark ComposedElement dirty when first elmtIds are added
             // do not need to do this every time
             this.syncInstanceId();
-            this.markNeedUpdate();
-            this.restoreInstanceId();
+            try {
+                this.markNeedUpdate();
+            } finally {
+                this.restoreInstanceId();
+            }
         }
         this.dirtDescendantElementIds_.add(elmtId);
         stateMgmtConsole.debug(`${this.debugInfo__()}: uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
@@ -794,15 +837,30 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // and `aboutToReuseInternal` for @ReusableV2 components.
     public setActiveInternal(active: boolean, isReuse: boolean = false): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
-        stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${this.isCompFreezeAllowed()}`);
-        if (this.isCompFreezeAllowed() && !isReuse) {
+        const isCompFreezeAllowed = this.isCompFreezeAllowed();
+        stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${isCompFreezeAllowed}`);
+        if (!isCompFreezeAllowed && !isReuse && this.__needToActiveOrInactiveLifecycle__Internal) {
+            // Non-freeze state: use __activeCountForNonFreeze__Internal
+            // Only execute when @Active/@Inactive decorator is used for performance
+            const oldCount = this.__activeCountForNonFreeze__Internal;
+            this.setActiveCountForNonFreeze(active);
+            this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount);
+        }
+        if (isCompFreezeAllowed && !isReuse) {
             stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+            const oldCount = this.activeCount_;
             this.setActiveCount(active);
             if (this.isViewActive()) {
                 this.performDelayedUpdate();
                 ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+                if (oldCount === 0 && this.activeCount_ > 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+                    this.__customComponentExecuteActive__Internal();
+                }
             } else {
                 ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
+                if (oldCount > 0 && this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+                    this.__customComponentExecuteInactive__Internal();
+                }
             }
         }
         // Propagate state to all child View
@@ -827,14 +885,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
           // exec monitor functions
           ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
-        if (this.monitorIdsDelayedUpdateForAddMonitor_?.size) {
-            ObserveV2.getObserve().updateDirtyMonitorPath(this.monitorIdsDelayedUpdateForAddMonitor_);
+        if (this.monitorIdsDelayedUpdateForAddMonitorBased_?.size) {
+            let funcsToRun = ObserveV2.getObserve().updateDirtyMonitorPath(this.monitorIdsDelayedUpdateForAddMonitorBased_);
+            ObserveV2.getObserve().runAddMonitorBasedFunctions(funcsToRun)
         }
-        if (ObserveV2.getObserve().monitorFuncsToRun_.size) {
-            const monitorFuncs = ObserveV2.getObserve().monitorFuncsToRun_;
-            ObserveV2.getObserve().monitorFuncsToRun_ = new Set<number>();
-            ObserveV2.getObserve().runMonitorFunctionsForAddMonitor(monitorFuncs)
-        } 
         if(this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active
           if(this.dirtDescendantElementIds_.size === 0) {
@@ -849,7 +903,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         this.markNeedUpdate();
         this.elmtIdsDelayedUpdate.clear();
         this.monitorIdsDelayedUpdate?.clear();
-        this.monitorIdsDelayedUpdateForAddMonitor_?.clear();
+        this.monitorIdsDelayedUpdateForAddMonitorBased_?.clear();
         this.computedIdsDelayedUpdate?.clear();
         stateMgmtProfiler.end();
     }
@@ -867,6 +921,93 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     get localStorage_(): LocalStorage {
         // FIXME check this also works for root @ComponentV2
         return (this.getParent()) ? this.getParent().localStorage_ : new LocalStorage({ /* empty */ });
+    }
+
+    /**
+   * Executes the component's initialRender in a sandboxed pre-render context.
+   *
+   * Temporarily overrides `observeComponentCreation2` and
+   * `reuseOrCreateNewComponent` so that the full component subtree
+   * can be constructed ahead of time without framework side effects.
+   *
+   * Nested reusable children are created inline and stored in
+   * `preRenderedChildren_` so they can be reused when the component
+   * is later popped from the pool and mounted via `createRecycle`.
+   */
+    public initialRenderForPreRender(): void {
+        const originalObserve = this.observeComponentCreation2;
+        const originalReuse = this.reuseOrCreateNewComponent;
+
+        this.observeComponentCreation2 = (updateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void => {
+            const preRenderElmtId = -1000 - (ViewV2.preRenderCounter++);
+            updateFunc(preRenderElmtId, true);
+            if (classObject.pop) {
+                classObject.pop();
+            }
+        };
+
+        this.reuseOrCreateNewComponent = (params): void => {
+            const { componentClass, getParams,   getReuseId = (): string => '', extraInfo } = params;
+
+            // Use negative IDs starting from -1000 to avoid collisions with real element IDs,
+            // which are always positive. These temporary IDs are replaced during actual mounting.
+            const elmtId = -1000 - (ViewV2.preRenderCounter++);
+            const child = new componentClass(this, getParams(), undefined, elmtId, () => {}, extraInfo);
+            child.isPreRendered = true;
+
+            let reuseId = getReuseId?.() || componentClass.name;
+            (this.preRenderedChildren_ ??= new Map()).set(reuseId, child);
+
+            child.initialRenderForPreRender();
+
+            if (componentClass.pop) {
+                componentClass.pop();
+            }
+        };
+
+        this.initialRender();
+
+        this.observeComponentCreation2 = originalObserve;
+        this.reuseOrCreateNewComponent = originalReuse;
+    }
+
+    private queueIfPreRenderActive(componentClass: ViewV2Constructor, params: Object, elmtId: number, reuseId: string, extraInfo?: ExtraInfo): boolean {
+        const preRenderPool = PUV2ViewBase.getCurrentPreRenderPool();
+        if (!preRenderPool) {
+            return false;
+        }
+        stateMgmtConsole.debug(`${this.debugInfo__()} [PreRender] PreRendering component creation for ${componentClass.name}`);
+        ObserveV2.getObserve().queuePreRenderCreation(this, componentClass, params, elmtId, preRenderPool, reuseId, extraInfo);
+        return true;
+    }
+
+    // GLOBAL POOL PATH
+    // Component may come from a different parent entirely,
+    // so we need to re-parent and update its id_.
+    private reparentFromGlobalPool(recycledNode: ViewV2, elmtId: number, globalPool: __ReusePool_Internal__): void {
+        const oldParent = recycledNode.getParent?.();
+        const oldElmtId = recycledNode.id__();
+
+        if (oldParent && oldParent !== this) {
+            oldParent.removeChild(recycledNode);
+            (oldParent as ViewV2).updateFuncByElmtId.delete(oldElmtId);
+        }
+
+        recycledNode.id_ = elmtId;
+        recycledNode.setParent(this);
+        this.addChild(recycledNode);
+        recycledNode.hasBeenRecycled_ = false;
+
+        const lastId = globalPool.proxyNodeId(oldElmtId);
+        globalPool.updateReuseIdMapping(oldElmtId, elmtId);
+        this.cleanupRecycledElmtId(lastId);
+    }
+
+    private recycleLegacyPoolNode(recycledNode: ViewV2, elmtId: number): void {
+        const lastId = this.recyclePoolV2_.getRecycleIdMapping(recycledNode.id__());
+        this.recyclePoolV2_.updateRecycleIdMapping(recycledNode.id__(), elmtId);
+        recycledNode.hasBeenRecycled_ = false;
+        this.cleanupRecycledElmtId(lastId);
     }
 
     /**
@@ -888,47 +1029,90 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
      * @param getParams - A function returning the parameters for the component.
      * @param getReuseId - A function providing a unique reuse ID (default: component class name).
      * @param extraInfo - Additional information required for component creation.
-     */
+    */
     public reuseOrCreateNewComponent(params: {
-        componentClass: any, getParams: () => Object,
+        componentClass: ViewV2Constructor, getParams: () => Object,
         getReuseId?: () => string, extraInfo?: ExtraInfo
     }): void {
         const { componentClass, getParams, getReuseId = (): string => '', extraInfo } = params;
-        let reuseId = getReuseId();
-        // If reuseId is null or empty (not set by the application), default to the component's name
-        if (!reuseId) {
-            reuseId = componentClass.name;
+        const globalPool = this.__isGlobalPoolActive ? this.getReusePoolInternal(componentClass) : undefined;
+        let reuseId = getReuseId() || componentClass.name;
+
+    	// In aliasing cases, matching reuseId strings alone can cause duplicates,
+    	// so we use the constructor reference to uniquely store/retrieve pool keys.
+        if (globalPool && componentClass && (!reuseId || reuseId === componentClass.name)) {
+            __ReusePool_Internal__.registerCtorName(componentClass, reuseId);
         }
+
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             if (isInitialRender) {
                 const params = getParams(); // should call here to record dependency
-                const recycledNode = this.hasRecyclePool() ? this.getRecyclePool().popRecycleV2Component(reuseId) : null;
-                const componentRef = recycledNode ? recycledNode :
-                    new componentClass(/* Parent */this, params, /*localStorage */undefined, elmtId, /*paramsLambda */() => { }, extraInfo);
-                if (recycledNode) {
-                    // If a recycled node is found, update the recycled element ID mapping in the recycle pool
-                    const lastId = this.recyclePoolV2_.getRecycleIdMapping(recycledNode.id__());
-                    this.recyclePoolV2_.updateRecycleIdMapping(recycledNode.id__(), elmtId);
-                    recycledNode.hasBeenRecycled_ = false;
 
-                    // Removes the recycled elementId after the recycleId mapping is updated.
-                    this.cleanupRecycledElmtId(lastId); // clean useless dependency
+                // PRE-RENDER mode: queue for later creation
+		        if (this.queueIfPreRenderActive(componentClass, params, elmtId, reuseId, extraInfo)) {
+                    return;
                 }
 
-                // Native call to fetch the cached recycle node or create a new one if it doesn't exist
-                ViewV2.createRecycle(componentRef, recycledNode != null, reuseId, () => {
-                        // Callback from the native side when the component is reused.
-                        recycledNode?.aboutToReuseInternal(params);
-                    });
+                // PRE-RENDERED CHILD: reuse child already created during pre-render
+                if (this.preRenderedChildren_?.has(reuseId) && this.mountPreRenderedChild(reuseId)) {
+                    return;
+                }
+                let recycledNode: ViewV2 = null;
+                let fromGlobalPool = false;
 
-                // Set the component's parameters generator function for later retrieval during reuse
+                // Try to pop from legacy pool first, then global pool
+                if (this.hasRecyclePool()) {
+                    recycledNode = this.getRecyclePool().popRecycleV2Component(reuseId);
+                }
+                if (!recycledNode && globalPool) {
+                    recycledNode = globalPool.pop(reuseId, componentClass);
+                    if (recycledNode) {
+                        fromGlobalPool = true;
+                    }
+                }
+
+                const componentRef = recycledNode ? recycledNode :
+                    new componentClass(/* Parent */this, params, /*localStorage */undefined, elmtId, /*paramsLambda */() => { }, extraInfo);
+
+                if (recycledNode && fromGlobalPool) {
+                    // Global pool active
+                    this.reparentFromGlobalPool(recycledNode, elmtId, globalPool);
+                } else if (recycledNode) {
+                    // Legacy pool active
+                    this.recycleLegacyPoolNode(recycledNode, elmtId);
+                }
+
+                // Only register if reuseId exists and it's NOT the class name default
+                if (globalPool && reuseId && reuseId !== componentClass.name) {
+                    globalPool.registerActiveReuseId?.(componentClass, reuseId);
+                    stateMgmtConsole.debug(`${this.debugInfo__()} [Active Registration] Registered for getReusableInfo ${componentClass.name} with reuseId: ${reuseId}`);
+                }
+
+                const isActuallyRecycled = recycledNode != null && !componentRef.isPreRendered;
+
+                // Clear stale children created during pre-render before real initialRender creates new ones
+                if (componentRef.isPreRendered && componentRef.childrenWeakrefMap_) {
+                    componentRef.childrenWeakrefMap_.clear();
+                }
+
+                componentRef.isPreRendered = false;
                 componentRef.paramsGenerator_ = getParams;
-                stateMgmtConsole.debug(`${this.debugInfo__()}: paramsGenerator_:${JSON.stringify(componentRef.paramsGenerator_())}`);
-             }
+                componentRef.myReusePool__ = globalPool ?? componentRef.myReusePool__;
+
+                // Native call to fetch the cached recycle node or create a new one if it doesn't exist
+                ViewV2.createRecycle(componentRef, isActuallyRecycled, reuseId, () => {
+                    recycledNode?.aboutToReuseInternal(getParams());
+                });
+                if (recycledNode && !isActuallyRecycled) {
+                    this.rerender();
+                }
+            }
             else {
                 // Retrieve the mapped recycled element ID to update the state variables
-                const recycledElmtId = this.getOrCreateRecyclePool().getRecycleIdMapping(elmtId);
-                this.updateStateVarsOfChildByElmtId(recycledElmtId, getParams());
+                const recycledElmtId = globalPool ? globalPool.proxyNodeId(elmtId) : this.getOrCreateRecyclePool().getRecycleIdMapping(elmtId);
+                if (recycledElmtId !== undefined) {
+                    this.updateStateVarsOfChildByElmtId(recycledElmtId, getParams());
+                }
             }
         }, componentClass);
     }
@@ -987,7 +1171,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                     dependentElmtIds.forEach((elmtId) => {
                         if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
                             retVal += ` ` + ObserveV2.getObserve().getElementInfoById(elmtId);
-                        } else if (elmtId < MonitorV2.MIN_WATCH_ID) {
+                        } else if (elmtId < MonitorV2.MIN_MONITOR_ORIG_ID) {
                             retVal += ` @Computed[${elmtId}]`;
                         } else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
                             retVal += ` @Monitor[${elmtId}]`;

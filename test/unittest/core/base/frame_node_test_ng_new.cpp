@@ -16,8 +16,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2060,7 +2062,7 @@ HWTEST_F(FrameNodeTestNg, FrameDumpOverlayInfo002, TestSize.Level1)
      */
     auto layoutProperty = frameNode->GetLayoutProperty();
     layoutProperty->SetIsOverlayNode(true);
-    
+
     /**
      * @tc.steps: step4. test DumpOverlayInfo.
      * @tc.expected: expect is TRUE.
@@ -2179,7 +2181,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSafeAreaInfo, TestSize.Level1)
      */
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     EXPECT_NE(json, nullptr);
-    
+
     /**
      * @tc.steps: step3. set layoutProperty.
      * @tc.expected: expect is TRUE.
@@ -2206,7 +2208,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSafeAreaInfo, TestSize.Level1)
     const auto& valueExpandOpts = json->GetValue("SafeAreaExpandOpts");
     bool hasKeyExpandOpts = !(valueExpandOpts->IsNull());
     EXPECT_TRUE(hasKeyExpandOpts);
-    
+
     /**
      * @tc.steps: step7. safeAreaInsets_ is nullptr.
      * @tc.expected: expect is FALSE.
@@ -2272,7 +2274,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeBuildLayoutInfo, TestSize.Level1)
      */
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     EXPECT_NE(json, nullptr);
-    
+
     /**
      * @tc.steps: step3. set layoutProperty.
      * @tc.expected: expect is TRUE.
@@ -2423,7 +2425,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving003, TestSize.Level1)
      * @tc.expected: expect is nullptr.
      */
     auto geometryNode = frameNode->GetGeometryNode();
-    
+
     /**
      * @tc.steps: step3. test MarkRemoving.
      * @tc.expected: expect is false.
@@ -3599,18 +3601,22 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsJsCustomPropertyUpdated001, TestSize.Level1
 
     /**
      * @tc.steps: step2. frameNode has one customProperty and flag 1.
-     * @tc.expected: expect result true.
+     * @tc.expected: expect result false.
      */
     frameNode->AddCustomProperty("key", "value");
     result = frameNode->IsJsCustomPropertyUpdated();
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step3. frameNode has another customProperty and flag 0.
-     * @tc.expected: expect result false.
+     * @tc.expected: expect result true.
      */
     frameNode->AddCustomProperty("key1", "value1");
     frameNode->SetCustomPropertyMapFlagByKey("key1");
+    result = frameNode->IsJsCustomPropertyUpdated();
+    EXPECT_TRUE(result);
+    
+    frameNode->AddCustomProperty("key1", "value2");
     result = frameNode->IsJsCustomPropertyUpdated();
     EXPECT_FALSE(result);
 }
@@ -3692,6 +3698,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground003, TestSize.Level1)
         return FrameNode::CreateFrameNode("backgroundNode", 1, AceType::MakeRefPtr<Pattern>(), true);
     };
     frameNode->builderFunc_ = func;
+    frameNode->isNeedRefreshBackgroundBuilder_ = true;
 
     /**
      * @tc.steps: step2. set the BuilderBackgroundFlag to true.
@@ -3699,7 +3706,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground003, TestSize.Level1)
      */
     mockRenderContext->UpdateBuilderBackgroundFlag(true);
     frameNode->UpdateBackground();
-    EXPECT_EQ(frameNode->builderFunc_, nullptr);
+    EXPECT_FALSE(frameNode->isNeedRefreshBackgroundBuilder_);
 }
 
 /**

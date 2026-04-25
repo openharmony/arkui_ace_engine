@@ -65,8 +65,11 @@ struct UnionIndex<T, SELECTOR_ID_11, std::void_t<decltype(T().value11)>> :
 template<typename T>
 struct UnionIndex<T, SELECTOR_ID_12, std::void_t<decltype(T().value12)>> :
     std::integral_constant<int, SELECTOR_ID_12> {};
+template<typename T>
+struct UnionIndex<T, SELECTOR_ID_13, std::void_t<decltype(T().value13)>> :
+    std::integral_constant<int, SELECTOR_ID_13> {};
 
-constexpr std::size_t MAX_UNION_INDEX = SELECTOR_ID_12;
+constexpr std::size_t MAX_UNION_INDEX = SELECTOR_ID_13;
 
 template<typename T, std::size_t... Is>
 constexpr int GetUnionSize(std::index_sequence<Is...>)
@@ -300,6 +303,30 @@ struct UnionVisitor<T, SELECTOR_ID_12> {
             case SELECTOR_ID_10: visitor(src.value10);break;
             case SELECTOR_ID_11: visitor(src.value11);break;
             case SELECTOR_ID_12: visitor(src.value12);break;
+            default: visitor();break;
+        }
+    }
+};
+template<typename T>
+struct UnionVisitor<T, SELECTOR_ID_13> {
+    template<typename V>
+    static void Visit(const T& src, const V& visitor)
+    {
+        switch (src.selector) {
+            case SELECTOR_ID_0: visitor(src.value0);break;
+            case SELECTOR_ID_1: visitor(src.value1);break;
+            case SELECTOR_ID_2: visitor(src.value2);break;
+            case SELECTOR_ID_3: visitor(src.value3);break;
+            case SELECTOR_ID_4: visitor(src.value4);break;
+            case SELECTOR_ID_5: visitor(src.value5);break;
+            case SELECTOR_ID_6: visitor(src.value6);break;
+            case SELECTOR_ID_7: visitor(src.value7);break;
+            case SELECTOR_ID_8: visitor(src.value8);break;
+            case SELECTOR_ID_9: visitor(src.value9);break;
+            case SELECTOR_ID_10: visitor(src.value10);break;
+            case SELECTOR_ID_11: visitor(src.value11);break;
+            case SELECTOR_ID_12: visitor(src.value12);break;
+            case SELECTOR_ID_13: visitor(src.value13);break;
             default: visitor();break;
         }
     }

@@ -31,6 +31,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #include "core/components_ng/base/ui_node.h"
+#include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -490,8 +491,6 @@ public:
     void JsStateProfilerResgiter();
 
     void JsSetAceDebugMode();
-
-    void JsEnableSwitchInstance();
 
     void JsUnregisterInstanceId();
 

@@ -14,9 +14,11 @@
  */
 
 #include "core/components/image/render_image.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine_ext.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components/image/image_event.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/theme/icon_theme.h"

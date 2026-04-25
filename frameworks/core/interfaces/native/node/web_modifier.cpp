@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/web_modifier.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -32,6 +33,7 @@ constexpr WebDarkMode DEFAULT_DARK_MODE = WebDarkMode::Off;
 constexpr int32_t DEFAULT_MULTIWINDOW_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_ALLOW_WINDOWOPEN_METHOD = false;
 constexpr WebKeyboardAvoidMode DEFAULT_KEYBOARD_AVOID_MODE = WebKeyboardAvoidMode::RESIZE_VISUAL;
+constexpr WebKeyboardAppearanceMode DEFAULT_KEYBOARD_APPEARANCE_MODE = WebKeyboardAppearanceMode::NONE_IMMERSIVE;
 constexpr bool DEFAULT_VERTICAL_SCROLL_BAR_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_HORIZONTAL_SCROLL_BAR_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
@@ -48,6 +50,8 @@ constexpr bool DEFAULT_ENABLE_IMAGE_ANALYZER = true;
 constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
 constexpr bool DEFAULT_AUTO_FILL_ENABLED = true;
 constexpr bool DEFAULT_ENABLE_DEFAULT_CONTEXT_MENU = true;
+constexpr bool DEFAULT_DRAG_ENABLED = true;
+constexpr ScrollbarLayoutPolicy DEFAULT_SCROLLBAR_LAYOUT_POLICY = ScrollbarLayoutPolicy::CONTENT;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 0;
@@ -244,6 +248,25 @@ void ResetKeyboardAvoidMode(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOARD_AVOID_MODE);
+}
+
+void SetKeyboardAppearance(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value < static_cast<int32_t>(WebKeyboardAppearanceMode::NONE_IMMERSIVE) ||
+    value > static_cast<int32_t>(WebKeyboardAppearanceMode::DARK_IMMERSIVE)) {
+    TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAppearance param err");
+    return;
+    }
+    WebModelNG::SetKeyboardAppearanceMode(frameNode, WebKeyboardAppearanceMode(value));
+}
+
+void ResetKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetKeyboardAppearanceMode(frameNode, DEFAULT_KEYBOARD_APPEARANCE_MODE);
 }
 
 void SetOnControllerAttached(ArkUINodeHandle node, void* extraParam)
@@ -2555,6 +2578,20 @@ void ResetEnableWebAVSession(ArkUINodeHandle node)
     WebModelNG::SetWebMediaAVSessionEnabled(frameNode, DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED);
 }
 
+void SetEnableDrag(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDrag(frameNode, value);
+}
+
+void ResetEnableDrag(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDrag(frameNode, DEFAULT_DRAG_ENABLED);
+}
+
 void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2581,6 +2618,20 @@ void ResetBackToTop(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetBackToTop(frameNode, DEFAULT_BACK_TO_TOP_ENABLED);
+}
+
+void SetScrollbarLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetScrollbarLayoutPolicy(frameNode, static_cast<ScrollbarLayoutPolicy>(value));
+}
+
+void ResetScrollbarLayoutPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetScrollbarLayoutPolicy(frameNode, DEFAULT_SCROLLBAR_LAYOUT_POLICY);
 }
 
 void SetOnCameraCaptureStateChanged(ArkUINodeHandle node, void* extraParam)
@@ -2642,6 +2693,67 @@ void ResetOnMicrophoneCaptureStateChanged(ArkUINodeHandle node)
     WebModelNG::SetMicrophoneCaptureStateChangedId(frameNode, nullptr);
 }
 
+void SetAiSessionOptions(
+    ArkUINodeHandle node, const struct ArkUIAISessionEventStruct* aiSessionEvents, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(aiSessionEvents);
+    if (length <= 0) {
+        return;
+    }
+
+    for (int32_t i = 0; i < length; i++) {
+        auto& event = aiSessionEvents[i];
+        uint32_t type = static_cast<uint32_t>(event.aiSessionType);
+        if (type == 0 || type > MAX_AI_SESSION_TYPE) {
+            continue;
+        }
+        auto onCreate = event.onCreateAISession
+            ? *static_cast<AISessionCallback*>(event.onCreateAISession)
+            : nullptr;
+        auto onExecute = event.onExecuteAIAction
+            ? *static_cast<AISessionCallback*>(event.onExecuteAIAction)
+            : nullptr;
+        auto onDestroy = event.onDestroyAISession
+            ? *static_cast<AISessionCallback*>(event.onDestroyAISession)
+            : nullptr;
+        WebModelNG::SetAiSessionOptions(frameNode, type - 1,
+            std::move(onCreate), std::move(onExecute), std::move(onDestroy));
+    }
+}
+
+void ResetAiSessionOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // Reset all AI session types by passing empty callbacks
+    for (uint32_t type = 1; type <= MAX_AI_SESSION_TYPE; type++) {
+        WebModelNG::SetAiSessionOptions(frameNode, type - 1, nullptr, nullptr, nullptr);
+    }
+}
+
+void SetOnInputMethodAttached(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* onInputMethodAttachedCallBackPtr = reinterpret_cast<std::function<void()>*>(extraParam);
+        CHECK_NULL_VOID(onInputMethodAttachedCallBackPtr);
+        auto onInputMethodAttachedCallBack = *onInputMethodAttachedCallBackPtr;
+        WebModelNG::SetInputMethodAttachedId(frameNode, std::move(onInputMethodAttachedCallBack));
+    } else {
+        WebModelNG::SetInputMethodAttachedId(frameNode, nullptr);
+    }
+}
+
+void ResetOnInputMethodAttached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetInputMethodAttachedId(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2673,6 +2785,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetAllowWindowOpenMethod = ResetAllowWindowOpenMethod,
         .setKeyboardAvoidMode = SetKeyboardAvoidMode,
         .resetKeyboardAvoidMode = ResetKeyboardAvoidMode,
+        .setKeyboardAppearance = SetKeyboardAppearance,
+        .resetKeyboardAppearance = ResetKeyboardAppearance,
         .setOnControllerAttached = SetOnControllerAttached,
         .resetOnControllerAttached = ResetOnControllerAttached,
         .setVerticalScrollBarAccessEnabled = SetVerticalScrollBarAccessEnabled,
@@ -2885,12 +2999,20 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableAutoFill = ResetEnableAutoFill,
         .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
+        .setAiSessionOptions = SetAiSessionOptions,
+        .resetAiSessionOptions = ResetAiSessionOptions,
         .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
         .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
         .setEnableNativeMediaPlayer = SetEnableNativeMediaPlayer,
         .resetEnableNativeMediaPlayer = ResetEnableNativeMediaPlayer,
         .setEnableWebAVSession = SetEnableWebAVSession,
         .resetEnableWebAVSession = ResetEnableWebAVSession,
+        .setEnableDrag = SetEnableDrag,
+        .resetEnableDrag = ResetEnableDrag,
+        .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
+        .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
+        .setOnInputMethodAttached = SetOnInputMethodAttached,
+        .resetOnInputMethodAttached = ResetOnInputMethodAttached,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2926,6 +3048,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetAllowWindowOpenMethod = ResetAllowWindowOpenMethod,
         .setKeyboardAvoidMode = SetKeyboardAvoidMode,
         .resetKeyboardAvoidMode = ResetKeyboardAvoidMode,
+        .setKeyboardAppearance = SetKeyboardAppearance,
+        .resetKeyboardAppearance = ResetKeyboardAppearance,
         .setOnControllerAttached = SetOnControllerAttached,
         .resetOnControllerAttached = ResetOnControllerAttached,
         .setVerticalScrollBarAccessEnabled = SetVerticalScrollBarAccessEnabled,
@@ -3138,12 +3262,20 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableAutoFill = ResetEnableAutoFill,
         .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
         .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
+        .setAiSessionOptions = SetAiSessionOptions,
+        .resetAiSessionOptions = ResetAiSessionOptions,
         .setEnableScrollDirectionalLock = SetEnableScrollDirectionalLock,
         .resetEnableScrollDirectionalLock = ResetEnableScrollDirectionalLock,
         .setEnableNativeMediaPlayer = SetEnableNativeMediaPlayer,
         .resetEnableNativeMediaPlayer = ResetEnableNativeMediaPlayer,
         .setEnableWebAVSession = SetEnableWebAVSession,
         .resetEnableWebAVSession = ResetEnableWebAVSession,
+        .setEnableDrag = SetEnableDrag,
+        .resetEnableDrag = ResetEnableDrag,
+        .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
+        .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
+        .setOnInputMethodAttached = SetOnInputMethodAttached,
+        .resetOnInputMethodAttached = ResetOnInputMethodAttached,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

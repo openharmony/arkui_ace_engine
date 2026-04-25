@@ -123,6 +123,7 @@ private:
     static bool IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId);
+    static bool InitButtonRect(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool GetPaddingInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool GetSizeWithScale(RefPtr<FrameNode>& node, double& width, double& height);

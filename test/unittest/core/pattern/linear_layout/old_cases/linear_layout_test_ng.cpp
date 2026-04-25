@@ -14,6 +14,7 @@
  */
 
 #include <cstdint>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 
 #include "gtest/gtest.h"
@@ -40,7 +41,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

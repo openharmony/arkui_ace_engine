@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <atomic>
 #include <future>
@@ -46,6 +47,7 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/ace_events.h"

@@ -323,6 +323,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src, ConvContext *ctx);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src);
+    void AssignArkValue(Ark_Coordinate2D& dst, const Offset& src);
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
     void AssignArkValue(Ark_arkui_component_enums_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
@@ -344,6 +345,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EffectScope& dst, const OHOS::Ace::ScopeType& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
     void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src);
+    void AssignArkValue(Ark_EventLocationInfo& dst, const FingerInfo& src);
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *ctx);
     void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
     void AssignArkValue(Ark_FlipDirection& dst, const TextFlipDirection& src);
@@ -766,6 +768,15 @@ namespace OHOS::Ace::NG::Converter {
         return {
             .selector = SELECTOR_ID_12,
             .value12 = ArkValue<Which>(src, ctx),
+        };
+    }
+    template<typename To, typename Which, typename From,
+        std::enable_if_t<std::is_same_v<Which, decltype(To().value13)>, int> = SELECTOR_ID_13>
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
+    {
+        return {
+            .selector = SELECTOR_ID_13,
+            .value13 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License" << std::endl;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,11 @@
  */
 
 #include "scroll_bar_test_ng.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -136,7 +137,7 @@ HWTEST_F(ArcScrollBarTestNg, HandleDrag002, TestSize.Level1)
      * @tc.steps: step1. HandleDragStart, drag on scrollBar
      */
     GestureEvent info;
-    scrollPattern_->HandleDragStart(info);
+    arcScrollBar->HandleDragStart(info);
 
     /**
      * @tc.steps: step3. HandleDragUpdate, drag down

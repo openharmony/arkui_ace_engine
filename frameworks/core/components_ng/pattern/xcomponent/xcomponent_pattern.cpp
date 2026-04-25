@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -43,6 +44,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/axis_event.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
@@ -227,6 +229,22 @@ void XComponentPattern::InitSurface()
     }
     surfaceId_ = renderSurface_->GetUniqueId();
     initialSurfaceId_ = surfaceId_;
+#ifdef RENDER_EXTRACT_SUPPORTED
+#ifdef ENABLE_ROSEN_BACKEND
+    auto context = AceType::DynamicCast<RosenRenderContext>(handlingSurfaceRenderContext_);
+    if (context) {
+        context->SetSurfaceCaptureCallback([weak = WeakClaim(this)]() -> std::shared_ptr<Media::PixelMap> {
+            std::shared_ptr<Media::PixelMap> ret = nullptr;
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, nullptr);
+            auto renderSurface = pattern->renderSurface_;
+            CHECK_NULL_RETURN(renderSurface, nullptr);
+            ret = renderSurface->SurfaceCapture();
+            return ret;
+        });
+    }
+#endif
+#endif
     UpdateTransformHint();
     RegisterNode();
 }
@@ -510,12 +528,18 @@ void XComponentPattern::RegisterRenderContextCallBack()
     };
     renderContextForSurface_->AddUpdateCallBack(OnUpdateCallBack);
 
-#ifdef IOS_PLATFORM
+#if defined(CROSS_PLATFORM)
     auto OnInitTypeCallback = [weak = WeakClaim(this)](int32_t& type) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->renderSurface_) {
+#if defined(IOS_PLATFORM)
             pattern->renderSurface_->GetTextureIsVideo(type);
+#elif defined(ANDROID_PLATFORM)
+            if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+                pattern->renderSurface_->AddInitTypeCallBack(type);
+            }
+#endif
         }
     };
     renderContextForSurface_->AddInitTypeCallBack(OnInitTypeCallback);
@@ -900,10 +924,16 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             static_cast<int32_t>(transformRelativeOffset.GetX() + localPosition_.GetX()),
             static_cast<int32_t>(transformRelativeOffset.GetY() + localPosition_.GetY()),
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
-        if (handlingSurfaceRenderContext_) {
-            handlingSurfaceRenderContext_->SetBounds(
-                paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() &&
+            !nativeWindow_ && drawSize_.IsPositive() && !isXComponentSizeInit_) {
+            XComponentSizeInit();
         }
+#endif
+    }
+    if (handlingSurfaceRenderContext_) {
+        handlingSurfaceRenderContext_->SetBounds(
+            paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
     }
 #endif
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
@@ -985,10 +1015,26 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 #endif
     if (renderSurface_->IsSurfaceValid() && (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE)) {
         float viewScale = context->GetViewScale();
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() && type_ == XComponentType::TEXTURE) {
+            if (isInitializingNativeWindow_) {
+                return;
+            }
+            isInitializingNativeWindow_ = true;
+            uint32_t w = static_cast<uint32_t>(textureWidth * viewScale);
+            uint32_t h = static_cast<uint32_t>(textureHeight * viewScale);
+            renderSurface_->SetExtSurfaceBoundsSync(0, 0, w, h);
+        }
+#endif
         renderSurface_->CreateNativeWindow();
         renderSurface_->AdjustNativeWindowSize(
             static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
         nativeWindow_ = renderSurface_->GetNativeWindow();
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() && type_ == XComponentType::TEXTURE) {
+            isInitializingNativeWindow_ = false;
+        }
+#endif
     }
 }
 
@@ -1373,7 +1419,7 @@ void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gest
         CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
         auto event = touchEvent.ConvertToTouchEvent();
         ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event, false,
-            Container::GetCurrentApiTargetVersion() };
+            Container::GetCurrentApiTargetVersion(), hostNode->GetId(), .usePXUnit = true };
         return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
     });
 }
@@ -1509,7 +1555,7 @@ void XComponentPattern::NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent)
     const auto callback = nativeXComponentImpl_->GetUIAxisEventCallback();
     CHECK_NULL_VOID(callback);
     ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_AXIS, AXIS_EVENT_ID, axisEvent, false,
-        Container::GetCurrentApiTargetVersion() };
+        Container::GetCurrentApiTargetVersion(), GetHost()->GetId(), .usePXUnit = true };
     callback(nativeXComponent_.get(), &uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
 }
 
@@ -2027,6 +2073,15 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     CHECK_NULL_VOID(host);
     auto width = surfaceRect.Width();
     auto height = surfaceRect.Height();
+#if defined(ANDROID_PLATFORM)
+    if (type_ == XComponentType::TEXTURE && OHOS::Rosen::RSSystemProperties::IsUseVulkan() &&
+        isInitializingNativeWindow_) {
+        return;
+    }
+    if (type_ == XComponentType::TEXTURE && OHOS::Rosen::RSSystemProperties::IsUseVulkan() && !nativeWindow_) {
+        InitNativeWindow(width, height);
+    }
+#endif
     if (needResizeNativeWindow) {
         AdjustNativeWindowSize(width, height);
     }
@@ -2036,6 +2091,11 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
         UpdateSdrRatioIfNeed();
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width * xcomponentSizeSdrRatio_));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height * xcomponentSizeSdrRatio_));
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+            nativeXComponentImpl_->SetSurface(nativeWindow_);
+        }
+#endif
         auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);

@@ -73,6 +73,8 @@ public:
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void SetOnWillCopy(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateSimpleJsOnWillObj(const std::u16string& value);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetHeightAdaptivePolicy(int32_t value);
     static void SetContentTransition(const JSCallbackInfo& info);
@@ -86,6 +88,8 @@ public:
     static void SetSelectDetectEnable(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
+    static bool BindPreviewMenu(const JSRef<JSVal> argsMenuOptions, NG::TextResponseType responseType,
+        NG::TextSpanType textSpanType, std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam);
@@ -96,6 +100,7 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo &info);
+    static void SetFontVariations(const JSCallbackInfo& info);
     static void SetMarqueeOptions(const JSCallbackInfo& info);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
     static void SetOrphanCharOptimization(const JSCallbackInfo& info);

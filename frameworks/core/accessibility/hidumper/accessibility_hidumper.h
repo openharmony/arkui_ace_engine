@@ -43,6 +43,7 @@ enum class DumpMode {
     SPECIFIC_SEARCH_TEST,
     SET_CHECKLIST_TEST,
     GET_CHECKLIST_TEST,
+    EXECUTE_ACTION_TEST,
     WEB_ACC_DUMP,
 };
 
@@ -61,6 +62,12 @@ struct DumpInfoArgument {
     std::string webAccFun = "tree";
 };
 
+struct ExecuteActionArgument {
+    int64_t elementId = -1;
+    int32_t actionType = 0;
+    std::map<std::string, std::string> actionArguments;
+};
+
 class AccessibilityHidumper {
 public:
     static bool DumpProcessInjectActionParameters(
@@ -68,6 +75,9 @@ public:
         int64_t& nodeId,
         int32_t& result,
         InjectActionType& actionType);
+    static bool DumpProcessExecuteActionParameters(
+        const std::vector<std::string>& params,
+        ExecuteActionArgument& argument);
 };
 } // OHOS::Ace
 

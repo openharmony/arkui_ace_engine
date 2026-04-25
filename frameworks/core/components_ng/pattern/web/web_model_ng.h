@@ -243,6 +243,7 @@ public:
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback) override;
     void SetOverlayScrollbarEnabled(bool isEnabled) override;
     void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) override;
+    void SetKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode) override;
     void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick,
         const NG::OnPrepareMenuCallback&& onPrepareMenuCallback = nullptr) override;
@@ -265,6 +266,7 @@ public:
     void SetOnFirstScreenPaint(std::function<void(const BaseEventInfo *info)> &&jsCallback) override;
     void SetEnableImageAnalyzer(bool isEnabled) override;
     void SetEnableAutoFill(bool isEnabled) override;
+    void SetEnableDrag(bool isEnabled) override;
     void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetForceEnableZoom(bool isEnabled) override;
@@ -276,6 +278,8 @@ public:
     void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetEnableDefaultContextMenu(bool isEnabled) override;
     void SetEnableScrollDirectionalLock(bool enabled, int32_t type) override;
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy layoutPolicy) override;
+    void SetInputMethodAttachedId(std::function<void()>&& jsCallback) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
@@ -288,6 +292,7 @@ public:
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetKeyboardAvoidMode(FrameNode* frameNode, const WebKeyboardAvoidMode& mode);
+    static void SetKeyboardAppearanceMode(FrameNode* frameNode, const WebKeyboardAppearanceMode& mode);
     static void SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetVerticalScrollBarAccessEnabled(FrameNode* frameNode, bool isVerticalScrollBarAccessEnabled);
     static void SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled);
@@ -434,9 +439,15 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetEnableAutoFill(FrameNode* frameNode, bool isEnabled);
     static void SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled);
+    static void SetAiSessionOptions(FrameNode* frameNode, uint32_t type, AISessionCallback&& onCreateAISession,
+        AISessionCallback&& onExecuteAIAction, AISessionCallback&& onDestroyAISession);
     static void SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabled, int32_t type);
     static void SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay);
     static void SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled);
+    static void SetEnableDrag(FrameNode* frameNode, bool isEnabled);
+    static void SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy layoutPolicy);
+    static void SetInputMethodAttachedId(
+        FrameNode* frameNode, std::function<void()>&& jsCallback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

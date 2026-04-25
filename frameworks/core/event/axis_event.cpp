@@ -16,6 +16,8 @@
 #include "core/event/axis_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace {
@@ -363,6 +365,15 @@ bool AxisEventTarget::HandleAxisEvent(const AxisEvent& event)
     Offset localLocation = Offset(
         event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
     AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
+    auto frameNodeWeak = node_;
+    auto globalOffset = event.GetOffset();
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent = event.passThrough,
+                                           postEventNodeId = event.postEventNodeId, globalOffset, localLocation]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localLocation);
+        NG::PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NG::NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     info.SetScreenLocation(Offset(event.screenX, event.screenY));
     info.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     info.SetSourceTool(event.sourceTool);

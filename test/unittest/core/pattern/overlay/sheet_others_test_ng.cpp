@@ -21,10 +21,10 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

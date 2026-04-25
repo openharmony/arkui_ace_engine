@@ -270,12 +270,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     contentHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    std::u16string selectTextContent;
-    pattern->GetContentBySpans(selectTextContent);
-    std::u16string selectData16 = selectTextContent.substr(static_cast<int32_t>(selectStart),
-        static_cast<int32_t>(selectEnd - selectStart));
-    std::string selectData = StringUtils::Str16ToStr8(selectData16);
-    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
+    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
 }
 
 std::string RichEditorSelectOverlay::GetSelectedText()
@@ -569,6 +564,14 @@ void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, To
         ResumeTwinkling();
     } else {
         HideMenu();
+    }
+    if (!IsSingleHandle() && IsTouchUp(sourceType, touchType) &&
+        GetClearPolicy() == TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH) {
+        auto pattern = GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetSelection();
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        ResumeTwinkling();
     }
 }
 

@@ -178,7 +178,7 @@ void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj
         jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
     }
     auto frameNode = node ? node : NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() ||
+    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() || listChildrenMainSize->NeedSync() ||
         (jsChildrenMainSize && !jsChildrenMainSize->IsHostEqual(frameNode))) {
         InitNativeMainSize(childrenSizeObj, listChildrenMainSize, frameNode);
         listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
@@ -188,9 +188,9 @@ void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj
 
 void JSListItemGroup::Create(const JSCallbackInfo& args)
 {
-    V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE;
+    V2::ListItemGroupOptions options;
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        ListItemGroupModel::GetInstance()->Create(listItemGroupStyle);
+        ListItemGroupModel::GetInstance()->Create(options);
         NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         args.ReturnSelf();
@@ -199,15 +199,43 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     auto styleObject = obj->GetProperty("style");
     if (styleObject->IsNumber()) {
-        listItemGroupStyle = static_cast<V2::ListItemGroupStyle>(styleObject->ToNumber<int32_t>());
+        options.style = static_cast<V2::ListItemGroupStyle>(styleObject->ToNumber<int32_t>());
     }
-    ListItemGroupModel::GetInstance()->Create(listItemGroupStyle);
+    auto headerStyleObject = obj->GetProperty("headerStyle");
+    if (headerStyleObject->IsNumber()) {
+        options.headerStyle =
+            static_cast<V2::ListItemGroupHeaderFooterStyle>(headerStyleObject->ToNumber<int32_t>());
+    }
+    auto footerStyleObject = obj->GetProperty("footerStyle");
+    if (footerStyleObject->IsNumber()) {
+        options.footerStyle =
+            static_cast<V2::ListItemGroupHeaderFooterStyle>(footerStyleObject->ToNumber<int32_t>());
+    }
+
+    ListItemGroupModel::GetInstance()->Create(options);
 
     Dimension space;
-    if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsNonNegative()) {
-        ListItemGroupModel::GetInstance()->SetSpace(space);
+    RefPtr<ResourceObject> resObj;
+    auto spaceWidthValue = obj->GetProperty("spaceWidth");
+    auto spaceValue = obj->GetProperty("space");
+    if (spaceValue->IsUndefined() || spaceValue->IsNull()) {
+        ListItemGroupModel::GetInstance()->ResetSpace();
     }
-
+    if (spaceWidthValue->IsUndefined() || spaceWidthValue->IsNull()) {
+        ListItemGroupModel::GetInstance()->ResetSpaceWidth();
+    }
+    if (obj->HasProperty("spaceWidth") && !spaceWidthValue->IsUndefined() && !spaceWidthValue->IsNull()) {
+        if (ConvertFromJSValue(spaceWidthValue, space, resObj)) {
+            ListItemGroupModel::GetInstance()->SetSpaceWidth(space);
+        } else {
+            ListItemGroupModel::GetInstance()->ResetSpaceWidth();
+        }
+    } else if (ConvertFromJSValue(spaceValue, space) && space.IsNonNegative()) {
+        ListItemGroupModel::GetInstance()->SetSpace(space);
+    } else {
+        ListItemGroupModel::GetInstance()->ResetSpace();
+    }
+    ListItemGroupModel::GetInstance()->CreateWithResourceObjSpace(resObj);
     if (obj->HasProperty("headerComponent")) {
         auto headerComponentObject = obj->GetProperty("headerComponent");
         if (!ParseHeaderAndFooterContent(headerComponentObject, true)) {

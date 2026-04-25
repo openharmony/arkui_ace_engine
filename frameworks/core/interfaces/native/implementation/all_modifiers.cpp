@@ -73,10 +73,6 @@ namespace GeneratedApiImpl {
     void ShowCrash(Ark_CharPtr message);
     void SetCallbackMethod(GENERATED_Ark_APICallbackMethod* method);
 } // namespace OHOS::Ace::NG::GeneratedApiImpl
-
-namespace GeneratedBridge {
-    Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags);
-}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -105,6 +101,7 @@ const GENERATED_ArkUICustomBuilderRootModifier* GetCustomBuilderRootModifier();
 const GENERATED_ArkUICustomLayoutRootModifier* GetCustomLayoutRootModifier();
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier();
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier();
+const GENERATED_ArkUIDepthComponentModifier* GetDepthComponentModifier();
 const GENERATED_ArkUIDividerModifier* GetDividerModifier();
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier();
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier();
@@ -257,10 +254,12 @@ const GENERATED_ArkUIDragUtilsAccessor* GetDragUtilsAccessor();
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor();
 const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
+const GENERATED_ArkUIEventLocationInfoAccessor* GetEventLocationInfoAccessor();
 const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor();
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
 const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor();
 const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor();
+const GENERATED_ArkUIFingerInfoAccessor* GetFingerInfoAccessor();
 const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor();
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
 const GENERATED_ArkUIForEachOpsAccessor* GetForEachOpsAccessor();
@@ -301,6 +300,7 @@ const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor()
 const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor();
 const GENERATED_ArkUILinearGradientStyleAccessor* GetLinearGradientStyleAccessor();
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor();
+const GENERATED_ArkUILineSpacingStyleAccessor* GetLineSpacingStyleAccessor();
 const GENERATED_ArkUIListItemSwipeActionManagerAccessor* GetListItemSwipeActionManagerAccessor();
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor();
 const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAccessor();
@@ -338,6 +338,7 @@ const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
 const GENERATED_ArkUIPromptActionExtenderAccessor* GetPromptActionExtenderAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUIRadialGradientStyleAccessor* GetRadialGradientStyleAccessor();
+const GENERATED_ArkUIRawInputEventWrapperAccessor* GetRawInputEventWrapperAccessor();
 const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor();
 const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor();
 const GENERATED_ArkUIRenderServiceNodeAccessor* GetRenderServiceNodeAccessor();
@@ -395,6 +396,7 @@ const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor
 const GENERATED_ArkUIThemeOpsAccessor* GetThemeOpsAccessor();
 const GENERATED_ArkUIToggleExtenderAccessor* GetToggleExtenderAccessor();
 const GENERATED_ArkUITouchEventExtenderAccessor* GetTouchEventExtenderAccessor();
+const GENERATED_ArkUITouchObjectAccessor* GetTouchObjectAccessor();
 const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor();
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
@@ -445,6 +447,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetCustomLayoutRootModifier,
         GetDataPanelModifier,
         GetDatePickerModifier,
+        GetDepthComponentModifier,
         GetDividerModifier,
         GetEffectComponentModifier,
         GetEllipseModifier,
@@ -603,10 +606,12 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDrawingRenderingContextAccessor,
         GetEnvironmentBackendAccessor,
         GetEventEmulatorAccessor,
+        GetEventLocationInfoAccessor,
         GetEventResultAccessor,
         GetEventTargetInfoAccessor,
         GetFileSelectorParamAccessor,
         GetFileSelectorResultAccessor,
+        GetFingerInfoAccessor,
         GetFocusAxisEventAccessor,
         GetFocusControllerAccessor,
         GetForEachOpsAccessor,
@@ -647,6 +652,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLinearGradientAccessor,
         GetLinearGradientStyleAccessor,
         GetLineHeightStyleAccessor,
+        GetLineSpacingStyleAccessor,
         GetListItemSwipeActionManagerAccessor,
         GetListScrollerAccessor,
         GetLongPressGestureEventAccessor,
@@ -684,6 +690,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPromptActionExtenderAccessor,
         GetPulseSymbolEffectAccessor,
         GetRadialGradientStyleAccessor,
+        GetRawInputEventWrapperAccessor,
         GetRenderingContextSettingsAccessor,
         GetRenderNodeExtenderAccessor,
         GetRenderServiceNodeAccessor,
@@ -741,6 +748,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetThemeOpsAccessor,
         GetToggleExtenderAccessor,
         GetTouchEventExtenderAccessor,
+        GetTouchObjectAccessor,
         GetTouchRecognizerAccessor,
         GetTransitionEffectAccessor,
         GetUICommonEventAccessor,
@@ -773,7 +781,7 @@ const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI()
 {
     static const GENERATED_ArkUIBasicNodeAPI basicNodeAPIImpl = {
         GENERATED_ARKUI_BASIC_NODE_API_VERSION, // version
-        OHOS::Ace::NG::GeneratedBridge::CreateNode,
+        nullptr,
         OHOS::Ace::NG::GeneratedApiImpl::GetNodeByViewStack,
         OHOS::Ace::NG::GeneratedApiImpl::DisposeNode,
         OHOS::Ace::NG::GeneratedApiImpl::DumpTreeNode,

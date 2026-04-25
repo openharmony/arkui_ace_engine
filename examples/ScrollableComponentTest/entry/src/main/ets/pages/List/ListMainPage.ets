@@ -92,6 +92,9 @@ struct IndexPage {
     new TextList(58, 'EditModeOptions', 'pages/List/ListEditModeOptions'),
     new TextList(59, 'BindControllerDeclare', 'pages/List/bindController/ListDeclare'),
     new TextList(60, 'BindControllerCommand', 'pages/List/bindController/ListCommand'),
+    new TextList(61, 'ListEventReport', 'pages/List/ListEventReport'),
+    new TextList(62, 'ListEventReportNestedScroll', 'pages/List/ListEventReportNestedScroll'),
+    new TextList(63, 'ListEmptyBranch', 'pages/List/ListEmptyBranch'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

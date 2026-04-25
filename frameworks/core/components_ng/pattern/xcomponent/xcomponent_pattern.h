@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
+class AccessibilityChildTreeCallback;
 enum class StatisticEventType;
 }
 namespace OHOS::Ace::NG {
@@ -405,6 +406,7 @@ protected:
     RefPtr<RenderSurface> renderSurface_;
 #ifdef RENDER_EXTRACT_SUPPORTED
     WeakPtr<RenderSurface> renderSurfaceWeakPtr_;
+    bool isInitializingNativeWindow_ = false;
 #endif
     OffsetF localPosition_;
     OffsetF surfaceOffset_;
@@ -432,6 +434,14 @@ protected:
     bool isNeedSoftKeyboard_ = false;
     std::list<StatisticEventType> statisticEventTypes_;
 
+    std::optional<float> selfIdealSurfaceWidth_;
+    std::optional<float> selfIdealSurfaceHeight_;
+    std::optional<float> selfIdealSurfaceOffsetX_;
+    std::optional<float> selfIdealSurfaceOffsetY_;
+
+    OffsetF globalPosition_;
+    void NativeXComponentOffset(double x, double y);
+
 private:
     void OnAreaChangedInner() override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
@@ -441,8 +451,6 @@ private:
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
-    void NativeXComponentOffset(double x, double y);
 
     void LoadNative();
     void OnNativeLoad(FrameNode* frameNode);
@@ -525,6 +533,7 @@ private:
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
 
     bool hasXComponentInit_ = false;
+    bool isXComponentSizeInit_ = false;
 
     RefPtr<TouchEventImpl> touchEvent_;
     OH_NativeXComponent_TouchEvent touchEventPoint_ = {};
@@ -534,12 +543,6 @@ private:
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
     SizeF initSize_;
-    OffsetF globalPosition_;
-
-    std::optional<float> selfIdealSurfaceWidth_;
-    std::optional<float> selfIdealSurfaceHeight_;
-    std::optional<float> selfIdealSurfaceOffsetX_;
-    std::optional<float> selfIdealSurfaceOffsetY_;
 
     uint32_t windowId_ = 0;
     int32_t treeId_ = 0;

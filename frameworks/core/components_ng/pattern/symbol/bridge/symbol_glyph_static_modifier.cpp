@@ -153,6 +153,23 @@ void SetFontColorImpl(Ark_NativePointer node,
     }
     SymbolModelNG::SetFontColor(frameNode, fontColors);
 }
+void SetSymbolColorImpl(Ark_NativePointer node,
+    const Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optFontColors = value ? Converter::OptConvert<std::vector<std::optional<Color>>>(*value) : std::nullopt;
+    std::vector<Color> fontColors;
+    if (optFontColors.has_value()) {
+        fontColors.reserve(optFontColors->size());
+        for (const auto& color : optFontColors.value()) {
+            if (color.has_value()) {
+                fontColors.emplace_back(color.value());
+            }
+        }
+    }
+    SymbolModelNG::SetFontColor(frameNode, fontColors);
+}
 void SetFontWeightImpl(Ark_NativePointer node,
                        const Opt_Union_I32_FontWeight_String* value)
 {
@@ -418,6 +435,7 @@ const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphStaticModifier()
         SymbolGlyphInterfaceModifier::SetSymbolGlyphOptionsImpl,
         SymbolGlyphAttributeModifier::SetFontSizeImpl,
         SymbolGlyphAttributeModifier::SetFontColorImpl,
+        SymbolGlyphAttributeModifier::SetSymbolColorImpl,
         SymbolGlyphAttributeModifier::SetFontWeightImpl,
         SymbolGlyphAttributeModifier::SetEffectStrategyImpl,
         SymbolGlyphAttributeModifier::SetRenderingStrategyImpl,

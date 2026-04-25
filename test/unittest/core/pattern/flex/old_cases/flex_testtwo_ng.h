@@ -14,13 +14,14 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 
 #define private public
 #define protectd public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"

@@ -475,6 +475,18 @@ void WebModelStatic::SetKeyboardAvoidMode(FrameNode* frameNode, const std::optio
     }
 }
 
+void WebModelStatic::SetKeyboardAppearance(FrameNode* frameNode, const std::optional<WebKeyboardAppearanceMode>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (mode) {
+        webPatternStatic->UpdateKeyboardAppearanceMode(mode.value());
+    } else {
+        webPatternStatic->ResetKeyboardAppearanceMode();
+    }
+}
+
 void WebModelStatic::SetAudioResumeInterval(FrameNode* frameNode, const std::optional<int32_t>& resumeInterval)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1688,6 +1700,14 @@ void WebModelStatic::SetEnableDefaultContextMenu(
     webPatternStatic->UpdateEnableDefaultContextMenu(isEnabled);
 }
 
+void WebModelStatic::SetEnableDrag(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableDrag(isEnabled);
+}
+
 void WebModelStatic::SetAISessionOptions(
     FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
     const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
@@ -1697,5 +1717,24 @@ void WebModelStatic::SetAISessionOptions(
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
         std::move(onExecuteAIAction), std::move(onDestroyAISession));
+}
+
+void WebModelStatic::SetScrollbarLayoutPolicy(
+    FrameNode* frameNode, ScrollbarLayoutPolicy policy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateScrollbarLayoutPolicy(policy);
+}
+
+void WebModelStatic::SetInputMethodAttachedId(
+    FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

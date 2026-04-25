@@ -18,12 +18,74 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/shape_painter.h"
 namespace OHOS::Ace::NG {
+namespace {
+std::shared_ptr<RSColorSpace> GetCircleStrokeColorSpace(const Color& color)
+{
+    if (color.GetColorSpace() == ColorSpace::BT2020) {
+        return RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::REC2020);
+    }
+    if (color.GetColorSpace() == ColorSpace::DISPLAY_P3) {
+        return RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3);
+    }
+    return RSColorSpace::CreateSRGB();
+}
+
+bool NeedUseHdrStrokeColor(const Color& color)
+{
+    return color.GetHeadRoomColor().has_value() || color.GetColorSpace() == ColorSpace::BT2020 ||
+           color.GetColorSpace() == ColorSpace::DISPLAY_P3;
+}
+
+RSColor4f GetCircleStrokeColor4f(const Color& color, double strokeOpacity)
+{
+    return { static_cast<RSScalar>(color.GetRed() / 255.0 * strokeOpacity),
+        static_cast<RSScalar>(color.GetGreen() / 255.0 * strokeOpacity),
+        static_cast<RSScalar>(color.GetBlue() / 255.0 * strokeOpacity),
+        static_cast<RSScalar>(color.GetAlpha() / 255.0 * strokeOpacity) };
+}
+
+void UpdateCircleStrokeColorIfNeeded(RSPen& pen, const ShapePaintProperty& shapePaintProperty)
+{
+    Color strokeColor = Color::TRANSPARENT;
+    if (shapePaintProperty.HasStroke()) {
+        strokeColor = shapePaintProperty.GetStrokeValue();
+    }
+    if (!NeedUseHdrStrokeColor(strokeColor)) {
+        return;
+    }
+
+    double strokeOpacity = 1.0;
+    if (shapePaintProperty.HasStrokeOpacity()) {
+        strokeOpacity = shapePaintProperty.GetStrokeOpacityValue();
+    }
+
+    if (strokeColor.GetHeadRoomColor().has_value()) {
+        const auto hdr = strokeColor.GetHeadRoomColor().value();
+        RSUIColor uiColor(hdr.red * strokeOpacity, hdr.green * strokeOpacity, hdr.blue * strokeOpacity,
+            hdr.alpha * strokeOpacity, hdr.headRoom);
+        pen.SetUIColor(uiColor, GetCircleStrokeColorSpace(strokeColor));
+        return;
+    }
+
+    pen.SetColor(GetCircleStrokeColor4f(strokeColor, strokeOpacity), GetCircleStrokeColorSpace(strokeColor));
+}
+
+bool SetCirclePen(RSPen& pen, const ShapePaintProperty& shapePaintProperty)
+{
+    if (!ShapePainter::SetPen(pen, shapePaintProperty)) {
+        return false;
+    }
+    UpdateCircleStrokeColorIfNeeded(pen, shapePaintProperty);
+    return true;
+}
+} // namespace
+
 void CirclePainter::DrawCircle(
     RSCanvas& canvas, float radius, const OffsetF& offset, const ShapePaintProperty& shapePaintProperty)
 {
     RSPen pen;
     RSBrush brush;
-    if (ShapePainter::SetPen(pen, shapePaintProperty)) {
+    if (SetCirclePen(pen, shapePaintProperty)) {
         canvas.AttachPen(pen);
     }
     ShapePainter::SetBrush(brush, shapePaintProperty);

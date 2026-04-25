@@ -56,5 +56,6 @@ CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupItemFont(double size, int3
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerItemBorderRadius(double radius);
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerPopupItemBorderRadius(double radius);
 CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerEnableHapticFeedback(bool state);
+CJ_EXPORT void FfiOHOSAceFrameworkAlphabetIndexerSetWidth(double width, int32_t unit);
 };
 #endif // OHOS_ACE_FRAMEWORK_CJ_ALPHABET_INDEXER_FFI_H

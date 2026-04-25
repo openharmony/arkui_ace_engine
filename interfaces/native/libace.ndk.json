@@ -456,6 +456,22 @@
         "name": "OH_ArkUI_PointerEvent_GetYByIndex"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalX"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalY"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetWindowXByIndex"
     },
@@ -1582,6 +1598,14 @@
     {
         "first_introduced": "15",
         "name": "OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CrossLanguageOption_SetTreeOperatingStatus"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CrossLanguageOption_GetTreeOperatingStatus"
     },
     {
         "first_introduced": "15",
@@ -2794,6 +2818,10 @@
     {
         "first_introduced": "15",
         "name": "OH_ArkUI_GetNodeSnapshot"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GetNodeSnapshotSizeLimitation"
     },
     {
         "first_introduced": "23",
@@ -5000,6 +5028,10 @@
         "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureDivider"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_EnableEventPassthrough"
+    },
+    {
         "first_introduced": "24",
  	    "name": "OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext"
     },
@@ -6576,6 +6608,34 @@
  	    "name": "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NodeEvent_GetGestureCollectInterceptInfo"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_TouchRecognizer_IsHostBelongsTo"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GestureRecognizer_IsHostBelongsTo"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_GetGestureBindNodeUniqueId"
+    },
+    {
         "first_introduced": "26",
         "name": "OH_ArkUI_TextController_Create"
     },
@@ -6594,6 +6654,58 @@
     },
     {
         "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_NativeModule_GetErrorMessage"
+    },
+    {
+        "first_introduced": "26.0.0",
         "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
+    },
+    {
+ 	    "first_introduced": "26.0.0",
+ 	    "name": "OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent"
+    },
+ 	{
+ 	    "first_introduced": "26.0.0",
+ 	    "name": "OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineHeightStyle_SetLineHeightMultiple"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineHeightStyle_GetLineHeightMultiple"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_Create"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_Destroy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_SpanStyle_SetLineSpacingStyle"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_SpanStyle_GetLineSpacingStyle"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_SetLineSpacing"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_GetLineSpacing"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_SetOnlyBetweenLines"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_GetOnlyBetweenLines"
     }
 ]

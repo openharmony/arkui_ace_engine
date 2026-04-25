@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SVG2 Mixed Features Test File -->
+<!-- Combines gradients, filters, masks, and patterns for complex SVG2 rendering -->
+<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- SVG2 Linear gradient -->
+    <linearGradient id="mixedLinearGrad" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#E91E63"/>
+      <stop offset="25%" stop-color="#9C27B0"/>
+      <stop offset="50%" stop-color="#673AB7"/>
+      <stop offset="75%" stop-color="#3F51B5"/>
+      <stop offset="100%" stop-color="#2196F3"/>
+    </linearGradient>
+    
+    <!-- SVG2 Radial gradient -->
+    <radialGradient id="mixedRadialGrad" cx="50%" cy="50%" r="50%" fx="30%" fy="30%" fr="10%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#FF9800"/>
+      <stop offset="100%" stop-color="#F44336"/>
+    </radialGradient>
+    
+    <!-- SVG2 Pattern with gradient -->
+    <pattern id="mixedPattern" patternUnits="userSpaceOnUse" width="40" height="40" patternTransform="rotate(30)">
+      <rect width="40" height="40" fill="url(#mixedLinearGrad)"/>
+      <circle cx="20" cy="20" r="10" fill="url(#mixedRadialGrad)"/>
+    </pattern>
+    
+    <!-- SVG2 Mask with pattern -->
+    <mask id="mixedMask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="250" height="250" fill="url(#mixedPattern)" opacity="0.8"/>
+      <circle cx="125" cy="125" r="80" fill="white"/>
+    </mask>
+    
+    <!-- SVG2 Combined filter -->
+    <filter id="mixedFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feColorMatrix in="blur" type="hueRotate" values="45" result="hue"/>
+      <feOffset in="hue" dx="3" dy="3" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.3" result="flood"/>
+      <feComposite in="offset" in2="flood" operator="over" result="composite"/>
+      <feGaussianBlur in="flood" stdDeviation="3" result="shadowBlur"/>
+      <feComposite in="composite" in2="shadowBlur" operator="over"/>
+    </filter>
+    
+    <!-- SVG2 Filter for animation effect -->
+    <filter id="animFilter">
+      <feGaussianBlur stdDeviation="5"/>
+      <feColorMatrix type="saturate" values="1.5"/>
+    </filter>
+    
+    <!-- SVG2 Gradient with filter -->
+    <linearGradient id="filterGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00BCD4"/>
+      <stop offset="100%" stop-color="#009688"/>
+    </linearGradient>
+    
+    <!-- Complex nested structures -->
+    <pattern id="complexPattern" width="60" height="60">
+      <rect width="30" height="30" fill="url(#mixedLinearGrad)"/>
+      <rect x="30" y="30" width="30" height="30" fill="url(#mixedRadialGrad)"/>
+      <circle cx="30" cy="30" r="15" fill="white" opacity="0.5"/>
+    </pattern>
+    
+    <mask id="complexMask">
+      <rect width="200" height="200" fill="url(#complexPattern)"/>
+    </mask>
+    
+    <filter id="complexFilter">
+      <feBlend in="SourceGraphic" in2="SourceGraphic" mode="difference"/>
+    </filter>
+  </defs>
+  
+  <!-- Complex gradient + filter -->
+  <g>
+    <rect x="10" y="10" width="240" height="240" fill="url(#mixedLinearGrad)" filter="url(#mixedFilter)"/>
+    <text x="130" y="130" fill="white" font-size="14" text-anchor="middle">Gradient + Filter</text>
+  </g>
+  
+  <!-- Pattern + Mask -->
+  <g>
+    <rect x="260" y="10" width="240" height="240" fill="#4CAF50" mask="url(#mixedMask)"/>
+    <text x="380" y="130" fill="white" font-size="14" text-anchor="middle">Pattern + Mask</text>
+  </g>
+  
+  <!-- Radial gradient + pattern -->
+  <g>
+    <circle cx="130" cy="380" r="110" fill="url(#mixedRadialGrad)" stroke="url(#mixedPattern)" stroke-width="20"/>
+    <text x="130" y="380" fill="white" font-size="14" text-anchor="middle">Radial + Pattern</text>
+  </g>
+  
+  <!-- All features combined -->
+  <g>
+    <rect x="260" y="260" width="240" height="240" fill="url(#complexPattern)" mask="url(#complexMask)" filter="url(#complexFilter)"/>
+    <text x="380" y="380" fill="white" font-size="14" text-anchor="middle">All Combined</text>
+  </g>
+  
+  <!-- Animated element (for SVG animation test) -->
+  <g>
+    <circle cx="130" cy="380" r="80" fill="url(#filterGradient)" filter="url(#animFilter)">
+      <animate attributeName="r" values="80;100;80" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

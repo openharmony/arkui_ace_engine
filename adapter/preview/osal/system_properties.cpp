@@ -15,6 +15,8 @@
 
 #include "base/utils/system_properties.h"
 
+#include "ui/properties/ui_material_enums.h"
+
 #include "base/utils/layout_break_point.h"
 
 #include "base/log/log.h"
@@ -32,6 +34,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 
 constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE = 20;
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -86,6 +89,7 @@ bool SystemProperties::eventBenchMarkEnabled_ = false;
 DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::layoutDetectEnabled_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
+bool SystemProperties::gestureDebugBoundaryEnabled_ = false;
 bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
@@ -114,6 +118,7 @@ bool SystemProperties::gridIrregularLayoutEnable_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
+bool SystemProperties::smartGestureEnabled_ = false;
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
@@ -129,7 +134,6 @@ double SystemProperties::scrollableDistance_ = 0.0;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 int32_t SystemProperties::touchAccelarate_ = 0;
-int32_t SystemProperties::pageLoadTimethreshold_ = 1000; // page load max timethreshold is 1000ms.
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -289,16 +293,6 @@ int32_t SystemProperties::GetSvgMode()
 bool SystemProperties::GetIsUseMemoryMonitor()
 {
     return false;
-}
-
-int32_t SystemProperties::GetComponentLoadNumber()
-{
-    return 1;
-}
-
-int32_t SystemProperties::GetStopCollectTimeWait()
-{
-    return 800; // 800 : Stop collecting asynchronous task waiting time.
 }
 
 bool SystemProperties::IsFormAnimationLimited()
@@ -481,11 +475,6 @@ int32_t SystemProperties::GetTouchAccelarate()
     return touchAccelarate_;
 }
 
-int32_t SystemProperties::GetPageLoadTimethreshold()
-{
-    return pageLoadTimethreshold_;
-}
-
 bool SystemProperties::GetContainerDeleteFlag()
 {
     return true;
@@ -518,7 +507,7 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 
 bool SystemProperties::GetMultiInstanceEnabled()
 {
-    return false;
+    return true;
 }
 
 int32_t SystemProperties::getFormSharedImageCacheThreshold()
@@ -648,5 +637,15 @@ void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnabl
 void SystemProperties::SetFocusCanBeActive(bool focusCanBeActive)
 {
     focusCanBeActive_.store(focusCanBeActive);
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    return UiMaterialLevel::DEFAULT;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    return DEFAULT_FORM_TASK_PRIORITY;
 }
 } // namespace OHOS::Ace

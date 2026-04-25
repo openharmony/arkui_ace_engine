@@ -16,37 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_NG_H
 
-#include <optional>
-#include <utility>
-
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/ng/vector.h"
-#include "base/geometry/offset.h"
-#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/position_param.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border_image.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
 class SpanString;
 class CalcDimensionRect;
+class BorderImage;
 }
 namespace OHOS::Ace::NG {
 constexpr int32_t MAT4_ZERO = 0;
@@ -65,6 +43,7 @@ constexpr int32_t MAT4_TWELVE = 12;
 constexpr int32_t MAT4_THIRTEEN = 13;
 constexpr int32_t MAT4_FOURTEEN = 14;
 constexpr int32_t MAT4_FIFTEEN = 15;
+struct SmartGestureShortcutConfig;
 
 class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
@@ -113,15 +92,7 @@ public:
         }
     }
 
-    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) override
-    {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto layoutProperty = frameNode->GetLayoutProperty();
-        if (layoutProperty) {
-            layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
-        }
-    }
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) override;
 
     void SetHeight(const RefPtr<ResourceObject>& resObj) override
     {
@@ -283,6 +254,10 @@ public:
     {
         ViewAbstract::SetPixelStretchEffect(option);
     }
+    void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) override
+    {
+        ViewAbstract::SetSpatialEffect(params);
+    }
     void SetLightUpEffect(double radio) override
     {
         ViewAbstract::SetLightUpEffect(radio);
@@ -336,11 +311,7 @@ public:
     }
 
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
-        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
-    {
-        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
-        ViewAbstract::SetPadding(paddings);
-    }
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
 
     void SetPaddings(const NG::PaddingProperty& paddings) override
     {
@@ -373,11 +344,7 @@ public:
     }
 
     void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
-        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
-    {
-        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
-        ViewAbstract::SetSafeAreaPadding(paddings);
-    }
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
 
     void SetMargin(const CalcDimension& value) override
     {
@@ -669,27 +636,7 @@ public:
         ViewAbstract::SetOuterBorderStyle(borderStyles);
     }
 
-    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
-    {
-        CHECK_NULL_VOID(borderImage);
-        if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(
-                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
-        }
-        if (bitset & BorderImage::OUTSET_BIT) {
-            ViewAbstract::SetHasBorderImageOutset(true);
-        }
-        if (bitset & BorderImage::SLICE_BIT) {
-            ViewAbstract::SetHasBorderImageSlice(true);
-        }
-        if (bitset & BorderImage::REPEAT_BIT) {
-            ViewAbstract::SetHasBorderImageRepeat(true);
-        }
-        if (bitset & BorderImage::WIDTH_BIT) {
-            ViewAbstract::SetHasBorderImageWidth(true);
-        }
-        ViewAbstract::SetBorderImage(borderImage);
-    }
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override;
 
     void SetBorderImageGradient(const NG::Gradient& gradient) override
     {
@@ -1155,6 +1102,16 @@ public:
         ViewAbstract::SetUseUnion(useUnion);
     }
 
+    void SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions) override
+    {
+        ViewAbstract::SetCenterGravityOptions(centerGravityOptions);
+    }
+
+    void SetEdgeLightParam(const std::optional<EdgeLightParam>& param) override
+    {
+        ViewAbstract::SetEdgeLightParam(param);
+    }
+
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);
@@ -1191,10 +1148,21 @@ public:
         ViewAbstract::SetOnTouchIntercept(std::move(touchInterceptFunc));
     }
 
+    void SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func) override
+    {
+        ViewAbstract::SetOnGestureCollectIntercept(std::move(func));
+    }
+
     void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
     {
         ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
+    }
+
+    void SetShouldRecognizerParallelWith(
+        NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc) override
+    {
+        ViewAbstract::SetShouldRecognizerParallelWith(std::move(shouldRecognizerParallelWithFunc));
     }
 
     void SetOnGestureRecognizerJudgeBegin(
@@ -1224,24 +1192,15 @@ public:
         ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
     }
 #endif
-    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
-    {
-        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
-    }
+
+    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override;
 
     void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) override
     {
         ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback));
     }
 
-    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
-    {
-        auto focusHub = frameNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
-    }
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback);
 
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
     {
@@ -1430,16 +1389,8 @@ public:
 
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
-            onAreaChanged) override
-    {
-        auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
-                                      const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
-            areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
-                Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
-                Offset(origin.GetX(), origin.GetY()));
-        };
-        ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
-    }
+            onAreaChanged,
+        int32_t minInterval) override;
 
     void SetOnSizeChanged(
         std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged) override
@@ -1472,6 +1423,16 @@ public:
     void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) override
     {
         ViewAbstract::SetMouseResponseRegion(responseRegion);
+    }
+
+    void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) override
+    {
+        ViewAbstract::SetSmartGestureShortcut(action, enabled, selectable);
+    }
+
+    void ResetSmartGestureShortcut() override
+    {
+        ViewAbstract::ResetSmartGestureShortcut();
     }
 
     void SetEnabled(bool enabled) override
@@ -1582,19 +1543,7 @@ public:
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
-    static void ResetKeyboardShortcutAll(FrameNode* frameNode)
-    {
-        CHECK_NULL_VOID(frameNode);
-        auto eventHub = frameNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->ClearSingleKeyboardShortcutAll();
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto eventManager = pipeline->GetEventManager();
-        CHECK_NULL_VOID(eventManager);
-        eventManager->DelKeyboardShortcutNode(frameNode->GetId());
-        return;
-    }
+    static void ResetKeyboardShortcutAll(FrameNode* frameNode);
 
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override
     {
@@ -1606,17 +1555,8 @@ public:
         ViewAbstract::SetPrivacySensitive(flag);
     }
 
-    void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
-    {
-        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
-    }
-
-    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& spanString) override
-    {
-        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
-    }
+    void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString) override;
 
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
     {
@@ -1811,24 +1751,14 @@ public:
     }
 #endif
 
-    void DisableOnKeyPreIme() override
-    {
-        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->ClearOnKeyPreIme();
-    }
+    void DisableOnKeyPreIme() override;
 
     void DisableOnKeyEventDispatch() override
     {
         ViewAbstract::DisableOnKeyEventDispatch();
     }
 
-    static void DisableOnKeyPreIme(FrameNode* frameNode)
-    {
-        auto focusHub = frameNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->ClearOnKeyPreIme();
-    }
+    static void DisableOnKeyPreIme(FrameNode* frameNode);
 
     void DisableOnHover() override
     {
@@ -2010,6 +1940,8 @@ public:
     static void SetAccessibilityGroupOptions(FrameNode* frameNode, AccessibilityGroupOptions groupOptions);
     static void SetAccessibilityActionOptions(FrameNode* frameNode, AccessibilityActionOptions actionOptions);
     static void ResetAccessibilityActionOptions(FrameNode* frameNode);
+    static void SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config);
+    static void ResetSmartGestureShortcut(FrameNode* frameNode);
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);

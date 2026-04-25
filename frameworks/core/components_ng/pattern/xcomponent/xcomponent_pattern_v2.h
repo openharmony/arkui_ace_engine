@@ -70,6 +70,9 @@ public:
 
     static FrameNode* QueryAccessibilityProviderHost(void* provider, bool& isProviderValied);
 
+    std::pair<bool, bool> UpdateSurfaceRect();
+    void HandleSurfaceChangeEvent(bool needForceRender, bool offsetChanged, bool sizeChanged, bool frameOffsetChange);
+
 private:
     void OnAttachToFrameNode() override;
     void OnAttachToMainTree() override;
@@ -92,8 +95,6 @@ private:
     int32_t HandleSurfaceCreated();
     int32_t HandleSurfaceDestroyed();
     void InitializeRenderContext(bool isThreadSafeNode = false);
-    std::pair<bool, bool> UpdateSurfaceRect();
-    void HandleSurfaceChangeEvent(bool offsetChanged, bool sizeChanged, bool frameOffsetChange);
     void XComponentSizeChange(const RectF& surfaceRect);
     void OnSurfaceChanged(const RectF& surfaceRect);
     std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<FrameNode>& frameNode);

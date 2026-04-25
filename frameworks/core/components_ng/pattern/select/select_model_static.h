@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_STATIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_STATIC_H
 
-#include "core/components_ng/base/common_configuration.h"
-#include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {

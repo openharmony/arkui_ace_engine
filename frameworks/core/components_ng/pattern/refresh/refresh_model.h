@@ -67,6 +67,9 @@ public:
     virtual void SetPullUpToCancelRefresh(bool isPullUpToCancelRefresh) = 0;
     virtual void SetIsCustomBuilderExist(bool isCustomBuilderExist) {}
     virtual void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjRefreshOffset(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjMaxPullDownDistance(const RefPtr<ResourceObject>& resObj) {};
+
 private:
     static std::unique_ptr<RefreshModel> instance_;
     static std::mutex mutex_;

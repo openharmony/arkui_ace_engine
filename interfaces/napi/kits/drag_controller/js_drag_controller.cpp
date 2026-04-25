@@ -1189,7 +1189,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     auto ret = StartDrag(asyncCtx, dragData.value(), true);
 #else
     auto ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
-        std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+        std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback, asyncCtx->instanceId));
 #endif
     if (ret) {
         return false;
@@ -1339,7 +1339,7 @@ int32_t StartPlatformDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     return StartDrag(asyncCtx, dragData, false);
 #else
     return Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData, std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+        dragData, std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback, asyncCtx->instanceId));
 #endif
 }
 

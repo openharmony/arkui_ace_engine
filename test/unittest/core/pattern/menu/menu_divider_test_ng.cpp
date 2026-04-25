@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -85,6 +85,13 @@ void MenuDividerTestNG::SetUpTestCase()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
         if (type == SelectTheme::TypeId()) {
             return AceType::MakeRefPtr<SelectTheme>();
         } else {
@@ -641,5 +648,30 @@ HWTEST_F(MenuDividerTestNG, MenuDividerTest014, TestSize.Level1)
     paintMethod->GetDividerMargin(startMargin, endMargin, paintProperty, SizeF(DEFAULT_SIZE, DEFAULT_SIZE));
     EXPECT_EQ(startMargin, DEFAULT_HEIGHT);
     EXPECT_EQ(endMargin, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: MenuDividerTest015
+ * @tc.desc: test the CreateNodePaintMethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuDividerTestNG, MenuDividerTest015, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto menuItem = CreateMenuItem(ITEM_CONTENT);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto bottomDivider = menuItemPattern->GetBottomDivider();
+    EXPECT_NE(bottomDivider, nullptr);
+    auto dividerPattern = bottomDivider->GetPattern<MenuDividerPattern>();
+    ASSERT_NE(dividerPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<MenuDividerPaintMethod>(dividerPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    auto selectTheme = menuItem->GetTheme<SelectTheme>(true);
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_EQ(paintMethod->themeDividerColor_, selectTheme->GetLineColor());
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

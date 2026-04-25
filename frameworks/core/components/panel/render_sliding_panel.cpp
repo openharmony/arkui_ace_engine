@@ -14,12 +14,14 @@
  */
 
 #include "core/components/panel/render_sliding_panel.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/animation/spring_animation.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/panel/sliding_events.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

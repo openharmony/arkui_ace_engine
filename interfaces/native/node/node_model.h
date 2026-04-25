@@ -139,6 +139,7 @@ inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
 
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
+ArkUIFullNodeAPI* GetFullImplForErrorMessage();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNativeSource(ArkUI_NodeHandle nativePtr);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
@@ -214,6 +215,8 @@ int32_t GetAnimationStatus(
     ArkUI_DrawableDescriptor_AnimationController* controller, DrawableDescriptor_AnimationStatus* status);
 bool CheckIsCNode(ArkUI_NodeHandle node);
 bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);
+bool CheckIsAllowCrossLanguageTreeOperating(ArkUI_NodeHandle node);
+bool CheckIsCNodeOrAllowCrossLanguageTreeOperating(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
 int32_t GetNodeTypeByTag(ArkUI_NodeHandle node);
 std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType);

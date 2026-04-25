@@ -73,6 +73,7 @@ public:
     static ArkUINativeModuleValue ResetInitialIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSpaceWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetScrollSnapAnimationSpeed(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -95,6 +96,7 @@ public:
     static ArkUINativeModuleValue SetOnListReachStart(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnListReachEnd(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportEmptyBranchInLazyLoading(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackPressCloseSwipeAction(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
     static ArkUINativeModuleValue ResetOnScrollIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnScrollVisibleContentChange(ArkUIRuntimeCallInfo* runtimeCallInfo);

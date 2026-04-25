@@ -37,7 +37,6 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
-#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
@@ -48,7 +47,6 @@
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/distributed_ui.h"
-#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/non_pointer_event.h"
@@ -60,7 +58,16 @@ template<typename T>
 class sptr;
 } // namespace OHOS
 namespace OHOS::Ace {
+
+namespace NG {
+class AppBarView;
+class FrameNode;
+struct SafeAreaInsets;
+} // namespace NG
+
+struct MouseEvent;
 struct CrownEvent;
+
 using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
@@ -77,16 +84,17 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
 using TouchpadInteractionBeginCallback = std::function<void(const NonPointerEvent&, const std::function<void()>&)>;
-using AbilityRuntimeContextCallback = std::function<void()>;
+using AbilityRuntimeContextCallback = std::function<void(int32_t)>;
 
 class PipelineBase;
+class ContainerHandler;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
 public:
-    Container() = default;
-    ~Container() override = default;
+    Container();
+    ~Container() override;
 
     virtual void Initialize() = 0;
 
@@ -378,6 +386,7 @@ public:
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFocused();
+    static RefPtr<Container> GetNormalFocused();
     static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
@@ -665,15 +674,9 @@ public:
         return container->GetApiTargetVersion();
     }
 
-    void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
-    {
-        appBar_ = appBar;
-    }
+    void SetAppBar(const RefPtr<NG::AppBarView>& appBar);
 
-    RefPtr<NG::AppBarView> GetAppBar() const
-    {
-        return appBar_;
-    }
+    RefPtr<NG::AppBarView> GetAppBar() const;
 
     virtual void TerminateUIExtension() {}
     virtual void RequestAtomicServiceTerminate() {}
@@ -747,15 +750,9 @@ public:
         return false;
     }
 
-    void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
-    {
-        containerHandler_ = containerHandler;
-    }
+    void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler);
 
-    RefPtr<ContainerHandler> GetContainerHandler()
-    {
-        return containerHandler_;
-    }
+    RefPtr<ContainerHandler> GetContainerHandler();
 
     void SetCurrentDisplayId(uint64_t displayId)
     {
@@ -833,10 +830,8 @@ public:
         return extensionHostParams_;
     }
 
-    virtual void LoadCompleteManagerStartCollect(const std::string& url) {};
-    virtual void LoadCompleteManagerStopCollect() {};
     virtual void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
-    virtual void TerminateUIExtensionInner() {}
+    virtual void TerminateUIExtensionInner(int32_t code) {}
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);

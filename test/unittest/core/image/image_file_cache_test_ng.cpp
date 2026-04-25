@@ -23,9 +23,9 @@
 #include "core/image/image_file_cache.h"
 #include "base/utils/system_properties.h"
 
-#include "test/mock/base/mock_image_packer.h"
-#include "test/mock/base/mock_image_source.h"
-#include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/frameworks/base/image/mock_image_packer.h"
+#include "test/mock/frameworks/base/image/mock_image_source.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
 
 using namespace testing;
 using namespace testing::ext;

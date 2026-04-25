@@ -27,7 +27,6 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #if defined(ENABLE_ROSEN_BACKEND)
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
@@ -55,6 +54,7 @@ struct BubbleDumpInfo {
     Dimension targetSpace;
     std::string originPlacement;
     std::string finalPlacement = "NONE";
+    float needAvoidWindowButtonHeight = 0.0f;
 };
 struct PopupCanPlacement {
     bool bottom = false;
@@ -193,7 +193,8 @@ public:
     std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSmoothUnionShape(
         const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
         const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY);
-    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFCornerRectShape(Placement placement);
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFRRectShapeWithCustomCorners(
+        Placement arrowBuildplacement);
 #endif
 
     const std::vector<std::vector<float>>& GetArrowOffsetsFromClip() const
@@ -289,7 +290,8 @@ private:
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void UpdateClipOffset(const RefPtr<FrameNode>& frameNode);
-    void UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bool showInSubWindow);
+    void UpdateBubbleMaxSize(
+        const RefPtr<BubbleLayoutProperty>& layoutProp, LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
     std::string ClipBubbleWithPath();
     float GetArrowOffset(const Placement& placement);
@@ -319,6 +321,7 @@ private:
     void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     void FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     void FitMouseOffset(LayoutWrapper* layoutWrapper);
+    void UpdateWindowBoundsRect(bool showInSubWindow);
 
     void UpdateTextNodeMaxLines(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& layoutConstraint);
     void MeasureTipsRegion(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childContraint);
@@ -453,6 +456,9 @@ private:
     bool doubleBorderEnable_ = false;
     bool expandDisplay_ = false;
     bool isUserSetMaterial_ = false;
+
+    float floatButtonsHeight_ = 0.0f;
+    Rect windowBoundsRect_;
     // param to generate arrow shape.
     double angleSideX_ = 0.0;
     double angleSideY_ = 0.0;

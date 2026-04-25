@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
 #include "core/components_ng/event/event_constants.h"
 

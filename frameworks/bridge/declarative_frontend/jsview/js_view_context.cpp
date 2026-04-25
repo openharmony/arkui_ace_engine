@@ -34,10 +34,12 @@
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
+#include "core/image/image_cache.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
@@ -1081,7 +1083,7 @@ int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
                 targetId = targetComponentIdNode->GetId();
                 return ERROR_CODE_NO_ERROR;
             }
-            auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
+            auto targetNode = NG::FrameNode::FindChildByNameUINode(targetComponentIdNode, targetIdString);
             CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
             targetId = targetNode->GetId();
         } else {
@@ -1513,6 +1515,27 @@ void JSViewContext::JSIsEasySplit(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+void JSViewContext::JSSetTextSelectionClearPolicy(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        return;
+    }
+    auto policyValue = info[0]->ToNumber<int32_t>();
+    if (policyValue <= static_cast<int32_t>(NG::TextSelectionClearPolicy::POLICY_BEGIN) ||
+        policyValue >= static_cast<int32_t>(NG::TextSelectionClearPolicy::POLICY_END)) {
+        return;
+    }
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto selectOverlayManager = pipelineContext->GetSelectOverlayManager();
+    CHECK_NULL_VOID(selectOverlayManager);
+    auto contentOverlayManager = selectOverlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    contentOverlayManager->SetTextSelectionClearPolicy(static_cast<NG::TextSelectionClearPolicy>(policyValue));
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1544,6 +1567,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod(
         "setCustomKeyboardContinueFeature",  JSViewContext::JSSetCustomKeyboardContinueFeature);
     JSClass<JSViewContext>::StaticMethod("isEasySplit", JSViewContext::JSIsEasySplit);
+    JSClass<JSViewContext>::StaticMethod("setTextSelectionClearPolicy", JSViewContext::JSSetTextSelectionClearPolicy);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

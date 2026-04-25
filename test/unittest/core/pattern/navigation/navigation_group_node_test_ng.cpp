@@ -17,11 +17,11 @@
 #include "test/unittest/core/pattern/navigation/mock_navigation_route.h"
 #include "test/unittest/core/pattern/navigation/mock_navigation_stack.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 
 #include "core/components_ng/pattern/navigation/navigation_model_static.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1231,7 +1232,8 @@ HWTEST_F(NavigationGroupNodeTestNg, UpdateLastStandardIndexTest001, TestSize.Lev
     ASSERT_NE(stack, nullptr);
     stack->Add("test", navDestination);
 
-    navigation->UpdateLastStandardIndex();
+    bool hasFullScreenOverlay = false;
+    navigation->UpdateLastStandardIndex(hasFullScreenOverlay);
     EXPECT_EQ(navigation->GetLastStandardIndex(), 0);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }

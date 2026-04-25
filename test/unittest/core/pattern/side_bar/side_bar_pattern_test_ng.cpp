@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -40,8 +41,8 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "ui/properties/ui_material.h"
 
@@ -706,7 +707,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg023, TestSize.Level1)
     SideBarContainerModelNG sideBarContainerModelInstance;
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->HandleDragStart();
+    pattern->HandleDragStart(true);
     EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
 }
 
@@ -730,7 +731,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg024, TestSize.Level1)
      * @tc.expected: step2. check whether the pattern->sideBarStatus_ is correct.
      */
     pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
-    pattern->HandleDragStart();
+    pattern->HandleDragStart(true);
     EXPECT_NE(pattern->sideBarStatus_, SideBarStatus::SHOW);
 }
 
@@ -3025,5 +3026,51 @@ HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern003, TestSize.Level1)
     pattern->showSideBar_ = false;
     pattern->sideBarStatus_ = SideBarStatus::SHOW;
     pattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+}
+
+/**
+ * @tc.name: SideBarContainerDoSpringAnimation001
+ * @tc.desc: Test SideBarContainerPattern OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerDoSpringAnimation001, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    pattern->DoSpringAnimation();
+    ASSERT_NE(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarContainerDoSpringAnimation002
+ * @tc.desc: Test SideBarContainerPattern OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerDoSpringAnimation002, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->DoSpringAnimation();
+    ASSERT_NE(pattern->sideBarStatus_, SideBarStatus::HIDDEN);
 }
 } // namespace OHOS::Ace::NG

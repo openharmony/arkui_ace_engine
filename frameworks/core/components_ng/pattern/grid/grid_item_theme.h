@@ -44,7 +44,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<GridItemTheme>& theme) const
         {
             if (!theme) {
@@ -108,16 +108,17 @@ public:
 protected:
     GridItemTheme() = default;
 
-private:
     Color pressColor_;
     Color hoverColor_;
+    Color focusColor_;
+
+private:
     int32_t hoverAnimationDuration_ = 250;
     int32_t hoverToPressAnimationDuration_ = 100;
     double disabledAlpha_ = 0.4;
     double enabledAlpha_ = 1.0;
     Dimension focusRadius_;
     Dimension focusPaintPadding_ = 3.0_vp;
-    Color focusColor_;
     Dimension borderRadiusValue_;
     NG::BorderRadiusProperty borderRadius_;
 };

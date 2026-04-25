@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/common/event_manager.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;

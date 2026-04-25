@@ -22,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"

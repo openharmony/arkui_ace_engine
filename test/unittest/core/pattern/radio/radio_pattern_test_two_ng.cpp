@@ -17,11 +17,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -987,7 +987,7 @@ HWTEST_F(RadioPatternTwoTestNg, ReportOnChangeEvent001, TestSize.Level1)
  */
 HWTEST_F(RadioPatternTwoTestNg, UpdateGroupManager001, TestSize.Level1)
 {
-    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AIWriteAdapter::MakeRefPtr<StagePattern>());
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AceType::MakeRefPtr<StagePattern>());
     ASSERT_NE(stageNode, nullptr);
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(pageNode, nullptr);

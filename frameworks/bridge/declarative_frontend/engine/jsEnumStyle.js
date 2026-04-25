@@ -639,6 +639,7 @@ let KeyType;
   KeyType[KeyType.Down = 0] = 'Down';
   KeyType[KeyType.Up = 1] = 'Up';
   KeyType[KeyType.LongPress = 2] = 'LongPress';
+  KeyType[KeyType.CANCEL = 3] = 'CANCEL';
 })(KeyType || (KeyType = {}));
 
 let GestureMode;
@@ -680,6 +681,15 @@ let GestureMask;
   GestureMask[GestureMask.Normal = 0] = 'Normal';
   GestureMask[GestureMask.IgnoreInternal = 1] = 'IgnoreInternal';
 })(GestureMask || (GestureMask = {}));
+
+let GestureCollectIntervention;
+(function (GestureCollectIntervention) {
+  GestureCollectIntervention[GestureCollectIntervention.CONTINUE = 0] = 'CONTINUE';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_LOWER = 1] = 'DISCARD_LOWER';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_HIGHER = 2] = 'DISCARD_HIGHER';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_SELF = 3] = 'DISCARD_SELF';
+  GestureCollectIntervention[GestureCollectIntervention.DISCARD_LOWER_PRIORITY_SIBLINGS = 4] = 'DISCARD_LOWER_PRIORITY_SIBLINGS';
+})(GestureCollectIntervention || (GestureCollectIntervention = {}));
 
 let GesturePriority;
 (function (GesturePriority) {
@@ -1434,6 +1444,7 @@ let SeekMode;
 
 let SideBarContainerType;
 (function (SideBarContainerType) {
+  SideBarContainerType[SideBarContainerType.DISPLACE = 3] = 'DISPLACE';
   SideBarContainerType[SideBarContainerType.AUTO = 2] = 'AUTO';
   SideBarContainerType[SideBarContainerType.Overlay = 1] = 'Overlay';
   SideBarContainerType[SideBarContainerType.Embed = 0] = 'Embed';
@@ -1647,6 +1658,14 @@ let KeyboardAppearance;
   KeyboardAppearance[KeyboardAppearance.LIGHT_IMMERSIVE = 2] = 'LIGHT_IMMERSIVE';
   KeyboardAppearance[KeyboardAppearance.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
 })(KeyboardAppearance || (KeyboardAppearance = {}));
+
+let WebKeyboardAppearanceMode;
+(function (WebKeyboardAppearanceMode) {
+  WebKeyboardAppearanceMode[WebKeyboardAppearanceMode.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';
+  WebKeyboardAppearanceMode[WebKeyboardAppearanceMode.IMMERSIVE = 1] = 'IMMERSIVE';
+  WebKeyboardAppearanceMode[WebKeyboardAppearanceMode.LIGHT_IMMERSIVE = 2] = 'LIGHT_IMMERSIVE';
+  WebKeyboardAppearanceMode[WebKeyboardAppearanceMode.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
+})(WebKeyboardAppearanceMode || (WebKeyboardAppearanceMode = {}));
 
 class SymbolEffect {
 }
@@ -1873,6 +1892,12 @@ let ThemeColorMode;
   ThemeColorMode[ThemeColorMode.DARK = 2] = 'DARK';
 })(ThemeColorMode || (ThemeColorMode = {}));
 
+let AnchoredColorMode;
+(function (AnchoredColorMode) {
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_SYSTEM = 0] = 'FOLLOW_SYSTEM';
+  AnchoredColorMode[AnchoredColorMode.FOLLOW_TARGET = 1] = 'FOLLOW_TARGET';
+})(AnchoredColorMode || (AnchoredColorMode = {}));
+
 let AdaptiveColor;
 (function (AdaptiveColor) {
   AdaptiveColor[AdaptiveColor.Default = 0] = 'Default';
@@ -1896,6 +1921,12 @@ let ShadowStyle;
   ShadowStyle[ShadowStyle.OUTER_FLOATING_SM = 4] = 'OUTER_FLOATING_SM';
   ShadowStyle[ShadowStyle.OUTER_FLOATING_MD = 5] = 'OUTER_FLOATING_MD';
 })(ShadowStyle || (ShadowStyle = {}));
+
+let UnionMode;
+(function (UnionMode) {
+  UnionMode[UnionMode.SMOOTH_UNION = 0] = 'SMOOTH_UNION';
+  UnionMode[UnionMode.GRAVITY_UNION = 1] = 'GRAVITY_UNION';
+})(UnionMode || (UnionMode = {}));
 
 let ShadowType;
 (function (ShadowType) {
@@ -2165,6 +2196,12 @@ let KeyboardAvoidMode;
     KeyboardAvoidMode[KeyboardAvoidMode.DEFAULT = 0] = 'DEFAULT';
     KeyboardAvoidMode[KeyboardAvoidMode.NONE = 1] = 'NONE';
 })(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
+
+let ScrollbarLayoutPolicy;
+(function (ScrollbarLayoutPolicy) {
+  ScrollbarLayoutPolicy[ScrollbarLayoutPolicy.CONTENT = 0] = 'CONTENT';
+  ScrollbarLayoutPolicy[ScrollbarLayoutPolicy.SYSTEM = 1] = 'SYSTEM';
+})(ScrollbarLayoutPolicy || (ScrollbarLayoutPolicy = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -4203,6 +4240,12 @@ let ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle.CARD = 1] = 'CARD';
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
 
+let ListItemGroupHeaderFooterStyle;
+(function (ListItemGroupHeaderFooterStyle) {
+  ListItemGroupHeaderFooterStyle[ListItemGroupHeaderFooterStyle.NONE = 0] = 'NONE';
+  ListItemGroupHeaderFooterStyle[ListItemGroupHeaderFooterStyle.FLOATING = 1] = 'FLOATING';
+})(ListItemGroupHeaderFooterStyle || (ListItemGroupHeaderFooterStyle = {}));
+
 let ListItemGroupArea;
 (function (ListItemGroupArea) {
   ListItemGroupArea[ListItemGroupArea.NONE = 0] = 'NONE';
@@ -4572,7 +4615,6 @@ let MarqueeState;
   MarqueeState[MarqueeState.START = 0] = 'START';
   MarqueeState[MarqueeState.BOUNCE = 1] = 'BOUNCE';
   MarqueeState[MarqueeState.FINISH = 2] = 'FINISH';
-  MarqueeState[MarqueeState.STOP = 3] = 'STOP';
 })(MarqueeState || (MarqueeState = {}));
 
 let MarqueeStartPolicy;
@@ -4656,6 +4698,7 @@ let StyledStringKey;
   StyledStringKey[StyledStringKey.PARAGRAPH_STYLE = 200] = 'PARAGRAPH_STYLE';
   StyledStringKey[StyledStringKey.BACKGROUND_COLOR = 6] = 'BACKGROUND_COLOR';
   StyledStringKey[StyledStringKey.URL = 7] = 'URL';
+  StyledStringKey[StyledStringKey.LINE_SPACING = 8] = 'LINE_SPACING';
   StyledStringKey[StyledStringKey.GESTURE = 100] = 'GESTURE';
   StyledStringKey[StyledStringKey.IMAGE = 300] = 'IMAGE';
   StyledStringKey[StyledStringKey.CUSTOM_SPAN = 400] = 'CUSTOM_SPAN';
@@ -4742,6 +4785,12 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment.DEFAULT = 0] = 'DEFAULT';
   GridItemAlignment[GridItemAlignment.STRETCH = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
+
+let DepthSpaceType;
+(function (DepthSpaceType) {
+  DepthSpaceType[DepthSpaceType.INSTANCE = 0] = 'INSTANCE';
+  DepthSpaceType[DepthSpaceType.GLOBAL = 1] = 'GLOBAL';
+})(DepthSpaceType || (DepthSpaceType = {}));
 
 let ContentClipMode;
 (function (ContentClipMode) {
@@ -5019,6 +5068,12 @@ let TextMenuShowMode;
   TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
 })(TextMenuShowMode || (TextMenuShowMode = {}));
 
+let TextSelectionClearPolicy;
+(function (TextSelectionClearPolicy) {
+  TextSelectionClearPolicy[TextSelectionClearPolicy.KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0] = 'KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH';
+  TextSelectionClearPolicy[TextSelectionClearPolicy.CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1] = 'CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH';
+})(TextSelectionClearPolicy || (TextSelectionClearPolicy = {}));
+
 let KeyProcessingMode;
 (function (KeyProcessingMode) {
   KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
@@ -5085,6 +5140,7 @@ let ColorSpace;
 (function (ColorSpace) {
   ColorSpace[ColorSpace.SRGB = 0] = 'SRGB';
   ColorSpace[ColorSpace.DISPLAY_P3 = 1] = 'DISPLAY_P3';
+  ColorSpace[ColorSpace.BT2020 = 2] = 'BT2020';
 })(ColorSpace || (ColorSpace = {}));
 
 let AudioSessionType;
@@ -5184,6 +5240,12 @@ let PresetFillType;
   PresetFillType[PresetFillType.BREAKPOINT_SM2MD3LG5 = 2] = 'BREAKPOINT_SM2MD3LG5';
 })(PresetFillType || (PresetFillType = {}));
 
+let RawInputEventType;
+(function (RawInputEventType) {
+  RawInputEventType[RawInputEventType.TOUCH = 0] = 'TOUCH';
+  RawInputEventType[RawInputEventType.MOUSE = 1] = 'MOUSE';
+})(RawInputEventType || (RawInputEventType = {}));
+
 let SystemProperties;
 (function (SystemProperties) {
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
@@ -5191,6 +5253,10 @@ let SystemProperties;
   SystemProperties.WINDOW_SIZE_PX = 'system.window.size.px';
   SystemProperties.WINDOW_AVOID_AREA = 'system.window.avoidarea';
   SystemProperties.WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px';
+  SystemProperties.WINDOW_IS_FOCUSED = 'system.window.focused';
+  SystemProperties.WINDOW_IS_HIGHLIGHTED = 'system.window.highlighted';
+  SystemProperties.SYSTEM_DENSITY = 'system.window.systemdensity';
+  SystemProperties.DISPLAY_ID = 'system.window.displayid';
 })(SystemProperties || (SystemProperties = {}));
 
 let PinVerifyResult;
@@ -5269,3 +5335,57 @@ let MicrophoneCaptureState;
   MicrophoneCaptureState[MicrophoneCaptureState.PAUSED = 1] = 'PAUSED';
   MicrophoneCaptureState[MicrophoneCaptureState.ACTIVE = 2] = 'ACTIVE';
 })(MicrophoneCaptureState || (MicrophoneCaptureState = {}));
+
+let InputEventSubTypeMask;
+(function (InputEventSubTypeMask) {
+  InputEventSubTypeMask[InputEventSubTypeMask.LEFT_MOUSE_DOWN = 1 << 0] = 'LEFT_MOUSE_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.LEFT_MOUSE_UP = 1 << 1] = 'LEFT_MOUSE_UP';
+  InputEventSubTypeMask[InputEventSubTypeMask.RIGHT_MOUSE_DOWN = 1 << 2] = 'RIGHT_MOUSE_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.RIGHT_MOUSE_UP = 1 << 3] = 'RIGHT_MOUSE_UP';
+  InputEventSubTypeMask[InputEventSubTypeMask.MIDDLE_MOUSE_DOWN = 1 << 4] = 'MIDDLE_MOUSE_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.MIDDLE_MOUSE_UP = 1 << 5] = 'MIDDLE_MOUSE_UP';
+  InputEventSubTypeMask[InputEventSubTypeMask.LEFT_MOUSE_DRAGGING = 1 << 6] = 'LEFT_MOUSE_DRAGGING';
+  InputEventSubTypeMask[InputEventSubTypeMask.RIGHT_MOUSE_DRAGGING = 1 << 7] = 'RIGHT_MOUSE_DRAGGING';
+  InputEventSubTypeMask[InputEventSubTypeMask.MIDDLE_MOUSE_DRAGGING = 1 << 8] = 'MIDDLE_MOUSE_DRAGGING';
+  InputEventSubTypeMask[InputEventSubTypeMask.TOUCH_DOWN = 1 << 9] = 'TOUCH_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.TOUCH_UP = 1 << 10] = 'TOUCH_UP';
+  InputEventSubTypeMask[InputEventSubTypeMask.KEY_DOWN = 1 << 11] = 'KEY_DOWN';
+  InputEventSubTypeMask[InputEventSubTypeMask.KEY_UP = 1 << 12] = 'KEY_UP';
+})(InputEventSubTypeMask || (InputEventSubTypeMask = {}));
+
+let InputEventInterceptAction;
+(function (InputEventInterceptAction) {
+  InputEventInterceptAction[InputEventInterceptAction.CONTINUE = 0] = 'CONTINUE';
+  InputEventInterceptAction[InputEventInterceptAction.BLOCK = 1] = 'BLOCK';
+})(InputEventInterceptAction || (InputEventInterceptAction = {}));
+
+let LazyForEachReleaseStrategy;
+(function (LazyForEachReleaseStrategy) {
+  LazyForEachReleaseStrategy.BATCH = 0;
+  LazyForEachReleaseStrategy.PROGRESSIVE = 1;
+})(LazyForEachReleaseStrategy || (LazyForEachReleaseStrategy = {}));
+
+let LazyForEachCustomComponentFreezeMode ;
+(function (LazyForEachCustomComponentFreezeMode ) {
+  LazyForEachCustomComponentFreezeMode.AUTO = 0;
+  LazyForEachCustomComponentFreezeMode.DISABLED = 1;
+  LazyForEachCustomComponentFreezeMode.ENABLED = 2;
+})(LazyForEachCustomComponentFreezeMode  || (LazyForEachCustomComponentFreezeMode  = {}));
+
+let GestureShortcut;
+(function (GestureShortcut) {
+  GestureShortcut[GestureShortcut.PRIMARY = 0] = 'PRIMARY';
+})(GestureShortcut || (GestureShortcut = {}));
+globalThis.GestureShortcut = GestureShortcut;
+
+let EdgeLightPosition;
+(function (EdgeLightPosition) {
+  EdgeLightPosition[EdgeLightPosition.TOP_LEFT = 0] = 'TOP_LEFT';
+  EdgeLightPosition[EdgeLightPosition.TOP_RIGHT = 1] = 'TOP_RIGHT';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM_LEFT = 2] = 'BOTTOM_LEFT';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM_RIGHT = 3] = 'BOTTOM_RIGHT';
+  EdgeLightPosition[EdgeLightPosition.TOP = 4] = 'TOP';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM = 5] = 'BOTTOM';
+  EdgeLightPosition[EdgeLightPosition.LEFT = 6] = 'LEFT';
+  EdgeLightPosition[EdgeLightPosition.RIGHT = 7] = 'RIGHT';
+})(EdgeLightPosition || (EdgeLightPosition = {}));

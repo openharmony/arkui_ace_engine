@@ -14,6 +14,7 @@
  */
 
 #include "core/common/force_split/force_split_utils.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include <string>
 #include <vector>
@@ -21,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/utils/string_utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -29,6 +31,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -53,16 +56,29 @@ constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholde
 constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
 constexpr char FULL_SCREEN_PAGES_KEY[] = "fullScreenPages";
 constexpr char DIALOG_SUPPORT_SPLIT_KEY[] = "dialogSupportSplit";
+constexpr char SPLIT_DIVIDER_COLOR[] = "splitDividerColor";
+constexpr char COLOR_LIGHT[] = "light";
+constexpr char COLOR_DARK[] = "dark";
+constexpr char WIDE_SPLIT_KEY[] = "wideSplit";
+constexpr char SQUARE_SPLIT_KEY[] = "squareSplit";
+constexpr char RATIO_KEY[] = "ratio";
+constexpr float MIN_SPLIT_RATIO = 1.0f / 3;
+constexpr float MAX_SPLIT_RATIO = 2.0f / 3;
+constexpr char BEHAVIOR_MODE_KEY[] = "mode";
+constexpr char PAGE_PAIRS_KEY[] = "pagePairs";
+constexpr char TRANS_PAGES_KEY[] = "transPages";
+constexpr int DISPLACE_BEHAVIOR_MODE = 0;
+constexpr int NAVIGATION_BEHAVIOR_MODE = 1;
 
-std::string FullScreenPageToString(const std::set<std::string>& fullScreenPages)
+std::string JoinStringSet(const std::unordered_set<std::string>& strSet)
 {
     std::string str("[");
     int32_t idx = 0;
-    for (const auto& page : fullScreenPages) {
+    for (const auto& item : strSet) {
         if (idx != 0) {
             str.append(", ");
         }
-        str.append(page);
+        str.append(item);
         idx++;
     }
     str.append("]");
@@ -353,7 +369,7 @@ bool ForceSplitUtils::ParseFullScreenPages(const std::unique_ptr<JsonValue>& ful
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, fullScreenPages is an invalid json array!");
         return false;
     }
-    std::set<std::string> pageSet;
+    std::unordered_set<std::string> pageSet;
     int32_t itemSize = fullScreenPages->GetArraySize();
     for (int32_t idx = 0; idx < itemSize; ++idx) {
         auto item = fullScreenPages->GetArrayItem(idx);
@@ -370,6 +386,194 @@ bool ForceSplitUtils::ParseFullScreenPages(const std::unique_ptr<JsonValue>& ful
     return true;
 }
 
+bool ForceSplitUtils::ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor,
+    ForceSplitConfig& config)
+{
+    if (!splitDividerColor || !splitDividerColor->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor is an invalid json object!");
+        return false;
+    }
+    if (splitDividerColor->Contains(COLOR_LIGHT)) {
+        auto lightColorValue = splitDividerColor->GetValue(COLOR_LIGHT);
+        if (!lightColorValue->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor.light is not color!");
+            return false;
+        }
+        config.splitDividerColorLight = Color::FromString(lightColorValue->GetString());
+    }
+    if (splitDividerColor->Contains(COLOR_DARK)) {
+        auto darkColorValue = splitDividerColor->GetValue(COLOR_DARK);
+        if (!darkColorValue->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, splitDividerColor.dark is not color!");
+            return false;
+        }
+        config.splitDividerColorDark = Color::FromString(darkColorValue->GetString());
+    }
+    return true;
+}
+
+bool ForceSplitUtils::ParseSplitParam(
+    const std::unique_ptr<JsonValue>& split, const std::string& splitType, std::optional<float>& splitRatio)
+{
+    splitRatio = std::nullopt;
+    if (!split || !split->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is an invalid json Object!", splitType.c_str());
+        return false;
+    }
+    if (!split->Contains(RATIO_KEY)) {
+        return true;
+    }
+    auto ratioJson = split->GetValue(RATIO_KEY);
+    if (!ratioJson || !ratioJson->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, %{public}s must be type of string!", RATIO_KEY);
+        return false;
+    }
+    auto ratioStr = ratioJson->GetString();
+    auto pos = ratioStr.find('|');
+    if (pos == std::string::npos) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, Invalid %{public}s format value: %{public}s, expected format "
+            "\"<integer number> | <integer number>\"", RATIO_KEY, ratioStr.c_str());
+        return false;
+    }
+    auto primaryStr = ratioStr.substr(0, pos);
+    auto secondaryStr = ratioStr.substr(pos + 1);
+    auto primaryValue = StringUtils::StringToInt(primaryStr);
+    auto secondaryValue = StringUtils::StringToInt(secondaryStr);
+    if (primaryValue <= 0 || secondaryValue <= 0 || (primaryValue + secondaryValue <= 0)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, Invalid %{public}s value: %{public}s", RATIO_KEY, ratioStr.c_str());
+        return false;
+    }
+    auto ratio = 1.0f * secondaryValue / (primaryValue + secondaryValue);
+    if (ratio < MIN_SPLIT_RATIO || ratio > MAX_SPLIT_RATIO) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "%{public}s: %{public}f must belong to range[1/3, 2/3]", RATIO_KEY, ratio);
+    }
+    splitRatio = std::clamp(ratio, MIN_SPLIT_RATIO, MAX_SPLIT_RATIO);
+    return true;
+}
+
+bool ForceSplitUtils::ParsePagePairs(const std::unique_ptr<JsonValue>& pagePairs, ForceSplitConfig& config)
+{
+    if (!pagePairs || !pagePairs->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is an invalid json array!", PAGE_PAIRS_KEY);
+        return false;
+    }
+    config.pagePairs.clear();
+    std::unordered_set<std::string> fromToAnyPageSet;
+    int32_t itemSize = pagePairs->GetArraySize();
+    for (int32_t idx = 0; idx < itemSize; ++idx) {
+        auto item = pagePairs->GetArrayItem(idx);
+        if (!item || !item->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s's item is not a object!", PAGE_PAIRS_KEY);
+            continue;
+        }
+        if (!item->Contains("from") || !item->Contains("to")) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s's item must contain from & to", PAGE_PAIRS_KEY);
+            continue;
+        }
+        auto fromJson = item->GetValue("from");
+        auto toJson = item->GetValue("to");
+        if (!fromJson || !fromJson->IsString() || !toJson || !toJson->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s's from & to must be type of string!",
+                PAGE_PAIRS_KEY);
+            continue;
+        }
+        auto from = fromJson->GetString();
+        auto to = toJson->GetString();
+        if (from.empty() || to.empty()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s's from & to can not be empty string!",
+                PAGE_PAIRS_KEY);
+            continue;
+        }
+        auto it = config.pagePairs.find(from);
+        if (it == config.pagePairs.end()) {
+            std::unordered_set<std::string> set;
+            config.pagePairs.emplace(from, set);
+        }
+        if (to == "*") {
+            config.pagePairs[from].clear();
+            fromToAnyPageSet.emplace(from);
+        } else if (fromToAnyPageSet.find(from) == fromToAnyPageSet.end()) {
+            config.pagePairs[from].emplace(to);
+        }
+    }
+    return true;
+}
+
+bool ForceSplitUtils::ParseTransPages(const std::unique_ptr<JsonValue>& transPages, ForceSplitConfig& config)
+{
+    if (!transPages || !transPages->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, transPages is an invalid json array!");
+        return false;
+    }
+    config.transPages.clear();
+    int32_t itemSize = transPages->GetArraySize();
+    for (int32_t idx = 0; idx < itemSize; ++idx) {
+        auto item = transPages->GetArrayItem(idx);
+        if (!item || !item->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, transPages item is not a string!");
+            continue;
+        }
+        auto page = item->GetString();
+        if (!page.empty()) {
+            config.transPages.emplace(page);
+        }
+    }
+    return true;
+}
+
+bool ForceSplitUtils::ParseCommonConfig(const std::unique_ptr<JsonValue>& configJson, ForceSplitConfig& config)
+{
+    if (!configJson) {
+        return false;
+    }
+    config.dialogSupportSplit = configJson->GetBool(DIALOG_SUPPORT_SPLIT_KEY, true);
+    if (configJson->Contains(FULL_SCREEN_PAGES_KEY)) {
+        if (!ParseFullScreenPages(configJson->GetValue(FULL_SCREEN_PAGES_KEY), config)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(SPLIT_DIVIDER_COLOR)) {
+        if (!ParseSplitDividerColor(configJson->GetValue(SPLIT_DIVIDER_COLOR), config)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(WIDE_SPLIT_KEY)) {
+        if (!ParseSplitParam(configJson->GetValue(WIDE_SPLIT_KEY), WIDE_SPLIT_KEY, config.wideSplitRatio)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(SQUARE_SPLIT_KEY)) {
+        if (!ParseSplitParam(configJson->GetValue(SQUARE_SPLIT_KEY), SQUARE_SPLIT_KEY, config.squareSplitRatio)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(BEHAVIOR_MODE_KEY)) {
+        auto modeJson = configJson->GetValue(BEHAVIOR_MODE_KEY);
+        if (!modeJson || !modeJson->IsNumber()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, %{public}s must be type of number!", BEHAVIOR_MODE_KEY);
+            return false;
+        }
+        auto modeValue = modeJson->GetInt();
+        if (modeValue != DISPLACE_BEHAVIOR_MODE && modeValue != NAVIGATION_BEHAVIOR_MODE) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "invalid behavior mode value: %{public}d", modeValue);
+            return false;
+        }
+        config.behaviorMode = modeValue == DISPLACE_BEHAVIOR_MODE ?
+            ForceSplitBehaviorMode::DISPLACE : ForceSplitBehaviorMode::NAVIGATION;
+    }
+    if (configJson->Contains(PAGE_PAIRS_KEY)) {
+        if (!ParsePagePairs(configJson->GetValue(PAGE_PAIRS_KEY), config)) {
+            return false;
+        }
+    }
+    if (configJson->Contains(TRANS_PAGES_KEY)) {
+        if (!ParseTransPages(configJson->GetValue(TRANS_PAGES_KEY), config)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse system forceSplit config: %{public}s", configJsonStr.c_str());
@@ -382,16 +586,13 @@ bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonS
         return false;
     }
     config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, true);
-    config.dialogSupportSplit = configJson->GetBool(DIALOG_SUPPORT_SPLIT_KEY, true);
     if (configJson->Contains(NAVIGATION_OPTIONS_KEY)) {
         if (!ParseNavigationOptions(configJson->GetValue(NAVIGATION_OPTIONS_KEY), config)) {
             return false;
         }
     }
-    if (configJson->Contains(FULL_SCREEN_PAGES_KEY)) {
-        if (!ParseFullScreenPages(configJson->GetValue(FULL_SCREEN_PAGES_KEY), config)) {
-            return false;
-        }
+    if (!ParseCommonConfig(configJson, config)) {
+        return false;
     }
     return true;
 }
@@ -413,7 +614,6 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
         return false;
     }
     config.isArkUIHookEnabled = configJson->GetBool(ENABLE_REDUCED_CONTAINER_SIZE_KEY, false);
-    config.dialogSupportSplit = configJson->GetBool(DIALOG_SUPPORT_SPLIT_KEY, true);
     if (configJson->Contains(HOME_PAGE_KEY)) {
         auto homePageJson = configJson->GetValue(HOME_PAGE_KEY);
         if (!homePageJson->IsString()) {
@@ -436,10 +636,8 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
             config.relatedPage = relatedPageStr;
         }
     }
-    if (configJson->Contains(FULL_SCREEN_PAGES_KEY)) {
-        if (!ParseFullScreenPages(configJson->GetValue(FULL_SCREEN_PAGES_KEY), config)) {
-            return false;
-        }
+    if (!ParseCommonConfig(configJson, config)) {
+        return false;
     }
     if (isRouter) {
         return true;
@@ -483,11 +681,19 @@ void ForceSplitUtils::LogSystemForceSplitConfig(
         AceLogTag::ACE_NAVIGATION,
         "system ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, "
         "fullScreenPages:%{public}s, enableHook:%{public}d, navId:%{public}s,"
-        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d",
-        isRouter, homePage.c_str(), FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
+        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d, "
+        "dividerColorLight:%{public}s, dividerColorDark:%{public}s, "
+        "wideSplit[ratio:%{public}s], squareSplit[ratio:%{public}s], "
+        "behaviorMode:%{public}d, transPages:%{public}s",
+        isRouter, homePage.c_str(), JoinStringSet(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
         (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider);
+        config.navigationDisablePlaceholder, config.navigationDisableDivider,
+        (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"),
+        (config.wideSplitRatio.has_value() ? std::to_string(config.wideSplitRatio.value()).c_str() : "NA"),
+        (config.squareSplitRatio.has_value() ? std::to_string(config.squareSplitRatio.value()).c_str() : "NA"),
+        static_cast<int32_t>(config.behaviorMode), JoinStringSet(config.transPages).c_str());
 }
 
 void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config)
@@ -495,11 +701,19 @@ void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConf
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "app ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, relatedPage:%{public}s, "
         "fullScreenPages:%{public}s, enableArkUIHook:%{public}d, navId:%{public}s,"
-        "disablePlaceholder:%{public}d, disableDivider:%{public}d",
+        "disablePlaceholder:%{public}d, disableDivider:%{public}d, "
+        "dividerColorLight:%{public}s, dividerColorDark:%{public}s, "
+        "wideSplit[ratio:%{public}s], squareSplit[ratio:%{public}s], "
+        "behaviorMode:%{public}d, transPages:%{public}s",
         isRouter, config.homePage.c_str(), config.relatedPage.c_str(),
-        FullScreenPageToString(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
+        JoinStringSet(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider);
+        config.navigationDisablePlaceholder, config.navigationDisableDivider,
+        (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
+        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"),
+        (config.wideSplitRatio.has_value() ? std::to_string(config.wideSplitRatio.value()).c_str() : "NA"),
+        (config.squareSplitRatio.has_value() ? std::to_string(config.squareSplitRatio.value()).c_str() : "NA"),
+        static_cast<int32_t>(config.behaviorMode), JoinStringSet(config.transPages).c_str());
 }
 } // namespace OHOS::Ace::NG
 

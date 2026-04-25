@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 
+#include "core/common/event_manager.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -93,7 +94,12 @@ bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEve
 bool PostEventManager::PostTouchEventWithStrategy(const RefPtr<NG::UINode>& uiNode, TouchEvent&& touchEvent)
 {
     CHECK_NULL_RETURN(uiNode, false);
-    if (touchEvent.eventHandleId < 0 || touchEvent.eventHandleId > INT_MAX) {
+    auto it = targetNodes_.find(uiNode->GetId());
+    if (it != targetNodes_.end()) {
+        return false;
+    }
+    if (touchEvent.eventHandleId < 0 || touchEvent.eventHandleId > INT_MAX ||
+        touchEvent.eventHandleId > INT_MAX - PASS_THROUGH_EVENT_ID) {
         return false;
     }
     if (touchEvent.eventHandleId == 0) {
@@ -122,7 +128,9 @@ bool PostEventManager::PostTouchEventWithStrategy(const RefPtr<NG::UINode>& uiNo
         // Normal touch event processing: dispatch the touch event through the pipeline context
         // for standard event handling and gesture recognition
         targetNode_ = frameNode;
+        targetNodes_.insert(uiNode->GetId());
         pipelineContext->OnTouchEvent(touchEvent, frameNode, false);
+        targetNodes_.erase(uiNode->GetId());
         targetNode_.Reset();
     } else {
         // Abnormal state handling: when drag cancel is pending, use specialized event validation
@@ -177,7 +185,12 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
 bool PostEventManager::PostMouseEventWithStrategy(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent)
 {
     CHECK_NULL_RETURN(uiNode, false);
-    if (mouseEvent.eventHandleId < 0 || mouseEvent.eventHandleId > INT_MAX) {
+    auto it = targetNodes_.find(uiNode->GetId());
+    if (it != targetNodes_.end()) {
+        return false;
+    }
+    if (mouseEvent.eventHandleId < 0 || mouseEvent.eventHandleId > INT_MAX ||
+        mouseEvent.eventHandleId > INT_MAX - PASS_THROUGH_EVENT_ID) {
         return false;
     }
     if (mouseEvent.eventHandleId == 0) {
@@ -207,7 +220,9 @@ bool PostEventManager::PostMouseEventWithStrategy(const RefPtr<NG::UINode>& uiNo
         postMouseEventWindowAction_.push_back({ uiNode, mouseEvent });
     }
     if (!eventManager->IsDragCancelPending()) {
+        targetNodes_.insert(uiNode->GetId());
         pipelineContext->OnMouseEvent(mouseEvent, frameNode);
+        targetNodes_.erase(uiNode->GetId());
     }
     mouseEvent.passThrough = false;
     targetNode_.Reset();
@@ -223,15 +238,7 @@ bool PostEventManager::PostMouseEventWithStrategy(const RefPtr<NG::UINode>& uiNo
 bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent)
 {
     CHECK_NULL_RETURN(uiNode, false);
-    if (axisEvent.eventHandleId < 0 || axisEvent.eventHandleId > INT_MAX) {
-        return false;
-    }
-    if (axisEvent.eventHandleId == 0) {
-        axisEvent.eventHandleId = axisEvent.id + PASS_THROUGH_EVENT_ID;
-    } else {
-        axisEvent.eventHandleId += PASS_THROUGH_EVENT_ID;
-    }
-    axisEvent.id = axisEvent.eventHandleId;
+    axisEvent.id += PASS_THROUGH_EVENT_ID;
     axisEvent.postEventNodeId = uiNode->GetId();
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_RETURN(frameNode, false);
@@ -258,7 +265,20 @@ bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent
 bool PostEventManager::PostAxisEventWithStrategy(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent)
 {
     CHECK_NULL_RETURN(uiNode, false);
-    axisEvent.id += PASS_THROUGH_EVENT_ID;
+    auto it = targetNodes_.find(uiNode->GetId());
+    if (it != targetNodes_.end()) {
+        return false;
+    }
+    if (axisEvent.eventHandleId < 0 || axisEvent.eventHandleId > INT_MAX ||
+        axisEvent.eventHandleId > INT_MAX - PASS_THROUGH_EVENT_ID) {
+        return false;
+    }
+    if (axisEvent.eventHandleId == 0) {
+        axisEvent.eventHandleId = axisEvent.id + PASS_THROUGH_EVENT_ID;
+    } else {
+        axisEvent.eventHandleId += PASS_THROUGH_EVENT_ID;
+    }
+    axisEvent.id = axisEvent.eventHandleId;
     axisEvent.postEventNodeId = uiNode->GetId();
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_RETURN(frameNode, false);
@@ -274,7 +294,9 @@ bool PostEventManager::PostAxisEventWithStrategy(const RefPtr<NG::UINode>& uiNod
     if (axisEvent.action != AxisAction::UPDATE) {
         postAxisEventAction_.push_back({ uiNode, axisEvent });
     }
+    targetNodes_.insert(uiNode->GetId());
     pipelineContext->OnAxisEvent(axisEvent, frameNode);
+    targetNodes_.erase(uiNode->GetId());
     axisEvent.passThrough = false;
     if (axisEvent.action == AxisAction::END || axisEvent.action == AxisAction::CANCEL) {
         ClearPostInputActions(uiNode, axisEvent.id, PostInputEventType::AXIS);

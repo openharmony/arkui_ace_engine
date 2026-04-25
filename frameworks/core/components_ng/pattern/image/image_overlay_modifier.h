@@ -33,23 +33,9 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
     
-    void SetIsSelected(bool isSelected)
-    {
-        CHECK_NULL_VOID(isSelected_);
-        isSelected_->Set(isSelected);
-    }
-    
-    void SetSize(const SizeF& size)
-    {
-        CHECK_NULL_VOID(size_);
-        size_->Set(size);
-    }
-
-    void SetOffset(const OffsetF& offset)
-    {
-        CHECK_NULL_VOID(offset_);
-        offset_->Set(offset);
-    }
+    void SetIsSelected(bool isSelected);
+    void SetSize(const SizeF& size);
+    void SetOffset(const OffsetF& offset);
 
 private:
     RefPtr<PropertyBool> isSelected_;

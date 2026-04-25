@@ -27,9 +27,7 @@ namespace OHOS::Ace::NG {
 void SwiperModelStatic::ParseAndSetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     SwiperArrowParameters arrowParameters;
     arrowParameters.isShowBackground =
@@ -86,9 +84,7 @@ void SwiperModelStatic::ParseAndSetArrowStyle(FrameNode* frameNode, const Swiper
 void SwiperModelStatic::SetDefaultArrowStyle(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     SwiperArrowParameters swiperArrowParameters;
     swiperArrowParameters.isShowBackground = swiperIndicatorTheme->GetIsShowArrowBackground();
@@ -147,6 +143,9 @@ RefPtr<FrameNode> SwiperModelStatic::CreateFrameNode(int32_t nodeId)
     swiperNode = AceType::MakeRefPtr<SwiperNode>(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<SwiperPattern>());
     swiperNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, swiperNode);
+    pattern->SetIsPureSwiper(true);
     return swiperNode;
 }
 

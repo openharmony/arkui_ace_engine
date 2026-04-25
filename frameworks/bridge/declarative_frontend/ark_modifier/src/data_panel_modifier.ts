@@ -13,12 +13,58 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class DataPanelModifier extends ArkDataPanelComponent implements AttributeModifier<DataPanelAttribute> {
+class LazyArkDataPanelComponent extends ArkComponent {
+  static module: DataPanelComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkDataPanelComponent.module === undefined) {
+      LazyArkDataPanelComponent.module = globalThis.requireNapi('arkui.components.arkdatapanel');
+    }
+
+    this.lazyComponent = LazyArkDataPanelComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  closeEffect(value: boolean): this {
+    this.lazyComponent.closeEffect(value);
+    return this;
+  }
+
+  valueColors(value: Array<ResourceColor | LinearGradient>): this {
+    this.lazyComponent.valueColors(value);
+    return this;
+  }
+
+  trackBackgroundColor(value: ResourceColor): this {
+    this.lazyComponent.trackBackgroundColor(value);
+    return this;
+  }
+
+  strokeWidth(value: Length): this {
+    this.lazyComponent.strokeWidth(value);
+    return this;
+  }
+
+  trackShadow(value: DataPanelShadowOptions): this {
+    this.lazyComponent.trackShadow(value);
+    return this;
+  }
+
+  contentModifier(value: ContentModifier<DataPanelConfiguration>): this {
+    this.lazyComponent.contentModifier(value);
+    return this;
+  }
+}
+  class DataPanelModifier extends LazyArkDataPanelComponent implements AttributeModifier<DataPanelAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: DataPanelAttribute): void {

@@ -15,7 +15,7 @@
         ],
         "arkui_navigation": [
             "jiangdayuan",
-            "tsj_2020",
+            "tsj_20201",
             "huangxiaolinabc",
             "mayaolll",
             "Hu_ZeQi",
@@ -123,17 +123,16 @@
             "huaweimaxuchu"
         ],
         "arkuilayout1": [
-            "lanshouren",
             "Lichtschein",
             "zju_ljz",
             "camlostshi",
-            "WendongPang",
-            "fenglinbailu",
             "lihao71",
+            "song-song-song",
+            "zhangwentao96",
+            "qianpinyi",
             "skrobagleb",
             "spirinandrey",
-            "huaweimaxuchu",
-            "song-song-song"
+            "huaweimaxuchu"
         ],
         "arkweb-committer-group": [
             "libing23232323",
@@ -277,7 +276,7 @@
         "jiangdayuan": {
             "info": "[导航 jiangdayuan]"
         },
-        "tsj_2020": {
+        "tsj_20201": {
             "info": "[导航 tongshijia]"
         },
         "huangxiaolinabc": {
@@ -448,29 +447,26 @@
         "yangfan229": {
             "info": "[文本大类&AutoFill yangfan]"
         },
-        "lanshouren": {
-            "info": "[布局类组件 lanshouren]"
-        },
-        "fenglinbailu": {
-            "info": "[布局类组件 liubin]"
-        },
-        "WendongPang": {
-            "info": "[安全区&键盘避让相关 pangwendong]"
-        },
         "Lichtschein": {
             "info": "[布局类、Video组件 linhu]"
         },
         "zju_ljz": {
-            "info": "[栅格、分栏布局相关/预览 lijiazhi]"
+            "info": "[栅格、动态布局，边框、位置设置，预览 lijiazhi]"
         },
         "camlostshi": {
-            "info": "[弹性、线性布局、Canvas及安全区相关 shibofan]"
+            "info": "[弹性、线性、层叠布局, 绘制类组件, 安全区&键盘避让 shibofan]"
         },
         "song-song-song": {
-            "info": "[自定义布局相关 songqifan]"
+            "info": "[自定义布局, 媒体查询, FolderStack及FoldSplitContiner songqifan]"
         },
         "lihao71": {
             "info": "[预览 lihao]"
+        },
+        "zhangwentao96": {
+            "info": "[像素取整、相对布局 zhangwentao]"
+        },
+        "qianpinyi": {
+            "info": "[安全区&键盘避让、Video组件 qianpinyi]"
         },
         "libing23232323": {
             "info": "[web-交互安全 libing]"

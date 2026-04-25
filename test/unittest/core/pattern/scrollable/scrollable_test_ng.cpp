@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,18 +15,19 @@
 
 #include "scrollable_test_ng.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 #define protected public
 #define private public
+#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 
 namespace OHOS::Ace::NG {
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -504,197 +505,6 @@ HWTEST_F(ScrollableTestNg, GetCanOverScroll001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SelectWithScroll001
- * @tc.desc: Test nested SelectWithScroll
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, SelectWithScroll001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the SelectWithScroll method, Set the parameter IsScrollable is false
-     * @tc.expected: The OutOfScrollableOffset is 0.0
-     */
-    EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(false));
-    scrollPn->SelectWithScroll();
-    EXPECT_EQ(scrollPn->GetOutOfScrollableOffset(), 0.0f);
-}
-
-/**
- * @tc.name: SelectWithScroll002
- * @tc.desc: Test nested SelectWithScroll
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, SelectWithScroll002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the SelectWithScroll method, Set the parameter IsScrollable is true
-     * @tc.expected: The OutOfScrollableOffset is -1.1
-     */
-    EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1);
-    scrollPn->SetAxis(Axis::VERTICAL);
-    Offset localLocation;
-    localLocation.SetX(-1.0f);
-    localLocation.SetY(-1.1f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    scrollPn->SelectWithScroll();
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -1.1f);
-}
-
-/**
- * @tc.name: SelectWithScroll003
- * @tc.desc: Test nested SelectWithScroll
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, SelectWithScroll003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the SelectWithScroll method, Set the parameter IsScrollable is true and deltaY_ is 0
-     * @tc.expected: The OutOfScrollableOffset is -1.1
-     */
-    EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
-    scrollPn->SetAxis(Axis::VERTICAL);
-    Offset localLocation;
-    localLocation.SetX(-1.0f);
-    localLocation.SetY(0.0f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    scrollPn->SelectWithScroll();
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 0.0f);
-}
-
-/**
- * @tc.name: SelectWithScroll004
- * @tc.desc: Test nested SelectWithScroll
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, SelectWithScroll004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the SelectWithScroll method, Set the parameter isAnimationStop_ is false
-     * @tc.expected: The OutOfScrollableOffset is -1.1
-     */
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1);
-    EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
-    scrollPn->SetAxis(Axis::VERTICAL);
-    Offset localLocation;
-    localLocation.SetX(-1.0f);
-    localLocation.SetY(-1.1f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    scrollPn->isAnimationStop_ = false;
-    scrollPn->SelectWithScroll();
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -1.1f);
-}
-
-/**
- * @tc.name: SelectWithScroll005
- * @tc.desc: Test nested SelectWithScroll
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, SelectWithScroll005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the SelectWithScroll method, Set the parameter isAnimationStop_ is true
-     *   and selectMotion_ is not nullptr
-     * @tc.expected: The OutOfScrollableOffset is -1.1
-     */
-    EXPECT_CALL(*scrollPn, IsAtTop).Times(1);
-    EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
-    scrollPn->SetAxis(Axis::VERTICAL);
-    Offset localLocation;
-    localLocation.SetX(-1.0f);
-    localLocation.SetY(-1.1f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    scrollPn->isAnimationStop_ = true;
-    scrollPn->selectMotion_ = AceType::MakeRefPtr<SelectMotion>(0.0f, [this]() -> bool { return true; });
-    scrollPn->SelectWithScroll();
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -1.1f);
-}
-
-/**
- * @tc.name: LimitMouseEndOffset001
- * @tc.desc: Test nested LimitMouseEndOffset
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, LimitMouseEndOffset001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the LimitMouseEndOffset method, Set the parameter is Axis::HORIZONTAL
-     *   and selectMotion_ is not nullptr
-     * @tc.expected: The OutOfScrollableOffset is -1.1
-     */
-    scrollPn->SetAxis(Axis::HORIZONTAL);
-    scrollPn->mouseEndOffset_ = OffsetF(-1.0f, -1.1f);
-    scrollPn->LimitMouseEndOffset();
-    EXPECT_EQ(scrollPn->mouseEndOffset_.GetX(), 0.0f);
-    EXPECT_EQ(scrollPn->mouseEndOffset_.GetY(), 0.0f);
-
-    /**
-     * @tc.steps: step3. Call the LimitMouseEndOffset method, Set the parameter is Axis::VERTICAL
-     *   and selectMotion_ is not nullptr
-     * @tc.expected: The OutOfScrollableOffset is -1.1
-     */
-    scrollPn->SetAxis(Axis::VERTICAL);
-    scrollPn->mouseEndOffset_ = OffsetF(1.0f, 1.1f);
-    scrollPn->LimitMouseEndOffset();
-    EXPECT_EQ(scrollPn->mouseEndOffset_.GetX(), 0.0f);
-    EXPECT_EQ(scrollPn->mouseEndOffset_.GetY(), 0.0f);
-}
-
-/**
  * @tc.name: HotZoneScroll001
  * @tc.desc: Test nested HotZoneScroll
  * @tc.type: FUNC
@@ -820,210 +630,6 @@ HWTEST_F(ScrollableTestNg, SetMaxFlingVelocity001, TestSize.Level1)
     max = 0.2f;
     scrollPn->SetMaxFlingVelocity(max);
     EXPECT_EQ(scrollPn->maxFlingVelocity_, 0.2f);
-}
-
-/**
- * @tc.name: MarkSelectedItems001
- * @tc.desc: Test nested MarkSelectedItems
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, MarkSelectedItems001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the MarkSelectedItems method
-     * @tc.expected: The IsScrollable is false
-     */
-    scrollPn->MarkSelectedItems();
-    EXPECT_FALSE(scrollPn->IsScrollable());
-    scrollPn->multiSelectable_ = true;
-    scrollPn->MarkSelectedItems();
-    EXPECT_FALSE(scrollPn->IsScrollable());
-    scrollPn->mousePressed_ = true;
-    scrollPn->MarkSelectedItems();
-    EXPECT_FALSE(scrollPn->IsScrollable());
-    scrollPn->mouseStartOffset_ = OffsetF(0.0f, 0.0f);
-    scrollPn->mouseEndOffset_ = OffsetF(1.0f, 1.0f);
-    scrollPn->MarkSelectedItems();
-    EXPECT_FALSE(scrollPn->IsScrollable());
-}
-
-/**
- * @tc.name: ShouldSelectScrollBeStopped001
- * @tc.desc: Test nested ShouldSelectScrollBeStopped
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, ShouldSelectScrollBeStopped001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-
-    /**
-     * @tc.steps: step2. When lastMouseMove is not nullptr, call the MarkSelectedItems method
-     * @tc.expected: The result is false
-     */
-    scrollPn->GetHost();
-    scrollPn->parent_ = mockPn;
-    scrollPn->mousePressed_ = true;
-    scrollPn->SetAxis(Axis::HORIZONTAL);
-    Offset localLocation;
-    localLocation.SetX(-1.1f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetX(), -1.1f);
-    auto result = scrollPn->ShouldSelectScrollBeStopped();
-    EXPECT_FALSE(result);
-
-    /**
-     * @tc.steps: step3. When selectMotion is not nullptr, call the MarkSelectedItems method
-     * @tc.expected: The result is false
-     */
-    scrollPn->selectMotion_ = AceType::MakeRefPtr<SelectMotion>(0.0f, [this]() -> bool { return true; });
-    result = scrollPn->ShouldSelectScrollBeStopped();
-    EXPECT_FALSE(result);
-
-    /**
-     * @tc.steps: step4. When lastMouseMove is not nullptr, call the MarkSelectedItems method
-     * @tc.expected: The result is true
-     */
-    scrollPn->SetAxis(Axis::VERTICAL);
-    localLocation.SetY(0.0f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 0.0f);
-    result = scrollPn->ShouldSelectScrollBeStopped();
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: ShouldSelectScrollBeStopped002
- * @tc.desc: Test nested ShouldSelectScrollBeStopped
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, ShouldSelectScrollBeStopped002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer and call ShouldSelectScrollBeStopped
-     * @tc.expected: Pointer is not nullptr and result is true
-     */
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    scrollPn->parent_ = mockPn;
-    auto result = scrollPn->ShouldSelectScrollBeStopped();
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: ShouldSelectScrollBeStopped003
- * @tc.desc: Test nested ShouldSelectScrollBeStopped
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, ShouldSelectScrollBeStopped003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the ShouldSelectScrollBeStopped method
-     * @tc.expected: The result is false
-     */
-    scrollPn->mousePressed_ = true;
-    scrollPn->SetAxis(Axis::VERTICAL);
-    Offset localLocation;
-    localLocation.SetY(1.0f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 1.0f);
-    auto result = scrollPn->ShouldSelectScrollBeStopped();
-    EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: GetOffsetWithLimit001
- * @tc.desc: Test nested GetOffsetWithLimit
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, GetOffsetWithLimit001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.2
-     */
-    float offset = 0.2f;
-    auto result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_NE(result, offset);
-}
-
-/**
- * @tc.name: GetOffsetWithLimit002
- * @tc.desc: Test nested GetOffsetWithLimit
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, GetOffsetWithLimit002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.0
-     */
-    float offset = -0.1f;
-    auto result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_EQ(result, 0.0f);
-}
-
-/**
- * @tc.name: GetOffsetWithLimit003
- * @tc.desc: Test nested GetOffsetWithLimit
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, GetOffsetWithLimit003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.0
-     */
-    float offset = 0.0f;
-    auto result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_EQ(result, offset);
 }
 
 /**
@@ -1497,9 +1103,9 @@ HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
     scrollPn->isMousePressed_ = true;
     scrollPn->scrollBar_->isScrollable_ = true;
     /**
-    * @tc.steps: step2. Test HandleClickEvent.
-    * @tc.expect: CheckBarDirection equal to equal BarDirection's Value.
-    */
+     * @tc.steps: step2. Test HandleClickEvent.
+     * @tc.expect: CheckBarDirection equal to equal BarDirection's Value.
+     */
     scrollPn->scrollBar_->locationInfo_ = Offset(1.0f, 110.0f);
     scrollPn->scrollBar_->HandleLongPress(true);
     Point point(scrollPn->scrollBar_->locationInfo_.GetX(), scrollPn->scrollBar_->locationInfo_.GetY());
@@ -1541,8 +1147,8 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     MouseInfo info;
     info.SetAction(MouseAction::PRESS);
     info.SetButton(MouseButton::LEFT_BUTTON);
-    auto& inputEvents = scrollPn->GetEventHub<EventHub>()
-        ->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
+    auto& inputEvents =
+        scrollPn->GetEventHub<EventHub>()->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
     EXPECT_EQ(inputEvents.size(), 1);
     for (const auto& callback : inputEvents) {
         if (callback) {
@@ -1559,37 +1165,6 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
         }
     };
     EXPECT_FALSE(scrollPn->isMousePressed_);
-}
-
-/**
- * @tc.name: InitMouseEvent002
- * @tc.desc: Test multiSelectable event and mouse scroll event
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, InitMouseEvent002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable.
-     * @tc.expected: create PartiallyMockedScrollable successfully.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    ASSERT_NE(scroll_, nullptr);
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    ASSERT_NE(scrollPn, nullptr);
-    auto gestureHub = scroll_->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    EXPECT_EQ(gestureHub->panEventActuator_, nullptr);
-
-    /**
-     * @tc.steps: step2. execute the InitMouseEbent.
-     * @tc.expected: the isExcludedAxis_ of panEventActuator_ is true.
-     */
-    scrollPn->InitMouseEvent();
-    gestureHub = scroll_->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    ASSERT_NE(gestureHub->panEventActuator_, nullptr);
-    EXPECT_TRUE(gestureHub->panEventActuator_->isExcludedAxis_);
 }
 
 /**
@@ -1798,8 +1373,8 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone003, TestSize.Level1)
     RefPtr<Scrollable> scrollable = scrollablePattern->GetScrollable();
     EXPECT_NE(scrollable, nullptr);
     auto scrollableEvent = scrollablePattern->GetScrollableEvent();
-    scrollableEvent->SetClickJudgeCallback([](const PointF&){ return true; });
-    
+    scrollableEvent->SetClickJudgeCallback([](const PointF&) { return true; });
+
     /**
      * @tc.steps: step2. call OnTouchTestDone.
      * @tc.expected: isHitTestBlock_ is true, clickRecognizer and panRecognizer not prevent.
@@ -1823,10 +1398,8 @@ HWTEST_F(ScrollableTestNg, onScrollerAreaChangeEventTest001, TestSize.Level1)
     scrollPn->parent_ = mockPn;
 
     bool isChange = false;
-    OnScrollerAreaChangeEvent onScrollerAreaChange = [&isChange](Dimension dimension, ScrollSource state,
-        bool isAtTop, bool isAtBottom) {
-        isChange = true;
-    };
+    OnScrollerAreaChangeEvent onScrollerAreaChange = [&isChange](Dimension dimension, ScrollSource state, bool isAtTop,
+                                                         bool isAtBottom) { isChange = true; };
     ScrollerObserver obs;
     obs.onScrollerAreaChangeEvent = onScrollerAreaChange;
     auto obserserMgr = AceType::MakeRefPtr<Ace::ScrollerObserverManager>();
@@ -1882,7 +1455,7 @@ HWTEST_F(ScrollableTestNg, GetCrownRotatePx001, TestSize.Level1)
 
     CrownEvent event = {};
     event.degree = 1.f;
-    
+
     /**
      * @tc.steps: step2. Very slow rotation speed test.
      * @tc.expected: Rotating pixel points with specific row values.
@@ -1891,7 +1464,7 @@ HWTEST_F(ScrollableTestNg, GetCrownRotatePx001, TestSize.Level1)
     scrollable->SetDigitalCrownSensitivity(CrownSensitivity::LOW);
     double resPx = scrollable->GetCrownRotatePx(event);
     double px = Dimension(TEST_DISPLAY_CONTROL_RATIO_VERY_SLOW, DimensionUnit::VP).ConvertToPx();
-    EXPECT_EQ(resPx, px*TEST_CROWN_SENSITIVITY_LOW);
+    EXPECT_EQ(resPx, px * TEST_CROWN_SENSITIVITY_LOW);
 
     /**
      * @tc.steps: step3. Medium rotation speed test.
@@ -1901,7 +1474,7 @@ HWTEST_F(ScrollableTestNg, GetCrownRotatePx001, TestSize.Level1)
     scrollable->SetDigitalCrownSensitivity(CrownSensitivity::MEDIUM);
     resPx = scrollable->GetCrownRotatePx(event);
     px = Dimension(TEST_DISPLAY_CONTROL_RATIO_SLOW, DimensionUnit::VP).ConvertToPx();
-    EXPECT_EQ(resPx, px*TEST_CROWN_SENSITIVITY_MEDIUM);
+    EXPECT_EQ(resPx, px * TEST_CROWN_SENSITIVITY_MEDIUM);
 
     /**
      * @tc.steps: step4. Fast rotation speed test.
@@ -1911,7 +1484,7 @@ HWTEST_F(ScrollableTestNg, GetCrownRotatePx001, TestSize.Level1)
     scrollable->SetDigitalCrownSensitivity(CrownSensitivity::HIGH);
     resPx = scrollable->GetCrownRotatePx(event);
     px = Dimension(TEST_DISPLAY_CONTROL_RATIO_MEDIUM, DimensionUnit::VP).ConvertToPx();
-    EXPECT_EQ(resPx, px*TEST_CROWN_SENSITIVITY_HIGH);
+    EXPECT_EQ(resPx, px * TEST_CROWN_SENSITIVITY_HIGH);
 
     /**
      * @tc.steps: step5. Other rotation speed test.
@@ -1950,7 +1523,7 @@ HWTEST_F(ScrollableTestNg, UpdateCrownVelocity001, TestSize.Level1)
     scrollable->SetAxis(Axis::VERTICAL);
     auto accumulativeCrownPx = scrollable->accumulativeCrownPx_;
     scrollable->UpdateCrownVelocity(ts, TEST_CROWN_VELOCITY, false);
-    EXPECT_EQ(scrollable->accumulativeCrownPx_, accumulativeCrownPx+Offset(0, TEST_CROWN_VELOCITY));
+    EXPECT_EQ(scrollable->accumulativeCrownPx_, accumulativeCrownPx + Offset(0, TEST_CROWN_VELOCITY));
 
     /**
      * @tc.steps: step3. horizontal axis test.
@@ -1959,7 +1532,7 @@ HWTEST_F(ScrollableTestNg, UpdateCrownVelocity001, TestSize.Level1)
     scrollable->SetAxis(Axis::HORIZONTAL);
     accumulativeCrownPx = scrollable->accumulativeCrownPx_;
     scrollable->UpdateCrownVelocity(ts, TEST_CROWN_VELOCITY, true);
-    EXPECT_EQ(scrollable->accumulativeCrownPx_, accumulativeCrownPx+Offset(TEST_CROWN_VELOCITY, 0));
+    EXPECT_EQ(scrollable->accumulativeCrownPx_, accumulativeCrownPx + Offset(TEST_CROWN_VELOCITY, 0));
 }
 
 /**
@@ -1991,9 +1564,7 @@ HWTEST_F(ScrollableTestNg, HandleCrownEvent001, TestSize.Level1)
     double px = Dimension(TEST_DISPLAY_CONTROL_RATIO_VERY_SLOW, DimensionUnit::VP).ConvertToPx();
     px *= TEST_CROWN_SENSITIVITY_LOW;
     OffsetF oft = OffsetF(100.f, 100.f);
-    auto fun = [oft](const GestureEvent& info) {
-        EXPECT_EQ(oft.GetX(), 100.f);
-    };
+    auto fun = [oft](const GestureEvent& info) { EXPECT_EQ(oft.GetX(), 100.f); };
     scrollable->AddPanActionEndEvent(std::move(fun));
 
     /**
@@ -2028,7 +1599,7 @@ HWTEST_F(ScrollableTestNg, HandleCrownEvent001, TestSize.Level1)
     scrollable->SetAxis(Axis::VERTICAL);
     scrollable->SetCrownEventDragging(!scrollable->GetCrownEventDragging());
     scrollable->HandleCrownEvent(event, oft);
-    EXPECT_EQ(scrollable->accumulativeCrownPx_, accumulativeCrownPx+Offset(0, px));
+    EXPECT_EQ(scrollable->accumulativeCrownPx_, accumulativeCrownPx + Offset(0, px));
 
     /**
      * @tc.steps: step6. Unknown action test 01.
@@ -2069,9 +1640,7 @@ HWTEST_F(ScrollableTestNg, HandleCrownEvent002, TestSize.Level1)
     double px = Dimension(TEST_DISPLAY_CONTROL_RATIO_VERY_SLOW, DimensionUnit::VP).ConvertToPx();
     px *= TEST_CROWN_SENSITIVITY_LOW;
     OffsetF oft = OffsetF(100.f, 100.f);
-    auto fun = [oft](const GestureEvent& info) {
-        EXPECT_EQ(oft.GetX(), 100.f);
-    };
+    auto fun = [oft](const GestureEvent& info) { EXPECT_EQ(oft.GetX(), 100.f); };
     scrollable->AddPanActionEndEvent(std::move(fun));
 
     /**
@@ -2108,9 +1677,7 @@ HWTEST_F(ScrollableTestNg, HandleCrownEvent002, TestSize.Level1)
      * @tc.expected: Rotating pixel points is 0.
      */
     event.action = CrownAction::UNKNOWN;
-    scrollable->SetDragCancelCallback([&]() {
-        EXPECT_EQ(event.degree, 0.f);
-    });
+    scrollable->SetDragCancelCallback([&]() { EXPECT_EQ(event.degree, 0.f); });
     accumulativeCrownPx = scrollable->accumulativeCrownPx_;
     scrollable->panRecognizerNG_ = nullptr;
     scrollable->HandleCrownEvent(event, oft);

@@ -14,15 +14,15 @@
  */
 
 class ArkThemeNativeHelper {
-    static sendThemeToNative(theme: ThemeInternal, elmtId: number) {
+    static sendThemeToNative(theme: ThemeInternal, elmtId: number, darkSetStatus: boolean) {
         // @ts-ignore
         const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.colors);
         const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.darkColors);
-        WithTheme.sendThemeToNative(lightColorArray, darkColorArray, elmtId);
+        WithTheme.sendThemeToNative(lightColorArray, darkColorArray, elmtId, darkSetStatus);
     }
 
     static createInternal(themeScopeId: number, themeId: number, theme: CustomTheme, colorMode: ThemeColorMode,
-        onThemeScopeDestroy: () => void
+        onThemeScopeDestroy: () => void, darkSetStatus: boolean
     ) {
         // set local color mode if need
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
@@ -31,7 +31,7 @@ class ArkThemeNativeHelper {
 
         const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.colors);
         const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.darkColors);
-        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy );
+        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy, darkSetStatus );
 
         // reset local color mode if need
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
@@ -41,10 +41,17 @@ class ArkThemeNativeHelper {
 
     static setDefaultTheme(theme: CustomTheme) {
         const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.colors);
-        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.darkColors);
+        let darkColorArray = [];
+        if(!!theme?.darkColors) {
+            darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.darkColors);
+        }else {
+            darkColorArray = colorArray;
+        }
 
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         getUINativeModule().theme.setDefaultTheme(colorArray, false);
+        ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
         getUINativeModule().theme.setDefaultTheme(darkColorArray, true);
         ArkThemeScopeManager.getInstance().onExitLocalColorMode();

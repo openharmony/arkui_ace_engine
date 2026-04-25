@@ -48,6 +48,44 @@ namespace {
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
+template<typename T>
+inline bool HasLpxUnit(const std::optional<T>& value)
+{
+    return value.has_value() && value.value().Unit() == DimensionUnit::LPX;
+}
+
+template<typename T>
+inline bool HasCalcLpxUnit(const std::optional<T>& value)
+{
+    return value.has_value() && value.value().GetDimension().Unit() == DimensionUnit::LPX;
+}
+
+inline bool HasPaddingLpxUnit(const std::optional<MarginProperty>& prop)
+{
+    CHECK_NULL_RETURN(prop.has_value(), false);
+    auto& p = prop.value();
+    return HasCalcLpxUnit(p.left) || HasCalcLpxUnit(p.right) ||
+           HasCalcLpxUnit(p.top) || HasCalcLpxUnit(p.bottom) ||
+           HasCalcLpxUnit(p.start) || HasCalcLpxUnit(p.end);
+}
+
+inline bool HasBorderRadiusLpxUnit(const std::optional<BorderRadiusProperty>& prop)
+{
+    CHECK_NULL_RETURN(prop.has_value(), false);
+    auto& r = prop.value();
+    return HasLpxUnit(r.radiusTopLeft) || HasLpxUnit(r.radiusTopRight) ||
+           HasLpxUnit(r.radiusBottomLeft) || HasLpxUnit(r.radiusBottomRight) ||
+           HasLpxUnit(r.radiusTopStart) || HasLpxUnit(r.radiusTopEnd) ||
+           HasLpxUnit(r.radiusBottomStart) || HasLpxUnit(r.radiusBottomEnd);
+}
+
+inline bool HasImageSpanSizeLpxUnit(const std::optional<ImageSpanSize>& size)
+{
+    CHECK_NULL_RETURN(size.has_value(), false);
+    auto& s = size.value();
+    return HasLpxUnit(s.width) || HasLpxUnit(s.height);
+}
+
 std::string GetDeclaration(const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -79,6 +117,21 @@ std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shado
     }
     return jsonShadows;
 }
+
+std::unique_ptr<JsonValue> ConvertFontVariationsToJson(const FONT_VARIATIONS_LIST& fontVariations)
+{
+    auto jsonFontVariations = JsonUtil::CreateArray(true);
+    for (const auto& fontVariation : fontVariations) {
+        auto jsonFontVariation = JsonUtil::Create(true);
+        jsonFontVariation->Put("axis", fontVariation.axis.c_str());
+        jsonFontVariation->Put("value", std::to_string(fontVariation.value).c_str());
+        if (fontVariation.isNormalized.has_value()) {
+            jsonFontVariation->Put("isNormalized", fontVariation.isNormalized.value());
+        }
+        jsonFontVariations->Put(jsonFontVariation);
+    }
+    return jsonFontVariations;
+}
 } // namespace
 
 std::string SpanItem::GetFont() const
@@ -95,6 +148,56 @@ std::string SpanItem::GetFont() const
     return jsonValue->ToString();
 }
 
+std::string SpanItem::GetFontWeightConfigs() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("enableVariableFontWeight",
+        fontStyle->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
+    jsonValue->Put("enableDeviceFontWeightCategory",
+        fontStyle->GetEnableDeviceFontWeightCategory().value_or(true) ? "true" : "false");
+    return jsonValue->ToString();
+}
+
+void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter,
+    const RefPtr<TextPattern>& textPattern) const
+{
+    json->PutExtAttr("font", GetFont().c_str(), filter);
+    json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
+    json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
+        fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
+        fontStyle->GetTextDecorationStyle()).c_str(), filter);
+    json->PutExtAttr("letterSpacing",
+        fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("textCase",
+        V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
+    if (spanItemType == SpanItemType::SYMBOL) {
+        const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
+        auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
+        json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
+    } else {
+        Color defaultFontColor = textStyle_.has_value() ? textStyle_.value().GetTextColor() : Color::BLACK;
+        json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
+            .value_or(defaultFontColor)).ColorToString().c_str(), filter);
+    }
+    json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
+    json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
+    json->PutExtAttr("variableFontWeight",
+        std::to_string(fontStyle->GetVariableFontWeight().value_or(0)).c_str(), filter);
+    json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
+    json->PutExtAttr("fontVariations", ConvertFontVariationsToJson(
+        fontStyle->GetFontVariations().value_or(FONT_VARIATIONS_LIST {})), filter);
+    json->PutExtAttr("renderingStrategy",
+        GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
+    json->PutExtAttr(
+        "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
+    json->Put("symbolEffect",
+        GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
+    auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
+    json->PutExtAttr("textShadow", jsonShadow, filter);
+    json->PutExtAttr("fontWeightConfigs", GetFontWeightConfigs().c_str(), filter);
+}
+
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
@@ -107,36 +210,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     auto textPattern = DynamicCast<TextPattern>(pattern);
     CHECK_NULL_VOID(textPattern);
     if (fontStyle) {
-        json->PutExtAttr("font", GetFont().c_str(), filter);
-        json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
-        json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
-            fontStyle->GetTextDecoration().value_or(std::vector<TextDecoration>({TextDecoration::NONE})),
-            fontStyle->GetTextDecorationStyle()).c_str(), filter);
-        json->PutExtAttr("letterSpacing",
-            fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
-        json->PutExtAttr("textCase",
-            V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
-        if (spanItemType == SpanItemType::SYMBOL) {
-            const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
-            auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
-            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
-        } else {
-            Color defaultFontColor = textStyle_.has_value() ? textStyle_.value().GetTextColor() : Color::BLACK;
-            json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
-                .value_or(defaultFontColor)).ColorToString().c_str(), filter);
-        }
-        json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
-        json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
-        json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
-        json->PutExtAttr("renderingStrategy",
-            GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
-        json->PutExtAttr(
-            "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
-        json->Put("symbolEffect",
-            GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
-        auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
-        auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
-        json->PutExtAttr("textShadow", jsonShadow, filter);
+        ToJsonForFontStyle(json, filter, textPattern);
     }
     auto dim = Dimension();
     if (textLineStyle) {
@@ -234,14 +308,14 @@ void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModify
 void SpanNode::SetTextBackgroundStyle(const TextBackgroundStyle& style)
 {
     BaseSpan::SetTextBackgroundStyle(style);
-    spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->SetBackgroundStyle(GetTextBackgroundStyle());
     spanItem_->MarkReLayoutParagraph();
 }
 
 void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)
 {
     BaseSpan::UpdateTextBackgroundFromParent(style);
-    spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->SetBackgroundStyle(GetTextBackgroundStyle());
     spanItem_->MarkReLayoutParagraph();
 }
 
@@ -847,6 +921,7 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, Superscript, Superscript);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontWeight, FontWeight);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFeature, FontFeatures);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, FontVariations, FontVariations);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecoration, TextDecoration);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
@@ -938,7 +1013,7 @@ void SpanItem::UpdateSymbolSpanParagraph(
     if (fontStyle || textLineStyle) {
         UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true);
         if (fontStyle && fontStyle->HasFontWeight()) {
-            symbolSpanStyle.SetEnableVariableFontWeight(false);
+            symbolSpanStyle.SetEnableVariableFontWeight(fontStyle->GetEnableVariableFontWeight().value_or(false));
         }
         if (frameNode) {
             FontRegisterCallback(frameNode, symbolSpanStyle);
@@ -1227,6 +1302,7 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
     COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
     COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, FontVariations, UpdateFontVariations);
     COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
     COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
     COPY_TEXT_STYLE(fontStyle, Superscript, UpdateSuperscript);
@@ -1234,6 +1310,7 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
     COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
     COPY_TEXT_STYLE(fontStyle, LineThicknessScale, UpdateLineThicknessScale);
+    COPY_TEXT_STYLE(fontStyle, FontSizeScale, UpdateFontSizeScale);
     COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
     COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
     COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
@@ -1248,7 +1325,9 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
 void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
 {
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
+    COPY_TEXT_STYLE(textLineStyle, LineHeightMultiply, UpdateLineHeightMultiply);
     COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
+    COPY_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, UpdateIsOnlyBetweenLines);
     COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
     COPY_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, UpdateCompressLeadingPunctuation);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
@@ -1291,6 +1370,7 @@ void SpanItem::CopyBaseSpanItem(RefPtr<SpanItem> sameSpan) const
     sameSpan->urlAddress = urlAddress;
     CopySpanItemEvents(sameSpan);
     sameSpan->resMap_ = resMap_;
+    sameSpan->lpxFlags_ = lpxFlags_;
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -1359,6 +1439,7 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TEXT_STYLE_TLV(fontStyle, EnableVariableFontWeight, TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT, Bool);
     WRITE_TEXT_STYLE_TLV(
         fontStyle, EnableDeviceFontWeightCategory, TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY, Bool);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontSizeScale, TLV_SPAN_FONT_STYLE_FONTSIZESCALE, Double);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
     WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);
@@ -1384,7 +1465,10 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
 void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
 {
     WRITE_TLV_INHERIT(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension, LineHeight);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LineHeightMultiply, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHTMULTIPLY, Double);
     WRITE_TLV_INHERIT(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension, LineSpacing);
+    WRITE_TLV_INHERIT(textLineStyle, IsOnlyBetweenLines,
+        TLV_SPAN_TEXT_LINE_STYLE_ISONLYBETWEENLINES, Bool, IsOnlyBetweenLines);
     WRITE_TLV_INHERIT(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline, TextBaseline);
     // text's baselineOffset attribute is not span's baselineOffset attribute
     WRITE_TEXT_STYLE_TLV(textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
@@ -1450,13 +1534,18 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateFontSizeScale, TLV_SPAN_FONT_STYLE_FONTSIZESCALE, Double);
             case TLV_SPAN_FONT_STYLE_TEXTDECORATION: {
                 sameSpan->fontStyle->UpdateTextDecoration(TLVUtil::ReadTextDecorations(buff, cursor));
                 break;
             }
 
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeightMultiply,
+                TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHTMULTIPLY, Double);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateIsOnlyBetweenLines,
+                TLV_SPAN_TEXT_LINE_STYLE_ISONLYBETWEENLINES, Bool);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateBaselineOffset,
                 TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
@@ -1509,6 +1598,9 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             default:
                 break;
         }
+    }
+    if (sameSpan->backgroundStyle.has_value()) {
+        sameSpan->SetBackgroundStyle(sameSpan->backgroundStyle);
     }
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         sameSpan->textLineStyle->ResetParagraphSpacing();
@@ -1662,17 +1754,49 @@ void ImageSpanItem::UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& im
     CHECK_NULL_VOID(imageNode);
     auto property = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(property);
-    backgroundStyle = property->GetPlaceHolderStyle();
+    SetBackgroundStyle(property->GetPlaceHolderStyle());
 }
 
 void ImageSpanItem::SetImageSpanOptions(const ImageSpanOptions& options)
 {
     this->options = options;
+    ClearLpxFlag(LPX_FLAG_IMAGE_MARGIN | LPX_FLAG_IMAGE_PADDING | LPX_FLAG_IMAGE_BORDER_RADIUS | LPX_FLAG_IMAGE_SIZE);
+    if (options.imageAttribute.has_value()) {
+        auto& attr = options.imageAttribute.value();
+        if (HasPaddingLpxUnit(attr.marginProp)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_MARGIN);
+        }
+        if (HasPaddingLpxUnit(attr.paddingProp)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_PADDING);
+        }
+        if (HasBorderRadiusLpxUnit(attr.borderRadius)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_BORDER_RADIUS);
+        }
+        if (HasImageSpanSizeLpxUnit(attr.size)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_SIZE);
+        }
+    }
 }
 
 void ImageSpanItem::ResetImageSpanOptions()
 {
     options.imageAttribute.reset();
+    ClearLpxFlag(LPX_FLAG_IMAGE_MARGIN | LPX_FLAG_IMAGE_PADDING | LPX_FLAG_IMAGE_BORDER_RADIUS | LPX_FLAG_IMAGE_SIZE);
+}
+
+void SpanItem::SetBackgroundStyle(const std::optional<TextBackgroundStyle>& style)
+{
+    backgroundStyle = style;
+    ClearLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
+    if (style.has_value() && HasBorderRadiusLpxUnit(style->backgroundRadius)) {
+        SetLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
+    }
+}
+
+void SpanItem::ResetBackgroundStyle()
+{
+    backgroundStyle.reset();
+    ClearLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
 }
 
 RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
@@ -1685,7 +1809,7 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         sameSpan->onClick = onClick;
         sameSpan->onLongPress = onLongPress;
         if (backgroundStyle.has_value()) {
-            sameSpan->backgroundStyle = backgroundStyle;
+            sameSpan->SetBackgroundStyle(backgroundStyle);
         }
         if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
             sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());
@@ -1951,7 +2075,7 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         sameSpan->onClick = onClick;
         sameSpan->onLongPress = onLongPress;
         if (backgroundStyle.has_value()) {
-            sameSpan->backgroundStyle = backgroundStyle;
+            sameSpan->SetBackgroundStyle(backgroundStyle);
         }
         if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
             sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());

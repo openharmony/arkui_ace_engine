@@ -14,10 +14,13 @@
  */
 
 #include "core/components_ng/pattern/form/form_node.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/utils/utils.h"
 #include "core/components/form/sub_container.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"

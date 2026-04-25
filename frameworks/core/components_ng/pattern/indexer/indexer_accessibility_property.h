@@ -41,6 +41,8 @@ public:
 
     std::string GetText() const override;
 
+    void SetSpecificSupportAction() override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(IndexerAccessibilityProperty);
 };

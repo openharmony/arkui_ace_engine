@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 #include "test/unittest/core/event/focus_hub_test_ng.h"
+#include "core/common/event_manager.h"
 #include "gtest/gtest.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/event/focus_axis_event.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

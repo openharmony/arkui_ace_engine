@@ -15,11 +15,12 @@
 
 #include <cstddef>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -920,6 +921,70 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest018, TestSize.Level0)
     bool result = customNode->RenderCustomChild(futureDeadline);
     EXPECT_TRUE(result);
     EXPECT_EQ(recycleCallCount, 1);
+}
+
+/**
+ * @tc.name: CustomMeasureLayoutTest019
+ * @tc.desc: Test FireTriggerLifecycleFunc called during Measure with ON_APPEAR and ON_BUILD
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest019, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create CustomMeasureLayoutNode.
+     * @tc.expected: Node created successfully.
+     */
+    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set triggerLifecycleFunction to capture lifecycle events.
+     * @tc.expected: Function set successfully.
+     */
+    std::vector<int32_t> lifecycleEvents;
+    auto triggerLifecycleFunc = [&lifecycleEvents](int32_t eventId) -> bool {
+        lifecycleEvents.push_back(eventId);
+        return true;
+    };
+    customNode->SetTriggerLifecycleFunction(std::move(triggerLifecycleFunc));
+
+    /**
+     * @tc.steps: step3. Set render function.
+     * @tc.expected: Render function set.
+     */
+    auto renderFunction = [](int64_t, bool&) -> RefPtr<UINode> {
+        return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    };
+    customNode->SetRenderFunction(std::move(renderFunction));
+
+    /**
+     * @tc.steps: step4. Create layout wrapper and algorithm.
+     * @tc.expected: Wrapper and algorithm created.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto customPattern = customNode->GetPattern<CustomNodePattern>();
+    ASSERT_NE(customPattern, nullptr);
+    auto customLayoutAlgorithm = customPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(customLayoutAlgorithm, nullptr);
+
+    auto customLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(customNode, geometryNode, customNode->GetLayoutProperty());
+    customLayoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(customLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step5. Call Measure.
+     * @tc.expected: FireTriggerLifecycleFunc is called with ON_APPEAR and ON_BUILD.
+     */
+    customLayoutAlgorithm->Measure(AceType::RawPtr(customLayoutWrapper));
+
+    /**
+     * @tc.steps: step6. Verify lifecycle events were triggered in correct order.
+     * @tc.expected: ON_APPEAR (0) and ON_BUILD (1) events are in order.
+     */
+    EXPECT_EQ(lifecycleEvents.size(), 2);
+    EXPECT_EQ(lifecycleEvents[0], CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+    EXPECT_EQ(lifecycleEvents[1], CustomNodeBase::LifeCycleEvent::ON_BUILD);
 }
 
 } // namespace OHOS::Ace::NG

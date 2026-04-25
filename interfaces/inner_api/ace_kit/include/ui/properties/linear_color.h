@@ -21,6 +21,8 @@
 
 namespace OHOS::Ace {
 
+constexpr float LINEAR_COLOR_EPSILON = 1e-6f;
+
 class ACE_FORCE_EXPORT LinearColor {
 public:
     LinearColor() = default;
@@ -33,7 +35,8 @@ public:
     }
     explicit LinearColor(const Color& color)
         : alpha_(color.GetAlpha()), red_(color.GetRed()), green_(color.GetGreen()), blue_(color.GetBlue()),
-            placeholder_(color.GetPlaceholder())
+            placeholder_(color.GetPlaceholder()), colorWithHeadRoom_(color.GetHeadRoomColor()),
+            colorSpace_(color.GetColorSpace())
     {}
     LinearColor(int16_t alpha, int16_t red, int16_t green, int16_t blue)
         : alpha_(alpha), red_(red), green_(green), blue_(blue)
@@ -75,6 +78,18 @@ public:
 
     bool CompareColorExceptHolder(const LinearColor& color) const
     {
+        if (colorWithHeadRoom_.has_value() || color.colorWithHeadRoom_.has_value()) {
+            if (!(colorWithHeadRoom_.has_value() && color.colorWithHeadRoom_.has_value())) {
+                return false;
+            }
+            const auto& lhs = colorWithHeadRoom_.value();
+            const auto& rhs = color.colorWithHeadRoom_.value();
+            return std::abs(lhs.red - rhs.red) <= LINEAR_COLOR_EPSILON &&
+                   std::abs(lhs.green - rhs.green) <= LINEAR_COLOR_EPSILON &&
+                   std::abs(lhs.blue - rhs.blue) <= LINEAR_COLOR_EPSILON &&
+                   std::abs(lhs.alpha - rhs.alpha) <= LINEAR_COLOR_EPSILON &&
+                   std::abs(lhs.headRoom - rhs.headRoom) <= LINEAR_COLOR_EPSILON;
+        }
         return alpha_ == color.GetAlpha() && red_ == color.GetRed() && green_ == color.GetGreen() &&
                blue_ == color.GetBlue();
     }
@@ -147,10 +162,20 @@ public:
 
     Color ToColor() const
     {
+        if (colorWithHeadRoom_.has_value()) {
+            return Color(colorWithHeadRoom_.value());
+        }
         return Color::FromARGB(static_cast<uint8_t>(std::clamp<int16_t>(alpha_, 0, UINT8_MAX)),
             static_cast<uint8_t>(std::clamp<int16_t>(red_, 0, UINT8_MAX)),
             static_cast<uint8_t>(std::clamp<int16_t>(green_, 0, UINT8_MAX)),
             static_cast<uint8_t>(std::clamp<int16_t>(blue_, 0, UINT8_MAX)));
+    }
+
+    Color ToColorWithColorSpace() const
+    {
+        Color color = ToColor();
+        color.SetColorSpace(colorSpace_);
+        return color;
     }
 
     ColorPlaceholder GetPlaceholder() const
@@ -164,6 +189,8 @@ private:
     int16_t green_;
     int16_t blue_;
     ColorPlaceholder placeholder_ = ColorPlaceholder::NONE;
+    std::optional<ColorWithHeadRoom> colorWithHeadRoom_;
+    ColorSpace colorSpace_ = ColorSpace::SRGB;
 };
 
 } // namespace OHOS::Ace

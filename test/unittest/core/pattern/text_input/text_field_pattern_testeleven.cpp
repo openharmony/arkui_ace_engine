@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 
 #include "base/memory/ace_type.h"
@@ -1037,6 +1037,32 @@ HWTEST_F(TextFieldPatternTesteleven, OnBackPressed001, TestSize.Level1)
 
     auto result = textFieldPattern->OnBackPressed();
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnBackPressed002
+ * @tc.desc: Test OnBackPressed with voice button keyboard fallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, OnBackPressed002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsShowVoiceButton(true);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    textFieldPattern->voiceButtonKeyboardOpened_ = true;
+    auto result = textFieldPattern->OnBackPressed();
+    EXPECT_TRUE(result);
+#else
+    auto result = textFieldPattern->OnBackPressed();
+    EXPECT_FALSE(result);
+#endif
 }
 
 /**

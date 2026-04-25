@@ -31,6 +31,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
@@ -40,9 +41,11 @@
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 
@@ -52,12 +55,17 @@ class VisualEffect;
 class Filter;
 enum class Gravity;
 class Blender;
+class RSNGFilterBase;
 class RSNGShapeBase;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
 struct SharedTransitionOption;
 class UiMaterial;
+struct UiMaterialInfo;
+struct ImmersiveMaterialConfig;
+enum class MaterialType;
+enum class UiMaterialFilterQuality;
 }
 
 namespace OHOS::Ace::Kit {
@@ -65,7 +73,6 @@ class Modifier;
 }
 
 namespace OHOS::Ace::NG {
-
 typedef enum {
     OPINC_INVALID,
     OPINC_NODE,
@@ -80,6 +87,8 @@ class FrameNode;
 class InspectorFilter;
 class Modifier;
 class PipelineContext;
+struct DistortionParam;
+struct GestureDebugBoundaryInfo;
 
 struct PaintFocusExtraInfo final {
     PaintFocusExtraInfo() = default;
@@ -101,7 +110,7 @@ class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType);
 
 public:
-    ~RenderContext() override = default;
+    ~RenderContext() override;
 
     static RefPtr<RenderContext> Create();
 
@@ -188,6 +197,7 @@ public:
         HARDWARE_SURFACE,
         COMPOSITE_COMPONENT,
         UNION,
+        DEPTH,
 #ifdef RENDER_EXTRACT_SUPPORTED
         HARDWARE_TEXTURE,
 #endif
@@ -309,6 +319,7 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
     virtual void SetSecurityLayer(bool isSecure) {}
+    virtual void SetIsBackground(bool isBackground) {}
     virtual void SetHDRBrightness(float hdrBrightness) {}
     virtual void SetHDRBrightness(float hdrBrightness, uint32_t type) {}
     virtual void SetImageHDRBrightness(float hdrBrightness) {}
@@ -360,7 +371,16 @@ public:
     virtual void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
     virtual void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) {}
+    virtual void SetShadowPath(const std::string path) {}
+    virtual void ResetShadowPath() {}
     void SetSystemMaterial(const RefPtr<UiMaterial>& material);
+    virtual void SetMaterialWithQualityLevel(
+        const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
+    {}
+    void SetImmersiveMaterialConfig(const std::optional<ImmersiveMaterialConfig>& config);
+    void SetTransparencyCallbackId(const std::optional<int32_t>& id);
+    std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig() const;
+    std::optional<int32_t> GetTransparencyCallbackId() const;
     RefPtr<UiMaterial> GetSystemMaterial() const;
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
@@ -560,6 +580,7 @@ public:
     virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
+    virtual void OnSpatialEffectUpdate(const SpatialEffectParams& params) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
@@ -573,6 +594,7 @@ public:
     virtual void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionArray) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SpatialEffect, SpatialEffectParams);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
@@ -593,6 +615,7 @@ public:
 
     virtual void ResetSurface(int width, int height) {}
     virtual void PaintDebugBoundary(bool flag) {}
+    virtual void PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Transform3DMatrix, Matrix4);
@@ -619,8 +642,17 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
 
     // BorderImage
-    ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImage, RefPtr<BorderImage>);
+    const std::unique_ptr<BorderImageProperty>& GetOrCreateBdImage();
+    const std::unique_ptr<BorderImageProperty>& GetBdImage() const;
+    std::unique_ptr<BorderImageProperty> CloneBdImage() const;
+    void ResetBdImage();
+
+    std::optional<RefPtr<BorderImage>> GetBorderImage() const;
+    bool HasBorderImage() const;
+    RefPtr<BorderImage> GetBorderImageValue(const RefPtr<BorderImage>& defaultValue) const;
+    void ResetBorderImage();
+    void UpdateBorderImage(const RefPtr<BorderImage>& value);
+
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageSource, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageSlice, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageWidth, bool);
@@ -739,6 +771,16 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Motion, MotionPathProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
 
+    // UnionEffect
+    ACE_DEFINE_PROPERTY_GROUP(UnionEffect, UnionEffectProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(UnionEffect, UseUnionEffect, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(UnionEffect, UnionMode, UnionMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(UnionEffect, CenterGravityOptions, CenterGravityOptions);
+
+    // EdgeLight
+    ACE_DEFINE_PROPERTY_GROUP(EdgeLight, EdgeLightProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(EdgeLight, EdgeLightParam, EdgeLightParam);
+
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP_FOR_VIRTUAL_NODE(AccessibilityFocus, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
@@ -746,9 +788,6 @@ public:
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffectType, EffectType);
-
-    // useUnionEffect
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseUnionEffect, bool);
 
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
@@ -851,6 +890,7 @@ public:
     }
 
     virtual void SetDrawNode() {}
+    virtual void SetUnionSpacing(float spacing) {}
 
     static void SetNeedCallbackNodeChange(bool needCallback);
 
@@ -877,14 +917,30 @@ public:
 
     virtual void UpdateOverlayText() {}
 
+    virtual void UpdateEdgeLightFilter(const SizeF& frameSize) {}
+
+    virtual void UpdateEdgeLightFilterWithLightMask(const SizeF& frameSize) {}
+
+    virtual void ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX,
+        float& positionY, float rectH, const SizeF& frameSize)
+    {}
+
+    virtual void ResetEdgeLightFilter() {}
+
     void SetIsFree(bool isFree)
     {
         isFree_ = isFree;
     }
+    virtual void UpdateDistortionParam(const DistortionParam& param) {}
 
+    virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
+
+    virtual void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) {}
 protected:
-    RenderContext() = default;
+    RenderContext();
+    std::unique_ptr<BorderImageProperty> propBdImage_;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
+    std::shared_ptr<UiMaterialInfo> uiMaterial_;
     ShareId shareId_;
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
@@ -983,11 +1039,15 @@ protected:
     virtual void OnUseEffectUpdate(bool useEffect) {}
     virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
     virtual void OnUseUnionEffectUpdate(bool useUnion) {}
+    virtual void OnUnionModeUpdate(UnionMode unionMode) {}
+    virtual void OnCenterGravityOptionsUpdate(const CenterGravityOptions& centerGravityOptions) {}
     virtual bool GetStatusByEffectTypeAndWindow() { return false; }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
+
+    virtual void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) {}
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;
@@ -997,7 +1057,6 @@ private:
     std::function<void(bool)> requestFrame_;
     WeakPtr<FrameNode> host_;
     RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;
-    RefPtr<UiMaterial> uiMaterial_;
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };
 } // namespace OHOS::Ace::NG

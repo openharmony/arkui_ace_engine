@@ -35,9 +35,9 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -646,7 +646,8 @@ HWTEST_F(NavigationPatternTestThreeNg, isNodeVisible, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    navigationNode->UpdateLastStandardIndex();
+    bool hasFullScreenOverlay = false;
+    navigationNode->UpdateLastStandardIndex(hasFullScreenOverlay);
     
     auto navBarNode2 = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     EXPECT_NE(navBarNode2, nullptr);

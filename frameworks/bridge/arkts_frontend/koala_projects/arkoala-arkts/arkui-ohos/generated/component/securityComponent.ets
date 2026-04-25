@@ -37,7 +37,7 @@ import { hookSecurityComponentMethodAttributeModifier, AttributeModifier, Attrib
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkSecurityComponentMethodPeer extends PeerNode {
-    attributeSet?: SecurityComponentMethodModifier;
+    securityComponentMethodAttributeSet?: SecurityComponentMethodModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -568,12 +568,12 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_setAlignRules(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setIdAttribute(description: string | undefined): void {
+    setIdAttribute(id: string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (description !== undefined) {
+        if (id !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const descriptionTmpValue = description!
-            thisSerializer.writeString(descriptionTmpValue)
+            const idTmpValue = id!
+            thisSerializer.writeString(idTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -824,7 +824,7 @@ export interface SecurityComponentMethod {
     alignRules(alignRule: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         throw new Error('Unimplemented method alignRules')
     }
-    id(description: string | undefined): this {
+    id(id: string | undefined): this {
         throw new Error('Unimplemented method id')
     }
     chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
@@ -987,9 +987,9 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         this.getPeer()?.setAlignRulesAttribute(alignRule_casted)
         return this
     }
-    public id(description: string | undefined): this {
-        const description_casted = description as (string | undefined)
-        this.getPeer()?.setIdAttribute(description_casted)
+    public id(id: string | undefined): this {
+        const id_casted = id as (string | undefined)
+        this.getPeer()?.setIdAttribute(id_casted)
         return this
     }
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {

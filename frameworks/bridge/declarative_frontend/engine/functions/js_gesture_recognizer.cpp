@@ -17,10 +17,25 @@
 
 #include "ui/base/utils/utils.h"
 
+#include "core/common/event_manager.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+bool IsNodeBelongsTo(const RefPtr<NG::FrameNode>& startNode, int32_t uniqueId)
+{
+    auto node = startNode;
+    while (node) {
+        if (node->GetId() == uniqueId) {
+            return true;
+        }
+        node = node->GetAncestorNodeOfFrame(false);
+    }
+    return false;
+}
+} // namespace
 
 JSRef<JSObject> CreateEventTargetInfo(RefPtr<NG::FrameNode> attachNode)
 {
@@ -41,11 +56,13 @@ JSRef<JSObject> CreateEventTargetInfo(RefPtr<NG::FrameNode> attachNode)
         auto scrollableTarget = Referenced::Claim(scrollableTargetObj->Unwrap<JSScrollableTargetInfo>());
         scrollableTarget->SetPattern(pattern);
         scrollableTarget->SetInspectorId(attachNode->GetInspectorIdValue(""));
+        scrollableTarget->SetUniqueId(attachNode->GetId());
         return scrollableTargetObj;
     }
     auto eventTargetObj = JSClass<JSEventTargetInfo>::NewInstance();
     auto eventTarget = Referenced::Claim(eventTargetObj->Unwrap<JSEventTargetInfo>());
     eventTarget->SetInspectorId(attachNode->GetInspectorIdValue(""));
+    eventTarget->SetUniqueId(attachNode->GetId());
     return eventTargetObj;
 }
 
@@ -192,6 +209,19 @@ void JSGestureRecognizer::IsValid(const JSCallbackInfo& args)
         isValid = true;
     }
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(isValid)));
+}
+
+void JSGestureRecognizer::IsHostBelongsTo(const JSCallbackInfo& args)
+{
+    bool result = false;
+    if (args.Length() >= 1 && args[0]->IsNumber()) {
+        auto recognizer = recognizer_.Upgrade();
+        if (recognizer) {
+            auto node = recognizer->GetAttachedNode().Upgrade();
+            result = IsNodeBelongsTo(node, args[0]->ToNumber<int32_t>());
+        }
+    }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
 void JSPanRecognizer::GetDirection(const JSCallbackInfo& args)
@@ -361,10 +391,24 @@ void JSTouchRecognizer::GetEventTargetInfo(const JSCallbackInfo& args)
     args.SetReturnValue(eventTargetObj);
 }
 
+void JSTouchRecognizer::IsHostBelongsTo(const JSCallbackInfo& args)
+{
+    bool result = false;
+    if (args.Length() >= 1 && args[0]->IsNumber()) {
+        auto target = target_.Upgrade();
+        if (target) {
+            auto node = target->GetAttachedNode().Upgrade();
+            result = IsNodeBelongsTo(node, args[0]->ToNumber<int32_t>());
+        }
+    }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 void JSEventTargetInfo::JSBind(BindingTarget globalObj)
 {
     JSClass<JSEventTargetInfo>::Declare("EventTargetInfo");
     JSClass<JSEventTargetInfo>::CustomMethod("getId", &JSEventTargetInfo::GetInspectorId);
+    JSClass<JSEventTargetInfo>::CustomMethod("getUniqueId", &JSEventTargetInfo::GetUniqueId);
     JSClass<JSEventTargetInfo>::Bind(globalObj, &JSEventTargetInfo::Constructor, &JSEventTargetInfo::Destructor);
 }
 
@@ -374,6 +418,7 @@ void JSScrollableTargetInfo::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableTargetInfo>::CustomMethod("isBegin", &JSScrollableTargetInfo::IsBegin);
     JSClass<JSScrollableTargetInfo>::CustomMethod("isEnd", &JSScrollableTargetInfo::IsEnd);
     JSClass<JSScrollableTargetInfo>::CustomMethod("getId", &JSEventTargetInfo::GetInspectorId);
+    JSClass<JSEventTargetInfo>::CustomMethod("getUniqueId", &JSEventTargetInfo::GetUniqueId);
     JSClass<JSScrollableTargetInfo>::Inherit<JSEventTargetInfo>();
     JSClass<JSScrollableTargetInfo>::Bind(
         globalObj, &JSScrollableTargetInfo::Constructor, &JSScrollableTargetInfo::Destructor);
@@ -393,6 +438,7 @@ void JSGestureRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSGestureRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
     JSClass<JSGestureRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSGestureRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSGestureRecognizer>::CustomMethod("isHostBelongsTo", &JSGestureRecognizer::IsHostBelongsTo);
     JSClass<JSGestureRecognizer>::Bind(globalObj, &JSGestureRecognizer::Constructor, &JSGestureRecognizer::Destructor);
 }
 
@@ -411,6 +457,7 @@ void JSPanRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSPanRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSPanRecognizer>::CustomMethod("getPanGestureOptions", &JSPanRecognizer::GetPanGestureOptions);
     JSClass<JSPanRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSPanRecognizer>::CustomMethod("isHostBelongsTo", &JSGestureRecognizer::IsHostBelongsTo);
     JSClass<JSPanRecognizer>::CustomMethod("getDirection", &JSPanRecognizer::GetDirection);
     JSClass<JSPanRecognizer>::CustomMethod("getDistance", &JSPanRecognizer::GetPanDistance);
     JSClass<JSPanRecognizer>::CustomMethod("getDistanceMap", &JSPanRecognizer::GetPanDistanceMap);
@@ -433,6 +480,7 @@ void JSPinchRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSPinchRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
     JSClass<JSPinchRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSPinchRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSPinchRecognizer>::CustomMethod("isHostBelongsTo", &JSGestureRecognizer::IsHostBelongsTo);
     JSClass<JSPinchRecognizer>::Inherit<JSGestureRecognizer>();
     JSClass<JSPinchRecognizer>::Bind(globalObj, &JSPinchRecognizer::Constructor, &JSPinchRecognizer::Destructor);
 }
@@ -452,6 +500,7 @@ void JSTapRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSTapRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
     JSClass<JSTapRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSTapRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSTapRecognizer>::CustomMethod("isHostBelongsTo", &JSGestureRecognizer::IsHostBelongsTo);
     JSClass<JSTapRecognizer>::Inherit<JSGestureRecognizer>();
     JSClass<JSTapRecognizer>::Bind(globalObj, &JSTapRecognizer::Constructor, &JSTapRecognizer::Destructor);
 }
@@ -473,6 +522,7 @@ void JSLongPressRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSLongPressRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
     JSClass<JSLongPressRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSLongPressRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSLongPressRecognizer>::CustomMethod("isHostBelongsTo", &JSGestureRecognizer::IsHostBelongsTo);
     JSClass<JSLongPressRecognizer>::Inherit<JSGestureRecognizer>();
     JSClass<JSLongPressRecognizer>::Bind(
         globalObj, &JSLongPressRecognizer::Constructor, &JSLongPressRecognizer::Destructor);
@@ -493,6 +543,7 @@ void JSRotationRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSRotationRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
     JSClass<JSRotationRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSRotationRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSRotationRecognizer>::CustomMethod("isHostBelongsTo", &JSGestureRecognizer::IsHostBelongsTo);
     JSClass<JSRotationRecognizer>::Inherit<JSGestureRecognizer>();
     JSClass<JSRotationRecognizer>::Bind(
         globalObj, &JSRotationRecognizer::Constructor, &JSRotationRecognizer::Destructor);
@@ -514,6 +565,7 @@ void JSSwipeRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSSwipeRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
     JSClass<JSSwipeRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSSwipeRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSSwipeRecognizer>::CustomMethod("isHostBelongsTo", &JSGestureRecognizer::IsHostBelongsTo);
     JSClass<JSSwipeRecognizer>::Inherit<JSGestureRecognizer>();
     JSClass<JSSwipeRecognizer>::Bind(globalObj, &JSSwipeRecognizer::Constructor, &JSSwipeRecognizer::Destructor);
 }
@@ -523,6 +575,7 @@ void JSTouchRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSTouchRecognizer>::Declare("TouchRecognizer");
     JSClass<JSTouchRecognizer>::CustomMethod("getEventTargetInfo", &JSTouchRecognizer::GetEventTargetInfo);
     JSClass<JSTouchRecognizer>::CustomMethod("cancelTouch", &JSTouchRecognizer::CancelTouch);
+    JSClass<JSTouchRecognizer>::CustomMethod("isHostBelongsTo", &JSTouchRecognizer::IsHostBelongsTo);
     JSClass<JSTouchRecognizer>::Bind(globalObj, &JSTouchRecognizer::Constructor, &JSTouchRecognizer::Destructor);
 }
 } // namespace OHOS::Ace::Framework

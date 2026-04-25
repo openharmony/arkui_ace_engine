@@ -18,20 +18,14 @@ function nullOrUndef(value: unknown): boolean {
   return value === null || value === undefined;
 }
 
-function runNoThrow<T>(fn: () => T): T | undefined {
-  try {
-    return fn();
-  } catch {
-    return undefined;
-  }
-}
-
 class DataCoder {
   // Tag to detect payload format
   public static readonly FORMAT_TAG = 'JSON2';
 
-  // Track visited objects to prevent recursion in restoreObject()
-  private static visited_ = new Set<string>();
+  // Track visited target objects to prevent recursion in restoreObject()
+  private static visitedTargets_ = new Set<string>();
+  // Track visited source objects to restore shared references
+  private static visitedSources_ = new Map<object, object>();
 
   /**
    * Serialize an object to a JSON2
@@ -87,6 +81,7 @@ class DataCoder {
 
     try {
       if (!nullOrUndef(source) && globalThis.isSendable(source)) {
+        this.throwIfNotSendable(origTarget);
         // The root is Sendable; only properties are restored
         this.restoreObject(origTarget, source, { factory });
       } else {
@@ -95,7 +90,8 @@ class DataCoder {
         this.restorePropValue(dst, 'root', src, 'root', { factory });
       }
     } finally {
-      this.visited_.clear();
+      this.visitedTargets_.clear();
+      this.visitedSources_.clear();
     }
 
     // Regular or @ObservedV2 target, return as-is
@@ -152,26 +148,38 @@ class DataCoder {
         return value;
       }
 
+      if (this.visitedSources_.has(value)) {
+        return this.visitedSources_.get(value);
+      }
+
       if (opts?.factory === undefined) {
+        this.visitedSources_.set(value, value);
         return value;
       }
 
-      const type = opts.factory(value);
-      const newValue = type ? new type() : value;
+      const clazz = opts.factory(value);
+      const newValue = clazz ? new clazz() : value;
 
-      // don't allow collections as items of a collection
+      // we don't allow collections directly nested inside other collections
       this.throwIfCollection(newValue);
 
       this.restoreObject(newValue, value, opts);
       return newValue;
     };
 
-    // ignore already visited
+    // track visited targets (objects) to prevent recursion
     if (typeof target === 'object' && target != null) {
-      if (this.visited_.has(target)) {
+      if (this.visitedTargets_.has(target)) {
         return;
       }
-      this.visited_.add(target);
+      this.visitedTargets_.add(target);
+    }
+
+    // track visited sources (objects) to restore shared references
+    if (typeof source === 'object' && source != null) {
+      if (!this.visitedSources_.has(source)) {
+        this.visitedSources_.set(source, target);
+      }
     }
 
     if (source instanceof Array) {
@@ -247,18 +255,23 @@ class DataCoder {
     }
 
     if (['string','number','boolean','bigint'].includes(typeof srcVal)) {
-      runNoThrow(() => target[targetProp] = srcVal);
+      target[targetProp] = srcVal;
+      return;
+    }
+
+    if (this.visitedSources_.get(srcVal)) {
+      target[targetProp] = this.visitedSources_.get(srcVal);
       return;
     }
 
     // try to restore the Date without replacing the existing instance
     if (srcVal instanceof Date && tgtVal instanceof Date) {
-      runNoThrow(() => target[targetProp].setTime(srcVal.getTime()));
+      target[targetProp].setTime(srcVal.getTime())
       return;
     }
 
     if ([Boolean, Date, Number, String].includes(srcVal?.constructor)) {
-      runNoThrow(() => target[targetProp] = srcVal);
+      target[targetProp] = srcVal;
       return;
     }
 
@@ -269,7 +282,7 @@ class DataCoder {
 
     if (!nullOrUndef(srcVal) && globalThis.isSendable(srcVal)) {
       this.throwIfNotSendable(tgtVal);
-      runNoThrow(() => target[targetProp] = srcVal);
+      target[targetProp] = srcVal;
       return;
     }
 
@@ -289,19 +302,19 @@ class DataCoder {
     }
 
     if (nullOrUndef(srcVal)) {
-      runNoThrow(() => target[targetProp] = srcVal);
+      target[targetProp] = srcVal;
       return;
     }
 
     if (nullOrUndef(tgtVal) && opts.factory) {
-      const type = opts.factory(srcVal);
-      runNoThrow(() => target[targetProp] = type ? new type() : {});
+      const clazz = opts.factory(srcVal);
+      target[targetProp] = clazz ? new clazz() : {};
       this.restoreObject(target[targetProp], srcVal, {});
       return;
     }
 
     if (tgtVal === undefined) {
-      runNoThrow(() => target[targetProp] = srcVal);
+      target[targetProp] = srcVal;
       return;
     }
 
@@ -310,8 +323,8 @@ class DataCoder {
     }
 
     if (tgtVal.constructor !== srcVal.constructor && opts.factory !== undefined) {
-      const type = opts.factory(srcVal)
-      runNoThrow(() => target[targetProp] = type ? new type() : {});
+      const clazz = opts.factory(srcVal)
+      target[targetProp] = clazz ? new clazz() : {};
       this.restoreObject(target[targetProp], srcVal, {});
       return;
     }
@@ -341,7 +354,7 @@ class DataCoder {
     if (target != null && globalThis.isSendable(target) === false) {
       const type = target.constructor?.name ?? typeof target;
       const msg = `Not supported type! The target (${type}) is not @Sendable`;
-      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, msg);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, msg);
     }
   }
 

@@ -232,9 +232,9 @@ void HandleTrackBackgroundColor(
         CHECK_NULL_VOID(pattern);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<DataPanelTheme>();
+            auto frameNode = pattern->GetHost();
+            CHECK_NULL_VOID(frameNode);
+            auto theme = frameNode->GetTheme<DataPanelTheme>(true);
             CHECK_NULL_VOID(theme);
             result = theme->GetBackgroundColor();
         }
@@ -254,9 +254,7 @@ void HandleStrokeWidth(
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<DataPanelTheme>();
+        auto theme = host->GetTheme<DataPanelTheme>(true);
         CHECK_NULL_VOID(theme);
         CalcDimension result;
         if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {

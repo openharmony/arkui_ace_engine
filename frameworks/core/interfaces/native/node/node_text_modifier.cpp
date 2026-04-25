@@ -20,7 +20,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,7 +31,6 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
 #include "frameworks/core/common/ime/text_range.h"
 
@@ -1725,6 +1724,25 @@ void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)
     }
 }
 
+void SetTextOnWillCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        TextModelNG::SetOnWillCopy(frameNode, std::move(*func));
+    } else {
+        TextModelNG::SetOnWillCopy(frameNode, nullptr);
+    }
+}
+
+void ResetTextOnWillCopy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOnWillCopy(frameNode, nullptr);
+}
+
 void SetTextOnCopy(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2857,6 +2875,29 @@ void SetStyledString(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* 
     CHECK_NULL_VOID(spanStringRawPtr);
     TextModelNG::SetStyledString(frameNode, spanStringRawPtr);
 }
+
+void SetFontVariations(ArkUINodeHandle node, ArkUIFontVariation* value, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FONT_VARIATIONS_LIST fontVariations;
+    for (int32_t i = 0; i < length; i++) {
+        ArkUIFontVariation fontVariation = value[i];
+        std::optional<bool> isNormalized;
+        if (fontVariation.isNormalized.isSet) {
+            isNormalized = fontVariation.isNormalized.value;
+        }
+        fontVariations.push_back({ fontVariation.axis ? fontVariation.axis : "", fontVariation.value, isNormalized });
+    }
+    TextModelNG::SetFontVariations(frameNode, fontVariations);
+}
+
+void ResetFontVariations(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetFontVariations(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2991,6 +3032,8 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextSelectableMode = ResetTextSelectableMode,
         .setTextDataDetectorConfigWithEvent = SetTextDataDetectorConfigWithEvent,
         .resetTextDataDetectorConfigWithEvent = ResetTextDataDetectorConfigWithEvent,
+        .setTextOnWillCopy = SetTextOnWillCopy,
+        .resetTextOnWillCopy = ResetTextOnWillCopy,
         .setTextOnCopy = SetTextOnCopy,
         .resetTextOnCopy = ResetTextOnCopy,
         .setTextOnTextSelectionChange = SetTextOnTextSelectionChange,
@@ -3066,6 +3109,8 @@ const ArkUITextModifier* GetTextModifier()
         .getGlyphRangeForCharacterRange = GetGlyphRangeForCharacterRange,
         .getCharacterRangeForGlyphRange = GetCharacterRangeForGlyphRange,
         .setStyledString = SetStyledString,
+        .setFontVariations = SetFontVariations,
+        .resetFontVariations = ResetFontVariations,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -3229,11 +3274,76 @@ void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam)
     TextModelNG::SetOnDetectResultUpdate(frameNode, std::move(onDetectResultUpdate));
 }
 
+void SetOnTextTextSelectionChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onSelectionChange = [node, extraParam](int32_t start, int32_t end) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_TEXT_SELECTION_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
+        SendArkUISyncEvent(&event);
+    };
+    TextModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
+}
+
+void SetOnTextWillCopy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) -> bool {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_WILL_COPY;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        nodeEvent.textInputEvent.preventDefault = 1;
+        SendArkUISyncEvent(&nodeEvent);
+        return static_cast<bool>(nodeEvent.textInputEvent.preventDefault);
+    };
+    TextModelNG::SetOnWillCopy(frameNode, std::move(func));
+}
+
+void SetOnTextCopy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_COPY;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        SendArkUISyncEvent(&nodeEvent);
+    };
+    TextModelNG::SetOnCopy(frameNode, std::move(func));
+}
+
 void ResetOnDetectResultUpdate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnDetectResultUpdate(frameNode, nullptr);
+}
+
+void ResetOnTextTextSelectionChange(ArkUINodeHandle node)
+{
+    GetTextModifier()->resetTextOnTextSelectionChange(node);
+}
+
+void ResetOnTextWillCopy(ArkUINodeHandle node)
+{
+    GetTextModifier()->resetTextOnWillCopy(node);
+}
+
+void ResetOnTextCopy(ArkUINodeHandle node)
+{
+    GetTextModifier()->resetTextOnCopy(node);
 }
 
 template<typename T>

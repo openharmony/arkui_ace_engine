@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include "menu_item_model.h"
@@ -37,8 +38,6 @@
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -126,6 +125,7 @@ void UpdateFontColor(const RefPtr<FrameNode>& textNode, RefPtr<MenuLayoutPropert
     CHECK_NULL_VOID(textProperty);
     auto renderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+
     if (fontColor.has_value()) {
         textProperty->UpdateTextColor(fontColor.value());
     } else if (menuProperty && menuProperty->GetFontColor().has_value()) {
@@ -255,9 +255,7 @@ void MenuItemPattern::InitFocusPadding()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    auto selectTheme = context->GetTheme<SelectTheme>();
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     focusPadding_ = selectTheme->GetOptionFocusedBoxPadding();
 }
@@ -347,7 +345,7 @@ void MenuItemPattern::SetThemeProps(const RefPtr<FrameNode>& host)
     if (!layoutProp->GetMarginProperty()) {
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
-        auto selectTheme = context->GetTheme<SelectTheme>();
+        auto selectTheme = host->GetTheme<SelectTheme>(true);
         CHECK_NULL_VOID(selectTheme);
         MarginProperty margin;
         auto horizontalMargin = CalcLength(selectTheme->GetMenuItemLeftRightMargin());
@@ -374,7 +372,7 @@ void MenuItemPattern::NeedFocusEvent()
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto selectTheme = context->GetTheme<SelectTheme>();
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto menuItemNeedFocus = selectTheme->GetMenuItemNeedFocus();
     if (menuItemNeedFocus) {
@@ -500,7 +498,7 @@ void MenuItemPattern::ClearFocusStyle()
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         isFocusShadowSet_ = false;
     }
     auto paintProperty = GetPaintProperty<MenuItemPaintProperty>();
@@ -523,7 +521,7 @@ void MenuItemPattern::HandleFocusEvent()
     renderContext->SetClipToBounds(focusPadding_ == 0.0_vp);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto selectTheme = context->GetTheme<SelectTheme>();
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
 
     if (!renderContext->HasBackgroundColor()) {
@@ -566,7 +564,7 @@ void MenuItemPattern::HandleBlurEvent()
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         isFocusShadowSet_ = false;
     }
 
@@ -725,6 +723,9 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (menuPattern->GetScrollBar().has_value()) {
         param.scrollBar = menuPattern->GetScrollBar().value();
     }
+    param.targetSpace = outterMenuLayoutProps->GetMenuTargetSpace();
+    param.targetOffset = outterMenuLayoutProps->GetTargetOffset();
+    param.targetSize = outterMenuLayoutProps->GetTargetMenuSize();
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
@@ -751,7 +752,7 @@ void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
     CHECK_NULL_VOID(subMenu);
     auto pipeline = subMenu->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    auto menuTheme = subMenu->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(menuTheme);
     if (menuTheme->GetMenuAnimationDuration()) {
         auto renderContext = subMenu->GetRenderContext();
@@ -783,7 +784,8 @@ void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
 void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
 {
     CHECK_NULL_VOID(subMenu);
-    auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto accessibilityProperty = AceType::DynamicCast<MenuAccessibilityProperty>(
+        subMenu->GetAccessibilityProperty<AccessibilityProperty>());
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
@@ -1475,7 +1477,7 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     auto props = GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(props);
@@ -1621,7 +1623,7 @@ void MenuItemPattern::PostHoverSubMenuTask()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto menuTheme = context->GetTheme<MenuTheme>();
+    auto menuTheme = host->GetTheme<MenuTheme>(true);
     CHECK_NULL_VOID(menuTheme);
     auto delayTime = menuTheme->GetSubMenuShowDelayDuration();
     if (delayTime > 0) {
@@ -1652,7 +1654,7 @@ void MenuItemPattern::CheckHideSubMenu(std::function<void()> callback, const Poi
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto menuTheme = context->GetTheme<MenuTheme>();
+    auto menuTheme = host->GetTheme<MenuTheme>(true);
     CHECK_NULL_VOID(menuTheme);
     if (!lastInnerPosition_.has_value()) {
         TAG_LOGW(AceLogTag::ACE_MENU, "Last inner position not has value");
@@ -1994,12 +1996,26 @@ void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
+void MenuItemPattern::UpdateSymbolColorList(RefPtr<TextLayoutProperty>& props, const std::vector<Color>& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    props->UpdateSymbolColorList(color);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        props->UpdateTextColorFlagByUser(false);
+    }
+}
 void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
+    if (selectIcon->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        selectIcon->SetThemeScopeId(host->GetThemeScopeId());
+    }
     auto symbol = itemProperty->GetSelectSymbol();
     if (itemProperty->GetSelectIconSrc().value_or("").empty() &&
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && SystemProperties::IsNeedSymbol()) {
@@ -2007,20 +2023,20 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         row->RemoveChild(selectIcon);
         selectIcon = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        auto selectTheme = selectIcon->GetTheme<SelectTheme>(true);
         CHECK_NULL_VOID(selectTheme);
         auto props = selectIcon->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateFontSize(selectTheme->GetEndIconWidth());
-        props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
+        UpdateSymbolColorList(props, { selectTheme->GetMenuIconColor() });
         symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(selectIcon)));
     } else {
         // image -> image
-        auto iconTheme = pipeline->GetTheme<IconTheme>();
+        auto iconTheme = selectIcon->GetTheme<IconTheme>(true);
         CHECK_NULL_VOID(iconTheme);
         auto userIcon = itemProperty->GetSelectIconSrc().value_or("");
         auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        auto selectTheme = selectIcon->GetTheme<SelectTheme>(true);
         CHECK_NULL_VOID(selectTheme);
         ImageSourceInfo imageSourceInfo;
         imageSourceInfo.SetSrc(iconPath);
@@ -2040,17 +2056,19 @@ void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>
     CHECK_NULL_VOID(props);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto symbol = itemProperty->GetSelectSymbol();
     if (itemProperty->GetSelectIconSrc().value_or("").empty()) {
         // symbol -> symbol
         props->UpdateFontSize(selectTheme->GetEndIconWidth());
-        props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
+        UpdateSymbolColorList(props, { selectTheme->GetMenuIconColor() });
         if (symbol) {
             symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(selectIcon)));
         } else {
-            auto menuTheme = pipeline->GetTheme<MenuTheme>();
+            auto menuTheme = selectIcon->GetTheme<MenuTheme>(true);
             CHECK_NULL_VOID(menuTheme);
             uint32_t symbolId = menuTheme->GetSymbolId();
             props->UpdateSymbolSourceInfo(SymbolSourceInfo(symbolId));
@@ -2133,11 +2151,9 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        auto selectTheme = host->GetTheme<SelectTheme>(true);
         CHECK_NULL_VOID(selectTheme);
-        auto menuTheme = pipeline->GetTheme<MenuTheme>();
+        auto menuTheme = host->GetTheme<MenuTheme>(true);
         CHECK_NULL_VOID(menuTheme);
         auto props = expandIcon_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(props);
@@ -2153,7 +2169,7 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
             symbolId = menuTheme->GetEmbeddedExpandIconId();
             props->UpdateFontSize(selectTheme->GetIconSideLength());
         }
-        props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
+        UpdateSymbolColorList(props, { selectTheme->GetMenuIconColor() });
         props->UpdateSymbolSourceInfo(SymbolSourceInfo(symbolId));
     }
     auto expandIconIndex = row->GetChildren().size();
@@ -2406,7 +2422,7 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateFontSize(selectTheme->GetEndIconWidth());
-        props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
+        UpdateSymbolColorList(props, { selectTheme->GetMenuIconColor() });
         symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
     } else {
         // image -> image
@@ -2450,7 +2466,7 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
     if (symbol) {
         // symbol -> symbol
         props->UpdateFontSize(selectTheme->GetEndIconWidth());
-        props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
+        UpdateSymbolColorList(props, { selectTheme->GetMenuIconColor() });
         symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
     } else {
         // symbol -> image
@@ -2465,6 +2481,24 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
         props->UpdateImageSourceInfo(imageSourceInfo);
         Ace::NG::UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
     }
+}
+
+void MenuItemPattern::UpdateTextAlignment(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme)
+{
+    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
+    TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
+    if (layoutDirection == TextDirection::RTL) {
+        if (textAlign == TextAlign::LEFT) {
+            textAlign = TextAlign::RIGHT;
+        } else if (textAlign == TextAlign::RIGHT) {
+            textAlign = TextAlign::LEFT;
+        } else if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else if (textAlign == TextAlign::END) {
+            textAlign = TextAlign::START;
+        }
+    }
+    textProperty->UpdateTextAlign(textAlign);
 }
 
 void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel)
@@ -2488,25 +2522,13 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     CHECK_NULL_VOID(node);
     auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
+    textProperty->UpdateEnableSmallLanguageTruncation(true);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(isTextFadeOut_);
     auto theme = GetCurrentSelectTheme();
     CHECK_NULL_VOID(theme);
-    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
-    TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
-    if (layoutDirection == TextDirection::RTL) {
-        if (textAlign == TextAlign::LEFT) {
-            textAlign = TextAlign::RIGHT;
-        } else if (textAlign == TextAlign::RIGHT) {
-            textAlign = TextAlign::LEFT;
-        } else if (textAlign == TextAlign::START) {
-            textAlign = TextAlign::END;
-        } else if (textAlign == TextAlign::END) {
-            textAlign = TextAlign::START;
-        }
-    }
-    textProperty->UpdateTextAlign(textAlign);
+    UpdateTextAlignment(textProperty, theme);
     UpdateFont(menuProperty, theme, isLabel);
     textProperty->UpdateContent(content);
     UpdateTextOverflow(textProperty, theme);
@@ -2528,6 +2550,10 @@ void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textPropert
             textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
             textProperty->UpdateMaxLines(1);
         } else {
+            auto host = textProperty->GetHost();
+            if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                textProperty->UpdateOrphanCharOptimization(true);
+            }
             textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
         }
     } else {
@@ -2585,10 +2611,10 @@ void MenuItemPattern::UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textPr
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto menuTheme = host->GetTheme<NG::MenuTheme>(true);
+    CHECK_NULL_VOID(menuTheme);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
     auto fontScale = pipeline->GetFontScale();
     if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
         NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
@@ -2635,7 +2661,7 @@ void MenuItemPattern::UpdateDisabledStyle()
     CHECK_NULL_VOID(eventHub);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     auto enabled = eventHub->IsEnabled();
     auto alpha = theme->GetDisabledFontColorAlpha();
@@ -2790,9 +2816,7 @@ void MenuItemPattern::ModifyDivider()
     auto divider = menuProperty->GetItemDivider();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto selectTheme = context->GetTheme<SelectTheme>();
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto hasDivider = divider.has_value();
     auto isDefaultShowDivider = selectTheme->GetDefaultShowDivider();
@@ -3264,11 +3288,10 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
 {
     HandleOptionBackgroundColor();
     HandleOptionFontColor();
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    textTheme_ = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(host);
+    textTheme_ = host->GetTheme<TextTheme>(true);
     CHECK_NULL_VOID(textTheme_);
-    selectTheme_ = context->GetTheme<SelectTheme>();
+    selectTheme_ = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme_);
 
     auto eventHub = host->GetEventHub<MenuItemEventHub>();
@@ -3418,12 +3441,12 @@ RefPtr<FrameNode> MenuItemPattern::CreateCheckMarkNode(const RefPtr<FrameNode>& 
     CHECK_NULL_RETURN(checkMarkNode, nullptr);
     auto checkLayoutProperty = checkMarkNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(checkLayoutProperty, nullptr);
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(selectTheme, nullptr);
     checkLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo { selectTheme->GetCheckMarkIconId() });
-    checkLayoutProperty->UpdateSymbolColorList({ selectTheme->GetCheckMarkColor() });
+    UpdateSymbolColorList(checkLayoutProperty, { selectTheme->GetCheckMarkColor() });
     checkLayoutProperty->UpdateFontSize(selectTheme->GetCheckMarkFontSize());
     checkLayoutProperty->UpdateFontWeight(selectTheme->GetCheckMarkFontWeight());
 
@@ -3558,9 +3581,7 @@ void MenuItemPattern::ApplySelectedThemeStyles()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto selectedColorText = selectTheme->GetSelectedColorText();
     auto selectedFontSizeText = selectTheme->GetSelectFontSizeText();
@@ -3580,10 +3601,8 @@ void MenuItemPattern::ApplyOptionThemeStyles()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
+    auto textTheme = host->GetTheme<TextTheme>(true);
     CHECK_NULL_VOID(selectTheme && textTheme);
     SetFontColor(selectTheme->GetMenuFontColor());
     SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
@@ -3601,7 +3620,7 @@ RefPtr<SelectTheme> MenuItemPattern::GetCurrentSelectTheme()
     CHECK_NULL_RETURN(host, nullptr);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     return theme;
 }
@@ -3620,7 +3639,7 @@ void MenuItemPattern::OnColorConfigurationUpdate()
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     auto pipeline = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    auto menuTheme = menuNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(menuTheme);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
@@ -3643,6 +3662,85 @@ void MenuItemPattern::OnColorConfigurationUpdate()
         content_->MarkModifyDone();
         content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+}
+
+void MenuItemPattern::UpdateStartIconByThemeColor(RefPtr<SelectTheme> &menuTheme)
+{
+    CHECK_NULL_VOID(startIcon_);
+    startIcon_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuItemPattern::UpdateEndIconByThemeColor(RefPtr<SelectTheme> &menuTheme)
+{
+    CHECK_NULL_VOID(endIcon_);
+    endIcon_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuItemPattern::UpdateexpandIconByThemeColor(RefPtr<SelectTheme> &menuTheme)
+{
+    CHECK_NULL_VOID(expandIcon_);
+    expandIcon_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuItemPattern::UpdateSelectIconByThemeColor(RefPtr<SelectTheme> &menuTheme)
+{
+    CHECK_NULL_VOID(selectIcon_);
+    selectIcon_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuItemPattern::UpdateCheckMarkIconByThemeColor(RefPtr<SelectTheme> &menuTheme)
+{
+    CHECK_NULL_VOID(checkMarkNode_);
+    checkMarkNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuItemPattern::UpdateFontByThemeColor(RefPtr<MenuLayoutProperty>& menuProperty,
+    RefPtr<MenuItemLayoutProperty>& itemProperty, RefPtr<SelectTheme> &menuTheme, bool isLabel)
+{
+    auto fontNode = isLabel ? label_ : content_;
+    CHECK_NULL_VOID(fontNode);
+    CHECK_NULL_VOID(itemProperty);
+    auto fontColor = itemProperty->GetLabelFontColor();
+    if (isLabel && (!fontColor.has_value() || !itemProperty->GetLabelFontColorSetByUser().value_or(false))) {
+        CHECK_NULL_VOID(menuProperty);
+        auto textProperty = fontNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textProperty);
+        if (menuProperty->GetFontColorSetByUser().value_or(false) && menuProperty->GetFontColor().has_value()) {
+            textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
+            itemProperty->UpdateLabelFontColor(menuProperty->GetFontColor().value());
+        } else {
+            textProperty->UpdateTextColor(menuTheme->GetMenuFontColor());
+            itemProperty->UpdateLabelFontColor(menuTheme->GetMenuFontColor());
+        }
+    }
+    fontNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
+        return false;
+    }
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    CHECK_NULL_RETURN(menuTheme, false);
+    auto menu = GetMenu();
+    CHECK_NULL_RETURN(menu, false);
+    auto itemProperty = host->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_RETURN(itemProperty, false);
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuProperty, false);
+    host->MarkModifyDone();
+    UpdateFontByThemeColor(menuProperty, itemProperty, menuTheme, true);
+    UpdateFontByThemeColor(menuProperty, itemProperty, menuTheme, false);
+    UpdateStartIconByThemeColor(menuTheme);
+    UpdateEndIconByThemeColor(menuTheme);
+    UpdateexpandIconByThemeColor(menuTheme);
+    UpdateSelectIconByThemeColor(menuTheme);
+    UpdateCheckMarkIconByThemeColor(menuTheme);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return true;
 }
 
 void MenuItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -3669,15 +3767,24 @@ void MenuItemPattern::UpdateOptionStyle()
     CHECK_NULL_VOID(selectNode);
     auto selectPattern = selectNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(selectPattern);
-
+    auto selectPaintProperty = selectNode->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(selectPaintProperty);
     if (isSelected_) {
-        ApplySelectedThemeStyles();
+        if (SystemProperties::ConfigChangePerform()) {
+            ApplySelectedThemeStyles(selectPaintProperty, menuNode);
+        } else {
+            ApplySelectedThemeStyles();
+        }
         if (optionSelectedApply_) {
             ApplyTextModifier(optionSelectedApply_);
         }
         selectPattern->UpdateSelectedOptionFontFromPattern(host);
     } else {
-        ApplyOptionThemeStyles();
+        if (SystemProperties::ConfigChangePerform()) {
+            ApplyOptionThemeStyles(selectPaintProperty);
+        } else {
+            ApplyOptionThemeStyles();
+        }
         if (optionApply_) {
             ApplyTextModifier(optionApply_);
         }
@@ -3685,6 +3792,76 @@ void MenuItemPattern::UpdateOptionStyle()
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::ApplySelectedThemeStyles(
+    const RefPtr<SelectPaintProperty>& selectPaintProperty, const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_VOID(selectPaintProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectTheme = host->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    if (!showDefaultSelectedIcon_) {
+        if (!(selectPaintProperty->GetSelectedOptionBgColorSetByUser().has_value() &&
+                selectPaintProperty->GetSelectedOptionBgColorSetByUser().value())) {
+            SetBgColor(selectTheme->GetSelectedColor());
+            auto property = GetPaintProperty<MenuItemPaintProperty>();
+            CHECK_NULL_VOID(property);
+            if (property->HasSelectedOptionBgColor()) {
+                property->UpdateSelectedOptionBgColor(selectTheme->GetSelectedColor());
+            }
+        }
+        if (!(selectPaintProperty->GetSelectedOptionFontColorSetByUser().has_value() &&
+                selectPaintProperty->GetSelectedOptionFontColorSetByUser().value())) {
+            SetFontColor(selectTheme->GetSelectedColorText());
+            auto property = GetPaintProperty<MenuItemPaintProperty>();
+            CHECK_NULL_VOID(property);
+            if (property->HasSelectedOptionFontColor()) {
+                property->UpdateSelectedOptionFontColor(selectTheme->GetSelectedColorText());
+            }
+        }
+    }
+    SetBorderColor(selectTheme->GetOptionSelectedBorderColor());
+    SetBorderWidth(selectTheme->GetOptionSelectedBorderWidth());
+
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    if (!menuPattern->IsSelectMenuBackgroundColorJsview()) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+    }
+}
+
+void MenuItemPattern::ApplyOptionThemeStyles(const RefPtr<SelectPaintProperty>& selectPaintProperty)
+{
+    CHECK_NULL_VOID(selectPaintProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectTheme = host->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    if (!(selectPaintProperty->GetOptionBgColorSetByUser().has_value() &&
+            selectPaintProperty->GetOptionBgColorSetByUser().value())) {
+        auto property = GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(property);
+        if (property->HasOptionBgColor()) {
+            SetBgColor(selectTheme->GetBackgroundColor());
+            property->UpdateOptionBgColor(selectTheme->GetBackgroundColor());
+        }
+    }
+    if (!(selectPaintProperty->GetOptionFontColorSetByUser().has_value() &&
+            selectPaintProperty->GetOptionFontColorSetByUser().value())) {
+        SetFontColor(selectTheme->GetMenuFontColor());
+        auto property = GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(property);
+        if (property->HasOptionFontColor()) {
+            property->UpdateOptionFontColor(selectTheme->GetMenuFontColor());
+        }
+    }
+    SetBorderColor(GetBorderColor());
+    SetBorderWidth(GetBorderWidth());
 }
 
 void MenuItemPattern::ReportEvent()

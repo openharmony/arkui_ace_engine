@@ -18,7 +18,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "frameworks/base/memory/ace_type.h"
 #include "interfaces/inner_api/ace_kit/include/ui/resource/resource_object.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

@@ -451,6 +451,7 @@ bool GetShowDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Di
     if (!dialogProps.isShowInSubWindow) {
         GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
     }
+    GetSystemMaterial(env, object, dialogProps.systemMaterial);
     return true;
 }
 
@@ -696,6 +697,20 @@ bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetFunctionParam(env, object, "onDidDisappear", dialogProps.onDidDisappear);
     GetFunctionParam(env, object, "onWillAppear", dialogProps.onWillAppear);
     GetFunctionParam(env, object, "onWillDisappear", dialogProps.onWillDisappear);
+    return true;
+}
+
+bool GetActionMenuOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps)
+{
+    if (IsUndefinedObject(env, object)) {
+        return false;
+    }
+
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.ActionMenuOptionsInternal")) {
+        return false;
+    }
+
+    GetSystemMaterial(env, object, dialogProps.systemMaterial);
     return true;
 }
 
@@ -1036,6 +1051,7 @@ bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Dialog
     if (!dialogProps.isShowInSubWindow) {
         GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
     }
+    GetSystemMaterial(env, object, dialogProps.systemMaterial);
     return true;
 }
 

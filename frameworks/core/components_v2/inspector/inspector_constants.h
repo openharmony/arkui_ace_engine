@@ -148,6 +148,7 @@ ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
+ACE_EXPORT extern const char NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG[];
 ACE_EXPORT extern const char TOOL_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
@@ -581,6 +582,12 @@ ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
 // effect view
 ACE_EXPORT extern const char EFFECT_COMPONENT_ETS_TAG[];
 
+// distortion component
+ACE_EXPORT extern const char DISTORTION_COMPONENT_ETS_TAG[];
+
+// distortion content node
+ACE_EXPORT extern const char DISTORTION_CONTENT_ETS_TAG[];
+
 // button
 ACE_EXPORT extern const char MODEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char MODEL_ETS_TAG[];
@@ -683,6 +690,9 @@ ACE_EXPORT extern const char LAZY_V_GRID_LAYOUT_ETS_TAG[];
 
 // Picker
 ACE_EXPORT extern const char CONTAINER_PICKER_ETS_TAG[];
+
+// DepthComponent
+ACE_EXPORT extern const char DEPTH_COMPONENT_ETS_TAG[];
 
 // UndefinedNode
 ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];

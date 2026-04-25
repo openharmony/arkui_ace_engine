@@ -21,7 +21,7 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Font as arkui_component_units_Font, Length, ResourceStr, Dimension, LengthMetrics as arkui_component_units_LengthMetrics, ColorMetrics as arkui_component_units_ColorMetrics } from './units'
 import { CaretStyle_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, VoiceButtonOptions_serializer, MaxLinesOptions_serializer, LineSpacingOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, IMEClient, SelectedDragPreviewStyle, TextDirection, VoiceButtonOptions, MaxLinesOptions, LineSpacingOptions, MaxLinesMode } from './textCommon'
-import { TextDecorationOptions_serializer, InputCounterOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, Callback as arkui_component_common_Callback, InputCounterOptions, Bindable, ArkCommonMethodComponent, Bindable_ResourceStr_serializer, Bindable_Resource_serializer, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common'
+import { TextDecorationOptions_serializer, InputCounterOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, TextDecorationOptions, InputCounterOptions, Bindable, ArkCommonMethodComponent, Bindable_ResourceStr_serializer, Bindable_Resource_serializer, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
 import { extractors, AttributeModifier, initializers, hookTextAreaAttributeModifier, AttributeUpdater } from '#handwritten'
@@ -46,7 +46,7 @@ import { TextAreaModifier } from './../TextAreaModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkTextAreaPeer extends ArkCommonMethodPeer {
-    attributeSet?: TextAreaModifier;
+    textAreaAttributeSet?: TextAreaModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -426,6 +426,18 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setOnCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnWillCopyAttribute(value: arkui_component_common_Callback<string, boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setOnWillCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnCutAttribute(value: ((breakpoints: string) => void) | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -436,6 +448,18 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAreaAttribute_setOnCut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillCutAttribute(value: arkui_component_common_Callback<string, boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setOnWillCut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnPasteAttribute(value: ((value: string,event: PasteEvent) => void) | undefined): void {
@@ -1071,18 +1095,6 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.writeBoolean(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._TextAreaAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setVoiceButtonAttribute(value: VoiceButtonOptions | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1105,6 +1117,18 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAreaAttribute_setHorizontalScrolling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setInputFilterAttribute(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): void {
@@ -1298,8 +1322,14 @@ export interface TextAreaAttribute extends CommonMethod {
     onCopy(value: ((breakpoints: string) => void) | undefined): this {
         throw new Error('Unimplemented method onCopy')
     }
+    onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillCopy')
+    }
     onCut(value: ((breakpoints: string) => void) | undefined): this {
         throw new Error('Unimplemented method onCut')
+    }
+    onWillCut(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillCut')
     }
     onPaste(value: ((value: string,event: PasteEvent) => void) | undefined): this {
         throw new Error('Unimplemented method onPaste')
@@ -1439,14 +1469,14 @@ export interface TextAreaAttribute extends CommonMethod {
     textDirection(value: TextDirection | undefined): this {
         throw new Error('Unimplemented method textDirection')
     }
-    orphanCharOptimization(value: boolean | undefined): this {
-        throw new Error("Unimplemented method orphanCharOptimization")
-    }
     voiceButton(value: VoiceButtonOptions | undefined): this {
         throw new Error('Unimplemented method voiceButton')
     }
     horizontalScrolling(value: boolean | undefined): this {
         throw new Error('Unimplemented method horizontalScrolling')
+    }
+    orphanCharOptimization(value: boolean | undefined): this {
+        throw new Error('Unimplemented method orphanCharOptimization')
     }
     inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {
         throw new Error('Unimplemented method inputFilter')
@@ -1578,9 +1608,19 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         this.getPeer()?.setOnCopyAttribute(value_casted)
         return this
     }
+    public onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<string, boolean> | undefined)
+        this.getPeer()?.setOnWillCopyAttribute(value_casted)
+        return this
+    }
     public onCut(value: ((breakpoints: string) => void) | undefined): this {
         const value_casted = value as (((breakpoints: string) => void) | undefined)
         this.getPeer()?.setOnCutAttribute(value_casted)
+        return this
+    }
+    public onWillCut(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<string, boolean> | undefined)
+        this.getPeer()?.setOnWillCutAttribute(value_casted)
         return this
     }
     public onPaste(value: ((value: string,event: PasteEvent) => void) | undefined): this {
@@ -1813,11 +1853,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         this.getPeer()?.setTextDirectionAttribute(value_casted)
         return this
     }
-    public orphanCharOptimization(value: boolean | undefined): this {
-        const value_casted = value as (boolean | undefined)
-        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
-        return this
-    }
     public voiceButton(value: VoiceButtonOptions | undefined): this {
         const value_casted = value as (VoiceButtonOptions | undefined)
         this.getPeer()?.setVoiceButtonAttribute(value_casted)
@@ -1826,6 +1861,11 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     public horizontalScrolling(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setHorizontalScrollingAttribute(value_casted)
+        return this
+    }
+    public orphanCharOptimization(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
         return this
     }
     public inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {

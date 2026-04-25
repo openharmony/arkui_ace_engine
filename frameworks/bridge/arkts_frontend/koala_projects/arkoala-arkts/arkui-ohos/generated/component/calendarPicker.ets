@@ -77,7 +77,7 @@ export class CalendarPickerDialog implements MaterializedBase {
     }
 }
 export class ArkCalendarPickerPeer extends ArkCommonMethodPeer {
-    attributeSet?: CalendarPickerModifier;
+    calendarPickerAttributeSet?: CalendarPickerModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

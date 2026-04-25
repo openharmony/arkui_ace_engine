@@ -17,11 +17,12 @@
 #include "gtest/internal/gtest-internal.h"
 
 #define private public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/color.h"
@@ -34,6 +35,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components_ng/pattern/data_panel/data_panel_theme_wrapper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -87,7 +89,29 @@ class DataPanelTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
     void GradientColorSet(std::vector<Gradient>& valueColors, const int& length);
+    
+    // Helper function to create LinearData for testing
+    static LinearData CreateLinearData(const OffsetF& offset, float xSegment, float segmentWidth, float height,
+                                        bool isEndData = false)
+    {
+        LinearData data;
+        data.offset = offset;
+        data.xSegment = xSegment;
+        data.segmentWidth = segmentWidth;
+        data.height = height;
+        data.isEndData = isEndData;
+        return data;
+    }
+
+    static RefPtr<OHOS::Ace::DataPanelTheme> GetRealDataPanelTheme()
+    {
+        auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+        return AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+            DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    }
 };
 
 class DataPanelTheme : public Theme {
@@ -123,14 +147,29 @@ void DataPanelTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    auto dataPanelTheme = GetRealDataPanelTheme();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
 }
 
 void DataPanelTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void DataPanelTestNg::SetUp()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = GetRealDataPanelTheme();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+}
+
+void DataPanelTestNg::TearDown()
+{
+    // No teardown needed for this test suite
 }
 
 void DataPanelTestNg::GradientColorSet(std::vector<Gradient>& valueColors, const int& length)
@@ -812,12 +851,26 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest010, TestSize.Level1)
  */
 HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level0)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier(nullptr);
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -844,6 +897,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level0)
 
     dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, false);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -853,18 +908,35 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level0)
  */
 HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level0)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier(nullptr);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
+
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
     dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT, SEGMENTWIDTH);
     dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT * 4, SEGMENTWIDTH);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -874,12 +946,26 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level0)
  */
 HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level0)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier(nullptr);
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -895,9 +981,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level0)
     /**
      * @tc.case: layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl(nullptr);
+    DataPanelModifier dataPanelModifierRtl(pattern);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -907,12 +995,26 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level0)
  */
 HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level0)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier(nullptr);
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -940,9 +1042,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level0)
     /**
      * @tc.case: layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl(nullptr);
+    DataPanelModifier dataPanelModifierRtl(pattern);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintColorSegment(rsCanvas, linerData);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -952,18 +1056,34 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level0)
  */
 HWTEST_F(DataPanelTestNg, DataPanelPaintTrackBackgroundTest001, TestSize.Level0)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier(nullptr);
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     dataPanelModifier.PaintTrackBackground(rsCanvas, arcData, START_COLOR);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -977,11 +1097,26 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level0)
      * case 1:defaultThickness >= radius
      * radius = -10.0f
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DataPanelTheme>()));
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier(nullptr);
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, -10.0f, -10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -991,6 +1126,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level0)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.PaintCircle(context, OFFSET);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1004,13 +1141,26 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level0)
      * case 2: totalvalue = 20
      *  values = { 10.0f, 10.0f } totalvalue = 20
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataPanelTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1025,6 +1175,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level0)
     std::vector<double> VALUES = { 10.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
     dataPanelModifier.PaintCircle(context, OFFSET);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1039,13 +1191,25 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
      * max = 100.0f Values = { 0.001f, 20.0f };
      * isShadowVisible = true
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataPanelTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1061,19 +1225,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
     dataPanelModifier.SetValues(VALUES);
     std::vector<Gradient> valueColors;
     // test Solid color when the valueColors >0 and valueColors <=9
-    Gradient gradient;
-    GradientColor gradientColorStart;
-    gradientColorStart.SetLinearColor(LinearColor::WHITE);
-    gradientColorStart.SetDimension(Dimension(0.0));
-    gradient.AddColor(gradientColorStart);
-    GradientColor gradientColorEnd;
-    gradientColorEnd.SetLinearColor(LinearColor::BLACK);
-    gradientColorEnd.SetDimension(Dimension(1.0));
-    gradient.AddColor(gradientColorEnd);
     int length = 2;
-    for (int i = 0; i < length; i++) {
-        valueColors.push_back(gradient);
-    }
+    GradientColorSet(valueColors, length);
     dataPanelModifier.SetShadowColors(valueColors, length);
     /**
      * @tc.cases: case. cover branch isShadowVisible is true.
@@ -1094,6 +1247,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
      */
     dataPanelModifier.SetIsHasShadowValue(true);
     dataPanelModifier.PaintCircle(context, OFFSET);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1107,13 +1262,25 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level0)
      * case 1: maxValue = 100, totalValue = 110
      *  values = { 100.0f, 10.0f } totalValue = 110
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataPanelTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
 
@@ -1148,6 +1315,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level0)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.PaintCircle(context, OFFSET);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1161,13 +1330,25 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level0)
      * case 1: value1 nearZero, value2 nearMax
      *  values = { 0.0001f, 99.9f }
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataPanelTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
 
@@ -1202,6 +1383,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level0)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.PaintCircle(context, OFFSET);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1215,13 +1398,25 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level0)
      * case 1:sum of value = max ,max > 0
      * values ={10.0f,10.0f} max = 20.0f
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataPanelTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1259,6 +1454,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level0)
     dataPanelModifier.SetIsHasShadowValue(true);
     dataPanelModifier.PaintLinearProgress(context, OFFSET);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1272,13 +1469,25 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level0)
      * case 2:sum of value != max, max < 0
      * values ={-5.0f, 0.0f} max = -20.0f
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataPanelTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1290,6 +1499,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level0)
     std::vector<double> VALUES = { -5.0f, 0.0f };
     dataPanelModifier.SetValues(VALUES);
     dataPanelModifier.PaintLinearProgress(context, OFFSET);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1303,13 +1514,25 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level0)
      * case 3:one of value nearequael 0 and > 0
      * values ={ 0.0001f, 5.0f} max = 20.0f
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataPanelTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1324,6 +1547,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level0)
     std::vector<double> VALUES = { 0.0001f, 5.0f };
     dataPanelModifier.SetValues(VALUES);
     dataPanelModifier.PaintLinearProgress(context, OFFSET);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1333,13 +1558,25 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level0)
  */
 HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.Level1)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
-        { Color::WHITE, Color::BLACK } };
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataPanelTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1361,11 +1598,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     /**
      * @tc.cases: case. cover isEndData is true.
      */
-    segmentLinearData.isEndData = true;
-    segmentLinearData.offset = OFFSET;
-    segmentLinearData.xSegment = 5.0;
-    segmentLinearData.segmentWidth = 5.0;
-    segmentLinearData.height = 5.0;
+    segmentLinearData = CreateLinearData(OFFSET, 5.0, 5.0, 5.0, true);
     dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
 
     /**
@@ -1386,9 +1619,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     /**
      * @tc.case: case. layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl(nullptr);
+    DataPanelModifier dataPanelModifierRtl(pattern);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1398,15 +1633,29 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
  */
 HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level0)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
 
     /**
      * @tc.cases: case. cover branch isEffect_.
      */
-    DataPanelModifier dataPanelModifier(nullptr);
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     dataPanelModifier.isEffect_->Set(true);
     dataPanelModifier.date_->Set(0.0f);
     dataPanelModifier.UpdateDate();
@@ -1416,6 +1665,8 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level0)
     dataPanelModifier.date_->Set(0.0f);
     dataPanelModifier.UpdateDate();
     EXPECT_EQ(1.0f, dataPanelModifier.date_->Get());
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1428,11 +1679,25 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level0)
     /**
      * @tc.steps: step1. statement dataPanelModifier.
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
 
     /**
      * @tc.steps: step2. construct context and call onDraw().
@@ -1454,6 +1719,8 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level0)
     dataPanelModifier.dataPanelType_ = 1;
     dataPanelModifier.onDraw(context);
     EXPECT_EQ(1, dataPanelModifier.dataPanelType_);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1466,11 +1733,25 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest001, TestSize.Lev
     /**
      * @tc.steps: step1. statement dataPanelModifier.
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
 
     /**
      * @tc.steps: step2. Test positive sequence gradientColor.
@@ -1495,6 +1776,8 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest001, TestSize.Lev
     EXPECT_EQ(color1, LinearColor::GRAY);
     auto color2 = result.at(2).GetLinearColor();
     EXPECT_EQ(color2, LinearColor::WHITE);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1507,11 +1790,25 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest002, TestSize.Lev
     /**
      * @tc.steps: step1. statement dataPanelModifier.
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
 
     /**
      * @tc.steps: step2. Test Reverse GradientColor.
@@ -1536,6 +1833,8 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest002, TestSize.Lev
     EXPECT_EQ(color1, LinearColor::GRAY);
     auto color2 = result.at(2).GetLinearColor();
     EXPECT_EQ(color2, LinearColor::BLACK);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1548,11 +1847,25 @@ HWTEST_F(DataPanelTestNg, DataPanelShadowTest001, TestSize.Level0)
     /**
      * @tc.steps: step1. statement dataPanelModifier.
      */
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+     
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
 
     /**
      * @tc.steps: step2. Test the setting of Shadow attribute.
@@ -1589,6 +1902,8 @@ HWTEST_F(DataPanelTestNg, DataPanelShadowTest001, TestSize.Level0)
     EXPECT_EQ(dataPanelModifier.shadowOffsetXFloat_->Get(), -DEFAULT_SHADOW_VALUE);
     EXPECT_EQ(dataPanelModifier.shadowOffsetYFloat_->Get(), -DEFAULT_SHADOW_VALUE);
     EXPECT_EQ(dataPanelModifier.shadowColorsLastLength_, MAX_COUNT);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1679,6 +1994,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level0)
     auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
     dataPanelTheme->defaultBorderRadius_ = Dimension(4.0, DimensionUnit::VP);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
 
     DataPanelModelNG dataPanel;
     dataPanel.Create(VALUES, MAX, TYPE_LINE);
@@ -1730,6 +2046,7 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level0)
     auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
     dataPanelTheme->defaultBorderRadius_ = Dimension(4.0, DimensionUnit::VP);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
 
     DataPanelModelNG dataPanel;
     dataPanel.Create(VALUES, MAX, TYPE_LINE);
@@ -2326,7 +2643,18 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest006, TestSize.Level1)
  */
 HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest001, TestSize.Level0)
 {
-    DataPanelModifier dataPanelModifier(nullptr);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+    
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 50.0f, 50.0f };
     // test Solid color when the valueColors >0 and valueColors <=9
@@ -2361,6 +2689,8 @@ HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest001, TestSize.Level0)
     dataPanelModifier.GetPaintPath(arcData, path, endPath);
     dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, true);
     dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, false);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2372,13 +2702,24 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest002, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_DATA_PANEL);
+    auto dataTheme = AceType::DynamicCast<OHOS::Ace::DataPanelTheme>(
+        DataPanelThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataTheme));
 
     /**
      * @tc.cases: case. cover branch isEffect_.
      */
-    DataPanelModifier dataPanelModifier(nullptr);
+    // Create a mock pattern to avoid null pointer in DataPanelModifier constructor
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    auto pattern = frameNode->GetPattern();
+    
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+    
+    DataPanelModifier dataPanelModifier(pattern);
     dataPanelModifier.isEffect_->Set(false);
     dataPanelModifier.date_->Set(1.0f);
     dataPanelModifier.UpdateDate();

@@ -33,6 +33,7 @@ public:
     static void SetWidth(const JSRef<JSVal>& jsValue);
     static void SetHeight(const JSRef<JSVal>& jsValue);
     static void SetSize(const JSCallbackInfo& info);
+    static void SetSyncLoad(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -19,24 +19,29 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pattern/mock_picker_haptic_impl.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_picker_haptic_impl.h"
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/json/json_util.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #undef private
 #undef protected
 
@@ -1852,6 +1857,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest002, Tes
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
     EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":0,"month":6,"day":15})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1879,6 +1889,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest003, Tes
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
     EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":2024,"month":0,"day":15})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1905,6 +1920,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest004, Tes
     int32_t day = 0;
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
+    EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":2024,"month":6,"day":0})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
     EXPECT_FALSE(result);
 }
 

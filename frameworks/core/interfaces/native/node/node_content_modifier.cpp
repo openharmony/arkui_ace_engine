@@ -16,32 +16,54 @@
 
 #include "base/error/error_code.h"
 #include "core/components_ng/syntax/node_content.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 
 ArkUI_Int32 AddChild(ArkUINodeContentHandle content, ArkUINodeHandle child)
 {
-    CHECK_NULL_RETURN(content, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    if (!content) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!child) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
     auto* uiNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(uiNode, ERROR_CODE_PARAM_INVALID);
+    if (!uiNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child UI node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (uiNode->IsAdopted()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node has already been adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     nodeContent->AddNode(uiNode);
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 InsertChild(ArkUINodeContentHandle content, ArkUINodeHandle child, ArkUI_Int32 position)
+ArkUI_Int32 InsertChild(
+    ArkUINodeContentHandle content, ArkUINodeHandle child, ArkUI_Int32 position)
 {
-    CHECK_NULL_RETURN(content, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    if (!content) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!child) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
     auto* uiNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(uiNode, ERROR_CODE_PARAM_INVALID);
+    if (!uiNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child UI node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (uiNode->IsAdopted()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node has already been adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     nodeContent->AddNode(uiNode, position);
@@ -50,8 +72,14 @@ ArkUI_Int32 InsertChild(ArkUINodeContentHandle content, ArkUINodeHandle child, A
 
 ArkUI_Int32 RemoveChild(ArkUINodeContentHandle content, ArkUINodeHandle child)
 {
-    CHECK_NULL_RETURN(content, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    if (!content) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!child) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
     auto* uiNode = reinterpret_cast<UINode*>(child);
     nodeContent->RemoveNode(uiNode);
@@ -61,8 +89,14 @@ ArkUI_Int32 RemoveChild(ArkUINodeContentHandle content, ArkUINodeHandle child)
 ArkUI_Int32 RegisterEvent(
     ArkUINodeContentHandle content, void* userData, void (*receiver)(ArkUINodeContentEvent* event))
 {
-    CHECK_NULL_RETURN(content, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(receiver, ERROR_CODE_PARAM_INVALID);
+    if (!content) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!receiver) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Event receiver is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto onAttach = [receiver, userData, content]() {
         ArkUINodeContentEvent event { 0, userData, content };
         receiver(&event);
@@ -79,7 +113,10 @@ ArkUI_Int32 RegisterEvent(
 
 ArkUI_Int32 SetUserData(ArkUINodeContentHandle content, void* userData)
 {
-    CHECK_NULL_RETURN(content, ERROR_CODE_PARAM_INVALID);
+    if (!content) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
     nodeContent->SetUserData(userData);
     return ERROR_CODE_NO_ERROR;

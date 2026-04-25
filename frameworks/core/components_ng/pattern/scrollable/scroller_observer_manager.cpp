@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scrollable/scroller_observer_manager.h"
 
+#include "ui/event/touch_event.h"
+
 namespace OHOS::Ace {
 void ScrollerObserverManager::AddObserver(const ScrollerObserver& obs, int32_t id)
 {

@@ -17,7 +17,7 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"

@@ -75,6 +75,7 @@ private:
     static void SetOnWillHide(const JSCallbackInfo& info);
     static bool ParseDrawableIndicator(const JSRef<JSVal>& info, ImageInfoConfig& drawableIndicatorConfig);
     static ImageType ParseImageType(const JSRef<JSVal>& imageInfo);
+    static int32_t GetThemeScopeId();
 };
 
 } // namespace OHOS::Ace::Framework

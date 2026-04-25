@@ -83,7 +83,8 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         "resetUndoStyle", "setScrollBarColor", "resetScrollBarColor", "setSelectedDragPreviewStyle",
         "resetSelectedDragPreviewStyle", "setSingleLine", "resetSingleLine", "setBindSelectionMenu",
         "setEnableSelectedDataDetector", "setClip", "setFocusable", "setSelectedDataDetectorConfig",
-        "setCustomKeyboardJS", "setOrphanCharOptimization", "resetOrphanCharOptimization"
+        "setCustomKeyboardJS", "setOrphanCharOptimization", "resetOrphanCharOptimization", "setHorizontalScrolling",
+        "resetHorizontalScrolling"
     };
 
     Local<JSValueRef> functionValues[] = {
@@ -178,6 +179,8 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCustomKeyboardJS),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOrphanCharOptimization),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOrphanCharOptimization),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetHorizontalScrolling),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetHorizontalScrolling),
     };
 
     auto richEditor = panda::ObjectRef::NewWithNamedProperties(
@@ -3109,6 +3112,38 @@ ArkUINativeModuleValue RichEditorBridge::ResetOrphanCharOptimization(ArkUIRuntim
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->resetRichEditorOrphanCharOptimization(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetHorizontalScrolling(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> boolArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (boolArg->IsNull() || boolArg->IsUndefined() || !boolArg->IsBoolean()) {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorHorizontalScrolling(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t horizontalScrolling = boolArg->Uint32Value(vm);
+    nodeModifiers->getRichEditorModifier()->setRichEditorHorizontalScrolling(nativeNode, horizontalScrolling);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue RichEditorBridge::ResetHorizontalScrolling(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorHorizontalScrolling(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

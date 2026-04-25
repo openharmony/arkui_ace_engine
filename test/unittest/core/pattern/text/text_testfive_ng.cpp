@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1043,6 +1044,26 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle002, TestSize.Level1)
     EXPECT_CALL(*paragraph, PushStyle).Times(2);
     EXPECT_CALL(*paragraph, PopStyle).Times(2);
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
+}
+
+/**
+ * @tc.name: SpanUpdateFontVariations001
+ * @tc.desc: test span fontVariations property update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, SpanUpdateFontVariations001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    spanModelNG.SetFontVariations(FONT_VARIATIONS_VALUE);
+    EXPECT_TRUE(spanNode->HasFontVariations());
+    EXPECT_EQ(spanNode->GetFontVariationsValue({}), FONT_VARIATIONS_VALUE);
+
+    SpanModelNG::SetFontVariations(AceType::RawPtr(spanNode), {});
+    EXPECT_EQ(spanNode->GetFontVariationsValue(FONT_VARIATIONS_VALUE), FONT_VARIATIONS_LIST {});
 }
 
 /**

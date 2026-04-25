@@ -41,11 +41,11 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 

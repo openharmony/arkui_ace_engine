@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -654,6 +652,10 @@ public:
     {
         return hoverColor_;
     }
+    void SetHoverColor(const Color& value)
+    {
+        hoverColor_ = value;
+    }
 
     const Color& GetBackgroundColor() const
     {
@@ -748,6 +750,11 @@ public:
     const Color& GetSecondaryFontColor() const
     {
         return secondaryFontColor_;
+    }
+
+    void SetSecondaryFontColor(const Color& value)
+    {
+        secondaryFontColor_ = value;
     }
 
     const std::string& GetFontFamily() const
@@ -1084,9 +1091,19 @@ public:
         return menuIconColor_;
     }
 
+    void SetMenuIconColor(const Color& value)
+    {
+        menuIconColor_ = value;
+    }
+
     const Color& GetLineColor() const
     {
         return lineColor_;
+    }
+
+    void SetLineColor(const Color& value)
+    {
+        lineColor_ = value;
     }
 
     const TextStyle& GetOptionTextStyle() const
@@ -1132,6 +1149,11 @@ public:
     const Color& GetMenuFontColor() const
     {
         return menuFontColor_;
+    }
+
+    void SetMenuFontColor(const Color& value)
+    {
+        menuFontColor_ = value;
     }
 
     const Color& GetDisabledMenuFontColor() const

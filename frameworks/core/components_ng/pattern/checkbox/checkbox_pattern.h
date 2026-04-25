@@ -20,7 +20,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/toggle/toggle_base_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"

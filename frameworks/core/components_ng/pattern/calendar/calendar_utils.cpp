@@ -13,14 +13,27 @@
  * limitations under the License.
  */
 #include "calendar_utils.h"
+
+#include "base/utils/utils.h"
+#include "core/common/font_manager.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "core/interfaces/native/node/calendar_picker_dialog_modifier.h"
+
 namespace OHOS::Ace::NG {
 bool CalendarUtils::CheckOrientationChange()
 {
     auto modifier = NodeModifier::GetCalendarPickerDialogModifier();
     CHECK_NULL_RETURN(modifier, true);
     return modifier->checkOrientationChange();
-};
 }
+
+bool CalendarUtils::SkipCalendarPickerDayGridAgingAdapt(OHOS::Ace::PipelineBase* pipeline)
+{
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    return fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
+}
+} // namespace OHOS::Ace::NG

@@ -334,6 +334,7 @@ public:
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     using TextChangeEventHandleFuncForAni = std::function<void(const TextChangeEventInfo& info)>;
     using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
+    using SwiperContentUpdateHandleFuncForAni = std::function<void(const SwiperContentInfo&)>;
     using SwiperContentObservrEmptyFunc = bool (*)();
     using RouterPageSizeChangeHandleFunc = void (*)(const RouterPageInfoNG&);
     using NavDestinationSizeChangeHandleFunc = void (*)(const NavDestinationInfo&);
@@ -397,6 +398,7 @@ public:
     void SetNavDestinationSizeChangeHandleFuncForAni(NavDestinationSizeChangeHandleFuncForAni&& func);
     void SetNavDestinationSizeChangeByUniqueIdHandleFuncForAni(
         NavDestinationSizeChangeByUniqueIdHandleFuncForAni&& func);
+    void SetHandleSwiperContentUpdateFuncForAni(SwiperContentUpdateHandleFuncForAni&& func);
 
     static void AddBeforePanStartListenerCallback(
         int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback);
@@ -482,6 +484,7 @@ private:
     TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
     TextChangeEventHandleFuncForAni textChangeEventHandleFuncForAni_ = nullptr;
     SwiperContentUpdateHandleFunc swiperContentUpdateHandleFunc_ = nullptr;
+    SwiperContentUpdateHandleFuncForAni swiperContentUpdateHandleFuncForAni_ = nullptr;
     SwiperContentObservrEmptyFunc swiperContentObservrEmptyFunc_ = nullptr;
 
     BeforePanStartHandleFuncForAni beforePanStartHandleFuncForAni_ = nullptr;

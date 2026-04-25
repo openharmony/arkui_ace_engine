@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "testing_color.h"
+#include "testing_color_space.h"
 #include "testing_enums.h"
 #include "testing_filter.h"
 #include "testing_path_effect.h"
@@ -47,6 +48,8 @@ public:
     virtual void SetWidth(float width) {}
     virtual void SetCapStyle(CapStyle cap) {}
     virtual void SetColor(const TestingColor& color) {}
+    virtual void SetColor(const TestingColor4f& color, std::shared_ptr<TestingColorSpace> colorSpace) {}
+    virtual void SetUIColor(const TestingUIColor& color, std::shared_ptr<TestingColorSpace> colorSpace) {}
     virtual void SetColor(int color) {}
     virtual void SetFilter(const TestingFilter& filter) {}
     virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> /* effect */) {}

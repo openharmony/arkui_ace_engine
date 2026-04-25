@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
@@ -329,6 +330,11 @@ void MenuModelNG::SetFontColor(const std::optional<Color>& color)
         ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
         ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColorSetByUser);
     }
+}
+
+void MenuModelNG::UpdateFontColorSetByUser(bool setByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColorSetByUser, setByUser);
 }
 
 void MenuModelNG::SetBorderRadius(const Dimension& radius)

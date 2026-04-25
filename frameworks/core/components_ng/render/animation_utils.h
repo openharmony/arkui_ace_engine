@@ -33,6 +33,8 @@ enum class CancelAnimationStatus;
 class PipelineContext;
 class AnimationOption;
 class Color;
+template<typename T>
+class RefPtr;
 
 namespace NG {
 class RenderContext;
@@ -52,33 +54,58 @@ public:
 
     class InteractiveAnimation;
 
+    // Overloads without context parameter (declared here, implemented in cpp)
+    static void OpenImplicitAnimation(
+        const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallback, const RefPtr<PipelineBase>& context = nullptr);
-    static bool CloseImplicitAnimation(const RefPtr<PipelineBase>& context = nullptr);
-    static bool CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& context = nullptr);
-    static CancelAnimationStatus CloseImplicitCancelAnimationReturnStatus(
-        const RefPtr<PipelineBase>& context = nullptr);
-    static bool IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context = nullptr);
+        const std::function<void()>& finishCallback, const RefPtr<PipelineBase>& context);
+
+    static bool CloseImplicitAnimation();
+    static bool CloseImplicitAnimation(const RefPtr<PipelineBase>& context);
+
+    static bool CloseImplicitCancelAnimation();
+    static bool CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& context);
+
+    static CancelAnimationStatus CloseImplicitCancelAnimationReturnStatus();
+    static CancelAnimationStatus CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context);
+
+    static bool IsImplicitAnimationOpen();
+    static bool IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context);
+
     static void Animate(const AnimationOption& option, const PropertyCallback& callback,
-        const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr,
-            const RefPtr<PipelineBase>& context = nullptr);
+        const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr);
+    static void Animate(const AnimationOption& option, const PropertyCallback& callback,
+        const FinishCallback& finishCallback, const RepeatCallback& repeatCallback,
+        const RefPtr<PipelineBase>& context);
+
+    static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback);
     static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback,
-        const RefPtr<PipelineBase>& context = nullptr);
-    static void AddKeyFrame(float fraction, const PropertyCallback& callback,
-        const RefPtr<PipelineBase>& context = nullptr);
+        const RefPtr<PipelineBase>& context);
+
+    static void AddKeyFrame(float fraction, const PropertyCallback& callback);
+    static void AddKeyFrame(float fraction, const PropertyCallback& callback, const RefPtr<PipelineBase>& context);
+
+    static void AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve, const PropertyCallback& callback);
     static void AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve, const PropertyCallback& callback,
-        const RefPtr<PipelineBase>& context = nullptr);
+        const RefPtr<PipelineBase>& context);
 
     // Similar to Animate, but reuses current options and replaces callback
+    static void AnimateWithCurrentOptions(const PropertyCallback& callback, const FinishCallback& finishCallback);
     static void AnimateWithCurrentOptions(const PropertyCallback& callback, const FinishCallback& finishCallback,
-        bool timingSensitive = true, const RefPtr<PipelineBase>& context = nullptr);
+        bool timingSensitive, const RefPtr<PipelineBase>& context);
+
     // Similar to Animate, but reuses current callback and replaces options
-    static void AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback,
-        const RefPtr<PipelineBase>& context = nullptr);
+    static void AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback);
+    static void AnimateWithCurrentCallback(
+        const AnimationOption& option, const PropertyCallback& callback, const RefPtr<PipelineBase>& context);
 
     static std::shared_ptr<AnimationUtils::Animation> StartAnimation(const AnimationOption& option,
         const PropertyCallback& callback, const FinishCallback& finishCallback = nullptr,
-        const RepeatCallback& repeatCallback = nullptr, const RefPtr<PipelineBase>& context = nullptr);
+        const RepeatCallback& repeatCallback = nullptr);
+    static std::shared_ptr<AnimationUtils::Animation> StartAnimation(const AnimationOption& option,
+        const PropertyCallback& callback, const FinishCallback& finishCallback,
+        const RepeatCallback& repeatCallback, const RefPtr<PipelineBase>& context);
+
     static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void BlendBgColorAnimation(
         RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
@@ -86,8 +113,9 @@ public:
     static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     // need to reset the attribute of arkui node after Reverse in case of attribute inconsistent
     static void ReverseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
-    static void ExecuteWithoutAnimation(const PropertyCallback& callback,
-        const RefPtr<PipelineBase>& context = nullptr);
+
+    static void ExecuteWithoutAnimation(const PropertyCallback& callback);
+    static void ExecuteWithoutAnimation(const PropertyCallback& callback, const RefPtr<PipelineBase>& context);
 
     static std::shared_ptr<AnimationUtils::InteractiveAnimation> CreateInteractiveAnimation(
         const InteractiveAnimationCallback& addCallback, const FinishCallback& callback);

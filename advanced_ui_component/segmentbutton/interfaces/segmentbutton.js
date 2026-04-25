@@ -37,6 +37,8 @@ const util = globalThis.requireNapi('util');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const I18n = requireNapi('i18n');
+const uiMaterial = requireNapi('arkui.uiMaterial');
+const deviceInfo = requireNapi('deviceInfo');
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
 const DEFAULT_MAX_FONT_SCALE = 1;
@@ -81,6 +83,13 @@ const segmentButtonTheme = {
     id: -1,
     type: 10002,
     params: ['sys.float.segment_button_checked_text_size'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  ADAPTIVE_ITEM_FONT_SIZE: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.Caption_M'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -165,13 +174,6 @@ const segmentButtonTheme = {
     id: -1,
     type: 10001,
     params: ['sys.color.segment_button_focus_text_primary'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  SEGMENT_BUTTON_SHADOW: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.segment_button_shadow'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -426,12 +428,19 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     let themePadding = LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.segment_button_baseplate_padding'],
+      params: ['sys.float.padding_level1'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }).value;
     this.componentPadding = this.multiply ? 0 : themePadding;
-    this.backgroundSystemMaterial = options.backgroundSystemMaterial;
+    let info = uiMaterial.getMaterialInfo();
+    if (info.state === uiMaterial.MaterialState.ENABLE && !options.backgroundSystemMaterial) {
+      this.backgroundSystemMaterial = new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.THIN
+      });
+    } else if (info.state !== uiMaterial.MaterialState.DISABLE) {
+      this.backgroundSystemMaterial = options.backgroundSystemMaterial;
+    }
   }
   onButtonsUpdated() {
     this.buttons?.forEach(button => {
@@ -610,6 +619,12 @@ class SelectItem extends ViewPU {
       this,
       'isSegmentFocusStyleCustomized'
     );
+    this.__openSelectedItemSystemMaterial = this.initializeConsume(
+      'openSelectedItemSystemMaterial',
+      'openSelectedItemSystemMaterial',
+      false
+    );
+    this.__selectedItemScale = this.initializeConsume('selectedItemScale', 'selectedItemScale');
     this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
   }
@@ -631,6 +646,8 @@ class SelectItem extends ViewPU {
     this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
     this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
     this.__isSegmentFocusStyleCustomized.purgeDependencyOnElmtId(rmElmtId);
+    this.__openSelectedItemSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
+    this.__selectedItemScale.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.__optionsArray.aboutToBeDeleted();
@@ -641,6 +658,8 @@ class SelectItem extends ViewPU {
     this.__zoomScaleArray.aboutToBeDeleted();
     this.__buttonBorderRadius.aboutToBeDeleted();
     this.__isSegmentFocusStyleCustomized.aboutToBeDeleted();
+    this.__openSelectedItemSystemMaterial.aboutToBeDeleted();
+    this.__selectedItemScale.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -686,6 +705,45 @@ class SelectItem extends ViewPU {
   set isSegmentFocusStyleCustomized(newValue) {
     this.__isSegmentFocusStyleCustomized.set(newValue);
   }
+  get openSelectedItemSystemMaterial() {
+    return this.__openSelectedItemSystemMaterial.get();
+  }
+  set openSelectedItemSystemMaterial(newValue) {
+    this.__openSelectedItemSystemMaterial.set(newValue);
+  }
+  get selectedItemScale() {
+    return this.__selectedItemScale.get();
+  }
+  set selectedItemScale(newValue) {
+    this.__selectedItemScale.set(newValue);
+  }
+  getBackgroundColor() {
+    if (this.options.selectedBackgroundColor) {
+      return this.options.selectedBackgroundColor;
+    }
+    if (this.options.type === 'tab') {
+      return segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+    } else {
+      return segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+    }
+  }
+  getScale() {
+    if (this.openSelectedItemSystemMaterial) {
+      return this.selectedItemScale;
+    } else {
+      return {
+        x: this.zoomScaleArray[this.selectedIndexes[0]],
+        y: this.zoomScaleArray[this.selectedIndexes[0]],
+      };
+    }
+  }
+  getOpacity() {
+    if (this.openSelectedItemSystemMaterial) {
+      return 0.7;
+    } else {
+      return 1;
+    }
+  }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
@@ -696,22 +754,10 @@ class SelectItem extends ViewPU {
             Stack.direction(this.options.direction);
             Stack.borderRadius(this.buttonBorderRadius[this.selectedIndexes[0]]);
             Stack.size(this.buttonItemsSize[this.selectedIndexes[0]]);
-            Stack.backgroundColor(
-              this.options.selectedBackgroundColor ??
-                (this.options.type === 'tab'
-                  ? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR
-                  : segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR)
-            );
+            Stack.backgroundColor(this.getBackgroundColor());
             Stack.position(ObservedObject.GetRawObject(this.selectedItemPosition));
-            Stack.scale({
-              x: this.zoomScaleArray[this.selectedIndexes[0]],
-              y: this.zoomScaleArray[this.selectedIndexes[0]],
-            });
-            Stack.shadow(
-              this.isSegmentFocusStyleCustomized
-                ? undefined
-                : resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW, 0)
-            );
+            Stack.scale(this.getScale());
+            Stack.opacity(this.getOpacity());
           }, Stack);
           Stack.pop();
         });
@@ -905,6 +951,7 @@ class SegmentButtonItem extends ViewPU {
     );
     this.__isTextInMarqueeCondition = new ObservedPropertySimplePU(false, this, 'isTextInMarqueeCondition');
     this.__isButtonTextFadeout = new ObservedPropertySimplePU(false, this, 'isButtonTextFadeout');
+    this.__useAdaptiveLineHeight = this.initializeConsume('useAdaptiveLineHeight', 'useAdaptiveLineHeight');
     this.groupId = '';
     this.__hover = new SynchedPropertySimpleOneWayPU(params.hover, this, 'hover');
     this.setInitiallyProvidedValue(params);
@@ -952,6 +999,7 @@ class SegmentButtonItem extends ViewPU {
     this.__isSegmentFocusStyleCustomized.purgeDependencyOnElmtId(rmElmtId);
     this.__isTextInMarqueeCondition.purgeDependencyOnElmtId(rmElmtId);
     this.__isButtonTextFadeout.purgeDependencyOnElmtId(rmElmtId);
+    this.__useAdaptiveLineHeight.purgeDependencyOnElmtId(rmElmtId);
     this.__hover.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
@@ -967,6 +1015,7 @@ class SegmentButtonItem extends ViewPU {
     this.__isSegmentFocusStyleCustomized.aboutToBeDeleted();
     this.__isTextInMarqueeCondition.aboutToBeDeleted();
     this.__isButtonTextFadeout.aboutToBeDeleted();
+    this.__useAdaptiveLineHeight.aboutToBeDeleted();
     this.__hover.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
@@ -1033,6 +1082,12 @@ class SegmentButtonItem extends ViewPU {
   }
   set isButtonTextFadeout(newValue) {
     this.__isButtonTextFadeout.set(newValue);
+  }
+  get useAdaptiveLineHeight() {
+    return this.__useAdaptiveLineHeight.get();
+  }
+  set useAdaptiveLineHeight(newValue) {
+    this.__useAdaptiveLineHeight.set(newValue);
   }
   get hover() {
     return this.__hover.get();
@@ -1159,6 +1214,8 @@ class SegmentButtonItem extends ViewPU {
             Text.maxLines(1);
             Text.textAlign(TextAlign.Center);
             Text.padding(this.getTextPadding());
+            Text.includeFontPadding(this.useAdaptiveLineHeight);
+            Text.fallbackLineSpacing(this.useAdaptiveLineHeight);
           }, Text);
           Text.pop();
         });
@@ -2040,7 +2097,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         }
                         this.hoverColorArray[index].hoverColor = Color.Transparent;
                       });
-                      Gesture.create(GesturePriority.Low);
+                      globalThis.Gesture.create(GesturePriority.Low);
                       TapGesture.create();
                       TapGesture.onAction(() => {
                         if (this.onItemClicked) {
@@ -2057,7 +2114,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         }
                       });
                       TapGesture.pop();
-                      Gesture.pop();
+                      globalThis.Gesture.pop();
                       Button.onTouch(event => {
                         if (this.isSegmentFocusStyleCustomized) {
                           this.getUIContext().getFocusController().clearFocus();
@@ -2341,11 +2398,25 @@ export class SegmentButton extends ViewPU {
     );
     this.doSelectedChangeAnimate = false;
     this.isCurrentPositionSelected = false;
+    this.isCurrentPositionPressed = false;
     this.panGestureStartPoint = { x: 0, y: 0 };
     this.isPanGestureMoved = false;
     this.__shouldMirror = new ObservedPropertySimplePU(false, this, 'shouldMirror');
     this.isGestureInProgress = false;
     this.isCustomizedCache = undefined;
+    this.__openSelectedItemSystemMaterial = new ObservedPropertySimplePU(false, this, 'openSelectedItemSystemMaterial');
+    this.addProvidedVar('openSelectedItemSystemMaterial', this.__openSelectedItemSystemMaterial, false);
+    this.__selectedItemScale = new ObservedPropertyObjectPU(undefined, this, 'selectedItemScale');
+    this.addProvidedVar('selectedItemScale', this.__selectedItemScale, false);
+    this.__useAdaptiveLineHeight = new ObservedPropertySimplePU(false, this, 'useAdaptiveLineHeight');
+    this.addProvidedVar('useAdaptiveLineHeight', this.__useAdaptiveLineHeight, false);
+    this.environmentCallbackID = undefined;
+    this.environmentCallback = {
+      onConfigurationUpdated: configuration => {
+        this.updateLanguageLineHeight();
+      },
+      onMemoryLevel() {},
+    };
     this.setInitiallyProvidedValue(params);
     this.declareWatch('options', this.onOptionsChange);
     this.declareWatch('selectedIndexes', this.onSelectedChange);
@@ -2405,6 +2476,9 @@ export class SegmentButton extends ViewPU {
     if (params.isCurrentPositionSelected !== undefined) {
       this.isCurrentPositionSelected = params.isCurrentPositionSelected;
     }
+    if (params.isCurrentPositionPressed !== undefined) {
+      this.isCurrentPositionPressed = params.isCurrentPositionPressed;
+    }
     if (params.panGestureStartPoint !== undefined) {
       this.panGestureStartPoint = params.panGestureStartPoint;
     }
@@ -2419,6 +2493,21 @@ export class SegmentButton extends ViewPU {
     }
     if (params.isCustomizedCache !== undefined) {
       this.isCustomizedCache = params.isCustomizedCache;
+    }
+    if (params.openSelectedItemSystemMaterial !== undefined) {
+      this.openSelectedItemSystemMaterial = params.openSelectedItemSystemMaterial;
+    }
+    if (params.selectedItemScale !== undefined) {
+      this.selectedItemScale = params.selectedItemScale;
+    }
+    if (params.useAdaptiveLineHeight !== undefined) {
+      this.useAdaptiveLineHeight = params.useAdaptiveLineHeight;
+    }
+    if (params.environmentCallbackID !== undefined) {
+      this.environmentCallbackID = params.environmentCallbackID;
+    }
+    if (params.environmentCallback !== undefined) {
+      this.environmentCallback = params.environmentCallback;
     }
   }
   updateStateVars(params) {
@@ -2444,6 +2533,9 @@ export class SegmentButton extends ViewPU {
     this.__hoverArray.purgeDependencyOnElmtId(rmElmtId);
     this.__hoverColorArray.purgeDependencyOnElmtId(rmElmtId);
     this.__shouldMirror.purgeDependencyOnElmtId(rmElmtId);
+    this.__openSelectedItemSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
+    this.__selectedItemScale.purgeDependencyOnElmtId(rmElmtId);
+    this.__useAdaptiveLineHeight.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.__enableStateAnimation.aboutToBeDeleted();
@@ -2463,6 +2555,9 @@ export class SegmentButton extends ViewPU {
     this.__hoverArray.aboutToBeDeleted();
     this.__hoverColorArray.aboutToBeDeleted();
     this.__shouldMirror.aboutToBeDeleted();
+    this.__openSelectedItemSystemMaterial.aboutToBeDeleted();
+    this.__selectedItemScale.aboutToBeDeleted();
+    this.__useAdaptiveLineHeight.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -2565,6 +2660,24 @@ export class SegmentButton extends ViewPU {
   set shouldMirror(newValue) {
     this.__shouldMirror.set(newValue);
   }
+  get openSelectedItemSystemMaterial() {
+    return this.__openSelectedItemSystemMaterial.get();
+  }
+  set openSelectedItemSystemMaterial(newValue) {
+    this.__openSelectedItemSystemMaterial.set(newValue);
+  }
+  get useAdaptiveLineHeight() {
+    return this.__useAdaptiveLineHeight.get();
+  }
+  set useAdaptiveLineHeight(newValue) {
+    this.__useAdaptiveLineHeight.set(newValue);
+  }
+  get selectedItemScale() {
+    return this.__selectedItemScale.get();
+  }
+  set selectedItemScale(newValue) {
+    this.__selectedItemScale.set(newValue);
+  }
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return;
@@ -2623,6 +2736,18 @@ export class SegmentButton extends ViewPU {
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
   }
+  updateLanguageLineHeight() {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
+  }
   onSelectedChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return;
@@ -2650,6 +2775,22 @@ export class SegmentButton extends ViewPU {
     this.updateSelectedIndexes();
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
+      }
+    }
+  }
+  aboutToDisappear() {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
+      }
+      this.environmentCallbackID = void 0;
+    }
   }
   isMouseWheelScroll(event) {
     return event.source === SourceType.Mouse && !this.isPanGestureMoved;
@@ -2716,8 +2857,8 @@ export class SegmentButton extends ViewPU {
         }
       });
       Stack.accessibilityLevel('no');
-      Gesture.create(GesturePriority.High);
-      GestureGroup.create(GestureMode.Exclusive);
+      globalThis.Gesture.create(GesturePriority.High);
+      GestureGroup.create(GestureMode.Parallel);
       TapGesture.create();
       TapGesture.onAction(event => {
         if (this.isGestureInProgress) {
@@ -2795,6 +2936,69 @@ export class SegmentButton extends ViewPU {
         }
       });
       SwipeGesture.pop();
+      LongPressGesture.create({ repeat: false, duration: 200 });
+      LongPressGesture.onAction(event => {
+        if (!this.isBackgroundSystemMaterialEnabled()) {
+          return;
+        }
+        if (this.options === void 0 || this.options.buttons === void 0) {
+          return;
+        }
+        if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+          // Non long press gesture in multi-select mode
+          return;
+        }
+        let fingerInfo = event.fingerList.find(Boolean);
+        if (fingerInfo === void 0) {
+          return;
+        }
+        let selectedInfo = fingerInfo.localX;
+        let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+        for (let i = 0; i < buttonLength; i++) {
+          selectedInfo = selectedInfo - this.buttonItemsSize[i].width;
+          if (selectedInfo < 0) {
+            let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+            this.isCurrentPositionPressed = realIndex === this.selectedIndexes[0] ? true : false;
+            break;
+          }
+        }
+        if (this.isCurrentPositionPressed && !this.openSelectedItemSystemMaterial) {
+          this.startSelectMaterialAnimation();
+        }
+      });
+      LongPressGesture.onActionCancel(event => {
+        if (!this.isBackgroundSystemMaterialEnabled()) {
+          return;
+        }
+        if (this.options === void 0 || this.options.buttons === void 0) {
+          return;
+        }
+        if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+          // Non drag gesture in multi-select mode
+          return;
+        }
+        if (this.isCurrentPositionPressed && this.openSelectedItemSystemMaterial) {
+          this.finishSelectMaterialAnimation();
+        }
+        this.isCurrentPositionPressed = false;
+      });
+      LongPressGesture.onActionEnd(event => {
+        if (!this.isBackgroundSystemMaterialEnabled()) {
+          return;
+        }
+        if (this.options === void 0 || this.options.buttons === void 0) {
+          return;
+        }
+        if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+          // Non drag gesture in multi-select mode
+          return;
+        }
+        if (this.isCurrentPositionPressed && this.openSelectedItemSystemMaterial) {
+          this.finishSelectMaterialAnimation();
+        }
+        this.isCurrentPositionPressed = false;
+      });
+      LongPressGesture.pop();
       PanGesture.create({ direction: PanDirection.Horizontal });
       PanGesture.onActionStart(event => {
         this.isGestureInProgress = true;
@@ -2821,6 +3025,16 @@ export class SegmentButton extends ViewPU {
             break;
           }
         }
+        if (this.isBackgroundSystemMaterialEnabled() && this.isCurrentPositionSelected) {
+          this.getUIContext().animateTo(
+            {
+              curve: curves.interpolatingSpring(0, 1, 195, 14),
+            },
+            () => {
+              this.selectedItemScale = { x: 1.01, y: 0.99 };
+            }
+          );
+        }
       });
       PanGesture.onActionUpdate(event => {
         if (this.options === void 0 || this.options.buttons === void 0) {
@@ -2841,28 +3055,44 @@ export class SegmentButton extends ViewPU {
         if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX, fingerInfo.globalY)) {
           this.isPanGestureMoved = true;
         }
-        let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
-        for (let i = 0; i < buttonLength; i++) {
-          selectedInfo = selectedInfo - this.buttonItemsSize[i].width;
-          if (selectedInfo < 0) {
-            let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
-            this.doSelectedChangeAnimate = true;
-            this.selectedIndexes[0] = realIndex;
-            this.doSelectedChangeAnimate = false;
-            break;
+        if (this.isBackgroundSystemMaterialEnabled()) {
+          let nowX =
+            fingerInfo.globalX -
+            this.panGestureStartPoint.x +
+            this.buttonItemsPosition[this.selectedIndexes[0]].start?.value;
+          nowX = Math.max(this.buttonItemsPosition[0].start?.value, nowX);
+          let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+          nowX = Math.min(this.buttonItemsPosition[buttonLength - 1].start?.value, nowX);
+          this.selectedItemPosition = {
+            start: LengthMetrics.vp(nowX),
+            end: this.selectedItemPosition.end,
+            top: this.selectedItemPosition.top,
+            bottom: this.selectedItemPosition.bottom,
+          };
+        } else {
+          let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+          for (let i = 0; i < buttonLength; i++) {
+            selectedInfo = selectedInfo - this.buttonItemsSize[i].width;
+            if (selectedInfo < 0) {
+              let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+              this.doSelectedChangeAnimate = true;
+              this.selectedIndexes[0] = realIndex;
+              this.doSelectedChangeAnimate = false;
+              break;
+            }
           }
+          this.zoomScaleArray.forEach((_, index) => {
+            if (index === this.selectedIndexes[0]) {
+              Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                this.zoomScaleArray[index] = 0.95;
+              });
+            } else {
+              Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+                this.zoomScaleArray[index] = 1;
+              });
+            }
+          });
         }
-        this.zoomScaleArray.forEach((_, index) => {
-          if (index === this.selectedIndexes[0]) {
-            Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
-              this.zoomScaleArray[index] = 0.95;
-            });
-          } else {
-            Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
-              this.zoomScaleArray[index] = 1;
-            });
-          }
-        });
       });
       PanGesture.onActionEnd(event => {
         this.isGestureInProgress = false;
@@ -2880,25 +3110,46 @@ export class SegmentButton extends ViewPU {
         if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX, fingerInfo.globalY)) {
           this.isPanGestureMoved = true;
         }
-        if (this.isMouseWheelScroll(event)) {
-          let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
-          this.doSelectedChangeAnimate = true;
-          // Reverse mouse wheel direction in mirrored layout
-          let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
-          let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
-          if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
-            this.selectedIndexes[0] -= 1;
-          } else if (
-            shouldMoveNext &&
-            this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1
-          ) {
-            this.selectedIndexes[0] += 1;
+        if (this.isBackgroundSystemMaterialEnabled()) {
+          let selectedInfo = fingerInfo.localX;
+          let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+          let realIndex = -1;
+          for (let i = 0; i < buttonLength; i++) {
+            selectedInfo = selectedInfo - this.buttonItemsSize[i].width;
+            if (selectedInfo < 0) {
+              realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+              break;
+            }
           }
-          this.doSelectedChangeAnimate = false;
+          if (realIndex === -1) {
+            realIndex = this.isShouldMirror() ? 0 : buttonLength - 1;
+          }
+          this.getUIContext().animateTo({ curve: this.getSelectedChangeCurve() }, () => {
+            this.selectedIndexes[0] = realIndex;
+            this.selectedItemPosition = this.buttonItemsPosition[realIndex];
+          });
+          this.finishSelectMaterialAnimation();
+        } else {
+          if (this.isMouseWheelScroll(event)) {
+            let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
+            this.doSelectedChangeAnimate = true;
+            // Reverse mouse wheel direction in mirrored layout
+            let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
+            let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
+            if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
+              this.selectedIndexes[0] -= 1;
+            } else if (
+              shouldMoveNext &&
+              this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1
+            ) {
+              this.selectedIndexes[0] += 1;
+            }
+            this.doSelectedChangeAnimate = false;
+          }
+          Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+            this.zoomScaleArray[this.selectedIndexes[0]] = 1;
+          });
         }
-        Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
-          this.zoomScaleArray[this.selectedIndexes[0]] = 1;
-        });
         this.isCurrentPositionSelected = false;
       });
       PanGesture.onActionCancel(() => {
@@ -2913,10 +3164,13 @@ export class SegmentButton extends ViewPU {
           this.zoomScaleArray[this.selectedIndexes[0]] = 1;
         });
         this.isCurrentPositionSelected = false;
+        if (this.isBackgroundSystemMaterialEnabled()) {
+          this.finishSelectMaterialAnimation();
+        }
       });
       PanGesture.pop();
       GestureGroup.pop();
-      Gesture.pop();
+      globalThis.Gesture.pop();
     }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
@@ -2967,13 +3221,17 @@ export class SegmentButton extends ViewPU {
                   Stack.direction(this.options.direction);
                   Stack.size(ObservedObject.GetRawObject(this.componentSize));
                   Stack.backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR);
-                  Stack.systemMaterial(this.options.backgroundSystemMaterial);
                   Stack.borderRadius(getBackgroundBorderRadius(this.options, this.componentSize.height / 2));
                   Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, {
                     disableSystemAdaptation: true,
                   });
-                  Stack.borderWidth(segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH);
-                  Stack.borderColor(segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR);
+                  Stack.borderWidth(
+                    this.options.backgroundSystemMaterial ? undefined : segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH
+                  );
+                  Stack.borderColor(
+                    this.options.backgroundSystemMaterial ? undefined : segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR
+                  );
+                  Stack.systemMaterial(this.options.backgroundSystemMaterial);
                 }, Stack);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                   If.create();
@@ -3031,10 +3289,10 @@ export class SegmentButton extends ViewPU {
           If.pop();
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Context.animation({ duration: 0 });
+            globalThis.Context.animation({ duration: 0 });
             Stack.direction(this.options.direction);
             Stack.size(ObservedObject.GetRawObject(this.componentSize));
-            Context.animation(null);
+            globalThis.Context.animation(null);
             Stack.borderRadius(getBackgroundBorderRadius(this.options, this.componentSize.height / 2));
             Stack.clip(true);
           }, Stack);
@@ -3180,6 +3438,40 @@ export class SegmentButton extends ViewPU {
     If.pop();
     Stack.pop();
   }
+  isBackgroundSystemMaterialEnabled() {
+    return this.options !== undefined && this.options.backgroundSystemMaterial !== undefined;
+  }
+  startSelectMaterialAnimation() {
+    if (!this.openSelectedItemSystemMaterial) {
+      this.getUIContext().animateTo(
+        {
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+        },
+        () => {
+          this.selectedItemScale = { x: 1.23, y: 1.18 };
+          this.openSelectedItemSystemMaterial = true;
+        }
+      );
+    }
+  }
+  finishSelectMaterialAnimation() {
+    if (this.openSelectedItemSystemMaterial) {
+      this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
+        this.selectedItemScale = { x: 1.23, y: 1.18 };
+      });
+      this.getUIContext().animateTo(
+        {
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+          delay: 300,
+          onFinish: () => {},
+        },
+        () => {
+          this.openSelectedItemSystemMaterial = false;
+          this.selectedItemScale = undefined;
+        }
+      );
+    }
+  }
   getMaxFontSize() {
     if (typeof this.maxFontScale === void 0) {
       return DEFAULT_MAX_FONT_SCALE;
@@ -3218,17 +3510,40 @@ export class SegmentButton extends ViewPU {
       });
     };
     if (curve) {
-      Context.animateTo({ curve: curve }, setAnimatedPropertyFunc);
+      if (this.options.backgroundSystemMaterial) {
+        this.getUIContext().animateTo(
+          {
+            curve: curves.interpolatingSpring(0, 1, 195, 14),
+          },
+          () => {
+            this.selectedItemScale = { x: 1.01, y: 0.99 };
+            this.openSelectedItemSystemMaterial = true;
+          }
+        );
+        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+        this.getUIContext().animateTo(
+          {
+            curve: curves.interpolatingSpring(0, 1, 195, 14),
+            delay: 200,
+          },
+          () => {
+            this.openSelectedItemSystemMaterial = false;
+          }
+        );
+      } else {
+        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+      }
     } else {
       setAnimatedPropertyFunc();
     }
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected
-        ? (this.options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE)
-        : (this.options.fontSize ?? segmentButtonTheme.FONT_SIZE);
-      this.buttonItemProperty[index].fontWeight = selected
-        ? (this.options.selectedFontWeight ?? FontWeight.Medium)
-        : (this.options.fontWeight ?? initFontWeight(FontWeight.Regular));
+      this.buttonItemProperty[index].fontSize = selected ?
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.selectedFontSize ??
+          segmentButtonTheme.SELECTED_FONT_SIZE) :
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.fontSize ??
+          segmentButtonTheme.FONT_SIZE);
+      this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
+        this.options.fontWeight ?? initFontWeight(FontWeight.Regular);
       this.buttonItemProperty[index].isSelected = selected;
     });
   }

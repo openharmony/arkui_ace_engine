@@ -41,10 +41,11 @@
 #include "compatible/components/svg/svg_rect_declaration.h"
 #include "compatible/components/svg/svg_stop_declaration.h"
 #include "include/core/SkStream.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/drawing.h"

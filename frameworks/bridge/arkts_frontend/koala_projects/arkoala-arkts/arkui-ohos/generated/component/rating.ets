@@ -36,7 +36,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkRatingPeer extends ArkCommonMethodPeer {
-    attributeSet?: RatingModifier;
+    ratingAttributeSet?: RatingModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -110,12 +110,12 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RatingOptions {
-    rating: double | Bindable<double> | undefined;
+    rating?: double | Bindable<double> | undefined;
     indicator?: boolean;
 }
 export interface StarStyleOptions {
-    backgroundUri: ResourceStr | undefined;
-    foregroundUri: ResourceStr | undefined;
+    backgroundUri?: ResourceStr | undefined;
+    foregroundUri?: ResourceStr | undefined;
     secondaryUri?: ResourceStr;
 }
 export interface RatingConfiguration extends CommonConfiguration<RatingConfiguration> {

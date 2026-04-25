@@ -30,6 +30,7 @@
 #include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
@@ -1252,7 +1253,7 @@ bool GetPropertyIntByName(ani_env *env, ani_object config, const char *name, int
         return false;
     }
     ani_int value_obj = 0;
-    if (ANI_OK != env->Object_CallMethodByName_Int(obj, "unboxed", ":i", &value_obj)) {
+    if (ANI_OK != env->Object_CallMethodByName_Int(obj, "toInt", ":i", &value_obj)) {
         return false;
     }
     value = static_cast<int>(value_obj);

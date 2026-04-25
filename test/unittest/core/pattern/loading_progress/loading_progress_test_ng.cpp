@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,11 +28,11 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "core/components_ng/pattern/progress/progress_theme_wrapper.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -55,11 +55,17 @@ protected:
 void LoadingProgressTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressThemeWrapper>()));
 }
 
 void LoadingProgressTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> LoadingProgressTestNg::CreateLoadingProgressNode(const Color& color)
@@ -391,6 +397,30 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest006, TestSize.Level0)
 }
 
 /**
+ * @tc.name: LoadingProgressPatternTest007
+ * @tc.desc: Test Pattern OnThemeScopeUpdate function of loadingProgress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest007, TestSize.Level0)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    modelNg.SetColor(COLOR_DEFAULT);
+    pattern->SetColorLock(true);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
+    pattern->SetColorLock(false);
+    frameNode->SetThemeScopeId(334455);
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
  * @tc.name: LoadingProgressPaintMethodTest001
  * @tc.desc: Test LoadingProgressPaintMethod function of loadingProgress.
  * @tc.type: FUNC
@@ -473,7 +503,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest001, TestSize.Level0)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->loadingColor_ = COLOR_DEFAULT;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressThemeWrapper>()));
     LoadingProgressModifier loadingProgressModifier;
     Testing::MockCanvas rsCanvas;
     DrawingContext context = { rsCanvas, 10.0f, 10.0f };

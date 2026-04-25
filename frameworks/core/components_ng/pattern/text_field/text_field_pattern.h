@@ -32,7 +32,6 @@
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_application_info.h"
-#include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/common/clipboard/clipboard.h"
@@ -46,6 +45,7 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -90,6 +90,8 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace {
+class AIWriteAdapter;
+struct AIWriteInfo;
 class SpanString;
 }
 
@@ -312,8 +314,8 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
     bool ParseCommand(const std::string& command);
-    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, const std::string& value,
-        int32_t start, int32_t end);
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, int32_t start,
+        int32_t end);
 
     int32_t GetInstanceId() const override
     {
@@ -799,6 +801,9 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeShown_ = keyboardShown;
+        if (keyboardShown && !voiceKbShown_) {
+            voiceButtonKeyboardOpened_ = false;
+        }
 #endif
     }
     void NotifyKeyboardClosedByUser() override;
@@ -1061,7 +1066,7 @@ public:
     void SetSelection(int32_t start, int32_t end,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     void HandleBlurEvent();
-    bool IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager);
+    bool IsCloseKeyboard(const RefPtr<TextFieldManagerNG>& textFieldManager);
     void HandleFocusEvent();
     void CheckAndUpdateInputTypeForOTP();
     void SetFocusStyle();
@@ -1076,6 +1081,7 @@ public:
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
+    void CloseVoiceKeyboardOpenedByButton();
     bool HandleBetweenSelectedPosition(const GestureEvent& info);
     void HandleSetTextCommand(const std::unique_ptr<JsonValue>& params);
     void HandleAddTextCommand(const std::unique_ptr<JsonValue>& params);
@@ -1520,17 +1526,7 @@ public:
         return isTransparent_;
     }
 
-    RefPtr<Clipboard> GetClipboard() override
-    {
-        if (!clipboard_) {
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, clipboard_);
-            auto context = host->GetContext();
-            CHECK_NULL_RETURN(context, clipboard_);
-            clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-        }
-        return clipboard_;
-    }
+    RefPtr<Clipboard> GetClipboard() override;
 
     const Dimension& GetAvoidSoftKeyboardOffset() const override;
 
@@ -2001,6 +1997,8 @@ protected:
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    bool OnThemeScopeUpdateColor(RefPtr<TextFieldLayoutProperty> textFieldLayoutProperty,
+    RefPtr<TextFieldPaintProperty> paintProperty, RefPtr<TextFieldTheme> textFieldTheme);
 
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
@@ -2274,6 +2272,9 @@ private:
     void OnCaretMoveDone(const TouchEventInfo& info);
     void HandleCrossPlatformInBlurEvent();
     void ModifyInnerStateInBlurEvent();
+    void ProcessMagnifierInBlurEvent();
+    void ProcessMenuAndSelectionInBlurEvent(bool shouldKeepSelection);
+    void ProcessCaretIndexInBlurEvent(bool shouldKeepSelection);
 
     void TwinklingByFocus();
 
@@ -2350,6 +2351,8 @@ private:
     void PaintPasswordRectForTV();
     void SetThemeBorderAttrForTV();
     void PaintFocusAreaRectForTV(const RefPtr<TextInputResponseArea>& responseArea);
+    bool QuerySmartEdgeState();
+    bool ShouldKeepSelectionOnWindowBlur();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2357,6 +2360,8 @@ private:
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
     bool voiceKbShown_ = false;
+    bool voiceKbOpenedByButton_ = false;
+    bool voiceButtonKeyboardOpened_ = false;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -2560,6 +2565,7 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> lastCaretPos_ = std::nullopt;
     bool firstClickAfterLosingFocus_ = true;
+    bool UnFocusOnHandleClick_ = false;
     CancelableCallback<void()> firstClickResetTask_;
     RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
     bool directionKeysMoveFocusOut_ = false;

@@ -955,6 +955,14 @@ void SetOrphanCharOptimizationImpl(Ark_NativePointer node, const Opt_Boolean* va
     RichEditorModelNG::SetOrphanCharOptimization(frameNode, convValue.value_or(false));
 }
 
+void SetHorizontalScrollingImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelNG::SetHorizontalScrolling(frameNode, convValue.value_or(false));
+}
+
 } // RichEditorAttributeModifier
 const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
 {
@@ -1001,10 +1009,11 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
         RichEditorAttributeModifier::SetSingleLineImpl,
         RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
         RichEditorAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
+        RichEditorAttributeModifier::SetHorizontalScrollingImpl,
         RichEditorAttributeModifier::SetBindSelectionMenuImpl,
         RichEditorAttributeModifier::SetCustomKeyboardImpl,
         RichEditorAttributeModifier::SetPlaceholderImpl,
-        RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUIRichEditorModifierImpl;
 }

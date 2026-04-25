@@ -29,26 +29,24 @@ namespace {
 void ProcessFontConfigs(Font& font, const Opt_FontConfigs* fontConfigs, const RefPtr<TextTheme>& theme)
 {
     auto configs = Converter::GetOptPtr(fontConfigs);
-    if (configs && configs->fontWeightConfigs.tag != INTEROP_TAG_UNDEFINED) {
-        const auto& weightConfigs = configs->fontWeightConfigs.value;
-        if (weightConfigs.enableVariableFontWeight.tag != INTEROP_TAG_UNDEFINED) {
-            font.enableVariableFontWeight =
-                Converter::OptConvert<bool>(weightConfigs.enableVariableFontWeight);
-        } else {
-            font.enableVariableFontWeight =
-                theme->GetTextStyle().GetEnableVariableFontWeight();
-        }
-        if (weightConfigs.enableDeviceFontWeightCategory.tag != INTEROP_TAG_UNDEFINED) {
-            font.enableDeviceFontWeightCategory =
-                Converter::OptConvert<bool>(weightConfigs.enableDeviceFontWeightCategory);
-        } else {
-            font.enableDeviceFontWeightCategory =
-                theme->GetTextStyle().GetEnableDeviceFontWeightCategory();
-        }
+    if (!configs) {
+        return;
+    }
+    if (configs->fontWeightConfigs.tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    const auto& weightConfigs = configs->fontWeightConfigs.value;
+    if (weightConfigs.enableVariableFontWeight.tag != INTEROP_TAG_UNDEFINED) {
+        font.enableVariableFontWeight =
+            Converter::OptConvert<bool>(weightConfigs.enableVariableFontWeight);
     } else {
-        font.enableVariableFontWeight = theme->GetTextStyle().GetEnableVariableFontWeight();
+        font.enableVariableFontWeight = false;
+    }
+    if (weightConfigs.enableDeviceFontWeightCategory.tag != INTEROP_TAG_UNDEFINED) {
         font.enableDeviceFontWeightCategory =
-            theme->GetTextStyle().GetEnableDeviceFontWeightCategory();
+            Converter::OptConvert<bool>(weightConfigs.enableDeviceFontWeightCategory);
+    } else {
+        font.enableDeviceFontWeightCategory = true;
     }
 }
 void ProcessFontWeight(Font& font, const Opt_Union_I32_FontWeight_String* fontWeight,
@@ -65,6 +63,23 @@ void ProcessFontWeight(Font& font, const Opt_Union_I32_FontWeight_String* fontWe
         font.variableFontWeight = convertedWeightInt.variable.value();
     } else {
         font.variableFontWeight = theme->GetTextStyle().GetVariableFontWeight();
+    }
+}
+void ProcessFontVariations(Font& font, const Opt_Array_text_FontVariation* fontVariations)
+{
+    auto optValue = Converter::GetOptPtr(fontVariations);
+    if (!optValue.has_value()) {
+        return;
+    }
+    font.fontVariations = FONT_VARIATIONS_LIST {};
+    font.fontVariations->reserve(optValue->length);
+    for (Ark_Int32 i = 0; i < optValue->length; ++i) {
+        const auto& item = optValue->array[i];
+        font.fontVariations->push_back({
+            Converter::Convert<std::string>(item.axis),
+            static_cast<float>(item.value),
+            Converter::OptConvert<bool>(item.isNormalized)
+        });
     }
 }
 } // anonymous namespace
@@ -119,6 +134,7 @@ Ark_TextStyle ConstructImpl(const Opt_TextStyleInterface* value)
             font.strokeColor = font.fontColor;
         }
         ProcessFontConfigs(font, &options->fontConfigs, theme);
+        ProcessFontVariations(font, &options->fontVariations);
     }
     peer->span = Referenced::MakeRefPtr<FontSpan>(font);
 
@@ -220,6 +236,26 @@ Opt_ResourceColor GetStrokeColorImpl(Ark_TextStyle peer)
     auto color = peer->span->GetFont().strokeColor;
     return Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
 }
+Opt_Array_text_FontVariation GetFontVariationsImpl(Ark_TextStyle peer)
+{
+    auto invalidValue = Converter::ArkValue<Opt_Array_text_FontVariation>(Ark_Empty());
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    const auto& fontVariations = peer->span->GetFont().fontVariations;
+    CHECK_NULL_RETURN(fontVariations.has_value(), invalidValue);
+    Converter::FC->Clear();
+    auto result = Converter::FC->AllocateArray<Array_text_FontVariation>(fontVariations->size());
+    for (size_t i = 0; i < fontVariations->size(); ++i) {
+        const auto& item = fontVariations->at(i);
+        result.array[i].axis = Converter::FC->Store(item.axis);
+        result.array[i].value = item.value;
+        result.array[i].isNormalized = Converter::ArkValue<Opt_Boolean>(item.isNormalized);
+    }
+    return {
+        .tag = INTEROP_TAG_OBJECT,
+        .value = result,
+    };
+}
 } // TextStyleAccessor
 const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
 {
@@ -236,8 +272,8 @@ const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
         TextStyleAccessor::GetSuperscriptImpl,
         TextStyleAccessor::GetStrokeWidthImpl,
         TextStyleAccessor::GetStrokeColorImpl,
+        TextStyleAccessor::GetFontVariationsImpl,
     };
     return &TextStyleAccessorImpl;
 }
-
 }

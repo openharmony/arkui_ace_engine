@@ -33,12 +33,14 @@ public:
     {
         auto layoutProperty = MakeRefPtr<StackLayoutProperty>();
         layoutProperty->UpdateLayoutProperty(this);
+        layoutProperty->propSyncLoad_ = CloneSyncLoad();
         return layoutProperty;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
+        ResetSyncLoad();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -53,6 +55,7 @@ public:
             align = GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
         }
         json->PutExtAttr("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str(), filter);
+        json->PutExtAttr("syncLoad", propSyncLoad_.value_or(true), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -61,6 +64,7 @@ public:
         LayoutProperty::FromJson(json);
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(StackLayoutProperty);
 };

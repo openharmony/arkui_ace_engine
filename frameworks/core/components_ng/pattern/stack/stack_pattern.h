@@ -71,6 +71,15 @@ public:
         return true;
     }
 
+    void PostAsyncLoadTask();
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    bool OnDirtyLayoutWrapperSwap(
+        const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/) override
+    {
+        return false;
+    }
 
     RefPtr<EventHub> CreateEventHub() override;
 
@@ -84,6 +93,7 @@ public:
     }
 private:
     RefPtr<VerticalOverflowHandler> vOverflowHandler_;
+    bool prevMeasureBreak_ = false;
 };
 } // namespace OHOS::Ace::NG
 

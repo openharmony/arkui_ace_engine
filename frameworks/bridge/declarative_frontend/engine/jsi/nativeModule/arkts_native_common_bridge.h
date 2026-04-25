@@ -193,6 +193,8 @@ public:
     static ArkUINativeModuleValue ResetOnAccessibilityActionIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAccessibilityActionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAccessibilityActionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSmartGestureShortcut(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSmartGestureShortcut(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAccessibilityHoverTransparent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAccessibilityHoverTransparent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetConstraintSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -366,7 +368,7 @@ public:
     static Local<panda::ObjectRef> CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent* info);
     static Local<panda::ArrayRef> CreateFingerInfosArray(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ArrayRef> CreateFingerListArray(EcmaVM* vm, GestureEvent& info);
-    static Local<panda::ObjectRef> CreateTapGestureInfo(EcmaVM* vm, GestureEvent& info);
+    static Local<panda::ObjectRef> CreateTapGestureInfo(EcmaVM* vm, GestureEvent* infoPtr);
     static ArkUINativeModuleValue SetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -412,6 +414,7 @@ public:
     static ArkUINativeModuleValue SetOnSizeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnSizeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnAreaChangeWithInterval(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnGestureJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -419,8 +422,15 @@ public:
     static ArkUINativeModuleValue ResetOnGestureRecognizerJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnTouchTestDone(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnTouchTestDone(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnGestureCollectIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnGestureCollectIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static NG::GestureCollectIntervention ProcessOnGestureCollectIntercept(EcmaVM* vm,
+        panda::Local<panda::FunctionRef> func, const std::vector<RefPtr<NG::NGGestureRecognizer>>& recognizers,
+        const std::vector<RefPtr<TouchEventTarget>>& touchRecognizers);
     static ArkUINativeModuleValue SetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetShouldRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetShouldRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AddTapGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AddLongPressGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AddPanGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -447,6 +457,8 @@ public:
     static ArkUINativeModuleValue FreezeUINodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSystemBarEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue PostFrameCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddLocalInputEventMonitor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue RemoveLocalInputEventMonitor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusScopeId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFocusScopeId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusScopePriority(ArkUIRuntimeCallInfo* runtimeCallInfo);

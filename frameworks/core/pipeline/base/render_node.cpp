@@ -15,6 +15,8 @@
 
 #include "core/pipeline/base/render_node.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -27,6 +29,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/rotation/rotation_node.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/box/render_box.h"
 #include "core/components/root/render_root.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/transform/render_transform.h"
@@ -224,6 +227,37 @@ void RenderNode::ClearChildren()
     children_.clear();
 }
 
+int32_t RenderNode::GetAccessibilityNodeId() const
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        return accessibilityNode->GetNodeId();
+    }
+    return 0;
+}
+
+void RenderNode::ClearAccessibilityRect()
+{
+    auto node = accessibilityNode_.Upgrade();
+    if (node) {
+        node->ClearRect();
+    }
+    for (auto& child : children_) {
+        child->ClearAccessibilityRect();
+    }
+}
+
+void RenderNode::SetAccessibilityVisible(bool visible)
+{
+    auto node = accessibilityNode_.Upgrade();
+    if (node) {
+        node->SetVisible(visible);
+    }
+    for (auto& child : children_) {
+        child->SetAccessibilityVisible(visible);
+    }
+}
+
 void RenderNode::UpdateTouchRect()
 {
     if (!isResponseRegion_) {
@@ -347,7 +381,9 @@ void RenderNode::DumpTree(int32_t depth)
     }
     const auto& children = GetChildren();
     if (DumpLog::GetInstance().GetDumpFile()) {
-        auto dirtyRect = context_.Upgrade()->GetDirtyRect();
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto dirtyRect = context->GetDirtyRect();
         std::string touchRectList = "[";
         for (auto& rect : touchRectList_) {
             touchRectList.append("{").append(rect.ToString()).append("}");
@@ -840,8 +876,8 @@ void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoi
     OnMouseTestHit(coordinatePoint, result);
 }
 
-bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& hoverList,
-    WeakPtr<RenderNode>& hoverNode)
+bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalPoint,
+    std::list<WeakPtr<RenderNode>>& hoverList, WeakPtr<RenderNode>& hoverNode)
 {
     if (disableTouchEvent_ || disabled_) {
         return false;
@@ -865,11 +901,9 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
     auto beforeSize = hoverList.size();
     for (auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
-            if (!hoverNode.Upgrade()) {
-                if (hoverAnimationType_ != HoverAnimationType::UNKNOWN) {
-                    hoverNode = AceType::WeakClaim<RenderNode>(this);
-                    LOGI("Got hoverEffect node: %{public}s", AceType::TypeName(this));
-                }
+            if (!hoverNode.Upgrade() && hoverAnimationType_ != HoverAnimationType::UNKNOWN) {
+                hoverNode = AceType::WeakClaim<RenderNode>(this);
+                LOGI("Got hoverEffect node: %{public}s", AceType::TypeName(this));
             }
             hoverList.emplace_back(AceType::WeakClaim<RenderNode>(this));
             // Calculates the coordinate offset in this node.

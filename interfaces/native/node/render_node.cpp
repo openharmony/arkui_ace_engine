@@ -19,6 +19,7 @@
 
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,46 +31,72 @@ std::set<ArkUIPropertyHandle> g_propertySet;
 
 int32_t OH_ArkUI_RenderNodeUtils_AddRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle child)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(child, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        child, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child node is null");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE, __FUNCTION__, "Node is not a custom node");
         return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->addRenderNode(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->addRenderNode(
         node->uiNodeHandle, child->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_RemoveRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle child)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(child, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        child, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child node is null");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE, __FUNCTION__, "Node is not a custom node");
         return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->removeRenderNode(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->removeRenderNode(
         node->uiNodeHandle, child->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren(ArkUI_NodeHandle node)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE, __FUNCTION__, "Node is not a custom node");
         return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->clearRenderNodeChildren(node->uiNodeHandle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->clearRenderNodeChildren(
+        node->uiNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_Invalidate(ArkUI_NodeHandle node)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     impl->getNodeModifiers()->getFrameNodeModifier()->invalidate(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -91,11 +118,15 @@ ArkUI_RenderNodeHandle OH_ArkUI_RenderNodeUtils_CreateNode()
 
 int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     auto nodeId = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getId(node->renderNodeHandle);
     if (nodeId == 0) {
+        SET_ERROR_MESSAGE(
+            OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is invalid");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto it = g_renderNodeMap.find(nodeId);
@@ -113,52 +144,91 @@ int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
 
 int32_t OH_ArkUI_RenderNodeUtils_AddChild(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle child)
 {
-    CHECK_NULL_RETURN(node && child, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (!(node && child)) {
+        SET_ERROR_MESSAGE(
+            OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or child is null");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->addChild(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->addChild(
         node->renderNodeHandle, child->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_InsertChildAfter(
     ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle child, ArkUI_RenderNodeHandle sibling)
 {
-    CHECK_NULL_RETURN(node && child && sibling, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (!(node && child && sibling)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node, child, or sibling is null");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->insertChildAfter(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->insertChildAfter(
         node->renderNodeHandle, child->renderNodeHandle, sibling->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_RemoveChild(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle child)
 {
-    CHECK_NULL_RETURN(node && child, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (!(node && child)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or child is null");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->removeChild(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->removeChild(
         node->renderNodeHandle, child->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_ClearChildren(ArkUI_RenderNodeHandle node)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->clearChildren(node->renderNodeHandle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->clearChildren(
+        node->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t index, ArkUI_RenderNodeHandle* child)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (index < 0) {
+        SET_ERROR_MESSAGE(
+            OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child index is invalid");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNode;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChild(
         node->renderNodeHandle, index, &renderNode, &nodeId);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         // Find in map first, try return same handle.
         auto it = g_renderNodeMap.find(nodeId);
@@ -175,13 +245,18 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t i
 
 int32_t OH_ArkUI_RenderNodeUtils_GetFirstChild(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* child)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNode;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFirstChild(
         node->renderNodeHandle, &renderNode, &nodeId);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         // Find in map first, try return same handle.
         auto it = g_renderNodeMap.find(nodeId);
@@ -198,13 +273,18 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFirstChild(ArkUI_RenderNodeHandle node, ArkU
 
 int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* sibling)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNode;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getNextSibling(
         node->renderNodeHandle, &renderNode, &nodeId);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         // Find in map first, try return same handle.
         auto it = g_renderNodeMap.find(nodeId);
@@ -221,13 +301,18 @@ int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle* sibling)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNode;
     int32_t nodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPreviousSibling(
         node->renderNodeHandle, &renderNode, &nodeId);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         // Find in map first, try return same handle.
         auto it = g_renderNodeMap.find(nodeId);
@@ -245,14 +330,19 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node,
 int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
     ArkUI_RenderNodeHandle node, ArkUI_RenderNodeHandle** children, int32_t* count)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle* renderNode;
     uint32_t* nodeId;
     int32_t nodeCount = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChildren(
         node->renderNodeHandle, &renderNode, &nodeId, &nodeCount);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     *count = nodeCount;
     if (nodeCount > 0 && result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         ArkUI_RenderNodeHandle* childrenList = new ArkUI_RenderNodeHandle[nodeCount];
@@ -267,12 +357,17 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
 
 int32_t OH_ArkUI_RenderNodeUtils_GetChildrenCount(ArkUI_RenderNodeHandle node, int32_t* count)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     int32_t childCount;
-    auto result =
-        impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChildrenCount(node->renderNodeHandle, &childCount);
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChildrenCount(
+        node->renderNodeHandle, &childCount);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         *count = childCount;
     }
@@ -281,362 +376,533 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildrenCount(ArkUI_RenderNodeHandle node, i
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBackgroundColor(ArkUI_RenderNodeHandle node, uint32_t color)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBackgroundColor(node->renderNodeHandle, color);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBackgroundColor(
+        node->renderNodeHandle, color);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBackgroundColor(ArkUI_RenderNodeHandle node, uint32_t* color)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBackgroundColor(node->renderNodeHandle, color);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBackgroundColor(
+        node->renderNodeHandle, color);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetOpacity(ArkUI_RenderNodeHandle node, float opacity)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (!OHOS::Ace::InRegion(0, 1, opacity)) {
+        SET_ERROR_MESSAGE(
+            OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "Opacity is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setOpacity(node->renderNodeHandle, opacity);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setOpacity(
+        node->renderNodeHandle, opacity);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetOpacity(ArkUI_RenderNodeHandle node, float* opacity)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getOpacity(node->renderNodeHandle, opacity);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getOpacity(
+        node->renderNodeHandle, opacity);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetSize(ArkUI_RenderNodeHandle node, int32_t width, int32_t height)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (width < 0 || height < 0) {
+        SET_ERROR_MESSAGE(
+            OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "Size is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setSize(node->renderNodeHandle, width, height);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setSize(
+        node->renderNodeHandle, width, height);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetSize(ArkUI_RenderNodeHandle node, int32_t* width, int32_t* height)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getSize(node->renderNodeHandle, width, height);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getSize(
+        node->renderNodeHandle, width, height);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetPosition(ArkUI_RenderNodeHandle node, int32_t x, int32_t y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setPosition(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setPosition(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetPosition(ArkUI_RenderNodeHandle node, int32_t* x, int32_t* y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPosition(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPosition(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetPivot(ArkUI_RenderNodeHandle node, float x, float y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setPivot(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setPivot(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetPivot(ArkUI_RenderNodeHandle node, float* x, float* y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPivot(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPivot(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetScale(ArkUI_RenderNodeHandle node, float x, float y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setScale(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setScale(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetScale(ArkUI_RenderNodeHandle node, float* x, float* y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getScale(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getScale(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetTranslation(ArkUI_RenderNodeHandle node, float x, float y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setTranslation(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setTranslation(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetTranslation(ArkUI_RenderNodeHandle node, float* x, float* y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getTranslation(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getTranslation(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetRotation(ArkUI_RenderNodeHandle node, float x, float y, float z)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRotation(node->renderNodeHandle, x, y, z);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRotation(
+        node->renderNodeHandle, x, y, z);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetRotation(ArkUI_RenderNodeHandle node, float* x, float* y, float* z)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRotation(node->renderNodeHandle, x, y, z);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRotation(
+        node->renderNodeHandle, x, y, z);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetTransform(ArkUI_RenderNodeHandle node, float* matrix)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setTransform(node->renderNodeHandle, matrix);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setTransform(
+        node->renderNodeHandle, matrix);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowColor(ArkUI_RenderNodeHandle node, uint32_t color)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowColor(node->renderNodeHandle, color);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowColor(
+        node->renderNodeHandle, color);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowColor(ArkUI_RenderNodeHandle node, uint32_t* color)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowColor(node->renderNodeHandle, color);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowColor(
+        node->renderNodeHandle, color);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowOffset(ArkUI_RenderNodeHandle node, int32_t x, int32_t y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowOffset(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowOffset(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowOffset(ArkUI_RenderNodeHandle node, int32_t* x, int32_t* y)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowOffset(node->renderNodeHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowOffset(
+        node->renderNodeHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowAlpha(ArkUI_RenderNodeHandle node, float alpha)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (!OHOS::Ace::InRegion(0, 1, alpha)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "Shadow alpha is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowAlpha(node->renderNodeHandle, alpha);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowAlpha(
+        node->renderNodeHandle, alpha);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowAlpha(ArkUI_RenderNodeHandle node, float* alpha)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowAlpha(node->renderNodeHandle, alpha);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowAlpha(
+        node->renderNodeHandle, alpha);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowElevation(ArkUI_RenderNodeHandle node, float elevation)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (elevation < 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "Shadow elevation is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowElevation(node->renderNodeHandle, elevation);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowElevation(
+        node->renderNodeHandle, elevation);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowElevation(ArkUI_RenderNodeHandle node, float* radius)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowElevation(node->renderNodeHandle, radius);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowElevation(
+        node->renderNodeHandle, radius);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetShadowRadius(ArkUI_RenderNodeHandle node, float* radius)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowRadius(node->renderNodeHandle, radius);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowRadius(
+        node->renderNodeHandle, radius);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetShadowRadius(ArkUI_RenderNodeHandle node, float radius)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (radius < 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "Shadow radius is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowRadius(node->renderNodeHandle, radius);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowRadius(
+        node->renderNodeHandle, radius);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderStyle(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderStyleOption* borderStyle)
 {
     if (node == nullptr || borderStyle == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "Render node or border style option is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderStyle(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderStyle(node->renderNodeHandle,
         borderStyle->leftStyle, borderStyle->topStyle, borderStyle->rightStyle, borderStyle->bottomStyle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBorderStyle(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderStyleOption** borderStyle)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    int32_t code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderStyle(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderStyle(node->renderNodeHandle,
         reinterpret_cast<uint32_t*>(&((*borderStyle)->leftStyle)),
         reinterpret_cast<uint32_t*>(&((*borderStyle)->topStyle)),
         reinterpret_cast<uint32_t*>(&((*borderStyle)->rightStyle)),
         reinterpret_cast<uint32_t*>(&((*borderStyle)->leftStyle)));
+    if (code != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return code;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderWidth(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderWidthOption* borderWidth)
 {
     if (node == nullptr || borderWidth == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "Render node or border width option is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderWidth(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderWidth(node->renderNodeHandle,
         borderWidth->leftWidth, borderWidth->topWidth, borderWidth->rightWidth, borderWidth->bottomWidth);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBorderWidth(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderWidth** borderWidth)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    int32_t code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderWidth(node->renderNodeHandle,
+    auto code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderWidth(node->renderNodeHandle,
         reinterpret_cast<float*>(&((*borderWidth)->leftWidth)), reinterpret_cast<float*>(&((*borderWidth)->topWidth)),
         reinterpret_cast<float*>(&((*borderWidth)->rightWidth)),
         reinterpret_cast<float*>(&((*borderWidth)->leftWidth)));
+    if (code != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+
     return code;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderColor(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderColor* borderColor)
 {
     if (node == nullptr || borderColor == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "Render node or border color option is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderColor(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderColor(node->renderNodeHandle,
         borderColor->leftColor, borderColor->topColor, borderColor->rightColor, borderColor->bottomColor);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBorderColor(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderColor** borderColor)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    int32_t code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderColor(node->renderNodeHandle,
+    auto code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderColor(node->renderNodeHandle,
         reinterpret_cast<uint32_t*>(&((*borderColor)->leftColor)),
         reinterpret_cast<uint32_t*>(&((*borderColor)->topColor)),
         reinterpret_cast<uint32_t*>(&((*borderColor)->rightColor)),
         reinterpret_cast<uint32_t*>(&((*borderColor)->leftColor)));
+    if (code != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return code;
 }
 
@@ -644,135 +910,193 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderRadius(ArkUI_RenderNodeHandle node,
     ArkUI_NodeBorderRadiusOption* borderRadius)
 {
     if (node == nullptr || borderRadius == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "Render node or border radius option is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderRadius(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderRadius(node->renderNodeHandle,
         borderRadius->topLeftRadius, borderRadius->topRightRadius,
         borderRadius->bottomLeftRadius, borderRadius->bottomRightRadius);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBorderRadius(ArkUI_RenderNodeHandle node,
     ArkUI_NodeBorderRadiusOption** borderRadius)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    int32_t code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderRadius(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderRadius(node->renderNodeHandle,
         reinterpret_cast<float*>(&((*borderRadius)->topLeftRadius)),
         reinterpret_cast<float*>(&((*borderRadius)->topRightRadius)),
         reinterpret_cast<float*>(&((*borderRadius)->bottomLeftRadius)),
         reinterpret_cast<float*>(&((*borderRadius)->bottomRightRadius)));
+    if (code != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return code;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetMarkNodeGroup(ArkUI_RenderNodeHandle node, bool markNodeGroup)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setMarkNodeGroup(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setMarkNodeGroup(node->renderNodeHandle,
         static_cast<int32_t>(markNodeGroup));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBounds(ArkUI_RenderNodeHandle node,
     int32_t x, int32_t y, int32_t width, int32_t height)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (width < 0 || height < 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "Bounds size is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBounds(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBounds(node->renderNodeHandle,
         static_cast<uint32_t>(x), static_cast<uint32_t>(y),
         static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetBounds(ArkUI_RenderNodeHandle node, int32_t* x, int32_t* y, int32_t* width,
     int32_t* height)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBounds(node->renderNodeHandle,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBounds(node->renderNodeHandle,
         reinterpret_cast<uint32_t*>(x), reinterpret_cast<uint32_t*>(y),
         reinterpret_cast<uint32_t*>(width), reinterpret_cast<uint32_t*>(height));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetDrawRegion(ArkUI_RenderNodeHandle node, float x, float y, float w, float h)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setDrawRegion(node->renderNodeHandle, x, y, w, h);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setDrawRegion(
+        node->renderNodeHandle, x, y, w, h);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetClipToFrame(ArkUI_RenderNodeHandle node, int32_t clipToFrame)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (!OHOS::Ace::InRegion(0, 1, clipToFrame)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "ClipToFrame is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setClipToFrame(node->renderNodeHandle, clipToFrame);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setClipToFrame(
+        node->renderNodeHandle, clipToFrame);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetClipToFrame(ArkUI_RenderNodeHandle node, int32_t* clipToFrame)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getClipToFrame(node->renderNodeHandle, clipToFrame);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getClipToFrame(
+        node->renderNodeHandle, clipToFrame);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetClipToBounds(ArkUI_RenderNodeHandle node, int32_t clipToBounds)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     if (!OHOS::Ace::InRegion(0, 1, clipToBounds)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "ClipToBounds is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setClipToBounds(node->renderNodeHandle, clipToBounds);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setClipToBounds(
+        node->renderNodeHandle, clipToBounds);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetClipToBounds(ArkUI_RenderNodeHandle node, int32_t* clipToBounds)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getClipToBounds(node->renderNodeHandle, clipToBounds);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getClipToBounds(
+        node->renderNodeHandle, clipToBounds);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_AttachContentModifier(
     ArkUI_RenderNodeHandle node, ArkUI_RenderContentModifierHandle modifier)
 {
     if (node == nullptr || modifier == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or content modifier is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachModifier(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachModifier(
         node->renderNodeHandle, modifier->RenderModifierHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 ArkUI_RenderContentModifierHandle OH_ArkUI_RenderNodeUtils_CreateContentModifier()
@@ -803,72 +1127,114 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachFloatProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_FloatPropertyHandle property)
 {
     if (modifier == nullptr || property == nullptr) {
+        SET_ERROR_MESSAGE(
+            OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content modifier or float property is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
         modifier->RenderModifierHandle, property->rsPropertyHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_AttachVector2Property(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_Vector2PropertyHandle property)
 {
     if (modifier == nullptr || property == nullptr) {
+        SET_ERROR_MESSAGE(
+            OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content modifier or vector2 property is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
         modifier->RenderModifierHandle, property->rsPropertyHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_AttachColorProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_ColorPropertyHandle property)
 {
     if (modifier == nullptr || property == nullptr) {
+        SET_ERROR_MESSAGE(
+            OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content modifier or color property is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
         modifier->RenderModifierHandle, property->rsPropertyHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_FloatAnimatablePropertyHandle property)
 {
     if (modifier == nullptr || property == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "Content modifier or float animatable property is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
         modifier->RenderModifierHandle, property->rsPropertyHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_Vector2AnimatablePropertyHandle property)
 {
     if (modifier == nullptr || property == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "Content modifier or vector2 animatable property is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
         modifier->RenderModifierHandle, property->rsPropertyHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_ColorAnimatablePropertyHandle property)
 {
     if (modifier == nullptr || property == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "Content modifier or color animatable property is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
         modifier->RenderModifierHandle, property->rsPropertyHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 ArkUI_FloatPropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatProperty(float value)
@@ -886,22 +1252,32 @@ ArkUI_FloatPropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatProperty(float val
 
 int32_t OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue(ArkUI_FloatPropertyHandle property, float value)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Float property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setFloatProperty(property->rsPropertyHandle, value);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setFloatProperty(
+        property->rsPropertyHandle, value);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(ArkUI_FloatPropertyHandle property, float* value)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Float property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFloatProperty(property->rsPropertyHandle, value);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFloatProperty(
+        property->rsPropertyHandle, value);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 void OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(ArkUI_FloatPropertyHandle property)
@@ -930,22 +1306,32 @@ ArkUI_Vector2PropertyHandle OH_ArkUI_RenderNodeUtils_CreateVector2Property(float
 
 int32_t OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue(ArkUI_Vector2PropertyHandle property, float x, float y)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Vector2 property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setVector2Property(property->rsPropertyHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setVector2Property(
+        property->rsPropertyHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(ArkUI_Vector2PropertyHandle property, float* x, float* y)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Vector2 property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getVector2Property(property->rsPropertyHandle, x, y);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getVector2Property(
+        property->rsPropertyHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 void OH_ArkUI_RenderNodeUtils_DisposeVector2Property(ArkUI_Vector2PropertyHandle property)
@@ -974,22 +1360,32 @@ ArkUI_ColorPropertyHandle OH_ArkUI_RenderNodeUtils_CreateColorProperty(uint32_t 
 
 int32_t OH_ArkUI_RenderNodeUtils_SetColorPropertyValue(ArkUI_ColorPropertyHandle property, uint32_t value)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Color property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setColorProperty(property->rsPropertyHandle, value);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setColorProperty(
+        property->rsPropertyHandle, value);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(ArkUI_ColorPropertyHandle property, uint32_t* value)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Color property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getColorProperty(property->rsPropertyHandle, value);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getColorProperty(
+        property->rsPropertyHandle, value);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 void OH_ArkUI_RenderNodeUtils_DisposeColorProperty(ArkUI_ColorPropertyHandle property)
@@ -1019,25 +1415,33 @@ ArkUI_FloatAnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue(
     ArkUI_FloatAnimatablePropertyHandle property, float value)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Float animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setFloatAnimatableProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setFloatAnimatableProperty(
         property->rsPropertyHandle, value);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(
     ArkUI_FloatAnimatablePropertyHandle property, float* value)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Float animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFloatAnimatableProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFloatAnimatableProperty(
         property->rsPropertyHandle, value);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 void OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty(ArkUI_FloatAnimatablePropertyHandle property)
@@ -1067,25 +1471,33 @@ ArkUI_Vector2AnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateVector2Anim
 int32_t OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue(
     ArkUI_Vector2AnimatablePropertyHandle property, float x, float y)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Vector2 animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setVector2AnimatableProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setVector2AnimatableProperty(
         property->rsPropertyHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(
     ArkUI_Vector2AnimatablePropertyHandle property, float* x, float* y)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Vector2 animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getVector2AnimatableProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getVector2AnimatableProperty(
         property->rsPropertyHandle, x, y);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 void OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty(ArkUI_Vector2AnimatablePropertyHandle property)
@@ -1115,25 +1527,33 @@ ArkUI_ColorAnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateColorAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue(
     ArkUI_ColorAnimatablePropertyHandle property, uint32_t value)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Color animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setColorAnimatableProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setColorAnimatableProperty(
         property->rsPropertyHandle, value);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(
     ArkUI_ColorAnimatablePropertyHandle property, uint32_t* value)
 {
-    if (property == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        property, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Color animatable property is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getColorAnimatableProperty(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getColorAnimatableProperty(
         property->rsPropertyHandle, value);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 void OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(ArkUI_ColorAnimatablePropertyHandle property)
@@ -1150,11 +1570,17 @@ void OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(ArkUI_ColorAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw(ArkUI_RenderContentModifierHandle modifier, void* userData,
     void (*callback)(ArkUI_DrawContext* context, void* userData))
 {
-    CHECK_NULL_RETURN(modifier, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        modifier, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Content modifier is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setModifierOnDraw(
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setModifierOnDraw(
         modifier->RenderModifierHandle, userData, reinterpret_cast<void (*)(ArkUIDrawingContext*, void*)>(callback));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 /** 结构体类型写最下面,结构体内容参考 render_node.h*/
@@ -1520,10 +1946,12 @@ void OH_ArkUI_RenderNodeUtils_SetCommandPathOptionCommands(ArkUI_CommandPathOpti
 int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeMaskOption* option)
 {
     if (node == nullptr || option == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or mask option is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     auto result = OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     auto type = option->type;
     ArkUIMaskFill fillColor;
@@ -1546,33 +1974,41 @@ int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_Rend
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setCommandPathMask(
             node->renderNodeHandle, option->commands, fillColor);
     }
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     return result;
 }
 
 int32_t OH_ArkUI_RenderNodeUtils_SetClip(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeClipOption* option)
 {
     if (node == nullptr || option == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node or clip option is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     auto result = OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR;
     auto type = option->type;
     if (type == RECT_SHAPE) {
-        result =
-            impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRectClip(node->renderNodeHandle, option->rect);
+        result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRectClip(
+            node->renderNodeHandle, option->rect);
     } else if (type == CIRCLE_SHAPE) {
-        result =
-            impl->getNodeModifiers()->getNDKRenderNodeModifier()->setCircleClip(node->renderNodeHandle, option->circle);
+        result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setCircleClip(
+            node->renderNodeHandle, option->circle);
     } else if (type == ROUND_RECT_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRoundRectClip(
             node->renderNodeHandle, option->roundRect);
     } else if (type == OVAL_SHAPE) {
-        result =
-            impl->getNodeModifiers()->getNDKRenderNodeModifier()->setOvalClip(node->renderNodeHandle, option->oval);
+        result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setOvalClip(
+            node->renderNodeHandle, option->oval);
     } else if (type == COMMANDS) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setCommandPathClip(
             node->renderNodeHandle, option->commands);
+    }
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1748,14 +2184,20 @@ void OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(ArkUI_RenderNodeClipOp
 
 int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle* renderNode)
 {
-    CHECK_NULL_RETURN(renderNode, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        renderNode, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_RENDER_NOT_ADOPTED_NODE, __FUNCTION__, "Node is not an adopted node");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNodeHandle;
     int renderNodeId = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNode(
         node->uiNodeHandle, &renderNodeHandle, &renderNodeId);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         auto iter = g_renderNodeMap.find(renderNodeId);
         if (iter == g_renderNodeMap.end()) {

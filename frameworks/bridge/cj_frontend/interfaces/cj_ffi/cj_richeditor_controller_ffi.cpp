@@ -18,6 +18,7 @@
 #include "pixel_map_impl.h"
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components/common/properties/text_style_parser.h"
 

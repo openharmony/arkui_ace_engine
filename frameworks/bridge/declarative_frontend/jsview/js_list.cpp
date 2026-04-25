@@ -199,10 +199,12 @@ void JSList::SetScrollBarColor(const JSCallbackInfo& info)
 
 void JSList::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 {
-    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    RefPtr<ResourceObject> resObj;
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth, resObj);
     if (!scrollBarWidth.empty()) {
         ListModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
     }
+    ListModel::GetInstance()->CreateWithResourceObjScrollBarWidth(resObj);
 }
 
 void JSList::SetEdgeEffect(const JSCallbackInfo& info)
@@ -284,11 +286,24 @@ void JSList::Create(const JSCallbackInfo& args)
     if (arg0->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg0);
         JSRef<JSVal> spaceValue = obj->GetProperty("space");
-        if (!spaceValue->IsNull()) {
-            CalcDimension space;
+        JSRef<JSVal> spaceWidthValue = obj->GetProperty("spaceWidth");
+        CalcDimension space;
+        RefPtr<ResourceObject> resObj;
+        if (spaceValue->IsNull() || spaceValue->IsUndefined()) {
+            ListModel::GetInstance()->ResetListSpace();
+        }
+        if (spaceWidthValue->IsNull() || spaceWidthValue->IsUndefined()) {
+            ListModel::GetInstance()->ResetListSpaceWidth();
+        }
+        if (!spaceWidthValue->IsNull() && !spaceWidthValue->IsUndefined()) {
+            ConvertFromJSValue(spaceWidthValue, space, resObj);
+            ListModel::GetInstance()->SetSpaceWidth(space);
+        } else if (!spaceValue->IsNull()) {
+            ListModel::GetInstance()->ResetListSpaceWidth();
             ConvertFromJSValue(spaceValue, space);
             ListModel::GetInstance()->SetSpace(space);
         }
+        ListModel::GetInstance()->CreateWithResourceObjSpace(resObj);
         int32_t initialIndex = 0;
         if (ConvertFromJSValue(obj->GetProperty("initialIndex"), initialIndex) && initialIndex >= 0) {
             ListModel::GetInstance()->SetInitialIndex(initialIndex);
@@ -335,7 +350,7 @@ void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj, NG::Fra
         jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
     }
     auto frameNode = node ? node : NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() ||
+    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() || listChildrenMainSize->NeedSync() ||
         (jsChildrenMainSize && !jsChildrenMainSize->IsHostEqual(frameNode))) {
         InitNativeMainSize(childrenSizeObj, listChildrenMainSize);
         listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
@@ -1016,6 +1031,19 @@ void JSList::SetSupportEmptyBranchInLazyLoading(const JSCallbackInfo& args)
     ListModel::GetInstance()->SetSupportEmptyBranchInLazyLoading(supportEmptyBranch);
 }
 
+void JSList::SetBackPressBehavior(const JSCallbackInfo& args)
+{
+    bool closeSwipeAction = true;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        auto behaviorObj = JSRef<JSObject>::Cast(args[0]);
+        auto closeSwipeActionValue = behaviorObj->GetProperty("closeSwipeAction");
+        if (closeSwipeActionValue->IsBoolean()) {
+            closeSwipeAction = closeSwipeActionValue->ToBoolean();
+        }
+    }
+    ListModel::GetInstance()->SetBackPressCloseSwipeAction(closeSwipeAction);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -1046,6 +1074,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("focusWrapMode", &JSList::SetFocusWrapMode);
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("supportEmptyBranchInLazyLoading", &JSList::SetSupportEmptyBranchInLazyLoading);
+    JSClass<JSList>::StaticMethod("backPressBehavior", &JSList::SetBackPressBehavior);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);

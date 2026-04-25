@@ -422,7 +422,8 @@ std::string PluginPattern::GetPackagePath(const WeakPtr<PluginPattern>& weak, Re
         info.pluginName = info.pluginName + JS_EXT;
     }
     size_t pos = info.pluginName.rfind(JS_EXT);
-    if (info.pluginName.front() == '/' && pos != std::string::npos && info.pluginName.substr(pos) == JS_EXT) {
+    if (!info.pluginName.empty() && info.pluginName.front() == '/' && pos != std::string::npos &&
+        info.pluginName.substr(pos) == JS_EXT) {
         packagePathStr = GetPackagePathByAbsolutePath(weak, info);
     } else {
         packagePathStr = GetPackagePathByWant(weak, info);

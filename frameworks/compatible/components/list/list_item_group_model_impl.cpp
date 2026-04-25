@@ -15,14 +15,13 @@
 
 #include "frameworks/compatible/components/list/list_item_group_model_impl.h"
 
-#include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "compatible/components/list_v2/list_item_group_component.h"
 
 namespace OHOS::Ace::Framework {
 
-void ListItemGroupModelImpl::Create(V2::ListItemGroupStyle listItemGroupStyle)
+void ListItemGroupModelImpl::Create(const V2::ListItemGroupOptions& options)
 {
     auto listItemGroupComponent = AceType::MakeRefPtr<V2::ListItemGroupComponent>();
     ViewStackProcessor::GetInstance()->Push(listItemGroupComponent);

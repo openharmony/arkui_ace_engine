@@ -16,9 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_BRIDGE_INNER_MODIFIER_MENU_ITEM_GROUP_INNER_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_BRIDGE_INNER_MODIFIER_MENU_ITEM_GROUP_INNER_MODIFIER_H
 
-#include "interfaces/inner_api/ace_kit/include/ui/base/geometry/dimension.h"
-
 namespace OHOS::Ace {
+class Dimension;
 class AceType;
 template<class T>
 class RefPtr;

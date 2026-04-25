@@ -17,10 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_STATIC_H
 
 #include "core/components_ng/base/common_configuration.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
 class ACE_EXPORT CheckBoxModelStatic {
 public:
     static void SetSelect(FrameNode* frameNode, const std::optional<bool>& isSelected);

@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_SVG_IMAGE_FIT_CONVERTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_SVG_IMAGE_FIT_CONVERTOR_H
 
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/layout/constants.h"
 

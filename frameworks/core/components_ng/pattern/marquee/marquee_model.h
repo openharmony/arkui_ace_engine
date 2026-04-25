@@ -16,13 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_MODEL_H
 
+#include <functional>
+#include <memory>
 #include <mutex>
 #include <optional>
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT MarqueeModel {

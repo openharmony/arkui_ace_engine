@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/utils/utf_helper.h"
 #include "base/json/json_util.h"
@@ -21,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
@@ -120,6 +122,31 @@ bool NavDestinationNodeBase::CustomizeExpandSafeArea()
 
 void NavDestinationNodeBase::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    if (adjustConstraintType_ != ForceSplitAdjustConstraintType::NONE && parentConstraint.has_value()) {
+        auto constraint = parentConstraint.value();
+        do {
+            auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+            CHECK_NULL_BREAK(navNode);
+            auto adjustWidth = 0.0f;
+            if (adjustConstraintType_ == ForceSplitAdjustConstraintType::ADJUST_TO_PRIMARY) {
+                adjustWidth = navNode->GetPrimaryPartitionWidth();
+            } else if (adjustConstraintType_ == ForceSplitAdjustConstraintType::ADJUST_TO_SECONDARY) {
+                adjustWidth = navNode->GetSecondaryPartitionWidth();
+            } else {
+                break;
+            }
+            constraint.maxSize.SetWidth(adjustWidth);
+            constraint.percentReference.SetWidth(adjustWidth);
+            if (constraint.parentIdealSize.Width().has_value()) {
+                constraint.parentIdealSize.SetWidth(adjustWidth);
+            }
+            if (constraint.selfIdealSize.Width().has_value()) {
+                constraint.selfIdealSize.SetWidth(adjustWidth);
+            }
+        } while (false);
+        FrameNode::Measure(constraint);
+        return;
+    }
     if (rotateAngle_.has_value() && rotateAngle_.value() != ROTATION_0 && viewportConfig_) {
         ScopePageViewportConfig scopeConfig(viewportConfig_);
         FrameNode::Measure(parentConstraint);
@@ -313,6 +340,15 @@ OffsetF NavDestinationNodeBase::GetParentGlobalOffsetWithSafeArea(bool checkBoun
         return OffsetF(0.0f, 0.0f);
     }
     return LayoutWrapper::GetParentGlobalOffsetWithSafeArea(checkBoundary, checkPosition);
+}
+
+OffsetF NavDestinationNodeBase::GetParentGlobalOffsetWithSafeAreaInner(RefPtr<FrameNode>& host,
+    RefPtr<FrameNode>& parentNode) const
+{
+    if (rotateAngle_.has_value()) {
+        return OffsetF(0.0f, 0.0f);
+    }
+    return LayoutWrapper::GetParentGlobalOffsetWithSafeAreaInner(host, parentNode);
 }
 
 TranslateOptions NavDestinationNodeBase::CalcContentTranslateForDialog(const SizeF& frameSize)

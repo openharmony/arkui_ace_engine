@@ -307,6 +307,16 @@ inline bool GreaterOrEqualToInfinity(float num)
     return GreatOrEqual(num, INF_APPROACH);
 }
 
+inline bool IsNaN(double num)
+{
+    return std::isnan(num);
+}
+
+inline bool IsInfinity(double num)
+{
+    return std::isinf(num);
+}
+
 inline uint64_t GetMilliseconds()
 {
     auto now = std::chrono::system_clock::now();

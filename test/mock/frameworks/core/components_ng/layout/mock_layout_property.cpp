@@ -80,15 +80,15 @@ IgnoreLayoutSafeAreaOpts LayoutProperty::GenIgnoreOpts() const
     return options;
 }
 
-void LayoutProperty::ExpandConstraintWithSafeArea() {}
+void LayoutProperty::ExpandConstraintWithSafeArea(RefPtr<FrameNode>& host) {}
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint) {}
 
-void LayoutProperty::CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint) {}
+void LayoutProperty::CheckCalcLayoutConstraint(RefPtr<FrameNode>& host, const LayoutConstraintF& parentConstraint) {}
 
 void LayoutProperty::UpdateLayoutConstraintWithLayoutRect() {}
 
-void LayoutProperty::CheckBorderAndPadding() {}
+void LayoutProperty::CheckBorderAndPadding(RefPtr<FrameNode>& host) {}
 
 void LayoutProperty::CheckAspectRatio() {}
 

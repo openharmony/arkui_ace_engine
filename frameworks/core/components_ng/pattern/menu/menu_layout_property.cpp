@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -110,7 +112,7 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
+    auto theme = context ? context->GetTheme<SelectTheme>(host->GetThemeScopeId()) : nullptr;
     auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
     json->PutExtAttr("fontSize", GetFontSize().value_or(defaultFontSize).ToString().c_str(), filter);
     auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;

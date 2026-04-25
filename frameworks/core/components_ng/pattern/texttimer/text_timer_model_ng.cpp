@@ -18,7 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
@@ -67,6 +67,11 @@ void TextTimerModelNG::SetIsCountDown(bool isCountDown)
 void TextTimerModelNG::SetInputCount(double count)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count);
+}
+
+void TextTimerModelNG::SetStartTime(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, StartTime, value);
 }
 
 void TextTimerModelNG::SetFontSize(const Dimension& value)
@@ -216,6 +221,11 @@ void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, bool isCountDown)
 void TextTimerModelNG::SetInputCount(FrameNode* frameNode, double count)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count, frameNode);
+}
+
+void TextTimerModelNG::SetStartTime(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, StartTime, value, frameNode);
 }
 
 void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)

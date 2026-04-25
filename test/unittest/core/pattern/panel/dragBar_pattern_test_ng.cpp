@@ -31,6 +31,7 @@
 
 #define private public
 #include "base/geometry/dimension.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/animation/curve_animation.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -44,7 +45,7 @@
 #include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

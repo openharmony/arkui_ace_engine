@@ -29,17 +29,18 @@
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -85,7 +86,7 @@ public:
     virtual void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void ResetResObj(const std::string& key) {};
-    
+
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
     virtual void SetWidth(const RefPtr<ResourceObject>& resObj) {}
@@ -109,8 +110,9 @@ public:
     virtual void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) = 0;
     // Bind dynamic color picker placeholder to current component. Placeholder NONE clears binding.
     // strategy chooses sampling algorithm; interval hints sampling period in ms (0 = backend default).
-    virtual void SetColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy = ColorPickStrategy::NONE,
-        uint32_t interval = 0) {}
+    virtual void SetColorPicker(
+        ColorPlaceholder placeholder, ColorPickStrategy strategy = ColorPickStrategy::NONE, uint32_t interval = 0)
+    {}
     virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageWithResourceObj(
         const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
@@ -172,11 +174,13 @@ public:
         const std::optional<BorderStyle>& styleBottom) = 0;
     virtual void SetDashGap(const Dimension& value) {}
     virtual void SetDashGap(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
-        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) {}
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom)
+    {}
     virtual void SetDashGap(const NG::BorderWidthProperty& value) {}
     virtual void SetDashWidth(const Dimension& value) {}
     virtual void SetDashWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
-        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) {}
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom)
+    {}
     virtual void SetDashWidth(const NG::BorderWidthProperty& value) {}
     virtual void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) = 0;
     virtual void SetBorderImageGradient(const NG::Gradient& gradient) = 0;
@@ -232,16 +236,19 @@ public:
 
     // position
     virtual void SetPosition(const Dimension& x, const Dimension& y) = 0;
-    virtual void SetPosition(const Dimension& x, const Dimension& y,
-        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
+    virtual void SetPosition(const Dimension& x, const Dimension& y, const RefPtr<ResourceObject>& xresObj,
+        const RefPtr<ResourceObject>& yresObj)
+    {}
     virtual void SetOffset(const Dimension& x, const Dimension& y) = 0;
-    virtual void SetOffset(const Dimension& x, const Dimension& y,
-        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
+    virtual void SetOffset(const Dimension& x, const Dimension& y, const RefPtr<ResourceObject>& xresObj,
+        const RefPtr<ResourceObject>& yresObj)
+    {}
     virtual void SetPositionEdges(const EdgesParam& value) {};
     virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
-    virtual void MarkAnchor(const Dimension& x, const Dimension& y,
-        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj) {}
+    virtual void MarkAnchor(const Dimension& x, const Dimension& y, const RefPtr<ResourceObject>& xresObj,
+        const RefPtr<ResourceObject>& yresObj)
+    {}
     virtual void ResetPosition() {};
 
     // transforms
@@ -266,8 +273,8 @@ public:
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
-    virtual void SetGeometryTransition(const std::string& id,
-        bool followWithoutTransition = false, bool doRegisterSharedTransition = true) = 0;
+    virtual void SetGeometryTransition(
+        const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) {}
@@ -326,16 +333,20 @@ public:
     virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
     virtual void SetFreeze(bool freeze) = 0;
     virtual void SetUseUnion(bool useUnion) {}
+    virtual void SetCenterGravityOptions(const NG::CenterGravityOptions& centerGravityOptions) {}
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity()) = 0;
-    virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
-        Dimension distanceThreshold) = 0;
+    virtual void SetOnClick(
+        GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, Dimension distanceThreshold) = 0;
     virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
+    virtual void SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
+    virtual void SetShouldRecognizerParallelWith(
+        NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc) = 0;
     virtual void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) = 0;
@@ -385,7 +396,7 @@ public:
         const std::vector<double>& ratioList, int32_t expectedUpdateInterval, bool measureFromViewport = false) = 0;
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
-            onAreaChanged) = 0;
+            onAreaChanged, int32_t minInterval = 0) = 0;
     virtual void SetOnSizeChanged(
         std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) = 0;
     virtual void* GetFrameNode() = 0;
@@ -419,6 +430,8 @@ public:
             responseRegionMap) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
     virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
+    virtual void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) {}
+    virtual void ResetSmartGestureShortcut() {}
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
@@ -432,7 +445,8 @@ public:
     virtual void ResetNextFocus() {}
     virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
     virtual void SetFocusBoxStyleUpdateFunc(
-        NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property) {}
+        NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property)
+    {}
     virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) {}
     virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
@@ -498,8 +512,7 @@ public:
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange,
-        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) = 0;
     virtual void DismissContentCover() = 0;
     virtual void DismissSheet() = 0;
@@ -565,14 +578,19 @@ public:
     virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
     virtual void ResetMarkAnchorStart() = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
-    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) = 0;
+    virtual void CreateWithResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, const PopupType& type) = 0;
     virtual void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) = 0;
     virtual void RemoveResObj(const std::string& key) {};
     virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) = 0;
     virtual void AllowForceDark(bool forceDarkAllowed) {};
+
+    // depth space
+    virtual void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) {};
+    // edgelight
+    virtual void SetEdgeLightParam(const std::optional<NG::EdgeLightParam>& param) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

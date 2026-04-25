@@ -14,17 +14,17 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_data_detector_mgr.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1387,6 +1387,51 @@ HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest002, TestSize.Level1)
     EXPECT_EQ(ret, RET_SUCCESS);
 
     command = R"({"cmd":"setCaretPosition", "position":1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest003
+ * @tc.desc: Test RichEditorPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create richEditor node
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get RichEditorPattern
+     */
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    std::string command = R"()";
+    auto ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({)";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"addText", "params":{"value":"222222222222"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"selectText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"selectText", "selectionStart":-1, "selectionEnd":-1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"clear"})";
     ret = pattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_SUCCESS);
 }

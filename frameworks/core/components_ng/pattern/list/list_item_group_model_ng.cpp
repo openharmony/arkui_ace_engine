@@ -17,19 +17,20 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
 
-void ListItemGroupModelNG::Create(V2::ListItemGroupStyle listItemGroupStyle)
+void ListItemGroupModelNG::Create(const V2::ListItemGroupOptions& options)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_GROUP_ETS_TAG, nodeId);
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, nodeId, [itemGroupStyle = listItemGroupStyle]() {
-            return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, itemGroupStyle);
+        FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, nodeId, [options]() {
+            return AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, options);
         });
     stack->Push(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
@@ -39,18 +40,43 @@ void ListItemGroupModelNG::Create(V2::ListItemGroupStyle listItemGroupStyle)
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->ResetDividerColorSetByUser();
     }
+    if (options.style == V2::ListItemGroupStyle::CARD && frameNode) {
+        RefPtr<ListItemGroupPattern> pattern = frameNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->GetIsCardStyleInitialized()) {
+            return;
+        }
+        pattern->ApplyListItemGroupDefaultAttributes(frameNode);
+        pattern->SetIsCardStyleInitialized(true);
+    }
 }
 
 RefPtr<FrameNode> ListItemGroupModelNG::CreateFrameNode(int32_t nodeId)
 {
+    V2::ListItemGroupOptions options;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, nodeId,
-        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupStyle::NONE));
+        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, options));
     return frameNode;
 }
 
 void ListItemGroupModelNG::SetSpace(const Dimension& space)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space);
+}
+
+void ListItemGroupModelNG::SetSpaceWidth(const Dimension& spaceWidth)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, SpaceWidth, spaceWidth);
+}
+
+void ListItemGroupModelNG::ResetSpace()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListItemGroupLayoutProperty, Space, PROPERTY_UPDATE_MEASURE);
+}
+
+void ListItemGroupModelNG::ResetSpaceWidth()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListItemGroupLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE);
 }
 
 void ListItemGroupModelNG::SetDivider(const V2::ItemDivider& divider)
@@ -157,12 +183,33 @@ void ListItemGroupModelNG::SetSpace(FrameNode* frameNode, const Dimension& space
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space, frameNode);
 }
 
+void ListItemGroupModelNG::SetSpaceWidth(FrameNode* frameNode, const Dimension& spaceWidth)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, SpaceWidth, spaceWidth, frameNode);
+}
+
 void ListItemGroupModelNG::SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetListItemGroupStyle(style);
+}
+
+void ListItemGroupModelNG::SetHeaderStyle(FrameNode* frameNode, V2::ListItemGroupHeaderFooterStyle style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHeaderStyle(style);
+}
+
+void ListItemGroupModelNG::SetFooterStyle(FrameNode* frameNode, V2::ListItemGroupHeaderFooterStyle style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFooterStyle(style);
 }
 
 void ListItemGroupModelNG::SetFooterComponent(const RefPtr<NG::UINode>& footerComponent)
@@ -432,5 +479,33 @@ void ListItemGroupModelNG::SetDividerColorByUser(FrameNode* frameNode, bool colo
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, DividerColorSetByUser, colorSetByUser, frameNode);
+}
+
+void ListItemGroupModelNG::CreateWithResourceObjSpace(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::CreateWithResourceObjSpace(frameNode, resObj);
+}
+
+void ListItemGroupModelNG::CreateWithResourceObjSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("listItemGroup.spaceWidth");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CalcDimension result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || !result.IsNonNegative()) {
+            result.Reset();
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, SpaceWidth, result, frameNode);
+    };
+    pattern->AddResObj("listItemGroup.spaceWidth", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/property/flex_property.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "ui/base/ace_type.h"
@@ -33,7 +34,11 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/event_manager.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
@@ -43,6 +48,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -56,9 +62,15 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/render/ui_material_filter_creator.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/smart_gesture_property.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 
@@ -72,6 +84,19 @@ constexpr double WIDTH_BREAKPOINT_1440VP = 1440.0;
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0.8
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
+constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
+
+void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto manager = eventManager->GetOrCreateSmartGestureManager();
+    CHECK_NULL_VOID(manager);
+    manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
+}
 
 std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
 {
@@ -177,6 +202,7 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->MarkUserDefinedHeightConfigured();
     // get previously user defined ideal width
     std::optional<CalcLength> width = std::nullopt;
     auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
@@ -258,6 +284,9 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    if (!isWidth) {
+        layoutProperty->MarkUserDefinedHeightConfigured();
+    }
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
@@ -1061,6 +1090,19 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
         pattern->AddResObj("pixelStretchEffect", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
+}
+
+void ViewAbstract::SetSpatialEffect(const std::optional<SpatialEffectParams>& params)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+
+    if (params.has_value()) {
+        ACE_UPDATE_RENDER_CONTEXT(SpatialEffect, params.value());
+        return;
+    }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, SpatialEffect);
 }
 
 void ViewAbstract::SetLightUpEffect(double radio)
@@ -2569,12 +2611,27 @@ void ViewAbstract::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
     gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
 }
 
+void ViewAbstract::SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureCollectInterceptFunc(std::move(func));
+}
+
 void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
+void ViewAbstract::SetShouldRecognizerParallelWith(
+    NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldRecognizerParallelWithFunc(std::move(shouldRecognizerParallelWithFunc));
 }
 
 void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
@@ -2874,6 +2931,22 @@ void ViewAbstract::SetOnAreaChanged(
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
+void ViewAbstract::SetOnAreaChangedWithInterval(
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
+        onAreaChanged,
+    int32_t minInterval)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (minInterval < 0) {
+        minInterval = DEFAULT_AREA_CHANGE_INTERVAL;
+    }
+    frameNode->SetOnAreaChangeCallbackWithInterval(std::move(onAreaChanged), static_cast<uint32_t>(minInterval));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
+}
+
 void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -2904,6 +2977,9 @@ void ViewAbstract::SetResponseRegionList(
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (responseRegionMap.empty()) {
+        gestureHub->MarkTouchResponseRegionConfigured();
+    }
     gestureHub->SetResponseRegionMap(responseRegionMap);
 }
 
@@ -2911,6 +2987,9 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseR
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (responseRegion.empty()) {
+        gestureHub->MarkTouchResponseRegionConfigured();
+    }
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -4884,13 +4963,23 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
             CHECK_NULL_VOID(frameNode);
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadowValue, frameNode);
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (!(renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+                renderContext->UpdateBackShadow(shadow);
+            }
+            renderContext->UpdatePreBackShadow(shadow);
         };
         pattern->AddResObj("shadow", resObj, std::move(updateFunc));
     }
-    ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
-    ACE_UPDATE_RENDER_CONTEXT(PreBackShadow, shadow);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!(renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+        renderContext->UpdateBackShadow(shadow);
+    }
+    renderContext->UpdatePreBackShadow(shadow);
 }
 
 void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
@@ -4905,13 +4994,22 @@ void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
             CHECK_NULL_VOID(frameNode);
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadowValue, frameNode);
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (!(renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+                renderContext->UpdateBackShadow(shadowValue);
+            }
+            renderContext->UpdatePreBackShadow(shadowValue);
         };
         pattern->AddResObj("shadow", resObj, std::move(updateFunc));
     }
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!(renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+        renderContext->UpdateBackShadow(shadow);
+    }
+    renderContext->UpdatePreBackShadow(shadow);
 }
 
 void ViewAbstract::SetBlendMode(BlendMode blendMode)
@@ -5763,13 +5861,17 @@ void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 
 void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material)
 {
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
-        ViewAbstract::SetSystemMaterialImmediate(frameNode, material);
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(material);
+    if (!MaterialUtils::CallSetMaterial(frameNode, nativeMaterial)) {
+        ViewAbstract::SetSystemMaterialImmediate(frameNode, nativeMaterial);
     }
-    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
+    renderContext->SetSystemMaterial(nativeMaterial ? nativeMaterial->Copy() : nullptr);
 }
 
 void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
@@ -5779,52 +5881,76 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
     auto preMaterial = renderContext->GetSystemMaterial();
     if (!preMaterial) {
         return;
+    }
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("viewAbstract.uiMaterial");
+    if (preMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        auto preConfig = renderContext->GetImmersiveMaterialConfig();
+        if (!preConfig.has_value()) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT,
+                "immersiveConfig is null when remove, node id:%{public}d tag:%{public}s", frameNode->GetId(),
+                frameNode->GetTag().c_str());
+            return;
+        }
+        if (preConfig->key.level == UiMaterialLevel::SMOOTH) {
+            ResetBorderAndBackgroundEffect(frameNode, pattern, renderContext);
+        } else {
+            // reset color picker, materialFilter, and transparency callback.
+            if (preConfig->colorInvert) {
+                renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+            }
+            renderContext->SetMaterialWithQualityLevel(nullptr, UiMaterialFilterQuality::DEFAULT);
+            auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
+            if (transparencyCallbackId.has_value()) {
+                TransparencyUtils::UnRegisterTransparencyListener(transparencyCallbackId.value());
+                renderContext->SetTransparencyCallbackId(std::nullopt);
+            }
+        }
+        if (preConfig->applyShadow) {
+            ResetImmersiveShadowToDefault(pattern, renderContext);
+        }
+        renderContext->SetImmersiveMaterialConfig(std::nullopt);
     } else {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->RemoveResObj("viewAbstract.uiMaterial");
-        auto preBackgroundColor = renderContext->GetPreBackgroundColor();
-        auto preBorderWidth = renderContext->GetPreBorderWidth();
-        auto preBorderColor = renderContext->GetPreBorderColor();
-        auto preBackShadow = renderContext->GetPreBackShadow();
+        ResetBorderAndBackgroundEffect(frameNode, pattern, renderContext);
+        ResetImmersiveShadowToDefault(pattern, renderContext);
+    }
+}
 
-        if (preBackgroundColor.has_value()) {
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
-        } else {
-            renderContext->ResetBackgroundColor();
-            renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
-            pattern->OnBackgroundColorReset();
-        }
+void ViewAbstract::ResetBorderAndBackgroundEffect(
+    FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext)
+{
+    auto preBackgroundColor = renderContext->GetPreBackgroundColor();
+    auto preBorderWidth = renderContext->GetPreBorderWidth();
+    auto preBorderColor = renderContext->GetPreBorderColor();
 
-        if (preBorderWidth.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, preBorderWidth.value(), frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, preBorderWidth.value(), frameNode);
-        } else {
-            BorderWidthProperty borderWidth;
-            borderWidth.SetBorderWidth(Dimension(0));
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
-            pattern->OnBorderWidthReset();
-        }
+    if (preBackgroundColor.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
+    } else {
+        renderContext->ResetBackgroundColor();
+        renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
+        pattern->OnBackgroundColorReset();
+    }
 
-        if (preBorderColor.has_value()) {
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, preBorderColor.value(), frameNode);
-        } else {
-            BorderColorProperty borderColor;
-            borderColor.SetColor(Color::BLACK);
-            renderContext->ResetBorderColor();
-            renderContext->OnBorderColorUpdate(borderColor);
-            pattern->OnBorderColorReset();
-        }
+    if (preBorderWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, preBorderWidth.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, preBorderWidth.value(), frameNode);
+    } else {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(Dimension(0));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+        pattern->OnBorderWidthReset();
+    }
 
-        if (preBackShadow.has_value()) {
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, preBackShadow.value(), frameNode);
-        } else {
-            Shadow shadow;
-            renderContext->ResetBackShadow();
-            renderContext->OnBackShadowUpdate(shadow);
-            pattern->OnBackShadowReset();
-        }
+    if (preBorderColor.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, preBorderColor.value(), frameNode);
+    } else {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(Color::BLACK);
+        renderContext->ResetBorderColor();
+        renderContext->OnBorderColorUpdate(borderColor);
+        pattern->OnBorderColorReset();
     }
 }
 
@@ -5832,13 +5958,18 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
 {
     auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
     auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
-    auto updateFunc = [materialType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+    auto immersiveOptionsPtr = material ? material->CopyImmersiveOptions() : nullptr;
+    auto updateFunc = [materialType, immersiveOptionsPtr = std::move(immersiveOptionsPtr), weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         auto pipeline = frameNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
+        if (materialType == MaterialType::IMMERSIVE) {
+            SetImmersiveOptions(frameNode, immersiveOptionsPtr);
+            return;
+        }
         auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
         if (!materialTheme) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
@@ -5871,6 +6002,126 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
         ResetSystemMaterialEffect(frameNode);
     }
     // This function cannot save uiMaterial to renderContext.
+}
+
+void ViewAbstract::SetImmersiveOptions(
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
+{
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!optionsPtr) {
+        return;
+    }
+    auto materialConfig = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
+    if (!materialConfig) {
+        return;
+    }
+    if (materialConfig->key.level != UiMaterialLevel::SMOOTH) {
+        RegisterTransparencyListener(frameNode);
+        SetImmersiveConfigs(frameNode, materialConfig);
+        return;
+    }
+    // SMOOTH
+    auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
+    if (transparencyCallbackId.has_value()) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "unExpect: materialLevel change");
+        TransparencyUtils::UnRegisterTransparencyListener(transparencyCallbackId.value());
+        renderContext->SetTransparencyCallbackId(std::nullopt);
+    }
+    SetImmersiveConfigs(frameNode, materialConfig);
+}
+
+void ViewAbstract::RegisterTransparencyListener(const RefPtr<FrameNode>& frameNode)
+{
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto transparencyCallbackId = renderContext->GetTransparencyCallbackId();
+    if (!transparencyCallbackId) {
+        auto weakNode = WeakPtr<FrameNode>(frameNode);
+        auto callbackId = TransparencyUtils::RegisterTransparencyListener(weakNode, [weak = weakNode](int32_t _) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto material = renderContext->GetSystemMaterial();
+            if (!material || material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "material has changed, no need transparency callback");
+                return;
+            }
+            ViewAbstract::SetImmersiveOptions(frameNode, material->GetImmersiveOptions());
+        });
+        renderContext->SetTransparencyCallbackId(callbackId);
+    }
+}
+
+void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const std::optional<ImmersiveMaterialConfig>& config)
+{
+    if (!config) {
+        return;
+    }
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto preConfig = renderContext->GetImmersiveMaterialConfig();
+    if (config->key.level == UiMaterialLevel::SMOOTH) {
+        auto pipeline = frameNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+        if (!materialTheme) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
+            return;
+        }
+        auto params = materialTheme->GetUiMaterialParam(MaterialType::IMMERSIVE, pipeline);
+        if (!params) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "Get immersive param failed");
+            return;
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
+        if (config->applyShadow) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, params->shadow, frameNode);
+        } else if (preConfig && preConfig->applyShadow) {
+            ResetImmersiveShadowToDefault(pattern, renderContext);
+        }
+        pattern->OnUiMaterialParamUpdate(params.value());
+        renderContext->SetImmersiveMaterialConfig(config);
+        return;
+    }
+    if (preConfig == config) {
+        return;
+    }
+    // gentle or exquisite
+    auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
+    if (preConfig && preConfig->colorInvert && !config->colorInvert) {
+        // reset color picker
+        renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
+    }
+    renderContext->SetMaterialWithQualityLevel(
+        materialFilter, config->colorInvert ? UiMaterialFilterQuality::ADAPTIVE : UiMaterialFilterQuality::DEFAULT);
+    if (config->applyShadow) {
+        Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale);
+        renderContext->UpdateBackShadow(shadow);
+    } else if (preConfig && preConfig->applyShadow) {
+        ResetImmersiveShadowToDefault(pattern, renderContext);
+    }
+    renderContext->SetImmersiveMaterialConfig(config);
+}
+
+void ViewAbstract::ResetImmersiveShadowToDefault(
+    const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext)
+{
+    auto shadowProperty = renderContext->GetPreBackShadow();
+    if (shadowProperty.has_value()) {
+        renderContext->UpdateBackShadow(shadowProperty.value());
+    } else {
+        auto shadow = MaterialUtils::GetImmersiveEmptyShadow();
+        renderContext->ResetBackShadow();
+        renderContext->OnBackShadowUpdate(shadow);
+        pattern->OnBackShadowReset();
+    }
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
@@ -6093,6 +6344,14 @@ void ViewAbstract::SetUseUnion(bool useUnion)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     SetUseUnion(frameNode, useUnion);
+}
+
+void ViewAbstract::SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(CenterGravityOptions, centerGravityOptions);
 }
 
 void ViewAbstract::SetFreeze(bool freeze)
@@ -6622,6 +6881,7 @@ void ViewAbstract::SetHeight(FrameNode* frameNode, const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->MarkUserDefinedHeightConfigured();
     std::optional<CalcLength> width = std::nullopt;
     auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
@@ -6681,6 +6941,9 @@ void ViewAbstract::ClearWidthOrHeight(FrameNode* frameNode, bool isWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    if (!isWidth) {
+        layoutProperty->MarkUserDefinedHeightConfigured();
+    }
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
@@ -7171,6 +7434,16 @@ void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectO
     ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
 }
 
+void ViewAbstract::SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params)
+{
+    if (params.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SpatialEffect, params.value(), frameNode);
+        return;
+    }
+    auto target = frameNode->GetRenderContext();
+    ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
+}
+ 
 void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, double radio)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio, frameNode);
@@ -8342,6 +8615,9 @@ void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (responseRegionMap.empty()) {
+        gestureHub->MarkTouchResponseRegionConfigured();
+    }
     gestureHub->SetResponseRegionMap(responseRegionMap);
 }
 
@@ -8370,6 +8646,9 @@ void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (responseRegion.empty()) {
+        gestureHub->MarkTouchResponseRegionConfigured();
+    }
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -8428,6 +8707,33 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }
+}
+
+void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (action != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
+        return;
+    }
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    SmartGestureShortcutConfig config;
+    config.action = SmartGestureShortcutAction::PRIMARY;
+    config.enabled = enabled;
+    config.selectable = selectable;
+    smartGestureProperty->SetSmartGestureShortcut(config);
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
+void ViewAbstract::ResetSmartGestureShortcut()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->ResetSmartGestureShortcut();
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
 }
 
 void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
@@ -8579,6 +8885,22 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
+}
+
+void ViewAbstract::SetOnAreaChangedWithInterval(FrameNode* frameNode,
+    std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)>
+        &&onAreaChanged,
+    int32_t minInterval)
+{
+    FREE_NODE_CHECK(frameNode, SetOnAreaChangedWithInterval, frameNode, std::move(onAreaChanged), minInterval);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (minInterval < 0) {
+        minInterval = DEFAULT_AREA_CHANGE_INTERVAL;
+    }
+    frameNode->SetOnAreaChangeCallbackWithInterval(std::move(onAreaChanged), static_cast<uint32_t>(minInterval));
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
@@ -9724,6 +10046,15 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
+void ViewAbstract::SetShouldRecognizerParallelWith(
+    FrameNode* frameNode, NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldRecognizerParallelWithFunc(std::move(shouldRecognizerParallelWithFunc));
+}
+
 void ViewAbstract::SetNextFocus(FrameNode* frameNode, FocusIntension key,
     std::variant<WeakPtr<AceType>, std::string> nextFocus)
 {
@@ -9880,6 +10211,13 @@ void ViewAbstract::SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc&
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
+}
+
+void ViewAbstract::SetOnGestureCollectIntercept(FrameNode* frameNode, NG::OnGestureCollectInterceptFunc&& func)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureCollectInterceptFunc(std::move(func));
 }
 
 float ViewAbstract::GetLayoutWeight(FrameNode* frameNode)
@@ -10847,5 +11185,21 @@ void ViewAbstract::ResetOnNeedSoftkeyboard(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetOnNeedSoftKeyboard();
+}
+
+void ViewAbstract::SetEdgeLightParam(const std::optional<EdgeLightParam>& param)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (param.has_value()) {
+        renderContext->UpdateEdgeLightParam(param.value());
+    } else {
+        renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
+    }  
 }
 } // namespace OHOS::Ace::NG

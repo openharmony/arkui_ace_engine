@@ -17,6 +17,8 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/base/log/log_wrapper.h"
@@ -25,8 +27,8 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

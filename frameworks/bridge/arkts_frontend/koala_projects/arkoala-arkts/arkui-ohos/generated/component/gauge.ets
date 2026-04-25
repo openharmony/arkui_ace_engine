@@ -38,7 +38,7 @@ import { GaugeModifier } from './../GaugeModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkGaugePeer extends ArkCommonMethodPeer {
-    attributeSet?: GaugeModifier;
+    gaugeAttributeSet?: GaugeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -127,7 +127,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt32(0)
                 } else {
                     const valueTmpValueElem = valueTmpValue[0]
-                    if (valueTmpValueElem instanceof [ ResourceColor | LinearGradient, double ]) {
+                    if ((valueTmpValueElem instanceof [ ResourceColor | LinearGradient, double ]) && ((valueTmpValue.length) == (2))) {
                         thisSerializer.writeInt8((2).toByte())
                         const valueTmpValueForIdx2 = valueTmpValue as Array<[ ResourceColor | LinearGradient, double ]>
                         thisSerializer.writeInt32((valueTmpValueForIdx2.length).toInt())
@@ -209,7 +209,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
     }
 }
 export interface GaugeOptions {
-    value: double | undefined;
+    value?: double | undefined;
     min?: double;
     max?: double;
 }

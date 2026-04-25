@@ -97,6 +97,20 @@ void DataProviderManagerStandard::InitHelper()
     }
 }
 
+void DataProviderManagerStandard::InitObserverHelper()
+{
+    {
+        std::shared_lock lock(observerHelperMutex_);
+        if (observerHelper_) {
+            return;
+        }
+    }
+    std::unique_lock lock(observerHelperMutex_);
+    if (!observerHelper_ && dataShareObserverHelperImpl_) {
+        observerHelper_ = dataShareObserverHelperImpl_();
+    }
+}
+
 int32_t DataProviderManagerStandard::GetDataProviderFile(const std::string& uriStr, const std::string& mode)
 {
     InitHelper();
@@ -145,5 +159,37 @@ std::string DataProviderManagerStandard::GetMovingPhotoImagePath(const std::stri
     std::shared_lock lock(helperMutex_);
     CHECK_NULL_RETURN(helper_, "");
     return helper_->GetMovingPhotoImagePath(uri);
+}
+
+int32_t DataProviderManagerStandard::RegisterDataShareSmartEdgeStateObserver()
+{
+    InitObserverHelper();
+    std::shared_lock lock(observerHelperMutex_);
+    CHECK_NULL_RETURN(observerHelper_, -1);
+    return observerHelper_->RegisterDataShareSmartEdgeStateObserver();
+}
+
+int32_t DataProviderManagerStandard::UnregisterDataShareObservers()
+{
+    InitObserverHelper();
+    std::shared_lock lock(observerHelperMutex_);
+    CHECK_NULL_RETURN(observerHelper_, -1);
+    return observerHelper_->UnregisterDataShareObservers();
+}
+
+bool DataProviderManagerStandard::IsInSmartEdgeState()
+{
+    InitObserverHelper();
+    std::shared_lock lock(observerHelperMutex_);
+    CHECK_NULL_RETURN(observerHelper_, false);
+    return observerHelper_->IsInSmartEdgeState();
+}
+
+bool DataProviderManagerStandard::QuerySmartEdgeState()
+{
+    InitObserverHelper();
+    std::shared_lock lock(observerHelperMutex_);
+    CHECK_NULL_RETURN(observerHelper_, false);
+    return observerHelper_->QuerySmartEdgeState();
 }
 } // namespace OHOS::Ace

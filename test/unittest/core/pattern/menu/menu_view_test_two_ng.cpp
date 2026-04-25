@@ -20,13 +20,13 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
@@ -64,6 +64,7 @@
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -534,5 +535,49 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam003, TestSize.Level1)
     EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
     EXPECT_TRUE(menuParamValue.isDarkMode);
     g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: UpdateMenuProperties003
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTwoTestNg, UpdateMenuProperties003, TestSize.Level1)
+{
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+    MenuParam menuParam;
+    menuParam.placement = Placement::TOP;
+    menuParam.placement = OHOS::Ace::Placement::TOP;
+    menuParam.targetSpace = Dimension(TWO_HUNDRED);
+    ASSERT_NE(wrapperNode_, nullptr);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
+    auto menuProperty = menuFrameNode_->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    EXPECT_TRUE(menuProperty->HasMenuTargetSpace());
+}
+
+/**
+ * @tc.name: UpdateMenuProperties004
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTwoTestNg, UpdateMenuProperties004, TestSize.Level1)
+{
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+    MenuParam menuParam;
+    menuParam.placement = Placement::TOP;
+    menuParam.placement = OHOS::Ace::Placement::TOP;
+    menuParam.targetSpace = Dimension(TWO_HUNDRED);
+    ASSERT_NE(wrapperNode_, nullptr);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    MenuView::UpdateMenuLayoutProperty(menuFrameNode_, menuParam);
+    auto menuProperty = menuFrameNode_->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    EXPECT_TRUE(menuProperty->HasMenuTargetSpace());
 }
 } // namespace OHOS::Ace::NG

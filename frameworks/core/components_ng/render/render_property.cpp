@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/render_property.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -461,6 +462,107 @@ void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         json->PutExtAttr("LightPosition", jsonLightPosition, filter);
     } else {
         json->PutExtAttr("LightPosition", JsonUtil::Create(true), filter);
+    }
+}
+
+const std::optional<RefPtr<BorderImage>>& BorderImageProperty::GetBorderImage() const
+{
+    return propBorderImage;
+}
+
+bool BorderImageProperty::HasBorderImage() const
+{
+    return propBorderImage.has_value();
+}
+
+RefPtr<BorderImage> BorderImageProperty::GetBorderImageValue() const
+{
+    return propBorderImage.value();
+}
+
+bool BorderImageProperty::UpdateBorderImage(const RefPtr<BorderImage>& value)
+{
+    if (propBorderImage.has_value()) {
+        if (NearEqual(propBorderImage.value(), value)) {
+            return false;
+        }
+    }
+    propBorderImage = value;
+    return true;
+}
+
+bool BorderImageProperty::UpdateBorderImage(const std::optional<RefPtr<BorderImage>>& value)
+{
+    if (value.has_value()) {
+        return UpdateBorderImage(value.value());
+    }
+    return false;
+}
+
+bool BorderImageProperty::CheckBorderImage(const RefPtr<BorderImage>& value) const
+{
+    if (!propBorderImage.has_value()) {
+        return false;
+    }
+    return NearEqual(propBorderImage.value(), value);
+}
+
+void BorderImageProperty::ResetBorderImage()
+{
+    propBorderImage.reset();
+}
+
+void BorderImageProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    static const char* REPEAT_MODE[] = {
+        "RepeatMode.Space",
+        "RepeatMode.Stretch",
+        "RepeatMode.Repeat",
+        "RepeatMode.Round",
+    };
+    auto jsonBorderImage = JsonUtil::Create(true);
+    jsonBorderImage->Put("source", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetSrc().c_str());
+    jsonBorderImage->Put(
+        "slice", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->SliceToString().c_str());
+    jsonBorderImage->Put(
+        "width", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->WidthToString().c_str());
+    jsonBorderImage->Put(
+        "outset", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->OutsetToString().c_str());
+    jsonBorderImage->Put("repeat", REPEAT_MODE[static_cast<int>(
+                      propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetRepeatMode())]);
+    jsonBorderImage->Put("fill", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
+        ->GetNeedFillCenter() ? "true" : "false");
+    json->PutExtAttr("borderImage", jsonBorderImage->ToString().c_str(), filter);
+}
+
+void UnionEffectProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("useUnionEffect", propUseUnionEffect.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("unionMode", static_cast<int32_t>(propUnionMode.value_or(UnionMode::SMOOTH_UNION)), filter);
+    if (propCenterGravityOptions.has_value()) {
+        auto jsonCenterGravity = JsonUtil::Create(true);
+        jsonCenterGravity->Put("gravityCenter", propCenterGravityOptions->gravityCenter ? "true" : "false");
+        jsonCenterGravity->Put("gravityIntensity", propCenterGravityOptions->gravityIntensity);
+        json->PutExtAttr("centerGravityOptions", jsonCenterGravity, filter);
+    }
+}
+
+void EdgeLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (propEdgeLightParam.has_value()) {
+        auto jsonEdgeLight = JsonUtil::Create(true);
+        jsonEdgeLight->Put("edgeLightPosition", static_cast<int32_t>(propEdgeLightParam->edgeLightPosition));
+        jsonEdgeLight->Put("length", propEdgeLightParam->length.ToString().c_str());
+        jsonEdgeLight->Put("intensity", propEdgeLightParam->intensity);
+        jsonEdgeLight->Put("thickness", propEdgeLightParam->thickness.ToString().c_str());
+        jsonEdgeLight->Put("color", propEdgeLightParam->color.ColorToString().c_str());
+        json->PutExtAttr("edgeLightParam", jsonEdgeLight, filter);
     }
 }
 } // namespace OHOS::Ace::NG

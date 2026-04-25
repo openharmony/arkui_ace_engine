@@ -23,6 +23,7 @@ import { FrameNode_serializer } from './../framework/FrameNode'
 import { Edge, ScrollSource, BarState, Color as arkui_component_enums_Color, EdgeEffect, Curve } from './enums'
 import { Length, Resource as arkui_component_units_Resource, VoidCallback, LengthMetrics as arkui_component_units_LengthMetrics, Dimension } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
+import { extractors, AttributeModifier, hookScrollAttributeModifier, AttributeUpdater } from '#handwritten'
 import { FrameNode } from 'arkui.FrameNode'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
@@ -31,7 +32,6 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ScrollState, ScrollSnapAlign } from './list'
-import { AttributeModifier, extractors, hookScrollAttributeModifier, AttributeUpdater } from '#handwritten'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -161,7 +161,8 @@ export class Scroller implements MaterializedBase {
             buffer = OffsetResult_serializer.read(retvalDeserializer)
         }
         const returnResult: OffsetResult | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as OffsetResult | undefined)
     }
     private offset_serialize(): OffsetResult | undefined {
         const retval = ArkUIGeneratedNativeModule._Scroller_offset(this.peer!.ptr)
@@ -172,7 +173,8 @@ export class Scroller implements MaterializedBase {
             buffer = OffsetResult_serializer.read(retvalDeserializer)
         }
         const returnResult: OffsetResult | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as OffsetResult | undefined)
     }
     private scrollToIndex_serialize(value: int32, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -239,7 +241,8 @@ export class Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: RectResult = RectResult_serializer.read(retvalDeserializer)
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as RectResult)
     }
     private getItemIndex_serialize(x: double, y: double): int32 {
         const retval = ArkUIGeneratedNativeModule._Scroller_getItemIndex(this.peer!.ptr, x, y)
@@ -249,7 +252,8 @@ export class Scroller implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._Scroller_contentSize(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SizeResult = SizeResult_serializer.read(retvalDeserializer)
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as SizeResult)
     }
     private getFrameNode_serialize(): FrameNode | undefined {
         const retval = ArkUIGeneratedNativeModule._Scroller_getFrameNode(this.peer!.ptr)
@@ -260,11 +264,12 @@ export class Scroller implements MaterializedBase {
             buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
         }
         const returnResult: FrameNode | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as FrameNode | undefined)
     }
 }
 export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
-    attributeSet?: ScrollModifier;
+    scrollAttributeSet?: ScrollModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -492,7 +497,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarWidthAttribute(value: double | string | undefined): void {
+    setScrollBarWidth0Attribute(value: double | string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -509,7 +514,19 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarWidth1Attribute(value: arkui_component_units_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            global_resource_Resource_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
@@ -718,6 +735,7 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
     scrollBar(value: BarState | undefined): this
     scrollBarColor(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): this
     scrollBarWidth(value: double | string | undefined): this
+    scrollBarWidth(value: arkui_component_units_Resource | undefined): this
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         throw new Error('Unimplemented method onScrollFrameBegin')
     }
@@ -831,7 +849,12 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
     }
     public scrollBarWidth(value: double | string | undefined): this {
         const value_casted = value as (double | string | undefined)
-        this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+        this.getPeer()?.setScrollBarWidth0Attribute(value_casted)
+        return this
+    }
+    public scrollBarWidth(value: arkui_component_units_Resource | undefined): this {
+        const value_casted = value as (arkui_component_units_Resource | undefined)
+        this.getPeer()?.setScrollBarWidth1Attribute(value_casted)
         return this
     }
     public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {

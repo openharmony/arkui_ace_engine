@@ -21,7 +21,7 @@
 
 #include "interfaces/native/node/styled_string.h"
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +32,8 @@ public:
     static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>&);
     static void SetVariableFontWeight(FrameNode* frameNode, const std::optional<int32_t>& value);
     static void SetEnableVariableFontWeight(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetFontVariations(FrameNode* frameNode, const std::optional<FONT_VARIATIONS_LIST>& value);
+    static void ResetFontVariations(FrameNode* frameNode);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
@@ -69,6 +71,9 @@ public:
     static void SetTextSelectableMode(FrameNode* frameNode, const std::optional<TextSelectableMode>& value);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
         std::function<void()>&& buildFunc, SelectMenuParam& menuParam);
+    static void BindPreviewMenu(FrameNode* frameNode, TextSpanType& spanType, std::function<void()>&& buildFunc,
+        SelectMenuParam& menuParam);
+    static void UnBindPreviewMenu(FrameNode* frameNode);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void ResetSelectionMenuOptions(FrameNode* frameNode);

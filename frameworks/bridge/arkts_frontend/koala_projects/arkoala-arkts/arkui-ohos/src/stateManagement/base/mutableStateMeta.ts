@@ -79,6 +79,12 @@ export class TrackedMutableStateMeta extends MutableStateMeta {
  * fireChange(obj, propName) marks all dependencies for this prop need update
  */
 export class MutableStateMeta extends MutableStateMetaBase implements IMutableStateMeta, IBindingSource {
+    public static registry: FinalizationRegistry<WeakRef<MutableState<int32>>> = new FinalizationRegistry<WeakRef<MutableState<int32>>>(
+        (weak: WeakRef<MutableState<int32>>) => {
+            const state = weak.deref();
+            state?.dispose();
+        }
+    );
     // meta MutableState to record dependencies in addRef
     // and mutate in fireChange
     protected __metaDependency: MutableState<int32>;
@@ -97,6 +103,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
         this.weakThis = new WeakRef<IBindingSource>(this);
         this.metaValue = 0;
         this.hasFired = false;
+        MutableStateMeta.registry.register(this, new WeakRef<MutableState<int32>>(this.__metaDependency));
     }
 
     public registerDynamicHookFunc(addRef: () => void, fireChange: () => void) {
@@ -142,6 +149,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
                     this.clearBindingRefs(listener);
                 }
             });
+            ObserveSingleton.instance.updateDirtySyncMonitorPaths();
         }
         if (!this.hasFired && this.shouldFireChange()) {
             ObserveSingleton.instance.changeMutableState(this);
@@ -202,6 +210,8 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
             resolvedKey = '__metaBuiltInV2Key_';
         } else if (info.startsWith('__metaBuiltInMakeObserved_')) {
             resolvedKey = '__metaMakeObservedKey_';
+        } else if (info.startsWith('__metaInterfaceMakeObserved_')) {
+            resolvedKey = '__metaInterfaceMakeObservedKey_';
         }
         observedInfo.setType(resolvedKey);
     }

@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -47,6 +48,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -99,6 +101,33 @@ void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
                 StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
         }
     }
+}
+
+bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    auto array = JSRef<JSArray>::Cast(jsValue);
+    for (uint32_t i = 0; i < array->Length(); ++i) {
+        auto item = array->GetValueAt(i);
+        if (!item->IsObject()) {
+            continue;
+        }
+        auto itemObj = JSRef<JSObject>::Cast(item);
+        auto axis = itemObj->GetProperty("axis");
+        auto value = itemObj->GetProperty("value");
+        auto isNormalized = itemObj->GetProperty("isNormalized");
+        if (!axis->IsString() || !value->IsNumber()) {
+            continue;
+        }
+        std::optional<bool> normalized;
+        if (isNormalized->IsBoolean()) {
+            normalized = isNormalized->ToBoolean();
+        }
+        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
+    }
+    return !fontVariations.empty();
 }
 }; // namespace
 
@@ -1028,6 +1057,33 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetCopyOption(copyOptions);
 }
 
+void JSText::SetOnWillCopy(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    CHECK_NULL_VOID(args->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::u16string& value) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillCopy");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(value);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextModel::GetInstance()->SetOnWillCopy(std::move(callback));
+}
+
+JSRef<JSVal> JSText::CreateSimpleJsOnWillObj(const std::u16string& value)
+{
+    JSRef<JSVal> stringValue = JSRef<JSVal>::Make(ToJSValue(value));
+    return stringValue;
+}
+
 void JSText::SetOnCopy(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
@@ -1140,6 +1196,23 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
+bool JSText::BindPreviewMenu(const JSRef<JSVal> argsMenuOptions, NG::TextResponseType responseType,
+    NG::TextSpanType textSpanType, std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam)
+{
+    JSRef<JSObject> menuOptions = JSRef<JSObject>::Cast(argsMenuOptions);
+    auto menuType = menuOptions->GetProperty("menuType");
+    bool isPreviewMenu = !menuType->IsUndefined() && !menuType->IsNull() && menuType->IsNumber() &&
+                        (menuType->ToNumber<int32_t>() == 1);
+    bool bindImagePreviewMenu = isPreviewMenu && responseType == NG::TextResponseType::LONG_PRESS;
+    if (bindImagePreviewMenu) {
+        TextModel::GetInstance()->BindPreviewMenu(textSpanType, buildFunc, menuParam);
+        return true;
+    } else {
+        TextModel::GetInstance()->UnBindPreviewMenu();
+        return false;
+    }
+}
+
 void JSText::BindSelectionMenu(const JSCallbackInfo& info)
 {
     // TextSpanType
@@ -1188,7 +1261,11 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     if (info.Length() > static_cast<uint32_t>(resquiredParameterCount)) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
         if (argsMenuOptions->IsObject()) {
-            ParseMenuParam(info, argsMenuOptions, menuParam);
+            auto menuOptions = JSRef<JSObject>::Cast(argsMenuOptions);
+            ParseMenuParam(info, menuOptions, menuParam);
+            if (BindPreviewMenu(menuOptions, responseType, textSpanType, buildFunc, menuParam)) {
+                return;
+            }
         }
     }
 
@@ -1223,6 +1300,18 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
     }
     std::string fontFeatureSettings = info[0]->ToString();
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
+void JSText::SetFontVariations(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    FONT_VARIATIONS_LIST fontVariations;
+    if (!ParseJsFontVariations(info[0], fontVariations)) {
+        TextModel::GetInstance()->ResetFontVariations();
+    }
+    TextModel::GetInstance()->SetFontVariations(fontVariations);
 }
 
 void JSText::JsResponseRegion(const JSCallbackInfo& info)
@@ -1431,6 +1520,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("remoteMessage", &JSText::JsRemoteMessage);
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
+    JSClass<JSText>::StaticMethod("onWillCopy", &JSText::SetOnWillCopy);
     JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
     JSClass<JSText>::StaticMethod("minLines", &JSText::SetMinLines);
     JSClass<JSText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
@@ -1448,6 +1538,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
+    JSClass<JSText>::StaticMethod("fontVariations", &JSText::SetFontVariations);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
     JSClass<JSText>::StaticMethod("orphanCharOptimization", &JSText::SetOrphanCharOptimization);

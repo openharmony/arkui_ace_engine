@@ -91,6 +91,12 @@ ace_unittest("drag_drop_proxy_test_ng") {
   sources = [ "drag_drop_proxy_test_ng.cpp" ]
 }
 
+ace_unittest("start_drag_listener_impl_test_ng") {
+  module_name = "Drag-CommonDrag"
+  type = "new"
+  sources = [ "start_drag_listener_impl_test_ng.cpp" ]
+}
+
 ace_unittest("full_screen_manager_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
@@ -101,12 +107,6 @@ ace_unittest("json_report_test_ng") {
   module_name = "CommonProperties-LayoutAndBorder"
   type = "new"
   sources = [ "json_report_test_ng.cpp" ]
-}
-
-ace_unittest("load_complete_manager_test_ng") {
-  module_name = "StateManagement-CustomCoponent"
-  type = "new"
-  sources = [ "load_complete_manager_test_ng.cpp" ]
 }
 
 ace_unittest("post_event_manager_test_ng") {
@@ -136,6 +136,12 @@ ace_unittest("shared_overlay_manager_test_ng") {
   sources = [ "shared_overlay_manager_test_ng.cpp" ]
 }
 
+ace_unittest("smart_gesture_decider_test_ng") {
+  module_name = "SmartGesture-Decider"
+  type = "new"
+  sources = [ "smart_gesture_decider_test_ng.cpp" ]
+}
+
 ace_unittest("display_sync_manager_test_ng") {
   module_name = "DrawingSet-Line"
   type = "new"
@@ -152,6 +158,13 @@ ace_unittest("frame_rate_manager_test_ng") {
   module_name = "StateManagement-InComponent"
   type = "new"
   sources = [ "frame_rate_manager_test.cpp" ]
+}
+
+ace_unittest("gesture_debug_boundary_manager_test_ng") {
+  module_name = "Gesture-DebugBoundaryManager"
+  type = "new"
+  sources = [ "gesture_debug_boundary_manager_test_ng.cpp" ]
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
 }
 
 ace_unittest("focus_manager_test_ng") {
@@ -207,6 +220,7 @@ ace_unittest("theme_manager_test_ng") {
     "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
     "theme_manager_test_ng.cpp",
+    "theme_test.cpp",
   ]
 }
 
@@ -241,9 +255,9 @@ group("core_manager_unittest") {
     ":focus_view_test_ng",
     ":force_split_manager_test_ng",
     ":frame_rate_manager_test_ng",
+    ":gesture_debug_boundary_manager_test_ng",
     ":full_screen_manager_test_ng",
     ":json_report_test_ng",
-    ":load_complete_manager_test_ng",
     ":navigation_manager_test_ng",
     ":post_event_manager_test_ng",
     ":safe_area_manager_test_ng",
@@ -251,6 +265,7 @@ group("core_manager_unittest") {
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",
+    ":smart_gesture_decider_test_ng",
     ":theme_manager_test_ng",
   ]
 }

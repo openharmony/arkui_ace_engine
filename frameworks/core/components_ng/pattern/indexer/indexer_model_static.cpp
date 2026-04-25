@@ -138,9 +138,7 @@ void IndexerModelStatic::SetFont(FrameNode* frameNode, const std::optional<Dimen
     const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
     const std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle defaultTextStyle = indexerTheme->GetDefaultTextStyle();
     TextStyle textStyle;
@@ -155,9 +153,7 @@ void IndexerModelStatic::SetSelectedFont(FrameNode* frameNode, const std::option
     const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
     const std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle selectTextStyle = indexerTheme->GetSelectTextStyle();
     TextStyle textStyle;
@@ -172,9 +168,7 @@ void IndexerModelStatic::SetPopupFont(FrameNode* frameNode, const std::optional<
     const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
     const std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle popupTextStyle = indexerTheme->GetPopupTextStyle();
     TextStyle textStyle;

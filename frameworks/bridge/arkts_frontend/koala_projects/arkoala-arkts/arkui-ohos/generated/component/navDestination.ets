@@ -63,23 +63,49 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public pathInfo: NavPathInfo
-    public pathStack: NavPathStack
-    public navDestinationId?: string | undefined
-    public mode?: NavDestinationMode | undefined
+    // instructive change begin
+    get pathInfo(): NavPathInfo {
+        return this.getPathInfo()
+    }
+    set pathInfo(pathInfo: NavPathInfo) {
+        this.setPathInfo(pathInfo)
+    }
+    get pathStack(): NavPathStack {
+        return this.getPathStack()
+    }
+    set pathStack(pathStack: NavPathStack) {
+        this.setPathStack(pathStack)
+    }
+    get navDestinationId(): string | undefined {
+        return this.getNavDestinationId()
+    }
+    set navDestinationId(navDestinationId: string | undefined) {
+        this.setNavDestinationId(navDestinationId)
+    }
+    get mode(): NavDestinationMode | undefined {
+        return this.getMode()
+    }
+    set mode(mode: NavDestinationMode | undefined) {
+        this.setMode(mode)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, NavDestinationContextInternal.getFinalizer())
-        this.pathInfo = this.getPathInfo()
-        this.pathStack = this.getPathStack()
-        this.navDestinationId = this.getNavDestinationId()
-        this.mode = this.getMode()
+        // instructive change begin
+        // this.pathInfo = this.getPathInfo()
+        // this.pathStack = this.getPathStack()
+        // this.navDestinationId = this.getNavDestinationId()
+        // this.mode = this.getMode()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, NavDestinationContextInternal.construct())
-        this.pathInfo = this.getPathInfo()
-        this.pathStack = this.getPathStack()
-        this.navDestinationId = this.getNavDestinationId()
-        this.mode = this.getMode()
+        // instructive change begin
+        // this.pathInfo = this.getPathInfo()
+        // this.pathStack = this.getPathStack()
+        // this.navDestinationId = this.getNavDestinationId()
+        // this.mode = this.getMode()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._NavDestinationContext_construct()
@@ -135,6 +161,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
             buffer = RouteMapConfig_serializer.read(retvalDeserializer)
         }
         const returnResult: RouteMapConfig | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private getPathInfo_serialize(): NavPathInfo {
@@ -162,6 +189,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
             buffer = (retvalDeserializer.readString() as string)
         }
         const returnResult: string | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setNavDestinationId_serialize(navDestinationId: string | undefined): void {
@@ -185,6 +213,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
             buffer = NavDestinationMode.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: NavDestinationMode | undefined = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setMode_serialize(mode: NavDestinationMode | undefined): void {
@@ -201,7 +230,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     }
 }
 export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
-    attributeSet?: NavDestinationModifier;
+    navDestinationAttributeSet?: NavDestinationModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

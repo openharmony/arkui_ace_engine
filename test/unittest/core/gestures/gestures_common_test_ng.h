@@ -48,11 +48,11 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
-#include "test/mock/core/render/mock_media_player.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_media_player.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components/scroll/scroll_bar_controller.h"
 
 namespace OHOS::Ace::NG {

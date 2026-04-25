@@ -23,7 +23,6 @@
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/base/frame_scene_status.h"
-#include "frameworks/core/components_ng/pattern/list/list_layout_property.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_animation_state.h"
@@ -110,6 +109,7 @@ public:
 
     void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     bool NestedScrollOutOfBoundary() override
     {

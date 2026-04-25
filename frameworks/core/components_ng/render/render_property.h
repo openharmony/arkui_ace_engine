@@ -25,7 +25,6 @@
 #include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_style_option.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
@@ -39,10 +38,13 @@
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 enum class BlurStyle;
+class BorderImage;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -152,7 +154,15 @@ struct ForegroundProperty {
 };
 
 struct BorderImageProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImage, RefPtr<BorderImage>);
+    std::optional<RefPtr<BorderImage>> propBorderImage;
+    const std::optional<RefPtr<BorderImage>>& GetBorderImage() const;
+    bool HasBorderImage() const;
+    RefPtr<BorderImage> GetBorderImageValue() const;
+    bool UpdateBorderImage(const RefPtr<BorderImage>& value);
+    bool UpdateBorderImage(const std::optional<RefPtr<BorderImage>>& value);
+    bool CheckBorderImage(const RefPtr<BorderImage>& value) const;
+    void ResetBorderImage();
+
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImageSource, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageSlice, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageWidth, bool);
@@ -161,28 +171,7 @@ struct BorderImageProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImageGradient, Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderSourceFromImage, bool);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-    {
-        static const char* REPEAT_MODE[] = {
-            "RepeatMode.Space",
-            "RepeatMode.Stretch",
-            "RepeatMode.Repeat",
-            "RepeatMode.Round",
-        };
-        auto jsonBorderImage = JsonUtil::Create(true);
-        jsonBorderImage->Put("source", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetSrc().c_str());
-        jsonBorderImage->Put(
-            "slice", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->SliceToString().c_str());
-        jsonBorderImage->Put(
-            "width", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->WidthToString().c_str());
-        jsonBorderImage->Put(
-            "outset", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->OutsetToString().c_str());
-        jsonBorderImage->Put("repeat", REPEAT_MODE[static_cast<int>(
-                          propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetRepeatMode())]);
-        jsonBorderImage->Put("fill", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
-            ->GetNeedFillCenter() ? "true" : "false");
-        json->PutExtAttr("borderImage", jsonBorderImage->ToString().c_str(), filter);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct BorderProperty {
@@ -289,6 +278,20 @@ struct OverlayProperty {
 
 struct MotionPathProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MotionPath, MotionPathOption);
+};
+
+struct UnionEffectProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(UseUnionEffect, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(UnionMode, UnionMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CenterGravityOptions, CenterGravityOptions);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+};
+
+struct EdgeLightProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EdgeLightParam, EdgeLightParam);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 } // namespace OHOS::Ace::NG

@@ -109,7 +109,7 @@ export class StateMgmtDFX {
      * @returns The IObservedObject if the value is observed, otherwise undefined
      */
     public static getObservedObjectFromValue(value: Any): IObservedObject | undefined {
-        if (!value || typeof value !== 'object') {
+        if (!value || !(value instanceof Object)) {
             return undefined;
         }
 
@@ -424,7 +424,7 @@ export function GetObservedTypeInfo(info: string): ObservedType {
         return ObservedType.TRACE;
     } else if (info.startsWith('__metaInterfaceV1_')) {
         return ObservedType.INTERFACE_V1;
-    } else if (info.startsWith('__metaInterfaceMakeObserved_')) {
+    } else if (info.startsWith('__metaInterfaceMakeObservedKey_') || info.startsWith('__metaInterfaceMakeObserved_')) {
         return ObservedType.INTERFACE_MAKEOBSERVED;
     } else if (info.startsWith('__metaBuiltInV1Key_') || info.startsWith('__metaBuiltInV1_')) {
         return ObservedType.BUILTIN_V1;
@@ -824,7 +824,7 @@ function determineVariableNameByType(observedType: ObservedType, info: string): 
         }
         return info;
     } else if (observedType === ObservedType.INTERFACE_MAKEOBSERVED) {
-        return 'Any Object Literal Property';
+        return info;
     } else {
         return 'Unknown Variable Name';
     }
@@ -836,7 +836,7 @@ function determineClassName(observedType: ObservedType, obj: Object): string {
     } else if (observedType === ObservedType.OBSERVED) {
         return transferTypeName(Class.of(obj).getName());
     } else if (observedType === ObservedType.INTERFACE_MAKEOBSERVED) {
-        return transferTypeName(Class.of((obj as InterfaceProxyHandler).target).getName());
+        return transferTypeName(Class.of((obj as InterfaceProxyHandler).target).getInterfaces()![0]!.getName());
     } else if (observedType === ObservedType.TRACE) {
         return transferTypeName(Class.of(obj).getName());
     } else if (observedType === ObservedType.BUILTIN_V2) {
@@ -846,7 +846,7 @@ function determineClassName(observedType: ObservedType, obj: Object): string {
     } else if (observedType === ObservedType.BUILTIN_V1) {
         return transferTypeName(Class.of((obj as ObserveWrappedBase).getRaw()).getName());
     } else if (observedType === ObservedType.INTERFACE_V1) {
-        return transferTypeName(Class.of((obj as InterfaceProxyHandler).target).getName());
+        return transferTypeName(Class.of((obj as InterfaceProxyHandler).target).getInterfaces()![0]!.getName());
     } else {
         return 'Unknown Class Name';
     }
@@ -859,14 +859,17 @@ function extractMetaInfos(objectInfo: ObservedObjectInfo, observedType: Observed
     if (mutableStateMetas && mutableStateMetas.size > 0) {
         mutableStateMetas.forEach((meta: MutableStateMeta) => {
             const info = StateMgmtDFX.extractDecoratorInfoFromMutableStateMeta(meta);
-            if (info) {
-                info.decoratorName = ObservedTypeToDecoratorName.get(observedType)!;
-                info.stateVariableName = determineVariableNameByType(observedType, meta.info_);
-                info.owningComponentId = -1;
-                info.owningComponentOrClassName = determineClassName(observedType, obj);
-                metaInfos.push(info);
-                elementsCount += info.dependentInfo.length;
+            if (!info) {
+                return;
             }
+            info.decoratorName = ObservedTypeToDecoratorName.get(observedType)!;
+            info.stateVariableName = determineVariableNameByType(observedType, meta.info_);
+            info.owningComponentId = -1;
+            info.owningComponentOrClassName = determineClassName(observedType, obj);
+            if (!(info.owningComponentOrClassName === 'Date' && info.stateVariableName === '__OB_DATE' && info.dependentInfo.length === 0)) {
+                metaInfos.push(info);
+            }
+            elementsCount += info.dependentInfo.length;
         });
     }
 

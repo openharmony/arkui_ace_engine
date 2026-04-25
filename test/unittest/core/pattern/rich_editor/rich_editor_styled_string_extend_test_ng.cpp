@@ -759,4 +759,17 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, HandleRedoAction001, TestSize.Level
     EXPECT_EQ(richEditorPattern->styledString_->GetString(), EXPECT_STRING_LIST[18]);
 }
 
+/**
+ * @tc.name: IsCloseKeyboard001
+ * @tc.desc: Test IsCloseKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringExtendTestNg, IsCloseKeyboard001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_FALSE(richEditorPattern->IsCloseKeyboard());
+}
+
 } // namespace OHOS::Ace::NG

@@ -289,23 +289,49 @@ export class SwiperContentTransitionProxyInternal implements MaterializedBase,Sw
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public selectedIndex: int32
-    public index: int32
-    public position: double
-    public mainAxisLength: double
+    // instructive change begin
+    get selectedIndex(): int32 {
+        return this.getSelectedIndex()
+    }
+    set selectedIndex(selectedIndex: int32) {
+        this.setSelectedIndex(selectedIndex)
+    }
+    get index(): int32 {
+        return this.getIndex()
+    }
+    set index(index: int32) {
+        this.setIndex(index)
+    }
+    get position(): double {
+        return this.getPosition()
+    }
+    set position(position: double) {
+        this.setPosition(position)
+    }
+    get mainAxisLength(): double {
+        return this.getMainAxisLength()
+    }
+    set mainAxisLength(mainAxisLength: double) {
+        this.setMainAxisLength(mainAxisLength)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, SwiperContentTransitionProxyInternal.getFinalizer())
-        this.selectedIndex = this.getSelectedIndex()
-        this.index = this.getIndex()
-        this.position = this.getPosition()
-        this.mainAxisLength = this.getMainAxisLength()
+        // instructive change begin
+        // this.selectedIndex = this.getSelectedIndex()
+        // this.index = this.getIndex()
+        // this.position = this.getPosition()
+        // this.mainAxisLength = this.getMainAxisLength()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, SwiperContentTransitionProxyInternal.construct())
-        this.selectedIndex = this.getSelectedIndex()
-        this.index = this.getIndex()
-        this.position = this.getPosition()
-        this.mainAxisLength = this.getMainAxisLength()
+        // instructive change begin
+        // this.selectedIndex = this.getSelectedIndex()
+        // this.index = this.getIndex()
+        // this.position = this.getPosition()
+        // this.mainAxisLength = this.getMainAxisLength()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._SwiperContentTransitionProxy_construct()
@@ -525,7 +551,7 @@ export class SwiperController implements MaterializedBase {
     }
 }
 export class ArkSwiperPeer extends ArkCommonMethodPeer {
-    attributeSet?: SwiperModifier;
+    swiperAttributeSet?: SwiperModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

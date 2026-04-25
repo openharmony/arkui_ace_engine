@@ -287,6 +287,30 @@ RSColor ConvertToRSColor(Color color)
     }
     return color.GetValue();
 }
+
+Rosen::Drawing::UIColor ConvertToRSUIColor(const Color& color)
+{
+    if (auto headRoomColor = color.GetHeadRoomColor(); headRoomColor.has_value()) {
+        const auto& value = headRoomColor.value();
+        return Rosen::Drawing::UIColor(value.red, value.green, value.blue, value.alpha, value.headRoom);
+    }
+    return Rosen::Drawing::UIColor(static_cast<float>(color.GetRed()) / UINT8_MAX,
+        static_cast<float>(color.GetGreen()) / UINT8_MAX, static_cast<float>(color.GetBlue()) / UINT8_MAX,
+        static_cast<float>(color.GetAlpha()) / UINT8_MAX);
+}
+
+Rosen::SymbolColorSpace ConvertToRSSymbolColorSpace(ColorSpace colorSpace)
+{
+    switch (colorSpace) {
+        case ColorSpace::DISPLAY_P3:
+            return Rosen::SymbolColorSpace::DISPLAY_P3;
+        case ColorSpace::BT2020:
+            return Rosen::SymbolColorSpace::BT2020;
+        case ColorSpace::SRGB:
+        default:
+            return Rosen::SymbolColorSpace::SRGB;
+    }
+}
 }
 
 Rosen::TextDecoration ConvertTxtTextDecoration(const std::vector<TextDecoration>& textDecorations)
@@ -561,18 +585,33 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     auto fontWeightValue = (static_cast<int32_t>(
             ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
-    if (pipelineContext) {
-        if (textStyle.GetEnableDeviceFontWeightCategory()) {
-            fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
-        }
-    }
     if (textStyle.GetEnableVariableFontWeight()) {
         fontWeightValue = textStyle.GetVariableFontWeight();
         if (LessNotEqual(fontWeightValue, MIN_FONT_WEIGHT) || GreatNotEqual(fontWeightValue, MAX_FONT_WEIGHT)) {
             fontWeightValue = DEFAULT_FONT_WEIGHT;
         }
     }
+    if (pipelineContext) {
+        auto enableDeviceFontWeightCategory = textStyle.GetEnableDeviceFontWeightCategory();
+        if (enableDeviceFontWeightCategory.has_value()) {
+            // Span/styledString组件: 显式设置时根据设置值决定是否缩放
+            if (enableDeviceFontWeightCategory.value()) {
+                fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+            }
+        } else {
+            // Text组件: enableDeviceFontWeightCategory未设置，默认行为是缩放
+            if (!textStyle.GetEnableVariableFontWeight()) {
+                fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+            }
+        }
+    }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    for (const auto& variation : textStyle.GetFontVariations()) {
+        if (!variation.axis.empty()) {
+            txtStyle.fontVariations.SetAxisValue(
+                variation.axis, variation.value, variation.isNormalized.value_or(false));
+        }
+    }
     // Font size must be px when transferring to Rosen::TextStyle
     txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -761,6 +800,29 @@ Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>&
     return symbolColor;
 }
 
+void SetSymbolRenderColor(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
+{
+    const auto& symbolColor = textStyle.GetSymbolColorList();
+    if (textStyle.GetAndUpdateSymbolColorInfo().shouldUseUIColor) {
+        std::vector<Rosen::Drawing::UIColor> uiColors;
+        std::vector<Rosen::SymbolColorSpace> colorSpaces;
+        uiColors.reserve(symbolColor.size());
+        colorSpaces.reserve(symbolColor.size());
+        for (const auto& color : symbolColor) {
+            uiColors.emplace_back(ConvertToRSUIColor(color));
+            colorSpaces.emplace_back(ConvertToRSSymbolColorSpace(color.GetColorSpace()));
+        }
+        txtStyle.symbol.SetRenderUIColor(uiColors, colorSpaces);
+        return;
+    }
+
+    std::vector<RSColor> symbolColors;
+    for (const auto& color : symbolColor) {
+        symbolColors.emplace_back(ConvertToRSColor(color));
+    }
+    txtStyle.symbol.SetRenderColor(symbolColors);
+}
+
 void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {
     if (!textStyle.isSymbolGlyph_) {
@@ -769,12 +831,7 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
 
     txtStyle.isSymbolGlyph = true;
     txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
-    const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
-    std::vector<RSColor> symbolColors;
-    for (size_t i = 0; i < symbolColor.size(); i++) {
-        symbolColors.emplace_back(ConvertToRSColor(symbolColor[i]));
-    }
-    txtStyle.symbol.SetRenderColor(symbolColors);
+    SetSymbolRenderColor(textStyle, txtStyle);
 
     if (auto intermediateStyle = textStyle.GetShaderStyle(); !intermediateStyle.empty()) {
         txtStyle.symbol.SetSymbolColor(ConvertToNativeSymbolColor(intermediateStyle));

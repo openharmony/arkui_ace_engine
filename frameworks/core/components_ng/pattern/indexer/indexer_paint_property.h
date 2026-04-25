@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
@@ -76,9 +76,9 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto indexerTheme = host->GetTheme<IndexerTheme>(true);
         CHECK_NULL_VOID(indexerTheme);
         json->PutExtAttr("selectedBackgroundColor",
             propSelectedBackgroundColor_.value_or(indexerTheme->GetSelectedBackgroundColor()).ColorToString().c_str(),

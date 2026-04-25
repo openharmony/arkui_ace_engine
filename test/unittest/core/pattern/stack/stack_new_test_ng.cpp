@@ -1034,4 +1034,283 @@ HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
     EXPECT_EQ(childGeometry->GetMarginFrameOffset(), OffsetF(0, -45));
 }
 
+/**
+ * @tc.name: IsAsyncLoadAvailable001
+ * @tc.desc: Test IsAsyncLoadAvailable when layoutProperty is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create StackLayoutAlgorithm and FrameNode with null layoutProperty.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<StackPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Call IsAsyncLoadAvailable with null layoutProperty.
+     * @tc.expected: step2. Return false.
+     */
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable002
+ * @tc.desc: Test IsAsyncLoadAvailable when selfIdealSize is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Stack without setting width/height and create LayoutWrapper.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = CreateStack([](StackModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Set layout constraint with invalid selfIdealSize.
+     * @tc.expected: step2. Set successfully.
+     */
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.Reset();
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+
+    /**
+     * @tc.steps: step3. Call IsAsyncLoadAvailable with invalid selfIdealSize.
+     * @tc.expected: step3. Return false.
+     */
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable003
+ * @tc.desc: Test IsAsyncLoadAvailable when syncLoad is true with valid selfIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Stack with width and height.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = CreateStack([](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Set syncLoad to true.
+     * @tc.expected: step2. Set successfully.
+     */
+    auto stackLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateSyncLoad(true);
+
+    /**
+     * @tc.steps: step3. Set layout constraint with valid selfIdealSize.
+     * @tc.expected: step3. Set successfully.
+     */
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(100.0f, 100.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+
+    /**
+     * @tc.steps: step4. Call IsAsyncLoadAvailable with syncLoad true.
+     * @tc.expected: step4. Return false.
+     */
+    EXPECT_FALSE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: IsAsyncLoadAvailable004
+ * @tc.desc: Test IsAsyncLoadAvailable when syncLoad is false with valid selfIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, IsAsyncLoadAvailable004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Stack with width and height.
+     * @tc.expected: step1. Create successfully.
+     */
+    auto algorithm = StackLayoutAlgorithm();
+    auto frameNode = CreateStack([](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Set syncLoad to false.
+     * @tc.expected: step2. Set successfully.
+     */
+    auto stackLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateSyncLoad(false);
+
+    /**
+     * @tc.steps: step3. Set layout constraint with valid selfIdealSize.
+     * @tc.expected: step3. Set successfully.
+     */
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize = OptionalSizeF(100.0f, 100.0f);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+
+    /**
+     * @tc.steps: step4. Call IsAsyncLoadAvailable with syncLoad false.
+     * @tc.expected: step4. Return true.
+     */
+    EXPECT_TRUE(algorithm.IsAsyncLoadAvailable(layoutWrapper.GetRawPtr()));
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap with different skipMeasure/skipLayout combinations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Stack and get pattern.
+     * @tc.expected: step1. Stack and pattern created successfully.
+     */
+    auto frameNode = CreateStack([](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<StackPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(pattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithm);
+
+    /**
+     * @tc.steps: step2. Set skipMeasure and skipLayout both true.
+     * @tc.expected: step2. OnDirtyLayoutWrapperSwap returns false.
+     */
+    DirtySwapConfig config1;
+    config1.skipMeasure = true;
+    config1.skipLayout = true;
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config1));
+
+    /**
+     * @tc.steps: step3. Set skipMeasure true and skipLayout false.
+     * @tc.expected: step3. OnDirtyLayoutWrapperSwap returns true.
+     */
+    CreateLayoutTask(frameNode);
+    DirtySwapConfig config2;
+    config2.skipMeasure = true;
+    config2.skipLayout = false;
+    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config2));
+
+    /**
+     * @tc.steps: step4. Set skipMeasure false and skipLayout true.
+     * @tc.expected: step4. OnDirtyLayoutWrapperSwap returns true.
+     */
+    DirtySwapConfig config3;
+    config3.skipMeasure = false;
+    config3.skipLayout = true;
+    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config3));
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap when LayoutAlgorithmWrapper is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, OnDirtyLayoutWrapperSwap002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create frame node with null layout property.
+     * @tc.expected: step1. Frame node and pattern created successfully.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<StackPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<StackPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnDirtyLayoutWrapperSwap with null layout algorithm wrapper.
+     * @tc.expected: step2. OnDirtyLayoutWrapperSwap returns false.
+     */
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.skipLayout = false;
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap003
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap with MeasureInNextFrame true and false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, OnDirtyLayoutWrapperSwap003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Stack and get layout algorithm.
+     * @tc.expected: step1. Stack and layout algorithm created successfully.
+     */
+    auto frameNode = CreateStack([](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<StackPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(pattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithm);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    auto stackLayoutAlgorithm =
+        AceType::DynamicCast<StackLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(stackLayoutAlgorithm, nullptr);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.skipLayout = false;
+
+    /**
+     * @tc.steps: step2. Set measureInNextFrame to true and call OnDirtyLayoutWrapperSwap.
+     * @tc.expected: step2. prevMeasureBreak_ is true.
+     */
+    stackLayoutAlgorithm->measureInNextFrame_ = true;
+    pattern->prevMeasureBreak_ = false;
+    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    EXPECT_TRUE(pattern->prevMeasureBreak_);
+
+    /**
+     * @tc.steps: step3. Set measureInNextFrame to false and call OnDirtyLayoutWrapperSwap.
+     * @tc.expected: step3. prevMeasureBreak_ is false.
+     */
+    stackLayoutAlgorithm->measureInNextFrame_ = false;
+    pattern->prevMeasureBreak_ = false;
+    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    EXPECT_FALSE(pattern->prevMeasureBreak_);
+}
 } // namespace OHOS::Ace::NG

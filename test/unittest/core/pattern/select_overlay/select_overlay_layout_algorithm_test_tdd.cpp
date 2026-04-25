@@ -17,10 +17,10 @@
 #include "gtest/internal/gtest-internal.h"
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -564,6 +564,12 @@ HWTEST_F(SelectOverlayLayoutAlgorithmTddTest, GetIsMenuShowInSubWindow002, TestS
  */
 HWTEST_F(SelectOverlayLayoutAlgorithmTddTest, GetSafeAreaTop001, TestSize.Level1)
 {
+    // This case validates that GetSafeAreaTop reads the top boundary from system safe area.
+    // We intentionally inject a deterministic top inset to avoid dependence on device/runtime.
+    // The test writes SAFE_AREA_TOP to systemSafeArea_ as the minimal protected top region.
+    // Then we query algorithm->GetSafeAreaTop() to verify propagation from manager to algorithm.
+    // EXPECT_GE is used to keep the assertion robust if implementation adds extra clamping/offset.
+    // The key contract is: returned top must not be smaller than configured safe area top.
     auto info = CreateDefaultInfo();
     auto algorithm = CreateLayoutAlgorithm(info);
     auto pipeline = MockPipelineContext::GetCurrent();

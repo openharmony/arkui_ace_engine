@@ -109,6 +109,12 @@ public:
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);
+
+    
+    static void InnerSetSurfaceRectV1(FrameNode* frameNode, float offsetX, float offsetY,
+        float surfaceWidth, float surfaceHeight);
+    static void InnerSetSurfaceRectV2(FrameNode* frameNode, float offsetX, float offsetY,
+        float surfaceWidth, float surfaceHeight);
 };
 
 } // namespace OHOS::Ace::NG

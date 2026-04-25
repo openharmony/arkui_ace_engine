@@ -552,6 +552,19 @@ class RichEditorOrphanCharOptimizationModifier extends ModifierWithKey<Optional<
   }
 }
 
+class RichEditorHorizontalScrollingModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorHorizontalScrolling');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetHorizontalScrolling(node);
+    } else {
+      getUINativeModule().richEditor.setHorizontalScrolling(node, this.value);
+    }
+  }
+}
 
 class RichEditorIncludeFontPaddingModifier extends ModifierWithKey<Optional<boolean>> {
   constructor(value: Optional<boolean>) {
@@ -778,6 +791,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   orphanCharOptimization(enable: Optional<boolean>): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorOrphanCharOptimizationModifier.identity, RichEditorOrphanCharOptimizationModifier, enable);
+    return this;
+  }
+  horizontalScrolling(enabled: Optional<boolean>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorHorizontalScrollingModifier.identity, RichEditorHorizontalScrollingModifier, enabled);
     return this;
   }
 }

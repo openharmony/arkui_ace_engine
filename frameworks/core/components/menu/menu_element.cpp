@@ -15,7 +15,9 @@
 
 #include "core/components/menu/menu_element.h"
 
+#include "core/components/box/render_box.h"
 #include "core/components/box/box_element.h"
+#include "core/components/select_popup/select_popup_component.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {

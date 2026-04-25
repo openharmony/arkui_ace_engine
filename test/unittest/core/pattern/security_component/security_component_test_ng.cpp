@@ -44,14 +44,17 @@
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
+#include "core/components_ng/pattern/security_component/security_component_paint_property.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "security_component_test_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #undef protected
 #undef private
 
@@ -80,6 +83,10 @@ constexpr int INDEX_TWO = 2;
 constexpr int INDEX_SIZE = 3;
 constexpr int ICON_RESOURCE_TABLE = 2;
 const std::string CUSTOMIZE_TEXT = "customize";
+
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
+constexpr uint32_t RENDERINGSTRATEGY_SINGLE = 0;
 }
 
 namespace {
@@ -2696,5 +2703,300 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
     ASSERT_EQ(property->GetHeightAdaptivePolicy().value_or(
         TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     ASSERT_EQ(property->GetUserCancelEvent().value_or(false), true);
+}
+
+/**
+ * @tc.name: SecurityComponentSaveSymbolPropertyTest001
+ * @tc.desc: Test SetSymbolIconColor with single color and multiple colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveSymbolPropertyTest001, TestSize.Level0)
+{
+    CreateSecurityComponentNotFinish(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SecurityComponentPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    SaveButtonModelNG sc;
+    std::vector<Color> singleColor = { Color::RED };
+    sc.SetSymbolIconColor(singleColor);
+    auto colorList = paintProperty->GetSymbolIconColor();
+    ASSERT_TRUE(colorList.has_value());
+    EXPECT_EQ(colorList.value().size(), 1);
+    EXPECT_EQ(colorList.value()[0], Color::RED);
+
+    std::vector<Color> multipleColors = { Color::RED, Color::GREEN, Color::BLUE };
+    sc.SetSymbolIconColor(multipleColors);
+    colorList = paintProperty->GetSymbolIconColor();
+    ASSERT_TRUE(colorList.has_value());
+    EXPECT_EQ(colorList.value().size(), 3);
+    EXPECT_EQ(colorList.value()[0], Color::RED);
+    EXPECT_EQ(colorList.value()[1], Color::GREEN);
+    EXPECT_EQ(colorList.value()[2], Color::BLUE);
+
+    std::vector<Color> emptyColors;
+    sc.SetSymbolIconColor(emptyColors);
+    colorList = paintProperty->GetSymbolIconColor();
+    ASSERT_TRUE(colorList.has_value());
+    EXPECT_EQ(colorList.value().size(), 0);
+}
+
+/**
+ * @tc.name: SecurityComponentSaveSymbolPropertyTest002
+ * @tc.desc: Test SetSymbolFontFamilies with default and custom font families
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveSymbolPropertyTest002, TestSize.Level0)
+{
+    CreateSecurityComponentNotFinish(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SaveButtonModelNG sc;
+    std::vector<std::string> defaultFontFamily = { "HM Symbol" };
+    sc.SetSymbolFontFamilies(defaultFontFamily);
+    auto fontFamilies = layoutProperty->GetSymbolFontFamilies();
+    ASSERT_TRUE(fontFamilies.has_value());
+    EXPECT_EQ(fontFamilies.value().size(), 1);
+    EXPECT_EQ(fontFamilies.value()[0], "HM Symbol");
+
+    std::vector<std::string> customFontFamilies = { "CustomFont1", "CustomFont2", "CustomFont3" };
+    sc.SetSymbolFontFamilies(customFontFamilies);
+    fontFamilies = layoutProperty->GetSymbolFontFamilies();
+    ASSERT_TRUE(fontFamilies.has_value());
+    EXPECT_EQ(fontFamilies.value().size(), 3);
+    EXPECT_EQ(fontFamilies.value()[0], "CustomFont1");
+    EXPECT_EQ(fontFamilies.value()[1], "CustomFont2");
+    EXPECT_EQ(fontFamilies.value()[2], "CustomFont3");
+
+    std::vector<std::string> emptyFontFamilies;
+    sc.SetSymbolFontFamilies(emptyFontFamilies);
+    fontFamilies = layoutProperty->GetSymbolFontFamilies();
+    ASSERT_TRUE(fontFamilies.has_value());
+    EXPECT_EQ(fontFamilies.value().size(), 0);
+}
+
+/**
+ * @tc.name: SecurityComponentSaveSymbolPropertyTest003
+ * @tc.desc: Test SetSymbolType with SYSTEM and CUSTOM types
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveSymbolPropertyTest003, TestSize.Level0)
+{
+    CreateSecurityComponentNotFinish(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SaveButtonModelNG sc;
+    sc.SetSymbolType(SymbolType::SYSTEM);
+    auto symbolType = layoutProperty->GetSymbolType();
+    ASSERT_TRUE(symbolType.has_value());
+    EXPECT_EQ(symbolType.value(), SymbolType::SYSTEM);
+
+    sc.SetSymbolType(SymbolType::CUSTOM);
+    symbolType = layoutProperty->GetSymbolType();
+    ASSERT_TRUE(symbolType.has_value());
+    EXPECT_EQ(symbolType.value(), SymbolType::CUSTOM);
+}
+
+/**
+ * @tc.name: SecurityComponentSaveSymbolPropertyTest004
+ * @tc.desc: Test SetSymbolRenderingStrategy with all three rendering strategies
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveSymbolPropertyTest004, TestSize.Level0)
+{
+    CreateSecurityComponentNotFinish(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SaveButtonModelNG sc;
+    sc.SetSymbolRenderingStrategy(RENDERINGSTRATEGY_SINGLE);
+    auto strategy = layoutProperty->GetSymbolRenderingStrategy();
+    ASSERT_TRUE(strategy.has_value());
+    EXPECT_EQ(strategy.value(), RENDERINGSTRATEGY_SINGLE);
+
+    sc.SetSymbolRenderingStrategy(RENDERINGSTRATEGY_MULTIPLE_COLOR);
+    strategy = layoutProperty->GetSymbolRenderingStrategy();
+    ASSERT_TRUE(strategy.has_value());
+    EXPECT_EQ(strategy.value(), RENDERINGSTRATEGY_MULTIPLE_COLOR);
+
+    sc.SetSymbolRenderingStrategy(RENDERINGSTRATEGY_MULTIPLE_OPACITY);
+    strategy = layoutProperty->GetSymbolRenderingStrategy();
+    ASSERT_TRUE(strategy.has_value());
+    EXPECT_EQ(strategy.value(), RENDERINGSTRATEGY_MULTIPLE_OPACITY);
+}
+
+/**
+ * @tc.name: SecurityComponentSaveSymbolPropertyTest005
+ * @tc.desc: Test SetSymbolFontWeight with different FontWeight values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveSymbolPropertyTest005, TestSize.Level0)
+{
+    CreateSecurityComponentNotFinish(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SaveButtonModelNG sc;
+    sc.SetSymbolFontWeight(FontWeight::NORMAL);
+    auto fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::NORMAL);
+    
+    sc.SetSymbolFontWeight(FontWeight::LIGHTER);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::LIGHTER);
+    
+    sc.SetSymbolFontWeight(FontWeight::REGULAR);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::REGULAR);
+
+    sc.SetSymbolFontWeight(FontWeight::MEDIUM);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::MEDIUM);
+
+    sc.SetSymbolFontWeight(FontWeight::BOLD);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::BOLD);
+
+    sc.SetSymbolFontWeight(FontWeight::BOLDER);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::BOLDER);
+}
+
+/**
+ * @tc.name: SecurityComponentSaveSymbolPropertyTest006
+ * @tc.desc: Test SetSymbolFontWeight with different FontWeight values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveSymbolPropertyTest006, TestSize.Level0)
+{
+    CreateSecurityComponentNotFinish(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SaveButtonModelNG sc;
+    sc.SetSymbolFontWeight(FontWeight::W100);
+    auto fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W100);
+    
+    sc.SetSymbolFontWeight(FontWeight::W200);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W200);
+    
+    sc.SetSymbolFontWeight(FontWeight::W300);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W300);
+
+    sc.SetSymbolFontWeight(FontWeight::W400);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W400);
+
+    sc.SetSymbolFontWeight(FontWeight::W500);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W500);
+
+    sc.SetSymbolFontWeight(FontWeight::W600);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W600);
+
+    sc.SetSymbolFontWeight(FontWeight::W700);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W700);
+
+    sc.SetSymbolFontWeight(FontWeight::W800);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W800);
+
+    sc.SetSymbolFontWeight(FontWeight::W900);
+    fontWeight = layoutProperty->GetSymbolFontWeight();
+    ASSERT_TRUE(fontWeight.has_value());
+    EXPECT_EQ(fontWeight.value(), FontWeight::W900);
+}
+
+/**
+ * @tc.name: SecurityComponentSaveSymbolBoundaryTest001
+ * @tc.desc: Test FrameNode overload methods with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveSymbolBoundaryTest001, TestSize.Level0)
+{
+    SaveButtonModelNG sc;
+
+    std::optional<std::vector<Color>> colors = { { Color::RED } };
+    sc.SetSymbolIconColor(nullptr, colors);
+
+    std::optional<std::vector<std::string>> fontFamilies = { { "HM Symbol" } };
+    sc.SetSymbolFontFamilies(nullptr, fontFamilies);
+
+    std::optional<SymbolType> symbolType = SymbolType::SYSTEM;
+    sc.SetSymbolType(nullptr, symbolType);
+
+    std::optional<uint32_t> strategy = RENDERINGSTRATEGY_MULTIPLE_COLOR;
+    sc.SetSymbolRenderingStrategy(nullptr, strategy);
+
+    std::optional<FontWeight> fontWeight = FontWeight::MEDIUM;
+    sc.SetSymbolFontWeight(nullptr, fontWeight);
+}
+
+/**
+ * @tc.name: SecurityComponentSaveSymbolBoundaryTest002
+ * @tc.desc: Test FrameNode overload methods with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveSymbolBoundaryTest002, TestSize.Level0)
+{
+    CreateSecurityComponentNotFinish(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    SaveButtonModelNG::SetSymbolIconColor(frameNode, std::nullopt);
+    SaveButtonModelNG::SetSymbolFontFamilies(frameNode, std::nullopt);
+    SaveButtonModelNG::SetSymbolType(frameNode, std::nullopt);
+    SaveButtonModelNG::SetSymbolRenderingStrategy(frameNode, std::nullopt);
+    SaveButtonModelNG::SetSymbolFontWeight(frameNode, std::nullopt);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetSymbolFontFamilies().has_value());
+    EXPECT_FALSE(layoutProperty->GetSymbolType().has_value());
+    EXPECT_FALSE(layoutProperty->GetSymbolRenderingStrategy().has_value());
+    EXPECT_FALSE(layoutProperty->GetSymbolFontWeight().has_value());
+
+    auto paintProperty = frameNode->GetPaintProperty<SecurityComponentPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_FALSE(paintProperty->GetSymbolIconColor().has_value());
 }
 } // namespace OHOS::Ace::NG

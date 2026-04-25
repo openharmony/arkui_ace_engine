@@ -30,7 +30,7 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -53,17 +53,24 @@ struct Font {
     std::optional<Dimension> strokeWidth;
     std::optional<Color> strokeColor;
     std::optional<SuperscriptStyle> superscript;
+    std::optional<double> fontSizeScale;
+    std::optional<FONT_VARIATIONS_LIST> fontVariations;
 
     RefPtr<ResourceObject> fontColorResObj;
     RefPtr<ResourceObject> strokeColorResObj;
 
     bool IsEqual(const Font& other) const
     {
+        bool isFontSizeScaleEqual = !fontSizeScale.has_value() && !other.fontSizeScale.has_value();
+        if (fontSizeScale.has_value() && other.fontSizeScale.has_value()) {
+            isFontSizeScaleEqual = NearEqual(fontSizeScale.value(), other.fontSizeScale.value());
+        }
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
                     fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight &&
                     strokeWidth == other.strokeWidth && strokeColor == other.strokeColor &&
                     superscript == other.superscript && variableFontWeight == other.variableFontWeight &&
-                    enableDeviceFontWeightCategory == other.enableDeviceFontWeightCategory;
+                    enableDeviceFontWeightCategory == other.enableDeviceFontWeightCategory &&
+                    isFontSizeScaleEqual && fontVariations == other.fontVariations;
         if (!flag) {
             return false;
         }
@@ -145,6 +152,11 @@ struct Font {
     std::optional<uint32_t> GetVariableFontWeight() const
     {
         return variableFontWeight;
+    }
+
+    std::optional<FONT_VARIATIONS_LIST> GetFontVariations() const
+    {
+        return fontVariations;
     }
 };
 
@@ -341,6 +353,7 @@ public:
     virtual void ResetCaretColor() = 0;
     virtual void SetCaretPosition(const int32_t& value) = 0;
     virtual void SetSelectedBackgroundColor(const Color& value) = 0;
+    virtual void ResetSelectedBackgroundColor() {};
     virtual void SetCaretStyle(const CaretStyle& value) = 0;
     virtual void SetMaxLength(uint32_t value) = 0;
     virtual void SetMaxLines(uint32_t value) = 0;
@@ -364,7 +377,9 @@ public:
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
+    virtual void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnWillCut(std::function<bool(const std::u16string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) = 0;

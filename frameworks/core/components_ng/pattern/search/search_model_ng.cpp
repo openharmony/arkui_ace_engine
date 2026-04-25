@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,16 +102,16 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::u
     CHECK_NULL_RETURN(searchNode, nullptr);
     ViewStackProcessor::GetInstance()->Push(searchNode);
     auto pattern = searchNode->GetPattern<SearchPattern>();
-    searchNode->SetNeedCallChildrenUpdate(false);
+    if (searchNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        searchNode->SetNeedCallChildrenUpdate(false);
+    }
     return pattern->GetSearchController();
 }
 
 RefPtr<SearchTheme> SearchModelNG::GetTheme(const RefPtr<SearchNode>& frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>(frameNode->GetThemeScopeId());
+    auto searchTheme = frameNode->GetTheme<SearchTheme>(true);
     CHECK_NULL_RETURN(searchTheme, nullptr);
     return searchTheme;
 }
@@ -147,8 +147,10 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     auto frameNode =
         GetOrCreateSearchNode(SEARCH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchPattern>(); });
     CHECK_NULL_RETURN(frameNode, nullptr);
-    ACE_UINODE_TRACE(frameNode);
-    ViewStackProcessor::GetInstance()->ApplyParentThemeScopeId(frameNode);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        ACE_UINODE_TRACE(frameNode);
+        ViewStackProcessor::GetInstance()->ApplyParentThemeScopeId(frameNode);
+    }
     auto pattern = frameNode->GetPattern<SearchPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->SetSearchNode(frameNode);
@@ -748,6 +750,15 @@ void SearchModelNG::SetSelectionMenuHidden(bool selectionMenuHidden)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetOnWillCopy(std::function<bool(const std::u16string&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
+}
+
 void SearchModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();
@@ -755,6 +766,26 @@ void SearchModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
     auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
+}
+
+void SearchModelNG::SetOnWillCut(std::function<bool(const std::u16string&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto willCutFunc = [weak = AceType::WeakClaim(AceType::RawPtr(searchTextField)), func](
+                               const std::u16string& value) -> bool {
+        if (func) {
+            return func(value);
+        }
+        auto node = weak.Upgrade();
+        if (node) {
+            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+        return true;
+    };
+    eventHub->SetOnWillCut(std::move(willCutFunc));
 }
 
 void SearchModelNG::SetOnCut(std::function<void(const std::u16string&)>&& func)
@@ -1043,7 +1074,9 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        textFieldPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            textFieldPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
         if (!hasTextFieldNode) {
             textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
             textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
@@ -1138,11 +1171,17 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
 
     auto buttonRenderContext = frameNode->GetRenderContext();
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
     buttonPattern->SetApplyShadow(false);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFrameNode);
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     std::u16string defaultText = u"Search";
     textLayoutProperty->UpdateContent(defaultText);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
@@ -1178,9 +1217,7 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
         DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     CHECK_NULL_VOID(dividerNode);
 
-    auto pipeline = dividerNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>(dividerNode->GetThemeScopeId());
+    auto searchTheme = dividerNode->GetTheme<SearchTheme>(true);
     CHECK_NULL_VOID(searchTheme);
     auto searchDividerColor = searchTheme->GetSearchDividerColor();
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
@@ -1225,6 +1262,7 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    cancelButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     cancelButtonLayoutProperty->UpdateType(ButtonType::CIRCLE);
     cancelButtonLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
@@ -1531,6 +1569,7 @@ void SearchModelNG::SetSearchButtonFontColor(FrameNode* frameNode, const Color& 
     CHECK_NULL_VOID(buttonLayoutProperty);
 
     buttonLayoutProperty->UpdateFontColor(color);
+    buttonLayoutProperty->UpdateFontColorFlagByUser(true);
 
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1838,9 +1877,7 @@ void SearchModelNG::ResetDividerColor(FrameNode* frameNode)
     auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
 
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto searchTheme = dividerFrameNode->GetTheme<SearchTheme>(true);
     auto color = searchTheme->GetSearchDividerColor();
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, DividerColorSetByUser, frameNode);
     dividerRenderProperty->UpdateDividerColor(color);
@@ -2065,6 +2102,9 @@ void SearchModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color
     auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldPaintProperty->UpdateSelectedBackgroundColor(value);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textFieldPaintProperty->UpdateSelectedBackgroundColorFlagByUser(true);
+    }
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2076,6 +2116,9 @@ void SearchModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
     auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldPaintProperty->ResetSelectedBackgroundColor();
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textFieldPaintProperty->ResetSelectedBackgroundColorFlagByUser();
+    }
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2145,6 +2188,16 @@ void SearchModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(co
     eventHub->SetOnChangeEvent(std::move(searchChangeFunc));
 }
 
+void SearchModelNG::SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
+}
+
 void SearchModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2153,6 +2206,27 @@ void SearchModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std
     auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
+}
+
+void SearchModelNG::SetOnWillCut(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto willCutFunc = [weak = AceType::WeakClaim(AceType::RawPtr(searchTextField)), func](
+                               const std::u16string& value) -> bool {
+        if (func) {
+            return func(value);
+        }
+        auto node = weak.Upgrade();
+        if (node) {
+            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+        return true;
+    };
+    eventHub->SetOnWillCut(std::move(willCutFunc));
 }
 
 void SearchModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)

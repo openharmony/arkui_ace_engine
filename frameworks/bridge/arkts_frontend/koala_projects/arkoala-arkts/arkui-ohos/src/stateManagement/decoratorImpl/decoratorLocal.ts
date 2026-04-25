@@ -19,11 +19,17 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
+import { isDynamicObject, getV2ObservedObject } from '../../component/interop';
 export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements ILocalDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Local', owningView, varName);
-        this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+        if (isDynamicObject(initValue)) {
+            initValue = getV2ObservedObject(initValue);
+            this.backing_ = FactoryInternal.mkInteropV2DecoratorValue(varName, initValue);
+        } else {
+            this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+        }
 
         // Register the relationship between this Local variable and the observed object it uses
         this.registerToObservedObject(initValue);
@@ -48,7 +54,9 @@ export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         }
 
         // Update ObservedObjectRegistry registration before setting the new value
-        const processedNewValue = uiUtils.autoProxyObject(newValue) as T;
+        const processedNewValue = isDynamicObject(newValue)
+            ? getV2ObservedObject(newValue)
+            : (uiUtils.autoProxyObject(newValue) as T);
         this.updateObservedObjectRegistration(value, processedNewValue);
 
         this.backing_.setNoCheck(processedNewValue);

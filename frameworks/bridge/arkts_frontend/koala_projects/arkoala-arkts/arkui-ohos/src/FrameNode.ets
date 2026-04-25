@@ -14,7 +14,7 @@
  */
 
 import { UIContext } from "@ohos/arkui/UIContext"
-import { UIEventHelper } from 'arkui/component/idlize';
+import { UIEventHelper, FrameNodeCreateInfo } from 'arkui/component/idlize';
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk,
     InteropNativeModule, SerializerBase } from "@koalaui/interop"
@@ -124,6 +124,7 @@ import { Vector2 } from "./Graphics.ets"
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
+    treeOperating?: boolean;
 }
 export interface InteractionEventBindingInfo {
     baseEventRegistered: boolean;
@@ -308,8 +309,12 @@ export class FrameNode implements MaterializedBase {
     public isModifiable(): boolean {
         return FrameNodeExtender.isModifiable(this.peer!.ptr);
     }
+    public checkIfCanCrossLanguageTreeOperating(): boolean {
+        return FrameNodeExtender.checkIfCanCrossLanguageTreeOperating(this);
+    }
     public appendChild(node: FrameNode): void {
-        if (node.getType() === 'ProxyFrameNode' || !this.checkValid(node)) {
+        if ((node.getType() === 'ProxyFrameNode' && (!node.checkIfCanCrossLanguageTreeOperating()))
+            || !this.checkValid(node)) {
             const error = Error('The FrameNode is not modifiable.');
             throw new BusinessError(100021, error);
         }
@@ -375,7 +380,8 @@ export class FrameNode implements MaterializedBase {
         if (child === undefined || child === null) {
             return;
         }
-        if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+        if ((child.getType() === 'ProxyFrameNode' && (!child.checkIfCanCrossLanguageTreeOperating()))
+            || !this.checkValid(child)) {
             const error = Error('The FrameNode is not modifiable.');
             throw new BusinessError(100021, error);
         }
@@ -659,24 +665,23 @@ export class FrameNode implements MaterializedBase {
         FrameNodeExtender.disposeTree(this);
     };
     public static createFrameNodes(uiContext: UIContext, count: int32): Array<FrameNode> {
-        const frameNodes: FrameNode[] = [];
+
         if (count <= 0) {
-            return frameNodes;
+            return [];
         }
+        const frameNodes: Array<FrameNode> = new Array<FrameNode>(count);
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.instanceId_);
-        const ptrs = FrameNodeExtender.createFrameNodes(count);
-        ptrs.forEach((ptr: KPointer) => {
-            const frameNode = new FrameNode(uiContext, undefined, 'InternalBatchFrameNode', ptr);
-            frameNodes.push(frameNode);
-        })
-        ArkUIAniModule._SetCustomCallbackWithCheckForFrameNodes(ptrs, frameNodes);
-        const renderNodePtrs = FrameNodeExtender.getRenderNodesByFrameNodes(ptrs);
-        const ids = FrameNodeExtender.getIdsByFrameNodes(ptrs);
-        for (let i = 0; i < frameNodes.length; i++) {
-            frameNodes[i].renderNode_!.peer = new Finalizable(renderNodePtrs[i], RenderNode.getFinalizer());
-            frameNodes[i]._nodeId = ids[i];
-            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNodes[i]._nodeId, frameNodes[i]);
+        const frameNodeCreateInfoArray = FrameNodeExtender.getFrameNodeCreateInfoArray(count);
+        const frameNodePtrs: Array<KPointer> = new Array<KPointer>(frameNodeCreateInfoArray.length);
+        for (let i = 0; i < frameNodeCreateInfoArray.length; i++) {
+            const frameNode = new FrameNode(uiContext, undefined, 'InternalBatchFrameNode', frameNodeCreateInfoArray[i].frameNodePeer);
+            frameNode.renderNode_!.peer = new Finalizable(frameNodeCreateInfoArray[i].renderNodePeer, RenderNode.getFinalizer());
+            frameNode._nodeId = frameNodeCreateInfoArray[i].id;
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, frameNode);
+            frameNodes[i] = frameNode;
+            frameNodePtrs[i] = frameNodeCreateInfoArray[i].frameNodePeer;
         }
+        ArkUIAniModule._SetCustomCallbackWithCheckForFrameNodes(frameNodePtrs, frameNodes);
         ArkUIAniModule._Common_Restore_InstanceId();
         return frameNodes;
     }
@@ -725,15 +730,18 @@ export class FrameNode implements MaterializedBase {
             throw new BusinessError(100022, error);
         }
         let setting: boolean = options.attributeSetting ? options.attributeSetting! : false;
-        let isSupport = FrameNodeExtender.setCrossLanguageOptions(this, setting);
+        const treeOperating = options.treeOperating as (boolean | undefined);
+        let isSupport = FrameNodeExtender.setCrossLanguageOptions(this, setting, treeOperating);
         if (!isSupport) {
             throw new BusinessError(100022, error);
         }
     }
     public getCrossLanguageOptions(): CrossLanguageOptions {
         let option: boolean = FrameNodeExtender.getCrossLanguageOptions(this);
+        const treeOperatingOpt: boolean = FrameNodeExtender.getCrossLanguageTreeOperating(this);
         const crossLanguageOptions: CrossLanguageOptions = {
             attributeSetting: option,
+            treeOperating: treeOperatingOpt
         };
         return crossLanguageOptions;
     }
@@ -1020,18 +1028,30 @@ class ImmutableFrameNode extends FrameNode {
         return;
     }
     appendChild(node: FrameNode): void {
+        if (this.checkIfCanCrossLanguageTreeOperating()) {
+            return super.appendChild(node);
+        }
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     insertChildAfter(child: FrameNode, sibling: FrameNode | null): void {
+        if (this.checkIfCanCrossLanguageTreeOperating()) {
+            return super.insertChildAfter(child, sibling);
+        }
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     removeChild(node: FrameNode): void {
+        if (this.checkIfCanCrossLanguageTreeOperating()) {
+            return super.removeChild(node);
+        }
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     clearChildren(): void {
+        if (this.checkIfCanCrossLanguageTreeOperating()) {
+            return super.clearChildren();
+        }
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
@@ -1137,7 +1157,7 @@ export class FrameNodeUtils {
     }
 }
 
-abstract class TypedFrameNode<T extends Object> extends FrameNode {
+abstract class TypedFrameNode<T> extends FrameNode {
     attribute_: T | undefined = undefined;
     attrCreator_: (node: FrameNode, type: ModifierType) => T
     type_: string = "";

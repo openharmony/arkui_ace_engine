@@ -59,8 +59,8 @@ class ObserveV2 {
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
   public static readonly ID_REFS = Symbol('__id_refs__');
   public static readonly MONITOR_REFS = Symbol('___monitor_refs_');
-  public static readonly ADD_MONITOR_REFS = Symbol('___add_monitor_refs_');
-  public static readonly SYNC_MONITOR_REFS = Symbol('___sync_monitor_refs_');
+  public static readonly ADD_MONITOR_API_REFS = Symbol('___add_monitorapi_refs_');
+  public static readonly MONITOR_WITH_OPTIONS_OR_SYNC_MONITOR_REFS = Symbol('___monitor_with_options_or_syncmonitor_refs_');
   public static readonly COMPUTED_REFS = Symbol('___computed_refs_');
 
   public static readonly SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
@@ -106,17 +106,15 @@ class ObserveV2 {
   public elmtIdsChanged_: Set<number> = new Set();
   // @Computed id
   private computedPropIdsChanged_: Set<number> = new Set();
-  // AddMonitor API
-  private monitorIdsChangedForAddMonitor_: Set<number> = new Set();
-  // Sync AddMonitor API
-  private monitorSyncIdsChangedForAddMonitor_: Set<number> = new Set();
+  // AddMonitor API (ASync), @Monitor with Options
+  private monitorAsyncIdsChangedForAddMonitorBased_: Set<number> = new Set();
+  // AddMonitor API (Sync), @SyncMonitor
+  private monitorSyncIdsChangedForAddMonitorBased_: Set<number> = new Set();
   // @Monitor id
   private monitorIdsChanged_: Set<number> = new Set();
   private persistenceChanged_: Set<number> = new Set();
-  // used for Monitor API
-  // only store the MonitorV2 id, not the path id
-  // to make sure the callback function will be executed only once
-  public monitorFuncsToRun_: Set<number> = new Set();
+  private anonymousMonitorFuncKeyMap_: WeakMap<MonitorCallback, string> = new WeakMap();
+  private anonymousMonitorFuncKeySeed_: number = 0;
 
   // ViewV2s Grouped by instance id (container id), contains ReactiveBuilderNode.
   private viewV2NeedUpdateMap_: Map<number, Map<ViewBuildNodeBase, Array<number>>> = new Map();
@@ -174,6 +172,12 @@ class ObserveV2 {
   // return true given value is the return value of makeObserved
   public static IsMakeObserved(value: any): boolean {
     return !!(value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
+  }
+
+  // return true if given value is proxied observed object, either makeObserved or autoProxyObject
+  public static IsProxiedObservedV2OrMakeObserved(value: unknown): boolean {
+    return !!(value && typeof value === 'object' &&
+      (value[ObserveV2.SYMBOL_PROXY_GET_TARGET] || value[ObserveV2.SYMBOL_MAKE_OBSERVED]));
   }
 
   public static getCurrentRecordedId(): number {
@@ -236,6 +240,45 @@ class ObserveV2 {
       this.idleTasks_[this.idleTasks_.end++] = [this.clearBindingInternal, id];
     } else {
       this.clearBindingInternal(id);
+    }
+  }
+
+  // Queue pre-render component creation of global reuse as an idle task
+  public queuePreRenderCreation(parent: PUV2ViewBase, componentClass: new (...args: unknown[]) => PUV2ViewBase,
+      componentParams: Object, elmtId: number, pool: __ReusePool_Internal__, reuseId: string,
+      extraInfo: ExtraInfo = undefined): void {
+    const createPreRenderTask = (): void => {
+      const instance = new componentClass(parent, componentParams, undefined, elmtId, () => {}, extraInfo);
+      instance.isPreRendered = true;
+
+      // Set context before rendering children
+      PUV2ViewBase.beginPreRender(pool);
+
+      // Build the full component subtree in sandboxed mode
+      // (fake element IDs, no observation bindings)
+      if ('initialRenderForPreRender' in instance && typeof instance.initialRenderForPreRender === 'function') {
+        instance.initialRenderForPreRender();
+      }
+
+      // Push to pool before endPreRender
+      if (pool && typeof pool.push === 'function') {
+          pool.push(reuseId, instance, componentClass);
+      }
+      PUV2ViewBase.endPreRender();
+    };
+    setTimeout(() => createPreRenderTask(), 5);
+  }
+
+  /**
+ * Schedules a task to run during the framework's idle phase.
+ * Falls back to synchronous execution if no idle task queue exists.
+ */
+  public queueIdleTask(task: () => void): void {
+    if (this.idleTasks_) {
+        this.idleTasks_[this.idleTasks_.end++] = [task];
+    } else {
+        // No idle task system, run immediately
+        task();
     }
   }
 
@@ -374,6 +417,15 @@ class ObserveV2 {
               target['__staticStatic__' + attrName] = staticStatic;
             }
             staticCompatibleFunc[1](staticStatic);
+          }
+          let staticCompatibleMetaFunc = target['__staticCompatibleMetaFunc__'];
+          if (staticCompatibleMetaFunc) {
+            let staticStatic = target['__staticMetaState__' + attrName];
+            if (!staticStatic) {
+              staticStatic = staticCompatibleMetaFunc[0]();
+              target['__staticMetaState__' + attrName] = staticStatic;
+            }
+            staticCompatibleMetaFunc[1](staticStatic);
           }
       }
     }
@@ -551,6 +603,13 @@ class ObserveV2 {
           staticCompatibleFunc[2](staticStatic);
         }
       }
+      let staticCompatibleMetaFunc = target['__staticCompatibleMetaFunc__'];
+      if (staticCompatibleMetaFunc) {
+        let staticStatic = target['__staticMetaState__' + attrName];
+        if (staticStatic) {
+          staticCompatibleMetaFunc[2](staticStatic);
+        }
+      }
     }
 
     let targetSymbolRefs = target[ObserveV2.SYMBOL_REFS];
@@ -616,34 +675,31 @@ class ObserveV2 {
       }
 
       // add bindId to the correct Set of pending changes.
+
       if (id < ComputedV2.MIN_COMPUTED_ID) {
         this.elmtIdsChanged_.add(id);
-      } else if (id < MonitorV2.MIN_WATCH_ID) {
+      } else if (id < MonitorV2.MIN_MONITOR_ORIG_ID) {
         this.computedPropIdsChanged_.add(id);
-      } else if (id < MonitorV2.MIN_WATCH_FROM_API_ID) {
+      } else if (id < MonitorV2.MIN_MONITOR_WITH_OPTIONS_OR_ASYNC_API_ID) {
         this.monitorIdsChanged_.add(id);
-      } else if (id < MonitorV2.MIN_SYNC_WATCH_FROM_API_ID) {
-        this.monitorIdsChangedForAddMonitor_.add(id);
+      } else if (id < MonitorV2.MIN_SYNC_MONITOR_OR_SYNC_API_ID) {
+        this.monitorAsyncIdsChangedForAddMonitorBased_.add(id);
       } else if (id < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
-        this.monitorSyncIdsChangedForAddMonitor_.add(id);
+        this.monitorSyncIdsChangedForAddMonitorBased_.add(id);
       } else {
         this.persistenceChanged_.add(id);
       }
     } // for
 
-    // execute the AddMonitor synchronous function
-    while (this.monitorSyncIdsChangedForAddMonitor_.size + this.monitorFuncsToRun_.size > 0) {
-      if (this.monitorSyncIdsChangedForAddMonitor_.size) {
-        stateMgmtConsole.debug(`AddMonitor API/@SyncMonitor monitorSyncIdsChangedForAddMonitor_ ${this.monitorSyncIdsChangedForAddMonitor_.size}`)
-        const monitorId: Set<number> = this.monitorSyncIdsChangedForAddMonitor_;
-        this.monitorSyncIdsChangedForAddMonitor_ = new Set<number>();
-        // update the value and dependency for each path and get the MonitorV2 id needs to be execute
-        this.updateDirtyMonitorPath(monitorId);
-      }
-      if (this.monitorFuncsToRun_.size) {
-        const monitorFuncs = this.monitorFuncsToRun_;
-        this.monitorFuncsToRun_ = new Set<number>();
-        this.runMonitorFunctionsForAddMonitor(monitorFuncs);
+    // execute the AddMonitor synchronous function and @SyncMonitor function
+    while (this.monitorSyncIdsChangedForAddMonitorBased_.size) {
+      stateMgmtConsole.debug(`AddMonitor API/@SyncMonitor monitorSyncIdsChangedForAddMonitor_ ${this.monitorSyncIdsChangedForAddMonitorBased_.size}`)
+      const monitorIdSet: Set<number> = this.monitorSyncIdsChangedForAddMonitorBased_;
+      this.monitorSyncIdsChangedForAddMonitorBased_ = new Set<number>();
+      // update the value and dependency for each path and get the MonitorV2 id needs to be execute
+      let funcsToRun = this.updateDirtyMonitorPath(monitorIdSet);
+      if (funcsToRun.size) {
+        this.runAddMonitorBasedFunctions(funcsToRun);
       }
     }
 
@@ -887,23 +943,22 @@ class ObserveV2 {
         this.monitorIdsChanged_ = new Set<number>();
         this.updateDirtyMonitors(monitors);
       }
-      // handle the Monitor id from API configured with asynchronous options
-      while (this.monitorIdsChangedForAddMonitor_.size + this.monitorFuncsToRun_.size > 0) {
-        if (this.monitorIdsChangedForAddMonitor_.size) {
-          stateMgmtConsole.debug(`AddMonitor asynchronous ${this.monitorIdsChangedForAddMonitor_.size}`)
-          const monitorId: Set<number> = this.monitorIdsChangedForAddMonitor_;
-          this.monitorIdsChangedForAddMonitor_ = new Set<number>();
-          // update the value and dependency for each path and get the MonitorV2 id needs to be execute
-          this.updateDirtyMonitorPath(monitorId);
+      // Handle the id for AddMonitor API configured with asynchronous options
+      // Handle also Monitor With Options (that is always async) here
+      while (this.monitorAsyncIdsChangedForAddMonitorBased_.size) {
+        stateMgmtConsole.debug(`AddMonitor asynchronous ${this.monitorAsyncIdsChangedForAddMonitorBased_.size}`)
+        const monitorIdSet = this.monitorAsyncIdsChangedForAddMonitorBased_;
+        if (snapshot) {
+          this.monitorAsyncIdsChangedForAddMonitorBased_.forEach(Set.prototype.delete, snapshot['monitorAsyncIdsChangedForAddMonitorBased_']);
         }
-        if (this.monitorFuncsToRun_.size) {
-          const monitorFuncs = this.monitorFuncsToRun_;
-          this.monitorFuncsToRun_ = new Set<number>();
-          this.runMonitorFunctionsForAddMonitor(monitorFuncs);
+        this.monitorAsyncIdsChangedForAddMonitorBased_ = new Set<number>();
+        // update the value and dependency for each path and get the MonitorV2 id needs to be execute
+        let funcsToRun = this.updateDirtyMonitorPath(monitorIdSet);
+        if (funcsToRun.size) {
+          this.runAddMonitorBasedFunctions(funcsToRun);
         }
       }
-    } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size +
-    this.computedPropIdsChanged_.size + this.monitorIdsChangedForAddMonitor_.size + this.monitorFuncsToRun_.size > 0);
+    } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size  > 0)
   }
 
   public updateDirtyComputedProps(computed: Array<number>): void {
@@ -972,9 +1027,17 @@ class ObserveV2 {
     aceDebugTrace.end();
   }
 
-  public runMonitorFunctionsForAddMonitor(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}. AddMonitor/@SyncMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceDebugTrace.begin(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}`);
+  /**
+   * @function runAddMonitorBasedFunctions
+   * @description This function will run monitor functions for
+   * Monitors added with AddMonitor API, functions decorated with @SyncMonitor
+   * and with @Monitor with options
+   *
+   * @param monitors - Set with IDs of MonitorsV2
+   */
+  public runAddMonitorBasedFunctions(monitors: Set<number>): void {
+    stateMgmtConsole.debug(`ObservedV2.runAddMonitorBasedFunctions: ${monitors.size}. AddMonitor/@SyncMonitor/@MonitorWithOpts funcs: ${JSON.stringify(Array.from(monitors))} ...`);
+    aceDebugTrace.begin(`ObservedV2.runAddMonitorBasedFunctions: ${monitors.size}`);
 
     let monitor: MonitorV2 | undefined;
 
@@ -987,13 +1050,12 @@ class ObserveV2 {
     aceDebugTrace.end();
   }
 
-
-  public updateDirtyMonitorPath(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPath: ${monitors.size} addMonitor/@SyncMonitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceDebugTrace.begin(`ObservedV3.updateDirtyMonitorPath: ${monitors.size} addMonitor/@SyncMonitor`);
-
+  public updateDirtyMonitorPath(monitorIds: Set<number>): Set<number> {
+    stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPath: ${monitorIds.size} addMonitor/@SyncMonitor funcs: ${JSON.stringify(Array.from(monitorIds))} ...`);
+    aceDebugTrace.begin(`ObservedV3.updateDirtyMonitorPath: ${monitorIds.size} addMonitor/@SyncMonitor`);
     let ret: number = 0;
-    monitors.forEach((monitorId) => {
+    let funcsToRun = new Set<number>;
+    monitorIds.forEach((monitorId) => {
       const monitor = this.id2Others_[monitorId]?.deref();
       if (monitor instanceof MonitorV2) {
         const monitorTarget = monitor.getTarget();
@@ -1008,10 +1070,11 @@ class ObserveV2 {
 
       // Collect AddMonitor functions that need to be executed later
       if (ret > 0) {
-        this.monitorFuncsToRun_.add(ret);
+        funcsToRun.add(ret);
       }
     });
     aceDebugTrace.end();
+    return funcsToRun;
   }
 
 
@@ -1092,11 +1155,11 @@ class ObserveV2 {
   }
 
   public constructMonitor(owningObject: Object, owningObjectName: string): void {
-    let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + owningObjectName);
+    let watchProp = Symbol.for(MonitorV2.MONITOR_ORIG_PREFIX + owningObjectName);
     if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
       Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
         if (monitorFunc && pathString && typeof monitorFunc === 'function') {
-          const monitor = new MonitorV2(owningObject, pathString, monitorFunc as (m: IMonitor) => void, true);
+          const monitor = new MonitorV2(owningObject, pathString, monitorFunc as (m: IMonitor) => void, MonitorType.MONITOR_DECORATOR);
           monitor.InitRun();
           const refs = owningObject[ObserveV2.MONITOR_REFS] ??= {};
           // store a reference inside owningObject
@@ -1106,7 +1169,7 @@ class ObserveV2 {
           if (existingMonitor && existingMonitor instanceof MonitorV2) {
             // current Monitor will be override, and will be GC soon
             // to avoid the Monitor be triggered anymore, invalidate it
-            ObserveV2.getObserve().clearWatch(existingMonitor.getWatchId());
+            ObserveV2.getObserve().clearWatch(existingMonitor.getMonitorId());
           }
           refs[monitorFunc.name] = monitor;
         }
@@ -1115,42 +1178,89 @@ class ObserveV2 {
     } // if target[watchProp]
   }
 
-  public constructSyncMonitors(owningObject: Object, owningObjectName: string): void {
-    let watchProp = Symbol.for(MonitorV2.SYNC_MONITOR_PREFIX + owningObjectName);
+
+  private constructSyncMonitorAndMonitorsWithOptions(owningObject: Object, owningObjectName: string, isSync: boolean ): void {
+    let watchProp = Symbol.for(
+      (isSync? MonitorV2.SYNC_MONITOR_PREFIX : MonitorV2.MONITOR_WITH_OPTIONS_PREFIX) + owningObjectName);
     if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
-      Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
+      Object.entries(owningObject[watchProp]).forEach(([pathString, info]) => {
+        let monitorFunc;
+        let wildcardEnabled = false;
+        let type;
+        if (isSync) {
+          // SyncMonitor
+          monitorFunc = info;
+          wildcardEnabled = true;
+          type = MonitorType.SYNC_MONITOR_DECORATOR;
+        } else {
+          [monitorFunc, wildcardEnabled] = (info as MonitorFunctionInfo);
+          type = MonitorType.MONITOR_WITH_OPTIONS_DECORATOR;
+        }
         if (monitorFunc && pathString && typeof monitorFunc === 'function') {
-            this.AddMonitorPath(owningObject, pathString,
-                monitorFunc as MonitorCallback, {isSynchronous: true}, true, owningObjectName);
+          this.AddMonitorPath(owningObject, pathString,
+            monitorFunc as MonitorCallback, isSync, wildcardEnabled, type, owningObjectName);
         }
       });
       delete owningObject[watchProp];
     }
   }
 
-  public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions,
-    decorator: boolean = false, owningObjectName: string = ''): void {
-    const funcName = monitorFunc.name;
+  public constructMonitorsWithOptions(owningObject: Object, owningObjectName: string): void {
+    this.constructSyncMonitorAndMonitorsWithOptions(owningObject, owningObjectName, false);
+  }
+
+  public constructSyncMonitors(owningObject: Object, owningObjectName: string): void {
+    this.constructSyncMonitorAndMonitorsWithOptions(owningObject, owningObjectName, true);
+  }
+
+  public getAnonymousMonitorFuncDisplay(monitorFunc: MonitorCallback): string {
+    let funcKey = this.anonymousMonitorFuncKeyMap_.get(monitorFunc);
+    if (!funcKey) {
+      funcKey = `__anonymous_monitor_${++this.anonymousMonitorFuncKeySeed_}`;
+      this.anonymousMonitorFuncKeyMap_.set(monitorFunc, funcKey);
+    }
+    return funcKey;
+  }
+
+  public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback,
+    isSync: boolean,
+    wildcardEnabled: boolean,
+    monitorType: MonitorType = MonitorType.ADD_MONITOR_API,
+    owningObjectName: string = ''): void {
+
+    let funcName = monitorFunc.name;
+    // if monitorFunc is an anonymous function, assign a unique name for it to store in refs
+    if (funcName === 'anonymousMonitorFunc') {
+      funcName = this.getAnonymousMonitorFuncDisplay(monitorFunc);
+    }
     const pathsUniqueString = Array.isArray(path) ? path.join(' ') : path;
-    const isSync: boolean = options ? options.isSynchronous : false;
     const paths = Array.isArray(path) ? path : [path];
-    const refs_sym = (isSync && decorator) ? ObserveV2.SYNC_MONITOR_REFS : ObserveV2.ADD_MONITOR_REFS;
+    const decorator = monitorType === MonitorType.SYNC_MONITOR_DECORATOR || monitorType === MonitorType.MONITOR_WITH_OPTIONS_DECORATOR;
+
+    // ADD_MONITOR_API_REFS - used in clearMonitorPath and getMonitorIds
+    // MONITOR_WITH_OPTIONS_OR_SYNC_MONITOR_REFS - used in resetAllMonitorsOnReuse and getMonitorIds
+
+    const refs_sym = (monitorType === MonitorType.ADD_MONITOR_API)
+      ? ObserveV2.ADD_MONITOR_API_REFS
+      : ObserveV2.MONITOR_WITH_OPTIONS_OR_SYNC_MONITOR_REFS;
+
     const refs = target[refs_sym] ??= {};
     let monitor = refs[funcName] as MonitorV2;
 
-    // 'monitor' is a @SyncMonitor MonitorV2
-    if (monitor && monitor instanceof MonitorV2 && monitor.isSyncDecorator()) {
+    // 'monitor' is a @SyncMonitor MonitorV2 or @Monitor with options decorator
+    if (monitor && monitor instanceof MonitorV2 && (monitor.isSyncMonitorDecorator() || monitor.isMonitorWithOptionsdDecorator())) {
+      const decoratorName = monitor.getDecoratorName();
       if (!decorator) {
-        // Attempt to redefine @SyncMonitor vai API addMonitor call, ignore
-        stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} in ${owningObjectName} has already register as @SyncMonitor, cannot add path(s)`);
+        // Attempt to redefine @SyncMonitor or @Monitor With Options via API addMonitor call, ignore
+        stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} in ${owningObjectName} has already register as ${decoratorName}, cannot add path(s)`);
         return;
       }
       // Derived class defines @SyncMonitor for the function with the same name
       // as in the base class. Deleting MonitorV2 object of the base class here.
-      ObserveV2.getObserve().clearWatch(monitor.getWatchId());
-      delete refs[funcName];
+      ObserveV2.getObserve().clearWatch(monitor.getMonitorId());
+      refs[funcName] = undefined;
       monitor = undefined;
-      stateMgmtConsole.warn(`@SyncMonitor ${monitorFunc.name} ${path} in ${owningObjectName} instance with same name already exists.
+      stateMgmtConsole.warn(`${decoratorName} ${monitorFunc.name} ${path} in ${owningObjectName} instance with same name already exists.
         The new ${funcName} will override the previous one, and the old one will no longer take effect.`);
     }
 
@@ -1167,7 +1277,8 @@ class ObserveV2 {
       return;
     }
 
-    monitor = new MonitorV2(target, pathsUniqueString, monitorFunc, decorator, isSync);
+    // @SyncMonitor or @Monitor With Options
+    monitor = new MonitorV2(target, pathsUniqueString, monitorFunc, monitorType, isSync, wildcardEnabled);
     monitor.InitRun();
     // store a reference inside target
     // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2 to prevent the MonitorV2 is GC
@@ -1175,16 +1286,22 @@ class ObserveV2 {
     refs[funcName] = monitor;
 
     if (!(target instanceof PUV2ViewBase)) {
-      WeakRefPool.addMonitorId(target, monitor.getWatchId());
+      WeakRefPool.addMonitorId(target, monitor.getMonitorId());
     }
   }
 
   public clearMonitorPath(target: object, path: string | string[], monitorFunc?: MonitorCallback): void {
-    const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
+    const refs = target[ObserveV2.ADD_MONITOR_API_REFS] ??= {};
     const paths = Array.isArray(path) ? path : [path];
 
     if (monitorFunc) {
-      const funcName = monitorFunc.name;
+      let funcName = monitorFunc.name;
+      stateMgmtConsole.debug(`AddMonitorPath anonymous Func name ${funcName} typeof ${typeof funcName}`);
+      // if monitorFunc is an anonymous function, assign a unique name for it to store in refs
+      if (funcName === 'anonymousMonitorFunc') {
+        funcName = this.getAnonymousMonitorFuncDisplay(monitorFunc);
+        stateMgmtConsole.debug(`AddMonitorPath anonymous Func name ${funcName}`);
+      }
       let monitor = refs[funcName];
       if (monitor && monitor instanceof MonitorV2) {
         paths.forEach(item => {
@@ -1194,6 +1311,13 @@ class ObserveV2 {
             );
           }
         });
+        // there is a memory leak when path is empty, need to delete MonitorV2 from target
+        // only deal with monitorFunc is anonymous function, since for normal function may have compatibility issue
+        stateMgmtConsole.debug(`clearMonitorPath anonymous Func name ${funcName} length ${monitor.getValues().size}`);
+        if (monitorFunc.name === 'anonymousMonitorFunc' && monitor.getValues().size === 0) {
+          stateMgmtConsole.debug(`clearMonitorPath anonymous Func name ${funcName} delete ref`);
+          delete refs[funcName];
+        }
       } else {
         const pathsUniqueString = paths.join(' ');
         stateMgmtConsole.applicationError(
@@ -1244,11 +1368,11 @@ class ObserveV2 {
 
   public clearWatch(id: number): void {
     // @Monitor
-    if (id < MonitorV2.MIN_WATCH_FROM_API_ID) {
+    if (id < MonitorV2.MIN_MONITOR_WITH_OPTIONS_OR_ASYNC_API_ID) {
       this.clearBinding(id);
       return;
     }
-    // addMonitor, @SyncMonitor
+    // addMonitor, @SyncMonitor, @Monitor with options
     const monitor: MonitorV2 = this.id2Others_[id]?.deref();
     if (monitor instanceof MonitorV2) {
       monitor.getValues().forEach((monitorValueV2: MonitorValueV2<unknown>) => {
@@ -1285,14 +1409,18 @@ class ObserveV2 {
   }
   public static autoProxyObject(target: Object, key: string | symbol): any {
     let val = target[key];
+
     if (InteropConfigureStateMgmt.needsInterop()) {
-      val = ObserveV2.setStaticCompatibleFuncInVal(target, val);
+      const interopVal = tryGetInteropObservedValue(target, key, val);
+      if (interopVal !== undefined) {
+        return interopVal;
+      }
     }
     // Not an object, not a collection, no proxy required
     if (!val || typeof (val) !== 'object' ||
       !(Array.isArray(val) || val instanceof Set || val instanceof Map || val instanceof Date)) {
       return val;
-    }
+    } 
 
     // Collections are the only type that require proxy observation. If they have already been observed, no further observation is needed.
     // Prevents double-proxying: checks if the object is already proxied by either V1 or V2 (to avoid conflicts).
@@ -1455,6 +1583,14 @@ class ObserveV2 {
     return (weak && (monitorV2 = weak.deref()) && (monitorV2 instanceof MonitorV2)) ? monitorV2.getMonitorFuncName() : '';
   }
 
+  public getMonitorInfoByIdTagAndFunc(id: number): string {
+    let weak = this.id2Others_[id];
+    let monitorV2: MonitorV2;
+    return (weak && (monitorV2 = weak.deref()) && (monitorV2 instanceof MonitorV2))
+      ? monitorV2.getDecoratorName() + ' '  + monitorV2.getMonitorFuncName()
+      : '';
+  }
+
   public setCurrentReuseId(elmtId: number): void {
     this.currentReuseId_ = elmtId;
   }
@@ -1478,7 +1614,7 @@ class ObserveV2 {
     const names = [
       'elmtIdsChanged_',
       'computedPropIdsChanged_',
-      'monitorIdsChanged_', 'monitorIdsChangedForAddMonitor_', 'monitorSyncIdsChangedForAddMonitor_',
+      'monitorIdsChanged_', 'monitorAsyncIdsChangedForAddMonitorBased_', 'monitorSyncIdsChangedForAddMonitorBased_',
       'persistenceChanged_'
     ];
 

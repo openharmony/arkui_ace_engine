@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ShapeModifier extends ArkShapeComponent implements AttributeModifier<ShapeAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

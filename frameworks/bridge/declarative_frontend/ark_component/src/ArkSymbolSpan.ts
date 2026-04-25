@@ -42,8 +42,8 @@ class SymbolSpanFontSizeModifier extends ModifierWithKey<number | string | Resou
   }
 }
 
-class SymbolSpanFontWeightModifier extends ModifierWithKey<number | FontWeight | string> {
-  constructor(value: number | FontWeight | string) {
+class SymbolSpanFontWeightModifier extends ModifierWithKey<ArkFontWeight> {
+  constructor(value: ArkFontWeight) {
     super(value);
   }
   static identity: Symbol = Symbol('symbolSpanFontWeight');
@@ -51,7 +51,9 @@ class SymbolSpanFontWeightModifier extends ModifierWithKey<number | FontWeight |
     if (reset) {
       getUINativeModule().symbolSpan.resetFontWeight(node);
     } else {
-      getUINativeModule().symbolSpan.setFontWeight(node, this.value);
+      getUINativeModule().symbolSpan.setFontWeight(node, this.value.value,
+        this.value?.enableVariableFontWeight,
+        this.value?.enableDeviceFontWeightCategory);
     }
   }
 }
@@ -119,15 +121,21 @@ class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute
       SymbolSpanFontColorModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): SymbolSpanAttribute {
+  fontWeight(value: number | FontWeight | string, fontWeightConfigs?: FontWeightConfigs): SymbolSpanAttribute {
     let fontWeightStr: string = '400';
     if (isNumber(value)) {
       fontWeightStr = value.toString();
     } else if (isString(value)) {
       fontWeightStr = String(value);
     }
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = fontWeightStr;
+    if (fontWeightConfigs !== null && fontWeightConfigs !== undefined && typeof fontWeightConfigs === 'object') {
+      arkFontWeight.enableVariableFontWeight = fontWeightConfigs.enableVariableFontWeight ?? false;
+      arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs.enableDeviceFontWeightCategory ?? true;
+    }
     modifierWithKey(this._modifiersWithKeys, SymbolSpanFontWeightModifier.identity,
-      SymbolSpanFontWeightModifier, fontWeightStr);
+      SymbolSpanFontWeightModifier, arkFontWeight);
     return this;
   }
   effectStrategy(value: SymbolEffectStrategy): SymbolSpanAttribute {

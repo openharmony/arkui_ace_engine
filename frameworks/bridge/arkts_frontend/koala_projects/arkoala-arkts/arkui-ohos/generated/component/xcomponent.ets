@@ -137,6 +137,7 @@ export class XComponentController implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceId(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setXComponentSurfaceRect_serialize(rect: SurfaceRect): void {
@@ -149,6 +150,7 @@ export class XComponentController implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceRect(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SurfaceRect = SurfaceRect_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setXComponentSurfaceRotation_serialize(rotationOptions: SurfaceRotationOptions): void {
@@ -161,6 +163,7 @@ export class XComponentController implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceRotation(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SurfaceRotationOptions = SurfaceRotationOptions_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private stopImageAnalyzer_serialize(): void {
@@ -175,6 +178,7 @@ export class XComponentController implements MaterializedBase {
             buffer = (drawing_Canvas_serializer.read(retvalDeserializer) as drawing.Canvas)
         }
         const returnResult: DrawingCanvas | null = buffer
+        retvalDeserializer.dispose()
         return returnResult
     }
     private unlockCanvasAndPost_serialize(canvas: DrawingCanvas): void {
@@ -204,6 +208,7 @@ export class XComponentController implements MaterializedBase {
         }
         resourceFinalizerRegister(bufferClosure, bufferBufResource)
         const returnResult: ((breakpoints: string) => void) = bufferClosure
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setOnSurfaceCreated_serialize(onSurfaceCreated: ((breakpoints: string) => void)): void {
@@ -231,6 +236,7 @@ export class XComponentController implements MaterializedBase {
         }
         resourceFinalizerRegister(bufferClosure, bufferBufResource)
         const returnResult: ((surfaceId: string,rect: SurfaceRect) => void) = bufferClosure
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setOnSurfaceChanged_serialize(onSurfaceChanged: ((surfaceId: string,rect: SurfaceRect) => void)): void {
@@ -257,6 +263,7 @@ export class XComponentController implements MaterializedBase {
         }
         resourceFinalizerRegister(bufferClosure, bufferBufResource)
         const returnResult: ((breakpoints: string) => void) = bufferClosure
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setOnSurfaceDestroyed_serialize(onSurfaceDestroyed: ((breakpoints: string) => void)): void {
@@ -267,7 +274,7 @@ export class XComponentController implements MaterializedBase {
     }
 }
 export class ArkXComponentPeer extends ArkCommonMethodPeer {
-    attributeSet?: XComponentModifier;
+    xComponentAttributeSet?: XComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

@@ -247,6 +247,19 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
   }
 
+  /**
+   * Resets this property's local value from its source binding.
+   * Called during reuse to resync one-way storage
+   * bindings when the component is reparented to a new owner.
+  */
+  public resetSource(): void {
+    if (this.source_ !== undefined && this.source_ !== null) {
+      if (this.resetLocalValue(this.source_.getUnmonitored(), true)) {
+          this.notifyPropertyHasChangedPU();
+      }
+    }
+  }
+
   private createSourceDependency(sourceObject: C): void {
     if (ObservedObject.IsObservedObject(sourceObject)) {
       stateMgmtConsole.debug(`${this.debugInfo()} createSourceDependency: create dependency on source ObservedObject ...`);
@@ -310,6 +323,9 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       } else if (ObservedObject.IsObservedObject(this.localCopyObservedObject_)) {
         // case: new ObservedObject
         ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
+        this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
+      } else if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(this.localCopyObservedObject_)) {
+        this.localCopyObservedObject_ = InteropExtractorModule.getInteropObservedObject(this.localCopyObservedObject_, this);
         this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
       } else {
         // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
@@ -380,7 +396,13 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   // API 10 code path
   private deepCopyObject(obj: C, variable?: string): C {
-    let copy = SynchedPropertyObjectOneWayPU.deepCopyObjectInternal(obj, variable);
+    let copy: C | undefined = undefined;
+    try {
+      copy = SynchedPropertyObjectOneWayPU.deepCopyObjectInternal(obj, variable);
+    } catch (error) {
+      stateMgmtConsole.applicationError(`${this.debugInfo()}: deepCopyObject failed.`);
+      throw error;
+    }
 
     // this subscribe to the top level object/array of the copy
     // same as shallowCopy does
@@ -406,7 +428,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return getDeepCopyOfObjectRecursive(obj);
 
     function getDeepCopyOfObjectRecursive(obj: any): any {
-      if (!obj || typeof obj !== 'object') {
+      if (!obj || typeof obj !== 'object' || Reflect.get(obj, '__MATERIAL_REFERENCE__')) {
         return obj;
       }
 
@@ -417,7 +439,11 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       }
 
       let copy;
-      if (obj instanceof Set) {
+      if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
+        copy = deepCopyStaticProxy(obj, getDeepCopyOfObjectRecursive, copiedObjects);
+        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
+      } 
+      else if (obj instanceof Set) {
         copy = new Set<any>();
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
@@ -440,9 +466,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         copy = Array.isArray(obj) ? [] : {};
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
-      } else if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
-        copy = deepCopyStaticProxy(obj, getDeepCopyOfObjectRecursive, copiedObjects);
-        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
       } else {
         /**
          * As we define a variable called 'copy' with no initial value before this if/else branch,

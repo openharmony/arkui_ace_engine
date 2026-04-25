@@ -28,7 +28,7 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -363,5 +363,166 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest006, TestSize.Level1)
     EXPECT_NE(clickEventActuator.clickAfterEvents_, nullptr);
     clickEventActuator.ClearClickAfterEvent();
     EXPECT_EQ(clickEventActuator.clickAfterEvents_, nullptr);
+}
+
+/**
+ * @tc.name: ClickEventActuatorTest007
+ * @tc.desc: Test IsUserClickable when userCallback is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest007, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+ 
+    EXPECT_FALSE(clickEventActuator.IsUserClickable());
+ 
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    clickEventActuator.SetUserCallback(std::move(callback));
+    EXPECT_TRUE(clickEventActuator.IsUserClickable());
+}
+ 
+/**
+ * @tc.name: ClickEventActuatorTest008
+ * @tc.desc: Test IsComponentClickable with different combinations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest008, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+ 
+    EXPECT_FALSE(clickEventActuator.IsComponentClickable());
+ 
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    clickEventActuator.clickEvents_.emplace_back(clickEvent);
+    EXPECT_TRUE(clickEventActuator.IsComponentClickable());
+ 
+    clickEventActuator.clickEvents_.clear();
+    clickEventActuator.clickAfterEvents_ = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    EXPECT_TRUE(clickEventActuator.IsComponentClickable());
+ 
+    clickEventActuator.clickAfterEvents_ = nullptr;
+    clickEventActuator.userCallback_ = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    EXPECT_TRUE(clickEventActuator.IsComponentClickable());
+ 
+    clickEventActuator.userCallback_ = nullptr;
+    clickEventActuator.jsFrameNodeCallback_ = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    EXPECT_TRUE(clickEventActuator.IsComponentClickable());
+}
+ 
+/**
+ * @tc.name: ClickEventActuatorTest009
+ * @tc.desc: Test AddDistanceThreshold with double value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest009, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+ 
+    constexpr double positiveDistance = 10.0;
+    clickEventActuator.AddDistanceThreshold(positiveDistance);
+    EXPECT_GT(clickEventActuator.distanceThreshold_.ConvertToPx(), 0);
+ 
+    constexpr double zeroDistance = 0.0;
+    clickEventActuator.AddDistanceThreshold(zeroDistance);
+    EXPECT_EQ(clickEventActuator.distanceThreshold_.ConvertToPx(), std::numeric_limits<double>::infinity());
+ 
+    constexpr double negativeDistance = -1.0;
+    clickEventActuator.AddDistanceThreshold(negativeDistance);
+    EXPECT_EQ(clickEventActuator.distanceThreshold_.ConvertToPx(), std::numeric_limits<double>::infinity());
+}
+ 
+/**
+ * @tc.name: ClickEventActuatorTest010
+ * @tc.desc: Test AddDistanceThreshold with Dimension value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest010, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+ 
+    Dimension positiveDim(10.0, DimensionUnit::VP);
+    clickEventActuator.AddDistanceThreshold(positiveDim);
+    EXPECT_GT(clickEventActuator.distanceThreshold_.ConvertToPx(), 0);
+ 
+    Dimension zeroDim(0.0, DimensionUnit::VP);
+    clickEventActuator.AddDistanceThreshold(zeroDim);
+    EXPECT_EQ(clickEventActuator.distanceThreshold_.ConvertToPx(), std::numeric_limits<double>::infinity());
+ 
+    Dimension negativeDim(-1.0, DimensionUnit::VP);
+    clickEventActuator.AddDistanceThreshold(negativeDim);
+    EXPECT_EQ(clickEventActuator.distanceThreshold_.ConvertToPx(), std::numeric_limits<double>::infinity());
+}
+ 
+/**
+ * @tc.name: ClickEventActuatorTest011
+ * @tc.desc: Test GetClickRecognizer when clickRecognizer is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest011, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+ 
+    EXPECT_EQ(clickEventActuator.clickRecognizer_, nullptr);
+    auto recognizer = clickEventActuator.GetClickRecognizer();
+    EXPECT_NE(recognizer, nullptr);
+}
+ 
+/**
+ * @tc.name: ClickEventActuatorTest012
+ * @tc.desc: Test SetJSFrameNodeCallback and ClearJSFrameNodeCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest012, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+ 
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    clickEventActuator.SetJSFrameNodeCallback(std::move(callback));
+    EXPECT_NE(clickEventActuator.jsFrameNodeCallback_, nullptr);
+    EXPECT_NE(clickEventActuator.clickRecognizer_, nullptr);
+ 
+    clickEventActuator.ClearJSFrameNodeCallback();
+    EXPECT_EQ(clickEventActuator.jsFrameNodeCallback_, nullptr);
+ 
+    GestureEventFunc callback2 = [](GestureEvent& info) {};
+    clickEventActuator.SetJSFrameNodeCallback(std::move(callback2));
+    EXPECT_NE(clickEventActuator.jsFrameNodeCallback_, nullptr);
+ 
+    GestureEventFunc callback3 = [](GestureEvent& info) {};
+    clickEventActuator.SetJSFrameNodeCallback(std::move(callback3));
+    EXPECT_NE(clickEventActuator.jsFrameNodeCallback_, nullptr);
+}
+ 
+/**
+ * @tc.name: ClickEventActuatorTest013
+ * @tc.desc: Test IsClickEventsEmpty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest013, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+ 
+    EXPECT_TRUE(clickEventActuator.IsClickEventsEmpty());
+ 
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    clickEventActuator.AddClickEvent(clickEvent);
+    EXPECT_FALSE(clickEventActuator.IsClickEventsEmpty());
 }
 } // namespace OHOS::Ace::NG

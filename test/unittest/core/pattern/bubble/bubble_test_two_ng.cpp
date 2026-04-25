@@ -20,14 +20,14 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
-#include "test/mock/core/rosen/testing_path.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_path.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
@@ -37,6 +37,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -354,13 +355,13 @@ HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level0)
     ASSERT_NE(layoutWrapper, nullptr);
     bool showInSubwindow = false;
     layoutAlgorithm->useCustom_ = false;
-    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateBubbleMaxSize(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper), showInSubwindow);
     layoutAlgorithm->useCustom_ = true;
-    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateBubbleMaxSize(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper), showInSubwindow);
     showInSubwindow = true;
-    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateBubbleMaxSize(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper), showInSubwindow);
     layoutAlgorithm->isTips_ = true;
-    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateBubbleMaxSize(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper), showInSubwindow);
     auto childProp = childNode->GetLayoutProperty();
     ASSERT_NE(childProp, nullptr);
     auto layoutConstraint = childProp->GetLayoutConstraint();
@@ -382,6 +383,7 @@ HWTEST_F(BubbleTestTwoNg, CreateBubbleNode001, TestSize.Level0)
     ASSERT_NE(themeManagerOne, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     BubbleView::CreateBubbleNode("test1", 1, param);
     EXPECT_TRUE(param->HasEnableHoverMode());
 }
@@ -1478,5 +1480,162 @@ HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleBackGroundColorTest002, TestS
     ASSERT_NE(renderContext, nullptr);
     EXPECT_EQ(renderContext->GetBackBlurStyle().has_value(), true);
     EXPECT_EQ(BlurStyle::COMPONENT_REGULAR, renderContext->GetBackBlurStyle()->blurStyle);
+}
+
+/**
+ * @tc.name: BubbleViewShouldUpdateShadowTest001
+ * @tc.desc: Test ShouldUpdateShadow with null system material
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewShouldUpdateShadowTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create popup param without system material
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+
+    /**
+     * @tc.steps: step2. verify shadow should be updated
+     */
+    auto result = BubbleView::ShouldUpdateShadow(popupParam);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: BubbleViewShouldUpdateShadowTest002
+ * @tc.desc: Test ShouldUpdateShadow with default system material (no type set)
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewShouldUpdateShadowTest002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create popup param with default material (no explicit type)
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    // Don't set any type, testing default behavior
+    popupParam->SetSystemMaterial(systemMaterial);
+
+    /**
+     * @tc.steps: step2. verify shadow should be updated for default material
+     */
+    auto result = BubbleView::ShouldUpdateShadow(popupParam);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: BubbleViewShouldUpdateShadowTest003
+ * @tc.desc: Test ShouldUpdateShadow with NONE material type
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewShouldUpdateShadowTest003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create popup param with NONE material type
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    systemMaterial->SetType(static_cast<int32_t>(MaterialType::NONE));
+    popupParam->SetSystemMaterial(systemMaterial);
+
+    /**
+     * @tc.steps: step2. verify shadow should not be updated for NONE material
+     */
+    auto result = BubbleView::ShouldUpdateShadow(popupParam);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: BubbleViewShouldUpdateShadowTest004
+ * @tc.desc: Test ShouldUpdateShadow with SEMI_TRANSPARENT material type
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewShouldUpdateShadowTest004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create popup param with SEMI_TRANSPARENT material type
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    systemMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    popupParam->SetSystemMaterial(systemMaterial);
+
+    /**
+     * @tc.steps: step2. verify shadow should not be updated for SEMI_TRANSPARENT material
+     */
+    auto result = BubbleView::ShouldUpdateShadow(popupParam);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: BubbleViewShouldUpdateShadowTest005
+ * @tc.desc: Test ShouldUpdateShadow with IMMERSIVE material and applyShadow=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewShouldUpdateShadowTest005, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create popup param with IMMERSIVE material and applyShadow=true
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    systemMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions immersiveOptions;
+    immersiveOptions.applyShadow = true;
+    systemMaterial->SetImmersiveOptions(immersiveOptions);
+    popupParam->SetSystemMaterial(systemMaterial);
+
+    /**
+     * @tc.steps: step2. verify shadow should not be updated when applyShadow=true
+     */
+    auto result = BubbleView::ShouldUpdateShadow(popupParam);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: BubbleViewShouldUpdateShadowTest006
+ * @tc.desc: Test ShouldUpdateShadow with IMMERSIVE material and applyShadow=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewShouldUpdateShadowTest006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create popup param with IMMERSIVE material and applyShadow=false
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    systemMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions immersiveOptions;
+    immersiveOptions.applyShadow = false;
+    systemMaterial->SetImmersiveOptions(immersiveOptions);
+    popupParam->SetSystemMaterial(systemMaterial);
+
+    /**
+     * @tc.steps: step2. verify shadow should be updated when applyShadow=false
+     */
+    auto result = BubbleView::ShouldUpdateShadow(popupParam);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: BubbleViewShouldUpdateShadowTest007
+ * @tc.desc: Test ShouldUpdateShadow with IMMERSIVE material and no options
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewShouldUpdateShadowTest007, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create popup param with IMMERSIVE material but no options
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    systemMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    popupParam->SetSystemMaterial(systemMaterial);
+
+    /**
+     * @tc.steps: step2. verify shadow should be updated when no immersive options
+     */
+    auto result = BubbleView::ShouldUpdateShadow(popupParam);
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG

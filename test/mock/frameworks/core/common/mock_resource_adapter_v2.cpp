@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ std::map<uint32_t, std::vector<std::string>> g_strsMap;
 std::map<uint32_t, double> g_doubleMap;
 std::map<uint32_t, int32_t> g_int32Map;
 std::mutex g_mapMutex;
+int32_t g_resourceAdapterInstanceId = -1;
 } // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
@@ -34,8 +35,12 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 }
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName)
+    const std::string& bundleName, const std::string& moduleName, int32_t& actualInstanceId)
 {
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    if (g_resourceAdapterInstanceId != -1) {
+        actualInstanceId = g_resourceAdapterInstanceId;
+    }
     return AceType::MakeRefPtr<MockResourceAdapterV2>();
 }
 
@@ -140,5 +145,12 @@ void ResetMockResourceData()
     g_strsMap.clear();
     g_doubleMap.clear();
     g_int32Map.clear();
+    g_resourceAdapterInstanceId = -1;
+}
+
+void SetMockResourceAdapterInstanceId(int32_t instanceId)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    g_resourceAdapterInstanceId = instanceId;
 }
 } // namespace OHOS::Ace

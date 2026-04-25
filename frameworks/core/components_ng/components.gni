@@ -72,7 +72,7 @@ template("build_component_ng") {
 
       deps = []
       deps += extra_deps
-      deps += []
+      deps += [ "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen" ]
       if (defined(invoker.public_configs)) {
         public_configs = []
         public_configs += invoker.public_configs
@@ -114,6 +114,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/frameworks/text/interface/export/rosen_text/export/rosen_text",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics",
           "//foundation/graphic/graphic_2d/utils/color_manager/export",
+          "//foundation/graphic/graphic_2d/utils/log",
           "//foundation/multimedia/image_framework/interfaces/innerkits/include",
           "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
           "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
@@ -179,7 +180,7 @@ template("build_component_ng") {
       if (!defined(invoker.ark_sources) && defined(vendor_configs.ace_engine_advanced) &&
           (platform == "ohos" || platform == "ohos_ng") &&
           (!defined(invoker.disable_ace_advance_dirs) ||
-           !invoker.disable_ace_advance_dirs)) {
+           !invoker.disable_ace_advance_dirs) && component_name == "base_ng") {
         include_dirs += vendor_configs.ace_advance_dirs
       }
 
@@ -236,6 +237,12 @@ template("build_component_ng") {
             external_deps = invoker.standard_input_deps
           }
         }
+      }
+
+      if (defined(config.gesture_debug_boundary_support) &&
+          config.gesture_debug_boundary_support &&
+          defined(invoker.gesture_debug_sources)) {
+        sources += invoker.gesture_debug_sources
       }
     }
   }

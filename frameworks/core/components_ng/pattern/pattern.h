@@ -20,23 +20,18 @@
 
 #include "ui/properties/dirty_flag.h"
 
-#include "base/geometry/ng/rect_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/container_consts.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
 
 struct _ArkUINodeAdapter;
@@ -45,7 +40,7 @@ typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
-}
+} // namespace OHOS::Accessibility
 
 namespace OHOS::Ace {
 struct UiMaterialParam;
@@ -192,10 +187,7 @@ public:
         return false;
     }
 
-    virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
-    {
-        return MakeRefPtr<AccessibilityProperty>();
-    }
+    virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty();
 
     virtual RefPtr<PaintProperty> CreatePaintProperty()
     {
@@ -207,10 +199,7 @@ public:
         return MakeRefPtr<LayoutProperty>();
     }
 
-    virtual RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm()
-    {
-        return MakeRefPtr<BoxLayoutAlgorithm>();
-    }
+    virtual RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm();
 
     virtual RefPtr<NodePaintMethod> CreateNodePaintMethod()
     {
@@ -222,15 +211,28 @@ public:
         return MakeRefPtr<NodePaintMethod>();
     }
 
+    virtual bool IsScrollAble(SmartGestureDirection direction = SmartGestureDirection::FORWARD) const
+    {
+        return false;
+    }
+
+    virtual std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const
+    {
+        return std::nullopt;
+    }
+
+    virtual void PerformScroll(const ScrollingConfig& /* config */)
+    {
+        return;
+    }
+
     virtual std::optional<RectF> GetOverridePaintRect() const
     {
         return std::nullopt;
     }
 
-    virtual RefPtr<EventHub> CreateEventHub()
-    {
-        return MakeRefPtr<EventHub>();
-    }
+    virtual RefPtr<EventHub> CreateEventHub();
 
     virtual void OnContextAttached() {}
 
@@ -455,12 +457,10 @@ public:
     virtual void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
     {}
-    virtual void AddExtraInfoWithParamConfig(
-        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
+    virtual void AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) {}
+    virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap,
+        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST)
     {}
-    virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
-        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
     virtual bool CheckAutoSave()
     {
@@ -616,14 +616,18 @@ public:
         return -1;
     }
 
-    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode,
-        int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
-    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text,
-        int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
-    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType,
-        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
-    virtual void FocusMoveSearch(int64_t elementId, int32_t direction,
-        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+    virtual void SearchExtensionElementInfoByAccessibilityId(
+        int64_t elementId, int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    {}
+    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output)
+    {}
+    virtual void FindFocusedElementInfo(
+        int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    {}
+    virtual void FocusMoveSearch(
+        int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    {}
     virtual bool TransferExecuteAction(
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
     {
@@ -640,73 +644,16 @@ public:
         return -1;
     }
 
-    GestureEventFunc GetLongPressEventRecorder()
-    {
-        auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-                return;
-            }
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
-            auto desc = host->GetAutoEventParamValue("");
+    GestureEventFunc GetLongPressEventRecorder();
 
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId)
-                .SetType(host->GetTag())
-                .SetEventType(Recorder::LONG_PRESS)
-                .SetText(text)
-                .SetHost(host)
-                .SetDescription(desc);
-            if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT)) {
-                auto rect = host->GetTransformRectRelativeToWindow().ToBounds();
-                builder.SetExtra(Recorder::KEY_NODE_RECT, std::move(rect));
-            }
-            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
-        };
-        return longPressCallback;
-    }
-
-    virtual void OnAttachContext(PipelineContext *context) {}
-    virtual void OnDetachContext(PipelineContext *context) {}
+    virtual void OnAttachContext(PipelineContext* context) {}
+    virtual void OnDetachContext(PipelineContext* context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
     virtual bool GetEmulateTouchFromMouseEvent() const
     {
         return false;
     }
-    void CheckLocalized()
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto layoutProperty = host->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-        if (layoutProperty->IsPositionLocalizedEdges()) {
-            layoutProperty->CheckPositionLocalizedEdges(layoutDirection);
-        }
-        layoutProperty->CheckMarkAnchorPosition(layoutDirection);
-        if (layoutProperty->IsOffsetLocalizedEdges()) {
-            layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
-        }
-        layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
-        layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
-        layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
-        layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
-        layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);
-        layoutProperty->CheckLocalizedOuterBorderColor(layoutDirection);
-        layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
-        layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
-        layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
-        layoutProperty->CheckLocalizedAlignment(layoutDirection);
-        // Reset for safeAreaExpand's Cache in GeometryNode
-        host->ResetSafeAreaPadding();
-        layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
-        layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
-        layoutProperty->CheckBackgroundLayoutSafeAreaEdges(layoutDirection);
-    }
+    void CheckLocalized();
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
@@ -716,6 +663,11 @@ public:
     }
 
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
+    {
+        return false;
+    }
+
+    virtual bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const
     {
         return false;
     }
@@ -737,8 +689,7 @@ public:
         return false;
     }
 
-    virtual void AddInnerOnGestureRecognizerJudgeBegin(
-        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
+    virtual void AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
     virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
 
@@ -747,9 +698,7 @@ public:
         return false;
     }
 
-    void AddResObj(
-        const std::string& key,
-        const RefPtr<ResourceObject>& resObj,
+    void AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
 
     void RemoveResObj(const std::string& key);
@@ -784,7 +733,7 @@ public:
     int32_t OnRecvCommand(const std::string& command);
     virtual std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content)
     {
-        return std::vector<std::pair<float, float>>{};
+        return std::vector<std::pair<float, float>> {};
     };
     virtual void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
@@ -794,8 +743,8 @@ public:
         return RET_SUCCESS;
     };
 
-    bool HandleTextBoxComponentCommand(const std::string& command, std::string& cmd,
-        std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& params)
+    bool HandleTextBoxComponentCommand(const std::string& command, std::string& cmd, std::unique_ptr<JsonValue>& json,
+        std::unique_ptr<JsonValue>& params)
     {
         json = JsonUtil::ParseJsonString(command);
         CHECK_NULL_RETURN(json && !json->IsNull(), false);
@@ -877,7 +826,7 @@ public:
     {
         return false;
     }
-    virtual void PostponedTaskForIgnore() {}
+    virtual void PostponedTaskForIgnore(LayoutSafeAreaBundleType type) {}
     virtual bool NeedCustomizeSafeAreaPadding()
     {
         return false;

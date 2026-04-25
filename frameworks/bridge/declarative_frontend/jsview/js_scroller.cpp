@@ -17,7 +17,6 @@
 #include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 
 #include "base/geometry/axis.h"
-#include "base/log/event_report.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"

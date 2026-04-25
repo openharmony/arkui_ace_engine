@@ -14,9 +14,9 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_base.h"
 
 #include "core/components/select/select_theme.h"
@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

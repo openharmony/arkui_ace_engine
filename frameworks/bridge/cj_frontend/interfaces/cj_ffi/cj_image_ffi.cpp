@@ -19,6 +19,7 @@
 #include "pixel_map_impl.h"
 #endif
 #include "cj_lambda.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components/image/image_theme.h"
 

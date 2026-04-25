@@ -35,7 +35,7 @@ import { PathModifier } from './../PathModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkPathPeer extends ArkCommonShapeMethodPeer {
-    attributeSet?: PathModifier;
+    pathAttributeSet?: PathModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

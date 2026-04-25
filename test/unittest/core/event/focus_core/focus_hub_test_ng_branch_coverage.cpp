@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
 #include "test/unittest/core/event/focus_hub_test_ng.h"
+#include "core/common/event_manager.h"
+#include "core/common/key_event_manager.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -592,9 +594,9 @@ HWTEST_F(FocusHubTestNg, ScrollByOffsetToParent001, TestSize.Level1)
      */
     auto listNode = FrameNodeOnTree::CreateFrameNode(
         V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
-    auto listItemGroupNode =
-        FrameNodeOnTree::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupStyle::NONE));
+    auto listItemGroupNode = FrameNodeOnTree::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupOptions{V2::ListItemGroupStyle::NONE}));
     auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
     auto listItemNode = FrameNodeOnTree::CreateFrameNode(
         V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listItemPattern);

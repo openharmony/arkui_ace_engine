@@ -23,6 +23,8 @@
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
 
+#include <optional>
+
 namespace OHOS::Ace::NG {
 
 class FocusView;
@@ -478,8 +480,11 @@ public:
     bool IsSelfFocusableWholePath();
 
     bool IsFocusable();
+    bool IsChildFocusable();
     bool IsFocusableNode();
+    bool IsChildFocusableNode();
     bool IsFocusableScope();
+    bool IsChildFocusableScope();
 
     bool IsSyncRequestFocusable();
     bool IsSyncRequestFocusableNode();

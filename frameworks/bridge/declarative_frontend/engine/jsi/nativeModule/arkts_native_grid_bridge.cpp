@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
+#include <string>
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -411,7 +412,8 @@ ArkUINativeModuleValue GridBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension scrollBarWidth;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, scrollBarArg, scrollBarWidth, false)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, scrollBarArg, scrollBarWidth, resObj, false)) {
         GetArkUINodeModifiers()->getGridModifier()->resetGridScrollBarWidth(nativeNode);
     } else {
         if (LessNotEqual(scrollBarWidth.Value(), 0.0f)) {
@@ -421,6 +423,7 @@ ArkUINativeModuleValue GridBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* runti
                 nativeNode, scrollBarWidth.Value(), static_cast<int32_t>(scrollBarWidth.Unit()));
         }
     }
+    GetArkUINodeModifiers()->getGridModifier()->setGridScrollBarWidthResObj(nativeNode, resObj.GetRawPtr());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -432,6 +435,7 @@ ArkUINativeModuleValue GridBridge::ResetScrollBarWidth(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetGridScrollBarWidth(nativeNode);
+    GetArkUINodeModifiers()->getGridModifier()->setGridScrollBarWidthResObj(nativeNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -167,6 +167,27 @@ public:
         return output;
     }
 
+    OffsetT& Multiply(const T& x, const T& y)
+    {
+        x_ *= x;
+        y_ *= y;
+        return *this;
+    }
+
+    OffsetT& Add(const T& x, const T& y)
+    {
+        x_ += x;
+        y_ += y;
+        return *this;
+    }
+
+    OffsetT& Add(const OffsetT& other)
+    {
+        x_ += other.x_;
+        y_ += other.y_;
+        return *this;
+    }
+
 private:
     T x_ { 0 };
     T y_ { 0 };

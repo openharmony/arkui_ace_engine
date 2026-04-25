@@ -27,28 +27,27 @@
 #include "base/utils/noncopyable.h"
 #include "base/want/want_wrap.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
-#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
+#include "core/components_ng/pattern/overlay/overlay_options.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
-#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
+namespace OHOS::Ace {
+struct ModalUIExtensionCallbacks;
+struct ModalUIExtensionConfig;
+struct ModalUIExtensionAllowedUpdateConfig;
+} // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
+struct CalendarSettingData;
 
 enum class HideMenuType : int32_t {
     NORMAL = 0,
@@ -168,26 +167,14 @@ public:
     bool GetTipsStatus(int32_t targetId);
     bool TipsInfoListIsEmpty(int32_t targetId);
 
-    PopupInfo GetPopupInfo(int32_t targetId) const
-    {
-        auto it = popupMap_.find(targetId);
-        if (it == popupMap_.end()) {
-            return {};
-        }
-        return it->second;
-    }
+    PopupInfo GetPopupInfo(int32_t targetId) const;
 
     bool HasPopupInfo(int32_t targetId) const
     {
         return popupMap_.find(targetId) != popupMap_.end();
     }
 
-    void ErasePopupInfo(int32_t targetId)
-    {
-        if (popupMap_.find(targetId) != popupMap_.end()) {
-            popupMap_.erase(targetId);
-        }
-    }
+    void ErasePopupInfo(int32_t targetId);
 
     void SetDismissDialogId(int32_t id)
     {
@@ -315,25 +302,14 @@ public:
         onHideDialogCallback_ = callback;
     }
 
-    void CallOnHideDialogCallback()
-    {
-        if (onHideDialogCallback_) {
-            onHideDialogCallback_();
-        }
-    }
+    void CallOnHideDialogCallback();
 
     void SetBackPressEvent(std::function<bool()> event)
     {
         backPressEvent_ = event;
     }
 
-    bool FireBackPressEvent() const
-    {
-        if (backPressEvent_) {
-            return backPressEvent_();
-        }
-        return false;
-    }
+    bool FireBackPressEvent() const;
 
     bool GetHasPixelMap()
     {
@@ -442,18 +418,9 @@ public:
         const NG::OffsetF& offset);
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
 
-    void ResetContextMenuDragHideFinished()
-    {
-        isContextMenuDragHideFinished_ = false;
-        dragMoveVector_ = OffsetF(0.0f, 0.0f);
-        lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
-    }
+    void ResetContextMenuDragHideFinished();
 
-    void ResetContextMenuRestartDragVector()
-    {
-        dragMoveVector_ = OffsetF(0.0f, 0.0f);
-        lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
-    }
+    void ResetContextMenuRestartDragVector();
 
     void SetContextMenuDragHideFinished(bool isContextMenuDragHideFinished)
     {
@@ -475,11 +442,7 @@ public:
         return !GetUpdateDragMoveVector().NonOffset() && !lastDragMoveVector_.NonOffset();
     }
 
-    void UpdateDragMoveVector(const NG::OffsetF& offset)
-    {
-        lastDragMoveVector_ = dragMoveVector_;
-        dragMoveVector_ = offset;
-    }
+    void UpdateDragMoveVector(const NG::OffsetF& offset);
 
     OffsetF GetUpdateDragMoveVector() const
     {
@@ -627,6 +590,7 @@ public:
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
+    void OnKeyboardAvoid();
     float GetRootHeight() const;
     float GetRootWidth() const;
 
@@ -693,6 +657,9 @@ public:
     void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
     RefPtr<FrameNode> CreateOverlayNodeWithOrder(std::optional<double> levelOrder);
     void AddFrameNodeWithOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder);
+    bool TopNodeIsModelUEC();
+    void OpenOrderOverlay(const RefPtr<FrameNode>& node, const OrderOverlayOptions& options,
+        const std::function<void(int32_t)>&& callback);
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
     void RemoveFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node);
     void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
@@ -727,14 +694,7 @@ public:
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
-    bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
-    {
-        if (overlayInfo_.has_value()) {
-            return false;
-        }
-        overlayInfo_ = overlayInfo;
-        return true;
-    }
+    bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo);
     std::optional<OverlayManagerInfo> GetOverlayManagerOptions()
     {
         return overlayInfo_;
@@ -974,6 +934,10 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
+
+    void SetDetachedFreeRootProxy(const RefPtr<UINode>& node, int32_t targetId);
+    void ResetDetachedFreeRootProxy(int32_t targetId);
+
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
@@ -1058,6 +1022,7 @@ private:
     std::optional<SheetKey> imageGeneratorSheetKey_ = std::nullopt;
 
     RefPtr<AceType> menuManager_ = nullptr;
+    std::unordered_map<int32_t, RefPtr<UINode>> detachedProxyMap_;
 };
 } // namespace OHOS::Ace::NG
 

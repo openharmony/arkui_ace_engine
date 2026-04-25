@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "ui/properties/ui_material_enums.h"
+
 #include "base/utils/layout_break_point.h"
 #include "base/utils/system_properties.h"
 
@@ -84,11 +86,13 @@ bool SystemProperties::cacheNavigationNodeEnable_ = false;
 bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::gridIrregularLayoutEnable_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::smartGestureEnabled_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
+bool SystemProperties::gestureDebugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
@@ -104,7 +108,6 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
-int32_t SystemProperties::pageLoadTimethreshold_ = 1000;
 bool SystemProperties::multiInstanceEnabled_ = false;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
@@ -122,6 +125,7 @@ bool g_isNeedSymbol = true;
 bool g_isResourceDecoupling = true;
 bool g_isConfigChangePerform = false;
 bool g_isMultiInstanceEnabled = false;
+UiMaterialLevel g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::isPCMode_ = false;
@@ -162,16 +166,6 @@ float SystemProperties::GetAnimationScale()
 bool SystemProperties::GetIsUseMemoryMonitor()
 {
     return false;
-}
-
-int32_t SystemProperties::GetComponentLoadNumber()
-{
-    return 1;
-}
-
-int32_t SystemProperties::GetStopCollectTimeWait()
-{
-    return 800; // 800 : Stop collecting asynchronous task waiting time.
 }
 
 bool SystemProperties::GetMultiInstanceEnabled()
@@ -381,11 +375,6 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
     return dragDropFrameworkStatus_;
 }
 
-int32_t SystemProperties::GetPageLoadTimethreshold()
-{
-    return pageLoadTimethreshold_;
-}
-
 bool SystemProperties::GetContainerDeleteFlag()
 {
     return containerDeleteFlag_;
@@ -522,5 +511,10 @@ void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
 void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 {
     faultInjectEnabled_ = faultInjectEnable;
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    return g_uiMaterialLevel;
 }
 } // namespace OHOS::Ace

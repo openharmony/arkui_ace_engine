@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 #include "core/components/dialog/dialog_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 

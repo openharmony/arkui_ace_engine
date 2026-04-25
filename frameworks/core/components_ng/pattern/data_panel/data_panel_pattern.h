@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components/data_panel/data_panel_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,6 +47,8 @@ public:
     }
 
     FocusPattern GetFocusPattern() const override;
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void OnModifyDone() override;
 

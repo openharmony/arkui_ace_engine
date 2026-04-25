@@ -20,7 +20,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/pattern/select/select_properties.h"
 
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set render properties.

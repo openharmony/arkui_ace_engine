@@ -182,7 +182,9 @@ void SetFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr weight)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SymbolModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weight));
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    SymbolModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weight, theme->GetTextStyle().GetFontWeight()));
 }
 
 void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
@@ -196,7 +198,58 @@ void ResetFontWeight(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SymbolModelNG::SetFontWeight(frameNode, Ace::FontWeight::NORMAL);
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    SymbolModelNG::SetFontWeight(frameNode, theme->GetTextStyle().GetFontWeight());
+}
+
+void SetFontWeightEnum(ArkUINodeHandle node, ArkUI_Int32 fontWeightEnum)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(fontWeightEnum));
+}
+
+void SetVariableFontWeight(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetVariableFontWeight(frameNode, value);
+}
+
+void ResetVariableFontWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::ResetVariableFontWeight(frameNode);
+}
+
+void SetEnableVariableFontWeight(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetEnableVariableFontWeight(frameNode, value);
+}
+
+void ResetEnableVariableFontWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::ResetEnableVariableFontWeight(frameNode);
+}
+
+void SetEnableDeviceFontWeightCategory(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetEnableDeviceFontWeightCategory(frameNode, value);
+}
+
+void ResetEnableDeviceFontWeightCategory(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::ResetEnableDeviceFontWeightCategory(frameNode);
 }
 
 void SetRenderingStrategy(ArkUINodeHandle node, ArkUI_Uint32 renderingStrategy)
@@ -404,7 +457,14 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphDynamicModifier()
         .resetFontSize = ResetFontSize,
         .setFontWeightStr = SetFontWeightStr,
         .setFontWeight = SetFontWeight,
+        .setFontWeightEnum = SetFontWeightEnum,
         .resetFontWeight = ResetFontWeight,
+        .setVariableFontWeight = SetVariableFontWeight,
+        .resetVariableFontWeight = ResetVariableFontWeight,
+        .setEnableVariableFontWeight = SetEnableVariableFontWeight,
+        .resetEnableVariableFontWeight = ResetEnableVariableFontWeight,
+        .setEnableDeviceFontWeightCategory = SetEnableDeviceFontWeightCategory,
+        .resetEnableDeviceFontWeightCategory = ResetEnableDeviceFontWeightCategory,
         .setRenderingStrategy = SetRenderingStrategy,
         .resetRenderingStrategy = ResetRenderingStrategy,
         .setEffectStrategy = SetEffectStrategy,
@@ -442,7 +502,14 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
         .resetFontSize = ResetFontSize,
         .setFontWeightStr = SetFontWeightStr,
         .setFontWeight = SetFontWeight,
+        .setFontWeightEnum = SetFontWeightEnum,
         .resetFontWeight = ResetFontWeight,
+        .setVariableFontWeight = SetVariableFontWeight,
+        .resetVariableFontWeight = ResetVariableFontWeight,
+        .setEnableVariableFontWeight = SetEnableVariableFontWeight,
+        .resetEnableVariableFontWeight = ResetEnableVariableFontWeight,
+        .setEnableDeviceFontWeightCategory = SetEnableDeviceFontWeightCategory,
+        .resetEnableDeviceFontWeightCategory = ResetEnableDeviceFontWeightCategory,
         .setRenderingStrategy = SetRenderingStrategy,
         .resetRenderingStrategy = ResetRenderingStrategy,
         .setEffectStrategy = SetEffectStrategy,

@@ -34,8 +34,8 @@ public:
     bool CleanPageStack() override;
     bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true) override;
 
-    bool OnPrimaryPageDetected(const RefPtr<FrameNode>& primaryPage, const std::list<WeakPtr<FrameNode>>& pageStack);
-    void RemoveSecondaryPagesOfPrimaryHomePage();
+    bool OnHomePageDetected(const RefPtr<FrameNode>& homePage, const std::list<WeakPtr<FrameNode>>& pageStack);
+    void RemoveSecondaryPagesOfPrimaryPage();
     int32_t UpdateSecondaryPageNeedRemoved(bool needClearSecondaryPage);
 
     RefPtr<FrameNode> GetLastPage() const override;
@@ -57,19 +57,22 @@ public:
     
     void MarkDirtyPageAndOverlay(const RefPtr<FrameNode>& needMarkDirtyPage, PropertyChangeFlag changeFlag);
 
-    void SetPrimaryPageTouched(bool primaryPageTouched)
+    void SetHomePageTouched(bool homePageTouched)
     {
-        primaryPageTouched_ = primaryPageTouched;
+        homePageTouched_ = homePageTouched;
     }
 
-    bool GetPrimaryPageTouched()
+    bool GetHomePageTouched()
     {
-        return primaryPageTouched_;
+        return homePageTouched_;
     }
 
     void SetNeedClearSecondaryPage(bool needClearSecondaryPage)
     {
         needClearSecondaryPage_ = needClearSecondaryPage;
+        if (!needClearSecondaryPage) {
+            touchedPrimaryColumnPage_.Reset();
+        }
     }
     bool ExchangePageFocus(bool &initFlag);
     bool UpdatePageFocus(RefPtr<FrameNode> &focusPage);
@@ -101,6 +104,38 @@ public:
 
     bool IsDisplaySplitMode() const override;
 
+    RefPtr<FrameNode> GetTopPrimaryColumnPage() const;
+    RefPtr<FrameNode> GetTopSecondaryColumnPage() const;
+
+    struct RouterVisiblePages {
+        RefPtr<FrameNode> primary = nullptr;
+        RefPtr<FrameNode> detail = nullptr;
+    };
+    struct RouterAnimatedPageInfo {
+        WeakPtr<FrameNode> page;
+        PageTransitionType transitionType = PageTransitionType::NONE;
+    };
+    void SetTouchedPrimaryColumnPage(const RefPtr<FrameNode>& page)
+    {
+        touchedPrimaryColumnPage_ = page;
+    }
+
+    RefPtr<FrameNode> GetTouchedPrimaryColumnPage() const
+    {
+        return touchedPrimaryColumnPage_.Upgrade();
+    }
+    void SetTouchedSecondaryColumnPage(const RefPtr<FrameNode>& page)
+    {
+        touchedSecondaryColumnPage_ = page;
+    }
+    RefPtr<FrameNode> TakeTouchedSecondaryColumnPage()
+    {
+        auto page = touchedSecondaryColumnPage_.Upgrade();
+        touchedSecondaryColumnPage_.Reset();
+        return page;
+    }
+    void OnStageNodeStructureChanged() override;
+
 private:
     class StageOptScope {
     public:
@@ -118,10 +153,10 @@ private:
 
     void OnModeChange();
     void OnWindowStateChange(bool show);
-    RefPtr<FrameNode> GetLastPrimaryPage() const;
+    RefPtr<FrameNode> GetHomePage() const;
 
     void FirePageHideOnPushPage(RouterPageType newPageType, const RefPtr<FrameNode>& lastPage,
-        const RefPtr<FrameNode>& topRelatedOrPhPage, const RefPtr<FrameNode>& prePrimaryPage,
+        const RefPtr<FrameNode>& topRelatedOrPhPage, const RefPtr<FrameNode>& preHomePage,
         PageTransitionType hideTransitionType, bool newPageIsFullScreenPage);
     void FirePageShowOnPushPage(const RefPtr<FrameNode>& newTopPage,
         const RefPtr<ParallelPagePattern>& newTopPattern, PageTransitionType showTransitionType);
@@ -162,12 +197,94 @@ private:
     void FireParallelPageHide(const RefPtr<UINode>& node, PageTransitionType transitionType);
     void ReportPageTransitionEnd(const RefPtr<FrameNode>& page);
 
+    void RebuildRouterColumnNodesIfNeeded() const;
+    void InvalidateRouterColumnNodes() const;
+    bool IsVirtualStackBasedSplit() const;
+    void OnModeChangeInVirtualStackBasedSplit(const RefPtr<FrameNode>& lastPage);
+    void OnWindowStateChangeInVirtualStackBasedSplit(bool show);
+    bool PushPageInVirtualStackBasedSplit(
+        const RefPtr<FrameNode>& node, bool isNewLifecycle, bool needHideLast, bool needTransition);
+    bool PopPageInVirtualStackBasedSplit(bool needShowNext, bool needTransition);
+    bool PopPageToIndexInVirtualStackBasedSplit(int32_t index, bool needShowNext, bool needTransition);
+    bool CleanPageStackInVirtualStackBasedSplit(const RefPtr<ParallelStagePattern>& stagePattern);
+    bool MovePageToFrontInVirtualStackBasedSplit(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition);
+
+    void FireLifecycleOnPopByVisibleDiff(
+        const RouterVisiblePages& preVisiblePages, const RouterVisiblePages& newVisiblePages,
+        bool needShowNext, PageTransitionType hideTransitionType, PageTransitionType showTransitionType);
+    void EnsureSplitSecondaryPageIfNeeded();
+    bool HasRouterPushPageToPrimaryState() const;
+    bool ShouldCurrentPushPageToPrimary(const RefPtr<FrameNode>& newPageNode) const;
+    RefPtr<FrameNode> GetLastPageInStack() const;
+    std::vector<RefPtr<FrameNode>> CollectRouterStackPages() const;
+    std::vector<RefPtr<FrameNode>> CollectRouterStackPages(
+        const std::vector<RefPtr<FrameNode>>& excludedPages) const;
+    void UpdateRouterSplitPlaceholder();
+    void FireRouterHideByVisibleDiff(const RouterVisiblePages& preVisiblePages,
+        const RouterVisiblePages& newVisiblePages, PageTransitionType transitionType = PageTransitionType::NONE);
+    void FireRouterShowByVisibleDiff(const RouterVisiblePages& preVisiblePages,
+        const RouterVisiblePages& newVisiblePages, PageTransitionType transitionType = PageTransitionType::NONE);
+    RouterVisiblePages GetRouterVisiblePagesForCurrentStackTree() const;
+    RouterVisiblePages GetRouterVisiblePagesForCurrentSplitTree() const;
+    RouterVisiblePages GetRouterVisiblePages();
+    RouterVisiblePages ResolveRouterVisiblePagesFromStackPages(
+        const std::vector<RefPtr<FrameNode>>& stackPages, const RefPtr<FrameNode>& secondaryFallbackPage) const;
+    RouterVisiblePages GetRouterVisiblePagesExcluding(const std::vector<RefPtr<FrameNode>>& excludedPages);
+    // Transition-end should follow the final actually visible result.
+    // Prefer the right visible page, otherwise fall back to the left visible page.
+    RefPtr<FrameNode> GetRouterTransitionEndPageForCurrentVisible();
+    bool CheckIfMovePageToPrimaryIsAllowed(
+        const RouterVisiblePages& preVisiblePages, const RouterVisiblePages& newVisiblePages) const;
+    bool CheckIfMovePageToSecondaryIsAllowed(
+        const RouterVisiblePages& preVisiblePages, const RouterVisiblePages& newVisiblePages) const;
+    bool StartRouterSplitAnimation(
+        const RouterVisiblePages& preVisiblePages, const RouterVisiblePages& newVisiblePages);
+    bool StartSplitPushAnimation(const RouterVisiblePages& preVisiblePages, const RouterVisiblePages& newVisiblePages);
+    bool StartSplitPopAnimation(const RouterVisiblePages& preVisiblePages, const RouterVisiblePages& newVisiblePages);
+    void OnRouterPagesSplitPushStart(
+        const RefPtr<FrameNode>& exitPage, const RefPtr<FrameNode>& movePage, const RefPtr<FrameNode>& enterPage);
+    void OnRouterPagesSplitPushEnd(
+        const RefPtr<FrameNode>& exitPage, const RefPtr<FrameNode>& movePage, const RefPtr<FrameNode>& enterPage);
+    void OnRouterPagesSplitPopStart(
+        const RefPtr<FrameNode>& enterPage, const RefPtr<FrameNode>& exitPage, const RefPtr<FrameNode>& movePage);
+    void OnRouterPagesSplitPopEnd(
+        const RefPtr<FrameNode>& enterPage, const RefPtr<FrameNode>& exitPage, const RefPtr<FrameNode>& movePage);
+    void SetRouterDividerVisible(bool visible);
+    void OnRouterPagesSplitFinish(
+        const std::vector<RouterAnimatedPageInfo>& animatedPages, int32_t animationId);
+    void ClearCurrentRouterAnimationState();
+    void AddRouterAnimatedPage(
+        const RefPtr<FrameNode>& page, PageTransitionType transitionType, int32_t animationId);
+    void ResetRouterAnimatedPages();
+    int32_t GetPrimaryNodeCount() const;
+    ForceSplitPageColumnType GetPageColumnType(const RefPtr<FrameNode>& page) const;
+    void SetPageColumnType(const RefPtr<FrameNode>& page, ForceSplitPageColumnType columnType);
+    void ClearRouterPageState(const RefPtr<FrameNode>& page);
+    bool IsSecondaryPushToPrimaryScene(const RefPtr<FrameNode>& prePrimaryTopPage,
+        const RefPtr<FrameNode>& fromPage, const RefPtr<FrameNode>& toPage) const;
+    bool ShouldMovePageToPrimaryForTransition(
+        const RefPtr<FrameNode>& fromPage, const RefPtr<FrameNode>& toPage, bool onlyWhenSplit = true) const;
+    bool FinalizeRouterStackChange(
+        const RouterVisiblePages& beforeVisible, const RouterVisiblePages& afterVisible, bool needTransition);
+    void NormalizeRouterColumnsAfterStackChange();
+    void NormalizeRouterColumnsAfterStackChange(const RouterVisiblePages& afterVisible);
+    void UpdateRouterColumnsOnPush(const RefPtr<FrameNode>& currentTopPage, const RefPtr<FrameNode>& newPageNode);
+    void OnAbortAnimation() override;
+
     std::list<WeakPtr<FrameNode>> secondaryPageStack_;
     bool isInStageOperation_ = false;
-    bool primaryPageTouched_ = false;
+    bool homePageTouched_ = false;
     bool needClearSecondaryPage_ = false;
     bool isTopFullScreenPage_ = false;
     bool isTopFullScreenPageChanged_ = false;
+    mutable std::vector<WeakPtr<FrameNode>> primaryNodes_;
+    mutable std::vector<WeakPtr<FrameNode>> secondaryNodes_;
+    mutable bool routerColumnNodesDirty_ = true;
+    WeakPtr<FrameNode> touchedPrimaryColumnPage_;
+    WeakPtr<FrameNode> touchedSecondaryColumnPage_;
+    std::vector<RouterAnimatedPageInfo> routerAnimatedPages_;
+    WeakPtr<FrameNode> routerFocusOnFinishPage_;
+    WeakPtr<FrameNode> routerTransitionEndPage_;
 };
 } // namespace OHOS::Ace::NG
 

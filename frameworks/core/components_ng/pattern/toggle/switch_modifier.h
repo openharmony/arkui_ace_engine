@@ -22,12 +22,12 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
 namespace OHOS::Ace::NG {
@@ -57,11 +57,12 @@ public:
         }
         bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                        : direction_ == TextDirection::RTL;
+        float halfHeight = actualSize_.Height() / 2.0f;
         auto offsetNotRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
-                                ? (isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f)
+                                ? (isSelect_->Get() ? actualSize_.Width() - halfHeight : halfHeight)
                                 : (isSelect_->Get() ? actualSize_.Width() - actualTrackRadius_ : actualTrackRadius_);
         auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
-                               ? (isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height())
+                               ? (isSelect_->Get() ? halfHeight : actualSize_.Width() - halfHeight)
                                : (isSelect_->Get() ? actualTrackRadius_ : actualSize_.Width() - actualTrackRadius_);
         if (!isCancelAnimation_ || !isFocusOrBlur_) {
             AnimationOption colorOption = AnimationOption();
@@ -88,7 +89,7 @@ public:
         } else {
             if (GreatOrEqual(actualSize_.Width(), actualSize_.Height())) {
                 newPointOffset = std::clamp(
-                    dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, actualSize_.Width() - actualSize_.Height());
+                    dragOffsetX_->Get() - offset_->Get().GetX(), halfHeight, actualSize_.Width() - halfHeight);
             } else {
                 newPointOffset = std::clamp(dragOffsetX_->Get() - offset_->Get().GetX(), actualTrackRadius_,
                     actualSize_.Width() - actualTrackRadius_);
@@ -190,6 +191,44 @@ public:
         if (isOn_) {
             isOn_->Set(isOn);
         }
+    }
+
+    void SetPointAlpha(float alpha)
+    {
+        pointAlpha_ = alpha;
+    }
+
+    float GetPointAlpha() const
+    {
+        return pointAlpha_;
+    }
+
+    void SetPointScale(float scale)
+    {
+        if (animatePointScale_) {
+            animatePointScale_->Set(scale);
+        }
+    }
+
+    float GetPointScale() const
+    {
+        return animatePointScale_ ? animatePointScale_->Get() : 1.0f;
+    }
+
+    void SetHasSystemMaterial(bool has)
+    {
+        hasSystemMaterial_ = has;
+    }
+
+    bool GetHasSystemMaterial() const
+    {
+        return hasSystemMaterial_;
+    }
+
+    using MaterialNodePositionCallback = std::function<void(float centerX, float centerY, float pointRadius)>;
+    void SetMaterialNodePositionCallback(MaterialNodePositionCallback&& callback)
+    {
+        materialNodePositionCallback_ = std::move(callback);
     }
 
     void SetFocusPointColor(Color color)
@@ -357,6 +396,10 @@ private:
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyFloat> animatePointRadius_;
     RefPtr<PropertyFloat> animateTrackRadius_;
+    RefPtr<AnimatablePropertyFloat> animatePointScale_;
+    float pointAlpha_ = 1.0f;
+    bool hasSystemMaterial_ = false;
+    MaterialNodePositionCallback materialNodePositionCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchModifier);
 };

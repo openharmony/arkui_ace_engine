@@ -1519,7 +1519,6 @@ HWTEST_F(UIInputEventTest, CrownEventTest001, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_DigitalCrownEvent_GetDegree(&event), DOUBLE0);
     EXPECT_EQ(OH_ArkUI_DigitalCrownEvent_SetStopPropagation(&event, true), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
     EXPECT_EQ(OH_ArkUI_DigitalCrownEvent_GetAction(&event), ArkUI_CrownEvent_Action::ARKUI_CROWNEVENT_ACTION_UNKNOWN);
-
     EXPECT_EQ(OH_ArkUI_DigitalCrownEvent_GetEventTime(nullptr), NUM0);
     EXPECT_EQ(OH_ArkUI_DigitalCrownEvent_GetAngularVelocity(nullptr), DOUBLE0);
     EXPECT_EQ(OH_ArkUI_DigitalCrownEvent_GetDegree(nullptr), DOUBLE0);

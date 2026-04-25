@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/web/web_select_overlay.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
 #include <optional>

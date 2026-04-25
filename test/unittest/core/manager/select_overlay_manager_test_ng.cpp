@@ -19,9 +19,9 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

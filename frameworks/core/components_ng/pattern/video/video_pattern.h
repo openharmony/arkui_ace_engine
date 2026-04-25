@@ -298,6 +298,10 @@ public:
     {
         return lastProgressRate_;
     }
+    double GetLastSetProgressRate() const
+    {
+        return lastSetProgressRate_;
+    }
     void SetIsProgressInjectCmd(bool isProgressInjectCmd)
     {
         isProgressInjectCmd_ = isProgressInjectCmd;
@@ -305,6 +309,10 @@ public:
     void SetLastProgressRate(double lastProgressRate)
     {
         lastProgressRate_ = lastProgressRate;
+    }
+    void SetLastSetProgressRate(double lastSetProgressRate)
+    {
+        lastSetProgressRate_ = lastSetProgressRate;
     }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -443,6 +451,9 @@ private:
     static int32_t ParseCommand(const std::string& command, PlaybackStatus& status, double& speed);
     void ReportChangeEvent(PlaybackStatus status, double playbackSpeed, uint32_t currentPos);
     void ReportCommandResult(const std::string& event, const std::string& result, const std::string& reason = "");
+    void ReportChangeEventOnUIThread(PlaybackStatus status, double playbackSpeed, uint32_t currentPos);
+    void ReportCommandResultOnUIThread(
+        const std::string& event, const std::string& result, const std::string& reason = "");
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
@@ -496,6 +507,7 @@ private:
     std::string currentInjectedStatusCmd_ = "";
     bool isProgressInjectCmd_ = false;
     double lastProgressRate_ = 0.0;
+    double lastSetProgressRate_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };

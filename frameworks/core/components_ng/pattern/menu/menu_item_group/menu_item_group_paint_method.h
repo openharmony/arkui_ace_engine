@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -47,7 +46,7 @@ public:
 
 private:
     void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, GroupDividerInfo info);
-    GroupDividerInfo PreparePaintData(RefPtr<PipelineBase>& pipeline,
+    GroupDividerInfo PreparePaintData(const RefPtr<FrameNode>& host,
         RefPtr<MenuItemGroupPaintProperty>& props, PaintWrapper* paintWrapper);
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPaintMethod);

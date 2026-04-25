@@ -14,9 +14,11 @@
  */
 
 #include "core/components/text/render_text.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine_ext.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/text_overlay/text_overlay_component.h"

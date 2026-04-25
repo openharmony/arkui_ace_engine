@@ -17,8 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_STYLE_H
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/slider/slider_theme.h"
-#include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {

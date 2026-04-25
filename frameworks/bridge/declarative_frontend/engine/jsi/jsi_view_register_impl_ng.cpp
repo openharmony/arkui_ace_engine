@@ -47,6 +47,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
@@ -194,6 +195,9 @@
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
+#endif
+#ifndef CROSS_PLATFORM
+#include "frameworks/bridge/declarative_frontend/jsview/js_distortion_component.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -351,6 +355,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSImageAttachment::JSBind(globalObj);
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
+    JSLineSpacingSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
     JSTextLayout::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
@@ -451,6 +456,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTextPicker::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSContainerPicker::JSBind(globalObj);
+    JSDepthComponent::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
 #ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);
@@ -523,6 +529,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
     JSFormButton::JSBind(globalObj);
 #endif
+    JSDistortionComponent::JSBind(globalObj);
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);

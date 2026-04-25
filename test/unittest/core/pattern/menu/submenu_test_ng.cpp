@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +19,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -59,6 +59,7 @@
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -142,6 +143,17 @@ void SubMenuTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     RefPtr<MenuTheme> menuTheme_ = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([menuTheme_](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return menuTheme_;
+        }
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([menuTheme_](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
@@ -1188,5 +1200,275 @@ HWTEST_F(SubMenuTestNg, NormalizePositionY001, TestSize.Level1)
     });
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
     EXPECT_EQ(subMenuLayoutAlgorithm.NormalizePositionY(menuItemNode, 0.0f, 10.0f), 9.5f);
+}
+
+/**
+ * @tc.name: GetSubMenuLayoutOffset001
+ * @tc.desc: Verify GetSubMenuLayoutOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, GetSubMenuLayoutOffset001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    auto offset1 = subMenuLayoutAlgorithm.GetSubMenuLayoutOffset(
+        layoutWrapper, menuItemNode, size, SubMenuExpandingMode::EMBEDDED);
+    EXPECT_EQ(offset1.GetY(), -150.0F);
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
+    auto offset2 = subMenuLayoutAlgorithm.GetSubMenuLayoutOffset(
+        layoutWrapper, menuItemNode, size, SubMenuExpandingMode::EMBEDDED);
+    EXPECT_EQ(offset2.GetY(), -150.0F);
+    auto offset3 =
+        subMenuLayoutAlgorithm.GetSubMenuLayoutOffset(layoutWrapper, menuItemNode, size, SubMenuExpandingMode::STACK);
+    EXPECT_EQ(offset3.GetY(), -150.0F);
+}
+
+/**
+ * @tc.name: MenuLayoutTargetSpace
+ * @tc.desc: Verify MenuLayoutTargetSpace001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, MenuLayoutTargetSpace001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    auto offset1 =
+        subMenuLayoutAlgorithm.MenuLayoutTargetSpace(menuItemNode, size, SubMenuExpandingMode::EMBEDDED, layoutWrapper);
+    EXPECT_EQ(offset1.GetY(), 0.0f);
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
+    auto offset2 =
+        subMenuLayoutAlgorithm.MenuLayoutTargetSpace(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
+    EXPECT_EQ(offset2.GetY(), -150.0F);
+}
+
+/**
+ * @tc.name: UpdateStackPosition
+ * @tc.desc: Verify UpdateStackPosition001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, UpdateStackPosition001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    auto offset1 =
+        subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::EMBEDDED, layoutWrapper);
+    EXPECT_EQ(offset1.GetY(), 0.0f);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 10.0, 20.0 };
+    auto offset2 =
+        subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
+    EXPECT_EQ(offset2.GetY(), 0.0f);
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 10, 20 };
+    auto offset3 =
+        subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
+    EXPECT_EQ(offset3.GetY(), 0.0f);
+    auto offset4 = subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, nullptr);
+    EXPECT_EQ(offset4.GetY(), 0.0f);
+    auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+    menuLayoutProperty->layoutDirection_ = TextDirection::RTL;
+    auto offset5 =
+        subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
+    EXPECT_EQ(offset5.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: UpdateSidePosition
+ * @tc.desc: Verify UpdateSidePosition001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, UpdateSidePosition001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    auto offset1 =
+        subMenuLayoutAlgorithm.UpdateSidePosition(menuItemNode, size, SubMenuExpandingMode::EMBEDDED, layoutWrapper);
+    EXPECT_EQ(offset1.GetY(), 0.0f);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 10.0, 20.0 };
+    auto offset2 =
+        subMenuLayoutAlgorithm.UpdateSidePosition(menuItemNode, size, SubMenuExpandingMode::SIDE, layoutWrapper);
+    EXPECT_EQ(offset2.GetY(), 0.0f);
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 10, 20 };
+    auto offset3 =
+        subMenuLayoutAlgorithm.UpdateSidePosition(menuItemNode, size, SubMenuExpandingMode::SIDE, layoutWrapper);
+    EXPECT_EQ(offset3.GetY(), 0.0f);
+    auto offset4 = subMenuLayoutAlgorithm.UpdateSidePosition(menuItemNode, size, SubMenuExpandingMode::SIDE, nullptr);
+    EXPECT_EQ(offset4.GetY(), 0.0f);
+    auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+    menuLayoutProperty->layoutDirection_ = TextDirection::RTL;
+    auto offset5 =
+        subMenuLayoutAlgorithm.UpdateSidePosition(menuItemNode, size, SubMenuExpandingMode::SIDE, layoutWrapper);
+    EXPECT_EQ(offset5.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: LayoutSubMenuTargetSpace
+ * @tc.desc: Verify LayoutSubMenuTargetSpace001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, LayoutSubMenuTargetSpace001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 100.0, 200.0 };
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 100, 200 };
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    subMenuLayoutAlgorithm.wrapperSize_ = { 250.0, 400.0 };
+    OffsetF position = { 200, 400 };
+    SizeF menuItemSize = { 50.0f, 40.0f };
+    auto offset1 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, nullptr);
+    EXPECT_EQ(offset1.GetY(), 0.0f);
+    auto offset2 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, layoutWrapper);
+    EXPECT_EQ(offset2.GetY(), 0.0f);
+    auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+    menuLayoutProperty->layoutDirection_ = TextDirection::RTL;
+    auto offset3 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, layoutWrapper);
+    EXPECT_EQ(offset3.GetY(), 440.0f);
+    SizeF sizeTwo(HORIZONTAL_SIZE_HEIGHT, HORIZONTAL_SIZE_HEIGHT);
+    auto offset4 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(sizeTwo, position, menuItemSize, nullptr);
+    EXPECT_EQ(offset4.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CurrentPositionCheck
+ * @tc.desc: Verify CurrentPositionCheck001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, CurrentPositionCheck001, TestSize.Level1)
+{
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(10);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 50.0, 50.0 };
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 200, 200 };
+    subMenuLayoutAlgorithm.wrapperRect_ = Rect(12, 72, 700, 1000);
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    OffsetF position = { 300, 300 };
+    auto offset1 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, size, false, false);
+    EXPECT_EQ(offset1.GetY(), 300.0f);
+
+    OffsetF positionOne = { 150, 150 };
+    subMenuLayoutAlgorithm.proptargetSize_ = { 100.0, 200.0 };
+    auto offset2 = subMenuLayoutAlgorithm.CurrentPositionCheck(positionOne, size, false, false);
+    EXPECT_EQ(offset2.GetY(), 72);
+
+    OffsetF positionTwo = { 150, 150 };
+    auto offset3 = subMenuLayoutAlgorithm.CurrentPositionCheck(positionTwo, size, 400, true);
+    EXPECT_EQ(offset3.GetY(), 150.0f);
+
+    SizeF sizeThree(TWENTY, TWENTY);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 1000.0, 2000.0 };
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 350, 350 };
+    subMenuLayoutAlgorithm.wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
+    auto offset4 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeThree, 400, true);
+    EXPECT_EQ(offset4.GetY(), 270.0f);
+
+    SizeF sizeFour(HORIZONTAL_SIZE_HEIGHT, HORIZONTAL_SIZE_HEIGHT);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 1000.0, 2000.0 };
+    subMenuLayoutAlgorithm.wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
+    auto offset5 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeFour, 400, true);
+    EXPECT_EQ(offset5.GetY(), 140.0f);
+
+    SizeF sizeFive(HORIZONTAL_SIZE_HEIGHT, HORIZONTAL_SIZE_HEIGHT);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 1000.0, 2000.0 };
+    subMenuLayoutAlgorithm.wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
+    auto offset6 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeFive, true, true);
+    EXPECT_EQ(offset6.GetY(), 90.0f);
+}
+
+/**
+ * @tc.name: OthersPositionCheck
+ * @tc.desc: Verify OthersPositionCheck001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, OthersPositionCheck001, TestSize.Level1)
+{
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(10);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 50.0, 50.0 };
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 200, 200 };
+    subMenuLayoutAlgorithm.wrapperRect_ = Rect(12, 72, 700, 1000);
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    OffsetF position = { 300, 300 };
+    auto offset1 = subMenuLayoutAlgorithm.OthersPositionCheck(position, size);
+    EXPECT_EQ(offset1.GetY(), 300.0f);
+
+    OffsetF positionOne = { 150, 150 };
+    subMenuLayoutAlgorithm.proptargetSize_ = { 100.0, 200.0 };
+    auto offset2 = subMenuLayoutAlgorithm.OthersPositionCheck(positionOne, size);
+    EXPECT_EQ(offset2.GetY(), 72);
+}
+
+/**
+ * @tc.name: MenuVerticalPan
+ * @tc.desc: Verify MenuVerticalPan001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, MenuVerticalPan001, TestSize.Level1)
+{
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(10);
+    subMenuLayoutAlgorithm.proptargetSize_ = { 200.0, 200.0 };
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 200, 200 };
+    subMenuLayoutAlgorithm.wrapperRect_ = Rect(12, 72, 700, 1000);
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+    OffsetF position = { 300, 300 };
+    auto offset1 = subMenuLayoutAlgorithm.MenuVerticalPan(position, size);
+    EXPECT_EQ(offset1, 410.0f);
+
+    OffsetF positionTwo = { 200, 120 };
+    auto offset2 = subMenuLayoutAlgorithm.MenuVerticalPan(positionTwo, size);
+    EXPECT_EQ(offset2, 72);
+
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 400, 400 };
+    auto offset3 = subMenuLayoutAlgorithm.MenuVerticalPan(positionTwo, size);
+    EXPECT_EQ(offset3, 922);
+
+    subMenuLayoutAlgorithm.propTargetOffset_ = { 400, 300 };
+    OffsetF positionThree = { 400, 600 };
+    auto offset4 = subMenuLayoutAlgorithm.MenuVerticalPan(positionThree, size);
+    EXPECT_EQ(offset4, 922);
 }
 } // namespace OHOS::Ace::NG

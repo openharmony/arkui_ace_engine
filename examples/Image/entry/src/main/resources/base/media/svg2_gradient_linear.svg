@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SVG2 Linear Gradient Test File -->
+<!-- Tests SVG2 enhanced linearGradient parsing and coordinate system -->
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- SVG2 linearGradient with gradientUnits="objectBoundingBox" -->
+    <linearGradient id="linearGrad1" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#FF0000" stop-opacity="1"/>
+      <stop offset="50%" stop-color="#00FF00" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0000FF" stop-opacity="1"/>
+    </linearGradient>
+    
+    <!-- SVG2 linearGradient with gradientUnits="userSpaceOnUse" -->
+    <linearGradient id="linearGrad2" x1="50" y1="50" x2="250" y2="250" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFA500"/>
+      <stop offset="100%" stop-color="#800080"/>
+    </linearGradient>
+    
+    <!-- SVG2 linearGradient with gradientTransform -->
+    <linearGradient id="linearGrad3" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate(45)">
+      <stop offset="0%" stop-color="#E91E63"/>
+      <stop offset="50%" stop-color="#9C27B0"/>
+      <stop offset="100%" stop-color="#3F51B5"/>
+    </linearGradient>
+    
+    <!-- SVG2 linearGradient with spreadMethod -->
+    <linearGradient id="linearGrad4" x1="20%" y1="20%" x2="80%" y2="80%" spreadMethod="repeat">
+      <stop offset="0%" stop-color="#4CAF50"/>
+      <stop offset="50%" stop-color="#FFEB3B"/>
+    </linearGradient>
+    
+    <!-- SVG2 linearGradient with reflect spreadMethod -->
+    <linearGradient id="linearGrad5" x1="10%" y1="10%" x2="40%" y2="40%" spreadMethod="reflect">
+      <stop offset="0%" stop-color="#00BCD4"/>
+      <stop offset="100%" stop-color="#FF5722"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Rectangle with objectBoundingBox gradient -->
+  <rect x="10" y="10" width="130" height="130" fill="url(#linearGrad1)" rx="10"/>
+  
+  <!-- Circle with userSpaceOnUse gradient -->
+  <circle cx="200" cy="75" r="50" fill="url(#linearGrad2)"/>
+  
+  <!-- Rectangle with gradientTransform -->
+  <rect x="10" y="160" width="130" height="130" fill="url(#linearGrad3)" rx="10"/>
+  
+  <!-- Path with spreadMethod repeat -->
+  <path d="M200 160 L250 160 L250 210 L200 210 Z" fill="url(#linearGrad4)" stroke="#333" stroke-width="2"/>
+  
+  <!-- Ellipse with spreadMethod reflect -->
+  <ellipse cx="225" cy="255" rx="45" ry="30" fill="url(#linearGrad5)"/>
+  
+  <!-- Text labels -->
+  <text x="70" y="85" fill="white" font-size="12" text-anchor="middle">objectBoundingBox</text>
+  <text x="200" y="75" fill="white" font-size="12" text-anchor="middle">userSpaceOnUse</text>
+  <text x="70" y="235" fill="white" font-size="12" text-anchor="middle">gradientTransform</text>
+  <text x="225" y="185" fill="white" font-size="12" text-anchor="middle">repeat</text>
+  <text x="225" y="255" fill="white" font-size="10" text-anchor="middle">reflect</text>
+</svg>

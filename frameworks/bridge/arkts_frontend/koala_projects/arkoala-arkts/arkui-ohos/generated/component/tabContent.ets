@@ -485,7 +485,8 @@ export class TabBarSymbol implements MaterializedBase {
             buffer = (SymbolGlyphModifier_serializer.read(retvalDeserializer) as SymbolGlyphModifier)
         }
         const returnResult: SymbolGlyphModifier | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as SymbolGlyphModifier | undefined)
     }
     private setSelected_serialize(selected: SymbolGlyphModifier | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -501,7 +502,7 @@ export class TabBarSymbol implements MaterializedBase {
     }
 }
 export class ArkTabContentPeer extends ArkCommonMethodPeer {
-    attributeSet?: TabContentModifier;
+    tabContentAttributeSet?: TabContentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

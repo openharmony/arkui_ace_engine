@@ -26,7 +26,7 @@
 /**
  * @file drawable_descriptor.h
  *
- * @brief Defines theNativeDrawableDescriptor for the native module.
+ * @brief Defines the NativeDrawableDescriptor for the native module.
  *
  * @library libace_ndk.z.so
  * @syscap SystemCapability.ArkUI.ArkUI.Full

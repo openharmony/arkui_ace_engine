@@ -22,12 +22,18 @@
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
+
+namespace OHOS::Ace {
+class PickerDate;
+class PipelineBase;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+using ::OHOS::Ace::PickerDate;
 class ButtonLayoutProperty;
 class TextLayoutProperty;
 class PipelineContext;
+struct CalendarSettingData;
 
 class ACE_EXPORT CalendarDialogView {
 public:
@@ -46,6 +52,8 @@ public:
     }
 
     static bool CheckOrientationChange();
+
+    static bool SkipCalendarPickerDayGridAgingAdapt(PipelineBase* pipeline);
 
     static DeviceOrientation GetPreviousOrientation()
     {
@@ -66,9 +74,13 @@ private:
         const RefPtr<FrameNode>& calendarNode, const InternalResource::ResourceId& resourceId);
     static RefPtr<FrameNode> CreateCalendarNode(const RefPtr<FrameNode>& calendarDialogNode,
         const CalendarSettingData& settingData, const std::map<std::string, NG::DialogEvent>& dialogEvent);
+    static bool MountCalendarMonthFramesToSwiper(int32_t calendarNodeId, const CalendarSettingData& settingData,
+        const DialogEvent& changeEvent, const RefPtr<FrameNode>& calendarNode, const RefPtr<FrameNode>& swiperNode,
+        TextDirection textDirection);
     static RefPtr<FrameNode> CreateCalendarSwiperNode();
     static RefPtr<FrameNode> CreateCalendarMonthNode(int32_t calendarNodeId,
-        const CalendarSettingData& settingData, const DialogEvent& changeEvent);
+        const CalendarSettingData& settingData, const DialogEvent& changeEvent,
+        const RefPtr<FrameNode>& calendarNode);
     static void UpdateCalendarMonthData(const RefPtr<FrameNode>& calendarDialogNode,
         const RefPtr<FrameNode>& calendarNode, const CalendarMonth& currentMonth);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
@@ -85,7 +97,7 @@ private:
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
         const std::vector<ButtonInfo>& buttonInfos);
-    static void SetCalendarPaintProperties(const CalendarSettingData& settingData);
+    static void SetCalendarPaintProperties(const CalendarSettingData& settingData, RefPtr<FrameNode>& themeNode);
     static void InitOnRequestDataEvent(
         const RefPtr<FrameNode>& calendarDialogNode, const RefPtr<FrameNode>& calendarNode);
     static void OnSelectedChangeEvent(int32_t calendarNodeId, const std::string& callbackInfo,
@@ -125,7 +137,7 @@ private:
         const std::string& eventName, const std::string& eventData);
     static constexpr double deviceHeightLimit = 640.0;
     static void UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<CalendarTheme>& theme);
+        RefPtr<CalendarTheme>& theme, const RefPtr<FrameNode>& titleNode);
     static DeviceOrientation previousOrientation_;
 };
 } // namespace OHOS::Ace::NG

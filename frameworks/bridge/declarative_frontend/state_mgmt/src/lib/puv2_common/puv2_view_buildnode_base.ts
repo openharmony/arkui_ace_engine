@@ -250,6 +250,7 @@ abstract class ViewBuildNodeBase {
         }
         if (!this.isView_) {
             if ('updateDirtyElements' in child) {
+                child.paramsGenerator_ = (): Object => params;
                 child.updateDirtyElements();
             }
         }

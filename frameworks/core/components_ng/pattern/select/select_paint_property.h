@@ -18,10 +18,12 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
+
+namespace OHOS::Ace {
+class SelectTheme;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set paint properties.
@@ -44,22 +46,7 @@ public:
         ResetBackgroundColor();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        PaintProperty::ToJsonValue(json, filter);
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto theme = pipelineContext->GetTheme<SelectTheme>(host->GetThemeScopeId());
-        CHECK_NULL_VOID(theme);
-        json->PutExtAttr("backgroundColor",
-            propBackgroundColor_.value_or(theme->GetButtonBackgroundColor()).ColorToString().c_str(), filter);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
     {

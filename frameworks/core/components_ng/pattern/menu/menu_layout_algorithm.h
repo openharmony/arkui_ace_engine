@@ -24,10 +24,24 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/menu_property.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
+
+#if defined(ENABLE_ROSEN_BACKEND)
+namespace OHOS::Rosen {
+    class RSNGShapeBase;
+    template<typename T>
+    class Vector2;
+    typedef Vector2<float> Vector2f;
+}
+#endif
+
+namespace OHOS::Ace {
+class SelectTheme;
+class GridColumnInfo;
+}
 
 namespace OHOS::Ace::NG {
 struct PreviewMenuParam {
@@ -73,8 +87,15 @@ struct MenuDumpInfo {
     std::string finalPlacement = "NONE";
     OffsetF anchorPosition;
 };
+enum class TargetSpaceReason {
+    TOP = 0,
+    MIDDLE,
+    BOTTOM,
+};
 class MenuLayoutProperty;
+class MenuPaintProperty;
 class MenuPattern;
+class SafeAreaManager;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm);
 public:
@@ -107,6 +128,11 @@ public:
     bool HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper);
     Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
     bool IsExpandDisplay();
+    Placement GetPlacementWithItem(RefPtr<FrameNode> parentItem);
+    TargetSpaceReason CheckHeightReason(const OffsetF& position, const SizeF& size);
+    bool CheckFitScreen(const OffsetF& position, const SizeF& size);
+    bool CheckVerticalRange(const OffsetF& position, const SizeF& size);
+    bool CheckHorizontalRange(const OffsetF& position, const SizeF& size);
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);
@@ -130,6 +156,9 @@ protected:
     // rect is relative to menuWrapper
     Rect wrapperRect_;
     PreviewMenuParam param_;
+    std::optional<Dimension> propTargetSpace_;
+    std::optional<OffsetF> propTargetOffset_;
+    std::optional<SizeF> proptargetSize_;
 
 private:
     enum class ErrorPositionType {
@@ -168,6 +197,7 @@ private:
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
     float GetMenuMaxBottom(const RefPtr<MenuPattern>& menuPattern);
+    void UpdatePropTargetSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
 
     void ComputeMenuPositionByAlignType(const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize);
     OffsetF ComputeMenuPositionByOffset(
@@ -291,6 +321,29 @@ private:
     void BuildTopArrowPath(float arrowX, float arrowY, std::string& path);
     void BuildRightArrowPath(float arrowX, float arrowY, std::string& path);
     void BuildLeftArrowPath(float arrowX, float arrowY, std::string& path);
+    void CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets);
+#if defined(ENABLE_ROSEN_BACKEND)
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetMenuSDFShape(bool didNeedArrow);
+
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFRRectShape();
+    void CalculateArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+    void CalculateBottomArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+    void CalculateLeftArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+    void CalculateTopArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+    void CalculateRightArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFTriangleShape(
+        const OHOS::Rosen::Vector2f& vertex0, const OHOS::Rosen::Vector2f& vertex1,
+        const OHOS::Rosen::Vector2f& vertex2);
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSmoothUnionShape(
+        const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
+        const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY);
+#endif
     std::string BuildTopLinePath(const OffsetF& arrowPosition, float radiusPx,
         Placement arrowBuildPlacement, bool didNeedArrow);
     std::string BuildRightLinePath(const OffsetF& arrowPosition, float radiusPx,
@@ -314,6 +367,32 @@ private:
     bool MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode, const std::optional<Dimension>& minKeyboardAvoidDistance,
         float keyboardTopPosition);
     std::optional<float> GetKeyboardTopPosition(const RefPtr<FrameNode>& menuNode);
+    float NeedUpdateMaxHeight(
+        const SizeF& size, OffsetF position, const SizeF& menuItemSize, LayoutWrapper* layoutWrapper);
+    float MenuVerticalPanHeight(const OffsetF& position, const SizeF& size);
+    float GetCurrentPosition(OffsetF& position, const SizeF& size, float flip, bool widthEnough);
+    float GetOthersPosition(OffsetF& position, const SizeF& size);
+    float CalcSubMenuMaxHeightTargetSpace(LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    void UpdateTargetSpaceScroll(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+    void UpdateTargetSpaceMaxHeight(
+        LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint, float topSpace, float bottomSpace);
+    void UpdateEmbeddedPosition(OffsetF& menuPosition, const RefPtr<MenuPattern>& menuPattern, const SizeF& size,
+        const RefPtr<FrameNode>& menuNode);
+    void UpdateSideHeight(
+        LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    void UpdateStackHeight(
+        LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    SizeF GetMeasureSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+    OffsetF GetTargetSpacePosition(const SizeF& childSize, bool didNeedArrow);
+    OffsetF GetTargetSpaceDefaultPosition(const OffsetF& topPosition, const OffsetF& bottomPosition);
+    OffsetF FitToTargetSpaceScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow);
+    OffsetF AddCustomTargetSpace(const OffsetF& position);
+    OffsetF AddAdjustOffset(const OffsetF& position);
+    OffsetF GetAdjustTargetSpacePosition(std::vector<Placement>& currentPlacementStates, size_t step,
+        const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
+    void UpdateExpandSize(
+        LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
+    void UpdateTargetValue(const LayoutWrapper* layoutWrapper);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
@@ -373,6 +452,7 @@ private:
     bool isExpandDisplay_ = false;
     bool isFreeMultiWindow_ = false;
     bool isUIExtensionSubWindow_ = false;
+    bool targetInUIExtension_ = false;
     RectF displayWindowRect_;
     RectF UIExtensionHostWindowRect_;
     bool isContainerModal_ = false;
@@ -386,11 +466,13 @@ private:
     bool didNeedArrow_ = false;
     std::optional<PreviewScaleMode> previewScaleMode_ = std::nullopt;
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode_ = std::nullopt;
+    std::optional<MenuPathParams> pathParams_ = std::nullopt;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;
 
     std::optional<OffsetF> anchorPosition_;
+    std::optional<float> propmaxHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };

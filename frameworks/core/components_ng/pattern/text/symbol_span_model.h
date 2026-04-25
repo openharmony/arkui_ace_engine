@@ -25,7 +25,6 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 
@@ -43,6 +42,12 @@ public:
     virtual void SetSymbolEffect(const uint32_t effectStrategy) = 0;
     virtual void SetFontFamilies(std::vector<std::string>& familyNames) = 0;
     virtual void SetSymbolType(SymbolType value) = 0;
+    virtual void SetVariableFontWeight(int32_t value) = 0;
+    virtual void ResetVariableFontWeight() = 0;
+    virtual void SetEnableVariableFontWeight(bool value) = 0;
+    virtual void ResetEnableVariableFontWeight() = 0;
+    virtual void SetEnableDeviceFontWeightCategory(bool value) = 0;
+    virtual void ResetEnableDeviceFontWeightCategory() = 0;
 
 private:
     static std::unique_ptr<SymbolSpanModel> instance_;

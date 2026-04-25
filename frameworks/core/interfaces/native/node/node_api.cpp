@@ -18,6 +18,9 @@
 #include <securec.h>
 #include <vector>
 
+#include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -66,6 +69,7 @@
 #include "core/interfaces/native/runtime/runtime_init.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/html_utils.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 #include "interfaces/native/native_type.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -356,11 +360,16 @@ ArkUI_Int32 AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNode->IsAdopted()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::AddChild(parent, child);
@@ -371,11 +380,16 @@ ArkUI_Int32 InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNode->IsAdopted()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildAt(parent, child, position);
@@ -387,15 +401,21 @@ void RemoveChild(ArkUINodeHandle parent, ArkUINodeHandle child)
     ViewModel::RemoveChild(parent, child);
 }
 
-ArkUI_Int32 InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
+ArkUI_Int32 InsertChildAfter(
+    ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNode->IsAdopted()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildAfter(parent, child, sibling);
@@ -413,15 +433,21 @@ ArkUI_Float64 ConvertLengthMetricsUnit(ArkUI_Float64 value, ArkUI_Int32 originUn
     return lengthMetric.GetNativeValue(static_cast<DimensionUnit>(targetUnit));
 }
 
-ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
+ArkUI_Int32 InsertChildBefore(
+    ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (childNode->IsAdopted()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildBefore(parent, child, sibling);
@@ -492,6 +518,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnCustomOverflowScroll,
     NodeModifier::SetOnStackOverflowScroll,
     NodeModifier::SetOnNeedSoftkeyboard,
+    NodeModifier::SetOnGestureCollectIntercept,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -517,6 +544,9 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
 const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnDetectResultUpdate,
     NodeModifier::SetOnTextSpanLongPress,
+    NodeModifier::SetOnTextTextSelectionChange,
+    NodeModifier::SetOnTextCopy,
+    NodeModifier::SetOnTextWillCopy,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
@@ -535,6 +565,9 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnDidDelete,
     NodeModifier::SetOnTextInputChangeWithPreviewText,
     NodeModifier::SetOnTextInputWillChange,
+    NodeModifier::SetOnTextInputCopy,
+    NodeModifier::SetOnTextInputWillCopy,
+    NodeModifier::SetOnTextInputWillCut,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -553,6 +586,10 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnDidDeleteValue,
     NodeModifier::SetOnTextAreaChangeWithPreviewText,
     NodeModifier::SetOnTextAreaWillChange,
+    NodeModifier::SetOnTextAreaCopy,
+    NodeModifier::SetOnTextAreaWillCopy,
+    NodeModifier::SetOnTextAreaCut,
+    NodeModifier::SetOnTextAreaWillCut,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -734,6 +771,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnCustomOverflowScroll,
     NodeModifier::ResetOnStackOverflowScroll,
     NodeModifier::ResetOnNeedSoftkeyboard,
+    NodeModifier::ResetOnGestureCollectIntercept,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -759,6 +797,9 @@ const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnDetectResultUpdate,
     NodeModifier::ResetOnTextSpanLongPress,
+    NodeModifier::ResetOnTextTextSelectionChange,
+    NodeModifier::ResetOnTextCopy,
+    NodeModifier::ResetOnTextWillCopy,
 };
 
 const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -777,6 +818,9 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     nullptr,
     NodeModifier::ResetOnTextInputChangeWithPreviewText,
     NodeModifier::ResetOnTextInputWillChange,
+    NodeModifier::ResetOnTextInputCopy,
+    NodeModifier::ResetOnTextInputWillCopy,
+    NodeModifier::ResetOnTextInputWillCut,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -795,6 +839,10 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     nullptr,
     NodeModifier::ResetOnTextAreaChangeWithPreviewText,
     NodeModifier::ResetOnTextAreaWillChange,
+    NodeModifier::ResetOnTextAreaCopy,
+    NodeModifier::ResetOnTextAreaWillCopy,
+    NodeModifier::ResetOnTextAreaCut,
+    NodeModifier::ResetOnTextAreaWillCut,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1977,9 +2025,12 @@ ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
     auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     if (pipeline == nullptr) {
         LOGW("Cannot find pipeline context by contextHandle ID");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, "UI context is invalid");
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }
     if (!pipeline->CheckThreadSafe()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+            ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD, "Function is not called on the UI thread");
         return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
     }
     auto onframeCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimestamp, uint32_t frameCount) -> void {
@@ -1996,9 +2047,12 @@ ArkUI_Int32 PostIdleCallback(ArkUI_Int32 instanceId, void* userData,
     auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     if (pipeline == nullptr) {
         LOGW("Cannot find pipeline context by contextHandle ID");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, "UI context is invalid");
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }
     if (!pipeline->CheckThreadSafe()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+            ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD, "Function is not called on the UI thread");
         return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
     }
     auto onidleCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimeLeft, uint32_t frameCount) -> void {
@@ -2061,6 +2115,51 @@ ArkUI_Int32 CheckUIContextInvalid(ArkUI_Int32 instanceId)
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 EnableEventPassthrough(ArkUI_Int32 instanceId, ArkUI_Bool enabled, ArkUI_Int32 type)
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        TAG_LOGW(
+            AceLogTag::ACE_INPUTKEYFLOW, "Cannot find pipeline context by contextHandle ID %{public}d", instanceId);
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto container = Container::GetContainer(instanceId);
+    std::string bundleName = container ? container->GetBundleName() : "";
+    bool enabledValue = (enabled != 0);
+
+    switch (type) {
+        case 0:
+            AceApplicationInfo::GetInstance().UpdateTouchPassthroughForPipelines(enabledValue, bundleName);
+            break;
+        case 1:
+            AceApplicationInfo::GetInstance().UpdateMousePassthroughForPipelines(enabledValue, bundleName);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+                "EnableEventPassthrough: unknown eventType=%{public}d", type);
+            break;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void SetErrorCodeAndMessage(ArkUI_Int32 errorCode, ArkUI_CharPtr errorMessage)
+{
+    OHOS::Ace::ErrorMessageManager::GetInstance().SetErrorCodeAndMessage(errorCode, errorMessage);
+}
+
+void SetErrorFunctionName(ArkUI_CharPtr functionName)
+{
+    OHOS::Ace::ErrorMessageManager::GetInstance().SetFunctionName(functionName);
+}
+
+const char* GetErrorMessage()
+{
+    return OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2096,6 +2195,10 @@ const ArkUIBasicAPI* GetBasicAPI()
         .registerNodeAsyncCommonEventReceiver = RegisterNodeAsyncCommonEventReceiver,
         .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,
         .checkUIContextInvalid = CheckUIContextInvalid,
+        .enableEventPassthrough = EnableEventPassthrough,
+        .setErrorCodeAndMessage = SetErrorCodeAndMessage,
+        .setErrorFunctionName = SetErrorFunctionName,
+        .getErrorMessage = GetErrorMessage,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2127,6 +2230,9 @@ const CJUIBasicAPI* GetCJUIBasicAPI()
         .isBuilderNode = IsBuilderNode,
         .convertLengthMetricsUnit = ConvertLengthMetricsUnit,
         .getContextByNode = GetContextByNode,
+        .setErrorCodeAndMessage = SetErrorCodeAndMessage,
+        .setErrorFunctionName = SetErrorFunctionName,
+        .getErrorMessage = GetErrorMessage,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2795,6 +2901,15 @@ ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshot
     return result.first;
 }
 
+ArkUI_Int32 GetSnapshotSizeLimitation(ArkUI_Int32* maxWidth, ArkUI_Int32* maxHeight)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    auto limitation = delegate->GetSizeLimitation();
+    *maxWidth = limitation.maxWidth;
+    *maxHeight = limitation.maxHeight;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 const ArkUISnapshotAPI* GetComponentSnapshotAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2804,7 +2919,8 @@ const ArkUISnapshotAPI* GetComponentSnapshotAPI()
         .snapshotOptionsSetScale = SnapshotOptionsSetScale,
         .snapshotOptionsSetColorMode = SnapshotOptionsSetColorMode,
         .snapshotOptionsSetDynamicRangeMode = SnapshotOptionsSetDynamicRangeMode,
-        .getSyncSnapshot = GetNodeSnapshot
+        .getSyncSnapshot = GetNodeSnapshot,
+        .getSizeLimitation = GetSnapshotSizeLimitation
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

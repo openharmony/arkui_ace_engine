@@ -14,12 +14,15 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "core/components/common/properties/color.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -79,6 +82,12 @@ bool MagnifierController::UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pi
     CHECK_NULL_RETURN(pattern, false);
     auto node = pattern->GetHost();
     CHECK_NULL_RETURN(node, false);
+    if (node->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        auto searchNode = AceType::DynamicCast<FrameNode>(node->GetParent());
+        if (searchNode && searchNode->GetTag() == V2::SEARCH_ETS_TAG) {
+            node = searchNode;
+        }
+    }
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     RectF visibleRect;
     RectF frameRect;
@@ -365,7 +374,7 @@ void MagnifierController::InitMagnifierParams()
     params_.factor_ = MAGNIFIER_FACTOR;
     params_.width_ = MAGNIFIER_WIDTH.ConvertToPx();
     params_.height_ = MAGNIFIER_HEIGHT.ConvertToPx();
-    params_.borderWidth_ = MAGNIFIER_BORDERWIDTH.ConvertToPx();
+    params_.borderWidth_ = MAGNIFIER_BORDERWIDTH;
     params_.cornerRadius_ = MAGNIFIER_CORNERRADIUS.ConvertToPx();
     params_.shadowOffsetX_ = MAGNIFIER_SHADOWOFFSETX.ConvertToPx();
     params_.shadowOffsetY_ = MAGNIFIER_SHADOWOFFSETY.ConvertToPx();
@@ -376,8 +385,6 @@ void MagnifierController::InitMagnifierParams()
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
-    uint32_t gradientMaskColor1 = textFieldTheme->GetGlassMaskPrimaryColor().GetValue();
-    uint32_t gradientMaskColor2 = textFieldTheme->GetGlassMaskSecondaryColor().GetValue();
 
     Color outlineColor1 = textFieldTheme->GetGlassOutlinePrimaryColor();
     Color outlineColor2 = textFieldTheme->GetGlassOutlineSecondaryColor();
@@ -388,16 +395,12 @@ void MagnifierController::InitMagnifierParams()
         outlineColor1 = outlineColor1.ChangeAlpha(0x7F); // 0x7F: 50%
         outlineColor2 = outlineColor2.ChangeAlpha(0x7F); // 0x7F: 50%
     }
-    uint32_t outerContourColor1 = outlineColor1.GetValue();
-    uint32_t outerContourColor2 = outlineColor2.GetValue();
-    params_.gradientMaskColor1_ = ArgbToRgba(gradientMaskColor1);
-    params_.gradientMaskColor2_ = ArgbToRgba(gradientMaskColor2);
-    params_.outerContourColor1_ = ArgbToRgba(outerContourColor1);
-    params_.outerContourColor2_ = ArgbToRgba(outerContourColor2);
-    magnifierNodeWidth_ =
-        MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5; // 1.5: Compute the node width
-    magnifierNodeHeight_ =
-        MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5; // 1.5: Compute the node height
+    magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWSIZE * 2.0f;
+    magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWSIZE * 2.0f;
+    auto color = Color::WHITE;
+    color = color.ChangeOpacity(MAGNIFIER_BORDERSTRENGTH);
+    uint32_t borderColor = color.GetValue();
+    params_.outerContourColor1_ = ArgbToRgba(borderColor);
 }
 
 uint32_t MagnifierController::ArgbToRgba(const uint32_t& color)

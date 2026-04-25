@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "compatible/components/refresh/refresh_controller.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t CALL_ARG_0 = 0;
@@ -30,11 +31,12 @@ ArkUINativeModuleValue RefreshBridege::SetRefreshOffset(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension value(0.0f);
-    if (valueArg->IsNull() || valueArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, valueArg, value)) {
+    RefPtr<ResourceObject> resObj;
+    if (valueArg->IsNull() || valueArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, valueArg, value, resObj)) {
         GetArkUINodeModifiers()->getRefreshModifier()->resetRefreshOffset(nativeNode);
     } else {
         GetArkUINodeModifiers()->getRefreshModifier()->setRefreshOffset(
-            nativeNode, value.Value(), static_cast<int>(value.Unit()));
+            nativeNode, value.Value(), static_cast<int>(value.Unit()), resObj.GetRawPtr());
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -246,12 +248,22 @@ ArkUINativeModuleValue RefreshBridege::SetMaxPullDownDistance(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     auto refreshModifier = nodeModifiers->getRefreshModifier();
     CHECK_NULL_RETURN(refreshModifier, panda::JSValueRef::Undefined(vm));
-    if (valueArg->IsNumber()) {
+    if (!valueArg->IsNull() && valueArg->IsObject(vm) && !valueArg->IsUndefined()) {
+        double maxPullDownDistance = 0.0f;
+        RefPtr<ResourceObject> resObj;
+        bool parsed = ArkTSUtils::ParseJsDouble(vm, valueArg, maxPullDownDistance, resObj);
+        if (parsed) {
+            refreshModifier->setMaxPullDownDistance(
+                nativeNode, static_cast<float>(maxPullDownDistance), resObj.GetRawPtr());
+        } else {
+            refreshModifier->resetMaxPullDownDistance(nativeNode, resObj.GetRawPtr());
+        }
+    } else if (valueArg->IsNumber()) {
         float value = static_cast<float>(valueArg->ToNumber(vm)->Value());
         value = std::max(value, 0.0f);
-        refreshModifier->setMaxPullDownDistance(nativeNode, value);
+        refreshModifier->setMaxPullDownDistance(nativeNode, value, nullptr);
     } else {
-        refreshModifier->resetMaxPullDownDistance(nativeNode);
+        refreshModifier->resetMaxPullDownDistance(nativeNode, nullptr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -267,7 +279,7 @@ ArkUINativeModuleValue RefreshBridege::ResetMaxPullDownDistance(ArkUIRuntimeCall
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     auto refreshModifier = nodeModifiers->getRefreshModifier();
     CHECK_NULL_RETURN(refreshModifier, panda::JSValueRef::Undefined(vm));
-    refreshModifier->resetMaxPullDownDistance(nativeNode);
+    refreshModifier->resetMaxPullDownDistance(nativeNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

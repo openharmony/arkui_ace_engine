@@ -21,7 +21,6 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 

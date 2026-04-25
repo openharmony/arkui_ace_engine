@@ -51,6 +51,16 @@ public:
         return sideBarStatus_;
     }
 
+    void SetSideBarInDragGesture(bool SetSideBarInDragGesture)
+    {
+        sideBarInDragGesture_ = SetSideBarInDragGesture;
+    }
+
+    void SetCurrentContentDragOffset(float offset)
+    {
+        currentContentDragOffset_ = offset;
+    }
+
     void SetRealSideBarWidth(Dimension realSideBarWidth)
     {
         realSideBarWidthDimension_ = realSideBarWidth;
@@ -198,6 +208,10 @@ private:
         bool setMinContentWidth, float paretWidth);
     void AddChildToIgnoreLayoutSafeBundle(LayoutWrapper* layoutWrapper);
     void AdjustChildOffset(const RefPtr<LayoutWrapper>& layoutWrapper, OffsetF& offset);
+    float GetDividerOffsetX(float dividerOffsetX, float parentWidth, const PaddingPropertyF& padding,
+        const SideBarPosition& sideBarPosition);
+    float GetSideBarOffsetX(float sideBarOffsetX, float parentWidth, const PaddingPropertyF& padding,
+        const SideBarPosition& sideBarPosition);
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = -1.0f;
@@ -214,6 +228,8 @@ private:
     float typeUpdateWidth_ = 0.0f;
     WeakPtr<Pattern> pattern_;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
+    bool sideBarInDragGesture_ = false;
+    float currentContentDragOffset_ = 0.0f;
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;
     SideBarContainerType type_ = SideBarContainerType::EMBED;

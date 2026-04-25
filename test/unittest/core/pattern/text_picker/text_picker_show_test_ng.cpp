@@ -20,14 +20,15 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #undef private
 #undef protected
 
@@ -1222,18 +1224,18 @@ HWTEST_F(TextPickerShowTestNg, TextPickerModelNGSetDefaultAttributes001, TestSiz
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    ASSERT_FALSE(pickerProperty->HasSelectedColor());
+    ASSERT_TRUE(pickerProperty->HasSelectedColor());
 
     double fontSize = pickerProperty->GetSelectedFontSize().value().Value();
     EXPECT_EQ(20, fontSize);
     EXPECT_EQ(FontWeight::MEDIUM, pickerProperty->GetSelectedWeight().value());
 
-    ASSERT_FALSE(pickerProperty->HasColor());
+    ASSERT_TRUE(pickerProperty->HasColor());
     fontSize = pickerProperty->GetFontSize().value().Value();
     EXPECT_EQ(16, fontSize);
     EXPECT_EQ(FontWeight::REGULAR, pickerProperty->GetWeight().value());
 
-    ASSERT_FALSE(pickerProperty->HasDisappearColor());
+    ASSERT_TRUE(pickerProperty->HasDisappearColor());
     fontSize = pickerProperty->GetDisappearFontSize().value().Value();
     EXPECT_EQ(14, fontSize);
     EXPECT_EQ(FontWeight::REGULAR, pickerProperty->GetDisappearWeight().value());

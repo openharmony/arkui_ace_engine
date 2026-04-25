@@ -24,6 +24,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 
 namespace OHOS::Ace::Napi {
@@ -291,17 +292,14 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     napi_get_named_property(env, shadowNApi, "type", &typeApi);
     napi_get_named_property(env, shadowNApi, "fill", &fillApi);
     ResourceInfo recv;
-    double radiusValue = 0.0;
+    double radiusValue = -1.0;
     if (ParseResourceParam(env, radiusApi, recv)) {
         CalcDimension radius;
         if (ParseResource(recv, radius)) {
-            radiusValue = LessNotEqual(radius.Value(), 0.0) ? 0.0 : radius.Value();
+            radiusValue = radius.Value();
         }
     } else {
         napi_get_value_double(env, radiusApi, &radiusValue);
-        if (LessNotEqual(radiusValue, 0.0)) {
-            radiusValue = 0.0;
-        }
     }
     shadowProps.SetBlurRadius(radiusValue);
     Color color;
@@ -385,9 +383,9 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
         GetToastObjectShadow(env, shadowNApi, shadowProps);
         isTypeStyleShadow = false;
     } else {
-        auto shadowStyle = GetToastDefaultShadowStyle();
-        CHECK_EQUAL_VOID(GetShadowFromTheme(shadowStyle, shadowProps), false);
+        return;
     }
+    // Note: When shadow parameter is not provided, toast_view will handle default shadow from theme
     shadow = shadowProps;
 }
 
@@ -425,6 +423,21 @@ void GetToastHoverModeParams(napi_env env, napi_value argv, NG::ToastInfo& toast
     GetToastHoverModeArea(env, hoverModeAreaNApi, toastInfo.hoverModeArea);
 }
 
+void GetToastSystemMaterial(napi_env env, napi_value systemMaterialNApi, RefPtr<UiMaterial>& systemMaterial)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, systemMaterialNApi, &valueType);
+    if (valueType != napi_object) {
+        return;
+    }
+
+    UiMaterial* material = nullptr;
+    napi_unwrap(env, systemMaterialNApi, reinterpret_cast<void**>(&material));
+    if (material) {
+        systemMaterial = material->Copy();
+    }
+}
+
 bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
 {
     napi_value messageNApi = nullptr;
@@ -437,6 +450,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
     napi_value textColorNApi = nullptr;
     napi_value backgroundBlurStyleNApi = nullptr;
     napi_value shadowNApi = nullptr;
+    napi_value systemMaterialNApi = nullptr;
 
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
@@ -456,6 +470,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
         napi_get_named_property(env, argv, "textColor", &textColorNApi);
         napi_get_named_property(env, argv, "backgroundBlurStyle", &backgroundBlurStyleNApi);
         napi_get_named_property(env, argv, "shadow", &shadowNApi);
+        napi_get_named_property(env, argv, "systemMaterial", &systemMaterialNApi);
     } else {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return false;
@@ -473,6 +488,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
     GetToastTextColor(env, textColorNApi, toastInfo.textColor);
     GetToastBackgroundBlurStyle(env, backgroundBlurStyleNApi, toastInfo.backgroundBlurStyle);
     GetToastShadow(env, shadowNApi, toastInfo.shadow, toastInfo.isTypeStyleShadow);
+    GetToastSystemMaterial(env, systemMaterialNApi, toastInfo.systemMaterial);
     return true;
 }
 
@@ -728,6 +744,7 @@ struct PromptAsyncContext {
     napi_value focusableApi = nullptr;
     HasInvertColor hasInvertColor;
     napi_value displayModeApi = nullptr;
+    napi_value systemMaterialApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1240,11 +1257,8 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     napi_get_named_property(env, asyncContext->shadowApi, "color", &colorApi);
     napi_get_named_property(env, asyncContext->shadowApi, "type", &typeApi);
     napi_get_named_property(env, asyncContext->shadowApi, "fill", &fillApi);
-    double radius = 0.0;
+    double radius = -1.0;
     napi_get_value_double(env, radiusApi, &radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     Color color;
     ShadowColorStrategy shadowColorStrategy;
@@ -1507,6 +1521,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
     napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
     napi_get_named_property(env, argv[index], "focusable", &asyncContext->focusableApi);
+    napi_get_named_property(env, argv[index], "systemMaterial", &asyncContext->systemMaterialApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
 }
@@ -1616,6 +1631,19 @@ std::optional<double> GetLevelOrderParam(napi_env env, const std::shared_ptr<Pro
         return std::make_optional(levelOrder->GetOrder());
     }
     return std::nullopt;
+}
+
+RefPtr<UiMaterial> GetSystemMaterialParam(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->systemMaterialApi, &valueType);
+    if (valueType != napi_object) {
+        return nullptr;
+    }
+
+    UiMaterial* material = nullptr;
+    napi_unwrap(env, asyncContext->systemMaterialApi, reinterpret_cast<void**>(&material));
+    return material ? material->Copy() : nullptr;
 }
 
 PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -1761,6 +1789,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "levelMode", &asyncContext->dialogLevelModeApi);
             napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
             napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
+            napi_get_named_property(env, argv[0], "systemMaterial", &asyncContext->systemMaterialApi);
             napi_get_named_property(env, argv[0], "onDidAppear", &asyncContext->onDidAppear);
             napi_get_named_property(env, argv[0], "onDidDisappear", &asyncContext->onDidDisappear);
             napi_get_named_property(env, argv[0], "onWillAppear", &asyncContext->onWillAppear);
@@ -1951,6 +1980,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
+        .systemMaterial = GetSystemMaterialParam(asyncContext->env, asyncContext),
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -2171,6 +2201,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "levelMode", &asyncContext->dialogLevelModeApi);
             napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
             napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
+            napi_get_named_property(env, argv[0], "systemMaterial", &asyncContext->systemMaterialApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             if (!HasProperty(env, argv[0], "buttons")) {
                 DeleteContextAndThrowError(env, asyncContext, "Required input parameters are missing.");
@@ -2294,6 +2325,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
+        .systemMaterial = GetSystemMaterialParam(env, asyncContext),
     };
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -2643,6 +2675,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
+        .systemMaterial = GetSystemMaterialParam(env, asyncContext),
     };
     return promptDialogAttr;
 }
@@ -2931,6 +2964,7 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     napi_get_named_property(env, arg, "levelUniqueId", &asyncContext->dialogLevelUniqueId);
     napi_get_named_property(env, arg, "immersiveMode", &asyncContext->dialogImmersiveModeApi);
     napi_get_named_property(env, arg, "focusable", &asyncContext->focusableApi);
+    napi_get_named_property(env, arg, "systemMaterial", &asyncContext->systemMaterialApi);
 
     ParseBaseDialogOptionsEvent(env, arg, asyncContext);
 }

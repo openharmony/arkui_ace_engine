@@ -26,15 +26,27 @@
 #include <utility>
 #include <functional>
 
-#include "base/log/ace_trace.h"
+#include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/property/layout_constraint.h"
+#include "ui/properties/dirty_flag.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
+class UINode;
+
+enum class LazyForEachReleaseStrategy {
+    BATCH = 0,
+    PROGRESSIVE = 1,
+};
+
+enum class LazyForEachCustomComponentFreezeMode {
+    AUTO = 0,
+    DISABLED = 1,
+    ENABLED = 2,
+};
 
 typedef struct OperationInfo {
     OperationInfo():node(nullptr) {}
@@ -108,7 +120,7 @@ public:
 
     bool ClassifyOperation(V2::Operation& operation, int32_t& initialIndex,
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
-    
+
     bool ValidateIndex(int32_t index, const std::string& type);
 
     void OperateAdd(V2::Operation& operation, int32_t& initialIndex);
@@ -256,7 +268,25 @@ public:
 
     std::string DumpHashKey();
     void DumpInfo();
-    
+
+    virtual LazyForEachCustomComponentFreezeMode GetEnableCustomComponentFreeze() const
+    {
+        return LazyForEachCustomComponentFreezeMode::AUTO;
+    }
+
+    virtual LazyForEachReleaseStrategy GetLazyForEachReleaseStrategy() const
+    {
+        return LazyForEachReleaseStrategy::BATCH;
+    }
+
+    /*
+     * Removing nodes that should be released, and adopt an optimized release strategy.
+     * During each frame's idle time, determine whether to continue releasing based on the average
+     * time to release a single node and the remaining time of the current frame.
+     */
+    void RemovingExpiringItem(int64_t deadline);
+
+    std::map<int32_t, RefPtr<UINode>> removingNodeList_;
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
@@ -270,7 +300,7 @@ protected:
 
     virtual LazyForEachChild OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
-    
+
     virtual LazyForEachChild OnGetChildByIndexNew(int32_t index,
         std::map<int32_t, LazyForEachChild>& cachedItems,
         std::unordered_map<std::string, LazyForEachCacheChild>& expiringItems) = 0;
@@ -289,6 +319,7 @@ protected:
 private:
     void RecycleItemsOutOfBoundary();
     void RecycleChildByIndex(int32_t index);
+    void CollectNodesForDelayedRelease(const std::unordered_map<std::string, LazyForEachCacheChild>& cache);
 
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;

@@ -32,7 +32,7 @@ import { RemoteWindowModifier } from './../RemoteWindowModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkRemoteWindowPeer extends ArkCommonMethodPeer {
-    attributeSet?: RemoteWindowModifier;
+    remoteWindowAttributeSet?: RemoteWindowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

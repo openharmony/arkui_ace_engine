@@ -31,6 +31,7 @@ public:
         const RefPtr<FrameNode>& sheetWrapperNode, const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
     static bool IsSingleDetents(const NG::SheetStyle& sheetStyle);
     static void InitSheetKey(const RefPtr<FrameNode>& sheetNode, int32_t builderId, int32_t targetId);
+    static bool GetFallbackLineSpacingStyleOptimizeFlag(PipelineContext* pipeline);
 
 private:
     static RefPtr<FrameNode> CreateOperationColumnNode(

@@ -32,7 +32,14 @@ const static std::map<std::string, FixedAttrBit> FIXED_ATTR_MAP = {
     { "focused",     FIXED_ATTR_FOCUSED     },
 };
 }
-
+void InspectorFilter::EnableFreeNodes()
+{
+    isFreeNodesEnable = true;
+}
+bool InspectorFilter::IsFreeNodesEnabled() const
+{
+    return isFreeNodesEnable;
+}
 bool InspectorFilter::CheckFixedAttr(const FixedAttrBit attrBit) const
 {
     if (FilterEmpty()) {

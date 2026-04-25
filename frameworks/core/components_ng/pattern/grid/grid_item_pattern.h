@@ -20,7 +20,10 @@
 #include <optional>
 
 #include "core/components_ng/pattern/grid/grid_item_constants.h"
+#include "core/components_ng/pattern/grid/grid_item_drag_manager.h"
+#include "core/components_ng/pattern/grid/grid_item_model.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
+#include "core/components_ng/syntax/for_each_base_node.h"
 
 namespace OHOS::Ace {
 class Color;
@@ -105,8 +108,25 @@ public:
         irregularItemInfo_.reset();
     }
 
+    void InitDragManager(RefPtr<ForEachBaseNode> forEach)
+    {
+        if (!dragManager_) {
+            dragManager_ = MakeRefPtr<GridItemDragManager>(GetHost(), forEach);
+            dragManager_->InitDragDropEvent();
+        }
+    }
+
+    void DeInitDragManager()
+    {
+        if (dragManager_) {
+            dragManager_->DeInitDragDropEvent();
+            dragManager_ = nullptr;
+        }
+    }
+
     void UpdateGridItemStyle(GridItemStyle gridItemStyle);
     void UpdateGridItemStyleMultiThread(GridItemStyle gridItemStyle);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     bool IsEnableChildrenMatchParent() override
     {
@@ -156,8 +176,10 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     bool isHover_ = false;
     bool isPressed_ = false;
+    bool isFocusBorderColorInitialized_ = false;
     GridItemStyle gridItemStyle_ = GridItemStyle::NONE;
     std::optional<GridItemIndexInfo> irregularItemInfo_;
+    RefPtr<GridItemDragManager> dragManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridItemPattern);
 };

@@ -25,6 +25,7 @@ namespace OHOS::Ace {
 
 void PurgeMallocCache();
 
+#ifdef ACE_DEBUG
 class ACE_FORCE_EXPORT MemoryMonitor {
 public:
     static MemoryMonitor& GetInstance();
@@ -80,6 +81,7 @@ private:
     };
     static bool isEnable_;
 };
+#endif // ACE_DEBUG
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MEMORY_MONITOR_H

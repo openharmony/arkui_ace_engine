@@ -15,14 +15,15 @@
 
 #include "text_base.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 
 namespace OHOS::Ace::NG {
@@ -973,6 +974,29 @@ HWTEST_F(TextTestThreeNg, UpdateFontFeature001, TestSize.Level1)
     textLayoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
     TextModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
     EXPECT_EQ(textLayoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: UpdateFontVariations001
+ * @tc.desc: test fontVariations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateFontVariations001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    textModelNG.SetFontVariations(FONT_VARIATIONS_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontVariations(), FONT_VARIATIONS_VALUE);
+
+    FONT_VARIATIONS_LIST newFontVariations = { { "opsz", 14.0f } };
+    textLayoutProperty->UpdateFontVariations(newFontVariations);
+    TextModelNG::SetFontVariations(frameNode, FONT_VARIATIONS_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetFontVariations(), FONT_VARIATIONS_VALUE);
 }
 
 /**

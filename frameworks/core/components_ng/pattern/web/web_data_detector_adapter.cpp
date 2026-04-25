@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"

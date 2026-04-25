@@ -29,12 +29,13 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/base/mock_system_bar_style.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/system_bar/mock_system_bar_style.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/unittest/core/pattern/navigation/mock_navigation_stack.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,6 +61,14 @@ void NavDestinationPatternTestNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else {
+                return nullptr;
+            }
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 

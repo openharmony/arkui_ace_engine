@@ -66,6 +66,7 @@ ohos_shared_library("ui_session") {
     "c_utils:utils",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",

@@ -19,7 +19,7 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
@@ -1499,6 +1499,90 @@ HWTEST_F(WaterFlowTestNg, LazyVGridInWaterFlowTopDown002, TestSize.Level1)
         EXPECT_EQ(rect.Height(), 160.0f);
         EXPECT_EQ(rect.Width(), 480.0f);
     }
+}
+
+/**
+ * @tc.name: FlowItemLazyVGridOnVisibleIndexesChange001
+ * @tc.desc: Verify callback fires with initial visible range for WaterFlow-FlowItem-LazyVGrid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, FlowItemLazyVGridOnVisibleIndexesChange001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
+
+    int32_t indexStart = -2;
+    int32_t indexEnd = -2;
+
+    CreateWaterFlowItem(160.0f);
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetRowGap(Dimension(5.0f));
+    gridModel.SetColumnGap(Dimension(5.0f));
+    gridModel.SetOnVisibleIndexesChange([&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    });
+    for (int32_t i = 0; i < 6; ++i) {
+        CreateItemWithHeight(50.0f);
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 5);
+}
+
+/**
+ * @tc.name: FlowItemLazyVGridOnVisibleIndexesChange002
+ * @tc.desc: Verify callback returns -1,-1 when WaterFlow-FlowItem-LazyVGrid scrolls out of viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, FlowItemLazyVGridOnVisibleIndexesChange002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
+
+    int32_t indexStart = -2;
+    int32_t indexEnd = -2;
+
+    CreateWaterFlowItem(160.0f);
+    LazyVGridLayoutModel gridModel;
+    gridModel.Create();
+    gridModel.SetColumnsTemplate("1fr 1fr");
+    gridModel.SetRowGap(Dimension(5.0f));
+    gridModel.SetColumnGap(Dimension(5.0f));
+    gridModel.SetOnVisibleIndexesChange([&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    });
+    for (int32_t i = 0; i < 6; ++i) {
+        CreateItemWithHeight(50.0f);
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 5);
+
+    UpdateCurrentOffset(-200.0f);
+
+    EXPECT_EQ(indexStart, -1);
+    EXPECT_EQ(indexEnd, -1);
 }
 
 /**

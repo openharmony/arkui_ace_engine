@@ -14,13 +14,14 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components/slider/slider_theme.h"
 #include "core/components_ng/pattern/slider/slider_accessibility_property.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_layout_algorithm.h"
@@ -42,10 +44,10 @@
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
 #include "core/components_ng/render/drawing_mock.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;

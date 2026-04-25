@@ -1639,6 +1639,20 @@ class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey<(OnMicro
   }
 }
 
+class WebOnInputMethodAttachedModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnInputMethodAttachedModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnInputMethodAttached(node);
+    } else {
+      getUINativeModule().web.setOnInputMethodAttached(node, this.value);
+    }
+  }
+}
+
 class WebEnableAutoFillModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1663,6 +1677,20 @@ class WebEnableDefaultContextMenuModifier extends ModifierWithKey<boolean> {
       getUINativeModule().web.resetEnableDefaultContextMenu(node);
     } else {
       getUINativeModule().web.setEnableDefaultContextMenu(node, this.value);
+    }
+  }
+}
+
+class WebAiSessionOptionsModifier extends ModifierWithKey<Array<AISessionEvent>> {
+  constructor(value: Array<AISessionEvent>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webAiSessionOptionsModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetAiSessionOptions(node);
+    } else {
+      getUINativeModule().web.setAiSessionOptions(node, this.value);
     }
   }
 }
@@ -1706,6 +1734,47 @@ class WebEnableWebAVSessionModifier extends ModifierWithKey<boolean> {
       } else {
           getUINativeModule().web.setEnableWebAVSession(node, this.value);
       }
+    }
+}
+class WebEnableDragModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableDrag');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableDrag(node);
+    } else {
+      getUINativeModule().web.setEnableDrag(node, this.value);
+    }
+  }
+}
+
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webScrollbarLayoutPolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+
+class WebKeyboardAppearanceModifier extends ModifierWithKey<WebKeyboardAppearanceMode> {
+  constructor(value: WebKeyboardAppearanceMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('WebKeyboardAppearanceModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetKeyboardAppearance(node);
+    } else {
+      getUINativeModule().web.setKeyboardAppearance(node, this.value);
+    }
   }
 }
 
@@ -2158,21 +2227,6 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     }
     return this;
   }
-  enableScrollDirectionalLock(value: boolean, type: number): this {
-    let arkEnableScrollDirectionalLock = new ArkEnableScrollDirectionalLock();
-    if (!isUndefined(value) && !isNull(value)) {
-      arkEnableScrollDirectionalLock.value = value;
-    }
-    if (!isUndefined(type) && !isNull(type)) {
-      arkEnableScrollDirectionalLock.type = type;
-    }
-    if (arkEnableScrollDirectionalLock.value === undefined && arkEnableScrollDirectionalLock.type === undefined) {
-        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
-    } else {
-        modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
-    }
-    return this;
-  }
   nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt): this {
     if (!value) return this;
     const options = new ArkNestedScrollOptionsExt();
@@ -2289,13 +2343,33 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
     return this;
   }
+
+  enableDrag(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
+    return this;
+  }
+
   enableDefaultContextMenu(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;
   }
-  enableScrollDirectionalLock(enabled: boolean, type: number): this {
-    const config: DirectionalLockConfig = { enabled, type };
-    modifierWithKey(this._modifiersWithKeys, WebEnableDirectionalLockModifier.identity, WebEnableDirectionalLockModifier, config);
+  aiSessionOptions(value: Array<AISessionEvent>): this {
+    modifierWithKey(this._modifiersWithKeys, WebAiSessionOptionsModifier.identity, WebAiSessionOptionsModifier, value);
+    return this;
+  }
+  enableScrollDirectionalLock(value: boolean, type: number): this {
+    let arkEnableScrollDirectionalLock = new ArkEnableScrollDirectionalLock();
+    if (!isUndefined(value) && !isNull(value)) {
+      arkEnableScrollDirectionalLock.value = value;
+    }
+    if (!isUndefined(type) && !isNull(type)) {
+      arkEnableScrollDirectionalLock.type = type;
+    }
+    if (arkEnableScrollDirectionalLock.value === undefined && arkEnableScrollDirectionalLock.type === undefined) {
+      modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
+    }
     return this;
   }
   enableNativeMediaPlayer(config: NativeMediaPlayerConfig): this {
@@ -2305,6 +2379,18 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   enableWebAVSession(enabled: boolean): this {
       modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
       return this;
+  }
+  scrollbarLayoutPolicy(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
+  }
+  onInputmethodAttached(callback: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnInputMethodAttachedModifier.identity, WebOnInputMethodAttachedModifier, callback);
+    return this;
+  }
+  keyboardAppearance(mode: WebKeyboardAppearanceMode): this {
+    modifierWithKey(this._modifiersWithKeys, WebKeyboardAppearanceModifier.identity, WebKeyboardAppearanceModifier, mode);
+    return this;
   }
 }
 

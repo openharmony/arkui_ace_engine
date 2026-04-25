@@ -13,16 +13,87 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class SideBarContainerModifier extends ArkSideBarContainerComponent implements AttributeModifier<SideBarContainerAttribute> {
+class LazyArkSideBarContainerComponent extends ArkComponent {
+  static module: SideBarContainerComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkSideBarContainerComponent.module === undefined) {
+     LazyArkSideBarContainerComponent.module = globalThis.requireNapi('arkui.components.arksidebarcontainer');
+   }
+
+   this.lazyComponent = LazyArkSideBarContainerComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  onChange(callback: (value: boolean) => void): this {
+   this.lazyComponent.onChange(callback);
+   return this;
+  }
+
+  autoHide(value: boolean): this {
+   this.lazyComponent.autoHide(value);
+   return this;
+  }
+
+  showSideBar(value: boolean): this {
+   this.lazyComponent.showSideBar(value);
+   return this;
+  }
+
+  maxSideBarWidth(value: number | Length): this {
+   this.lazyComponent.maxSideBarWidth(value);
+   return this;
+  }
+
+  minSideBarWidth(value: number | Length): this {
+   this.lazyComponent.minSideBarWidth(value);
+   return this;
+  }
+
+  minContentWidth(value: Dimension): this {
+   this.lazyComponent.minContentWidth(value);
+   return this;
+  }
+
+  controlButton(value: ButtonStyle): this {
+   this.lazyComponent.controlButton(value);
+   return this;
+  }
+
+  divider(value: DividerStyle | null): this {
+   this.lazyComponent.divider(value);
+   return this;
+  }
+
+  sideBarPosition(value: SideBarPosition): this {
+   this.lazyComponent.sideBarPosition(value);
+   return this;
+  }
+
+  sideBarWidth(value: number | Length): this {
+   this.lazyComponent.sideBarWidth(value);
+   return this;
+  }
+
+  showControlButton(value: boolean): this {
+   this.lazyComponent.showControlButton(value);
+   return this;
+  }
+}
+class SideBarContainerModifier extends LazyArkSideBarContainerComponent implements AttributeModifier<SideBarContainerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: SideBarContainerAttribute): void {
     ModifierUtils.applySetOnChange(this);
+    // @ts-ignore
     ModifierUtils.applyAndMergeModifier<SideBarContainerAttribute, ArkSideBarContainerComponent, ArkComponent>(instance, this);
   }
 }

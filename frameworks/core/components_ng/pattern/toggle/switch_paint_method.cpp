@@ -40,6 +40,7 @@ SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float p
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     animatePointRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
     animateTrackRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
+    animatePointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
 
     AttachProperty(animatableBoardColor_);
     AttachProperty(animateTouchHoverColor_);
@@ -54,6 +55,7 @@ SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float p
     AttachProperty(size_);
     AttachProperty(animatePointRadius_);
     AttachProperty(animateTrackRadius_);
+    AttachProperty(animatePointScale_);
 }
 
 void SwitchModifier::InitializeParam(int32_t themeScopeId)
@@ -166,25 +168,30 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
 
-    brush.SetColor(ToRSColor(animatePointColor_->Get()));
+    auto finalPointColor = animatePointColor_->Get();
     if (isUseDiffPointColor_ && !hasPointColor_) {
         if (isFocused_->Get()) {
-            brush.SetColor(ToRSColor(isSelect_->Get() ? animatePointColor_->Get() : LinearColor(pointColor_)));
+            finalPointColor = isSelect_->Get() ? animatePointColor_->Get() : LinearColor(pointColor_);
         } else {
-            brush.SetColor(ToRSColor(isSelect_->Get() ? animatePointColor_->Get() : LinearColor(pointColorUnchecked_)));
+            finalPointColor = isSelect_->Get() ? animatePointColor_->Get() : LinearColor(pointColorUnchecked_);
         }
     }
+    brush.SetColor(ToRSColor(finalPointColor));
     brush.SetAntiAlias(true);
+    if (hasSystemMaterial_) {
+        float colorAlpha = static_cast<float>(finalPointColor.GetAlpha()) / 255.0f;
+        brush.SetAlphaF(colorAlpha * pointAlpha_);
+    }
     canvas.AttachBrush(brush);
     RSPoint point;
-    if (GreatOrEqual(contentSize.Width(), contentSize.Height())) {
-        point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
-    } else {
-        point.SetX(xOffset + pointOffset_->Get());
-    }
+    point.SetX(xOffset + pointOffset_->Get());
     point.SetY(yOffset + height / NUM_TWO);
-    canvas.DrawCircle(point, pointRadius_);
+    float drawRadius = hasSystemMaterial_ ? (pointRadius_ * animatePointScale_->Get()) : pointRadius_;
+    canvas.DrawCircle(point, drawRadius);
     canvas.DetachBrush();
+    if (hasSystemMaterial_ && materialNodePositionCallback_) {
+        materialNodePositionCallback_(point.GetX(), point.GetY(), pointRadius_);
+    }
 }
 
 void SwitchModifier::DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset)
@@ -223,8 +230,12 @@ void SwitchModifier::FixPointOffset()
     }
     auto currentOffset = pointOffset_->Get();
     if (GreatOrEqual(actualSize_.Width(), actualSize_.Height())) {
-        if (currentOffset > actualSize_.Width() - actualSize_.Height()) {
-            pointOffset_->Set(actualSize_.Width() - actualSize_.Height());
+        float halfHeight = actualSize_.Height() / static_cast<float>(NUM_TWO);
+        if (currentOffset < halfHeight) {
+            pointOffset_->Set(halfHeight);
+        }
+        if (currentOffset > actualSize_.Width() - halfHeight) {
+            pointOffset_->Set(actualSize_.Width() - halfHeight);
         }
     } else {
         if (currentOffset > actualSize_.Width() - actualTrackRadius_) {

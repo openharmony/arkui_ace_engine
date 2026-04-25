@@ -15,10 +15,43 @@
 
 #include "arc_list_test_ng.h"
 
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {
 const InspectorFilter filter;
+constexpr double USER_DEFINED_OPACITY = 0.2;
+constexpr double ENABLED_DYNAMIC_OPACITY = 1.0;
+constexpr double DISABLED_DYNAMIC_OPACITY = 0.2;
+constexpr double DISABLED_ALPHA = 0.4;
+
+struct ArcListItemDisableEventTestContext {
+    RefPtr<FrameNode> frameNode;
+    RefPtr<ArcListItemPattern> pattern;
+    RefPtr<ListItemEventHub> eventHub;
+    RefPtr<RenderContext> renderContext;
+};
+
+ArcListItemDisableEventTestContext CreateArcListItemForDisableEvent()
+{
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    CHECK_NULL_RETURN(frameNode, {});
+    return { frameNode, frameNode->GetPattern<ArcListItemPattern>(), frameNode->GetEventHub<ListItemEventHub>(),
+        frameNode->GetRenderContext() };
+}
+
+void UpdateDisableEventState(
+    const ArcListItemDisableEventTestContext& testContext, bool enabled, const std::optional<double>& opacity)
+{
+    if (opacity.has_value()) {
+        testContext.renderContext->UpdateOpacity(opacity.value());
+    }
+    testContext.eventHub->SetEnabled(enabled);
+    testContext.pattern->InitDisableEvent();
+}
 } // namespace
 
 class ArcListAttrTestNg : public ArcListTestNg {
@@ -1439,5 +1472,139 @@ HWTEST_F(ArcListAttrTestNg, InitDisableEvent001, TestSize.Level1)
     opacity = frameNode->GetRenderContext()->GetOpacity();
     // 1.0 is default value.
     EXPECT_EQ(opacity.value_or(-0.001), 1.0);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent001
+ * @tc.desc: Verify opacity when user does not set opacity and enable switches from true to false to true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ListItemDisableEvent001, TestSize.Level1)
+{
+    auto testContext = CreateArcListItemForDisableEvent();
+    ASSERT_NE(testContext.frameNode, nullptr);
+    ASSERT_NE(testContext.pattern, nullptr);
+    ASSERT_NE(testContext.eventHub, nullptr);
+    ASSERT_NE(testContext.renderContext, nullptr);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent002
+ * @tc.desc: Verify opacity when user does not set opacity and enable switches from false to true to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ListItemDisableEvent002, TestSize.Level1)
+{
+    auto testContext = CreateArcListItemForDisableEvent();
+    ASSERT_NE(testContext.frameNode, nullptr);
+    ASSERT_NE(testContext.pattern, nullptr);
+    ASSERT_NE(testContext.eventHub, nullptr);
+    ASSERT_NE(testContext.renderContext, nullptr);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent003
+ * @tc.desc: Verify opacity when user sets fixed opacity and enable switches from true to false to true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ListItemDisableEvent003, TestSize.Level1)
+{
+    auto testContext = CreateArcListItemForDisableEvent();
+    ASSERT_NE(testContext.frameNode, nullptr);
+    ASSERT_NE(testContext.pattern, nullptr);
+    ASSERT_NE(testContext.eventHub, nullptr);
+    ASSERT_NE(testContext.renderContext, nullptr);
+    testContext.renderContext->UpdateOpacity(USER_DEFINED_OPACITY);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), USER_DEFINED_OPACITY);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), USER_DEFINED_OPACITY);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent004
+ * @tc.desc: Verify opacity when user sets fixed opacity and enable switches from false to true to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ListItemDisableEvent004, TestSize.Level1)
+{
+    auto testContext = CreateArcListItemForDisableEvent();
+    ASSERT_NE(testContext.frameNode, nullptr);
+    ASSERT_NE(testContext.pattern, nullptr);
+    ASSERT_NE(testContext.eventHub, nullptr);
+    ASSERT_NE(testContext.renderContext, nullptr);
+
+    UpdateDisableEventState(testContext, false, USER_DEFINED_OPACITY);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), USER_DEFINED_OPACITY);
+
+    UpdateDisableEventState(testContext, false, std::nullopt);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent005
+ * @tc.desc: Verify opacity when user changes opacity dynamically and enable switches from true to false to true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ListItemDisableEvent005, TestSize.Level1)
+{
+    auto testContext = CreateArcListItemForDisableEvent();
+    ASSERT_NE(testContext.frameNode, nullptr);
+    ASSERT_NE(testContext.pattern, nullptr);
+    ASSERT_NE(testContext.eventHub, nullptr);
+    ASSERT_NE(testContext.renderContext, nullptr);
+    testContext.renderContext->UpdateOpacity(ENABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+
+    UpdateDisableEventState(testContext, false, DISABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, ENABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+}
+
+/**
+ * @tc.name: ListItemDisableEvent006
+ * @tc.desc: Verify opacity when user changes opacity dynamically and enable switches from false to true to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ListItemDisableEvent006, TestSize.Level1)
+{
+    auto testContext = CreateArcListItemForDisableEvent();
+    ASSERT_NE(testContext.frameNode, nullptr);
+    ASSERT_NE(testContext.pattern, nullptr);
+    ASSERT_NE(testContext.eventHub, nullptr);
+    ASSERT_NE(testContext.renderContext, nullptr);
+
+    UpdateDisableEventState(testContext, false, DISABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
+
+    UpdateDisableEventState(testContext, true, ENABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), ENABLED_DYNAMIC_OPACITY);
+
+    UpdateDisableEventState(testContext, false, DISABLED_DYNAMIC_OPACITY);
+    EXPECT_EQ(testContext.renderContext->GetOpacityValue(ENABLED_DYNAMIC_OPACITY), DISABLED_ALPHA);
 }
 } // namespace OHOS::Ace::NG

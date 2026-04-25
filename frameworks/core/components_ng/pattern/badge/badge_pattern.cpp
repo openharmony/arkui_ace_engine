@@ -53,6 +53,7 @@ void BadgePattern::OnModifyDone()
 
     auto textLayoutProperty = lastFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto badgeCount = layoutProperty->GetBadgeCount();
@@ -99,9 +100,7 @@ void BadgePattern::OnModifyDone()
         }
     }
     auto circleSize = layoutProperty->GetBadgeCircleSize();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
     CHECK_NULL_VOID(badgeTheme);
     Dimension width = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
     Dimension outerWidth = layoutProperty->GetBadgeOuterBorderWidthValue(badgeTheme->GetBadgeOuterBorderWidth());
@@ -525,9 +524,7 @@ void BadgePattern::OnColorConfigurationUpdate()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    auto badgeTheme = host->GetTheme<BadgeTheme>(true);
     CHECK_NULL_VOID(badgeTheme);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -565,5 +562,16 @@ void BadgePattern::OnColorConfigurationUpdate()
     if (!layoutProperty->GetBadgeColorByuser().value_or(false)) {
         UpdateBadgeColor(badgeTheme->GetBadgeColor());
     }
+}
+
+bool BadgePattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return true;
 }
 } // namespace OHOS::Ace::NG

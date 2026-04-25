@@ -36,6 +36,8 @@ int32_t OH_ArkUI_SnapshotOptions_SetDynamicRangeMode(
 int32_t OH_ArkUI_GetNodeSnapshot(
     ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions, OH_PixelmapNative** pixelmap);
 
+int32_t OH_ArkUI_GetNodeSnapshotSizeLimitation(int32_t* maxWidth, int32_t* maxHeight);
+
 #ifdef __cplusplus
 };
 #endif

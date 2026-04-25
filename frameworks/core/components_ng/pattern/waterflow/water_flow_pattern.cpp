@@ -314,7 +314,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     auto onJsFrameNodeScrollIndex = eventHub->GetJSFrameNodeOnWaterFlowScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
     FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
-    if (indexChanged) {
+    if (indexChanged && GetScrollSource() != SCROLL_FROM_NONE) {
         host->OnAccessibilityEvent(
             AccessibilityEventType::SCROLLING_EVENT, layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
     }

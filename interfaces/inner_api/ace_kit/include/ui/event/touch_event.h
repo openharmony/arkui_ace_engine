@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_EVENT_TOUCH_EVENT_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_EVENT_TOUCH_EVENT_H
 
+#include <functional>
 #include <utility>
 
 #include "ui/base/geometry/offset.h"
@@ -91,6 +92,7 @@ struct TouchEvent final : public PointerEvent {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
+    SourceTool primitiveSourceTool = SourceTool::UNKNOWN;
     int32_t touchEventId = 0;
     int32_t operatingHand = 0;
     // Coordinates relative to the upper-left corner of the current component
@@ -114,6 +116,7 @@ struct TouchEvent final : public PointerEvent {
     bool isInjected = false;
     bool isPrivacyMode = false;
     bool isPassThroughMode = false;
+    bool isGenerate = false;
     int32_t xReverse = 0;
     int32_t yReverse = 0;
     int32_t eventHandleId = 0;
@@ -182,6 +185,8 @@ class ACE_FORCE_EXPORT TouchLocationInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchLocationInfo, TypeInfoBase);
 
 public:
+    using CurrentLocalLocationGetter = std::function<Offset()>;
+
     explicit TouchLocationInfo(int32_t fingerId) : BaseEventInfo("default")
     {
         fingerId_ = fingerId;
@@ -206,6 +211,18 @@ public:
     const Offset& GetLocalLocation() const
     {
         return localLocation_;
+    }
+    Offset GetCurrentLocalLocation() const
+    {
+        if (currentLocalLocationGetter_) {
+            return currentLocalLocationGetter_();
+        }
+        return localLocation_;
+    }
+    TouchLocationInfo& SetCurrentLocalLocationGetter(CurrentLocalLocationGetter&& currentLocalLocationGetter)
+    {
+        currentLocalLocationGetter_ = std::move(currentLocalLocationGetter);
+        return *this;
     }
     const Offset& GetGlobalLocation() const
     {
@@ -241,6 +258,7 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    CurrentLocalLocationGetter currentLocalLocationGetter_;
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;

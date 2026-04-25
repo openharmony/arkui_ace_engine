@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
+#include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
 
 namespace OHOS::Ace::NG {
 void MenuItemGroupPattern::CreateBottomDivider()
@@ -200,6 +202,24 @@ void MenuItemGroupPattern::UpdateMenuItemIconInfo()
     }
 }
 
+void MenuItemGroupPattern::ModifyDividerColor(const RefPtr<FrameNode> &host, const Color &dividerColor)
+{
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        paintProperty->UpdateDividerColor(dividerColor);
+    } else {
+        if (dividerColor != Color::FOREGROUND) {
+            paintProperty->UpdateDividerColor(dividerColor);
+        } else {
+            auto theme = host->GetTheme<SelectTheme>(true);
+            CHECK_NULL_VOID(theme);
+            paintProperty->UpdateDividerColor(theme->GetLineColor());
+        }
+    }
+}
+
 void MenuItemGroupPattern::ModifyDivider()
 {
     auto menu = GetMenu();
@@ -216,7 +236,7 @@ void MenuItemGroupPattern::ModifyDivider()
         paintProperty->UpdateStrokeWidth(divider->strokeWidth);
         paintProperty->UpdateStartMargin(divider->startMargin);
         paintProperty->UpdateEndMargin(divider->endMargin);
-        paintProperty->UpdateDividerColor(divider->color);
+        ModifyDividerColor(host, divider->color);
         paintProperty->UpdateNeedHeaderDivider(true);
         paintProperty->UpdateNeedFooterDivider(true);
     }
@@ -292,12 +312,14 @@ void MenuItemGroupPattern::SetFooterContent(const std::string& str)
 
 void MenuItemGroupPattern::UpdateHeaderColor()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(headerContent_);
     auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(content);
     auto pipeline = headerContent_->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    auto menuTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(menuTheme);
     auto themeFontColor = menuTheme->GetMenuFontColor();
     content->UpdateTextColor(themeFontColor);
@@ -307,12 +329,14 @@ void MenuItemGroupPattern::UpdateHeaderColor()
 
 void MenuItemGroupPattern::UpdateFooterColor()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(footerContent_);
     auto content = footerContent_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(content);
     auto pipeline = footerContent_->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    auto menuTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(menuTheme);
     auto themeFontColor = menuTheme->GetSecondaryFontColor();
     content->UpdateTextColor(themeFontColor);
@@ -327,5 +351,18 @@ void MenuItemGroupPattern::OnColorConfigurationUpdate()
         UpdateHeaderColor();
         ModifyFontSize();
     }
+}
+
+bool MenuItemGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
+        return false;
+    }
+    UpdateFooterColor();
+    UpdateHeaderColor();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return true;
 }
 } // namespace OHOS::Ace::NG

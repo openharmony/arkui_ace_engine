@@ -19,8 +19,14 @@
 #include <string>
 
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
+
+namespace OHOS::Ace {
+class ThemeConstants;
+class ToastTheme;
+}
 
 namespace OHOS::Ace::NG {
 
@@ -33,7 +39,44 @@ private:
     static void UpdateTextLayoutProperty(
         const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft,
         const std::optional<Color>& textColor);
-    static void UpdateToastContext(const RefPtr<FrameNode>& toastContext);
+    static void UpdateToastContext(const RefPtr<FrameNode>& toastNode);
+    static bool SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const ToastInfo& toastInfo);
+    static bool HandleLowEndImmersiveMaterial(
+        const RefPtr<FrameNode>& toastNode,
+        const ToastInfo& toastInfo,
+        const RefPtr<RenderContext>& renderContext);
+    static void SetLowEndImmersiveBackground(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<ThemeConstants>& themeConstants);
+    static void SetLowEndImmersiveShadow(
+        const RefPtr<FrameNode>& toastNode,
+        const ToastInfo& toastInfo,
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<PipelineContext>& pipelineContext);
+    static bool HandleUserSetMaterial(
+        const RefPtr<FrameNode>& toastNode,
+        const ToastInfo& toastInfo,
+        const RefPtr<RenderContext>& renderContext);
+    static bool ApplyDefaultMaterial(
+        const RefPtr<FrameNode>& toastNode,
+        const ToastInfo& toastInfo,
+        const RefPtr<RenderContext>& renderContext);
+    static void UpdateToastBackgroundAndBlur(
+        const RefPtr<RenderContext>& renderContext,
+        const ToastInfo& toastInfo,
+        const RefPtr<ToastTheme>& toastTheme,
+        bool isUserSetMaterial);
+    static bool ShouldSkipShadowUpdate(const ToastInfo& toastInfo, bool isUserSetMaterial);
+    static Shadow GetToastShadow(
+        const ToastInfo& toastInfo,
+        const RefPtr<ToastTheme>& toastTheme,
+        const RefPtr<PipelineContext>& pipelineContext);
+    static void UpdateToastShadow(
+        const RefPtr<RenderContext>& renderContext,
+        const ToastInfo& toastInfo,
+        const RefPtr<ToastTheme>& toastTheme,
+        const RefPtr<PipelineContext>& pipelineContext,
+        bool isUserSetMaterial);
 };
 } // namespace OHOS::Ace::NG
 

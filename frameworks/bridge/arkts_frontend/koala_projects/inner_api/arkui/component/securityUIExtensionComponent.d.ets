@@ -16,12 +16,11 @@
  * @file
  * @kit ArkUI
  */
-import Want from '../../@ohos.app.ability.Want';
-import { RecordData } from './pluginComponent';
-import { Callback, ErrorCallback, BusinessError } from '../../@ohos.base';
-import { AttributeModifier, CommonMethod, TerminationInfo } from './common';
-import { ComponentContent } from '../ComponentContent';
-import { memo, ComponentBuilder } from './../stateManagement/runtime';
+import Want from '@ohos.app.ability.Want';
+import { Callback, ErrorCallback, BusinessError, RecordData } from '@ohos.base';
+import { AttributeModifier, CommonMethod, TerminationInfo } from 'arkui.component.common';
+import { ComponentContent } from 'arkui.ComponentContent';
+import { ComponentBuilder, CustomBuilder } from 'arkui.component.builder';
 
 /**
  * Enumeration of different types of SecurityDpiFollowStrategy.
@@ -227,10 +226,8 @@ export declare interface SecurityUIExtensionComponentAttribute extends CommonMet
  * @since 20 static
  * @noninterop
  */
-@memo
 @ComponentBuilder
 export declare function SecurityUIExtensionComponent(
-    want: Want, options?: SecurityUIExtensionOptions, 
-    @memo
-    content_?: () => void,
+    want: Want, options?: SecurityUIExtensionOptions,
+    content_?: CustomBuilder,
 ): SecurityUIExtensionComponentAttribute

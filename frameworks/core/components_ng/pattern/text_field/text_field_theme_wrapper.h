@@ -23,6 +23,8 @@
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace::NG {
+constexpr double DEFAULT_OPACITY = 0.2;
+const int32_t DEFAULT_ALPHA = 255;
 
 /**
  * TextThemeWrapper defines color and styles of TextComponent basing on TokenTheme's data.
@@ -62,7 +64,24 @@ public:
             inlineBgColor_ = colors->BackgroundPrimary();
             cursorColor_ =  colors->Brand();
             symbolColor_ = colors->IconPrimary();
-            textColorDisable_ = colors->IconTertiary();
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                textColorDisable_ = colors->FontTertiary();
+                selectedColor_ = (colors->CompEmphasizeSecondary().GetAlpha() == DEFAULT_ALPHA)
+                                     ? colors->CompEmphasizeSecondary().ChangeOpacity(DEFAULT_OPACITY)
+                                     : colors->CompEmphasizeSecondary();
+                focusPlaceholderColor_ = colors->FontSecondary();
+                disableTextColor_ = colors->FontTertiary();
+                hoverColor_ = colors->InteractiveHover();
+                pressColor_ = colors->InteractiveClick();
+                countTextStyle_.SetTextColor(colors->FontTertiary());
+                overCountTextStyle_.SetTextColor(colors->Warning());
+                overCountBorderColor_ = colors->Warning();
+                overCounterColor_ = colors->Warning();
+                previewUnderlineColor_ = colors->FontEmphasize();
+                previewBoardColor_ = colors->CompBackgroundSecondary();
+            } else {
+                textColorDisable_ = colors->IconTertiary();
+            }
         }
     }
 

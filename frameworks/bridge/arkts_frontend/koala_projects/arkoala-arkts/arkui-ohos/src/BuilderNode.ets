@@ -14,6 +14,7 @@
  */
 
 import { TouchEvent } from './component/common'
+import { CompetitionStrategy } from './component/enums'
 import { Size } from "./Graphics"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer, InteropNativeModule } from "@koalaui/interop"
@@ -154,6 +155,13 @@ export class ReactiveBuilderNode {
     // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
     private nodePtr_: KPointer | undefined;
     private isDisposed_: boolean = false;
+
+    constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
+        this._JSBuilderNode = new JSBuilderNode<undefined>(uiContext, nodePtr, frameNodePtr);
+        this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
+        BuilderNodeFinalizationRegisterProxy.registerReactive(this);
+    }
+
     constructor(uiContext: UIContext, options?: RenderOptions) {
         this._JSBuilderNode = new JSBuilderNode<undefined>(uiContext, options);
         BuilderNodeFinalizationRegisterProxy.registerReactive(this);
@@ -170,6 +178,10 @@ export class ReactiveBuilderNode {
 
     public getFrameNode(): FrameNode | null {
         return this._JSBuilderNode.getFrameNode();
+    }
+
+    public getBuilderRootNode(): KPointer | undefined {
+        return this._JSBuilderNode.getBuilderRootNode();
     }
 
     public postTouchEvent(event: TouchEvent): boolean {
@@ -207,6 +219,10 @@ export class ReactiveBuilderNode {
 
     public postInputEvent(event: InputEventType): boolean {
         let ret = this._JSBuilderNode.postInputEvent(event);
+        return ret;
+    }
+    public postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+        let ret = this._JSBuilderNode.postInputEventWithStrategy(event, competitionStrategy);
         return ret;
     }
     public getNodeWithoutProxy(): pointer | undefined {

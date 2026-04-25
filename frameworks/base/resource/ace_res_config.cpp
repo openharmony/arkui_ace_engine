@@ -16,6 +16,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/resource/ace_res_key_parser.h"
+#include "base/utils/linear_map.h"
 #include "core/common/container.h"
 #include "core/pipeline/pipeline_base.h"
 

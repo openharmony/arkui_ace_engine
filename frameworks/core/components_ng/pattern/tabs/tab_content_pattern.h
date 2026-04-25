@@ -19,7 +19,6 @@
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
@@ -431,9 +430,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContextWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<TabTheme>();
+        auto theme = host->GetTheme<TabTheme>(true);
         CHECK_NULL_VOID(theme);
         auto layout = GetLayoutProperty<TabContentLayoutProperty>();
         CHECK_NULL_VOID(layout);
@@ -450,9 +447,7 @@ public:
         Pattern::OnColorModeChange(colorMode);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContextWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<TabTheme>();
+        auto theme = host->GetTheme<TabTheme>(true);
         CHECK_NULL_VOID(theme);
         auto layout = GetLayoutProperty<TabContentLayoutProperty>();
         CHECK_NULL_VOID(layout);
@@ -484,6 +479,44 @@ public:
         auto tabContentNode = AceType::DynamicCast<TabContentNode>(host);
         CHECK_NULL_VOID(tabContentNode);
         tabContentNode->UpdataTabBarItem();
+    }
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return false;
+        }
+
+        auto theme = host->GetTheme<TabTheme>(true);
+        CHECK_NULL_RETURN(theme, false);
+        auto layout = GetLayoutProperty<TabContentLayoutProperty>();
+        CHECK_NULL_RETURN(layout, false);
+        if (!layout->HasLabelSelectedColorSetByUser() || !layout->GetLabelSelectedColorSetByUserValue()) {
+            auto currentLabelStyle = GetLabelStyle();
+            currentLabelStyle.selectedColor = theme->GetSubTabTextOnColor();
+            SetLabelStyle(currentLabelStyle);
+        }
+        if (!layout->HasLabelUnselectedColorSetByUser() || !layout->GetLabelUnselectedColorSetByUserValue()) {
+            auto currentLabelStyle = GetLabelStyle();
+            currentLabelStyle.unselectedColor = theme->GetSubTabTextOffColor();
+            SetLabelStyle(currentLabelStyle);
+        }
+        if (!layout->HasIconSelectedColorSetByUser() || !layout->GetIconSelectedColorSetByUserValue()) {
+            auto currentIconStyle = GetIconStyle();
+            currentIconStyle.selectedColor = theme->GetBottomTabTextOn();
+            SetIconStyle(currentIconStyle);
+        }
+        if (!layout->HasIconUnselectedColorSetByUser() || !layout->GetIconUnselectedColorSetByUserValue()) {
+            auto currentIconStyle = GetIconStyle();
+            currentIconStyle.unselectedColor = theme->GetBottomTabTextOff();
+            SetIconStyle(currentIconStyle);
+        }
+        auto tabContentNode = AceType::DynamicCast<TabContentNode>(host);
+        CHECK_NULL_RETURN(tabContentNode, false);
+        tabContentNode->UpdataTabBarItem();
+        return false;
     }
 
     Axis GetAxis() const

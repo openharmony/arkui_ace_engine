@@ -22,9 +22,11 @@
 #define protected public
 #include "common_constants.h"
 #include "mock_schedule_task.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
 
+#include "core/accessibility/accessibility_manager_ng.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {

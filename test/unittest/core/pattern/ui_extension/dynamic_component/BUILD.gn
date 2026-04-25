@@ -30,6 +30,7 @@ ace_unittest("dynamic_pattern_test") {
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
+    "$ace_root/adapter/ohos/entrance/utils.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
@@ -61,9 +62,10 @@ ace_unittest("dynamic_pattern_test") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
-    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_mmi_event_convertor.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_manager.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_preview_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
@@ -79,6 +81,7 @@ ace_unittest("dynamic_pattern_test") {
     ]
     external_deps = [
       "ability_base:want",
+      "ability_base:extractortool",
       "ability_runtime:abilitykit_native",
       "ability_runtime:napi_common",
       "accessibility:accessibility_common",
@@ -111,6 +114,7 @@ ace_unittest("dynamic_pattern_test_two") {
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
+    "$ace_root/adapter/ohos/entrance/utils.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
@@ -142,9 +146,10 @@ ace_unittest("dynamic_pattern_test_two") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
-    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_mmi_event_convertor.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_manager.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_preview_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
@@ -160,6 +165,7 @@ ace_unittest("dynamic_pattern_test_two") {
     ]
     external_deps = [
       "ability_base:want",
+      "ability_base:extractortool",
       "ability_runtime:abilitykit_native",
       "ability_runtime:napi_common",
       "accessibility:accessibility_common",
@@ -192,6 +198,7 @@ ace_unittest("dynamic_pattern_test_three") {
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
+    "$ace_root/adapter/ohos/entrance/utils.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
@@ -223,9 +230,10 @@ ace_unittest("dynamic_pattern_test_three") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
-    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_mmi_event_convertor.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_manager.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_preview_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
@@ -241,6 +249,7 @@ ace_unittest("dynamic_pattern_test_three") {
     ]
     external_deps = [
       "ability_base:want",
+      "ability_base:extractortool",
       "ability_runtime:abilitykit_native",
       "ability_runtime:napi_common",
       "accessibility:accessibility_common",
@@ -273,6 +282,7 @@ ace_unittest("dynamic_pattern_manager_test_ng") {
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
+    "$ace_root/adapter/ohos/entrance/utils.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.cpp",
@@ -285,6 +295,7 @@ ace_unittest("dynamic_pattern_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_manager.cpp",
     "dynamic_component_manager_test_ng.cpp",
   ]
   if (is_ohos_standard_system) {
@@ -294,6 +305,7 @@ ace_unittest("dynamic_pattern_manager_test_ng") {
     ]
     external_deps = [
       "ability_base:want",
+      "ability_base:extractortool",
       "ability_runtime:abilitykit_native",
       "ability_runtime:napi_common",
       "accessibility:accessibility_common",
@@ -325,6 +337,7 @@ ace_unittest("arkts_dynamic_pattern_test") {
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
+    "$ace_root/adapter/ohos/entrance/utils.cpp",
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
@@ -357,9 +370,10 @@ ace_unittest("arkts_dynamic_pattern_test") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
-    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
-    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/mock/adapter/ohos/entrance/mock_mmi_event_convertor.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_manager.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_preview_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
@@ -375,6 +389,7 @@ ace_unittest("arkts_dynamic_pattern_test") {
     ]
     external_deps = [
       "ability_base:want",
+      "ability_base:extractortool",
       "ability_runtime:abilitykit_native",
       "ability_runtime:napi_common",
       "accessibility:accessibility_common",

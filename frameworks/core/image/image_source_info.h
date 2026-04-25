@@ -86,10 +86,7 @@ public:
         const Color& color);
     void SetBundleName(const std::string& bundleName);
     void SetModuleName(const std::string& moduleName);
-    void SetIsUriPureNumber(bool isUriPureNumber = false)
-    {
-        isUriPureNumber_ = isUriPureNumber;
-    }
+    void SetIsUriPureNumber(bool isUriPureNumber = false);
     void Reset();
 
     // interfaces to get infomation from [ImageSourceInfo]
@@ -115,58 +112,26 @@ public:
     std::string GetTaskKey() const;
     void SetContainerId(int32_t containerId);
     int32_t GetContainerId() const;
-    bool GetIsUriPureNumber() const
-    {
-        return isUriPureNumber_;
-    }
+    bool GetIsUriPureNumber() const;
     bool SupportObjCache() const;
-    void SetNeedCache(bool needCache)
-    {
-        needCache_ = needCache;
-    }
-
-    ColorMode GetLocalColorMode() const
-    {
-        return localColorMode_;
-    }
+    void SetNeedCache(bool needCache);
+    ColorMode GetLocalColorMode() const;
     
     void UpdateLocalColorMode(ColorMode localColorMode);
 
-    bool IsFromReset()
-    {
-        return isFromReset_;
-    }
-    void SetIsFromReset(bool isFromReset)
-    {
-        isFromReset_ = isFromReset;
-    }
+    bool IsFromReset() const;
+    void SetIsFromReset(bool isFromReset);
 
-    void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig)
-    {
-        imageDfxConfig_ = imageDfxConfig;
-    }
+    void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig);
 
     void SetImageHdr(bool isHdr);
     bool IsImageHdr() const;
-    NG::ImageDfxConfig GetImageDfxConfig() const
-    {
-        return imageDfxConfig_;
-    }
+    NG::ImageDfxConfig GetImageDfxConfig() const;
 
-    bool IsSurportCachePixelmap() const
-    {
-        return srcType_ == SrcType::NETWORK || srcType_ == SrcType::RESOURCE;
-    }
+    bool IsSurportCachePixelmap() const;
 
-    void SetSupportSvg2(bool enable)
-    {
-        supportSvg2_ = enable;
-    }
-
-    bool IsSupportSvg2() const
-    {
-        return supportSvg2_;
-    }
+    void SetSupportSvg2(bool enable);
+    bool IsSupportSvg2() const;
 
 private:
     SrcType ResolveSrcType() const;

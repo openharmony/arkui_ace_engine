@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -810,11 +811,15 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             titleWrapper->Layout();
             return;
         }
-        MeasureContext context;
-        context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
-        context.fontSize = titleFontSize_;
-        minTitleHeight_ = static_cast<float>(MeasureUtil::MeasureTextSize(context).Height());
-        minTitleHeight_ = 0.0;
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            (NavigationTitleUtil::CheckNeedFontPadding(titleBarNode))) {
+            MeasureContext context;
+            context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
+            context.fontSize = titleFontSize_;
+            minTitleHeight_ = static_cast<float>(MeasureUtil::MeasureTextSize(context).Height());
+        } else {
+            minTitleHeight_ = 0.0;
+        }
         initialTitleOffsetY_ = menuOccupiedHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);

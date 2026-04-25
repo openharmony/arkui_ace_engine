@@ -16,13 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_OVERLAY_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_OVERLAY_PAINT_METHOD_H
 
-#include "base/geometry/ng/size_t.h"
-#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_ng/render/circle_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {

@@ -15,13 +15,13 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
@@ -357,10 +357,16 @@ HWTEST_F(RichEditorScrollControllerTest, StopAutoScroll001, TestSize.Level0)
  */
 HWTEST_F(RichEditorScrollControllerTest, GetAutoScrollOffsetDiff001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. GetAutoScrollOffsetDiff
+     */
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->prevAutoScrollOffset_ = OffsetF(1.0f, 0.0f);
     scrollController->isSingleLineMode_ = true;
@@ -596,10 +602,16 @@ HWTEST_F(RichEditorScrollControllerTest, AutoScrollByEdgeDetection004, TestSize.
  */
 HWTEST_F(RichEditorScrollControllerTest, GetOffset2d001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. get scroll controller and get offset
+     */
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);

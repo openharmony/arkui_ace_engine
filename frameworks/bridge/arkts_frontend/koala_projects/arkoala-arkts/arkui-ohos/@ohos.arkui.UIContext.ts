@@ -49,7 +49,7 @@ import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
 import { ComponentContent, ComponentContentBase } from 'arkui/ComponentContent';
 import overlayManager from '@ohos/overlayManager';
-import promptAction, { LevelOrder } from '@ohos/promptAction';
+import promptAction, { LevelOrder, LevelMode } from '@ohos/promptAction';
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 import { CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/framework';
 import { Router as RouterExt, AsyncCallback } from 'arkui/base';
@@ -61,19 +61,21 @@ import { int32, int64 } from "@koalaui/common";
 import { KPointer, KSerializerBuffer, KBuffer, DeserializerBase, nullptr, wrapSystemCallback } from '@koalaui/interop';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
+import { InputEventListener, InputEventMonitor } from 'arkui/component/common';
 import { TextLayoutOptions, Paragraph, StyledString, ContextMenu, FrameNodeExtender, AnimationExtender, AlertDialog, ActionSheet, DialogExtender } from 'arkui/framework';
 import { InnerGestureObserverConfigs, InnerGestureTriggerInfo, IUIContext, UIContextGetInfo, SystemOps } from 'arkui/component/idlize';
 import { BusinessError } from "@ohos.base"
 import { ArkUIGeneratedNativeModule } from '#components';
 import { GlobalScopeUicontextFontScale } from "#generated"
 import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
+import { RawInputEventType } from 'arkui/component/enums';
 
-export const enum GestureActionPhase {
+export enum GestureActionPhase {
     WILL_START = 0,
     WILL_END = 1
 }
 
-export const enum  GestureListenerType {
+export enum GestureListenerType {
     TAP = 0,
     LONG_PRESS = 1,
     PAN = 2,
@@ -342,6 +344,10 @@ export class ComponentSnapshot {
         options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error('getWithRange not implemented in ComponentSnapshot!')
     }
+
+    public getSizeLimitation(): componentSnapshot.SnapshotSizeLimitation {
+        throw Error('getSizeLimitation not implemented in ComponentSnapshot!')
+    }
 }
 
 export class DragController {
@@ -386,6 +392,12 @@ class OverlayManagerOptionsInner implements OverlayManagerOptions {
     enableBackPressedEvent?: boolean = false;
 }
 
+export interface OrderOverlayOptions {
+    levelOrder?: LevelOrder;
+    levelMode?: LevelMode;
+    levelUniqueId?: int32;
+}
+
 export class ContextMenuController {
     public close(): void {
         throw Error("close not implemented in ContextMenuController!")
@@ -427,6 +439,10 @@ export class OverlayManager {
 
     hideAllComponentContents(): void {
         throw Error("hideAllComponentContents not implemented in OverlayManager!")
+    }
+
+    openOrderOverlay(content: ComponentContent<Object>, options?: OrderOverlayOptions): Promise<void> {
+        throw Error("openOrderOverlay not implemented in OverlayManager!")
     }
 }
 
@@ -542,9 +558,13 @@ export class CursorController {
     public setCursor(value: PointerStyle): void {
         throw Error("setCursor not implemented in CursorController!")
     }
+
+    public setCustomCursor(value: PixelMap, focusX?: int32, focusY?: int32): void {
+        throw Error("setCustomCursor not implemented in CursorController!")
+    }
 }
 
-export const enum KeyboardAvoidMode {
+export enum KeyboardAvoidMode {
     OFFSET = 0,
     RESIZE = 1,
     OFFSET_WITH_CARET = 2,
@@ -560,7 +580,7 @@ export class ResolvedUIContext extends UIContext {
     }
 }
 
-export const enum ResolveStrategy {
+export enum ResolveStrategy {
     CALLING_SCOPE = 0,
     LAST_FOCUS = 1,
     MAX_INSTANCE_ID = 2,
@@ -732,6 +752,23 @@ export class UIContext {
         // instructive change start
         // IUIContext.setCustomKeyboardContinueFeature(feature);
         // instructive change end
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
+    public addLocalInputEventMonitor(eventMask: int32, listener: InputEventListener): InputEventMonitor {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const monitor = IUIContext.addLocalInputEventMonitor(eventMask as int32, listener);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return monitor;
+    }
+
+    public removeLocalInputEventMonitor(monitor: InputEventMonitor): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.removeLocalInputEventMonitor(monitor);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public setTextSelectionClearPolicy(policy: TextSelectionClearPolicy): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        IUIContext.setTextSelectionClearPolicy(policy);
         ArkUIAniModule._Common_Restore_InstanceId()
     }
     public getMaxFontScale() : number {
@@ -1282,6 +1319,12 @@ export class UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
+    public enableEventPassthrough(enabled: boolean | undefined, eventType: RawInputEventType): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.enableEventPassthrough(enabled, eventType);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
     public setRouter(router: RouterExt) {
         if (this.router_ === undefined) {
             this.router_ = new RouterImpl(this.instanceId_)
@@ -1614,6 +1657,27 @@ export class UIObserver {
         }
     }
 
+    public onSwiperContentUpdate(callback: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onSwiperContentUpdate(callback);
+        }
+    }
+    public offSwiperContentUpdate(callback?: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offSwiperContentUpdate(callback);
+        }
+    }
+    public onSwiperContentUpdate(config: uiObserver.ObserverOptions, callback: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onSwiperContentUpdate(config, callback);
+        }
+    }
+    public offSwiperContentUpdate(config: uiObserver.ObserverOptions, callback?: Callback<SwiperContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offSwiperContentUpdate(config, callback);
+        }
+    }
+
     public onBeforePanStart(callback: PanListenerCallback): void {
         let resourceId = UIObserverGestureEventOps.setOnBeforePanStart(this.instanceId_.toInt(), callback);
         ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_.toInt(), resourceId, 'beforePanStart', callback);
@@ -1714,6 +1778,28 @@ export interface PageInfo {
 }
 export interface ContentCoverController {}
 
+export interface SwiperContentInfo {
+    id: string;
+    uniqueId: int;
+    swiperItemInfos: Array<SwiperItemInfo>;
+}
+
+export interface SwiperItemInfo {
+    uniqueId: int;
+    index: int;
+}
+
+export class SwiperContentInfoImpl implements SwiperContentInfo {
+    id: string = '';
+    uniqueId: int = -1;
+    swiperItemInfos: Array<SwiperItemInfo> = new Array<SwiperItemInfo>();
+}
+
+export class SwiperItemInfoImpl implements SwiperItemInfo {
+    uniqueId: int = -1;
+    index: int = -1;
+}
+
 export class Magnifier {
     bind(id: string): void {}
     show(x: double, y: double): void {}
@@ -1734,7 +1820,7 @@ export class DynamicSyncScene {
     }
 }
 
-export const enum SwiperDynamicSyncSceneType {
+export enum SwiperDynamicSyncSceneType {
     GESTURE = 0,
     ANIMATION = 1,
 }
@@ -1754,7 +1840,7 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
     }
 }
 
-export const enum MarqueeDynamicSyncSceneType {
+export enum MarqueeDynamicSyncSceneType {
   ANIMATION = 1
 }
 
@@ -1773,7 +1859,12 @@ export class MarqueeDynamicSyncScene extends DynamicSyncScene {
     }
 }
 
-export const enum CustomKeyboardContinueFeature {
+export enum CustomKeyboardContinueFeature {
     ENABLED = 0,
     DISABLED = 1,
+}
+
+export enum TextSelectionClearPolicy {
+    KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0,
+    CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1,
 }

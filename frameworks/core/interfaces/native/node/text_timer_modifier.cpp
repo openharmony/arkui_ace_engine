@@ -253,9 +253,9 @@ void ParseShadowRadiusUpdate(const RefPtr<ResourceObject>& radiusResObj, Shadow&
         return;
     }
     auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
-        double radius = 0.0;
+        double radius = -1.0;
         ResourceParseUtils::ParseResDouble(resObj, radius);
-        shadow.SetBlurRadius(std::max(radius, 0.0));
+        shadow.SetBlurRadius(std::max(radius, -1.0));
     };
     shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
 }
@@ -353,7 +353,7 @@ void ResetTextShadow(ArkUINodeHandle node)
     TextTimerModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
 
-void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count)
+void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count, ArkUI_Int32 startTime)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -361,6 +361,7 @@ void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Flo
     if (isCountDown) {
         TextTimerModelNG::SetInputCount(frameNode, count);
     }
+    TextTimerModelNG::SetStartTime(frameNode, startTime);
 }
 
 void SetTextTimerOnTimer(ArkUINodeHandle node, void* callback)

@@ -21,10 +21,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "base/json/json_util.h"
 #include "core/animation/animator.h"
@@ -900,8 +900,14 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy0011, TestSize.Le
     paintProperty->UpdateLoop(loop);
     pattern->loop_ = false;
     pattern->direction_ = MarqueeDirection::RIGHT;
+    /*
+     * @tc.steps: step1. update delay
+     */
+    marqueeLayoutProperty->UpdateMarqueeDelay(100);
+    EXPECT_TRUE(pattern->AnimationParamChange());
     EXPECT_FALSE(pattern->OnlyPlayStatusChange());
     pattern->loop_ = true;
+    pattern->delay_ = 100;
     EXPECT_FALSE(pattern->OnlyPlayStatusChange());
     pattern->direction_ = MarqueeDirection::LEFT;
     EXPECT_FALSE(pattern->OnlyPlayStatusChange());
@@ -909,6 +915,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy0011, TestSize.Le
     EXPECT_TRUE(pattern->OnlyPlayStatusChange());
     pattern->StoreProperties();
     EXPECT_EQ(pattern->direction_, MarqueeDirection::LEFT);
+    EXPECT_EQ(pattern->delay_, 100);
     pattern->OnModifyDone();
     EXPECT_TRUE(CheckMeasureFlag(marqueeLayoutProperty->GetPropertyChangeFlag()));
     EXPECT_TRUE(CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()));

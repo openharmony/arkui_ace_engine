@@ -103,6 +103,7 @@ public:
     virtual void SetSupportLazyLoadingEmptyBranch(bool enable) {};
 
     virtual DisplayMode GetDisplayMode() const = 0;
+    virtual void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) {}
 
 private:
     static std::unique_ptr<GridModel> instance_;

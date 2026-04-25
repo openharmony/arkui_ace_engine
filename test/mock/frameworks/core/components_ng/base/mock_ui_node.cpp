@@ -89,6 +89,8 @@ std::atomic_int32_t UINode::count_ = 0;
 
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
+    (void)recursive;
+    context_ = context;
 }
 
 void UINode::AttachToMainTree(bool recursive)
@@ -116,6 +118,8 @@ int32_t UINode::CurrentFrameCount() const
 
 void UINode::DetachContext(bool recursive)
 {
+    (void)recursive;
+    context_ = nullptr;
 }
 
 void UINode::DetachFromMainTree(bool recursive , bool needCheckThreadSafeNodeTree)
@@ -252,7 +256,7 @@ RefPtr<PipelineContext> UINode::GetContextRefPtr() const
 
 PipelineContext* UINode::GetContext() const
 {
-    return nullptr;
+    return context_;
 }
 
 RefPtr<UINode> UINode::GetFrameChildByIndexWithoutExpanded(uint32_t index)

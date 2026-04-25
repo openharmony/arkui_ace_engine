@@ -14,6 +14,8 @@
  */
 
 /// <reference path='./import.ts' />
+type SpanFontVariation = { axis: string; value: number; isNormalized?: boolean };
+
 class SpanFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('spanFontSize');
   applyPeer(node: KNode, reset: boolean): void {
@@ -252,6 +254,20 @@ class SpanFontWeightModifier extends ModifierWithKey<ArkFontWeight> {
       getUINativeModule().span.resetFontWeight(node);
     } else {
       getUINativeModule().span.setFontWeight(node, this.value.value, this.value?.enableVariableFontWeight, this.value?.enableDeviceFontWeightCategory);
+    }
+  }
+}
+
+class SpanFontVariationsModifier extends ModifierWithKey<Array<SpanFontVariation>> {
+  constructor(value: Array<SpanFontVariation>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('spanFontVariations');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetFontVariations(node);
+    } else {
+      getUINativeModule().span.setFontVariations(node, this.value!);
     }
   }
 }
@@ -676,7 +692,8 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new BusinessError(100201, 'onDetach function not supported in attributeModifier scenario.');
   }
 
-  onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
+  onAreaChange(event: (oldValue: Area, newValue: Area) => void,
+    options?: { expectedUpdateInterval?: int32 }): this {
     throw new BusinessError(100201, 'onAreaChange function not supported in attributeModifier scenario.');
   }
 
@@ -966,8 +983,12 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   font(value: Font, fontConfigs?: FontConfigs): SpanAttribute {
     let arkFontWeight = new ArkFontWeight();
     arkFontWeight.value = value?.weight;
-    arkFontWeight.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeight.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
+    if (fontConfigs !== null && fontConfigs !== undefined &&
+        fontConfigs.fontWeightConfigs !== null && fontConfigs.fontWeightConfigs !== undefined &&
+        'fontWeightConfigs' in fontConfigs) {
+      arkFontWeight.enableVariableFontWeight = fontConfigs.fontWeightConfigs?.enableVariableFontWeight ?? false;
+      arkFontWeight.enableDeviceFontWeightCategory = fontConfigs.fontWeightConfigs?.enableDeviceFontWeightCategory ?? true;
+    }
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier, value?.size);
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier, value?.family);
@@ -993,8 +1014,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   fontWeight(value: number | FontWeight | string | Resource, fontWeightConfigs?: FontWeightConfigs): SpanAttribute {
     let arkFontWeight = new ArkFontWeight();
     arkFontWeight.value = value;
-    arkFontWeight.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
+    if (fontWeightConfigs !== null && fontWeightConfigs !== undefined && typeof fontWeightConfigs === 'object') {
+      arkFontWeight.enableVariableFontWeight = fontWeightConfigs.enableVariableFontWeight ?? false;
+      arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs.enableDeviceFontWeightCategory ?? true;
+    }
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     return this;
   }
@@ -1020,6 +1043,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
   textShadow(value: ShadowOptions | Array<ShadowOptions>): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanTextShadowModifier.identity, SpanTextShadowModifier, value);
+    return this;
+  }
+  fontVariations(value: Array<SpanFontVariation>): SpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, SpanFontVariationsModifier.identity, SpanFontVariationsModifier, value);
     return this;
   }
 }

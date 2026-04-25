@@ -136,10 +136,10 @@ export class UIUtilsImpl {
         ]);
 
     public makeV1Observed<T>(value: T): T {
-        if (!value || typeof value !== 'object') {
-            return value as T;
+        if (!(value instanceof Object)) {
+            return value;
         }
-        const isProxy = StateMgmtTool.isObjectLiteral(value);
+        const isProxy = StateMgmtTool.isObjectLiteral(value as Object);
         if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
         }
@@ -152,7 +152,7 @@ export class UIUtilsImpl {
         if (isProxy) {
             return UIUtilsImpl.makeObservedProxyNoCheck(value as Object, false, false) as T;
         }
-        return value;
+        return value as T;
     }
 
     public autoProxyObject<T>(value: T): T {
@@ -175,13 +175,13 @@ export class UIUtilsImpl {
     }
 
     public makeObserved<T>(value: T): T {
-        if (!value || typeof value !== 'object') {
-            return value as T;
+        if (!(value instanceof Object)) {
+            return value;
         }
         if (isDynamicObject(value)) {
-            value = getRawObject(value);
+            value = getRawObject(value as T);
         }
-        const isProxy = StateMgmtTool.isObjectLiteral(value);
+        const isProxy = StateMgmtTool.isObjectLiteral(value as Object);
         if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
         }
@@ -194,7 +194,7 @@ export class UIUtilsImpl {
         if (isProxy) {
             return UIUtilsImpl.makeObservedProxyNoCheck(value as Object, true, true) as T;
         }
-        return value;
+        return value as T;
     }
 
     public static checkIsBuitInType<T>(value: T): boolean {
@@ -202,10 +202,10 @@ export class UIUtilsImpl {
     }
 
     public getTarget<T>(source: T): T {
-        if (!source || typeof source !== 'object') {
+        if (!(source instanceof Object)) {
             return source;
         }
-        if (UIUtilsImpl.isProxied(source!)) {
+        if (UIUtilsImpl.isProxied(source! as Object)) {
             const handler = StateMgmtTool.tryGetHandler(source as Object);
             return (handler as InterfaceProxyHandler).target as T;
         }
@@ -217,7 +217,7 @@ export class UIUtilsImpl {
         ) {
             return (source as ObserveWrappedBase).getRaw()! as T;
         }
-        return source;
+        return source as T;
     }
 
     public makeBindingReadonly<T>(getter: () => T): Binding<T> {

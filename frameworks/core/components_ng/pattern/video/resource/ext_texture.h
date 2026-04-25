@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,13 @@ public:
         }
     }
 
+    void GetTextureId(int32_t& textureId);
+
+    void SetSizeSync(int64_t textureId, int32_t textureWidth, int32_t textureHeight, int32_t left, int32_t top);
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    bool SurfaceCapture(uintptr_t pointerVal, int32_t width, int32_t height);
+#endif
 private:
     void OnRefresh(const std::string& param);
     void OnSurfaceCreated();

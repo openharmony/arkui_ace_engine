@@ -18,11 +18,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components/button/button_theme.h"
 #undef private
 #undef protected
 
@@ -2423,5 +2424,165 @@ HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest025, TestSize.Level1)
     auto strOther = pattern->GetVisibleColumnsText();
     pattern->GetColumnText(host, strOther);
     EXPECT_EQ(strOther.empty(), false);
+}
+
+namespace {
+constexpr float TEST_DP_FONT_SCALE_VALUE = 1.5f;
+constexpr float TEST_DP_MAX_APP_FONT_SCALE = 3.2f;
+constexpr Dimension TEST_DP_FONT_SIZE_NORMAL = Dimension(10.0_vp);
+constexpr Dimension TEST_DP_FONT_SIZE_ZERO = Dimension(0.0_vp);
+constexpr float TEST_DP_NEAR_ZERO_SCALE = 0.001f;
+}
+
+/**
+ * @tc.name: DatePickerConvertFontScaleValueSkipOptimize001
+ * @tc.desc: Test DatePickerDialogView::ConvertFontScaleValue with skipOptimizeFlag=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerConvertFontScaleValueSkipOptimize001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(TEST_DP_MAX_APP_FONT_SCALE);
+    pipeline->SetFontScale(TEST_DP_FONT_SCALE_VALUE);
+
+    auto result = DatePickerDialogView::ConvertFontScaleValue(
+        TEST_DP_FONT_SIZE_NORMAL, TEST_DP_FONT_SIZE_ZERO, false, true);
+    EXPECT_NE(result, TEST_DP_FONT_SIZE_NORMAL / TEST_DP_FONT_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: DatePickerConvertFontScaleValueSkipOptimize002
+ * @tc.desc: Test DatePickerDialogView::ConvertFontScaleValue with skipOptimizeFlag=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerConvertFontScaleValueSkipOptimize002, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(TEST_DP_MAX_APP_FONT_SCALE);
+    pipeline->SetFontScale(TEST_DP_FONT_SCALE_VALUE);
+
+    auto result = DatePickerDialogView::ConvertFontScaleValue(
+        TEST_DP_FONT_SIZE_NORMAL, TEST_DP_FONT_SIZE_ZERO, false, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    EXPECT_NE(result, TEST_DP_FONT_SIZE_NORMAL / TEST_DP_FONT_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: DatePickerConvertFontScaleValueSkipOptimize003
+ * @tc.desc: Test DatePickerDialogView::ConvertFontScaleValue with NearZero fontSizeScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerConvertFontScaleValueSkipOptimize003, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetFontScale(TEST_DP_NEAR_ZERO_SCALE);
+
+    auto result = DatePickerDialogView::ConvertFontScaleValue(
+        TEST_DP_FONT_SIZE_NORMAL, TEST_DP_FONT_SIZE_ZERO, false, false);
+    EXPECT_EQ(result, TEST_DP_FONT_SIZE_NORMAL);
+}
+
+/**
+ * @tc.name: DatePickerConvertFontScaleValueSkipOptimize004
+ * @tc.desc: Test DatePickerDialogView::ConvertFontScaleValue with VP unit fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerConvertFontScaleValueSkipOptimize004, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetFontScale(TEST_DP_FONT_SCALE_VALUE);
+
+    auto result = DatePickerDialogView::ConvertFontScaleValue(
+        Dimension(10.0, DimensionUnit::VP), TEST_DP_FONT_SIZE_ZERO, false, false);
+    EXPECT_EQ(result, Dimension(10.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: DatePickerNeedAdaptForAgingSkipOptimize001
+ * @tc.desc: Test DatePickerDialogView::NeedAdaptForAging with skipOptimizeFlag=true when aging conditions are met
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerNeedAdaptForAgingSkipOptimize001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(5.0f);
+    pipeline->SetFontScale(5.0f);
+    pipeline->rootHeight_ = 1000;
+
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 5.0f;
+
+    auto result = DatePickerDialogView::NeedAdaptForAging(true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DatePickerNeedAdaptForAgingSkipOptimize002
+ * @tc.desc: Test DatePickerDialogView::NeedAdaptForAging with skipOptimizeFlag=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerNeedAdaptForAgingSkipOptimize002, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(5.0f);
+    pipeline->SetFontScale(5.0f);
+    pipeline->rootHeight_ = 1000;
+
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 5.0f;
+
+    auto result = DatePickerDialogView::NeedAdaptForAging(false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DatePickerNeedAdaptForAgingSkipOptimize003
+ * @tc.desc: Test DatePickerDialogView::NeedAdaptForAging when aging conditions are not met
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerNeedAdaptForAgingSkipOptimize003, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(1.0f);
+    pipeline->SetFontScale(1.0f);
+    pipeline->rootHeight_ = 500;
+
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 5.0f;
+
+    auto result = DatePickerDialogView::NeedAdaptForAging(false);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

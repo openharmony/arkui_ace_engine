@@ -179,6 +179,11 @@ public:
         return crossMatchChild_;
     }
 
+    void SetCrossMatchChild(bool crossMatchChild)
+    {
+        crossMatchChild_ = crossMatchChild;
+    }
+
     void SetUseCustomAnimation(bool useCustomAnimation)
     {
         useCustomAnimation_ = useCustomAnimation;
@@ -413,6 +418,7 @@ private:
     float mainSizeWithoutMargin_ = 0.0f;
     int32_t totalItemCount_ = 0;
     bool mainSizeIsDefined_ = false;
+    bool isPixelRoundAfterMeasure_ = false;
 
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;

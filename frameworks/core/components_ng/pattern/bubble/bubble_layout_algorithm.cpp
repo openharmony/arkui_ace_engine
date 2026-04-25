@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
 
@@ -37,8 +38,10 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -180,12 +183,11 @@ void GetP2(const Dimension& radius)
 
 static RefPtr<PopupTheme> GetPopupTheme(LayoutWrapper* layoutWrapper)
 {
-    RefPtr<PipelineContext> pipeline;
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(hostNode, nullptr);
-    pipeline = hostNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    auto bubblePattern = hostNode->GetPattern<BubblePattern>();
+    CHECK_NULL_RETURN(bubblePattern, nullptr);
+    auto popupTheme = bubblePattern->GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);
     return popupTheme;
 }
@@ -284,6 +286,33 @@ void SetArrowSize(float& width, float& height)
     width = BUBBLE_ARROW_WIDTH.ConvertToPx();
     height = BUBBLE_ARROW_HEIGHT.ConvertToPx();
 }
+
+bool IsPositionInWindowBounds(const OffsetF& position, Placement placement, const Rect& bounds)
+{
+    if (!bounds.IsValid()) {
+        return true;
+    }
+    switch (placement) {
+        case Placement::BOTTOM:
+        case Placement::BOTTOM_LEFT:
+        case Placement::BOTTOM_RIGHT:
+            return LessNotEqual(position.GetY(), bounds.Bottom());
+        case Placement::TOP:
+        case Placement::TOP_LEFT:
+        case Placement::TOP_RIGHT:
+            return GreatNotEqual(position.GetY(), bounds.Top());
+        case Placement::RIGHT:
+        case Placement::RIGHT_TOP:
+        case Placement::RIGHT_BOTTOM:
+            return LessNotEqual(position.GetX(), bounds.Right());
+        case Placement::LEFT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT_BOTTOM:
+            return GreatNotEqual(position.GetX(), bounds.Left());
+        default:
+            return true;
+    }
+}
 } // namespace
 
 BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
@@ -320,7 +349,8 @@ BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
         Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 }
 
-void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(
+    const RefPtr<BubbleLayoutProperty>& layoutProp, LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
     CHECK_EQUAL_VOID(isTips_, true);
     CHECK_NULL_VOID(layoutWrapper);
@@ -334,6 +364,15 @@ void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bo
     CHECK_NULL_VOID(child);
     auto childProp = child->GetLayoutProperty();
     CHECK_NULL_VOID(childProp);
+    auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
+    if (bubblePattern) {
+        auto floatButtonsHeight = bubblePattern->GetWindowButtonRect(bubbleNode).Height();
+        if (layoutProp->GetPositionOffset().value_or(OffsetF()).NonOffset()) {
+            floatButtonsHeight_ = floatButtonsHeight;
+        } else {
+            dumpInfo_.needAvoidWindowButtonHeight = floatButtonsHeight;
+        }
+    }
     auto maxSize = GetPopupMaxWidthAndHeight(showInSubWindow, bubbleNode);
     popupMaxWidth_ = maxSize.Width();
     popupMaxHeight_ = maxSize.Height();
@@ -436,6 +475,29 @@ void BubbleLayoutAlgorithm::FitMouseOffset(LayoutWrapper* layoutWrapper)
     }
 }
 
+void BubbleLayoutAlgorithm::UpdateWindowBoundsRect(bool showInSubWindow)
+{
+    if (followCursor_ || (!isTips_ && !showInSubWindow)) {
+        windowBoundsRect_ = Rect(0, 0, 0, 0);
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    if (!pipelineContext) {
+        windowBoundsRect_ = Rect(0, 0, wrapperSize_.Width(), wrapperSize_.Height());
+        return;
+    }
+    if (showInSubWindow) {
+        auto currentSubwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            pipelineContext->GetInstanceId(), SubwindowType::TYPE_POPUP);
+        if (currentSubwindow) {
+            auto rect = currentSubwindow->GetRect();
+            windowBoundsRect_ = Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+            return;
+        }
+    }
+    windowBoundsRect_ = pipelineContext->GetDisplayWindowRectInfo();
+}
+
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -448,7 +510,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
     useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     isTips_ = bubbleLayoutProperty->GetIsTips().value_or(false);
-    UpdateBubbleMaxSize(layoutWrapper, showInSubWindow);
+    UpdateBubbleMaxSize(bubbleProp, layoutWrapper, showInSubWindow);
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
@@ -584,7 +646,7 @@ SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, con
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(frameNode);
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar, the bottom is 0
     auto bottom = 0.0;
-    auto top = safeAreaInsets.top_.Length();
+    auto top = std::max(static_cast<float>(safeAreaInsets.top_.Length()), floatButtonsHeight_);
     auto maxHeight = windowGlobalRect.Height();
     if (showInSubWindow) {
         pipelineContext = frameNode->GetContextRefPtr();
@@ -643,6 +705,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         // because the final node position is set relative to the overlay node.
         auto overlayGlobalOffset = bubbleNode->GetOffsetRelativeToWindow();
         targetOffset_ -= overlayGlobalOffset;
+        UpdateWindowBoundsRect(showInSubWindow);
     }
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
     auto childShowWidth = childSize_.Width() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
@@ -717,6 +780,8 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         childOffset_.GetY() - BUBBLE_ARROW_HEIGHT.ConvertToPx());
     childWrapper->GetGeometryNode()->SetMarginFrameOffset(childShowOffset);
     childWrapper->Layout();
+    dumpInfo_.needAvoidWindowButtonHeight = std::max(0.0f,
+        dumpInfo_.needAvoidWindowButtonHeight - childShowOffset.GetY());
     auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childLayoutWrapper);
     const auto& columnChild = childLayoutWrapper->GetAllChildrenWithBuild();
@@ -878,7 +943,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
-    top_ = safeAreaInsets.top_.Length();
+    top_ = std::max(static_cast<float>(safeAreaInsets.top_.Length()), floatButtonsHeight_);
     bottom_ = safeAreaInsets.bottom_.Length();
     UpdateDumpInfo();
     marginStart_ = (isTips_ ? TIPS_MARGIN_SPACE : MARGIN_SPACE + DRAW_EDGES_SPACE).ConvertToPx();
@@ -2442,6 +2507,9 @@ bool BubbleLayoutAlgorithm::CheckPositionBottom(
     if (GreatNotEqual(childSize.Height(), rect.Height())) {
         i += step;
         return false;
+    } else if (!IsPositionInWindowBounds(position, placement_, windowBoundsRect_)) {
+        i += step;
+        return false;
     } else {
         bVertical_ = true;
     }
@@ -2464,6 +2532,9 @@ bool BubbleLayoutAlgorithm::CheckPositionTop(
         RecordMaxSpace(maxAreaSpace, position, maxWidth, maxHeight, arrowPosition);
     }
     if (GreatNotEqual(childSize.Height(), rect.Height())) {
+        i += step;
+        return false;
+    } else if (!IsPositionInWindowBounds(position, placement_, windowBoundsRect_)) {
         i += step;
         return false;
     } else {
@@ -2490,6 +2561,9 @@ bool BubbleLayoutAlgorithm::CheckPositionRight(
     if (GreatNotEqual(childSize.Width(), rect.Width())) {
         i += step;
         return false;
+    } else if (!IsPositionInWindowBounds(position, placement_, windowBoundsRect_)) {
+        i += step;
+        return false;
     } else {
         bHorizontal_ = true;
     }
@@ -2512,6 +2586,9 @@ bool BubbleLayoutAlgorithm::CheckPositionLeft(
         RecordMaxSpace(maxAreaSpace, position, maxWidth, maxHeight, arrowPosition);
     }
     if (GreatNotEqual(childSize.Width(), rect.Width())) {
+        i += step;
+        return false;
+    } else if (!IsPositionInWindowBounds(position, placement_, windowBoundsRect_)) {
         i += step;
         return false;
     } else {
@@ -2806,11 +2883,15 @@ void BubbleLayoutAlgorithm::UpdateClipOffset(const RefPtr<FrameNode>& frameNode)
     clipPath_.clear();
     clipPath_ = ClipBubbleWithPath();
 #if defined(ENABLE_ROSEN_BACKEND)
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (isUserSetMaterial_) {
         auto bubbleSDFShape = GetBubbleSDFShape();
-        auto renderContext = childNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetClipShape();
         renderContext->SetSDFShape(bubbleSDFShape);
+    } else {
+        renderContext->SetSDFShape(nullptr);
+        renderContext->ResetShadowPath();
     }
 #endif
 }
@@ -3993,74 +4074,11 @@ std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSmoothU
     return unionShape0;
 }
 
-std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSDFCornerRectShape(Placement placement)
-{
-    if (placement != Placement::TOP_LEFT && placement != Placement::TOP_RIGHT &&
-        placement != Placement::BOTTOM_LEFT && placement != Placement::BOTTOM_RIGHT &&
-        placement != Placement::LEFT_TOP && placement != Placement::LEFT_BOTTOM &&
-        placement != Placement::RIGHT_TOP && placement != Placement::RIGHT_BOTTOM) {
-        return nullptr;
-    }
-    auto rectShape0 = OHOS::Rosen::RSNGShapeBase::Create(
-        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
-    auto rectShape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(rectShape0);
-    CHECK_NULL_RETURN(rectShape, nullptr);
-
-    float radiusPx = borderRadius_.ConvertToPx();
-    float cornerSize = radiusPx; // Rectangle size equals to border radius
-
-    OHOS::Rosen::RectF rect;
-    float rectRadius = 0.0f; // Rectangle has no rounded corners (sharp corners)
-    switch (placement) {
-        case Placement::TOP_LEFT:
-        case Placement::LEFT_TOP:
-            rect = OHOS::Rosen::RectF(
-                childOffset_.GetX() - RIGHT_ANGLE_SPACING,
-                childOffset_.GetY() - RIGHT_ANGLE_SPACING,
-                cornerSize,
-                cornerSize);
-            break;
-        case Placement::TOP_RIGHT:
-        case Placement::RIGHT_TOP:
-            rect = OHOS::Rosen::RectF(
-                childOffset_.GetX() + childSize_.Width() - cornerSize + RIGHT_ANGLE_SPACING,
-                childOffset_.GetY() - RIGHT_ANGLE_SPACING,
-                cornerSize,
-                cornerSize);
-            break;
-        case Placement::BOTTOM_LEFT:
-        case Placement::LEFT_BOTTOM:
-            rect = OHOS::Rosen::RectF(
-                childOffset_.GetX() - RIGHT_ANGLE_SPACING,
-                childOffset_.GetY() + childSize_.Height() - cornerSize + RIGHT_ANGLE_SPACING,
-                cornerSize,
-                cornerSize);
-            break;
-        case Placement::BOTTOM_RIGHT:
-        case Placement::RIGHT_BOTTOM:
-            rect = OHOS::Rosen::RectF(
-                childOffset_.GetX() + childSize_.Width() - cornerSize + RIGHT_ANGLE_SPACING,
-                childOffset_.GetY() + childSize_.Height() - cornerSize + RIGHT_ANGLE_SPACING,
-                cornerSize,
-                cornerSize);
-            break;
-        default:
-            return nullptr;
-    }
-
-    OHOS::Rosen::RRect rrect(rect, OHOS::Rosen::Vector4(rectRadius, rectRadius, rectRadius, rectRadius));
-    rectShape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
-    return rectShape0;
-}
-
 std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::GetBubbleSDFShape()
 {
     if (!enableArrow_ || !showArrow_) {
         return CreateSDFRRectShape();
     }
-
-    auto rrectShape = CreateSDFRRectShape();
-    CHECK_NULL_RETURN(rrectShape, nullptr);
 
     float arrowOffset = GetArrowOffset(arrowPlacement_) +
         BUBBLE_ARROW_HEIGHT.ConvertToPx();
@@ -4075,19 +4093,76 @@ std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::GetBubbleSDFS
         arrowBuildplacement, arrowOffset, vertex0, vertex1, vertex2);
 
     if (arrowBuildplacement == Placement::NONE) {
-        return rrectShape;
+        return CreateSDFRRectShape();
     }
 
-    auto rectShape = CreateSDFCornerRectShape(arrowBuildplacement);
-    auto combinedShape = rrectShape;
-    if (rectShape) {
-        combinedShape = CreateSmoothUnionShape(rrectShape, rectShape);
-    }
+    auto shape0 = CreateSDFRRectShapeWithCustomCorners(arrowBuildplacement);
+    CHECK_NULL_RETURN(shape0, nullptr);
 
     auto triangleShape = CreateSDFTriangleShape(vertex0, vertex1, vertex2);
     CHECK_NULL_RETURN(triangleShape, nullptr);
 
-    return CreateSmoothUnionShape(combinedShape, triangleShape);
+    return CreateSmoothUnionShape(shape0, triangleShape);
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSDFRRectShapeWithCustomCorners(
+    Placement arrowBuildplacement)
+{
+    // Create rounded rectangle with different corner radii based on arrow placement
+    auto shape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
+    auto rrectShape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(shape0);
+    CHECK_NULL_RETURN(rrectShape, nullptr);
+
+    float radiusPx = borderRadius_.ConvertToPx();
+    OHOS::Rosen::Vector4 cornerRadii(radiusPx, radiusPx, radiusPx, radiusPx);
+
+    // Set the corner where arrow is attached to 0 (sharp corner)
+    switch (arrowBuildplacement) {
+        case Placement::TOP:
+            // Top side corners should remain the same for centered arrows
+            break;
+        case Placement::BOTTOM:
+            // Bottom side corners should remain the same for centered arrows
+            break;
+        case Placement::LEFT:
+            // Left side corners should remain the same for centered arrows
+            break;
+        case Placement::RIGHT:
+            // Right side corners should remain the same for centered arrows
+            break;
+        case Placement::TOP_LEFT:
+        case Placement::LEFT_TOP:
+            cornerRadii.x_ = 0.0f; // Top-left corner
+            break;
+        case Placement::TOP_RIGHT:
+        case Placement::RIGHT_TOP:
+            cornerRadii.y_ = 0.0f; // Top-right corner
+            break;
+        case Placement::BOTTOM_LEFT:
+        case Placement::LEFT_BOTTOM:
+            cornerRadii.w_ = 0.0f; // Bottom-left corner
+            break;
+        case Placement::BOTTOM_RIGHT:
+        case Placement::RIGHT_BOTTOM:
+            cornerRadii.z_ = 0.0f; // Bottom-right corner
+            break;
+        default:
+            break;
+    }
+
+    OHOS::Rosen::RRect rrect(
+        OHOS::Rosen::RectF(
+            childOffset_.GetX(),
+            childOffset_.GetY(),
+            childSize_.Width(),
+            childSize_.Height()
+        ),
+        cornerRadii
+    );
+    rrectShape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
+
+    return shape0;
 }
 #endif
 

@@ -106,6 +106,7 @@ private:
     std::list<PostAxisEventAction> postAxisEventAction_;
     std::map<int32_t, PostEventAction> lastEventMap_;
     WeakPtr<FrameNode> targetNode_;
+    std::set<int32_t> targetNodes_;
     bool passThroughResult_ = false;
 };
 } // namespace OHOS::Ace::NG

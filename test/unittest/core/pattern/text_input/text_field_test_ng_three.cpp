@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span_node.h"
 
@@ -43,7 +44,7 @@ HWTEST_F(TextFieldTestNgThree, OnThemeScopeUpdate002, TestSize.Level1)
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
     textFieldPattern->cleanNodeResponseArea_ =
-        AceType::MakeRefPtr<CleanNodeResponseArea>(AIWriteAdapter::WeakClaim(AceType::RawPtr(textFieldPattern)));
+        AceType::MakeRefPtr<CleanNodeResponseArea>(AceType::WeakClaim(AceType::RawPtr(textFieldPattern)));
     int32_t themeScopeId = 1;
     textFieldPattern->OnThemeScopeUpdate(themeScopeId);
     EXPECT_EQ(textFieldPattern->selectOverlay_, 1);

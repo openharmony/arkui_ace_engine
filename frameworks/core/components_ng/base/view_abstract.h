@@ -69,6 +69,8 @@ class SpanString;
 class CalcDimensionRect;
 class ResponseRegion;
 class UiMaterial;
+struct ImmersiveOptions;
+struct ImmersiveMaterialConfig;
 }
 
 namespace OHOS::Ace::NG {
@@ -222,6 +224,7 @@ public:
     static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
+    static void SetSpatialEffect(const std::optional<SpatialEffectParams>& params);
     static void SetLightUpEffect(double radio);
     static void CheckLocalizedMarginOrPadding(PaddingProperty& value, const TextDirection& direction);
     static void CheckPositionOrOffsetLocalizedEdges(EdgesParam& value, TextDirection layoutDirection);
@@ -410,8 +413,11 @@ public:
     static void SetOnClick(GestureEventFunc &&clickEventFunc, Dimension distanceThreshold);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
+    static void SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func);
     static void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetShouldRecognizerParallelWith(
+        NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc);
     static void SetOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag);
     static void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback);
@@ -448,6 +454,9 @@ public:
     static void SetOnDetach(std::function<void()> &&onDetach);
     static void SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect,
         const OffsetF &origin)> &&onAreaChanged);
+    static void SetOnAreaChangedWithInterval(
+        std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)>
+            &&onAreaChanged, int32_t minInterval);
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList, bool measureFromViewport = false);
     static void SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged);
@@ -578,6 +587,7 @@ public:
     static void SetMotionPath(const MotionPathOption &motionPath);
     // progress mask
     static void SetProgressMask(const RefPtr<ProgressMaskProperty> &progress);
+    static void SetEdgeLightParam(const std::optional<EdgeLightParam>& param);
 
     static void Pop();
 
@@ -636,6 +646,7 @@ public:
     static void SetUseEffect(bool useEffect, EffectType effectType);
     // useUnion
     static void SetUseUnion(bool useUnion);
+    static void SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions);
 
     static void SetFreeze(bool freeze);
     static void SetAttractionEffect(const AttractionEffect& effect);
@@ -794,6 +805,7 @@ public:
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option);
+    static void SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params);
     static void SetLightUpEffect(FrameNode* frameNode, double radio);
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
@@ -892,6 +904,8 @@ public:
         NG::TransitionFinishCallback&& finishCallback = nullptr);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
+    static void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable);
+    static void ResetSmartGestureShortcut();
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
@@ -912,6 +926,9 @@ public:
     static void SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
+    static void SetOnAreaChangedWithInterval(FrameNode* frameNode,
+        std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)>
+            &&onAreaChanged, int32_t minInterval);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc,
@@ -945,6 +962,8 @@ public:
         FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
         FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetShouldRecognizerParallelWith(
+        FrameNode* frameNode, NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc);
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);
@@ -1063,6 +1082,7 @@ public:
     static float GetAspectRatio(FrameNode* frameNode);
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
     static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
+    static void SetOnGestureCollectIntercept(FrameNode* frameNode, NG::OnGestureCollectInterceptFunc&& func);
     static float GetLayoutWeight(FrameNode* frameNode);
     static int32_t GetDisplayIndex(FrameNode* frameNode);
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
@@ -1190,6 +1210,15 @@ private:
         const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
     static void ResetSystemMaterialEffect(FrameNode* frameNode);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+    static void ResetBorderAndBackgroundEffect(
+        FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void SetImmersiveOptions(
+        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
+    static void SetImmersiveConfigs(
+        const RefPtr<FrameNode>& frameNode, const std::optional<ImmersiveMaterialConfig>& config);
+    static void ResetImmersiveShadowToDefault(
+        const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void RegisterTransparencyListener(const RefPtr<FrameNode>& frameNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;
@@ -1205,6 +1234,8 @@ void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOpti
     const SysOptions& sysOptions);
 void SetOnAreaChangedMultiThread(FrameNode* frameNode, std::function<void(const RectF& oldRect,
     const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&& onAreaChanged);
+void SetOnAreaChangedWithIntervalMultiThread(FrameNode* frameNode, std::function<void(const RectF& oldRect,
+    const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&& onAreaChanged, int32_t minInterval);
 void SetOnVisibleChangeMultiThread(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
     const std::vector<double> &ratioList);
 void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,

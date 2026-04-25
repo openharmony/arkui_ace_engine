@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+
+#include "base/utils/utf_helper.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,6 +52,21 @@ std::unique_ptr<JsonValue> CovertShadowsToJson(const std::vector<Shadow>& shadow
     }
     return jsonShadows;
 }
+
+std::unique_ptr<JsonValue> ConvertFontVariationsToJson(const FONT_VARIATIONS_LIST& fontVariations)
+{
+    auto jsonFontVariations = JsonUtil::CreateArray(true);
+    for (const auto& fontVariation : fontVariations) {
+        auto jsonFontVariation = JsonUtil::Create(true);
+        jsonFontVariation->Put("axis", fontVariation.axis.c_str());
+        jsonFontVariation->Put("value", std::to_string(fontVariation.value).c_str());
+        if (fontVariation.isNormalized.has_value()) {
+            jsonFontVariation->Put("isNormalized", fontVariation.isNormalized.value());
+        }
+        jsonFontVariations->Put(jsonFontVariation);
+    }
+    return jsonFontVariations;
+}
 } // namespace
 
 std::string TextLayoutProperty::GetCopyOptionString() const
@@ -69,6 +87,35 @@ std::string TextLayoutProperty::GetCopyOptionString() const
             break;
     }
     return copyOptionString;
+}
+
+void TextLayoutProperty::UpdateEnableSmallLanguageTruncation(const bool& value)
+{
+    auto host = GetHost();
+    if (!host || !host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
+    if (propEnableSmallLanguageTruncation_.has_value() &&
+        NearEqual(propEnableSmallLanguageTruncation_.value(), value)) {
+        return;
+    }
+    propEnableSmallLanguageTruncation_ = value;
+    UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    propNeedReCreateParagraph_ = true;
+    OnEnableSmallLanguageTruncationUpdate(value);
+}
+
+void TextLayoutProperty::OnEnableSmallLanguageTruncationUpdate(bool value)
+{
+    if (!value) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textPattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto flag = textPattern->GetFallbackLineSpacingStyleOptimizeFlag();
+    textPattern->SetFallbackLineSpacingAndIncludeFontPadding(flag);
 }
 
 std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
@@ -111,6 +158,16 @@ void TextLayoutProperty::UpdateMarqueeOptionsFromJson(const std::unique_ptr<Json
     UpdateTextMarqueeSpacing(Dimension::FromString(json->GetString("spacing")));
 }
 
+std::string TextLayoutProperty::GetFontWeightConfigs() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("enableVariableFontWeight",
+        GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
+    jsonValue->Put("enableDeviceFontWeightCategory",
+        GetEnableDeviceFontWeightCategory().value_or(true) ? "true" : "false");
+    return jsonValue->ToString();
+}
+
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
@@ -130,11 +187,14 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
         const std::optional<std::vector<Color>>& colorListOptional = GetSymbolColorList();
         if (colorListOptional.has_value()) {
-            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListOptional.value())
+            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToJsonString(colorListOptional.value())
                 .c_str(), filter);
         } else {
             json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(std::vector<Color>()).c_str(), filter);
         }
+        json->PutExtAttr("fontWeightConfigs", GetFontWeightConfigs().c_str(), filter);
+        json->PutExtAttr("variableFontWeight",
+            std::to_string(GetVariableFontWeight().value_or(0)).c_str(), filter);
     } else {
         json->PutExtAttr("fontColor", GetTextColor().value_or(defaultColor).ColorToString().c_str(), filter);
     }
@@ -142,6 +202,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("fontWeight",
         GetFontWeightInJson(GetFontWeight().value_or(theme->GetTextStyle().GetFontWeight())).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str(), filter);
+    json->PutExtAttr("fontVariations", ConvertFontVariationsToJson(
+        GetFontVariations().value_or(FONT_VARIATIONS_LIST {})), filter);
     json->PutExtAttr("renderingStrategy",
         GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);
     json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str(), filter);
@@ -243,3 +305,4 @@ void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     LayoutProperty::FromJson(json);
 }
 } // namespace OHOS::Ace::NG
+

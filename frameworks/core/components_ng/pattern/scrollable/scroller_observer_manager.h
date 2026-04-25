@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace {
+class TouchEventInfo;
 class ScrollerObserverManager : public Referenced {
 public:
     ScrollerObserverManager() = default;

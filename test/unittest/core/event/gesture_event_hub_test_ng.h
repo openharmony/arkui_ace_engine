@@ -21,10 +21,10 @@
 #define protected public
 #undef SECURITY_COMPONENT_ENABLE
 
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -45,6 +45,37 @@
 #include "frameworks/core/components_ng/pattern/text_drag/text_drag_base.h"
 
 namespace OHOS::Ace::NG {
+
+struct DragStartContext {
+    GestureEvent info;
+    RefPtr<FrameNode> frameNode;
+    RefPtr<OHOS::Ace::DragEvent> event;
+    DragDropInfo dragDropInfo;
+    DragDropInfo dragPreviewInfo;
+    RefPtr<PipelineContext> pipeline;
+    RefPtr<PipelineContext> dragNodePipeline;
+    RefPtr<OverlayManager> overlayManager;
+    RefPtr<DragDropManager> dragDropManager;
+    WeakPtr<EventHub> eventHub;
+    RefPtr<PixelMap> pixelMap;
+    RefPtr<PixelMap> pixelMapDuplicated;
+    RefPtr<Subwindow> subWindow;
+    PreparedInfoForDrag preparedInfo;
+    DragSummaryInfo dragSummaryInfo;
+    OffsetF pixelMapOffset;
+    float defaultPixelMapScale = 0.0f;
+    float windowScale = 0.0f;
+    float scale = 0.0f;
+    std::string udKey;
+    std::string extraInfoLimited;
+    bool needChangeFwkForLeaveWindow = false;
+    bool isSwitchedToSubWindow = false;
+    int32_t ret = 0;
+    int32_t recordsSize = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+};
+
 namespace {
 const std::string NODE_TAG("node");
 const OffsetF COORDINATE_OFFSET(20.0f, 20.0f);

@@ -216,6 +216,16 @@ const ComponentDisappear = __componentDisappear__Internal;
 const CustomComponentLifecycleState = __CustomComponentLifecycleState__Internal;
 
 /**
+ * The function decorated is invoked after a custom component becomes active.
+ */
+const ComponentActive = __componentActive__Internal;
+
+/**
+ * The function decorated is invoked after a custom component becomes inactive.
+ */
+const ComponentInactive = __componentInactive__Internal;
+
+/**
  * UIUtils is a state management tool class for operating the observed data.
  *
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -271,6 +281,21 @@ class UIUtils {
       return source.__getLifecycle__Internal();
     }
     return null;
+  }
+
+  /**
+   * Get the custom component context instance from the given CustomComponent.
+   * The context provides access to component-level utilities and services
+   * bound to the specific custom component instance.
+   *
+   * @param { T } customComponent - custom component instance.
+   * @returns { Context | null } the context instance of the custom component, or null if unavailable.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   */
+  static getCustomComponentContext(customComponent) {
+    return UIUtils.uiUtilsImpl_.getCustomComponentContext(customComponent);
   }
 
   /**
@@ -427,5 +452,7 @@ export default {
   ComponentReuse,
   ComponentRecycle,
   ComponentDisappear,
-  CustomComponentLifecycleState
+  CustomComponentLifecycleState,
+  ComponentActive,
+  ComponentInactive
 };

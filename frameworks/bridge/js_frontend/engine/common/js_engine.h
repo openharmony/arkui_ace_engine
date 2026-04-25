@@ -26,14 +26,19 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
-#include "frameworks/bridge/js_frontend/frontend_delegate.h"
+#include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 
 class NativeEngine;
 class NativeReference;
 typedef struct napi_value__* napi_value;
 
+namespace OHOS::Ace {
+class Component;
+}
+
 namespace OHOS::Ace::Framework {
 class JsAcePage;
+class FrontendDelegate;
 using PixelMapNapiEntry = void* (*)(void*, void*);
 struct JsModule {
     const std::string moduleName;
@@ -319,13 +324,21 @@ public:
     {
         auto iter = drawChildrenEvents_.find(componentId);
         if (iter != drawChildrenEvents_.end()) {
-            for (auto&& observer : iter->second) {
+            auto childrenCallbacks = iter->second;
+            for (auto&& observer : childrenCallbacks) {
+                if (!observer) {
+                    continue;
+                }
                 (*observer)();
             }
         }
         auto iterWithParameter = drawChildrenWithParameterEvents_.find(componentId);
         if (iterWithParameter != drawChildrenWithParameterEvents_.end()) {
-            for (auto&& observer : iterWithParameter->second) {
+            auto childrenWithParameterCallbacks = iterWithParameter->second;
+            for (auto&& observer : childrenWithParameterCallbacks) {
+                if (!observer) {
+                    continue;
+                }
                 (*observer)(childIds);
             }
         }

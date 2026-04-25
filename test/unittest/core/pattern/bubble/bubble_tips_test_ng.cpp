@@ -16,11 +16,12 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -35,8 +36,10 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/common/properties/placement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -116,6 +119,20 @@ void BubbleTipsTestNg::SetUpTestCase()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     BubbleTipsTestNg::popupTheme = AceType::MakeRefPtr<PopupTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == HyperlinkTheme::TypeId()) {
+            return AceType::MakeRefPtr<HyperlinkTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else if (type == ShadowTheme::TypeId()) {
+            return AceType::MakeRefPtr<ShadowTheme>();
+        } else {
+            return BubbleTipsTestNg::popupTheme;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+    .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
         } else if (type == HyperlinkTheme::TypeId()) {

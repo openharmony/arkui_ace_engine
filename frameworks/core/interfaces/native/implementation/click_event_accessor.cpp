@@ -214,6 +214,17 @@ void PreventDefaultImpl(Ark_ClickEvent peer)
     CHECK_NULL_VOID(info);
     info->SetPreventDefault(true);
 }
+Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_ClickEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Coordinate2D>(Offset{});
+    CHECK_NULL_RETURN(peer, errValue);
+    const auto* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    const auto& localLocation = info->GetCurrentLocalLocation();
+    const auto x = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+    const auto y = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+    return Converter::ArkValue<Ark_Coordinate2D>(Offset{x, y});
+}
 Opt_Float64 GetGlobalDisplayXImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
@@ -266,6 +277,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::ConstructImpl,
         ClickEventAccessor::GetFinalizerImpl,
         ClickEventAccessor::PreventDefaultImpl,
+        ClickEventAccessor::GetCurrentLocalPositionImpl,
         ClickEventAccessor::GetDisplayXImpl,
         ClickEventAccessor::SetDisplayXImpl,
         ClickEventAccessor::GetDisplayYImpl,

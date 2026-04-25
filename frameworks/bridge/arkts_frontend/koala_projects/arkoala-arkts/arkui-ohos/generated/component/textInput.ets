@@ -53,14 +53,25 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public text: string
+    // instructive change begin
+    get text(): string {
+        return this.getText()
+    }
+    set text(text: string) {
+        this.setText(text)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, SubmitEventInternal.getFinalizer())
-        this.text = this.getText()
+        // instructive change begin
+        // this.text = this.getText()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, SubmitEventInternal.construct())
-        this.text = this.getText()
+        // instructive change begin
+        // this.text = this.getText()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._SubmitEvent_construct()
@@ -91,6 +102,7 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
         const retval = ArkUIGeneratedNativeModule._SubmitEvent_getText(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
+        retvalDeserializer.dispose()
         return returnResult
     }
     private setText_serialize(text: string): void {
@@ -98,7 +110,7 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
     }
 }
 export class ArkTextInputPeer extends ArkCommonMethodPeer {
-    attributeSet?: TextInputModifier;
+    textInputAttributeSet?: TextInputModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -462,6 +474,18 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setOnCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnWillCopyAttribute(value: arkui_component_common_Callback<string, boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setOnWillCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnCutAttribute(value: arkui_component_common_Callback<string, void> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -472,6 +496,18 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextInputAttribute_setOnCut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillCutAttribute(value: arkui_component_common_Callback<string, boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setOnWillCut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnPasteAttribute(value: OnPasteCallback | undefined): void {
@@ -1561,8 +1597,14 @@ export interface TextInputAttribute extends CommonMethod {
     onCopy(value: arkui_component_common_Callback<string, void> | undefined): this {
         throw new Error('Unimplemented method onCopy')
     }
+    onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillCopy')
+    }
     onCut(value: arkui_component_common_Callback<string, void> | undefined): this {
         throw new Error('Unimplemented method onCut')
+    }
+    onWillCut(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillCut')
     }
     onPaste(value: OnPasteCallback | undefined): this {
         throw new Error('Unimplemented method onPaste')
@@ -1871,9 +1913,19 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         this.getPeer()?.setOnCopyAttribute(value_casted)
         return this
     }
+    public onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<string, boolean> | undefined)
+        this.getPeer()?.setOnWillCopyAttribute(value_casted)
+        return this
+    }
     public onCut(value: arkui_component_common_Callback<string, void> | undefined): this {
         const value_casted = value as (arkui_component_common_Callback<string, void> | undefined)
         this.getPeer()?.setOnCutAttribute(value_casted)
+        return this
+    }
+    public onWillCut(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<string, boolean> | undefined)
+        this.getPeer()?.setOnWillCutAttribute(value_casted)
         return this
     }
     public onPaste(value: OnPasteCallback | undefined): this {

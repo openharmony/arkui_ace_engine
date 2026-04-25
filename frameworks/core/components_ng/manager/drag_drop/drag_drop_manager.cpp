@@ -15,6 +15,8 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
+#include "core/gestures/drag_event.h"
+
 #include "base/geometry/point.h"
 #include "base/geometry/rect.h"
 #include "base/log/ace_trace.h"
@@ -22,9 +24,13 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
+#include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/common/udmf/udmf_client.h"
+#include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"

@@ -26,6 +26,8 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/list/list_theme.h"
+#include "core/components/list/list_item_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_toolbar.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
@@ -535,7 +537,9 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowActivated();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick(GestureEvent& info)
@@ -788,7 +792,9 @@ void ContainerModalPatternEnhance::OnMaxButtonClick()
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowActivated();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick()

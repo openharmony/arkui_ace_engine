@@ -26,6 +26,7 @@
 
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
+#include "core/common/event_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/pan_gesture.h"
@@ -56,6 +57,7 @@ constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char PARAM_FORM_MIGRATE_FORM_KEY[] = "ohos.extra.param.key.migrate_form";
+constexpr char CONNECT_TO_RENDER[] = "ohos.connect.to.render";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr int32_t FORM_STATUS_TIME_OUT = 16501009;
@@ -129,6 +131,12 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 
     SetParamForWant(info, formInfo);
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    if (rsUIContext_ && rsUIContext_->GetConnectToRender()) {
+        auto connectToRender = rsUIContext_->GetConnectToRender();
+        wantCache_.SetParam(CONNECT_TO_RENDER, connectToRender);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "rsUIContext_ or connectToRender is null");
+    }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
     std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
@@ -996,6 +1004,12 @@ void FormManagerDelegate::ReAddForm()
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
+    if (rsUIContext_ && rsUIContext_->GetConnectToRender()) {
+        auto connectToRender = rsUIContext_->GetConnectToRender();
+        wantCache_.SetParam(CONNECT_TO_RENDER, connectToRender);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "rsUIContext_ or connectToRender is null");
+    }
     auto ret =
         OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {

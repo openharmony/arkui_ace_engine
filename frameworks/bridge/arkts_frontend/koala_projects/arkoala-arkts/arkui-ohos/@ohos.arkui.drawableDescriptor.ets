@@ -89,7 +89,7 @@ export class DrawableDescriptor {
     }
     let drawableDescriptor = input as DrawableDescriptor;
     if (drawableDescriptor) {
-      let module = ESValue.load("@ohos.arkui.drawableDescriptor").getProperty('default');
+      let module = ESValue.load(`@ohos:arkui.drawableDescriptor`).getProperty('default');
       let initFunc = module.getProperty("__createTransfer__");
       if (!initFunc.isUndefined()) {
         let drawableRet = initFunc.invoke(ESValue.wrap(drawableDescriptor.nativeObj));

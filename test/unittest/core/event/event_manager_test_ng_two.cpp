@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "core/common/event_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -450,27 +451,29 @@ HWTEST_F(EventManagerTestNg, EventManagerHandleOut001, TestSize.Level1)
 
     auto touchCallback = []() -> void {};
     auto mouseCallback = []() -> void {};
-    std::vector<RectCallback> rectCallbackList {
-        RectCallback(rectGetCallback1, touchCallback, mouseCallback),
-        RectCallback(rectGetCallback2, touchCallback, mouseCallback),
-        RectCallback(nullptr, touchCallback, mouseCallback),
-        RectCallback(rectGetCallback2, touchCallback, nullptr)
-    };
+    eventManager->AddRectCallback(
+        [rectGetCallback1](std::vector<Rect>& rectList) -> void { rectGetCallback1(rectList); },
+        touchCallback, mouseCallback);
+    eventManager->AddRectCallback(
+        [rectGetCallback2](std::vector<Rect>& rectList) -> void { rectGetCallback2(rectList); },
+        touchCallback, mouseCallback);
+    eventManager->AddRectCallback(nullptr, touchCallback, mouseCallback);
+    eventManager->AddRectCallback(
+        [rectGetCallback2](std::vector<Rect>& rectList) -> void { rectGetCallback2(rectList); },
+        touchCallback, nullptr);
 
     /**
-     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
-     * @tc.expected: rectCallbackList.size() is 3
+     * @tc.steps: step3. Call HandleOutOfRectCallbacks with SourceType::TOUCH
+     * @tc.expected: callbacks are processed for touch
      */
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_EQ(rectCallbackList.size(), 3);
+    eventManager->HandleOutOfRectCallbacks(point);
 
     /**
-     * @tc.steps: step4. Call HandleOutOfRectCallback with SourceType::MOUSE
-     * @tc.expected: rectCallbackList.size() is not empty
+     * @tc.steps: step4. Call HandleOutOfRectCallbacks with SourceType::MOUSE
+     * @tc.expected: remaining callbacks are processed for mouse
      */
     point.SetSourceType(SourceType::MOUSE);
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_FALSE(rectCallbackList.empty());
+    eventManager->HandleOutOfRectCallbacks(point);
 }
 
 /**
@@ -1553,6 +1556,257 @@ HWTEST_F(EventManagerTestNg, AddDumpTouchInfo001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddDumpTouchInfo002
+ * @tc.desc: Test AddDumpTouchInfo when touchTimingCallback is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sensorTime = std::chrono::high_resolution_clock::now();
+    touchEvent.processTime = std::chrono::high_resolution_clock::now();
+
+    eventManager->UnregisterTouchTimingCallback();
+    EXPECT_EQ(eventManager->touchTimingCallback_, nullptr);
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+    EXPECT_EQ(eventManager->touchTimingCallback_, nullptr);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo003
+ * @tc.desc: Test AddDumpTouchInfo when touchTimingCallback is set but event is falsified.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo003, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    bool callbackExecuted = false;
+    uint64_t receivedSensorTime = 0;
+    uint64_t receivedReceiveTime = 0;
+    uint64_t receivedDispatchTime = 0;
+    int32_t receivedEventType = 0;
+
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackExecuted = true;
+        receivedSensorTime = sensorTime;
+        receivedReceiveTime = receiveTime;
+        receivedDispatchTime = dispatchTime;
+        receivedEventType = eventType;
+    };
+
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = true;
+    touchEvent.sensorTime = std::chrono::high_resolution_clock::now();
+    touchEvent.processTime = std::chrono::high_resolution_clock::now();
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+
+    EXPECT_FALSE(callbackExecuted);
+    EXPECT_EQ(receivedSensorTime, 0);
+    EXPECT_EQ(receivedReceiveTime, 0);
+    EXPECT_EQ(receivedDispatchTime, 0);
+    EXPECT_EQ(receivedEventType, 0);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo004
+ * @tc.desc: Test AddDumpTouchInfo when touchTimingCallback is set and event is not falsified.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo004, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    bool callbackExecuted = false;
+    uint64_t receivedSensorTime = 0;
+    uint64_t receivedReceiveTime = 0;
+    uint64_t receivedDispatchTime = 0;
+    int32_t receivedEventType = -1;
+
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackExecuted = true;
+        receivedSensorTime = sensorTime;
+        receivedReceiveTime = receiveTime;
+        receivedDispatchTime = dispatchTime;
+        receivedEventType = eventType;
+    };
+
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    auto testTime = std::chrono::high_resolution_clock::now();
+    touchEvent.sensorTime = testTime;
+    touchEvent.processTime = testTime;
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+
+    EXPECT_TRUE(callbackExecuted);
+    EXPECT_EQ(receivedSensorTime, static_cast<uint64_t>(testTime.time_since_epoch().count()));
+    EXPECT_EQ(receivedReceiveTime, static_cast<uint64_t>(testTime.time_since_epoch().count()));
+    EXPECT_GT(receivedDispatchTime, 0);
+    EXPECT_EQ(receivedEventType, static_cast<int32_t>(TouchType::DOWN));
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo005
+ * @tc.desc: Test AddDumpTouchInfo when touchTimingCallback is set and event has history points.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo005, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    
+    int callbackCount = 0;
+    std::vector<uint64_t> receivedSensorTimes;
+    std::vector<uint64_t> receivedReceiveTimes;
+    std::vector<uint64_t> receivedDispatchTimes;
+    std::vector<int32_t> receivedEventTypes;
+    
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackCount++;
+        receivedSensorTimes.push_back(sensorTime);
+        receivedReceiveTimes.push_back(receiveTime);
+        receivedDispatchTimes.push_back(dispatchTime);
+        receivedEventTypes.push_back(eventType);
+    };
+    
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+    
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    auto testTime1 = std::chrono::high_resolution_clock::now();
+    touchEvent.sensorTime = testTime1;
+    touchEvent.processTime = testTime1;
+    
+    TouchEvent historyPoint1;
+    historyPoint1.type = TouchType::MOVE;
+    historyPoint1.sourceTool = SourceTool::FINGER;
+    auto testTime2 = std::chrono::high_resolution_clock::now();
+    historyPoint1.sensorTime = testTime2;
+    historyPoint1.processTime = testTime2;
+    
+    TouchEvent historyPoint2;
+    historyPoint2.type = TouchType::UP;
+    historyPoint2.sourceTool = SourceTool::FINGER;
+    auto testTime3 = std::chrono::high_resolution_clock::now();
+    historyPoint2.sensorTime = testTime3;
+    historyPoint2.processTime = testTime3;
+    
+    touchEvent.history.push_back(historyPoint1);
+    touchEvent.history.push_back(historyPoint2);
+    
+    eventManager->AddDumpTouchInfo(touchEvent);
+    
+    EXPECT_EQ(callbackCount, 2);
+    EXPECT_EQ(receivedEventTypes.size(), 2);
+    EXPECT_EQ(receivedEventTypes[0], static_cast<int32_t>(TouchType::MOVE));
+    EXPECT_EQ(receivedEventTypes[1], static_cast<int32_t>(TouchType::UP));
+    EXPECT_EQ(receivedSensorTimes[0], static_cast<uint64_t>(testTime2.time_since_epoch().count()));
+    EXPECT_EQ(receivedSensorTimes[1], static_cast<uint64_t>(testTime3.time_since_epoch().count()));
+    EXPECT_EQ(receivedReceiveTimes[0], static_cast<uint64_t>(testTime2.time_since_epoch().count()));
+    EXPECT_EQ(receivedReceiveTimes[1], static_cast<uint64_t>(testTime3.time_since_epoch().count()));
+    EXPECT_GT(receivedDispatchTimes[0], 0);
+    EXPECT_GT(receivedDispatchTimes[1], 0);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo006
+ * @tc.desc: Test AddDumpTouchInfo when sourceTool is not FINGER (event.sourceTool == SourceTool::PEN).
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo006, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    bool callbackExecuted = false;
+    uint64_t receivedSensorTime = 0;
+    uint64_t receivedReceiveTime = 0;
+    uint64_t receivedDispatchTime = 0;
+    int32_t receivedEventType = 0;
+
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackExecuted = true;
+        receivedSensorTime = sensorTime;
+        receivedReceiveTime = receiveTime;
+        receivedDispatchTime = dispatchTime;
+        receivedEventType = eventType;
+    };
+
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sourceTool = SourceTool::PEN;
+    auto testTime = std::chrono::high_resolution_clock::now();
+    touchEvent.sensorTime = testTime;
+    touchEvent.processTime = testTime;
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+
+    EXPECT_FALSE(callbackExecuted);
+    EXPECT_EQ(receivedSensorTime, 0);
+    EXPECT_EQ(receivedReceiveTime, 0);
+    EXPECT_EQ(receivedDispatchTime, 0);
+    EXPECT_EQ(receivedEventType, 0);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo007
+ * @tc.desc: Test AddDumpTouchInfo when sourceTool is MOUSE (should not execute callback).
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo007, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    bool callbackExecuted = false;
+
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackExecuted = true;
+    };
+
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sourceTool = SourceTool::MOUSE;
+    auto testTime = std::chrono::high_resolution_clock::now();
+    touchEvent.sensorTime = testTime;
+    touchEvent.processTime = testTime;
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+
+    EXPECT_FALSE(callbackExecuted);
+}
+
+/**
  * @tc.name: DumpTouchInfo001
  * @tc.desc: Test DumpTouchInfo function.
  * @tc.type: FUNC
@@ -1602,5 +1856,325 @@ HWTEST_F(EventManagerTestNg, DumpTouchInfo001, TestSize.Level1)
     eventTouchInfoRecord.AddTouchPoint(touchEvent, timeStamp);
     eventManager->DumpTouchInfo(params2, hasJson);
     EXPECT_EQ(eventTouchInfoRecord.touchHistory_.size(), 0);
+}
+
+/**
+ * @tc.name: GetCurrentReferee001
+ * @tc.desc: Test GetCurrentReferee function with isNewReferee=false and key=1 (POST_ONCE).
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetCurrentReferee001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    constexpr bool IS_NEW_REFEREE = false;
+    constexpr int32_t EVENT_HANDLE_ID = 100001;
+ 
+    auto referee = eventManager->GetCurrentReferee(IS_NEW_REFEREE, EVENT_HANDLE_ID);
+    ASSERT_NE(referee, nullptr);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo001
+ * @tc.desc: Test UpdateDragInfo when type is PULL_MOVE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::PULL_MOVE;
+    touchEvent.pullType = TouchType::PULL_MOVE;
+ 
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::CANCEL);
+    EXPECT_EQ(touchEvent.pullType, TouchType::PULL_MOVE);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo002
+ * @tc.desc: Test UpdateDragInfo when type is PULL_IN_WINDOW.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::PULL_IN_WINDOW;
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::CANCEL);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo003
+ * @tc.desc: Test UpdateDragInfo when type is PULL_OUT_WINDOW.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo003, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::PULL_OUT_WINDOW;
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::CANCEL);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo004
+ * @tc.desc: Test UpdateDragInfo when type is PULL_UP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo004, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::PULL_UP;
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::UP);
+}
+ 
+/**
+ * @tc.name: UpdateDragInfo005
+ * @tc.desc: Test UpdateDragInfo when type is UP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateDragInfo005, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UP;
+    eventManager->UpdateDragInfo(touchEvent);
+    EXPECT_EQ(touchEvent.type, TouchType::UP);
+}
+ 
+/**
+ * @tc.name: FalsifyCancelEventAndDispatch001
+ * @tc.desc: Test FalsifyCancelEventAndDispatch with non-empty downFingerIds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, FalsifyCancelEventAndDispatch001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    eventManager->downFingerIds_[0] = 0;
+    eventManager->downFingerIds_[1] = 1;
+ 
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    touchEvent.originalId = 0;
+    eventManager->lastTouchEvent_ = touchEvent;
+    eventManager->FalsifyCancelEventAndDispatch(touchEvent, true);
+}
+ 
+/**
+ * @tc.name: SetResponseLinkRecognizers001
+ * @tc.desc: Test SetResponseLinkRecognizers with non-post event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, SetResponseLinkRecognizers001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    TouchTestResult result;
+    result.emplace_back(panRecognizer);
+ 
+    ResponseLinkResult responseLinkResult;
+    bool isPostEvent = false;
+    eventManager->SetResponseLinkRecognizers(result, responseLinkResult, isPostEvent);
+}
+ 
+/**
+ * @tc.name: SetResponseLinkRecognizers002
+ * @tc.desc: Test SetResponseLinkRecognizers with post event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, SetResponseLinkRecognizers002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto sequenceRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(std::vector<RefPtr<NG::NGGestureRecognizer>>());
+    ASSERT_NE(sequenceRecognizer, nullptr);
+ 
+    TouchTestResult result;
+    result.emplace_back(sequenceRecognizer);
+ 
+    ResponseLinkResult responseLinkResult;
+    bool isPostEvent = true;
+    eventManager->SetResponseLinkRecognizers(result, responseLinkResult, isPostEvent);
+}
+ 
+/**
+ * @tc.name: CleanRefereeBeforeTouchTest001
+ * @tc.desc: Test CleanRefereeBeforeTouchTest with eventHandleId=0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    touchEvent.eventHandleId = 0;
+    touchEvent.sourceType = SourceType::TOUCH;
+ 
+    constexpr bool NEED_APPEND = false;
+    eventManager->CleanRefereeBeforeTouchTest(touchEvent, NEED_APPEND);
+}
+ 
+/**
+ * @tc.name: CleanRefereeBeforeTouchTest002
+ * @tc.desc: Test CleanRefereeBeforeTouchTest when CheckEventTypeChange returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    touchEvent.eventHandleId = 0;
+    touchEvent.sourceType = SourceType::MOUSE;
+ 
+    auto refereeNG = eventManager->refereeNG_;
+    if (refereeNG) {
+        refereeNG->CheckEventTypeChange(SourceType::TOUCH);
+    }
+ 
+    constexpr bool NEED_APPEND = false;
+    eventManager->CleanRefereeBeforeTouchTest(touchEvent, NEED_APPEND);
+}
+ 
+/**
+ * @tc.name: FlushTouchEventsBegin001
+ * @tc.desc: Test FlushTouchEventsBegin with events in touchTestResults.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, FlushTouchEventsBegin001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(panRecognizer);
+    eventManager->touchTestResults_[0] = hitTestResult;
+ 
+    std::list<TouchEvent> touchEvents;
+    TouchEvent event;
+    event.id = 0;
+    touchEvents.push_back(event);
+    eventManager->FlushTouchEventsBegin(touchEvents);
+}
+ 
+/**
+ * @tc.name: FlushTouchEventsEnd001
+ * @tc.desc: Test FlushTouchEventsEnd with resampled events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, FlushTouchEventsEnd001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(panRecognizer);
+    eventManager->touchTestResults_[0] = hitTestResult;
+ 
+    std::list<TouchEvent> touchEvents;
+    TouchEvent event;
+    event.id = 0;
+    TouchEvent historyEvent;
+    historyEvent.id = 0;
+    event.history.push_back(historyEvent);
+    touchEvents.push_back(event);
+    eventManager->FlushTouchEventsEnd(touchEvents);
+}
+ 
+/**
+ * @tc.name: DispatchTouchEventToTouchTestResult001
+ * @tc.desc: Test DispatchTouchEventToTouchTestResult with passThrough=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchTouchEventToTouchTestResult001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    TouchTestResult touchTestResult;
+    touchTestResult.emplace_back(panRecognizer);
+ 
+    TouchEvent touchEvent;
+    touchEvent.passThrough = true;
+ 
+    constexpr bool SEND_ON_TOUCH = true;
+    eventManager->DispatchTouchEventToTouchTestResult(touchEvent, touchTestResult, SEND_ON_TOUCH);
+}
+ 
+/**
+ * @tc.name: LogTouchTestRecognizerStates001
+ * @tc.desc: Test LogTouchTestRecognizerStates with empty eventTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    eventManager->eventTree_.eventTreeList.clear();
+    eventManager->LogTouchTestRecognizerStates(0);
+}
+ 
+/**
+ * @tc.name: CleanResults001
+ * @tc.desc: Test ClearResults function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanResults001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+ 
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+ 
+    eventManager->touchTestResults_[0].emplace_back(panRecognizer);
+    eventManager->postEventTouchTestResults_[0].emplace_back(panRecognizer);
+    eventManager->axisTouchTestResults_[0].emplace_back(panRecognizer);
+    eventManager->ClearResults();
+    EXPECT_TRUE(eventManager->touchTestResults_.empty());
+    EXPECT_TRUE(eventManager->postEventTouchTestResults_.empty());
+    EXPECT_TRUE(eventManager->axisTouchTestResults_.empty());
 }
 } // namespace OHOS::Ace::NG

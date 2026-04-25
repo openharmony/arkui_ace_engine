@@ -29,10 +29,12 @@ public:
     static void Create(const JSCallbackInfo& info);
 
     static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const std::string& value);
+    static void SetFontWeight(const JSCallbackInfo& info);
     static void SetFontColor(const JSCallbackInfo& info);
     static void SetSymbolRenderingStrategy(const JSCallbackInfo& info);
     static void SetSymbolEffect(const JSCallbackInfo& info);
+    static void ResetFontWeightConfigs();
+    static void ProcessFontWeightConfigObject(const JSRef<JSObject>& paramObject);
     template<typename T>
     static void RegisterSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
     static void UnregisterSpanResource(const std::string& key);

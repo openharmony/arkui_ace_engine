@@ -19,14 +19,14 @@
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/i18n/time_format.h"
 #include "base/i18n/localization.h"
@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -63,6 +64,7 @@ const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 inline const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
 inline const std::string DEFAULT_FORMAT_24H = "HH:mm:ss";
+constexpr int32_t NEW_THEME_SCOPE_ID = 200;
 } // namespace
 
 struct TestProperty {
@@ -927,6 +929,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnColorConfigurationUpdate001, TestSiz
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textTheme = AceType::MakeRefPtr<TextTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textTheme));
 
     TestProperty testProperty;
     RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
@@ -950,12 +953,14 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnColorConfigurationUpdate001, TestSiz
     layoutProperty->UpdateTextColorSetByUser(false);
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
+    host->SetThemeScopeId(NEW_THEME_SCOPE_ID);
+    host->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
     auto pipeline = host->GetContextWithCheck();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetIsSystemColorChange(true);
-    auto theme = pipeline->GetTheme<TextTheme>();
+    auto theme = host->GetTheme<TextTheme>(true);
     ASSERT_NE(theme, nullptr);
-    Color testColor = theme->GetTextStyle().GetTextColor();
+    Color testColor = theme->GetTextClockFontColor();
     pattern->OnColorConfigurationUpdate();
     EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
 
@@ -2357,6 +2362,29 @@ HWTEST_F(TextClockPatternTestNG, UpdateTextLayoutPropertyTest001, TestSize.Level
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+}
+
+HWTEST_F(TextClockPatternTestNG, UpdateTextLayoutPropertyTest003, TestSize.Level1)
+{
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    auto lastPlatformVersion = mockContainer->GetApiTargetVersion();
+    mockContainer->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    pattern->UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    mockContainer->SetApiTargetVersion(lastPlatformVersion);
 }
 
 /**

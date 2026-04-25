@@ -33,9 +33,11 @@
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "core/interfaces/native/implementation/view_model_bridge.h"
 #include "core/interfaces/native/implementation/ui_common_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
@@ -169,6 +171,7 @@ void ParseArrayResultNumber(std::vector<float>& indexes, NG::OffsetF offset)
     indexes.emplace_back(offset.GetY());
 }
 } // namespace
+
 namespace FrameNodeExtenderAccessor {
 void DestroyPeerImpl(Ark_FrameNode peer)
 {
@@ -630,33 +633,32 @@ void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
     CHECK_ON_UI_THREAD_VOID();
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(frameNode);
-    
+
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    
+
     eventHub->RemoveSupportedUIState(static_cast<UIState>(uiStates), false);
 }
-Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options)
+Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options, const Opt_Boolean* treeOperating)
 {
     CHECK_ON_UI_THREAD_RETURN(false);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
-    static const std::vector<const char*> nodeTypeArray = { OHOS::Ace::V2::SCROLL_ETS_TAG,
-        OHOS::Ace::V2::SWIPER_ETS_TAG, OHOS::Ace::V2::LIST_ETS_TAG, OHOS::Ace::V2::LIST_ITEM_ETS_TAG,
-        OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, OHOS::Ace::V2::WATERFLOW_ETS_TAG, OHOS::Ace::V2::FLOW_ITEM_ETS_TAG,
-        OHOS::Ace::V2::GRID_ETS_TAG, OHOS::Ace::V2::GRID_ITEM_ETS_TAG, OHOS::Ace::V2::TEXT_ETS_TAG,
-        OHOS::Ace::V2::TEXTINPUT_ETS_TAG, OHOS::Ace::V2::TEXTAREA_ETS_TAG, OHOS::Ace::V2::COLUMN_ETS_TAG,
-        OHOS::Ace::V2::ROW_ETS_TAG, OHOS::Ace::V2::STACK_ETS_TAG, OHOS::Ace::V2::FLEX_ETS_TAG,
-        OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, OHOS::Ace::V2::PROGRESS_ETS_TAG,
-        OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, OHOS::Ace::V2::IMAGE_ETS_TAG, OHOS::Ace::V2::BUTTON_ETS_TAG,
-        OHOS::Ace::V2::CHECKBOX_ETS_TAG, OHOS::Ace::V2::RADIO_ETS_TAG, OHOS::Ace::V2::SLIDER_ETS_TAG,
-        OHOS::Ace::V2::TOGGLE_ETS_TAG, OHOS::Ace::V2::XCOMPONENT_ETS_TAG };
-    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), frameNode->GetTag());
-    if (pos == nodeTypeArray.end()) {
-        return false;
+    bool attributeSetting = static_cast<bool>(options);
+    auto convValue = Converter::OptConvertPtr<bool>(treeOperating);
+    ArkUITreeOperatingStatus treeOperatingStatus = ARKUI_TREE_OPERATING_STATUS_UNDEFINED;
+    if (convValue) {
+        treeOperatingStatus = (*convValue)
+                                ? ARKUI_TREE_OPERATING_STATUS_ENABLE
+                                : ARKUI_TREE_OPERATING_STATUS_DISABLE;
     }
-    frameNode->SetIsCrossLanguageAttributeSetting(options);
-    return true;
+    ArkUICrossLanguageOption option = {
+        .attributeSetting = attributeSetting,
+        .treeOperatingStatus = treeOperatingStatus
+ 	};
+    auto nativeNode = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+    int result = GetArkUINodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptionsFull(nativeNode, &option);
+    return result == ERROR_CODE_NO_ERROR;
 }
 Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 {
@@ -664,6 +666,22 @@ Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->isCrossLanguageAttributeSetting();
+}
+Ark_Boolean GetCrossLanguageTreeOperatingImpl(Ark_FrameNode peer)
+{
+    CHECK_ON_UI_THREAD_RETURN(false);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    return (static_cast<int32_t>(frameNode->GetTreeOperatingStatus()) == ARKUI_TREE_OPERATING_STATUS_ENABLE);
+}
+Ark_Boolean CheckIfCanCrossLanguageTreeOperatingImpl(Ark_FrameNode peer)
+{
+    CHECK_ON_UI_THREAD_RETURN(false);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    bool result = frameNode->IsCNode() &&
+ 	    (static_cast<int32_t>(frameNode->GetTreeOperatingStatus()) == ARKUI_TREE_OPERATING_STATUS_ENABLE);
+    return result;
 }
 void SetMeasuredSizeImpl(Ark_FrameNode peer,
                          const Ark_Size* size)
@@ -1181,56 +1199,86 @@ Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
     return AceType::RawPtr(nodeRf);
 }
 
-static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
+using NodeConstructFn = Ark_NativePointer (*)(Ark_Int32, Ark_Int32);
+using NodeConstructPair = std::pair<const char *, NodeConstructFn>;
+
+template <std::size_t N>
+constexpr bool IsSorted(const std::array<NodeConstructPair, N>& arr)
 {
-    static const std::unordered_map<std::string, GENERATED_Ark_NodeType> typeMap = {
-        { "List", GENERATED_ARKUI_LIST },
-        { "ListItem", GENERATED_ARKUI_LIST_ITEM },
-        { "ListItemGroup", GENERATED_ARKUI_LIST_ITEM_GROUP },
-        { "Scroll", GENERATED_ARKUI_SCROLL },
-        { "WaterFlow", GENERATED_ARKUI_WATER_FLOW },
-        { "FlowItem", GENERATED_ARKUI_FLOW_ITEM },
-        { "Grid", GENERATED_ARKUI_GRID },
-        { "GridItem", GENERATED_ARKUI_GRID_ITEM },
-        { "Column", GENERATED_ARKUI_COLUMN },
-        { "Row", GENERATED_ARKUI_ROW },
-        { "Stack", GENERATED_ARKUI_STACK },
-        { "Flex", GENERATED_ARKUI_FLEX },
-        { "RelativeContainer", GENERATED_ARKUI_RELATIVE_CONTAINER },
-        { "GridRow", GENERATED_ARKUI_GRID_ROW },
-        { "GridCol", GENERATED_ARKUI_GRID_COL },
-        { "Divider", GENERATED_ARKUI_DIVIDER },
-        { "Blank", GENERATED_ARKUI_BLANK },
-        { "Search", GENERATED_ARKUI_SEARCH },
-        { "Swiper", GENERATED_ARKUI_SWIPER },
-        { "TextArea", GENERATED_ARKUI_TEXT_AREA },
-        { "TextInput", GENERATED_ARKUI_TEXT_INPUT },
-        { "Text", GENERATED_ARKUI_TEXT },
-        { "Marquee", GENERATED_ARKUI_MARQUEE },
-        { "SymbolGlyph", GENERATED_ARKUI_SYMBOL_GLYPH },
-        { "XComponent", GENERATED_ARKUI_XCOMPONENT },
-        { "QRCode", GENERATED_ARKUI_QRCODE },
-        { "Badge", GENERATED_ARKUI_BADGE },
-        { "Progress", GENERATED_ARKUI_PROGRESS },
-        { "LoadingProgress", GENERATED_ARKUI_LOADING_PROGRESS },
-        { "TextClock", GENERATED_ARKUI_TEXT_CLOCK },
-        { "TextTimer", GENERATED_ARKUI_TEXT_TIMER },
-        { "Image", GENERATED_ARKUI_IMAGE },
-        { "Button", GENERATED_ARKUI_BUTTON },
-        { "CheckboxGroup", GENERATED_ARKUI_CHECKBOX_GROUP },
-        { "Checkbox", GENERATED_ARKUI_CHECKBOX },
-        { "Radio", GENERATED_ARKUI_RADIO },
-        { "Rating", GENERATED_ARKUI_RATING },
-        { "Select", GENERATED_ARKUI_SELECT },
-        { "Slider", GENERATED_ARKUI_SLIDER },
-        { "Toggle", GENERATED_ARKUI_TOGGLE },
-    };
-    GENERATED_Ark_NodeType nodeType = GENERATED_ARKUI_CUSTOM_NODE;
-    auto iter = typeMap.find(type);
-    if (iter != typeMap.end()) {
-        nodeType = iter->second;
+    for (std::size_t i = 1; i < N; ++i) {
+        if (std::less<>{}(std::string_view(arr[i].first), std::string_view(arr[i - 1].first))) {
+            return false;
+        }
     }
-    return nodeType;
+    return true;
+}
+
+#define NODE_CONSTRUCTOR(name) \
+    NodeConstructPair(#name, \
+        [](Ark_Int32 id, Ark_Int32 flags) -> Ark_NativePointer { \
+            auto modifier = GENERATED_GetArkUINodeModifiers()->get##name##Modifier(); \
+            CHECK_NULL_RETURN(modifier, nullptr); \
+            return modifier->construct(id, flags); \
+        })
+
+static constexpr std::array typeMap = {
+    // SORTED_SECTION
+    NODE_CONSTRUCTOR(Badge),
+    NODE_CONSTRUCTOR(Blank),
+    NODE_CONSTRUCTOR(Button),
+    NODE_CONSTRUCTOR(Checkbox),
+    NODE_CONSTRUCTOR(CheckboxGroup),
+    NODE_CONSTRUCTOR(Column),
+    NODE_CONSTRUCTOR(Divider),
+    NODE_CONSTRUCTOR(Flex),
+    NODE_CONSTRUCTOR(FlowItem),
+    NODE_CONSTRUCTOR(Grid),
+    NODE_CONSTRUCTOR(GridCol),
+    NODE_CONSTRUCTOR(GridItem),
+    NODE_CONSTRUCTOR(GridRow),
+    NODE_CONSTRUCTOR(Image),
+    NODE_CONSTRUCTOR(List),
+    NODE_CONSTRUCTOR(ListItem),
+    NODE_CONSTRUCTOR(ListItemGroup),
+    NODE_CONSTRUCTOR(LoadingProgress),
+    NODE_CONSTRUCTOR(Marquee),
+    NODE_CONSTRUCTOR(Progress),
+    NODE_CONSTRUCTOR(QRCode),
+    NODE_CONSTRUCTOR(Radio),
+    NODE_CONSTRUCTOR(Rating),
+    NODE_CONSTRUCTOR(RelativeContainer),
+    NODE_CONSTRUCTOR(Row),
+    NODE_CONSTRUCTOR(Scroll),
+    NODE_CONSTRUCTOR(Search),
+    NODE_CONSTRUCTOR(Select),
+    NODE_CONSTRUCTOR(Slider),
+    NODE_CONSTRUCTOR(Stack),
+    NODE_CONSTRUCTOR(Swiper),
+    NODE_CONSTRUCTOR(SymbolGlyph),
+    NODE_CONSTRUCTOR(Text),
+    NODE_CONSTRUCTOR(TextArea),
+    NODE_CONSTRUCTOR(TextClock),
+    NODE_CONSTRUCTOR(TextInput),
+    NODE_CONSTRUCTOR(TextTimer),
+    NODE_CONSTRUCTOR(Toggle),
+    NODE_CONSTRUCTOR(WaterFlow),
+    NODE_CONSTRUCTOR(XComponent),
+
+};
+#undef NODE_CONSTRUCTOR
+
+static_assert(IsSorted(typeMap), "typeMap array must be sorted for lowerBound() function to work properly");
+
+static NodeConstructFn ParseNodeConstructor(const std::string& type)
+{
+    auto iter = std::lower_bound(typeMap.begin(), typeMap.end(), type,
+        [](const NodeConstructPair& a, const std::string& b) {
+            return std::less<std::string_view>{}(a.first, b);
+        });
+    if (iter == typeMap.end() || type != iter->first) {
+        return nullptr;
+    }
+    return iter->second;
 }
 
 Ark_NativePointer CreateTypedFrameNodeImpl(const Ark_String* type, Ark_Boolean supportMultiThread)
@@ -1242,12 +1290,12 @@ Ark_NativePointer CreateTypedFrameNodeImpl(const Ark_String* type, Ark_Boolean s
         threadSafeScope.emplace();
     }
 
-    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    GENERATED_Ark_NodeType nodeType = ParseNodeType(valueType);
-    if (nodeType == GENERATED_ARKUI_CUSTOM_NODE) {
+    auto constructor = ParseNodeConstructor(valueType);
+    if (!constructor) {
         return nullptr;
     }
-    auto node =  OHOS::Ace::NG::GeneratedBridge::CreateNode(nodeType, nodeId, 0);
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = constructor(nodeId, 0);
     CHECK_NULL_RETURN(node, nullptr);
     auto newNode = AceType::Claim(reinterpret_cast<FrameNode*>(node));
     newNode->SetIsArkTsFrameNode(true);
@@ -1446,51 +1494,6 @@ Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
     auto isOnMainTree = frameNode->IsOnMainTree();
     return isOnMainTree;
 }
-Array_Pointer CreateFrameNodesImpl(Ark_Int32 count)
-{
-    std::vector<Ark_NativePointer> empty;
-    auto invalid = Converter::ArkValue<Array_Pointer>(empty, Converter::FC);
-    auto countVal = Converter::Convert<int32_t>(count);
-    std::vector<Ark_NativePointer> frameNodes;
-    for (int32_t i = 0; i < countVal; i++) {
-        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-        CHECK_NULL_RETURN(node, invalid);
-        node->SetExclusiveEventForChild(true);
-        node->SetIsArkTsFrameNode(true);
-        auto peer = FrameNodePeer::Create(node);
-        frameNodes.emplace_back(peer);
-    }
-    return Converter::ArkValue<Array_Pointer>(frameNodes, Converter::FC);
-}
-Array_Pointer GetRenderNodesByFrameNodesImpl(const Array_Pointer* ptrs)
-{
-    std::vector<Ark_NativePointer> empty;
-    auto invalid = Converter::ArkValue<Array_Pointer>(empty, Converter::FC);
-    auto frameNodeVec = Converter::Convert<std::vector<Ark_NativePointer>>(*ptrs);
-    std::vector<Ark_NativePointer> renderNodes;
-    for (size_t i = 0; i < frameNodeVec.size(); i++) {
-        auto node = reinterpret_cast<FrameNodePeer*>(frameNodeVec[i]);
-        CHECK_NULL_RETURN(node, invalid);
-        renderNodes.emplace_back(node->GetRenderNodePeer());
-    }
-    return Converter::ArkValue<Array_Pointer>(renderNodes, Converter::FC);
-}
-Array_I32 GetIdsByFrameNodesImpl(const Array_Pointer* ptrs)
-{
-    std::vector<int32_t> empty;
-    auto invalid = Converter::ArkValue<Array_I32>(empty, Converter::FC);
-    auto frameNodeVec = Converter::Convert<std::vector<Ark_NativePointer>>(*ptrs);
-    std::vector<int32_t> ids;
-    for (size_t i = 0; i < frameNodeVec.size(); i ++) {
-        auto node = reinterpret_cast<FrameNodePeer*>(frameNodeVec[i]);
-        CHECK_NULL_RETURN(node, invalid);
-        auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
-        CHECK_NULL_RETURN(frameNode, invalid);
-        ids.emplace_back(frameNode->GetId());
-    }
-    return Converter::ArkValue<Array_I32>(ids, Converter::FC);
-}
 Ark_NativePointer GetFrameNodeById1Impl(Ark_FrameNode peer,
                                         const Ark_String* id)
 {
@@ -1510,6 +1513,30 @@ Ark_NativePointer GetFrameNodeByUniqueId1Impl(Ark_FrameNode peer,
     auto node = frameNode->GetFrameNodeByUniqueIdInSubTree(valueId);
     CHECK_NULL_RETURN(node, nullptr);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
+}
+Array_FrameNodeCreateInfo GetFrameNodeCreateInfoArrayImpl(Ark_Int32 count)
+{
+    std::vector<Ark_FrameNodeCreateInfo> empty;
+    auto invalid = Converter::ArkValue<Array_FrameNodeCreateInfo>(empty, Converter::FC);
+    auto countVal = Converter::Convert<int32_t>(count);
+    std::vector<Ark_FrameNodeCreateInfo> frameNodeCreateInfoArray;
+    for (int32_t i = 0; i < countVal; i++) {
+        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+        CHECK_NULL_RETURN(node, invalid);
+        node->SetExclusiveEventForChild(true);
+        node->SetIsArkTsFrameNode(true);
+        auto frameNodePeer = FrameNodePeer::Create(node);
+        CHECK_NULL_RETURN(frameNodePeer, invalid);
+        auto renderNodePeer = frameNodePeer->GetRenderNodePeer();
+        auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+        CHECK_NULL_RETURN(frameNode, invalid);
+        auto id = frameNode->GetId();
+        Ark_FrameNodeCreateInfo frameNodeCreateInfo { frameNodePeer, renderNodePeer,
+            Converter::ArkValue<Ark_Int32>(id) };
+        frameNodeCreateInfoArray.emplace_back(frameNodeCreateInfo);
+    }
+    return Converter::ArkValue<Array_FrameNodeCreateInfo>(frameNodeCreateInfoArray, Converter::FC);
 }
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
@@ -1548,6 +1575,8 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
         FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
         FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
+        FrameNodeExtenderAccessor::GetCrossLanguageTreeOperatingImpl,
+        FrameNodeExtenderAccessor::CheckIfCanCrossLanguageTreeOperatingImpl,
         FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
         FrameNodeExtenderAccessor::SetLayoutPositionImpl,
         FrameNodeExtenderAccessor::MeasureImpl,
@@ -1590,11 +1619,9 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
         FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
         FrameNodeExtenderAccessor::ApplyAttributesFinishImpl,
-        FrameNodeExtenderAccessor::CreateFrameNodesImpl,
-        FrameNodeExtenderAccessor::GetRenderNodesByFrameNodesImpl,
-        FrameNodeExtenderAccessor::GetIdsByFrameNodesImpl,
         FrameNodeExtenderAccessor::GetFrameNodeById1Impl,
         FrameNodeExtenderAccessor::GetFrameNodeByUniqueId1Impl,
+        FrameNodeExtenderAccessor::GetFrameNodeCreateInfoArrayImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

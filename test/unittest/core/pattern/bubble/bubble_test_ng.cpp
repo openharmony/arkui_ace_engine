@@ -22,11 +22,12 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
-#include "test/mock/core/rosen/testing_path.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_path.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
@@ -34,6 +35,7 @@
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/select/select_theme.h"
@@ -49,8 +51,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,6 +60,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float ZERO = 0.0f;
+constexpr float MESSAGE_OFFSET_X = 6.0f;
+constexpr float MESSAGE_OFFSET_Y = 16.0f;
+constexpr float EXPECTED_OFFSET_VALUE_ZERO = 0.0f;
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE = true;
@@ -84,7 +89,7 @@ const std::string BUBBLE_NEW_MESSAGE = "Good";
 const std::string STATE = "true";
 const OffsetF DISPLAY_WINDOW_OFFSET = OffsetF(ZERO, ZERO);
 const OffsetF TARGET_OFFSET(TARGET_X, TARGET_Y);
-const OffsetF MESSAGE_OFFSET = OffsetF(6, 16);
+const OffsetF MESSAGE_OFFSET = OffsetF(MESSAGE_OFFSET_X, MESSAGE_OFFSET_Y);
 const Color BUBBLE_PAINT_PROPERTY_MASK_COLOR = Color(0XFFFF0000);
 const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color(0XFFFFFF00);
 const Color BUBBLE_PAINT_PROPERTY_TEXT_COLOR = Color(0XFFFF0000);
@@ -602,6 +607,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level0)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     EXPECT_NE(popupNode, nullptr);
     EXPECT_EQ(popupNode->GetPattern<BubblePattern>()->GetHasTransition(), true);
@@ -788,8 +794,8 @@ HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level0)
     OffsetT<Dimension> offset;
     pattern->arrowPlacement_.reset();
     offset = pattern->GetInvisibleOffset();
-    EXPECT_EQ(offset.GetX().Value(), 0);
-    EXPECT_EQ(offset.GetY().Value(), 0);
+    EXPECT_EQ(offset.GetX().Value(), EXPECTED_OFFSET_VALUE_ZERO);
+    EXPECT_EQ(offset.GetY().Value(), EXPECTED_OFFSET_VALUE_ZERO);
     pattern->arrowPlacement_ = Placement::LEFT;
     offset = pattern->GetInvisibleOffset();
     EXPECT_GT(offset.GetX().Value(), 0);
@@ -828,8 +834,8 @@ HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level0)
     EXPECT_LT(offset.GetY().Value(), 0);
     pattern->arrowPlacement_ = Placement::NONE;
     offset = pattern->GetInvisibleOffset();
-    EXPECT_EQ(offset.GetX().Value(), 0);
-    EXPECT_EQ(offset.GetY().Value(), 0);
+    EXPECT_EQ(offset.GetX().Value(), EXPECTED_OFFSET_VALUE_ZERO);
+    EXPECT_EQ(offset.GetY().Value(), EXPECTED_OFFSET_VALUE_ZERO);
 }
 
 /**
@@ -1096,6 +1102,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level0)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
     auto pattern = popupNode->GetPattern<BubblePattern>();
@@ -1146,6 +1153,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level0)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
     auto pattern = popupNode->GetPattern<BubblePattern>();
@@ -1234,6 +1242,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level0)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
     auto firstTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());

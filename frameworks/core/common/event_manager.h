@@ -16,11 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_EVENT_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_EVENT_MANAGER_H
 
+#include <functional>
+#include <list>
 #include <unordered_map>
+#include <vector>
 
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/event_dump.h"
+#include "core/common/input_event_monitor_manager.h"
 #include "core/common/key_event_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event_hub.h"
@@ -41,36 +46,29 @@
 namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
+class GestureDebugBoundaryManager;
 class SelectOverlayManager;
+class SmartGestureManager;
 class ResponseCtrl;
+#ifdef RELAXED_INTERACTION_SUPPORT
+class RelaxedInteractionManager;
+#endif
 class TouchDelegate : public virtual AceType {
     DECLARE_ACE_TYPE(TouchDelegate, AceType);
 public:
     virtual void DelegateTouchEvent(const TouchEvent& point) {};
 };
 } // namespace NG
+enum class MouseFormat;
+class MouseStyleManager;
 class RenderNode;
 class Element;
 class TextOverlayManager;
 class CoastingAxisEventGenerator;
-using MouseHoverTestList = std::list<WeakPtr<RenderNode>>;
-using OutOfRectGetRectCallback = std::function<void(std::vector<Rect>&)>;
-using OutOfRectTouchCallback = std::function<void(void)>;
-using OutOfRectMouseCallback = std::function<void(void)>;
 using TouchDelegates = std::vector<RefPtr<NG::TouchDelegate>>;
 using TouchDelegatesIter = TouchDelegates::const_iterator;
 
-struct RectCallback final {
-    RectCallback(OutOfRectGetRectCallback rectGetCallback, OutOfRectTouchCallback touchCallback,
-        OutOfRectMouseCallback mouseCallback)
-        : rectGetCallback(std::move(rectGetCallback)), touchCallback(std::move(touchCallback)),
-          mouseCallback(std::move(mouseCallback))
-    {}
-    ~RectCallback() = default;
-    OutOfRectGetRectCallback rectGetCallback;
-    OutOfRectTouchCallback touchCallback;
-    OutOfRectMouseCallback mouseCallback;
-};
+struct RectCallbackListImpl;
 
 struct TouchDelegateHdl {
     TouchDelegateHdl(int32_t touchId, TouchDelegatesIter iter) : touchId(touchId), iter(iter) {}
@@ -110,7 +108,7 @@ class EventManager : virtual public NG::KeyEventManager {
 
 public:
     EventManager();
-    ~EventManager() override = default;
+    ~EventManager() override;
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
@@ -131,6 +129,10 @@ public:
     bool HasDifferentDirectionGesture();
 
     bool OnNonPointerEvent(const NonPointerEvent& event);
+    ACE_FORCE_EXPORT const RefPtr<NG::SmartGestureManager>& GetOrCreateSmartGestureManager();
+    const RefPtr<NG::SmartGestureManager>& GetSmartGestureManager() const;
+    void ClearSmartGestureSelected();
+    void ResetSmartGestureManager();
     ACE_NON_VIRTUAL bool DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch = true);
     bool DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch = true);
     void DispatchTouchCancelToRecognizer(
@@ -199,7 +201,10 @@ public:
     bool HandleFocusByTabIndex(
         const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage);
 
-    void HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList);
+    void HandleOutOfRectCallbacks(const Point& point);
+    void AddRectCallback(std::function<void(std::vector<Rect>&)>&& getRectCallback,
+        std::function<void()>&& touchCallback, std::function<void()>&& mouseCallback);
+    void ClearRectCallbacks();
 
     RefPtr<GestureReferee> GetGestureReferee()
     {
@@ -219,11 +224,14 @@ public:
         return mouseStyleManager_;
     }
 
-    void FlushCursorStyleRequests()
+    const RefPtr<NG::GestureDebugBoundaryManager>& GetGestureDebugBoundaryManager();
+
+    RefPtr<InputEventMonitorManager> GetInputMonitorManager() const
     {
-        CHECK_NULL_VOID(mouseStyleManager_);
-        mouseStyleManager_->VsyncMouseFormat();
+        return inputMonitorManager_;
     }
+
+    void FlushCursorStyleRequests();
 
     bool TryResampleTouchEvent(std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& resample);
@@ -415,11 +423,7 @@ public:
 
     void DelegateTouchEvent(const TouchEvent& point);
 
-    MouseFormat GetCurrentMouseStyle()
-    {
-        CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
-        return mouseStyleManager_->GetCurrentMouseStyle();
-    }
+    MouseFormat GetCurrentMouseStyle();
 
     void AddTouchDoneFrameNode(const WeakPtr<NG::FrameNode>& frameNode);
 
@@ -472,6 +476,19 @@ public:
     void AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener);
     void UnregisterTouchpadInteractionListenerInner(int32_t frameNodeId);
     void NotifyTouchpadInteraction();
+    void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback)
+    {
+        touchTimingCallback_ = std::move(callback);
+    }
+    void UnregisterTouchTimingCallback()
+    {
+        touchTimingCallback_ = nullptr;
+    }
+    void ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback);
+    void FlushRelaxedInteraction(std::function<void()> requestFrameCallback);
+
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -499,6 +516,7 @@ private:
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
     void UpdateDragInfo(TouchEvent& point);
     void UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch);
+    void EraseEventRefereeWithStrategy(const TouchEvent& point);
     void DoSingleMouseActionRelease(const PressMouseInfo& pressMouseInfo);
     bool DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event);
     bool DispatchMouseEventInLessAPI13(const MouseEvent& event);
@@ -519,6 +537,13 @@ private:
     void ProcessTouchTestWithReferee(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
       TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend,
       const TouchTestResult& hitTestResult);
+    void AxisTouchTestResultsClear(int32_t eventHandleId);
+    void TouchTestResultsClear(int32_t eventHandleId);
+    void DownFingerIdsClear(int32_t eventHandleId);
+#ifdef RELAXED_INTERACTION_SUPPORT
+    RefPtr<NG::RelaxedInteractionManager> GetOrCreateRelaxedInteractionManager();
+#endif
+
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     std::unordered_map<int32_t, MouseTestResult> currMouseTestResultsMap_;
@@ -543,8 +568,8 @@ private:
      * handling does not belong to any controller in general
      */
     std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> dragTouchEventListener_;
-    MouseHoverTestList mouseHoverTestResults_;
-    MouseHoverTestList mouseHoverTestResultsPre_;
+    std::list<WeakPtr<RenderNode>> mouseHoverTestResults_;
+    std::list<WeakPtr<RenderNode>> mouseHoverTestResultsPre_;
     WeakPtr<RenderNode> mouseHoverNodePre_;
     WeakPtr<RenderNode> mouseHoverNode_;
     WeakPtr<RenderNode> axisNode_;
@@ -559,7 +584,10 @@ private:
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
     std::unordered_map<int32_t, RefPtr<NG::GestureReferee>> postEventRefereeWithStrategyNG_;
+    RefPtr<NG::SmartGestureManager> smartGestureManager_;
+    RefPtr<NG::GestureDebugBoundaryManager> gestureDebugBoundaryManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
+    RefPtr<InputEventMonitorManager> inputMonitorManager_;
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;
@@ -594,6 +622,12 @@ private:
     // Only used in TouchTest
     std::optional<HitTestRecordInfo> hitTestRecordInfo_ = std::nullopt;
     std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> hitTestFrameNodeListener_;
+    std::unique_ptr<RectCallbackListImpl> rectCallbackListImpl_;
+    std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>
+        touchTimingCallback_;
+#ifdef RELAXED_INTERACTION_SUPPORT
+    RefPtr<NG::RelaxedInteractionManager> relaxedInteractionManager_;
+#endif
 };
 
 } // namespace OHOS::Ace

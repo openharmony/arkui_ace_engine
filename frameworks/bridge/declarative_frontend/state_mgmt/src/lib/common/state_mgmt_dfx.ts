@@ -20,7 +20,6 @@ class stateMgmtDFX {
   private static readonly DUMP_MAX_LENGTH: number = 10;
   private static readonly DUMP_LAST_LENGTH: number = 3;
   public static enableDebug: boolean = false;
-  public static enableSwitchInstance: boolean = false;
 
   public static getObservedPropertyInfo<T>(observedProp: ObservedPropertyAbstractPU<T>, isProfiler: boolean,
     changedTrackPropertyName?: string): ObservedPropertyInfo<T> {
@@ -181,12 +180,14 @@ class stateMgmtDFX {
     if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
       return isGetElement ? ObserveV2.getObserve().getElementNameById(elmtId) :
         ObserveV2.getObserve().getElementInfoById(elmtId) as string;
-    } else if (elmtId < MonitorV2.MIN_WATCH_ID) {
+    } else if (elmtId < MonitorV2.MIN_MONITOR_ORIG_ID) {
       return `@Computed ${ObserveV2.getObserve().getComputedInfoById(elmtId)}`;
-    } else if (elmtId < MonitorV2.MIN_WATCH_FROM_API_ID) {
+    } else if (elmtId < MonitorV2.MIN_MONITOR_WITH_OPTIONS_OR_ASYNC_API_ID) {
       return `@Monitor ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`;
+    } else if (elmtId < MonitorV2.MIN_SYNC_MONITOR_OR_SYNC_API_ID) {
+      return ObserveV2.getObserve().getMonitorInfoByIdTagAndFunc(elmtId);
     } else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
-      return `MonitorApi ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`;
+      return ObserveV2.getObserve().getMonitorInfoByIdTagAndFunc(elmtId);
     } else {
       return isGetElement ? 'PersistenceV2' : `PersistenceV2[${elmtId}]`;
     }
@@ -329,14 +330,6 @@ declare function _arkUIUncaughtPromiseError(error: any);
 
 function setAceDebugMode(): void {
   stateMgmtDFX.enableDebug = true;
-}
-
-function enableSwitchInstance(): void {
-  stateMgmtDFX.enableSwitchInstance = true;
-}
-
-function getEnableSwitchInstance(): boolean {
-  return stateMgmtDFX.enableSwitchInstance;
 }
 
 function getStateMgmtInfo(nodeIds: Array<number>, propertyName: string, jsonPath: string): Array<string | undefined> {

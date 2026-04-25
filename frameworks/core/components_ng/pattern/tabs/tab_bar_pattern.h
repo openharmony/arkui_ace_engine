@@ -24,7 +24,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_theme.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
@@ -642,6 +641,7 @@ public:
 
     void ResetOnForceMeasure(int32_t index);
     void OnColorModeChange(uint32_t colorMode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTree() override;
@@ -805,8 +805,6 @@ private:
     template<typename T>
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
     void UpdateSubTabBarImageIndicator();
-    void LoadCompleteManagerStartCollect(int32_t index);
-    void LoadCompleteManagerStopCollect();
     void NotifyTabBarItemsChange();
 
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;

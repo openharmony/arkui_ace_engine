@@ -15,17 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
+#include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
+#include "core/common/event_manager.h"
+#include "core/common/input_event_monitor_manager.h"
 #include "core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIRawInputEventWrapperAccessor* GetRawInputEventWrapperAccessor();
+
 namespace {
 constexpr int32_t INVALID_ID = -1;
 struct ScrollInfo {
@@ -41,6 +50,179 @@ BindInfoMap bindInfoMap_;
 
 constexpr int32_t SHOW_TAB_BAR_DELAY = 2000;
 constexpr float SCROLL_RATIO = 2.0f;
+
+struct InputEventMonitorPeer {
+    RefPtr<InputEventMonitorHolder> holder;
+    RefPtr<CallbackHelper<InputEventListener>> listener;
+};
+
+thread_local Ark_InputEventInterceptResult* g_inputEventInterceptResult = nullptr;
+
+void HoldInputEventInterceptResultCallbackResource(Ark_Int32 /*resourceId*/)
+{}
+
+void ReleaseInputEventInterceptResultCallbackResource(Ark_Int32 /*resourceId*/)
+{}
+
+void OnInputEventInterceptResult(const Ark_Int32 /*resourceId*/, const Ark_InputEventInterceptResult value)
+{
+    if (g_inputEventInterceptResult != nullptr) {
+        *g_inputEventInterceptResult = value;
+    }
+}
+
+void OnInputEventInterceptResultSync(
+    Ark_VMContext /*vmContext*/, const Ark_Int32 resourceId, const Ark_InputEventInterceptResult value)
+{
+    OnInputEventInterceptResult(resourceId, value);
+}
+
+TouchEventInfo CreateMonitorTouchObject(const TouchEvent& event)
+{
+    TouchEventInfo info("touchEvent");
+    info.SetTimeStamp(event.time);
+    info.SetPointerEvent(event.GetTouchEventPointerEvent());
+    info.SetDeviceId(event.deviceId);
+    info.SetSourceDevice(event.sourceType);
+    info.SetForce(event.force);
+    if (event.tiltX.has_value()) {
+        info.SetTiltX(event.tiltX.value());
+    }
+    if (event.tiltY.has_value()) {
+        info.SetTiltY(event.tiltY.value());
+    }
+    if (event.rollAngle.has_value()) {
+        info.SetRollAngle(event.rollAngle.value());
+    }
+    info.SetSourceTool(event.sourceTool);
+    info.SetPressedKeyCodes(event.pressedKeyCodes_);
+    info.SetOperatingHand(event.operatingHand);
+    info.SetEventHandleId(event.eventHandleId);
+    info.SetTargetDisplayId(event.targetDisplayId);
+    return info;
+}
+
+TouchEventInfo CreateMonitorTouchEventInfo(const TouchEvent& event)
+{
+    TouchLocationInfo changedInfo("onTouch", event.GetOriginalReCovertId());
+    changedInfo.SetGlobalLocation(Offset(event.x, event.y));
+    changedInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    changedInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
+    changedInfo.SetTouchType(event.type);
+    changedInfo.SetSourceDevice(event.sourceType);
+    changedInfo.SetForce(event.force);
+    changedInfo.SetPressedTime(event.pressedTime);
+    changedInfo.SetWidth(event.width);
+    changedInfo.SetHeight(event.height);
+    if (event.tiltX.has_value()) {
+        changedInfo.SetTiltX(event.tiltX.value());
+    }
+    if (event.tiltY.has_value()) {
+        changedInfo.SetTiltY(event.tiltY.value());
+    }
+    if (event.rollAngle.has_value()) {
+        changedInfo.SetRollAngle(event.rollAngle.value());
+    }
+    changedInfo.SetSourceTool(event.sourceTool);
+    changedInfo.SetOperatingHand(event.operatingHand);
+
+    auto eventInfo = CreateMonitorTouchObject(event);
+    eventInfo.AddChangedTouchLocationInfo(std::move(changedInfo));
+    for (const auto& item : event.pointers) {
+        TouchLocationInfo info("onTouch", item.GetOriginalReCovertId());
+        info.SetGlobalLocation(Offset(item.x, item.y));
+        info.SetScreenLocation(Offset(item.screenX, item.screenY));
+        info.SetGlobalDisplayLocation(Offset(item.globalDisplayX, item.globalDisplayY));
+        info.SetTouchType(event.type);
+        info.SetForce(item.force);
+        info.SetPressedTime(item.downTime);
+        info.SetWidth(item.width);
+        info.SetHeight(item.height);
+        if (item.tiltX.has_value()) {
+            info.SetTiltX(item.tiltX.value());
+        }
+        if (item.tiltY.has_value()) {
+            info.SetTiltY(item.tiltY.value());
+        }
+        if (item.rollAngle.has_value()) {
+            info.SetRollAngle(item.rollAngle.value());
+        }
+        info.SetSourceTool(item.sourceTool);
+        info.SetOperatingHand(item.operatingHand);
+        eventInfo.AddTouchLocationInfo(std::move(info));
+    }
+    return eventInfo;
+}
+
+MouseInfo CreateMonitorMouseInfo(const MouseEvent& event)
+{
+    MouseInfo info;
+    info.SetPointerEvent(event.GetMouseEventPointerEvent());
+    info.SetButton(event.button);
+    info.SetAction(event.action);
+    info.SetPullAction(event.pullAction);
+    info.SetGlobalLocation(event.GetOffset());
+    info.SetScreenLocation(event.GetScreenOffset());
+    info.SetGlobalDisplayLocation(event.GetGlobalDisplayOffset());
+    info.SetTimeStamp(event.time);
+    info.SetDeviceId(event.deviceId);
+    info.SetTargetDisplayId(event.targetDisplayId);
+    info.SetSourceDevice(event.sourceType);
+    info.SetSourceTool(event.sourceTool);
+    info.SetPressedKeyCodes(event.pressedKeyCodes_);
+    info.SetRawDeltaX(event.rawDeltaX);
+    info.SetRawDeltaY(event.rawDeltaY);
+    info.SetPressedButtons(event.pressedButtonsArray);
+    info.SetIsRightButtonEventFromDoulbeTap(event.isRightButtonEventFromDoulbeTap);
+    info.SetEventHandleId(event.eventHandleId);
+    return info;
+}
+
+Ark_RawInputEventWrapper CreateArkRawInputEventWrapper(const RawInputEventWrapper& wrapper)
+{
+    Ark_Union_MouseEvent_TouchEventProxy_KeyEvent event {};
+
+    if (wrapper.IsMouseEvent()) {
+        event.selector = 0;
+        if (auto* mouseEvent = wrapper.GetMouseEvent()) {
+            auto mouseInfo = CreateMonitorMouseInfo(*mouseEvent);
+            Converter::SyncEvent<Ark_MouseEvent, MouseEventPeer, MouseInfo> mouseEventProxy(mouseInfo);
+            event.value0 = mouseEventProxy.ArkValue();
+        }
+    } else if (wrapper.IsTouchEvent()) {
+        event.selector = 1;
+        if (auto* touchEvent = wrapper.GetTouchEvent()) {
+            auto touchInfo = CreateMonitorTouchEventInfo(*touchEvent);
+            event.value1 = Ark_TouchEventProxy {
+                .target = Converter::ArkValue<Ark_EventTarget>(touchInfo.GetTarget()),
+                .timeStamp = Converter::ArkValue<Ark_Int64>(
+                    static_cast<int64_t>(touchInfo.GetTimeStamp().time_since_epoch().count())),
+                .source = Converter::ArkValue<Ark_SourceType>(touchInfo.GetSourceDevice()),
+                .pressure = Converter::ArkValue<Ark_Float64>(touchInfo.GetForce()),
+                .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchInfo.GetTiltX().value_or(0))),
+                .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchInfo.GetTiltY().value_or(0))),
+                .sourceTool = Converter::ArkValue<Ark_SourceTool>(touchInfo.GetSourceTool()),
+                .deviceId = Converter::ArkValue<Opt_Int32>(touchInfo.GetDeviceId()),
+                .targetDisplayId = Converter::ArkValue<Opt_Int32>(touchInfo.GetTargetDisplayId()),
+                .type = Converter::ArkValue<Ark_TouchType>(touchInfo.GetChangedTouches().front().GetTouchType()),
+                .touches = Converter::ArkValue<Array_TouchObject>(touchInfo.GetTouches(), Converter::FC),
+                .changedTouches = Converter::ArkValue<Array_TouchObject>(touchInfo.GetChangedTouches(), Converter::FC),
+                .ptr = nullptr,
+            };
+        }
+    } else if (wrapper.IsKeyEvent()) {
+        event.selector = 2;
+        if (auto* keyEvent = wrapper.GetKeyEvent()) {
+            KeyEventInfo keyEventInfo(*keyEvent);
+            Converter::SyncEvent<Ark_KeyEvent, KeyEventPeer, KeyEventInfo> keyEventProxy(keyEventInfo);
+            event.value2 = keyEventProxy.ArkValue();
+        }
+    }
+
+    auto* accessor = GetRawInputEventWrapperAccessor();
+    CHECK_NULL_RETURN(accessor, nullptr);
+    return accessor->construct(&event);
+}
 
 void HandleOnTouchEvent(WeakPtr<ScrollControllerBase> scroller, const TouchEventInfo& info)
 {
@@ -492,6 +674,147 @@ void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feat
     bool value = (featureVal == NG::CustomKeyboardContinueFeature::ENABLED);
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
+Ark_InputEventMonitor AddLocalInputEventMonitorImpl(Ark_Int32 eventMask, const InputEventListener* listener)
+{
+    Ark_InputEventMonitor invalidMonitor {};
+    CHECK_NULL_RETURN(listener, invalidMonitor);
+
+    auto listenerRef = AceType::MakeRefPtr<CallbackHelper<InputEventListener>>(*listener);
+    CHECK_NULL_RETURN(listenerRef, invalidMonitor);
+    CHECK_NULL_RETURN(listenerRef->IsValid(), invalidMonitor);
+
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, invalidMonitor);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, invalidMonitor);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, invalidMonitor);
+    auto monitorManager = eventManager->GetInputMonitorManager();
+    CHECK_NULL_RETURN(monitorManager, invalidMonitor);
+
+    auto handleFunc = [listenerRef](const RawInputEventWrapper& wrapper) -> InputEventInterceptAction {
+        CHECK_NULL_RETURN(listenerRef, InputEventInterceptAction::CONTINUE);
+        if (!listenerRef->IsValid()) {
+            return InputEventInterceptAction::CONTINUE;
+        }
+
+        auto rawEvent = CreateArkRawInputEventWrapper(wrapper);
+        Ark_InputEventInterceptResult result { .action = ARK_INPUT_EVENT_INTERCEPT_ACTION_CONTINUE };
+        Callback_InputEventInterceptResult_Void continuation {
+            .resource = {
+                .resourceId = 0,
+                .hold = HoldInputEventInterceptResultCallbackResource,
+                .release = ReleaseInputEventInterceptResultCallbackResource,
+            },
+            .call = OnInputEventInterceptResult,
+            .callSync = OnInputEventInterceptResultSync,
+        };
+        g_inputEventInterceptResult = &result;
+        listenerRef->InvokeSync(rawEvent, continuation);
+        g_inputEventInterceptResult = nullptr;
+
+        auto* rawInputEventWrapperAccessor = GetRawInputEventWrapperAccessor();
+        if (rawInputEventWrapperAccessor != nullptr && rawEvent != nullptr) {
+            rawInputEventWrapperAccessor->destroyPeer(rawEvent);
+        }
+
+        return result.action == ARK_INPUT_EVENT_INTERCEPT_ACTION_BLOCK ?
+            InputEventInterceptAction::BLOCK : InputEventInterceptAction::CONTINUE;
+    };
+
+    auto identity = monitorManager->AddLocalInputMonitor(static_cast<uint32_t>(eventMask), std::move(handleFunc));
+    CHECK_NULL_RETURN(identity, invalidMonitor);
+
+    auto* monitorPeer = new InputEventMonitorPeer {
+        .holder = AceType::MakeRefPtr<InputEventMonitorHolder>(identity),
+        .listener = listenerRef,
+    };
+    CHECK_NULL_RETURN(monitorPeer, invalidMonitor);
+    return Ark_InputEventMonitor { .handle = monitorPeer };
+}
+void RemoveLocalInputEventMonitorImpl(const Ark_InputEventMonitor* monitor)
+{
+    CHECK_NULL_VOID(monitor);
+    auto* monitorPeer = reinterpret_cast<InputEventMonitorPeer*>(monitor->handle);
+    CHECK_NULL_VOID(monitorPeer);
+
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto monitorManager = eventManager->GetInputMonitorManager();
+    CHECK_NULL_VOID(monitorManager);
+    CHECK_NULL_VOID(monitorPeer->holder);
+    monitorManager->RemoveLocalInputMonitor(monitorPeer->holder->GetIdentity());
+
+    delete monitorPeer;
+}
+void EnableEventPassthroughImpl(const Opt_Boolean* enabled, Ark_RawInputEventType eventType)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto enabledVal = Converter::OptConvertPtr<bool>(enabled).value_or(false);
+    auto bundleName = container->GetBundleName();
+    switch (eventType) {
+        case ARK_RAW_INPUT_EVENT_TYPE_TOUCH:
+            AceApplicationInfo::GetInstance().UpdateTouchPassthroughForPipelines(enabledVal, bundleName);
+            break;
+        case ARK_RAW_INPUT_EVENT_TYPE_MOUSE:
+            AceApplicationInfo::GetInstance().UpdateMousePassthroughForPipelines(enabledVal, bundleName);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+                "EnableEventPassthroughImpl: unknown eventType=%{public}d",
+                static_cast<int32_t>(eventType));
+            break;
+    }
+}
+void SetCustomCursorImpl(Ark_image_PixelMap value, const Opt_Int32* focusX, const Opt_Int32* focusY)
+{
+    auto pixelMap = Converter::Convert<RefPtr<PixelMap>>(value);
+    CHECK_NULL_VOID(pixelMap);
+
+    auto optX = Converter::OptConvertPtr<int32_t>(focusX);
+    auto optY = Converter::OptConvertPtr<int32_t>(focusY);
+    int32_t x = optX.value_or(0);
+    int32_t y = optY.value_or(0);
+    if (x < 0 || x >= pixelMap->GetWidth()) {
+        x = 0;
+    }
+    if (y < 0 || y >= pixelMap->GetHeight()) {
+        y = 0;
+    }
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    if (!pipeline->GetTaskExecutor()) {
+        return;
+    }
+    pipeline->GetTaskExecutor()->PostSyncTask(
+        [pipeline, pixelMap, x, y]() {
+            CustomCursorInfo customCursorInfo { pixelMap, x, y };
+            pipeline->SetCursor(customCursorInfo);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIJsSetCustomCursor");
+}
+void SetTextSelectionClearPolicyImpl(Ark_TextSelectionClearPolicy policy)
+{
+    auto policyValue = static_cast<int32_t>(policy);
+    if (policyValue <= static_cast<int32_t>(NG::TextSelectionClearPolicy::POLICY_BEGIN) ||
+        policyValue >= static_cast<int32_t>(NG::TextSelectionClearPolicy::POLICY_END)) {
+        return;
+    }
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selectOverlayManager = pipelineContext->GetSelectOverlayManager();
+    CHECK_NULL_VOID(selectOverlayManager);
+    auto contentOverlayManager = selectOverlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    contentOverlayManager->SetTextSelectionClearPolicy(static_cast<NG::TextSelectionClearPolicy>(policyValue));
+}
 } // IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
@@ -507,6 +830,11 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::BindTabsToNestedScrollableImpl,
         IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+        IUIContextAccessor::SetCustomCursorImpl,
+        IUIContextAccessor::EnableEventPassthroughImpl,
+        IUIContextAccessor::AddLocalInputEventMonitorImpl,
+        IUIContextAccessor::RemoveLocalInputEventMonitorImpl,
+        IUIContextAccessor::SetTextSelectionClearPolicyImpl,
     };
     return &IUIContextAccessorImpl;
 }

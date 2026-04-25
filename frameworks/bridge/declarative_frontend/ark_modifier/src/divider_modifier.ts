@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class DividerModifier extends ArkDividerComponent implements AttributeModifier<DividerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

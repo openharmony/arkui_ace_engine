@@ -15,9 +15,33 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_SHAPE_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_SHAPE_MODIFIER_H
 
+#include "core/components/common/properties/color.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "ui/resource/resource_object.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
+class ShapeColorModifierPayload : public AceType {
+    DECLARE_ACE_TYPE(ShapeColorModifierPayload, AceType);
+
+public:
+    ShapeColorModifierPayload(const Color& color, const RefPtr<ResourceObject>& resObj) : color_(color), resObj_(resObj)
+    {}
+
+    const Color& GetColor() const
+    {
+        return color_;
+    }
+
+    const RefPtr<ResourceObject>& GetResourceObject() const
+    {
+        return resObj_;
+    }
+
+private:
+    Color color_;
+    RefPtr<ResourceObject> resObj_;
+};
+
 const ArkUICommonShapeModifier* GetCommonShapeModifier();
 const CJUICommonShapeModifier* GetCJUICommonShapeModifier();
 }

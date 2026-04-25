@@ -189,11 +189,9 @@ RefPtr<FrameNode> TextClockModelNG::CreateFrameNode(int32_t nodeId)
         textNode->MarkModifyDone();
         textNode->MountToParent(textClockNode);
     }
-    auto pipeline = textClockNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto textTheme = textClockNode->GetTheme<TextTheme>(true);
     if (textTheme) {
-        InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyle());
+        InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyle(), textTheme->GetTextClockFontColor());
     }
     return textClockNode;
 }
@@ -253,21 +251,10 @@ void TextClockModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_
 
 void TextClockModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, true, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
-    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
-    CHECK_NULL_VOID(textNode);
-    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColorByRender(value);
-    auto textPattern = textNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->UpdateFontColor(value);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFontColor(frameNode, value);
 }
 
 void TextClockModelNG::SetFontColorByUser(FrameNode* frameNode, bool isSetByUser)
@@ -303,7 +290,8 @@ void TextClockModelNG::SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallbac
     pattern->SetBuilderFunc(std::move(makeFunc));
 }
 
-void TextClockModelNG::InitFontDefault(FrameNode* frameNode, const TextStyle& textStyle)
+void TextClockModelNG::InitFontDefault(
+    FrameNode* frameNode, const TextStyle& textStyle, const Color& textClockFontColor)
 {
     CHECK_NULL_VOID(frameNode);
     auto textClockLayoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
@@ -315,7 +303,7 @@ void TextClockModelNG::InitFontDefault(FrameNode* frameNode, const TextStyle& te
         SetFontWeight(frameNode, textStyle.GetFontWeight());
     }
     if (!textClockLayoutProperty->GetTextColor().has_value()) {
-        SetFontColor(frameNode, textStyle.GetTextColor());
+        SetFontColor(frameNode, textClockFontColor);
     }
     if (!textClockLayoutProperty->GetFontFamily().has_value()) {
         SetFontFamily(frameNode, textStyle.GetFontFamilies());
@@ -570,10 +558,6 @@ RefPtr<TextClockController> TextClockModelNG::CreateTextClock()
         textNode->MountToParent(textClockNode);
     }
 
-    auto layoutProperty = textClockNode->GetLayoutProperty<TextClockLayoutProperty>();
-    if (layoutProperty) {
-        layoutProperty->ResetTextColorSetByUser();
-    }
     stack->Push(textClockNode);
     return pattern ? pattern->GetTextClockController() : nullptr;
 }
