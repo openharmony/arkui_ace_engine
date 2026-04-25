@@ -1273,7 +1273,12 @@ extern "C" {
 
 ArkUI_NodeEventType OH_ArkUI_NodeEvent_GetEventType(ArkUI_NodeEvent* event)
 {
-    if (!event || event->kind < 0) {
+    if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
+        return ArkUI_NodeEventType::NODE_TOUCH_EVENT;
+    }
+    if (event->kind < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event kind is invalid");
         return ArkUI_NodeEventType::NODE_TOUCH_EVENT;
     }
     return static_cast<ArkUI_NodeEventType>(event->kind);
@@ -1290,6 +1295,7 @@ int32_t OH_ArkUI_NodeEvent_GetTargetId(ArkUI_NodeEvent* event)
 ArkUI_NodeHandle OH_ArkUI_NodeEvent_GetNodeHandle(ArkUI_NodeEvent* event)
 {
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return nullptr;
     }
     return reinterpret_cast<ArkUI_NodeHandle>(event->node);
@@ -1297,7 +1303,12 @@ ArkUI_NodeHandle OH_ArkUI_NodeEvent_GetNodeHandle(ArkUI_NodeEvent* event)
 
 ArkUI_UIInputEvent* OH_ArkUI_NodeEvent_GetInputEvent(ArkUI_NodeEvent* event)
 {
-    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
+    if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
+        return nullptr;
+    }
+    if (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event category is invalid");
         return nullptr;
     }
     return reinterpret_cast<ArkUI_UIInputEvent*>(event->origin);
@@ -1305,11 +1316,17 @@ ArkUI_UIInputEvent* OH_ArkUI_NodeEvent_GetInputEvent(ArkUI_NodeEvent* event)
 
 ArkUI_NodeComponentEvent* OH_ArkUI_NodeEvent_GetNodeComponentEvent(ArkUI_NodeEvent* event)
 {
-    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+    if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
+        return nullptr;
+    }
+    if (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event category is invalid");
         return nullptr;
     }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
     if (!originNodeEvent) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "originNodeEvent is null");
         return nullptr;
     }
     return const_cast<ArkUI_NodeComponentEvent*>(
@@ -1318,11 +1335,17 @@ ArkUI_NodeComponentEvent* OH_ArkUI_NodeEvent_GetNodeComponentEvent(ArkUI_NodeEve
 
 ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* event)
 {
-    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT)) {
+    if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
+        return nullptr;
+    }
+    if (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event category is invalid");
         return nullptr;
     }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
     if (!originNodeEvent) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "originNodeEvent is null");
         return nullptr;
     }
     return const_cast<ArkUI_StringAsyncEvent*>(
@@ -1358,6 +1381,7 @@ ArkUI_PreventableEvent* OH_ArkUI_NodeEvent_GetPreventableEvent(ArkUI_NodeEvent* 
 void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event)
 {
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return nullptr;
     }
     return event->userData;
@@ -1483,11 +1507,17 @@ int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_Nu
 
 ArkUI_DragEvent* OH_ArkUI_NodeEvent_GetDragEvent(ArkUI_NodeEvent* nodeEvent)
 {
-    if (!nodeEvent || nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+    if (!nodeEvent) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "nodeEvent is null");
+        return nullptr;
+    }
+    if (nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "nodeEvent category is invalid");
         return nullptr;
     }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
     if (!originNodeEvent) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "originNodeEvent is null");
         return nullptr;
     }
     return const_cast<ArkUI_DragEvent*>(reinterpret_cast<const ArkUI_DragEvent*>(&(originNodeEvent->dragEvent)));

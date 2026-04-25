@@ -1138,6 +1138,11 @@ const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value)
 ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create()
 {
     ArkUI_VisibleAreaEventOptions* options = new ArkUI_VisibleAreaEventOptions;
+    if (!options) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_VisibleAreaEventOptions_Create", "Failed to allocate memory for options");
+        return nullptr;
+    }
     options->expectedUpdateInterval = EXPECTED_UPDATE_INTERVAL_VALUE;
     return options;
 }
@@ -1145,6 +1150,8 @@ ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create()
 void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* option)
 {
     if (!option) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_VisibleAreaEventOptions_Dispose", "Option parameter is null");
         return;
     }
     delete option;
@@ -1193,6 +1200,8 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetMeasureFromViewport(
 bool OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(ArkUI_VisibleAreaEventOptions* option)
 {
     if (!option) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport", "Option parameter is null");
         return false;
     }
     return option->measureFromViewport;

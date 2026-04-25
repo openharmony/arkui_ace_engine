@@ -20,6 +20,7 @@
 #include "data_params_conversion.h"
 #include "ndk_data_conversion.h"
 #include "pixelmap_native_impl.h"
+#include "interfaces/native/native_error_message_macros.h"
 #include "securec.h"
 #include "udmf_async_client.h"
 #include "udmf_client.h"
@@ -36,9 +37,10 @@ constexpr int32_t MIN_POINTID = 0;
 
 ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDisplayId(ArkUI_DragEvent* event, int32_t* displayId)
 {
-    if (!event || !displayId) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(event, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_GetDisplayId", "event is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(displayId, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_GetDisplayId", "displayId is null");
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
     *displayId = dragEvent->displayId;
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -71,8 +73,13 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* b
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
 
-    if (!event || !bundleName || !dragEvent ||
-        static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
+    CHECK_NULL_RETURN_WITH_MESSAGE(event, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_GetDragSource", "event is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(bundleName, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_GetDragSource", "bundleName is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(dragEvent, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_GetDragSource", "dragEvent is null");
+    if (static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int32_t err = strcpy_s(bundleName, length, dragEvent->bundleName);
@@ -87,9 +94,12 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_IsRemote(ArkUI_DragEvent* event, bool* isRemo
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
 
-    if (!event || !isRemote || !dragEvent) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(event, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_IsRemote", "event is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(isRemote, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_IsRemote", "isRemote is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(dragEvent, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_IsRemote", "dragEvent is null");
     *isRemote = dragEvent->isRemoteDev;
 
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -156,7 +166,12 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
 ArkUI_DragAction* OH_ArkUI_CreateDragActionWithNode(ArkUI_NodeHandle node)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !node) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_CreateDragActionWithNode", "impl is null");
+        return nullptr;
+    }
+    if (!node) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_CreateDragActionWithNode", "node is null");
         return nullptr;
     }
     auto dragActions = impl->getDragAdapterAPI()->createDragActionWithNode(node->uiNodeHandle);
@@ -166,7 +181,12 @@ ArkUI_DragAction* OH_ArkUI_CreateDragActionWithNode(ArkUI_NodeHandle node)
 ArkUI_DragAction* OH_ArkUI_CreateDragActionWithContext(ArkUI_ContextHandle uiContext)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !uiContext) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_CreateDragActionWithContext", "impl is null");
+        return nullptr;
+    }
+    if (!uiContext) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_CreateDragActionWithContext", "uiContext is null");
         return nullptr;
     }
     auto* context = reinterpret_cast<ArkUIContext*>(uiContext);
@@ -177,6 +197,7 @@ ArkUI_DragAction* OH_ArkUI_CreateDragActionWithContext(ArkUI_ContextHandle uiCon
 void OH_ArkUI_DragAction_Dispose(ArkUI_DragAction* dragAction)
 {
     if (!dragAction) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_DragAction_Dispose", "dragAction is null");
         return;
     }
     auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
@@ -300,13 +321,13 @@ int32_t OH_ArkUI_DragAction_SetDragPreviewOption(ArkUI_DragAction* dragAction, A
 ArkUI_ErrorCode OH_ArkUI_DragAction_SetDataLoadParams(
     ArkUI_DragAction* dragAction, OH_UdmfDataLoadParams* dataLoadParams)
 {
-    if (!dragAction || !dataLoadParams) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(dragAction, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragAction_SetDataLoadParams", "dragAction is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(dataLoadParams, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragAction_SetDataLoadParams", "dataLoadParams is null");
     auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
-    if (!dragActions) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(dragActions, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragAction_SetDataLoadParams", "dragActions is null");
     dragActions->useDataLoadParams = true;
     dragActions->dataLoadParams = dataLoadParams;
 
@@ -328,7 +349,14 @@ int32_t OH_ArkUI_DragAction_RegisterStatusListener(ArkUI_DragAction* dragAction,
 void OH_ArkUI_DragAction_UnregisterStatusListener(ArkUI_DragAction* dragAction)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !dragAction) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_DragAction_UnregisterStatusListener", "impl is null");
+        return;
+    }
+    if (!dragAction) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_DragAction_UnregisterStatusListener", "dragAction is null");
         return;
     }
     impl->getDragAdapterAPI()->unregisterStatusListener(reinterpret_cast<ArkUIDragAction*>(dragAction));
@@ -337,10 +365,14 @@ void OH_ArkUI_DragAction_UnregisterStatusListener(ArkUI_DragAction* dragAction)
 ArkUI_DragStatus OH_ArkUI_DragAndDropInfo_GetDragStatus(ArkUI_DragAndDropInfo* dragAndDropInfo)
 {
     if (!dragAndDropInfo) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_DragAndDropInfo_GetDragStatus", "dragAndDropInfo is null");
         return ArkUI_DragStatus::ARKUI_DRAG_STATUS_UNKNOWN;
     }
     auto* dragAndDropInfos = reinterpret_cast<ArkUIDragAndDropInfo*>(dragAndDropInfo);
     if (!dragAndDropInfos) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_DragAndDropInfo_GetDragStatus", "dragAndDropInfos is null");
         return ArkUI_DragStatus::ARKUI_DRAG_STATUS_UNKNOWN;
     }
     return static_cast<ArkUI_DragStatus>(dragAndDropInfos->status);
@@ -349,6 +381,8 @@ ArkUI_DragStatus OH_ArkUI_DragAndDropInfo_GetDragStatus(ArkUI_DragAndDropInfo* d
 ArkUI_DragEvent* OH_ArkUI_DragAndDropInfo_GetDragEvent(ArkUI_DragAndDropInfo* dragAndDropInfo)
 {
     if (!dragAndDropInfo) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_DragAndDropInfo_GetDragEvent", "dragAndDropInfo is null");
         return nullptr;
     }
     auto* dragAndDropInfos = reinterpret_cast<ArkUIDragAndDropInfo*>(dragAndDropInfo);
@@ -380,11 +414,17 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
 
 ArkUI_PreDragStatus OH_ArkUI_NodeEvent_GetPreDragStatus(ArkUI_NodeEvent* nodeEvent)
 {
-    if (!nodeEvent || nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+    if (!nodeEvent) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_NodeEvent_GetPreDragStatus", "nodeEvent is null");
+        return ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN;
+    }
+    if (nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
         return ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN;
     }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
     if (!originNodeEvent) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_NodeEvent_GetPreDragStatus", "originNodeEvent is null");
         return ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN;
     }
     auto status = static_cast<ArkUI_PreDragStatus>(originNodeEvent->componentAsyncEvent.data[0].i32);
@@ -414,11 +454,19 @@ int32_t OH_ArkUI_SetNodeDraggable(ArkUI_NodeHandle node, bool enabled)
 ArkUI_DragPreviewOption* OH_ArkUI_CreateDragPreviewOption(void)
 {
     auto* previewOptions = new ArkUIDragPreViewAndInteractionOptions();
+    if (!previewOptions) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_CreateDragPreviewOption", "previewOptions is null");
+        return nullptr;
+    }
     return reinterpret_cast<ArkUI_DragPreviewOption*>(previewOptions);
 }
 
 void OH_ArkUI_DragPreviewOption_Dispose(ArkUI_DragPreviewOption* option)
 {
+    if (!option) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_DragPreviewOption_Dispose", "option is null");
+        return;
+    }
     delete reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(option);
     option = nullptr;
 }
@@ -813,13 +861,13 @@ int32_t OH_ArkUI_DragEvent_StartDataLoading(
 
 ArkUI_ErrorCode OH_ArkUI_DragEvent_SetDataLoadParams(ArkUI_DragEvent* event, OH_UdmfDataLoadParams* dataLoadParams)
 {
-    if (!event || !dataLoadParams) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(event, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_SetDataLoadParams", "event is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(dataLoadParams, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_SetDataLoadParams", "dataLoadParams is null");
     auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
-    if (!dragEvent) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(dragEvent, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_DragEvent_SetDataLoadParams", "dragEvent is null");
     dragEvent->useDataLoadParams = true;
     dragEvent->dataLoadParams = dataLoadParams;
 
@@ -925,9 +973,10 @@ int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify)
 int32_t OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled)
 {
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!fullImpl || !uiContext) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_EnableDropDisallowedBadge", "fullImpl is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(uiContext, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_EnableDropDisallowedBadge", "uiContext is null");
     fullImpl->getDragAdapterAPI()->enableDropDisallowedBadge(enabled);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

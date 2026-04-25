@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "interfaces/native/native_error_message_macros.h"
 #include "native_interface.h"
 #include "node/animate_impl.h"
 #include "node/dialog_model.h"
@@ -302,6 +303,7 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
     if (!OHOS::Ace::NodeModel::InitialFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family, impl library is not found", type);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl library is not found");
         return nullptr;
     }
     switch (type) {

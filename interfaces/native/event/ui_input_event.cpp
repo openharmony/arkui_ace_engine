@@ -4102,12 +4102,14 @@ bool OH_ArkUI_HoverEvent_IsHovered(const ArkUI_UIInputEvent* event)
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_HOVER_EVENT, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         RETURN_RET_WITH_STATUS_CHECK(false, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_HOVER_EVENT_ID: {
             const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent);
             if (!hoverEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "hoverEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(false, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             RETURN_RET_WITH_STATUS_CHECK(hoverEvent->isHover, ARKUI_ERROR_CODE_NO_ERROR);
@@ -4115,6 +4117,7 @@ bool OH_ArkUI_HoverEvent_IsHovered(const ArkUI_UIInputEvent* event)
         default:
             break;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT, __FUNCTION__, "event type not supported");
     RETURN_RET_WITH_STATUS_CHECK(false, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 }
 
@@ -5988,19 +5991,23 @@ ArkUI_CoastingAxisEvent* OH_ArkUI_UIInputEvent_GetCoastingAxisEvent(ArkUI_UIInpu
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_COASTING_AXIS_EVENT, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_COASTING_AXIS_EVENT_ID: {
             auto* coastingAxisEvent = reinterpret_cast<ArkUI_CoastingAxisEvent*>(event->inputEvent);
             if (!coastingAxisEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "coastingAxisEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             return coastingAxisEvent;
         }
         default:
+            SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event type not supported");
             RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is invalid");
     RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -6019,12 +6026,14 @@ int64_t OH_ArkUI_CoastingAxisEvent_GetEventTime(ArkUI_CoastingAxisEvent* event)
 ArkUI_CoastingAxisEventPhase OH_ArkUI_CoastingAxisEvent_GetPhase(ArkUI_CoastingAxisEvent* event)
 {
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return ARKUI_COASTING_AXIS_EVENT_PHASE_NONE;
     }
     auto* coastingAxisEvent = reinterpret_cast<ArkUICoastingAxisEvent*>(event);
     if (coastingAxisEvent) {
         return static_cast<ArkUI_CoastingAxisEventPhase>(coastingAxisEvent->phase);
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "coastingAxisEvent is null");
     return ARKUI_COASTING_AXIS_EVENT_PHASE_NONE;
 }
 
@@ -6068,11 +6077,21 @@ int32_t OH_ArkUI_CoastingAxisEvent_SetPropagation(ArkUI_CoastingAxisEvent* event
 ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_GetTouchTestInfoList(
     ArkUI_TouchTestInfo* info, ArkUI_TouchTestInfoItemArray* array, int32_t* size)
 {
-    if (!info || !array || !size) {
+    if (!info) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "info is null");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!array) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "array is null");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!size) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "size is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* touchTestInfo = reinterpret_cast<ArkUITouchTestInfo*>(info);
     if (!touchTestInfo) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "touchTestInfo is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *array = reinterpret_cast<ArkUI_TouchTestInfoItemArray>(touchTestInfo->array);
