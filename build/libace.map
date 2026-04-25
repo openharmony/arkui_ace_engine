@@ -1630,6 +1630,7 @@
       "OHOS::Ace::NG::PipelineContext::GetCustomTitleHeight()";
       "OHOS::Ace::NG::PipelineContext::GetDragDropManager()";
       "OHOS::Ace::NG::PipelineContext::GetMainPipelineContext()";
+      "OHOS::Ace::NG::PipelineContext::GetOrCreateAIWriteAdapter()";
       "OHOS::Ace::NG::PipelineContext::GetOverlayManager()";
       "OHOS::Ace::NG::PipelineContext::GetSelectOverlayManager()";
       "OHOS::Ace::NG::PipelineContext::GetStageManager()";

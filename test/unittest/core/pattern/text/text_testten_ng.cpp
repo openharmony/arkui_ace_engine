@@ -554,7 +554,7 @@ HWTEST_F(TextFieldTenPatternNg, CreateTextDragInfo001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     RefPtr<TextPattern> pattern = textNode->GetPattern<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    RefPtr<MockTextBase> mockBase = AceType::MakeRefPtr<MockTextBase>();
     WeakPtr<MockTextBase> textBase = mockBase;
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textNode);
@@ -609,7 +609,7 @@ HWTEST_F(TextFieldTenPatternNg, GetUrlSpanColor001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    RefPtr<MockTextBase> mockBase = AceType::MakeRefPtr<MockTextBase>();
     WeakPtr<MockTextBase> textBase = mockBase;
 
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
@@ -1232,7 +1232,7 @@ HWTEST_F(TextFieldTenPatternNg, BaseTextSelectOverlayTest001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    RefPtr<MockTextBase> mockBase = AceType::MakeRefPtr<MockTextBase>();
     WeakPtr<MockTextBase> textBase = mockBase;
 
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
@@ -1368,7 +1368,7 @@ HWTEST_F(TextFieldTenPatternNg, ApplySelectAreaWithKeyboard, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     RefPtr<TextPattern> pattern = textNode->GetPattern<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    RefPtr<MockTextBase> mockBase = AceType::MakeRefPtr<MockTextBase>();
     WeakPtr<MockTextBase> textBase = mockBase;
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textNode);

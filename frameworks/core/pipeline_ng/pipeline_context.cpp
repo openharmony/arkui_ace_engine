@@ -53,6 +53,7 @@
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
@@ -7658,6 +7659,14 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
         nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
     }
     return nodeRenderStatusMonitor_;
+}
+
+WeakPtr<AIWriteAdapter> PipelineContext::GetOrCreateAIWriteAdapter()
+{
+    if (!aiWriteAdapter_) {
+        aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    }
+    return aiWriteAdapter_;
 }
 
 void PipelineContext::RegisterArkUIObjectLifecycleCallback(Kit::ArkUIObjectLifecycleCallback&& callback)

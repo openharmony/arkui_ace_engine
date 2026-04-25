@@ -30,7 +30,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
-#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/color_inverter.h"
 #include "core/common/frontend.h"
 #include "core/common/thp_extra_manager.h"
@@ -72,6 +71,7 @@ namespace OHOS::Ace::NG {
 }
 
 namespace OHOS::Ace {
+class AIWriteAdapter;
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
 } // namespace OHOS::Ace
@@ -1252,13 +1252,7 @@ public:
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
     }
 
-    WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter()
-    {
-        if (!aiWriteAdapter_) {
-            aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
-        }
-        return aiWriteAdapter_;
-    }
+    ACE_FORCE_EXPORT WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter();
 
     int32_t RegisterRotationEndCallback(std::function<void()>&& callback)
     {
@@ -1740,7 +1734,7 @@ private:
     RotationEndCallbackMap rotationEndCallbackMap_ {};
     friend class ScopedLayout;
     friend class FormGestureManager;
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_;
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
     std::unordered_map<int32_t, bool> keyOcclusionNodes_;
     RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;

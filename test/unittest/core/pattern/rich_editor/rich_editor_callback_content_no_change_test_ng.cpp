@@ -399,7 +399,7 @@ HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnWindowSizeChanged001, TestSi
 
     auto context = richEditorNode_->GetContextRefPtr();
     ASSERT_NE(context, nullptr);
-    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     EXPECT_EQ(textFieldManager->GetOptionalClickPosition(), std::nullopt);
 }

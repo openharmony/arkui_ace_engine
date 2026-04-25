@@ -33,6 +33,7 @@
 #include "base/log/event_report.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/constant.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
