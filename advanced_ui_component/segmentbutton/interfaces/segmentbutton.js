@@ -428,7 +428,7 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     let themePadding = LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.padding_level2'],
+      params: ['sys.float.padding_level1'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }).value;
