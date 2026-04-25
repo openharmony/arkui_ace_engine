@@ -2799,6 +2799,8 @@ typedef struct Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier Ark_Union_Boole
 typedef struct Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier;
 typedef struct Ark_Union_BorderStyle_EdgeStyles Ark_Union_BorderStyle_EdgeStyles;
 typedef struct Opt_Union_BorderStyle_EdgeStyles Opt_Union_BorderStyle_EdgeStyles;
+typedef struct Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
+typedef struct Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
 typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 Ark_Union_ColumnOptions_ColumnOptionsV2;
 typedef struct Opt_Union_ColumnOptions_ColumnOptionsV2 Opt_Union_ColumnOptions_ColumnOptionsV2;
 typedef struct Ark_Union_CustomNodeBuilder_ComponentContentBase Ark_Union_CustomNodeBuilder_ComponentContentBase;
@@ -18371,6 +18373,19 @@ typedef struct Opt_Union_BorderStyle_EdgeStyles {
     Ark_Tag tag;
     Ark_Union_BorderStyle_EdgeStyles value;
 } Opt_Union_BorderStyle_EdgeStyles;
+typedef struct Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ColorFilter value0;
+        Ark_drawing_ColorFilter value1;
+        Ark_ResourceColor value2;
+    };
+} Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
+typedef struct Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor {
+    Ark_Tag tag;
+    Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor value;
+} Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
 typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -25425,7 +25440,7 @@ typedef struct GENERATED_ArkUIImageModifier {
     void (*setSyncLoad)(Ark_NativePointer node,
                         const Opt_Boolean* value);
     void (*setColorFilter)(Ark_NativePointer node,
-                           const Opt_Union_ColorFilter_drawing_ColorFilter* value);
+                           const Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor* value);
     void (*setCopyOption)(Ark_NativePointer node,
                           const Opt_CopyOptions* value);
     void (*setDraggable)(Ark_NativePointer node,

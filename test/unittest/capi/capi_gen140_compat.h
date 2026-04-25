@@ -111,8 +111,8 @@ using Opt_Union_Curve_String_ICurve = Opt_Union_curves_Curve_String_curves_ICurv
 using Ark_Union_Curve_String_ICurve = Ark_Union_curves_Curve_String_curves_ICurve;
 
 // Union types - ColorFilter with drawing_ prefix (DrawingColorFilter -> drawing_ColorFilter)
-using Ark_Union_ColorFilter_DrawingColorFilter = Ark_Union_ColorFilter_drawing_ColorFilter;
-using Opt_Union_ColorFilter_DrawingColorFilter = Opt_Union_ColorFilter_drawing_ColorFilter;
+using Ark_Union_ColorFilter_DrawingColorFilter = Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
+using Opt_Union_ColorFilter_DrawingColorFilter = Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
 
 // Union types - ResourceColor without ColorContent
 using Opt_Union_ResourceColor_ColorMetrics = Opt_Union_ResourceColor_ColorMetricsExt;

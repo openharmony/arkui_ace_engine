@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/osal/drawing_color_filter_ohos.h"
-
-#include "core/components_ng/render/drawing_mock.h"
+#include "base/image/drawing_color_filter.h"
 
 namespace OHOS::Ace {
 RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(void* sptrAddr)
@@ -28,14 +26,13 @@ RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(const st
     return nullptr;
 }
 
-RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromNative(void* sptrAddr)
+RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(Color color, BlendMode blendMode)
 {
     return nullptr;
 }
 
-void* DrawingColorFilterOhos::GetDrawingColorFilterSptrAddr()
+RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromNative(void* sptrAddr)
 {
-    auto colorFilter = std::make_shared<RSColorFilter>();
-    return static_cast<void*>(&colorFilter);
+    return nullptr;
 }
 } // namespace OHOS::Ace

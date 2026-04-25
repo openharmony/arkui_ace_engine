@@ -351,7 +351,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_setSyncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColorFilterAttribute(value: ColorFilter | DrawingColorFilter | undefined): void {
+    setColorFilterAttribute(value: ColorFilter | DrawingColorFilter | ResourceColor | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -364,6 +364,26 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as DrawingColorFilter
                 drawing_ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof ResourceColor) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as ResourceColor
+                if (valueTmpValueForIdx2 instanceof arkui_component_enums_Color) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0 = valueTmpValueForIdx2 as arkui_component_enums_Color
+                    thisSerializer.writeInt32((valueTmpValueForIdx2ForIdx0.getOrdinal()) % (12))
+                } else if (valueTmpValueForIdx2 instanceof int32) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1 = valueTmpValueForIdx2 as int32
+                    thisSerializer.writeInt32(valueTmpValueForIdx2ForIdx1)
+                } else if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((2).toByte())
+                    const valueTmpValueForIdx2ForIdx2 = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx2)
+                } else if (valueTmpValueForIdx2 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((3).toByte())
+                    const valueTmpValueForIdx2ForIdx3 = valueTmpValueForIdx2 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx3)
+                }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -663,7 +683,7 @@ export interface ImageAttribute extends CommonMethod {
     syncLoad(value: boolean | undefined): this {
         throw new Error('Unimplemented method syncLoad')
     }
-    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+    colorFilter(value: ColorFilter | DrawingColorFilter | ResourceColor | undefined): this {
         throw new Error('Unimplemented method colorFilter')
     }
     copyOption(value: CopyOptions | undefined): this {
@@ -811,8 +831,8 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         this.getPeer()?.setSyncLoadAttribute(value_casted)
         return this
     }
-    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
-        const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
+    public colorFilter(value: ColorFilter | DrawingColorFilter | ResourceColor | undefined): this {
+        const value_casted = value as (ColorFilter | DrawingColorFilter | ResourceColor | undefined)
         this.getPeer()?.setColorFilterAttribute(value_casted)
         return this
     }

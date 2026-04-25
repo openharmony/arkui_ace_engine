@@ -13,7 +13,8 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
+import(
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 # build static
@@ -109,11 +110,8 @@ template("ace_osal_ohos_source_set") {
       "websocket_manager.cpp",
       "window_utils.cpp",
     ]
-    if (defined(config.enable_standard_input) &&
-        config.enable_standard_input) {
-      sources += [
-      "ime_extra_config_ohos.cpp",
-      ]
+    if (defined(config.enable_standard_input) && config.enable_standard_input) {
+      sources += [ "ime_extra_config_ohos.cpp" ]
     }
     external_deps += [
       "ability_runtime:app_manager",
@@ -158,8 +156,8 @@ template("ace_osal_ohos_source_set") {
 
       if (defined(global_parts_info) &&
           defined(global_parts_info.theme_screenlock_mgr)) {
-          external_deps += [ "screenlock_mgr:screenlock_client" ]
-          defines += [ "ENABLE_SCREEN_LOCK_MANAGER" ]
+        external_deps += [ "screenlock_mgr:screenlock_client" ]
+        defines += [ "ENABLE_SCREEN_LOCK_MANAGER" ]
       }
 
       external_deps += [
@@ -170,7 +168,6 @@ template("ace_osal_ohos_source_set") {
         "graphic_2d:libframe_analyzer",
         "image_framework:image",
         "input:libmmi-client",
-        "napi:ace_napi",
         "resource_management:global_resmgr",
         "runtime_core:ani",
       ]
@@ -215,7 +212,6 @@ template("ace_osal_ohos_source_set") {
       "background_task_helper_ohos.cpp",
       "device_config.cpp",
       "display_manager_ohos.cpp",
-      "drawing_color_filter_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_packer_ohos.cpp",
       "image_source_ohos.cpp",
@@ -240,7 +236,6 @@ template("ace_osal_ohos_source_set") {
       "background_task_mgr:bgtaskmgr_innerkits",
       "bundle_framework:appexecfwk_core",
       "graphic_2d:2d_graphics",
-      "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
@@ -256,9 +251,7 @@ template("ace_osal_ohos_source_set") {
     if (defined(config.hichecker_exists) && config.hichecker_exists) {
       external_deps += [ "hichecker:libhichecker" ]
     }
-    deps += [
-      "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
-    ]
+    deps += [ "$ace_root/interfaces/inner_api/drawable_descriptor" ]
 
     if (ability_runtime_graphics) {
       external_deps += [ "image_framework:image_native" ]
