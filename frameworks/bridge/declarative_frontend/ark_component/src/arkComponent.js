@@ -15112,6 +15112,16 @@ class ArkSelectComponent extends ArkComponent {
   menuBackgroundEffect(menuBackgroundEffect) {
     modifierWithKey(
       this._modifiersWithKeys, MenuBackgroundEffectModifier.identity, MenuBackgroundEffectModifier, menuBackgroundEffect);
+      return this;
+  }
+  menuDistortionMode(mode) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuDistortionModeModifier.identity, MenuDistortionModeModifier, mode);
+    return this;
+  }
+  menuEdgeLightMode(mode) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuEdgeLightModeModifier.identity, MenuEdgeLightModeModifier, mode);
     return this;
   }
 }
@@ -15787,6 +15797,40 @@ class MenuBackgroundEffectModifier extends ModifierWithKey {
   }
 }
 MenuBackgroundEffectModifier.identity = Symbol('menuBackgroundEffect');
+class MenuDistortionModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetMenuDistortionMode(node);
+    } else {
+      getUINativeModule().select.setMenuDistortionMode(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+MenuDistortionModeModifier.identity = Symbol('menuDistortionMode');
+class MenuEdgeLightModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetMenuEdgeLightMode(node);
+    } else {
+      getUINativeModule().select.setMenuEdgeLightMode(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+MenuEdgeLightModeModifier.identity = Symbol('menuEdgeLightMode');
 class SelectOnSelectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

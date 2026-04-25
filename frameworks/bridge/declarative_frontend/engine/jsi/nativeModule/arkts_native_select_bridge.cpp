@@ -1711,4 +1711,60 @@ ArkUINativeModuleValue SelectBridge::ResetMenuBackgroundEffect(ArkUIRuntimeCallI
     GetArkUINodeModifiers()->getSelectModifier()->resetMenuBackgroundEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue SelectBridge::SetMenuDistortionMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (modeArg->IsUndefined() || !modeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetMenuDistortionMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t modeVal = modeArg->Int32Value(vm);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuDistortionMode(nativeNode, modeVal);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuDistortionMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuDistortionMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuEdgeLightMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (modeArg->IsUndefined() || !modeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetMenuEdgeLightMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t modeVal = modeArg->Int32Value(vm);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuEdgeLightMode(nativeNode, modeVal);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuEdgeLightMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuEdgeLightMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

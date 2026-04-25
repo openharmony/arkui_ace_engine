@@ -8122,6 +8122,10 @@ struct ArkUISelectModifier {
         ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg,
         void* colorRawPtr, void* inactiveColorRawPtr);
     void (*resetMenuBackgroundEffect)(ArkUINodeHandle node);
+    void (*setMenuDistortionMode)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
+    void (*resetMenuDistortionMode)(ArkUINodeHandle node);
+    void (*setMenuEdgeLightMode)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
+    void (*resetMenuEdgeLightMode)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/
