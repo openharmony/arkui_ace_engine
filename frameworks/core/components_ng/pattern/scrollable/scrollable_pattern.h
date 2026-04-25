@@ -443,8 +443,8 @@ public:
     {
         scrollAbort_ = abort;
     }
-    void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
-                            bool useTotalOffset = true);
+    void PlaySpringAnimation(float position, const SpringCurveOption& option, bool useTotalOffset = true,
+        bool isFormUser = false);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual double GetTotalOffset() const
     {
@@ -486,6 +486,7 @@ public:
     }
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
+    void SmartGesturePerformScroll(float position);
     virtual void AnimateTo(
         float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false,
         bool useTotalOffset = true);
@@ -531,6 +532,7 @@ public:
             }
         }
     }
+    void HandleAnimateFromUserStop();
 
     // scrollSnap
     virtual std::optional<float> CalcPredictSnapOffset(

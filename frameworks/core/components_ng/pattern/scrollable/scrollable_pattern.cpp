@@ -2019,6 +2019,56 @@ void ScrollablePattern::ScrollTo(float position)
     ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
 }
 
+void ScrollablePattern::HandleAnimateFromUserStop()
+{
+    auto scrollable = GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    bool isUserFling = scrollable->GetIsUserFling();
+    bool isTouchStopAnimation = scrollable->GetIsTouchStopAnimation();
+    if (isUserFling && !isTouchStopAnimation && scrollable->GetOnDidStopFlingCallback()) {
+        scrollable->GetOnDidStopFlingCallback()();
+        scrollable->SetIsUserFling(false);
+    }
+    scrollable->SetIsSmartGestureFling(false);
+}
+
+void ScrollablePattern::SmartGesturePerformScroll(float position)
+{
+    bool isWillFling = !NearEqual(position, GetTotalOffset());
+    if (!isWillFling) {
+        return;
+    }
+
+    auto scrollable = GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    bool userFlingBeforeAction = scrollable->GetIsUserFling();
+    if (!userFlingBeforeAction && scrollable->GetOnWillStartFlingCallback()) {
+        scrollable->GetOnWillStartFlingCallback()();
+    }
+    scrollable->SetIsUserFling(true);
+    scrollable->SetIsSmartGestureFling(true);
+
+    StopScrollableAndAnimate();
+    finalPosition_ = position;
+    lastPosition_ = GetTotalOffset();
+    scrollToDirection_ = ScrollToDirection::NONE;
+    if (GreatNotEqual(finalPosition_, GetTotalOffset())) {
+        scrollToDirection_ = ScrollToDirection::FORWARD;
+    } else {
+        scrollToDirection_ = ScrollToDirection::BACKWARD;
+    }
+
+    PlaySpringAnimation(position, SpringCurveOption(), false, true);
+    if (!GetIsDragging()) {
+        FireOnScrollStart(false);
+    }
+    PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
+}
+
 void ScrollablePattern::AnimateTo(
     float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll, bool useTotalOffset)
 {
@@ -2040,8 +2090,7 @@ void ScrollablePattern::AnimateTo(
         if (!useTotalOffset) {
             lastPosition_ = GetTotalOffset();
         }
-        PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
-            DEFAULT_SCROLL_TO_DAMPING, useTotalOffset);
+        PlaySpringAnimation(position, SpringCurveOption(), useTotalOffset);
     } else {
         useTotalOffset_ = true;
         PlayCurveAnimation(position, duration, curve, canOverScroll);
@@ -2074,8 +2123,8 @@ void ScrollablePattern::OnAnimateFinish()
     isBackToTopRunning_ = false;
 }
 
-void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
-                                            bool useTotalOffset)
+void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOption& curveOption, bool useTotalOffset,
+    bool isFormUser)
 {
     if (!springOffsetProperty_) {
         InitSpringOffsetProperty();
@@ -2083,7 +2132,8 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     }
 
     AnimationOption option;
-    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(
+        curveOption.velocity, curveOption.mass, curveOption.stiffness, curveOption.damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     isAnimationStop_ = false;
     SetAnimateCanOverScroll(GetCanStayOverScroll());
@@ -2101,11 +2151,14 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             pattern->SetUiDvsyncSwitch(true);
             pattern->springOffsetProperty_->Set(position);
         },
-        [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
+        [weak = AceType::WeakClaim(this), id = Container::CurrentId(), isFormUser]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateFinish();
+            if (isFormUser) {
+                pattern->HandleAnimateFromUserStop();
+            }
             pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
         });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);

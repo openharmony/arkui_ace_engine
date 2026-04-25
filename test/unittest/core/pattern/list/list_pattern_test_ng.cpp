@@ -2985,4 +2985,176 @@ HWTEST_F(ListPatternTestNg, RequestFocusForItemLastInGroup, TestSize.Level1)
     EXPECT_NE(frameNode_, nullptr);
 }
 
+/**
+ * @tc.name: IsScrollAble001
+ * @tc.desc: Test ListPattern IsScrollAble when isScrollable_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsScrollAble001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(10);
+    CreateDone();
+
+    pattern_->isScrollable_ = false;
+    auto result = pattern_->IsScrollAble(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsScrollAble002
+ * @tc.desc: Test ListPattern IsScrollAble when direction is not FORWARD or BACKWARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsScrollAble002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(10);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    auto result = pattern_->IsScrollAble(SmartGestureDirection::LEFT);
+    EXPECT_FALSE(result);
+
+    result = pattern_->IsScrollAble(SmartGestureDirection::RIGHT);
+    EXPECT_FALSE(result);
+
+    result = pattern_->IsScrollAble(SmartGestureDirection::UP);
+    EXPECT_FALSE(result);
+
+    result = pattern_->IsScrollAble(SmartGestureDirection::DOWN);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsScrollAble003
+ * @tc.desc: Test ListPattern IsScrollAble when FORWARD direction and IsAtBottom returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsScrollAble003, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(10);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->maxListItemIndex_ = 5;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 5;
+    pattern_->endMainPos_ = 400.0f;
+    pattern_->startMainPos_ = 100.0f;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    pattern_->itemPosition_.clear();
+    ListItemInfo info1 = { 1, 100.0f, 200.0f, false };
+    ListItemInfo info2 = { 2, 200.0f, 300.0f, false };
+    ListItemInfo info3 = { 3, 300.0f, 400.0f, false };
+    ListItemInfo info4 = { 4, 400.0f, 500.0f, false };
+    ListItemInfo info5 = { 5, 500.0f, 600.0f, false };
+    pattern_->itemPosition_[1] = info1;
+    pattern_->itemPosition_[2] = info2;
+    pattern_->itemPosition_[3] = info3;
+    pattern_->itemPosition_[4] = info4;
+    pattern_->itemPosition_[5] = info5;
+
+    auto result = pattern_->IsScrollAble(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsScrollAble004
+ * @tc.desc: Test ListPattern IsScrollAble when FORWARD direction and IsAtBottom returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsScrollAble004, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(10);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->maxListItemIndex_ = 20;
+    pattern_->endIndex_ = 5;
+    pattern_->endMainPos_ = 500.0f;
+    pattern_->startMainPos_ = 0.0f;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    auto result = pattern_->IsScrollAble(SmartGestureDirection::FORWARD);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsScrollAble005
+ * @tc.desc: Test ListPattern IsScrollAble when BACKWARD direction and IsAtTop returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsScrollAble005, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(10);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->startIndex_ = 0;
+    pattern_->startMainPos_ = 0.0f;
+    pattern_->endMainPos_ = 400.0f;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    pattern_->itemPosition_.clear();
+    ListItemInfo info0 = { 0, 0.0f, 100.0f, false };
+    pattern_->itemPosition_[0] = info0;
+
+    auto result = pattern_->IsScrollAble(SmartGestureDirection::BACKWARD);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsScrollAble006
+ * @tc.desc: Test ListPattern IsScrollAble when BACKWARD direction and IsAtTop returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsScrollAble006, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(10);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->startIndex_ = 5;
+    pattern_->startMainPos_ = 500.0f;
+    pattern_->endMainPos_ = 900.0f;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    pattern_->itemPosition_.clear();
+    ListItemInfo info5 = { 5, 500.0f, 600.0f, false };
+    ListItemInfo info6 = { 6, 600.0f, 700.0f, false };
+    ListItemInfo info7 = { 7, 700.0f, 800.0f, false };
+    ListItemInfo info8 = { 8, 800.0f, 900.0f, false };
+    ListItemInfo info9 = { 9, 900.0f, 1000.0f, false };
+    pattern_->itemPosition_[5] = info5;
+    pattern_->itemPosition_[6] = info6;
+    pattern_->itemPosition_[7] = info7;
+    pattern_->itemPosition_[8] = info8;
+    pattern_->itemPosition_[9] = info9;
+
+    auto result = pattern_->IsScrollAble(SmartGestureDirection::BACKWARD);
+    EXPECT_TRUE(result);
+}
+
 } // namespace OHOS::Ace::NG

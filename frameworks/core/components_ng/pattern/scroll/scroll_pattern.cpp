@@ -387,7 +387,9 @@ void ScrollPattern::PerformScroll(const ScrollingConfig& config)
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     auto distance = static_cast<float>(config.direction == SmartGestureDirection::FORWARD ?
         -config.distance.value() : config.distance.value());
-    ScrollBy(GetAxis() == Axis::HORIZONTAL ? distance : 0.0f, GetAxis() == Axis::VERTICAL ? distance : 0.0f, true);
+    auto position = currentOffset_ + distance;
+    SetIsOverScroll(false);
+    SmartGesturePerformScroll(-position);
 }
 
 OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
