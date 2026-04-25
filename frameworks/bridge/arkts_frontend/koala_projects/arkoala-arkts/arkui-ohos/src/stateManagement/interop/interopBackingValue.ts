@@ -1,4 +1,4 @@
-import { staticStateBindObservedObject, enableCompatibleObservedV2ForStaticMeta } from '../../component/interop';
+import { staticStateBindObservedObject, enableCompatibleObservedV2ForStaticMeta } from '@component/interop';
 import { DecoratorBackingValue } from '../base/backingValue';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { IMutableStateMeta, STATE_MGMT_FACTORY } from '../decorator';

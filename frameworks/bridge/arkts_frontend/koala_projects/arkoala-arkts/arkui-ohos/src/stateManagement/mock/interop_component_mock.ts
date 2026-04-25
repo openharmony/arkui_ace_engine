@@ -13,28 +13,29 @@
  * limitations under the License.
  */
 
-import { StateDecoratedVariable } from '../decoratorImpl/decoratorState';
-import { PropDecoratedVariable } from '../decoratorImpl/decoratorProp';
-import { ProvideDecoratedVariable } from '../decoratorImpl/decoratorProvide';
-
 export type CompatibleStateChangeCallback<T> = (value: T) => void;
 
 export function isDynamicObject<T>(value: T): boolean {
     return false;
 }
 
-export function getRawObject<T>(value: T): T {
+export function getObservedObject<T>(value: T, deep?: boolean): T {
     return value;
 }
 
-export type StateUnion<T> = StateDecoratedVariable<T> | ProvideDecoratedVariable<T> | PropDecoratedVariable<T>
-
-export function getObservedObject<T>(value: T): T {
+export function getV2ObservedObject<T>(value: T): T {
     return value;
 }
 
-export class InteropNativeModule {
-    public static _NativeLog(txt: string) {
-        console.log(txt)
-    }
+export function staticStateBindObservedObject<T>(
+    value: T,
+    onPropertyChange?: () => void,
+    onTrackPropertyRead?: (readPropName: string, isTracked: boolean) => void,
+    onTrackPropertyChange?: (readPropName: string) => void
+): T {
+    return value;
+}
+
+export function enableCompatibleObservedV2ForStaticMeta<T>(value: T): T {
+    return value;
 }

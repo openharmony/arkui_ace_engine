@@ -15,14 +15,14 @@
 import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { DecoratedV1VariableBase, DecoratedV2VariableBase, DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
-import { AceTrace } from '../../base/AceTrace';
+import { AceTrace } from '@aceTrace';
 import { UIUtils } from '../utils';
-import { ExtendableComponent } from '../../component/extendableComponent';
+import { ExtendableComponent } from '@component/extendableComponent';
 import { MutableStateMeta } from '../base/mutableStateMeta';
 import { IObservedObject } from '../decorator';
 import { ElementInfo, DecoratorInfo, ObservedResult } from '../utils';
 import { IncrementalNode } from '@koalaui/runtime';
-import { PeerNode } from '../../PeerNode';
+import { PeerNode } from '@peerNode';
 import { transferTypeName } from '../storage/persistenceV2';
 import { InterfaceProxyHandler, StateMgmtTool } from './arkts';
 import { ObserveWrappedBase } from '../base/observeWrappedBase';

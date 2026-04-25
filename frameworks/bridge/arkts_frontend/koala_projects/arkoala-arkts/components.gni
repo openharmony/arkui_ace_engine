@@ -605,6 +605,12 @@ arkui_path_keys = [
   "@ohos.arkui.ArcSwiper",
   "#arktheme",
   "arkui/base/ArkUIObjectFinalizationRegisterProxy",
+  "@component/customComponent",
+  "@component/extendableComponent",
+  "@component/interop",
+  "@peerNode",
+  "@aceTrace",
+  "@decoratorEnv",
 ]
 
 arkui_path_values = [
@@ -661,4 +667,10 @@ arkui_path_values = [
   "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
   "arkui-preprocessed/arkui/theme",
   "arkui-preprocessed/arkui/base/ArkUIObjectFinalizationRegisterProxy.ets",
+  "arkui-preprocessed/arkui/component/customComponent.ets",
+  "arkui-preprocessed/arkui/component/extendableComponent.ets",
+  "arkui-preprocessed/arkui/component/interop",
+  "arkui-preprocessed/arkui/PeerNode.ets",
+  "arkui-preprocessed/arkui/base/AceTrace.ets",
+  "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
 ]

@@ -19,7 +19,7 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
-import { isDynamicObject, getV2ObservedObject } from '../../component/interop';
+import { isDynamicObject, getV2ObservedObject } from '@component/interop';
 export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IProviderDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
