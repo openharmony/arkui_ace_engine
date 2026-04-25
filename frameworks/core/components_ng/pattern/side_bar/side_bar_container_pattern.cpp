@@ -53,6 +53,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 
 SideBarContainerPattern::SideBarContainerPattern() = default;

@@ -15,7 +15,12 @@
 
 #include "core/components/common/properties/decoration.h"
 
+#include <regex>
+
+#include "base/json/json_util.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components/theme/theme_utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline/pipeline_context.h"
 namespace OHOS::Ace {
 

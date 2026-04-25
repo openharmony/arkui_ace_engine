@@ -16,6 +16,7 @@
 
 #include <cerrno>
 #include <cstdlib>
+#include <regex>
 #include <utility>
 
 #include "frame_information.h"

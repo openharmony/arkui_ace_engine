@@ -29,6 +29,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
