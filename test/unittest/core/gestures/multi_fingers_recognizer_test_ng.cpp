@@ -653,6 +653,88 @@ HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest001, TestSize.Leve
 }
 
 /**
+ * @tc.name: CheckCurrentFingersTest002
+ * @tc.desc: Test CheckCurrentFingers with zero currentFingers_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 0;
+    fingersRecognizer->touchPoints_.clear();
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: CheckCurrentFingersTest003
+ * @tc.desc: Test CheckCurrentFingers with positive currentFingers_ equal to touchPoints size
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest003, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 2;
+    
+    TouchEvent event1;
+    event1.id = 1;
+    TouchEvent event2;
+    event2.id = 2;
+    fingersRecognizer->touchPoints_[1] = event1;
+    fingersRecognizer->touchPoints_[2] = event2;
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: CheckCurrentFingersTest004
+ * @tc.desc: Test CheckCurrentFingers with positive currentFingers_ greater than touchPoints size
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest004, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 3;
+    
+    TouchEvent event1;
+    event1.id = 1;
+    TouchEvent event2;
+    event2.id = 2;
+    fingersRecognizer->touchPoints_[1] = event1;
+    fingersRecognizer->touchPoints_[2] = event2;
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: CheckCurrentFingersTest005
+ * @tc.desc: Test CheckCurrentFingers with positive currentFingers_ less than touchPoints size
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest005, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 1;
+    
+    TouchEvent event1;
+    event1.id = 1;
+    TouchEvent event2;
+    event2.id = 2;
+    fingersRecognizer->touchPoints_[1] = event1;
+    fingersRecognizer->touchPoints_[2] = event2;
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
+
+/**
  * @tc.name: MultiFingersRecognizerConstructorTest001
  * @tc.desc: Test MultiFingersRecognizer default constructor
  * @tc.type: FUNC
