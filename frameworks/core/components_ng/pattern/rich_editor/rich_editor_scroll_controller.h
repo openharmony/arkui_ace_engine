@@ -107,6 +107,9 @@ public:
     bool UpdateScrollState();
     bool UpdateVerticalScrollState();
     bool UpdateHorizontalScrollState();
+    bool IsSupportHorizontalScroll();
+    OffsetF CalculateDestination(int32_t start, int32_t end, bool isRTL);
+    void ScrollToVisible(int32_t start, int32_t end);
 
 private:
     friend class RichEditorPattern;

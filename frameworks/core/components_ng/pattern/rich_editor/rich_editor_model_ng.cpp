@@ -1481,6 +1481,14 @@ void RichEditorModelNG::SetStyledPlaceholder(FrameNode* frameNode, const SpanStr
     pattern->SetPlaceholderStyledString(mutableSpanString);
 }
 
+void RichEditorModelNG::ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToVisible(start, end);
+}
+
 void RichEditorModelNG::SetOnStyledStringWillChange(FrameNode* frameNode,
     std::function<bool(const StyledStringChangeValue&)>&& func)
 {

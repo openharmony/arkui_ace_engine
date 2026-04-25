@@ -1946,6 +1946,13 @@ void SetStyledPlaceholder(ArkUINodeHandle node, const ArkUI_StyledString_Descrip
     RichEditorModelNG::SetStyledPlaceholder(frameNode, spanStringRawPtr);
 }
 
+void ScrollToVisible(ArkUINodeHandle node, int32_t start, int32_t end)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ScrollToVisible(frameNode, start, end);
+}
+
 void SetRichEditorNapiOnWillChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2202,6 +2209,7 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setStyledString = SetStyledString,
         .getStyledString = GetStyledString,
         .setStyledPlaceholder = SetStyledPlaceholder,
+        .scrollToVisible = ScrollToVisible,
         .setRichEditorOrphanCharOptimization = SetRichEditorOrphanCharOptimization,
         .resetRichEditorOrphanCharOptimization = ResetRichEditorOrphanCharOptimization,
         .getRichEditorOrphanCharOptimization = GetRichEditorOrphanCharOptimization,

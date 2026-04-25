@@ -738,6 +738,8 @@ public:
     void StopScrolling();
     void ClearAISpanRects();
     void HandleScrollStart();
+    std::vector<RectF> CalculateSelectedRect(int32_t start, int32_t end);
+    void ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end);
     bool OnScrollCallback(float offset, int32_t source) override;
     void OnScrollEndCallback() override;
     bool IsScrollable() const override;

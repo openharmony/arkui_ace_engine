@@ -82,6 +82,7 @@ public:
     void IsEditing(const JSCallbackInfo& args);
     void SetSelection(const JSCallbackInfo& args);
     void GetLayoutManager(const JSCallbackInfo& args);
+    void ScrollToVisible(const JSCallbackInfo& args);
     void DeleteBackward(const JSCallbackInfo& args);
     void GetPreviewTextInfo(const JSCallbackInfo& args);
 

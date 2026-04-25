@@ -350,6 +350,7 @@ public:
     virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
+    virtual void ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end) = 0;
     virtual void StopEditing() = 0;
     virtual void DeleteBackward() = 0;
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,

@@ -6424,6 +6424,10 @@
         "name": "OH_ArkUI_TextEditorStyledStringController_SetStyledPlaceholder"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_TextEditorStyledStringController_ScrollToVisible"
+    },
+    {
         "first_introduced": "24",
         "name": "OH_ArkUI_NodeEvent_GetTextEditorOnWillChangeEvent"
     },
