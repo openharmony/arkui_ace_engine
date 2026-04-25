@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-export type int32 = int;
-
-export function propDeepCopy<T>(value: T): T {
-  console.log('Mock variant of propDeepCopy not supported');
-  return value;
+export interface DensityInfo {
+    density: number;
 }
 
-export function functionOverValue<Value>(value: Value | (() => Value)): boolean {
-  return value instanceof Function;
+export interface WindowSizeLayoutBreakpointInfo {
 }
+
+export function onDensityUpdate(callback: Function): void {}
+export function offDensityUpdate(callback?: Function): void {}
+export function onWindowSizeLayoutBreakpointChange(callback: Function): void {}
+export function offWindowSizeLayoutBreakpointChange(callback?: Function): void {}

@@ -13,13 +13,10 @@
  * limitations under the License.
  */
 
-export type int32 = int;
+import { IncrementalNode } from '@koalaui/runtime';
 
-export function propDeepCopy<T>(value: T): T {
-  console.log('Mock variant of propDeepCopy not supported');
-  return value;
-}
-
-export function functionOverValue<Value>(value: Value | (() => Value)): boolean {
-  return value instanceof Function;
+export class PeerNode extends IncrementalNode {
+    getElementInfo(): Object | undefined {
+        return undefined;
+    }
 }

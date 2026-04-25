@@ -13,13 +13,25 @@
  * limitations under the License.
  */
 
-export type int32 = int;
-
-export function propDeepCopy<T>(value: T): T {
-  console.log('Mock variant of propDeepCopy not supported');
-  return value;
+export interface IEnvVariable {
+    onWatchFunc(): void;
+    offWatchFunc(instanceId?: int): void;
 }
 
-export function functionOverValue<Value>(value: Value | (() => Value)): boolean {
-  return value instanceof Function;
+export class EnvDecoratedVariable<T> implements IEnvVariable {
+    constructor(
+        owningView: Object | undefined,
+        envValue: string,
+        varName: string,
+        envOptions?: Object
+    ) {}
+
+    get(): T {
+        throw new Error('EnvDecoratedVariable mock: get() not implemented');
+    }
+
+    resetOnReuse(newValue: T): void {}
+
+    onWatchFunc(): void {}
+    offWatchFunc(instanceId?: int): void {}
 }
