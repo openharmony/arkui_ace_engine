@@ -259,6 +259,8 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
+        : static_cast<int32_t>(MouseAction::PRESS);
     extraInfo_ = "ETF: " + std::to_string(equalsToFingers_) + " CFP: " + std::to_string(currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -359,6 +361,8 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
+        : static_cast<int32_t>(MouseAction::RELEASE);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
         --currentTouchPointsNum_;
@@ -413,6 +417,8 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::MOVE)
+        : static_cast<int32_t>(MouseAction::MOVE);
     if (currentFingers_ < fingers_) {
         return;
     }
@@ -437,6 +443,8 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
+        : static_cast<int32_t>(MouseAction::CANCEL);
     extraInfo_ += "cancel received.";
     if (IsRefereeFinished()) {
         return;
@@ -577,6 +585,9 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayY(touchPoint.screenY);
 #endif
     info.SetPointerEvent(lastPointEvent_);
+    if (!lastPointEvent_) {
+        info.SetLastAction(lastAction_);
+    }
     info.SetClickPointerEvent(touchPoint.GetTouchEventPointerEvent());
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     info.SetInputEventType(inputEventType_);
