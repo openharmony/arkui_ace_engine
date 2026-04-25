@@ -19,12 +19,13 @@
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
+import { FontWeightConfigs_serializer, FontWeightConfigs } from './textCommon'
 import { int32, int64, float32 } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { ResourceColor, Resource as arkui_component_units_Resource } from './units'
+import { ResourceColor, Resource as arkui_component_units_Resource, ResourceStr } from './units'
 import { Color as arkui_component_enums_Color, FontWeight } from './enums'
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from './symbolglyph'
 import { AttributeModifier, hookSymbolSpanAttributeModifier, AttributeUpdater } from '#handwritten'
@@ -111,7 +112,7 @@ export class ArkSymbolSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SymbolSpanAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
+    setFontWeight0Attribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -132,7 +133,7 @@ export class ArkSymbolSpanPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SymbolSpanAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolSpanAttribute_setFontWeight0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEffectStrategyAttribute(value: SymbolEffectStrategy | undefined): void {
@@ -183,6 +184,45 @@ export class ArkSymbolSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SymbolSpanAttribute_setId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setFontWeight1Attribute(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof FontWeight) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as FontWeight
+                thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
+            } else if (valueTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0 = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
+                } else if (valueTmpValueForIdx2 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1 = valueTmpValueForIdx2 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (fontWeightConfigs !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fontWeightConfigsTmpValue = fontWeightConfigs!
+            FontWeightConfigs_serializer.write(thisSerializer, fontWeightConfigsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SymbolSpanAttribute_setFontWeight1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (moduleName !== undefined) {
@@ -221,6 +261,9 @@ export interface SymbolSpanAttribute {
     id(value: string | undefined): this {
         throw new Error('Unimplemented method id')
     }
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        throw new Error('Unimplemented method fontWeight')
+    }
     debugLine(sourceLine: string, moduleName?: string): this {
         throw new Error('Unimplemented method debugLine')
     }
@@ -251,7 +294,7 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
     }
     public fontWeight(value: int32 | FontWeight | string | undefined): this {
         const value_casted = value as (int32 | FontWeight | string | undefined)
-        this.getPeer()?.setFontWeightAttribute(value_casted)
+        this.getPeer()?.setFontWeight0Attribute(value_casted)
         return this
     }
     public effectStrategy(value: SymbolEffectStrategy | undefined): this {
@@ -272,6 +315,12 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
     public id(value: string | undefined): this {
         const value_casted = value as (string | undefined)
         this.getPeer()?.setIdAttribute(value_casted)
+        return this
+    }
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
+        const fontWeightConfigs_casted = fontWeightConfigs as (FontWeightConfigs | undefined)
+        this.getPeer()?.setFontWeight1Attribute(value_casted, fontWeightConfigs_casted)
         return this
     }
     public debugLine(sourceLine: string, moduleName?: string): this {
