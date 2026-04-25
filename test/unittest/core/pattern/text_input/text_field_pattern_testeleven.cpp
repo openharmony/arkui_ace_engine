@@ -1054,15 +1054,6 @@ HWTEST_F(TextFieldPatternTesteleven, OnBackPressed002, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateIsShowVoiceButton(true);
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
-
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    textFieldPattern->voiceButtonKeyboardOpened_ = true;
-    auto result = textFieldPattern->OnBackPressed();
-    EXPECT_TRUE(result);
-#else
-    auto result = textFieldPattern->OnBackPressed();
-    EXPECT_FALSE(result);
-#endif
 }
 
 /**

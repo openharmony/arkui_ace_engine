@@ -2524,7 +2524,6 @@ void TextFieldPattern::HandleOnTextMethodInput(
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request VoiceInput, Close CustomKeyboard.");
         CloseCustomKeyboard();
     }
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::%{public}s", typeName.c_str());
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
@@ -2532,6 +2531,8 @@ void TextFieldPattern::HandleOnTextMethodInput(
         return;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::%{public}s imeShown_:%{public}d",
+        typeName.c_str(), imeShown_);
     MiscServices::InputType inputType = MiscServices::InputType::NONE;
     if (type == TEXT_INPUT_CAMERA_INPUT) {
         inputType = MiscServices::InputType::CAMERA_INPUT;
@@ -2639,7 +2640,6 @@ void TextFieldPattern::HandleOnVoiceInput()
     TextFieldRequestFocus(RequestFocusReason::VOICE_NODE);
     if (!voiceKbShown_) {
         voiceKbOpenedByButton_ = true;
-        voiceButtonKeyboardOpened_ = true;
         HandleOnTextMethodInput(TEXT_INPUT_VOICE_INPUT, "HandleOnVoiceInput", nullptr);
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Close VoiceKB");
@@ -8294,7 +8294,7 @@ bool TextFieldPattern::OnBackPressed()
         }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!(imeShown_ || voiceKbShown_ || (IsShowVoiceButtonMode() && voiceButtonKeyboardOpened_)) &&
+    if (!(imeShown_ || voiceKbShown_) &&
         !isCustomKeyboardAttached_) {
         return false;
     }
