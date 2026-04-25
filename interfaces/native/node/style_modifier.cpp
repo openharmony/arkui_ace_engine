@@ -4929,6 +4929,40 @@ void ResetCompressLeadingPunctuation(ArkUI_NodeHandle node)
     }
 }
 
+int32_t SetPunctuationOverflow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size != 1 || !InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[0].i32))
+    {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
+        fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorPunctuationOverflow(
+            node->uiNodeHandle, item->value[0].i32);
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetPunctuationOverflow(ArkUI_NodeHandle node)
+{
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
+        g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->
+            getRichEditorPunctuationOverflow(node->uiNodeHandle);
+        g_attributeItem.size = REQUIRED_ONE_PARAM;
+        return &g_attributeItem;
+    }
+    return nullptr;
+}
+
+void ResetPunctuationOverflow(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
+        fullImpl->getNodeModifiers()->getRichEditorModifier()->
+            resetRichEditorPunctuationOverflow(node->uiNodeHandle);
+    }
+}
+
 int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == NUM_0) {

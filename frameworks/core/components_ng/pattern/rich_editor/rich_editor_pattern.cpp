@@ -11485,6 +11485,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("includeFontPadding", isIncludeFontPadding_ ? "true" : "false", filter);
     json->PutExtAttr("fallbackLineSpacing", isFallbackLineSpacing_ ? "true" : "false", filter);
     json->PutExtAttr("compressLeadingPunctuation", isCompressLeadingPunctuation_ ? "true" : "false", filter);
+    json->PutExtAttr("punctuationOverflow", isPunctuationOverflow_ ? "true" : "false", filter);
     json->PutExtAttr("scrollBarColor", GetScrollBarColor().ColorToString().c_str(), filter);
     json->PutExtAttr("singleLine", isSingleLineMode_ ? "true" : "false", filter);
     json->PutExtAttr("selectedDragPreviewStyle", GetSelectedDragPreviewStyleColor().ColorToString().c_str(), filter);
@@ -14499,6 +14500,19 @@ void RichEditorPattern::SetCompressLeadingPunctuation(bool enabled)
 bool RichEditorPattern::IsCompressLeadingPunctuation()
 {
     return isCompressLeadingPunctuation_;
+}
+
+void RichEditorPattern::SetPunctuationOverflow(bool enabled)
+{
+    CHECK_NULL_VOID(isPunctuationOverflow_ != enabled);
+    isPunctuationOverflow_ = enabled;
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPunctuationOverflow: %{public}d", isPunctuationOverflow_);
+}
+
+bool RichEditorPattern::IsPunctuationOverflow()
+{
+    return isPunctuationOverflow_;
 }
 
 void RichEditorPattern::OnAttachToMainTree()

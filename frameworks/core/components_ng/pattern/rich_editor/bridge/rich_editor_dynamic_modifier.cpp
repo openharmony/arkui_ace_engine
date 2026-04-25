@@ -1267,6 +1267,27 @@ void ResetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node)
     RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, false);
 }
 
+void SetRichEditorPunctuationOverflow(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetPunctuationOverflow(frameNode, value);
+}
+
+ArkUI_Int32 GetRichEditorPunctuationOverflow(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return RichEditorModelNG::IsPunctuationOverflow(frameNode);
+}
+
+void ResetRichEditorPunctuationOverflow(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetPunctuationOverflow(frameNode, false);
+}
+
 void SetRichEditorIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2153,6 +2174,9 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setRichEditorCompressLeadingPunctuation = SetRichEditorCompressLeadingPunctuation,
         .getRichEditorCompressLeadingPunctuation = GetRichEditorCompressLeadingPunctuation,
         .resetRichEditorCompressLeadingPunctuation = ResetRichEditorCompressLeadingPunctuation,
+        .setRichEditorPunctuationOverflow = SetRichEditorPunctuationOverflow,
+        .getRichEditorPunctuationOverflow = GetRichEditorPunctuationOverflow,
+        .resetRichEditorPunctuationOverflow = ResetRichEditorPunctuationOverflow,
         .setRichEditorIncludeFontPadding = SetRichEditorIncludeFontPadding,
         .getRichEditorIncludeFontPadding = GetRichEditorIncludeFontPadding,
         .resetRichEditorIncludeFontPadding = ResetRichEditorIncludeFontPadding,

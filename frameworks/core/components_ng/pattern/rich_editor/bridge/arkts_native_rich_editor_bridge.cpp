@@ -78,7 +78,8 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         "setKeyboardAppearance", "resetKeyboardAppearance", "setCustomKeyboard", "resetCustomKeyboard",
         "setOnDidIMEInput", "resetOnDidIMEInput", "setOnWillAttachIME", "resetOnWillAttachIME",
         "setEnableHapticFeedback", "resetEnableHapticFeedback", "setEnableAutoSpacing", "resetEnableAutoSpacing",
-        "setCompressLeadingPunctuation", "resetCompressLeadingPunctuation", "setIncludeFontPadding",
+        "setCompressLeadingPunctuation", "resetCompressLeadingPunctuation", "setPunctuationOverflow",
+        "resetPunctuationOverflow", "setIncludeFontPadding",
         "resetIncludeFontPadding", "setFallbackLineSpacing", "resetFallbackLineSpacing", "setUndoStyle",
         "resetUndoStyle", "setScrollBarColor", "resetScrollBarColor", "setSelectedDragPreviewStyle",
         "resetSelectedDragPreviewStyle", "setSingleLine", "resetSingleLine", "setBindSelectionMenu",
@@ -159,6 +160,8 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnableAutoSpacing),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCompressLeadingPunctuation),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCompressLeadingPunctuation),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetPunctuationOverflow),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetPunctuationOverflow),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetIncludeFontPadding),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetIncludeFontPadding),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetFallbackLineSpacing),
@@ -2868,6 +2871,38 @@ ArkUINativeModuleValue RichEditorBridge::ResetCompressLeadingPunctuation(ArkUIRu
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->resetRichEditorCompressLeadingPunctuation(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetPunctuationOverflow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        nodeModifiers->getRichEditorModifier()->setRichEditorPunctuationOverflow(nativeNode, value);
+    } else {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorPunctuationOverflow(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetPunctuationOverflow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorPunctuationOverflow(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

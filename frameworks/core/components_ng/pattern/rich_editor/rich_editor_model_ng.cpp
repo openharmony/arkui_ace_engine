@@ -979,6 +979,24 @@ bool RichEditorModelNG::IsCompressLeadingPunctuation(FrameNode* frameNode)
     return pattern->IsCompressLeadingPunctuation();
 }
 
+void RichEditorModelNG::SetPunctuationOverflow(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PunctuationOverflow, enabled);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPunctuationOverflow(enabled);
+}
+
+bool RichEditorModelNG::IsPunctuationOverflow(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsPunctuationOverflow();
+}
+
 void RichEditorModelNG::SetStopBackPress(bool isStopBackPress)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
@@ -1094,6 +1112,15 @@ void RichEditorModelNG::SetCompressLeadingPunctuation(FrameNode* frameNode, bool
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCompressLeadingPunctuation(enabled);
+}
+
+void RichEditorModelNG::SetPunctuationOverflow(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PunctuationOverflow, enabled, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPunctuationOverflow(enabled);
 }
 
 void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)

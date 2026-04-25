@@ -441,6 +441,7 @@ public:
     virtual void SetEnableAutoSpacing(bool enabled) {};
     virtual void SetOrphanCharOptimization(bool enabled) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) {};
+    virtual void SetPunctuationOverflow(bool enabled) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
     virtual void SetSupportStyledUndo(bool enabled) {};

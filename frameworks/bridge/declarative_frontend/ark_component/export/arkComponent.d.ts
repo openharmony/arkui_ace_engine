@@ -468,6 +468,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     maxLines(value: number): RichEditorAttribute;
     enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
     compressLeadingPunctuation(enable: Optional<boolean>): RichEditorAttribute;
+    punctuationOverflow(enable: Optional<boolean>): RichEditorAttribute;
     undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
     includeFontPadding(enable: Optional<boolean>): RichEditorAttribute;
     fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute;

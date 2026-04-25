@@ -673,6 +673,8 @@ public:
         OrphanCharOptimization, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         CompressLeadingPunctuation, bool, false, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        PunctuationOverflow, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(ColorShaderStyle, Color, TextStyleAttribute::FOREGROUND_BRUSH);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(IncludeFontPadding, bool, false, ParagraphStyleAttribute::RE_CREATE);

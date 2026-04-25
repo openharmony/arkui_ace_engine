@@ -955,6 +955,7 @@ void SpanItem::UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextS
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, PunctuationOverflow, PunctuationOverflow);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, HalfLeading, HalfLeading);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextOverflow, TextOverflow);
@@ -1330,6 +1331,7 @@ void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, UpdateIsOnlyBetweenLines);
     COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
     COPY_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, UpdateCompressLeadingPunctuation);
+    COPY_TEXT_STYLE(textLineStyle, PunctuationOverflow, UpdatePunctuationOverflow);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
     COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
     COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);

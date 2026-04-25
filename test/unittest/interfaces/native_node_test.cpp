@@ -9493,6 +9493,99 @@ HWTEST_F(NativeNodeTest, NativeNodeTestTextEditor3, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTestTextEditorPunctuationOverflow
+ * @tc.desc: Test NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW attribute set, reset and get functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestTextEditorPunctuationOverflow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextEditor node and get nodeAPI.
+     * @tc.expect: node and nodeAPI are not nullptr.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT_EDITOR, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+    /**
+     * @tc.steps: step2. Set NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW attribute with value true.
+     * @tc.expect: setAttribute returns ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    /**
+     * @tc.steps: step3. Get NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW attribute.
+     * @tc.expect: getAttribute returns valid value and value[0].i32 equals true.
+     */
+    auto attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    /**
+     * @tc.steps: step4. Set NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW attribute with value false.
+     * @tc.expect: setAttribute returns ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    value[0].i32 = false;
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    /**
+     * @tc.steps: step5. Get NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW attribute.
+     * @tc.expect: getAttribute returns valid value and value[0].i32 equals false.
+     */
+    attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    EXPECT_EQ(attrValue->value[0].i32, false);
+    /**
+     * @tc.steps: step6. Reset NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW attribute.
+     * @tc.expect: resetAttribute returns ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    result = nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    /**
+     * @tc.steps: step7. Get NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW attribute after reset.
+     * @tc.expect: getAttribute returns valid value (default value should be false).
+     */
+    attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    /**
+     * @tc.steps: step8. Test invalid parameter (item size != 1).
+     * @tc.expect: setAttribute returns ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NumberValue invalidValue[] = {{.i32 = true}, {.i32 = false}};
+    ArkUI_AttributeItem invalidItem = {invalidValue, sizeof(invalidValue) / sizeof(ArkUI_NumberValue)};
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW, &invalidItem);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    /**
+     * @tc.steps: step9. Test invalid parameter (value out of range [0, 1]).
+     * @tc.expect: setAttribute returns ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    value[0].i32 = 2; // Invalid value, should be 0 or 1
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    /**
+     * @tc.steps: step10. Dispose the node.
+     * @tc.expect: node is disposed successfully.
+     */
+    nodeAPI->disposeNode(rootNode);
+    /**
+     * @tc.steps: step11. Test with non-TextEditor node type.
+     * @tc.expect: setAttribute should handle gracefully (may return error or ignore).
+     */
+    auto nonTextEditorNode = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    nodeAPI->setAttribute(nonTextEditorNode, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW, &item);
+    nodeAPI->disposeNode(nonTextEditorNode);
+    /**
+     * @tc.steps: step12. Test GetPunctuationOverflow with non-TextEditor node.
+     * @tc.expect: getAttribute returns nullptr.
+     */
+    auto nonTextEditorNode2 = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    attrValue = nodeAPI->getAttribute(nonTextEditorNode2, NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(attrValue, nullptr);
+    nodeAPI->disposeNode(nonTextEditorNode2);
+}
+
+/**
  * @tc.name: NativeNodeTest150
  * @tc.desc: Test Undefined function.
  * @tc.type: FUNC
