@@ -198,19 +198,30 @@ void GestureEventHub::HandleGestureCollectIntervention(
     }
     if (intervention != GestureCollectIntervention::DISCARD_HIGHER &&
         intervention != GestureCollectIntervention::DISCARD_SELF) {
-        TriggerShouldParallelInnerWith(context.newComingResponseLinkTargets, context.responseLinkResult);
+        TriggerShouldParallelWith(context.newComingResponseLinkTargets, context.responseLinkResult);
         context.responseLinkResult.splice(
             context.responseLinkResult.end(), std::move(context.newComingResponseLinkTargets));
     }
 }
 
-void GestureEventHub::TriggerShouldParallelInnerWith(
+void ApplyBridgeResult(const RefPtr<NGGestureRecognizer>& recognizer, const WeakPtr<NGGestureRecognizer>& item,
+    const RefPtr<NGGestureRecognizer>& result, RefPtr<NGGestureRecognizer>& bridgedResult)
+{
+    if (!result || recognizer == result || bridgedResult == result) {
+        return;
+    }
+    recognizer->SetBridgeMode(true);
+    result->AddBridgeObj(item);
+    bridgedResult = result;
+}
+
+void GestureEventHub::TriggerShouldParallelWith(
     const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers)
 {
-    auto shouldBuiltInRecognizerParallelWithFunc = GetParallelInnerGestureToFunc();
-    CHECK_NULL_VOID(shouldBuiltInRecognizerParallelWithFunc);
+    auto shouldRecognizerParallelWithFunc = GetShouldRecognizerParallelWithFunc();
+    auto parallelInnerGestureToFunc = GetParallelInnerGestureToFunc();
+    CHECK_NULL_VOID(shouldRecognizerParallelWithFunc || parallelInnerGestureToFunc);
     std::map<GestureTypeName, std::vector<RefPtr<NGGestureRecognizer>>> sortedResponseLinkRecognizers;
-
     for (const auto& item : responseLinkRecognizers) {
         if (item.Invalid()) {
             continue;
@@ -222,13 +233,15 @@ void GestureEventHub::TriggerShouldParallelInnerWith(
         auto type = recognizer->GetRecognizerType();
         sortedResponseLinkRecognizers[type].emplace_back(recognizer);
     }
-
     for (const auto& item : currentRecognizers) {
         if (item.Invalid()) {
             continue;
         }
         auto recognizer = item.Upgrade();
-        if (!recognizer->IsSystemGesture() || recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+        if (!recognizer) {
+            continue;
+        }
+        if (recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
             continue;
         }
         auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
@@ -239,10 +252,13 @@ void GestureEventHub::TriggerShouldParallelInnerWith(
         if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
             continue;
         }
-        auto result = shouldBuiltInRecognizerParallelWithFunc(recognizer, iter->second);
-        if (result && item != result) {
-            recognizer->SetBridgeMode(true);
-            result->AddBridgeObj(item);
+        RefPtr<NGGestureRecognizer> bridgedResult;
+        if (shouldRecognizerParallelWithFunc) {
+            ApplyBridgeResult(
+                recognizer, item, shouldRecognizerParallelWithFunc(recognizer, iter->second), bridgedResult);
+        }
+        if (parallelInnerGestureToFunc && recognizer->IsSystemGesture()) {
+            ApplyBridgeResult(recognizer, item, parallelInnerGestureToFunc(recognizer, iter->second), bridgedResult);
         }
     }
 }
@@ -885,6 +901,16 @@ void GestureEventHub::SetShouldBuildinRecognizerParallelWithFunc(
 ShouldBuiltInRecognizerParallelWithFunc GestureEventHub::GetParallelInnerGestureToFunc() const
 {
     return shouldBuildinRecognizerParallelWithFunc_;
+}
+
+void GestureEventHub::SetShouldRecognizerParallelWithFunc(ShouldRecognizerParallelWithFunc&& parallelGestureToFunc)
+{
+    shouldRecognizerParallelWithFunc_ = std::move(parallelGestureToFunc);
+}
+
+ShouldRecognizerParallelWithFunc GestureEventHub::GetShouldRecognizerParallelWithFunc() const
+{
+    return shouldRecognizerParallelWithFunc_;
 }
 
 void GestureEventHub::SetOnGestureCollectInterceptFunc(OnGestureCollectInterceptFunc&& func)

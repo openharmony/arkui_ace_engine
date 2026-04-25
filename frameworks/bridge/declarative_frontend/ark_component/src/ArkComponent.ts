@@ -2388,6 +2388,21 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
   }
 }
 
+declare type ShouldRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
+class ShouldRecognizerParallelWithModifier extends ModifierWithKey<ShouldRecognizerParallelWithCallback> {
+  constructor(value: ShouldRecognizerParallelWithCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('shouldRecognizerParallelWith');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetShouldRecognizerParallelWith(node);
+    } else {
+      getUINativeModule().common.setShouldRecognizerParallelWith(node, this.value);
+    }
+  }
+}
+
 declare type FocusAxisEventCallback = (event: FocusAxisEvent) => void;
 class OnFocusAxisEventModifier extends ModifierWithKey<FocusAxisEventCallback> {
   constructor(value: FocusAxisEventCallback) {
@@ -4324,6 +4339,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   private _onTouchTestDone: TouchTestDoneCallback = null;
   private _onGestureCollectIntercept: GestureCollectInterceptCallback = null;
   private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
+  private _shouldRecognizerParallelWith: ShouldRecognizerParallelWithCallback = null;
   private _onFocusAxisEvent: FocusAxisEventCallback = null;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -4444,6 +4460,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
     this._shouldBuiltInRecognizerParallelWith = callback;
     modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
+    return this;
+  }
+  shouldRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
+    this._shouldRecognizerParallelWith = callback;
+    modifierWithKey(this._modifiersWithKeys, ShouldRecognizerParallelWithModifier.identity, ShouldRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback: (oldValue: SizeOptions, newValue: SizeOptions) => void): this {

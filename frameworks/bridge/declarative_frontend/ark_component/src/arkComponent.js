@@ -2248,6 +2248,20 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
   }
 }
 ShouldBuiltInRecognizerParallelWithModifier.identity = Symbol('shouldBuiltInRecognizerParallelWith');
+class ShouldRecognizerParallelWithModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetShouldRecognizerParallelWith(node);
+    }
+    else {
+      getUINativeModule().common.setShouldRecognizerParallelWith(node, this.value);
+    }
+  }
+}
+ShouldRecognizerParallelWithModifier.identity = Symbol('shouldRecognizerParallelWith');
 class MotionPathModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4100,6 +4114,11 @@ class ArkComponent {
   shouldBuiltInRecognizerParallelWith(callback) {
     this._shouldBuiltInRecognizerParallelWith = callback;
     modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
+    return this;
+  }
+  shouldRecognizerParallelWith(callback) {
+    this._shouldRecognizerParallelWith = callback;
+    modifierWithKey(this._modifiersWithKeys, ShouldRecognizerParallelWithModifier.identity, ShouldRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback) {

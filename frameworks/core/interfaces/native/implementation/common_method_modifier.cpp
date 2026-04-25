@@ -5343,6 +5343,29 @@ void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
+void SetShouldRecognizerParallelWithImpl(Ark_NativePointer node,
+                                         const ShouldRecognizerParallelWithCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || !CallbackHelper(*value).IsValid()) {
+        ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*value), node = weakNode](
+        const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
+    ) -> RefPtr<NG::NGGestureRecognizer> {
+        PipelineContext::SetCallBackNode(node);
+
+        auto arkValCurrent = CreateArkGestureRecognizer(current);
+        auto arkValOthers = CreateArkGestureRecognizerArray(others);
+        auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
+            Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
+        return resultOpt.value_or(nullptr);
+    };
+    ViewAbstract::SetShouldRecognizerParallelWith(frameNode, std::move(shouldRecognizerParallelWithFunc));
+}
 void SetMonopolizeEventsImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)
 {
@@ -7059,6 +7082,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnGestureJudgeBeginImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin0Impl,
         CommonMethodModifier::SetShouldBuiltInRecognizerParallelWithImpl,
+        CommonMethodModifier::SetShouldRecognizerParallelWithImpl,
         CommonMethodModifier::SetMonopolizeEventsImpl,
         CommonMethodModifier::SetOnTouchInterceptImpl,
         CommonMethodModifier::SetOnSizeChangeImpl,

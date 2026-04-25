@@ -321,6 +321,13 @@ typedef struct ArkUI_GestureEventTargetInfo ArkUI_GestureEventTargetInfo;
 typedef struct ArkUI_ParallelInnerGestureEvent ArkUI_ParallelInnerGestureEvent;
 
 /**
+ * @brief Defines a parallel gesture event.
+ *
+ * @since 26.0.0
+ */
+typedef struct ArkUI_ParallelGestureEvent ArkUI_ParallelGestureEvent;
+
+/**
  * @brief Defines a touch recognizer.
  *
  * @since 15
@@ -1255,6 +1262,33 @@ typedef struct {
     int32_t (*setGestureInterrupterToNode)(ArkUI_NodeHandle node, void* userData,
         ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
 } ArkUI_NativeGestureAPI_2;
+
+/**
+ * @brief Defines the gesture APIs.
+ *
+ * @since 26.0.0
+ */
+typedef struct {
+    /**
+     * @brief Pointer to the <b>ArkUI_NativeGestureAPI_2</b> struct.
+     */
+    ArkUI_NativeGestureAPI_2* gestureApi2;
+
+    /**
+    * @brief Sets the callback function for a parallel gesture event.
+    *
+    * @param node Indicates the ArkUI node for which the callback of a parallel gesture event is to be set.
+    * @param userData Indicates the custom data.
+    * @param parallelGesture Indicates the parallel gesture event. <b>event</b> returns the data of the
+    *        parallel gesture event; <b>parallelGesture</b> returns the pointer to the gesture recognizer
+    *        that requires parallel recognition.
+    * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+    *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+    */
+    ArkUI_ErrorCode (*setGestureParallelTo)(
+        ArkUI_NodeHandle node, void* userData, ArkUI_GestureRecognizer* (*parallelGesture)(
+            ArkUI_ParallelGestureEvent* event));
+} ArkUI_NativeGestureAPI_3;
 
 /**
 * @brief Obtains the custom data from a gesture interruption event.

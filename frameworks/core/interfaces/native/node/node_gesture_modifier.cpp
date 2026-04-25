@@ -1024,6 +1024,44 @@ ArkUI_Int32 setInnerGestureParallelTo(ArkUINodeHandle node, void* userData,
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 setGestureParallelTo(ArkUINodeHandle node, void* userData,
+    ArkUIGestureRecognizer* (*parallelGesture)(ArkUIParallelGestureEvent* event))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (!parallelGesture) {
+        ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
+        return ERROR_CODE_NO_ERROR;
+    }
+    auto parallelGestureTo =
+        [userData, parallelGesture](const RefPtr<NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NGGestureRecognizer>>& others) -> RefPtr<NGGestureRecognizer> {
+        auto* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
+        auto count = static_cast<int32_t>(others.size());
+        ArkUIGestureRecognizer** othersArkUIGestureRecognizer = nullptr;
+        if (count > 0) {
+            othersArkUIGestureRecognizer = new ArkUIGestureRecognizer* [count];
+        }
+        for (auto index = 0; index < count; index++) {
+            othersArkUIGestureRecognizer[index] = NodeModifier::CreateGestureRecognizer(others[index]);
+        }
+        ArkUIParallelGestureEvent parallelGestureEvent;
+        parallelGestureEvent.current = currentArkUIGestureRecognizer;
+        parallelGestureEvent.responseLinkRecognizer = othersArkUIGestureRecognizer;
+        parallelGestureEvent.userData = userData;
+        parallelGestureEvent.count = count;
+        auto* result = parallelGesture(&parallelGestureEvent);
+        if (!result || !result->recognizer) {
+            delete[] othersArkUIGestureRecognizer;
+            return nullptr;
+        }
+        delete[] othersArkUIGestureRecognizer;
+        return AceType::Claim(reinterpret_cast<NG::NGGestureRecognizer*>(result->recognizer));
+    };
+    ViewAbstract::SetShouldRecognizerParallelWith(frameNode, std::move(parallelGestureTo));
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Int32 setGestureRecognizerEnabled(ArkUIGestureRecognizer* recognizer, bool enabled)
 {
     auto* gestureRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
@@ -1411,6 +1449,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         .setGestureInterrupterToNode = setGestureInterrupterToNode,
         .setGestureInterrupterToNodeWithUserData = setGestureInterrupterToNodeWithUserData,
         .setInnerGestureParallelTo = setInnerGestureParallelTo,
+        .setGestureParallelTo = setGestureParallelTo,
         .setGestureRecognizerEnabled = setGestureRecognizerEnabled,
         .setGestureRecognizerLimitFingerCount = setGestureRecognizerLimitFingerCount,
         .setLongPressGestureAllowableMovement = setLongPressGestureAllowableMovement,

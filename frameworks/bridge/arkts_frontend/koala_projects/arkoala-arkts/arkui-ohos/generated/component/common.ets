@@ -5729,6 +5729,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setShouldBuiltInRecognizerParallelWith(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setShouldRecognizerParallelWithAttribute(value: ShouldRecognizerParallelWithCallback): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._CommonMethod_setShouldRecognizerParallelWith(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setMonopolizeEventsAttribute(value: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -8184,6 +8190,7 @@ export interface HistoricalPoint {
 export type SizeChangeCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
 export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>, touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult;
 export type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
+export type ShouldRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 export type TransitionFinishCallback = (transitionIn: boolean) => void;
 export type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
 export type GestureCollectInterceptCallback = (recognizers: Array<GestureRecognizer>, touchRecognizers?: Array<TouchRecognizer>) => GestureCollectIntervention;
@@ -10619,6 +10626,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method shouldBuiltInRecognizerParallelWith')
     }
+    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.shouldRecognizerParallelWith(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method shouldRecognizerParallelWith can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method shouldRecognizerParallelWith')
+    }
     monopolizeEvents(value: boolean | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -12452,6 +12471,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
         const value_casted = value as (ShouldBuiltInRecognizerParallelWithCallback | undefined)
         this.getPeer()?.setShouldBuiltInRecognizerParallelWithAttribute(value_casted)
+        return this
+    }
+    public shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
+        const value_casted = value as (ShouldRecognizerParallelWithCallback)
+        this.getPeer()?.setShouldRecognizerParallelWithAttribute(value_casted)
         return this
     }
     public monopolizeEvents(value: boolean | undefined): this {
