@@ -231,6 +231,7 @@ public:
     }
 
     virtual bool OnScrollCallback(float offset, int32_t source);
+    virtual void ReportBackToTop();
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart(bool withPerfMonitor = true);
     virtual void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) {}

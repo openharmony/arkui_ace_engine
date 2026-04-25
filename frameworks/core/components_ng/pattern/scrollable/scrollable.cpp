@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/event_report.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/common/properties/os_content.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -841,10 +842,13 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
         if ((isReverse && gestureVelocity > 0) || (!isReverse && gestureVelocity < 0)) {
             auto node = weakHost_.Upgrade();
             if (node) {
-                auto nodeStr = node->GetTag() + std::to_string(static_cast<uint64_t>(node->GetId()));
+                auto nodeIdStr = std::to_string(static_cast<uint64_t>(node->GetId()));
+                auto nodeStr = node->GetTag() + nodeIdStr;
                 TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
                     "LayoutDirectionEst %{public}s, gain: %{public}f, velocity: %{public}f, reverse: %{public}d",
                     nodeStr.c_str(), gain, gestureVelocity, isReverse);
+                OsContent::CallSendAction("ace_action", "scroll_gain", "{ \"nodeId\":" + nodeIdStr +
+                    ", \"compId\": \"" + node->GetInspectorIdValue("") + "\"}");
             }
         }
     }

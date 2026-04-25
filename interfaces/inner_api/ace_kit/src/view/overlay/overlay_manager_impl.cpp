@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,16 @@ void OverlayManagerImpl::CloseDialog(RefPtr<FrameNode>& dialogNode)
     auto aceNode = frameNode->GetAceNode();
     CHECK_NULL_VOID(aceNode);
     overlayManager_->CloseDialog(aceNode);
+}
+
+WeakPtr<FrameNode> OverlayManagerImpl::GetRootNode() const
+{
+    CHECK_NULL_RETURN(overlayManager_, nullptr);
+    if (auto strongNode = overlayManager_->GetRootNode().Upgrade()) {
+        return FrameNode::GetFrameNode(reinterpret_cast<ArkUINodeHandle>(AceType::DynamicCast<NG::FrameNode>(
+            strongNode).GetRawPtr()));
+    }
+    return nullptr;
 }
 
 void OverlayManagerImpl::ShowMenu(const int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode>& menu)
