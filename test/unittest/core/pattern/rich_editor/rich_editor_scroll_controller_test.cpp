@@ -996,9 +996,10 @@ HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible003, TestSize.Level0)
     AddSpan(INIT_VALUE_1);
     
     TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { RectF(0.0f, 0.0f, 100.0f, 20.0f) } };
-    CaretMetricsF caretMetricsDown = { .offset = OffsetF(50.0f, 20.0f), .height = 20.0f };
-    CaretMetricsF caretMetricsUp = { .offset = OffsetF(50.0f, 0.0f), .height = 20.0f };
-    TestCursorItem cursorItem = { .index = 3, .caretMetricsFDown = caretMetricsDown, .caretMetricsFUp = caretMetricsUp };
+    CaretMetricsF caretMetricsDown(OffsetF(50.0f, 20.0f), 20.0f);
+    CaretMetricsF caretMetricsUp(OffsetF(50.0f, 0.0f), 20.0f);
+    TestCursorItem cursorItem =
+        { .index = 3, .caretMetricsFDown = caretMetricsDown, .caretMetricsFUp = caretMetricsUp };
     TestParagraphItem paragraphItem = {
         .start = 0,
         .end = 6,
@@ -1165,9 +1166,10 @@ HWTEST_F(RichEditorScrollControllerTest, CalculateDestination001, TestSize.Level
 
     AddSpan(INIT_VALUE_1);
     
-    CaretMetricsF caretMetricsDown = { .offset = OffsetF(100.0f, 50.0f), .height = 20.0f };
-    CaretMetricsF caretMetricsUp = { .offset = OffsetF(100.0f, 30.0f), .height = 20.0f };
-    TestCursorItem cursorItem = { .index = 3, .caretMetricsFDown = caretMetricsDown, .caretMetricsFUp = caretMetricsUp };
+    CaretMetricsF caretMetricsDown(OffsetF(100.0f, 50.0f), 20.0f);
+    CaretMetricsF caretMetricsUp(OffsetF(100.0f, 30.0f), 20.0f);
+    TestCursorItem cursorItem =
+        { .index = 3, .caretMetricsFDown = caretMetricsDown, .caretMetricsFUp = caretMetricsUp };
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testCursorItems = { cursorItem } };
     AddParagraph(paragraphItem);
 
