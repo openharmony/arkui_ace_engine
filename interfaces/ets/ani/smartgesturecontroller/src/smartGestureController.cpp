@@ -17,7 +17,6 @@
 #include <array>
 #include <cstdint>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -511,8 +510,8 @@ public:
         auto object = CreateRawProposalObject(env);
         CHECK_NULL_RETURN(object, nullptr);
 
-        CHECK_NULL_RETURN(SetEnumPropertyByIndex(
-            env, object, ACTION_KEY, SMART_GESTURE_ACTION_ENUM, static_cast<ani_size>(ToJsAction(proposal))), nullptr);
+        CHECK_NULL_RETURN(SetEnumPropertyByIndex(env, object, ACTION_KEY, SMART_GESTURE_ACTION_ENUM,
+            static_cast<ani_size>(ToJsAction(proposal))), nullptr);
         CHECK_NULL_RETURN(SetEnumPropertyByIndex(env, object, OPERATE_INTENTION_KEY, OPERATE_INTENTION_ENUM,
             static_cast<ani_size>(ToJsOperateIntention(proposal.operateIntention))), nullptr);
 
@@ -726,9 +725,11 @@ private:
 
 class SmartGestureMonitorState final {
 public:
+    SmartGestureMonitorState(ani_env* env, int32_t instanceId) : env_(env), instanceId_(instanceId) {}
+
     static std::shared_ptr<SmartGestureMonitorState> Create(ani_env* env, int32_t instanceId, ani_fn_object callback)
     {
-        auto state = std::shared_ptr<SmartGestureMonitorState>(new SmartGestureMonitorState(env, instanceId));
+        auto state = std::make_shared<SmartGestureMonitorState>(env, instanceId);
         CHECK_NULL_RETURN(state && state->SetMonitorRef(callback), nullptr);
         return state;
     }
@@ -813,8 +814,6 @@ public:
     }
 
 private:
-    SmartGestureMonitorState(ani_env* env, int32_t instanceId) : env_(env), instanceId_(instanceId) {}
-
     bool SetMonitorRef(ani_fn_object callback)
     {
         CHECK_NULL_RETURN(env_ != nullptr && callback != nullptr, false);
@@ -843,7 +842,6 @@ class SmartGestureMonitorRegistry final {
 public:
     static bool Register(ani_env* env, int32_t instanceId, ani_fn_object callback)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
         auto state = SmartGestureMonitorState::Create(env, instanceId, callback);
         CHECK_NULL_RETURN(state, false);
         states_[instanceId].emplace_back(std::move(state));
@@ -852,47 +850,41 @@ public:
 
     static bool Unregister(ani_env* env, int32_t instanceId, ani_fn_object callback)
     {
-        std::shared_ptr<SmartGestureMonitorState> stateToDetach;
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            auto iter = states_.find(instanceId);
-            if (iter == states_.end() || iter->second.empty()) {
-                return false;
-            }
-
-            auto& stateStack = iter->second;
-            for (auto reverseIter = stateStack.rbegin(); reverseIter != stateStack.rend(); ++reverseIter) {
-                auto state = *reverseIter;
+        std::vector<std::shared_ptr<SmartGestureMonitorState>> statesToDetach;
+        auto iter = states_.find(instanceId);
+        if (iter == states_.end() || iter->second.empty()) {
+            return false;
+        }
+        auto& stateStack = iter->second;
+        auto removeIter = std::remove_if(stateStack.begin(), stateStack.end(),
+            [&statesToDetach, env, callback](const std::shared_ptr<SmartGestureMonitorState>& state) {
                 if (!state || !state->MatchesCallback(env, callback)) {
-                    continue;
+                    return false;
                 }
-                stateToDetach = state;
-                stateStack.erase(std::next(reverseIter).base());
-                break;
-            }
-            if (stateStack.empty()) {
-                states_.erase(iter);
+                statesToDetach.emplace_back(state);
+                return true;
+            });
+        stateStack.erase(removeIter, stateStack.end());
+        if (stateStack.empty()) {
+            states_.erase(iter);
+        }
+        for (const auto& state : statesToDetach) {
+            if (state) {
+                state->Detach();
             }
         }
-
-        if (stateToDetach) {
-            stateToDetach->Detach();
-        }
-        return stateToDetach != nullptr;
+        return !statesToDetach.empty();
     }
 
     static bool Clear(int32_t instanceId)
     {
         std::vector<std::shared_ptr<SmartGestureMonitorState>> statesToDetach;
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            auto iter = states_.find(instanceId);
-            if (iter == states_.end() || iter->second.empty()) {
-                return false;
-            }
-            statesToDetach = std::move(iter->second);
-            states_.erase(iter);
+        auto iter = states_.find(instanceId);
+        if (iter == states_.end() || iter->second.empty()) {
+            return false;
         }
+        statesToDetach = std::move(iter->second);
+        states_.erase(iter);
 
         for (const auto& state : statesToDetach) {
             if (state) {
@@ -904,7 +896,6 @@ public:
 
     static bool HasMonitor(int32_t instanceId)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
         auto iter = states_.find(instanceId);
         return iter != states_.end() && !iter->second.empty();
     }
@@ -912,15 +903,11 @@ public:
     static OHOS::Ace::NG::SmartGestureHandlingResolution Invoke(
         int32_t instanceId, const SmartGestureProposal& defaultProposal)
     {
-        std::vector<std::shared_ptr<SmartGestureMonitorState>> states;
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            auto iter = states_.find(instanceId);
-            if (iter == states_.end() || iter->second.empty()) {
-                return CreateAcceptedResolution();
-            }
-            states = iter->second;
+        auto iter = states_.find(instanceId);
+        if (iter == states_.end() || iter->second.empty()) {
+            return CreateAcceptedResolution();
         }
+        auto states = iter->second;
 
         for (auto stateIter = states.rbegin(); stateIter != states.rend(); ++stateIter) {
             auto state = *stateIter;
@@ -938,11 +925,9 @@ public:
     }
 
 private:
-    static std::mutex mutex_;
     static std::unordered_map<int32_t, std::vector<std::shared_ptr<SmartGestureMonitorState>>> states_;
 };
 
-std::mutex SmartGestureMonitorRegistry::mutex_;
 std::unordered_map<int32_t, std::vector<std::shared_ptr<SmartGestureMonitorState>>>
     SmartGestureMonitorRegistry::states_;
 
