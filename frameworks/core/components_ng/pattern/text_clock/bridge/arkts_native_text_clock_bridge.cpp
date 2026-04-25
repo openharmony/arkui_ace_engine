@@ -186,18 +186,15 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
             nodeModifiers->getTextClockModifier()->resetFontColor(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
-        if (!Framework::JSTextClockTheme::ObtainTextColor(color)) {
-            auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-            CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-            auto theme = frameNode->GetTheme<TextTheme>(true);
-            color = theme ? theme->GetTextClockFontColor() : Color::BLACK;
-            if (SystemProperties::ConfigChangePerform()) {
-                nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
-                nodeModifiers->getTextClockModifier()->setTextColorByUser(nativeNode, false);
-                return panda::JSValueRef::Undefined(vm);
-            }
-        }
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        auto theme = frameNode->GetTheme<TextTheme>(true);
+        color = theme ? theme->GetTextClockFontColor() : Color::BLACK;
         nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
+        if (SystemProperties::ConfigChangePerform()) {
+            nodeModifiers->getTextClockModifier()->setTextColorByUser(nativeNode, false);
+            return panda::JSValueRef::Undefined(vm);
+        }
     } else {
         if (isJsView) {
             nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
