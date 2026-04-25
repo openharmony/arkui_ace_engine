@@ -97,6 +97,7 @@ struct DragDataCore {
     int64_t totalSize { -1 };
     std::string summaryTag;
     int32_t materialId { -1 };
+    int32_t dragAnimationType { static_cast<int32_t>(DragAnimationType::DEFAULT) };
 };
 
 struct DragBundleInfo {
@@ -110,6 +111,7 @@ struct DragNotifyMsg {
     int32_t targetPid = -1;
     DragRet result { DragRet::DRAG_FAIL };
     DragBehavior dragBehavior { DragBehavior::UNKNOWN };
+    DragAnimationType dragAnimationType { DragAnimationType::DEFAULT };
     bool isInnerAndOuterTriggerBothNeeded = true;
 };
 
@@ -118,6 +120,7 @@ struct DragDropRet {
     bool hasCustomAnimation = false;
     int32_t mainWindow = -1;
     DragBehavior dragBehavior { DragBehavior::UNKNOWN };
+    std::string animationOption;
 };
 
 enum class DragState {

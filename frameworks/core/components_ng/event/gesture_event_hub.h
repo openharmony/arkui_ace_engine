@@ -128,6 +128,7 @@ struct PreparedInfoForDrag {
     SourceType deviceType = SourceType::NONE;
     bool isMenuNotShow = false;
     bool isSceneBoardTouchDrag = false;
+    bool disableArkuiAnimation = false;
     PointF displayPoint = { 0.0f, 0.0f };
 };
 

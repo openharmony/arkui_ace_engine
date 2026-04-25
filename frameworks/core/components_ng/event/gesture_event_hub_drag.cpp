@@ -419,7 +419,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
             auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / dragInfoData.dragPreviewRect.Height();
             result.SetX(-rateX * size.Width());
             result.SetY(-rateY * size.Height());
-        } else if (dragInfoData.isSceneBoardTouchDrag) {
+        } else if (dragInfoData.disableArkuiAnimation) {
             auto centerX = coordinateX + frameNodeSize_.Width() / HALF_PIXELMAP;
             auto centerY = coordinateY + frameNodeSize_.Height() / HALF_PIXELMAP;
             coordinateX = centerX - size.Width() / HALF_PIXELMAP;
@@ -1109,6 +1109,9 @@ void GestureEventHub::BuildPreparedDragInfo(DragStartContext& ctx)
         OffsetF(), OffsetF(), ctx.pixelMap, nullptr, ctx.preparedInfo.sizeChangeEffect };
     ctx.preparedInfo.isSceneBoardTouchDrag = DragDropFuncWrapper::CheckInSceneBoardWindow() &&
         ctx.info.GetInputEventType() != InputEventType::MOUSE_BUTTON;
+    auto dragAnimationType = ctx.event ? ctx.event->GetDragAnimationType() : DragAnimationType::DEFAULT;
+    ctx.preparedInfo.disableArkuiAnimation = ctx.preparedInfo.isSceneBoardTouchDrag ||
+        dragAnimationType == DragAnimationType::FOLLOW_HAND_MORPH;
     ctx.dragDropManager->ResetContextMenuDragPosition();
     ctx.preparedInfo.dragPreviewRect = RectF(0, 0, ctx.pixelMap->GetWidth(), ctx.pixelMap->GetHeight());
     ctx.preparedInfo.deviceType = ctx.info.GetSourceDevice();
@@ -1196,10 +1199,10 @@ void GestureEventHub::ResolveDragScreenPosition(const DragStartContext& ctx, flo
     CHECK_NULL_VOID(ctx.dragDropManager);
     auto dragMoveLastPoint = ctx.dragDropManager->GetDragMoveLastPointByCurrentPointer(ctx.info.GetPointerId());
     screenX = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ? dragMoveLastPoint.GetScreenX()
-        : (ctx.preparedInfo.isSceneBoardTouchDrag ? ctx.preparedInfo.displayPoint.GetX()
+        : (ctx.preparedInfo.disableArkuiAnimation ? ctx.preparedInfo.displayPoint.GetX()
                                                   : ctx.info.GetScreenLocation().GetX());
     screenY = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ? dragMoveLastPoint.GetScreenY()
-        : (ctx.preparedInfo.isSceneBoardTouchDrag ? ctx.preparedInfo.displayPoint.GetY()
+        : (ctx.preparedInfo.disableArkuiAnimation ? ctx.preparedInfo.displayPoint.GetY()
                                                   : ctx.info.GetScreenLocation().GetY());
 }
 
@@ -1216,7 +1219,9 @@ DragDataCore GestureEventHub::CreateDragData(const DragStartContext& ctx, const 
         static_cast<int32_t>(ctx.info.GetSourceDevice()), ctx.recordsSize, pointerId, screenX, screenY,
         ctx.info.GetTargetDisplayId(), windowId, true, false, ctx.dragSummaryInfo.summary,
         ctx.event->IsUseDataLoadParams(), ctx.dragSummaryInfo.detailedSummary, ctx.dragSummaryInfo.summaryFormat,
-        ctx.dragSummaryInfo.version, ctx.dragSummaryInfo.totalSize, ctx.dragSummaryInfo.tag, materialId };
+        ctx.dragSummaryInfo.version, ctx.dragSummaryInfo.totalSize, ctx.dragSummaryInfo.tag, materialId,
+        ctx.event->GetDragAnimationTypeValue() };
+    ctx.dragDropManager->SetDragAnimationType(ctx.event->GetDragAnimationType());
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && ctx.info.GetSourceTool() == SourceTool::MOUSE &&
         ctx.info.GetSourceDevice() == SourceType::TOUCH) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
@@ -1484,7 +1489,7 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::u
     float scale, const PreparedInfoForDrag& dragInfoData)
 {
     CHECK_NULL_VOID(arkExtraInfoJson);
-    arkExtraInfoJson->Put("enable_animation", dragInfoData.isSceneBoardTouchDrag);
+    arkExtraInfoJson->Put("enable_animation", !dragInfoData.disableArkuiAnimation);
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);

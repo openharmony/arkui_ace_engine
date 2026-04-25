@@ -41,7 +41,8 @@ public:
     MOCK_METHOD(int32_t, UpdatePreviewStyleWithAnimation, (const PreviewStyle& previewStyle,
         const PreviewAnimation& animation), (override));
 
-    MOCK_METHOD(int32_t, StopDrag, (DragDropRet result), (override));
+    MOCK_METHOD(int32_t, StopDrag,
+        (DragDropRet result, std::function<void()> callback), (override));
 
     MOCK_METHOD(int32_t, GetUdKey, (std::string& udKey), (override));
 
@@ -55,6 +56,18 @@ public:
         (std::string& tag)), (override));
 
     MOCK_METHOD(int32_t, GetDragExtraInfo, (std::string& extraInfo), (override));
+
+    int32_t GetDragAnimationType(int32_t& dragAnimationType) override
+    {
+        dragAnimationType = dragAnimationType_;
+        return getDragAnimationTypeRet_;
+    }
+
+    void SetDragAnimationTypeForTest(int32_t dragAnimationType, int32_t ret)
+    {
+        dragAnimationType_ = dragAnimationType;
+        getDragAnimationTypeRet_ = ret;
+    }
 
     MOCK_METHOD(int32_t, EnterTextEditorArea, (bool enable), (override));
 
@@ -89,6 +102,8 @@ private:
     std::function<void()> gDragOutCallback = nullptr;
     int gStartDrag = 0;
     DragDataCore gDragData_;
+    int32_t dragAnimationType_ = static_cast<int32_t>(DragAnimationType::DEFAULT);
+    int32_t getDragAnimationTypeRet_ = -1;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_INTERACTION_H

@@ -90,6 +90,14 @@ constexpr int32_t SCALE_TYPE_SECOND = 3;
 constexpr int32_t SCALE_TYPE_THIRD = 4;
 const RefPtr<InterpolatingSpring> DRAG_TRANSITION_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
+constexpr char STOP_DRAG_ANIMATION_END_TASK[] = "ArkUIDragStopAnimationEnd";
+
+DragAnimationType ParseDragAnimationType(int32_t dragAnimationTypeValue)
+{
+    return dragAnimationTypeValue == static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH)
+        ? DragAnimationType::FOLLOW_HAND_MORPH
+        : DragAnimationType::DEFAULT;
+}
 } // namespace
 
 RefPtr<RenderContext> GetMenuRenderContextFromMenuWrapper(const RefPtr<FrameNode>& menuWrapperNode)
@@ -993,6 +1001,7 @@ void DragDropManager::HandleDragEvent(const DragPointerEvent& pointerEvent, Drag
     switch (action) {
         case DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER: {
             RequireSummary();
+            RequireDragAnimationType();
             OnDragStart(pointerEvent.GetPoint());
             break;
         }
@@ -1173,6 +1182,7 @@ void DragDropManager::ResetDragEndOption(
     ResetBundleInfo();
     SetDragResult(notifyMessage, dragEvent);
     SetDragBehavior(notifyMessage, dragEvent);
+    SetDragAnimationType(notifyMessage, dragEvent);
     DoDragReset();
     SetIsDragged(false);
     SetDraggingPointer(-1);
@@ -1202,6 +1212,7 @@ void DragDropManager::DoDragReset()
     isPullThrow_ = false;
     fingerPointInfo_.clear();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+    dragAnimationType_ = DragAnimationType::DEFAULT;
     lastRootNode_ = nullptr;
     lastDragPointerEvent_.reset();
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
@@ -1249,6 +1260,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     }
 
     RequestDragSummaryInfoAndPrivilege();
+    RequireDragAnimationType();
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
@@ -1511,6 +1523,9 @@ void DragDropManager::HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, con
         TAG_LOGI(AceLogTag::ACE_DRAG, "Need do internal drop animation, set useCustomAnimation to false.");
         useCustomAnimation = false;
     }
+    if (event->HasFollowHandMorphDropAnimation() && !event->GetFollowHandMorphAnimationOption().empty()) {
+        useCustomAnimation = false;
+    }
     auto dragBehavior = event->GetDragBehavior();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -1568,10 +1583,55 @@ std::function<void(const DragRet&, const DragBehavior&, const bool&)> DragDropMa
     return callback;
 }
 
+void DragDropManager::ExecuteFollowHandMorphStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event,
+    DragRet dragResult, int32_t windowId, DragBehavior dragBehavior)
+{
+    HideSubwindowDragNode();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto pendingCallback = [id = Container::CurrentId(), weak = WeakClaim(this), event]() {
+        ContainerScope scope(id);
+        auto manager = weak.Upgrade();
+        CHECK_NULL_VOID(manager);
+        manager->ExecuteFollowHandMorphDropAnimation(event);
+    };
+    DragDropGlobalController::GetInstance().SavePendingFollowHandMorphDropAnimation(std::move(pendingCallback));
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag follow-hand morph branch enters pending state.");
+    auto stopDragCallback = [id = Container::CurrentId(), taskExecutor]() {
+        ContainerScope scope(id);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Receive stop-drag callback from drag framework for follow-hand morph.");
+        taskExecutor->PostTask(
+            []() {
+                if (!DragDropGlobalController::GetInstance().ConsumeAndExecutePendingFollowHandMorphDropAnimation()) {
+                    TAG_LOGI(AceLogTag::ACE_DRAG, "Ignore delayed stop-drag callback after interruption.");
+                    return;
+                }
+            },
+            TaskExecutor::TaskType::UI, STOP_DRAG_ANIMATION_END_TASK);
+    };
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "Stop drag, wait drag framework animation end. WindowId is %{public}d.", windowId);
+    DragDropRet dragDropRet { dragResult, false, windowId, dragBehavior };
+    dragDropRet.animationOption = event->GetFollowHandMorphAnimationOption();
+    auto stopDragRet = InteractionInterface::GetInstance()->StopDrag(dragDropRet, stopDragCallback);
+    if (stopDragRet != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "StopDrag failed in follow-hand morph flow: %{public}d, run fallback.",
+            stopDragRet);
+        static_cast<void>(
+            DragDropGlobalController::GetInstance().ConsumeAndExecutePendingFollowHandMorphDropAnimation());
+    }
+}
+
 void DragDropManager::ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event, DragRet dragResult,
     bool useCustomAnimation, int32_t windowId, DragBehavior dragBehavior,
     const OHOS::Ace::DragPointerEvent& pointerEvent)
 {
+    if (event->HasFollowHandMorphDropAnimation() && !event->GetFollowHandMorphAnimationOption().empty()) {
+        ExecuteFollowHandMorphStopDrag(event, dragResult, windowId, dragBehavior);
+        return;
+    }
     if (useCustomAnimation && event->HasDropAnimation()) {
         ExecuteCustomDropAnimation(event, DragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior });
         return;
@@ -1672,6 +1732,61 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
     pipeline->FlushMessages();
 #endif
     InteractionInterface::GetInstance()->StopDrag(dragDropRet);
+}
+
+void DragDropManager::ExecuteFollowHandMorphDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& event)
+{
+    CHECK_NULL_VOID(event);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+#ifdef ENABLE_ROSEN_BACKEND
+    OHOS::Rosen::RSSyncTransactionController* transactionController = nullptr;
+    std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler;
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto window = pipeline->GetWindow();
+        CHECK_NULL_VOID(window);
+        auto rsUIDirector = window->GetRSUIDirector();
+        CHECK_NULL_VOID(rsUIDirector);
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        transactionHandler = rsUIContext->GetSyncTransactionHandler();
+    } else {
+        transactionController = Rosen::RSSyncTransactionController::GetInstance();
+    }
+    if (transactionController) {
+        transactionController->OpenSyncTransaction();
+    } else if (transactionHandler) {
+        transactionHandler->OpenSyncTransaction();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "transactionController and handler invalid");
+        return;
+    }
+    if (event->HasFollowHandMorphDropAnimation()) {
+        event->ExecuteFollowHandMorphDropAnimation();
+    }
+    if (transactionController) {
+        auto transaction = transactionController->GetRSTransaction();
+        InteractionInterface::GetInstance()->SetDragWindowVisible(false, transaction);
+        pipeline->FlushUITasks();
+        transactionController->CloseSyncTransaction();
+    } else if (transactionHandler) {
+        auto transaction = transactionHandler->GetRSTransaction();
+        InteractionInterface::GetInstance()->SetDragWindowVisible(false, transaction);
+        pipeline->FlushUITasks();
+        transactionHandler->CloseSyncTransaction();
+    }
+#else
+    if (event->HasFollowHandMorphDropAnimation()) {
+        event->ExecuteFollowHandMorphDropAnimation();
+    }
+    InteractionInterface::GetInstance()->SetDragWindowVisible(false);
+    pipeline->FlushMessages();
+#endif
+}
+
+bool DragDropManager::InterruptFollowHandMorphDropAnimation()
+{
+    return DragDropGlobalController::GetInstance().InterruptPendingFollowHandMorphDropAnimation();
 }
 
 void DragDropManager::RequireSummary()
@@ -2208,6 +2323,7 @@ void DragDropManager::UpdateDragEvent(
     event->SetDisplayId(pointerEvent.displayId);
     event->SetDragSource(dragBundleInfo_.bundleName);
     event->SetRemoteDev(dragBundleInfo_.isRemoteDev);
+    event->SetDragAnimationType(dragAnimationType_);
 }
 
 std::string DragDropManager::GetExtraInfo()
@@ -2349,7 +2465,7 @@ void DragDropManager::CopyPreparedInfoForDrag(DragPreviewInfo& dragPreviewInfo, 
     dragPreviewInfo.stackNode = data.stackNode;
     dragPreviewInfo.sizeChangeEffect = data.sizeChangeEffect;
     dragPreviewInfo.menuNode = data.menuNode;
-    dragPreviewInfo.isSceneBoardTouchDrag = data.isSceneBoardTouchDrag;
+    dragPreviewInfo.disableArkuiAnimation = data.disableArkuiAnimation;
 }
 
 bool DragDropManager::IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent)
@@ -2536,7 +2652,7 @@ void DragDropManager::DragMoveAnimation(
     uint64_t dragStartVsyncTime = DragDropGlobalController::GetInstance().GetStartDragVsyncTime();
     uint64_t durationVsyncTime = pipeline->GetVsyncTime() - dragStartVsyncTime;
     AnimationOption option;
-    auto minResponse = info_.isSceneBoardTouchDrag ?
+    auto minResponse = info_.disableArkuiAnimation ?
         MIN_SPRING_RESPONSE_FOR_SCENE_BOARD : MIN_SPRING_RESPONSE;
     auto springResponse =
         std::max(DEFAULT_SPRING_RESPONSE
@@ -2722,7 +2838,7 @@ void DragDropManager::DragStartAnimation(
                info_.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) {
         StartDragTransitionAnimation(newOffset, option, overlayManager, animateProperty, point);
     }
-    if (info_.isSceneBoardTouchDrag) {
+    if (info_.disableArkuiAnimation) {
         renderContext->UpdateOpacity(0.0f);
         auto overlayManager = GetDragAnimationOverlayManager(containerId);
         CHECK_NULL_VOID(overlayManager);
@@ -2864,6 +2980,13 @@ void DragDropManager::SetDragBehavior(
     }
     CHECK_NULL_VOID(dragEvent);
     dragEvent->SetDragBehavior(dragBehavior);
+}
+
+void DragDropManager::SetDragAnimationType(
+    const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+{
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetDragAnimationType(notifyMessage.dragAnimationType);
 }
 
 void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
@@ -3282,8 +3405,21 @@ void DragDropManager::RequireSummaryAndDragBundleInfoIfNecessary(const DragPoint
     if (CheckIsNewDrag(pointerEvent)) {
         currentPullId_ = pointerEvent.pullId;
         RequireSummary();
+        RequireDragAnimationType();
         RequireBundleInfo();
     }
+}
+
+void DragDropManager::RequireDragAnimationType()
+{
+    int32_t dragAnimationTypeValue = static_cast<int32_t>(dragAnimationType_);
+    auto ret = InteractionInterface::GetInstance()->GetDragAnimationType(dragAnimationTypeValue);
+    if (ret != 0) {
+        dragAnimationType_ = DragAnimationType::DEFAULT;
+        TAG_LOGI(AceLogTag::ACE_DRAG, "GetDragAnimationType failed: %{public}d, fallback to DEFAULT.", ret);
+        return;
+    }
+    dragAnimationType_ = ParseDragAnimationType(dragAnimationTypeValue);
 }
 
 bool DragDropManager::IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, int32_t pointId)

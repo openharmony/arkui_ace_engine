@@ -45,6 +45,8 @@ void ANIDragActionNotifyDragStartReques(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatusObj);
 void ANIDragActionEnableDropDisallowedBadge(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enabled);
+ani_boolean ANIDragActionInterruptFollowHandMorphDropAnimation(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
 void ANICleanDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr);
 void ANICleanDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragPreviewPtr);
 void ANICleanSpringLoadingContext([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);

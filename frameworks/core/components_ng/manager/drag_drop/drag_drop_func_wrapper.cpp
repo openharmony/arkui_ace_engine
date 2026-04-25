@@ -321,6 +321,7 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     auto windowScale = container->GetWindowScale();
     CHECK_NULL_RETURN(windowScale, -1);
     dragAction->windowScale = windowScale;
+    manager->SetDragAnimationType(DragAnimationType::DEFAULT);
     manager->SetDragAction(dragAction);
     if (CheckStartAction(dragAction, container, manager) == -1) {
         manager->GetDragAction()->dragState = DragAdapterState::INIT;

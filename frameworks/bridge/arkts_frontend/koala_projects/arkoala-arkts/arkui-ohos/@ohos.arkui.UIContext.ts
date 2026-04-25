@@ -380,6 +380,9 @@ export class DragController {
     public enableDropDisallowedBadge(enabled: boolean): void {
         throw Error('enableDropDisallowedBadge not implemented in DragController!')
     }
+    public interruptFollowHandMorphDropAnimation(): boolean {
+        throw Error('interruptFollowHandMorphDropAnimation not implemented in DragController!')
+    }
 }
 
 export interface OverlayManagerOptions {
