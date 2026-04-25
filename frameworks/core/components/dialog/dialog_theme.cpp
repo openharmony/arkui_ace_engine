@@ -15,6 +15,11 @@
 
 #include "core/components/dialog/dialog_theme.h"
 
+#include "core/components/common/layout/layout_param.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/property/measure_property.h"
+
 namespace OHOS::Ace {
 void DialogTheme::Builder::ParsePattern(
     const RefPtr<ThemeConstants>& themeConstants, const RefPtr<DialogTheme>& theme) const

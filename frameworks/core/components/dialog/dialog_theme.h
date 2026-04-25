@@ -20,18 +20,16 @@
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components_ng/property/measure_type.h"
 
 namespace OHOS::Ace {
+enum class DialogAlignment;
 namespace {
 constexpr double PRIMARY_RGBA_OPACITY = 0.9f;
 constexpr double SECONDARY_RGBA_OPACITY = 0.6f;

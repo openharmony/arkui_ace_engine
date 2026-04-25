@@ -16,10 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MENU_MENU_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MENU_MENU_ELEMENT_H
 
-#include "core/components/box/render_box.h"
 #include "core/components/menu/menu_component.h"
-#include "core/components/select_popup/select_popup_component.h"
 #include "core/pipeline/base/composed_element.h"
+
+namespace OHOS::Ace {
+class RenderBox;
+class OptionComponent;
+class SelectPopupComponent;
+}
 
 namespace OHOS::Ace {
 
