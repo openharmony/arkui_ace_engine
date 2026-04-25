@@ -2456,8 +2456,9 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
             pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
         targetOffset_ += displayWindowOffset;
+        auto currentWindowType = isTips_ ? SubwindowType::TYPE_TIPS : SubwindowType::TYPE_POPUP;
         auto currentSubwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
-            pipelineContext->GetInstanceId(), SubwindowType::TYPE_POPUP);
+            pipelineContext->GetInstanceId(), currentWindowType);
         if (currentSubwindow) {
             auto subwindowRect = currentSubwindow->GetRect();
             targetOffset_ -= subwindowRect.GetOffset();
