@@ -1232,7 +1232,8 @@ HWTEST_F(NavigationGroupNodeTestNg, UpdateLastStandardIndexTest001, TestSize.Lev
     ASSERT_NE(stack, nullptr);
     stack->Add("test", navDestination);
 
-    navigation->UpdateLastStandardIndex();
+    bool hasFullScreenOverlay = false;
+    navigation->UpdateLastStandardIndex(hasFullScreenOverlay);
     EXPECT_EQ(navigation->GetLastStandardIndex(), 0);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }

@@ -330,6 +330,45 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     contentWrapper->Layout();
 }
 
+void MeasureFullScreenOverlayNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& overlaySize)
+{
+    auto overlayNode = AceType::DynamicCast<FrameNode>(hostNode->GetOverlayNode());
+    CHECK_NULL_VOID(overlayNode);
+    auto index = hostNode->GetChildIndexById(overlayNode->GetId());
+    auto overlayWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(overlayWrapper);
+    // Overlay pages must be measured against the whole Navigation frame instead of the content
+    // area, otherwise split mode would clamp them to the right-side pane.
+    auto constraint = navigationLayoutProperty->CreateChildConstraint();
+    if (overlayNode->GetChildren().empty()) {
+        constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
+    } else {
+        NavigationLayoutUtil::UpdateConstraintWhenFixOrWrap(navigationLayoutProperty, constraint, overlaySize);
+    }
+    overlayWrapper->Measure(constraint);
+}
+
+void LayoutFullScreenOverlayNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty)
+{
+    auto overlayNode = AceType::DynamicCast<FrameNode>(hostNode->GetOverlayNode());
+    CHECK_NULL_VOID(overlayNode);
+    auto index = hostNode->GetChildIndexById(overlayNode->GetId());
+    auto overlayWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(overlayWrapper);
+    auto geometryNode = overlayWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    // The overlay container is anchored to Navigation's origin so its children can naturally
+    // cover nav bar, divider, and content without inheriting content-node offsets.
+    auto overlayOffset = OffsetT<float>(0.0f, 0.0f);
+    const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+    overlayOffset.AddX(padding.left.value_or(0.0f));
+    overlayOffset.AddY(padding.top.value_or(0.0f));
+    geometryNode->SetMarginFrameOffset(overlayOffset);
+    overlayWrapper->Layout();
+}
+
 void LayoutSplitPalceholderContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, float splitPlaceholderOffsetX,
     const NavBarPosition& position)
@@ -1023,6 +1062,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     MeasureContentChild(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
+    MeasureFullScreenOverlayNode(layoutWrapper, hostNode, navigationLayoutProperty, size);
     if (!IsDividerDisabled(hostNode)) {
         MeasureDivider(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
     }
@@ -1077,6 +1117,7 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutWrapper, hostNode, navigationLayoutProperty, splitPlaceholderOffsetX, navBarPosition);
     LayoutContent(
         layoutWrapper, hostNode, navigationLayoutProperty, navBarOrPrimarNodeWidth, dividerWidth, navBarPosition);
+    LayoutFullScreenOverlayNode(layoutWrapper, hostNode, navigationLayoutProperty);
     LayoutDragBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarOrPrimarNodeWidth, navBarPosition);
     if (pattern->IsForceSplitSuccess()) {
         LayoutForceSplitPlaceHolderNode(

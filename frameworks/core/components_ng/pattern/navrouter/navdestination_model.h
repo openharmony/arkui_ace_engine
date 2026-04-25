@@ -83,6 +83,7 @@ public:
     virtual void SetOnReady(std::function<void(RefPtr<NG::NavDestinationContext>)>&& onReady) = 0;
     virtual void SetOnPop(std::function<void(const RefPtr<NG::NavPathInfo>&)>&& onPop) = 0;
     virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
+    virtual void SetFullScreenOverlay(std::optional<bool> fullScreenOverlay) {}
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, NG::MoreButtonOptions&& opt) {}
     virtual void SetHideItemText(bool isHideItemText) {};

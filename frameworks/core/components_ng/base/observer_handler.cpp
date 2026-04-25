@@ -487,7 +487,8 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(c
         CHECK_NULL_CONTINUE(parent);
         const auto& parentTag = parent->GetTag();
         // NavDestination in stack or home NavDestination in forceSplit mode.
-        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG ||
+            parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
             break;
         }
         if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {
@@ -516,7 +517,8 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(c
         CHECK_NULL_CONTINUE(parent);
         const auto& parentTag = parent->GetTag();
         // NavDestination in stack or home NavDestination in forceSplit mode.
-        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG ||
+            parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
             break;
         }
         if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {

@@ -138,6 +138,7 @@ const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
 const char BAR_ITEM_ETS_TAG[] = "BarItem";
 const char TITLE_BAR_ETS_TAG[] = "TitleBar";
 const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
+const char NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG[] = "NavigationFullScreenOverlay";
 const char TOOL_BAR_ETS_TAG[] = "ToolBar";
 const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";

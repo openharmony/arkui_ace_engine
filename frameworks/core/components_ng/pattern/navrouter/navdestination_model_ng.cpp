@@ -1574,6 +1574,12 @@ void NavDestinationModelNG::SetHideToolBar(bool hideToolBar, bool animated)
     navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
+void NavDestinationModelNG::SetFullScreenOverlay(std::optional<bool> fullScreenOverlay)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetFullScreenOverlay(frameNode, fullScreenOverlay);
+}
+
 void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1583,6 +1589,26 @@ void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBa
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
     navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
+}
+
+void NavDestinationModelNG::SetFullScreenOverlay(FrameNode* frameNode, std::optional<bool> fullScreenOverlay)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    // Persist the request on the destination itself, then notify Navigation so it can recompute
+    // inherited overlay state and remount pages between content/overlay containers immediately.
+    auto previousRequest = navDestinationLayoutProperty->GetFullScreenOverlay();
+    if (fullScreenOverlay.has_value()) {
+        navDestinationLayoutProperty->UpdateFullScreenOverlay(fullScreenOverlay.value());
+    } else {
+        navDestinationLayoutProperty->ResetFullScreenOverlay();
+    }
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->NotifyFullScreenOverlayRequestChange(previousRequest, fullScreenOverlay);
 }
 
 void NavDestinationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt)
