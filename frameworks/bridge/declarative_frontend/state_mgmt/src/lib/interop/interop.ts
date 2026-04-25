@@ -286,3 +286,22 @@ function createMutableBinding(getter: () => Object, setter: (newValue: Object) =
 function createBinding(getter: () => Object): Binding<Object> {
     return UIUtilsImpl.instance().makeBinding(getter);
 }
+
+function tryGetInteropObservedValue(target: Object, key: string | symbol, val: any): any | undefined {
+    if (!val || typeof val !== 'object') {
+        return undefined;
+    }
+    val = ObserveV2.setStaticCompatibleFuncInVal(target, val);
+    if (isStaticProxy(val) && typeof key === 'string' && key.startsWith(ObserveV2.OB_PREFIX)) {
+        const propertyKey = key.substring(ObserveV2.OB_PREFIX.length);
+        val = InteropExtractorModule.getV2InteropObservedObject(
+            val,
+            target,
+            propertyKey,
+            '__autoProxyStaticWatch_'
+        );
+        target[key] = val;
+        return val;
+    }
+    return undefined;
+}
