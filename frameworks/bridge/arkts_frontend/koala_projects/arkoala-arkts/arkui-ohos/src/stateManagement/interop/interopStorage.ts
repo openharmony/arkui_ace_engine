@@ -61,7 +61,7 @@ export class InteropStorageBase extends StorageBase {
     }
 
     // get value from Storage in ArkTS1.1
-    protected getDynamicValue_: (value: string) => Object | undefined = (value: string) => {
+    protected getDynamicValue_: (value: string) => Any = (value: string) => {
         throw new Error('not implement');
     };
     protected removeDynamicValue_: (value: string) => boolean = (value: string) => {
@@ -129,7 +129,7 @@ export class InteropStorageBase extends StorageBase {
             return this.getStaticKeys();
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => Object | undefined): void => {
+        const setGetValueFunc = (event: (value: string) => Any): void => {
             this.getDynamicValue_ = event;
         };
         const setRemoveValueFunc = (event: (value: string) => boolean): void => {
@@ -665,7 +665,7 @@ export class InteropAppStorageBase extends InteropStorageBase {
             return this.getStaticKeys();
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => Object | undefined): void => {
+        const setGetValueFunc = (event: (value: string) => Any): void => {
             this.getDynamicValue_ = event;
         };
         const setRemoveValueFunc = (event: (value: string) => boolean): void => {

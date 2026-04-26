@@ -83,7 +83,7 @@ export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, Met
             needInitializeModifier = true;
             needUpdate = true;
         } else if (node !== attributeUpdater.peerNode_) {
-            attributeUpdater.onComponentChanged(attributeSet_ as Object as T);
+            attributeUpdater.onComponentChanged(attributeSet_ as T);
             needUpdate = true;
         }
         if (needUpdate) {
