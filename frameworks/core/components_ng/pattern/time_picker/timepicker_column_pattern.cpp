@@ -49,6 +49,7 @@ constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 const int32_t HALF_NUMBER = 2;
 const uint32_t NEXT_COLOUM_DIFF = 1;
 const std::string AMPM = "amPm";
+const char CHINESE_HOUR[] = u8"\u70b9";
 } // namespace
 
 void TimePickerColumnPattern::OnModifyDone()
@@ -656,6 +657,23 @@ void TimePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 }
 #endif
 
+std::string TimePickerColumnPattern::GetTimeUnitString(const std::string& timeValue,
+    TimeUnitStyle timeStyle, MeasureFormatStyle formatStyle) const
+{
+    double time = std::stod(timeValue);
+    std::string unitString = Localization::GetInstance()->TimeUnitFormat(time, timeStyle, formatStyle);
+    if (unitString.empty()) {
+        return timeValue;
+    }
+
+    size_t pos = 0;
+    while (pos < unitString.length() && (unitString[pos] >= '0' && unitString[pos] <= '9')) {
+        pos++;
+    }
+    std::string unit = unitString.substr(pos);
+    return timeValue + unit;
+}
+
 std::string TimePickerColumnPattern::GetCurrentOption() const
 {
     auto frameNode = GetHost();
@@ -677,7 +695,37 @@ std::string TimePickerColumnPattern::GetCurrentOption() const
         if (it->second < index) {
             return "";
         }
-        return timePickerRowPattern->GetOptionsValue(frameNode, index);
+        std::string text = timePickerRowPattern->GetOptionsValue(frameNode, index);
+        if (AceApplicationInfo::GetInstance().GetLanguage() == "zh" && text.compare("00") == 0) {
+            text = "0";
+        }
+        auto allChildNodes = timePickerRowPattern->GetAllChildNode();
+        std::string result;
+        
+        if (allChildNodes.find("hour") != allChildNodes.end() && allChildNodes.at("hour").Upgrade() == frameNode) {
+            if (AceApplicationInfo::GetInstance().GetLanguage() != "zh") {
+                result = text + "o'clock";
+            } else {
+                result = text + std::string(CHINESE_HOUR);
+            }
+        } else if (allChildNodes.find("minute") != allChildNodes.end() &&
+            allChildNodes.at("minute").Upgrade() == frameNode) {
+            result = GetTimeUnitString(text, TimeUnitStyle::MINUTE, MeasureFormatStyle::WIDTH_WIDE);
+        } else if (allChildNodes.find("second") != allChildNodes.end() &&
+            allChildNodes.at("second").Upgrade() == frameNode) {
+            result = GetTimeUnitString(text, TimeUnitStyle::SECOND, MeasureFormatStyle::WIDTH_WIDE);
+        } else {
+            result = text;
+        }
+        if (result.empty()) {
+            return "";
+        }
+        if (result.front() == '0') {
+            result = "[n1]" + result;
+        } else {
+            result = "[n2]" + result;
+        }
+        return result;
     }
     return "";
 }
