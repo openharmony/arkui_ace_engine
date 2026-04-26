@@ -173,7 +173,10 @@ public:
 
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
-    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force = false) {};
+    virtual bool SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force = false)
+    {
+        return false;
+    }
 
     virtual bool HasAnimatingGeometryTransition() const
     {

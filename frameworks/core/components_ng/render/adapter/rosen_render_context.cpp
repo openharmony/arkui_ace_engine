@@ -725,7 +725,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
 }
 #endif
 
-void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force)
+bool RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force)
 {
     FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition, force);
     CHECK_NULL_VOID(rsNode_);
@@ -736,7 +736,7 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             animatingGeometryTransitionCount_++;
         }
         if (onlyCountMode) {
-            return;
+            return false;
         }
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox [%{public}f, %{public}f]",
@@ -746,17 +746,18 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
         if (!force) {
             animatingGeometryTransitionCount_--;
             if (animatingGeometryTransitionCount_ > 0) {
-                return;
+                return false;
             }
         }
         animatingGeometryTransitionCount_ = 0;
         if (onlyCountMode) {
-            return;
+            return false;
         }
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
         rsNode_->SetSandBox(std::nullopt);
     }
+    return true;
 }
 
 void RosenRenderContext::SetDrawContentAtLast(bool useDrawContentLastOrder)

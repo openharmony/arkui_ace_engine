@@ -119,7 +119,7 @@ public:
 
     void SetExtraOffset(const std::optional<OffsetF>& offset) override;
 
-    void SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force = false) override;
+    bool SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force = false) override;
 
     bool HasAnimatingGeometryTransition() const override
     {
