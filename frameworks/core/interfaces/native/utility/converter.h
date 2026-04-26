@@ -38,9 +38,13 @@
 #endif
 
 #include "core/components/web/web_property.h" // Unscoped enum types
+#include "core/common/ime/text_range.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h" // Unscoped enum types
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
+#include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 

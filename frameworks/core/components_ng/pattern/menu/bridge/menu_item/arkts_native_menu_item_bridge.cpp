@@ -19,6 +19,8 @@
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_item_theme.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace OHOS::Ace::Framework;
 

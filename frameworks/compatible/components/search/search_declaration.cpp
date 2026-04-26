@@ -16,6 +16,8 @@
 #include "compatible/components/search/search_declaration.h"
 
 #include "base/utils/string_utils.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/search/search_theme.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"

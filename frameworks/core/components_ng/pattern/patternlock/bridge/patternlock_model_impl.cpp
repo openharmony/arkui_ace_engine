@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 

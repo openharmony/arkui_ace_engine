@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/search/bridge/search_custom_modifier.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"

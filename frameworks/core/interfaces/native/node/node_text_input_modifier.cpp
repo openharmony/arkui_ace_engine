@@ -15,14 +15,16 @@
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include <string>
 
-#include "core/components/common/layout/common_text_constants.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/layout/common_text_constants.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/native/node/node_model.h"
 
 namespace OHOS::Ace::NG {

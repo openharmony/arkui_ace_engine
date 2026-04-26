@@ -18,6 +18,7 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"

@@ -95,6 +95,20 @@ void UpdateSymbolHdrHeadRoomToRenderContext(const RefPtr<FrameNode>& frameNode, 
 }
 } // namespace
 
+std::string MultipleParagraphLayoutAlgorithm::SpansToString()
+{
+    std::stringstream ss;
+    for (auto& list : spans_) {
+        ss << "[";
+        for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
+            ss << "[" << item->interval.first << "," << item->interval.second << ":"
+               << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
+        });
+        ss << "], ";
+    }
+    return ss.str();
+}
+
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {

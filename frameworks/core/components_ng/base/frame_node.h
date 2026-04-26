@@ -32,7 +32,6 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "base/view_data/ace_auto_fill_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -58,6 +57,8 @@ class FrameNode;
 namespace OHOS::Ace {
 class CalcDimensionRect;
 enum class DragEventAction;
+enum class AceAutoFillType : int32_t;
+enum class AceAutoFillTriggerType : int32_t;
 struct MouseEvent;
 struct TouchEvent;
 class TouchEventInfo;
@@ -1068,7 +1069,9 @@ public:
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler);
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap,
-        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType);
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap,
+        AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false);
 
     int32_t GetUiExtensionId();

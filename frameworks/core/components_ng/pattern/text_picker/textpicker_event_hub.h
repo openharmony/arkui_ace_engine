@@ -19,6 +19,10 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 
+namespace OHOS::Ace {
+class GestureEvent;
+}
+
 namespace OHOS::Ace::NG {
 
 using TextChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;

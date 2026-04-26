@@ -18,9 +18,10 @@
 
 #include <iostream>
 #include <memory>
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "compatible/components/text_field/text_field_component.h"
 
 namespace OHOS::Ace::Framework {

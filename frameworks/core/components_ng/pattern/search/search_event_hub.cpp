@@ -15,6 +15,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utf_helper.h"
+#include "core/common/container.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"

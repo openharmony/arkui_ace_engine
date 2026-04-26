@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_CLOCK_MODEL_NG_H
 
 #include "core/components_ng/base/common_configuration.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace::NG {
 class TextClockConfiguration : public CommonConfiguration {

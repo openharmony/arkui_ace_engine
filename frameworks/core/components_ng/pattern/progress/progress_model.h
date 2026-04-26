@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {

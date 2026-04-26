@@ -25,6 +25,7 @@
 #include "core/event/ace_event_helper.h"
 #include "core/event/ace_events.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components_v2/inspector/utils.h"
 #include "compatible/components/text_field/modifier/text_field_modifier.h"
 
 namespace OHOS::Ace {

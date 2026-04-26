@@ -29,7 +29,10 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
+
+namespace OHOS::Ace {
+class TextLayoutProperty;
+}
 
 namespace OHOS::Ace::NG {
 class PipelineContext;

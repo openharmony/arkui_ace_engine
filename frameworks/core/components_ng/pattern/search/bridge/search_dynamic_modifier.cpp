@@ -16,10 +16,12 @@
 #include "ui/properties/color.h"
 
 #include "base/utils/utf_helper.h"
+#include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/search/bridge/search_custom_modifier.h"

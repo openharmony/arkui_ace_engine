@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
-
 #include "base/log/ace_scoring_log.h"
+
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/box/box_component_helper.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/coverage/coverage_component.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components/menu/menu_component.h"

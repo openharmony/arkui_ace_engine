@@ -27,6 +27,7 @@
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/wrap/wrap_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
 namespace {

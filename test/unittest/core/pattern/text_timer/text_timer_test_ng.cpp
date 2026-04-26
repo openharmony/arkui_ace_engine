@@ -38,6 +38,8 @@
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_static.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
+#include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
+#include "core/components_ng/pattern/texttimer/text_timer_accessibility_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
