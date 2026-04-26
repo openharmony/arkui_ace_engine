@@ -429,6 +429,12 @@ public:
         return DynamicCast<T>(eventHub_);
     }
 
+    template<typename T>
+    RefPtr<T> GetEventHubOnly()
+    {
+        return DynamicCast<T>(eventHub_);
+    }
+
     RefPtr<GestureEventHub> GetOrCreateGestureEventHub();
 
     RefPtr<InputEventHub> GetOrCreateInputEventHub();

@@ -100,7 +100,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     textContentModifier_->SetContentOffset(offset);
     auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     textContentModifier_->SetPrintOffset(paintOffset);
-    pattern->SetPrintInfo("ContentOffset:", paintOffset);
     auto frameNode = pattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();

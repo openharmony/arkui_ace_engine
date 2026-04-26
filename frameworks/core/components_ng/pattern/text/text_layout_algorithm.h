@@ -50,7 +50,7 @@ class ACE_FORCE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgor
 public:
     TextLayoutAlgorithm();
     explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
-        bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
+        const bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;

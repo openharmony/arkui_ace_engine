@@ -1823,11 +1823,9 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
     if (arrowApply_ && spinner_->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
-        const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
-        CHECK_NULL_VOID(symbolStyle);
-        auto fontSize = symbolStyle->GetFontSize();
+        auto fontSize = symbolLayoutProperty->GetFontSize();
         json->PutExtAttr("symbolFontSize", (fontSize.has_value() ? fontSize.value().ToString() : "").c_str(), filter);
-        const std::optional<std::vector<Color>>& colorListOptional = symbolStyle->GetSymbolColorList();
+        const std::optional<std::vector<Color>>& colorListOptional = symbolLayoutProperty->GetSymbolColorList();
         if (colorListOptional.has_value()) {
             std::string colorString = StringUtils::SymbolColorListToString(colorListOptional.value());
             json->PutExtAttr("symbolColorList", colorString.c_str(), filter);

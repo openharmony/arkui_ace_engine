@@ -462,6 +462,7 @@ HWTEST_F(TextTestNgEight, HandleSingleClickEvent001, TestSize.Level1)
     pattern->isMousePressed_ = true;
     pattern->clickedSpanPosition_ = -1;
     pattern->HandleSingleClickEvent(info);
+    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
     EXPECT_TRUE(pattern->selectOverlay_->originalMenuIsShow_);
 }
 

@@ -450,7 +450,7 @@ HWTEST_F(TitleBarPatternTestNg, HandleLongPress002, TestSize.Level1)
     auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
-    textLayoutProperty->propSymbolSourceInfo_ = SymbolSourceInfo();
+    textLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo());
     symbolNode->layoutProperty_ = textLayoutProperty;
     backButtonNode->children_.emplace_back(symbolNode);
 

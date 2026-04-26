@@ -309,6 +309,7 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate005, TestSize.Level1)
     pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
     pattern->magnifierController_->magnifierNodeExist_ = false;
     pattern->textSelector_.baseOffset = 0;
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->isTriggerParentToScroll_ = true;
     pattern->OnTextGestureSelectionUpdate(start, end, touchEventInfo);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
@@ -599,6 +600,7 @@ HWTEST_F(TextTestEightNg, HandleUrlMouseEvent001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto oldLocalLocation = info.GetLocalLocation();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->hasTransform_ = true;
     auto hasTransform = pattern->selectOverlay_->hasTransform_;
     pattern->isMousePressed_ = true;
@@ -621,6 +623,7 @@ HWTEST_F(TextTestEightNg, HandleUrlMouseEvent002, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto oldLocalLocation = info.GetLocalLocation();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->hasTransform_ = true;
     auto hasTransform = pattern->selectOverlay_->hasTransform_;
     pattern->isMousePressed_ = false;
@@ -661,7 +664,7 @@ HWTEST_F(TextTestEightNg, OnWindowSizeChanged001, TestSize.Level1)
 
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);
-    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
     pattern->selectOverlay_->OnBind(manager);
     SelectOverlayInfo overlayInfo;
     auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
@@ -1199,6 +1202,7 @@ HWTEST_F(TextTestEightNg, HandleLongPress001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     GestureEvent info;
     pattern->isMousePressed_ = false;
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->isHandleDragging_ = true;
     pattern->HandleLongPress(info);
     auto host = pattern->GetHost();

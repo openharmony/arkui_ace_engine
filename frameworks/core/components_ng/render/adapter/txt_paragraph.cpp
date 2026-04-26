@@ -177,6 +177,7 @@ void TxtParagraph::Build()
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Build");
     CHECK_NULL_VOID(!hasExternalParagraph_ && builder_);
     paragraph_ = builder_->CreateTypography();
+    builder_.reset();
 }
 
 uint32_t TxtParagraph::destructCount = 0;

@@ -84,9 +84,14 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent001, TestSize.Level1)
     auto leftSymbolProperty = GetSymbolProperty(leftArrowNode_);
     auto rightSymbolProperty = GetSymbolProperty(rightArrowNode_);
     auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
     auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    EXPECT_EQ(leftSymbolProperty->GetSymbolSourceInfoValue(), SymbolSourceInfo(swiperTheme->GetLeftSymbolId()));
-    EXPECT_EQ(rightSymbolProperty->GetSymbolSourceInfoValue(), SymbolSourceInfo(swiperTheme->GetRightSymbolId()));
+    ASSERT_NE(swiperTheme, nullptr);
+    EXPECT_EQ(leftSymbolProperty->GetSymbolSourceInfoValue(SymbolSourceInfo()),
+        SymbolSourceInfo(swiperTheme->GetLeftSymbolId()));
+    EXPECT_EQ(rightSymbolProperty->GetSymbolSourceInfoValue(SymbolSourceInfo()),
+        SymbolSourceInfo(swiperTheme->GetRightSymbolId()));
+    ASSERT_FALSE(leftSymbolProperty->GetSymbolColorListValue({}).empty());
     EXPECT_EQ(leftSymbolProperty->GetSymbolColorListValue({})[0], ARROW_PARAMETERS.arrowColor);
     EXPECT_EQ(leftSymbolProperty->GetSymbolColorList(), rightSymbolProperty->GetSymbolColorList());
 }
@@ -113,10 +118,14 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent002, TestSize.Level1)
     auto leftSymbol = GetSymbolProperty(leftArrowNode_);
     auto rightSymbol = GetSymbolProperty(rightArrowNode_);
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
+    ASSERT_NE(pipelineContext, nullptr);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    EXPECT_EQ(leftSymbol->GetSymbolSourceInfoValue(), SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
-    EXPECT_EQ(rightSymbol->GetSymbolSourceInfoValue(), SymbolSourceInfo(swiperIndicatorTheme->GetDownSymbolId()));
+    ASSERT_NE(swiperIndicatorTheme, nullptr);
+    EXPECT_EQ(leftSymbol->GetSymbolSourceInfoValue(SymbolSourceInfo()),
+        SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
+    EXPECT_EQ(rightSymbol->GetSymbolSourceInfoValue(SymbolSourceInfo()),
+        SymbolSourceInfo(swiperIndicatorTheme->GetDownSymbolId()));
+    ASSERT_FALSE(leftSymbol->GetSymbolColorListValue({}).empty());
     EXPECT_EQ(leftSymbol->GetSymbolColorListValue({})[0],
         ARROW_PARAMETERS.arrowColor.value().BlendOpacity(ARROW_DISABLED_ALPHA));
     EXPECT_EQ(leftSymbol->GetSymbolColorList(), rightSymbol->GetSymbolColorList());
