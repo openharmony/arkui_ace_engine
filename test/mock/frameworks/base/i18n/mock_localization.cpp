@@ -159,4 +159,9 @@ bool Localization::GetDateColumnFormatOrder(std::vector<std::string>& outOrder)
 {
     return true;
 }
+
+std::string Localization::TimeUnitFormat(double timeValue, TimeUnitStyle timeStyle, MeasureFormatStyle formatStyle)
+{
+    return "";
+}
 } // namespace OHOS::Ace
