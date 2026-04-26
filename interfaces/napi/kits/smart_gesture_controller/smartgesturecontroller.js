@@ -164,8 +164,19 @@ class GestureHandlingResolution {
 }
 globalThis.GestureHandlingResolution = GestureHandlingResolution;
 
-function applyDefaultOperateIntention(proposal) {
-    proposal.operateIntention = DEFAULT_OPERATE_INTENTION;
+function normalizeOperateIntention(rawOperateIntention) {
+    switch (rawOperateIntention) {
+        case OperateIntention.TAP:
+        case OperateIntention.SLIDE_FORWARD:
+        case OperateIntention.BACK_PRESS:
+            return rawOperateIntention;
+        default:
+            return DEFAULT_OPERATE_INTENTION;
+    }
+}
+
+function applyRawOperateIntention(proposal, rawOperateIntention) {
+    proposal.operateIntention = normalizeOperateIntention(rawOperateIntention);
     return proposal;
 }
 
@@ -175,18 +186,20 @@ function createProposalFromRaw(rawProposal) {
     }
     switch (rawProposal.action) {
         case SmartGestureAction.NONE:
-            return applyDefaultOperateIntention(new NoneActionProposal());
+            return applyRawOperateIntention(new NoneActionProposal(), rawProposal.operateIntention);
         case SmartGestureAction.BACK_PRESS:
-            return applyDefaultOperateIntention(new BackPressActionProposal());
+            return applyRawOperateIntention(new BackPressActionProposal(), rawProposal.operateIntention);
         case SmartGestureAction.CLICK:
-            return applyDefaultOperateIntention(new ClickActionProposal(rawProposal.node));
+            return applyRawOperateIntention(new ClickActionProposal(rawProposal.node), rawProposal.operateIntention);
         case SmartGestureAction.SELECT:
-            return applyDefaultOperateIntention(new SelectActionProposal(rawProposal.node));
+            return applyRawOperateIntention(new SelectActionProposal(rawProposal.node), rawProposal.operateIntention);
         case SmartGestureAction.PAGE_FORWARD:
-            return applyDefaultOperateIntention(new PageSwitchActionProposal(rawProposal.node, rawProposal.pageCount));
+            return applyRawOperateIntention(
+                new PageSwitchActionProposal(rawProposal.node, rawProposal.pageCount), rawProposal.operateIntention);
         case SmartGestureAction.SCROLL_FORWARD:
-            return applyDefaultOperateIntention(
-                new ScrollActionProposal(rawProposal.node, rawProposal.distance, rawProposal.pageCount));
+            return applyRawOperateIntention(
+                new ScrollActionProposal(rawProposal.node, rawProposal.distance, rawProposal.pageCount),
+                rawProposal.operateIntention);
         default:
             throw new TypeError('Unsupported smart gesture proposal action.');
     }

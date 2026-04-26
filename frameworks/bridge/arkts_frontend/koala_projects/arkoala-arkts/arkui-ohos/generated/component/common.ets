@@ -27,7 +27,7 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { unifiedDataChannel_UnifiedData_serializer } from './../framework/ohos.data.unifiedDataChannel'
 import { default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
 import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer } from './units'
-import { KeyType, KeySource, Color as arkui_component_enums_Color, HitTestMode, GestureCollectIntervention, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
+import { KeyType, KeySource, Color as arkui_component_enums_Color, HitTestMode, GestureCollectIntervention, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, GestureShortcut, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -5857,6 +5857,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityActionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSmartGestureShortcutAttribute(value: SmartGestureShortcutOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        SmartGestureShortcutOptions_serializer.write(thisSerializer, value)
+        ArkUIGeneratedNativeModule._CommonMethod_setSmartGestureShortcut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (types !== undefined) {
@@ -10758,6 +10764,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method accessibilityActionOptions')
     }
+    smartGestureShortcut(value: SmartGestureShortcutOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.smartGestureShortcut(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method smartGestureShortcut can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method smartGestureShortcut')
+    }
     customProperty(name: string, value: CustomProperty): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -11645,6 +11663,11 @@ export interface Bindable<T> {
     readonly value: T;
     readonly onChange: Callback<T, void>;
 }
+export interface SmartGestureShortcutOptions {
+    action?: GestureShortcut;
+    enabled?: boolean;
+    selectable?: boolean;
+}
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<global_resource_Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>>;
 export interface InputEventInterceptResult {
@@ -12526,6 +12549,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
         const value_casted = value as (AccessibilityActionOptions | undefined)
         this.getPeer()?.setAccessibilityActionOptionsAttribute(value_casted)
+        return this
+    }
+    public smartGestureShortcut(value: SmartGestureShortcutOptions): this {
+        const value_casted = value as (SmartGestureShortcutOptions)
+        this.getPeer()?.setSmartGestureShortcutAttribute(value_casted)
         return this
     }
     public customProperty(name: string, value: CustomProperty): this {
@@ -15912,6 +15940,58 @@ export class SelectionOptions_serializer {
         }
         const menuPolicyTmpResult: MenuPolicy | undefined = menuPolicyTmpBuf
         let value: SelectionOptions = ({menuPolicy: menuPolicyTmpResult} as SelectionOptions)
+        return value
+    }
+}
+export class SmartGestureShortcutOptions_serializer {
+    public static write(buffer: SerializerBase, value: SmartGestureShortcutOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForAction = value.action
+        if (valueHolderForAction !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActionTmpValue = (valueHolderForAction as GestureShortcut)
+            valueSerializer.writeInt32(valueHolderForActionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnabled = value.enabled
+        if (valueHolderForEnabled !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnabledTmpValue = valueHolderForEnabled!
+            valueSerializer.writeBoolean(valueHolderForEnabledTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSelectable = value.selectable
+        if (valueHolderForSelectable !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSelectableTmpValue = valueHolderForSelectable!
+            valueSerializer.writeBoolean(valueHolderForSelectableTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SmartGestureShortcutOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const actionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let actionTmpBuf: GestureShortcut | undefined = undefined
+        if ((actionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            actionTmpBuf = GestureShortcut.fromValue(valueDeserializer.readInt32())
+        }
+        const actionTmpResult: GestureShortcut | undefined = actionTmpBuf
+        const enabledTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enabledTmpBuf: boolean | undefined = undefined
+        if ((enabledTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enabledTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enabledTmpResult: boolean | undefined = enabledTmpBuf
+        const selectableTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let selectableTmpBuf: boolean | undefined = undefined
+        if ((selectableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            selectableTmpBuf = valueDeserializer.readBoolean()
+        }
+        const selectableTmpResult: boolean | undefined = selectableTmpBuf
+        let value: SmartGestureShortcutOptions = ({action: actionTmpResult, enabled: enabledTmpResult, selectable: selectableTmpResult} as SmartGestureShortcutOptions)
         return value
     }
 }

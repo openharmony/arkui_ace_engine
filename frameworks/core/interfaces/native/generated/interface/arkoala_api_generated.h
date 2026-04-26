@@ -1425,8 +1425,8 @@ typedef struct ButtonTriggerClickCallback ButtonTriggerClickCallback;
 typedef struct Opt_ButtonTriggerClickCallback Opt_ButtonTriggerClickCallback;
 typedef struct Callback_AccessibilityActionInterceptResult_Void Callback_AccessibilityActionInterceptResult_Void;
 typedef struct Opt_Callback_AccessibilityActionInterceptResult_Void Opt_Callback_AccessibilityActionInterceptResult_Void;
-typedef struct Callback_ArcSwiperContentTransitionProxy Callback_ArcSwiperContentTransitionProxy;
-typedef struct Opt_Callback_ArcSwiperContentTransitionProxy Opt_Callback_ArcSwiperContentTransitionProxy;
+typedef struct Callback_ArcSwiperContentTransitionProxy_Void Callback_ArcSwiperContentTransitionProxy_Void;
+typedef struct Opt_Callback_ArcSwiperContentTransitionProxy_Void Opt_Callback_ArcSwiperContentTransitionProxy_Void;
 typedef struct Callback_Area_Area_Void Callback_Area_Area_Void;
 typedef struct Opt_Callback_Area_Area_Void Opt_Callback_Area_Area_Void;
 typedef struct Callback_Array_I32_Void Callback_Array_I32_Void;
@@ -2683,6 +2683,8 @@ typedef struct Ark_SliderConfiguration Ark_SliderConfiguration;
 typedef struct Opt_SliderConfiguration Opt_SliderConfiguration;
 typedef struct Ark_SliderShowStepOptions Ark_SliderShowStepOptions;
 typedef struct Opt_SliderShowStepOptions Opt_SliderShowStepOptions;
+typedef struct Ark_SmartGestureShortcutOptions Ark_SmartGestureShortcutOptions;
+typedef struct Opt_SmartGestureShortcutOptions Opt_SmartGestureShortcutOptions;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
 typedef struct Ark_SpatialPosition Ark_SpatialPosition;
@@ -5214,6 +5216,13 @@ typedef struct Opt_GestureRecognizerState {
     Ark_Tag tag;
     Ark_GestureRecognizerState value;
 } Opt_GestureRecognizerState;
+typedef enum Ark_GestureShortcut {
+    ARK_GESTURE_SHORTCUT_PRIMARY = 0,
+} Ark_GestureShortcut;
+typedef struct Opt_GestureShortcut {
+    Ark_Tag tag;
+    Ark_GestureShortcut value;
+} Opt_GestureShortcut;
 typedef enum Ark_GradientDirection {
     ARK_GRADIENT_DIRECTION_LEFT = 0,
     ARK_GRADIENT_DIRECTION_TOP = 1,
@@ -6101,6 +6110,15 @@ typedef struct Opt_ObscuredReasons {
     Ark_Tag tag;
     Ark_ObscuredReasons value;
 } Opt_ObscuredReasons;
+typedef enum Ark_OperateIntention {
+    ARK_OPERATE_INTENTION_TAP = 0,
+    ARK_OPERATE_INTENTION_SLIDE_FORWARD = 1,
+    ARK_OPERATE_INTENTION_BACK_PRESS = 2,
+} Ark_OperateIntention;
+typedef struct Opt_OperateIntention {
+    Ark_Tag tag;
+    Ark_OperateIntention value;
+} Opt_OperateIntention;
 typedef enum Ark_OptionWidthMode {
     ARK_OPTION_WIDTH_MODE_FIT_CONTENT,
     ARK_OPTION_WIDTH_MODE_FIT_TRIGGER,
@@ -6971,6 +6989,18 @@ typedef struct Opt_SliderStyle {
     Ark_Tag tag;
     Ark_SliderStyle value;
 } Opt_SliderStyle;
+typedef enum Ark_SmartGestureAction {
+    ARK_SMART_GESTURE_ACTION_NONE = 0,
+    ARK_SMART_GESTURE_ACTION_PAGE_FORWARD = 1,
+    ARK_SMART_GESTURE_ACTION_SCROLL_FORWARD = 2,
+    ARK_SMART_GESTURE_ACTION_SELECT = 3,
+    ARK_SMART_GESTURE_ACTION_CLICK = 4,
+    ARK_SMART_GESTURE_ACTION_BACK_PRESS = 5,
+} Ark_SmartGestureAction;
+typedef struct Opt_SmartGestureAction {
+    Ark_Tag tag;
+    Ark_SmartGestureAction value;
+} Opt_SmartGestureAction;
 typedef enum Ark_SourceTool {
     ARK_SOURCE_TOOL_UNKNOWN = 0,
     ARK_SOURCE_TOOL_FINGER = 1,
@@ -11401,16 +11431,16 @@ typedef struct Opt_Callback_AccessibilityActionInterceptResult_Void {
     Ark_Tag tag;
     Callback_AccessibilityActionInterceptResult_Void value;
 } Opt_Callback_AccessibilityActionInterceptResult_Void;
-typedef struct Callback_ArcSwiperContentTransitionProxy {
+typedef struct Callback_ArcSwiperContentTransitionProxy_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_ArcSwiperContentTransitionProxy data);
     void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ArcSwiperContentTransitionProxy data);
-} Callback_ArcSwiperContentTransitionProxy;
-typedef struct Opt_Callback_ArcSwiperContentTransitionProxy {
+} Callback_ArcSwiperContentTransitionProxy_Void;
+typedef struct Opt_Callback_ArcSwiperContentTransitionProxy_Void {
     Ark_Tag tag;
-    Callback_ArcSwiperContentTransitionProxy value;
-} Opt_Callback_ArcSwiperContentTransitionProxy;
+    Callback_ArcSwiperContentTransitionProxy_Void value;
+} Opt_Callback_ArcSwiperContentTransitionProxy_Void;
 typedef struct Callback_Area_Area_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15147,7 +15177,7 @@ typedef struct Opt_ArcScrollBarOptions {
 typedef struct Ark_ArcSwiperContentAnimatedTransition {
     /* kind: Interface */
     Opt_Int32 timeout;
-    Callback_ArcSwiperContentTransitionProxy transition;
+    Callback_ArcSwiperContentTransitionProxy_Void transition;
 } Ark_ArcSwiperContentAnimatedTransition;
 typedef struct Opt_ArcSwiperContentAnimatedTransition {
     Ark_Tag tag;
@@ -17708,6 +17738,16 @@ typedef struct Opt_SliderShowStepOptions {
     Ark_Tag tag;
     Ark_SliderShowStepOptions value;
 } Opt_SliderShowStepOptions;
+typedef struct Ark_SmartGestureShortcutOptions {
+    /* kind: Interface */
+    Opt_GestureShortcut action;
+    Opt_Boolean enabled;
+    Opt_Boolean selectable;
+} Ark_SmartGestureShortcutOptions;
+typedef struct Opt_SmartGestureShortcutOptions {
+    Ark_Tag tag;
+    Ark_SmartGestureShortcutOptions value;
+} Opt_SmartGestureShortcutOptions;
 typedef struct Ark_SnapshotOptions {
     /* kind: Interface */
     Opt_Number scale;
@@ -24784,6 +24824,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                              const Opt_Union_String_Resource* value);
     void (*setAccessibilityActionOptions)(Ark_NativePointer node,
                                           const Opt_AccessibilityActionOptions* value);
+    void (*setSmartGestureShortcut)(Ark_NativePointer node,
+                                    const Ark_SmartGestureShortcutOptions* value);
     void (*setExpandSafeArea)(Ark_NativePointer node,
                               const Opt_Array_SafeAreaType* types,
                               const Opt_Array_SafeAreaEdge* edges);

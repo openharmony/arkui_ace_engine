@@ -658,6 +658,22 @@ export enum GestureCollectIntervention {
     DISCARD_SELF = 3,
     DISCARD_LOWER_PRIORITY_SIBLINGS = 4
 }
+export enum GestureShortcut {
+    PRIMARY = 0
+}
+export enum SmartGestureAction {
+    NONE = 0,
+    PAGE_FORWARD = 1,
+    SCROLL_FORWARD = 2,
+    SELECT = 3,
+    CLICK = 4,
+    BACK_PRESS = 5
+}
+export enum OperateIntention {
+    TAP = 0,
+    SLIDE_FORWARD = 1,
+    BACK_PRESS = 2
+}
 export enum RawInputEventType {
     TOUCH = 0,
     MOUSE = 1
