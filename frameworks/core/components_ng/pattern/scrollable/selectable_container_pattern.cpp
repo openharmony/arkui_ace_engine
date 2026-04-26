@@ -53,6 +53,8 @@ void SelectableContainerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, c
         editModeOptions_.enableGatherSelectedItemsAnimation ? "true" : "false", filter);
     editModeOptionsJson->PutExtAttr("useDefaultMultiSelectStyle",
         editModeOptions_.useDefaultMultiSelectStyle ? "true" : "false", filter);
+    editModeOptionsJson->PutExtAttr("enableFingerMultiSelect",
+        editModeOptions_.enableFingerMultiSelect ? "true" : "false", filter);
     json->PutExtAttr("editModeOptions", editModeOptionsJson, filter);
     json->PutExtAttr("enableEditMode", enableEditMode_ ? "true" : "false", filter);
 }
@@ -584,7 +586,6 @@ void SelectableContainerPattern::HandleSwipeSelectUpdate(const GestureEvent& inf
     if (swipeSelectState_ == SwipeSelectState::INACTIVE || !swipeStartStateKey_.IsValid()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Swipe select update");
 
     auto globalPoint = info.GetGlobalLocation();
     SwipeSelectAutoScroll(PointF(static_cast<float>(globalPoint.GetX()), static_cast<float>(globalPoint.GetY())));

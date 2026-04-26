@@ -127,6 +127,8 @@ struct ArkUI_AccessibilityProvider;
 typedef struct ArkUI_InnerColor ArkUI_InnerColor;
 struct ArkUI_EditModeOptions {
     ArkUI_Bool enableGatherSelectedItemsAnimation;
+    ArkUI_Bool useDefaultMultiSelectStyle;
+    ArkUI_Bool enableFingerMultiSelect;
 };
 
 struct _ArkUIMatrix4;
@@ -4941,7 +4943,7 @@ struct ArkUIGridModifier {
     ArkUI_Bool (*getSyncLoad)(ArkUINodeHandle node);
     void (*setEditModeOptions)(ArkUINodeHandle node, ArkUIEditModeOptions options);
     void (*resetEditModeOptions)(ArkUINodeHandle node);
-    void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[1]);
+    void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetGridFadingEdge)(ArkUINodeHandle node);
@@ -4978,6 +4980,9 @@ struct ArkUIGridModifier {
     ArkUI_Bool (*getSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node);
     void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
     ArkUINodeHandle (*getController)(ArkUINodeHandle node);
+    void (*setGridEnableEditMode)(ArkUINodeHandle node, ArkUI_Bool enableEditMode);
+    void (*resetGridEnableEditMode)(ArkUINodeHandle node);
+    ArkUI_Bool (*getGridEnableEditMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {

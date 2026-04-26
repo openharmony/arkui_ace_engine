@@ -290,4 +290,29 @@ HWTEST_F(GridSwipeSelectGestureTestNg, HandleSwipeSelectCancel001, TestSize.Leve
     EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
 }
 
+/**
+ * @tc.name: HandleSwipeSelectEndResetStateUnconditionally001
+ * @tc.desc: Verify HandleSwipeSelectEnd resets state unconditionally when enableEditMode_ is true
+ *           and multiSelectable_ is true, since the code has no guard for these flags.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSwipeSelectGestureTestNg, HandleSwipeSelectEndResetStateUnconditionally001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->enableEditMode_ = true;
+    pattern_->multiSelectable_ = true;
+    pattern_->swipeSelectState_ = SelectableContainerPattern::SwipeSelectState::SELECTING;
+    pattern_->swipeStartStateKey_.index = 0;
+    pattern_->swipeCurrentStateKey_.index = 2;
+    pattern_->swipeOriginalStates_[{0, -1}] = false;
+    pattern_->swipeOriginalStates_[{1, -1}] = false;
+    pattern_->HandleSwipeSelectEnd();
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
+    EXPECT_EQ(pattern_->swipeStartStateKey_.index, -1);
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_.index, -1);
+    EXPECT_TRUE(pattern_->swipeOriginalStates_.empty());
+}
+
 } // namespace OHOS::Ace::NG

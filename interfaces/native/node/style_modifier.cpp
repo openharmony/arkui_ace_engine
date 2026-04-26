@@ -19316,6 +19316,69 @@ const ArkUI_AttributeItem* GetGridSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle
     return &g_attributeItem;
 }
 
+int32_t SetGridEnableEditMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Bool enableEditMode = item->value[0].i32;
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->setGridEnableEditMode(node->uiNodeHandle, enableEditMode);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetGridEnableEditMode(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->resetGridEnableEditMode(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetGridEnableEditMode(ArkUI_NodeHandle node)
+{
+    ArkUI_Bool value = GetFullImpl()->getNodeModifiers()->getGridModifier()->getGridEnableEditMode(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
+int32_t SetGridEditModeOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size < NUM_1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 useDefaultMultiSelectStyle = NUM_1;
+    if (item->size >= NUM_1) {
+        if (!InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        useDefaultMultiSelectStyle = item->value[NUM_0].i32;
+    }
+    ArkUI_Int32 enableFingerMultiSelect = NUM_1;
+    if (item->size >= NUM_2) {
+        if (!InRegion(NUM_0, NUM_1, item->value[NUM_1].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        enableFingerMultiSelect = item->value[NUM_1].i32;
+    }
+    ArkUI_EditModeOptions options;
+    options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle;
+    options.enableFingerMultiSelect = enableFingerMultiSelect;
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->setEditModeOptions(node->uiNodeHandle, &options);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetGridEditModeOptions(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->resetEditModeOptions(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetGridEditModeOptions(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 values[3] = { 0 };
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->getEditModeOptions(node->uiNodeHandle, &values);
+    g_numberValues[0].i32 = values[1];
+    g_numberValues[1].i32 = values[2];
+    g_attributeItem.size = NUM_2;
+    return &g_attributeItem;
+}
+
 int32_t SetGridScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -21945,7 +22008,8 @@ int32_t SetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     static Setter* setters[] = { SetGridColumnsTemplate, SetGridRowsTemplate, SetGridColumnsGap, SetGridRowsGap,
         SetGridNodeAdapter, SetGridCachedCount, SetGridFocusWrapMode, SetGridSyncLoad, SetGridAlignItems,
         SetGridLayoutOptions, SetGridColumnTemplateItemFillPolicy, SetGridEditMode, SetGridSupportAnimation,
-        SetGridMultiSelectable, SetGridScrollToIndex, SetGridSupportLazyLoadingEmptyBranch };
+        SetGridMultiSelectable, SetGridScrollToIndex, SetGridSupportLazyLoadingEmptyBranch,
+        SetGridEnableEditMode, SetGridEditModeOptions };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -21978,7 +22042,8 @@ void ResetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetGridColumnsTemplate, ResetGridRowsTemplate, ResetGridColumnsGap,
         ResetGridRowsGap, ResetGridNodeAdapter, ResetGridCachedCount, ResetGridFocusWrapMode, ResetGridSyncLoad,
         ResetGridAlignItems, ResetGridLayoutOptions, ResetGridColumnTemplateItemFillPolicy, ResetGridEditMode,
-        ResetGridSupportAnimation, ResetGridMultiSelectable, nullptr, ResetGridSupportLazyLoadingEmptyBranch };
+        ResetGridSupportAnimation, ResetGridMultiSelectable, nullptr, ResetGridSupportLazyLoadingEmptyBranch,
+        ResetGridEnableEditMode, ResetGridEditModeOptions };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -22013,7 +22078,8 @@ const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTy
     static Getter* getters[] = { GetGridColumnsTemplate, GetGridRowsTemplate, GetGridColumnsGap, GetGridRowsGap,
         GetGridNodeAdapter, GetGridCachedCount, GetGridFocusWrapMode, GetGridSyncLoad, GetGridAlignItems,
         GetGridLayoutOptions, GetGridColumnTemplateItemFillPolicy, GetGridEditMode, GetGridSupportAnimation,
-        GetGridMultiSelectable, nullptr, GetGridSupportLazyLoadingEmptyBranch };
+        GetGridMultiSelectable, nullptr, GetGridSupportLazyLoadingEmptyBranch,
+        GetGridEnableEditMode, GetGridEditModeOptions };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

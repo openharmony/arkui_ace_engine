@@ -8526,6 +8526,43 @@ typedef enum {
     NODE_GRID_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1013015,
 
     /**
+     * @brief Defines whether the <b>Grid</b> component enables edit mode. After entering edit mode,
+     * checkboxes are displayed by default, and finger sliding multi-selection is supported.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether the <b>Grid</b> component enables edit mode.
+     * <b>0</b>: Not editable. <b>1</b>: Editable. Default value: <b>0</b>.\n
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether the <b>Grid</b> component enables edit mode.
+     * <b>0</b>: Not editable. <b>1</b>: Editable.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_GRID_ENABLE_EDIT_MODE = 1013016,
+
+    /**
+     * @brief Defines the edit mode options for the <b>Grid</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether the <b>Grid</b> component uses the default multi-selection style.
+     * <b>0</b>: Do not use the default style. <b>1</b>: Use the default style. Default value: <b>1</b>.\n
+     * .value[1].i32: Whether the <b>Grid</b> component enables two-finger sliding multi-selection.
+     * <b>0</b>: Disabled. <b>1</b>: Enabled. Default value: <b>1</b>.\n
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether the <b>Grid</b> component uses the default multi-selection style.
+     * <b>0</b>: Do not use the default style. <b>1</b>: Use the default style.\n
+     * .value[1].i32: Whether the <b>Grid</b> component enables two-finger sliding multi-selection.
+     * <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_GRID_EDIT_MODE_OPTIONS = 1013017,
+
+    /**
      * @brief Sets the style of the <b>GridItem</b> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

@@ -770,4 +770,94 @@ HWTEST_F(GridSwipeSelectTestNg, GridMarkSwipeItemInvalidIndex001, TestSize.Level
     EXPECT_NO_FATAL_FAILURE(pattern_->MarkSwipeItemSelected(999, true));
 }
 
+/**
+ * @tc.name: UpdateSwipeSelectionNullHostNoCrash001
+ * @tc.desc: Verify UpdateSwipeSelection does not crash when GetHost() returns null.
+ *           Tests that the host null check protects MarkSwipeItemSelected calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSwipeSelectTestNg, UpdateSwipeSelectionNullHostNoCrash001, TestSize.Level2)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    EnableSwipeSelect();
+    pattern_->swipeSelectState_ = SwipeSelectState::SELECTING;
+    pattern_->swipeStartStateKey_.index = 0;
+    pattern_->swipeCurrentStateKey_.index = 2;
+    pattern_->swipeOriginalStates_[{0, -1}] = false;
+    pattern_->swipeOriginalStates_[{1, -1}] = false;
+    pattern_->swipeOriginalStates_[{2, -1}] = false;
+
+    pattern_->frameNode_ = nullptr;
+    EXPECT_NO_FATAL_FAILURE(pattern_->UpdateSwipeSelection());
+}
+
+/**
+ * @tc.name: UpdateSwipeSelectionNegativeIndexNoCrash001
+ * @tc.desc: Verify UpdateSwipeSelection does not crash when swipeStartStateKey_ is invalid.
+ *           Tests the boundary condition when auto-scroll callback fires after state reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSwipeSelectTestNg, UpdateSwipeSelectionNegativeIndexNoCrash001, TestSize.Level2)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    EnableSwipeSelect();
+    pattern_->swipeSelectState_ = SwipeSelectState::SELECTING;
+    pattern_->swipeStartStateKey_.index = -1;
+    pattern_->swipeCurrentStateKey_.index = 2;
+
+    EXPECT_NO_FATAL_FAILURE(pattern_->UpdateSwipeSelection());
+}
+
+/**
+ * @tc.name: UpdateSwipeSelectionBothNegativeIndexNoCrash001
+ * @tc.desc: Verify UpdateSwipeSelection does not crash when both indices are -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSwipeSelectTestNg, UpdateSwipeSelectionBothNegativeIndexNoCrash001, TestSize.Level2)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    EnableSwipeSelect();
+    pattern_->swipeSelectState_ = SwipeSelectState::SELECTING;
+    pattern_->swipeStartStateKey_.index = -1;
+    pattern_->swipeCurrentStateKey_.index = -1;
+
+    EXPECT_NO_FATAL_FAILURE(pattern_->UpdateSwipeSelection());
+}
+
+/**
+ * @tc.name: HandleSwipeSelectUpdateFrameNodeNullNoCrash001
+ * @tc.desc: Verify HandleSwipeSelectUpdate does not crash when DynamicCast to FrameNode
+ *           returns null (non-FrameNode child at target index).
+ *           Tests that the code falls through to UpdateSwipeSelection safely.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSwipeSelectTestNg, HandleSwipeSelectUpdateFrameNodeNullNoCrash001, TestSize.Level2)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    EnableSwipeSelect();
+
+    GestureEvent startInfo = CreateGestureEvent(30.f, 30.f);
+    pattern_->HandleSwipeSelectStart(startInfo);
+    ASSERT_TRUE(pattern_->swipeStartStateKey_.IsValid());
+
+    GestureEvent updateInfo = CreateGestureEvent(500.f, 500.f);
+    EXPECT_NO_FATAL_FAILURE(pattern_->HandleSwipeSelectUpdate(updateInfo));
+}
+
 } // namespace OHOS::Ace::NG

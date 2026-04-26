@@ -1549,6 +1549,10 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridEditModeOptionsModifier.identity, GridEditModeOptionsModifier, options);
     return this;
   }
+  enableEditMode(value) {
+    modifierWithKey(this._modifiersWithKeys, GridEnableEditModeModifier.identity, GridEnableEditModeModifier, value);
+    return this;
+  }
   onWillScroll(callback) {
     modifierWithKey(this._modifiersWithKeys, GridOnWillScrollModifier.identity, GridOnWillScrollModifier, callback);
     return this;
@@ -2151,6 +2155,20 @@ class GridEditModeOptionsModifier extends ModifierWithKey {
   }
 }
 GridEditModeOptionsModifier.identity = Symbol('gridEditModeOptions');
+class GridEnableEditModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetGridEnableEditMode(node);
+    }
+    else {
+      getUINativeModule().grid.setGridEnableEditMode(node, this.value);
+    }
+  }
+}
+GridEnableEditModeModifier.identity = Symbol('gridEnableEditMode');
 // @ts-ignore
 if (globalThis.Grid !== undefined) {
   globalThis.Grid.attributeModifier = function (modifier) {
@@ -2181,7 +2199,6 @@ if (globalThis.Grid !== undefined) {
     getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
   };
 }
-
 /// <reference path='./import.ts' />
 class GridColSpanModifier extends ModifierWithKey {
   constructor(value) {
