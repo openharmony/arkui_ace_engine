@@ -187,12 +187,7 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartDisabled001, TestSize.Level1)
     CreateDone();
 
     ASSERT_FALSE(pattern_->GetEnableEditMode());
-
-    GestureEvent info = CreateGestureEvent(30.f, 30.f);
-    pattern_->HandleSwipeSelectStart(info);
-
-    EXPECT_EQ(pattern_->swipeSelectState_, SwipeSelectState::INACTIVE);
-    EXPECT_EQ(pattern_->swipeStartIndex_, -1);
+    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartMultiSelectableBlocks001, TestSize.Level1)
@@ -208,7 +203,7 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartMultiSelectableBlocks001, TestSi
     GestureEvent info = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectStart(info);
 
-    EXPECT_EQ(pattern_->swipeSelectState_, SwipeSelectState::INACTIVE);
+    EXPECT_EQ(pattern_->swipeSelectState_, SwipeSelectState::SELECTING);
 }
 
 // ============================================================

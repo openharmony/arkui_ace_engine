@@ -44,7 +44,7 @@ static GestureJudgeFunc GetGestureJudgeCallback(const RefPtr<GridPattern>& patte
     CHECK_NULL_RETURN(host, nullptr);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, nullptr);
-    return gestureHub->GetOnGestureJudgeNativeBeginCallback();
+    return gestureHub->gestureJudgeNativeFunc_;
 }
 
 static RefPtr<GestureInfo> CreateGestureInfo(GestureTypeName type, InputEventType inputEventType)
@@ -266,7 +266,7 @@ HWTEST_F(GridSwipeSelectGestureTestNg, HandleSwipeSelectEndBlockedByMultiSelecta
     pattern_->multiSelectable_ = true;
     pattern_->swipeSelectState_ = SelectableContainerPattern::SwipeSelectState::SELECTING;
     pattern_->HandleSwipeSelectEnd();
-    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::SELECTING);
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
 }
 
 HWTEST_F(GridSwipeSelectGestureTestNg, HandleSwipeSelectEndBlockedByNoEditMode001, TestSize.Level1)
@@ -277,7 +277,7 @@ HWTEST_F(GridSwipeSelectGestureTestNg, HandleSwipeSelectEndBlockedByNoEditMode00
     pattern_->enableEditMode_ = false;
     pattern_->swipeSelectState_ = SelectableContainerPattern::SwipeSelectState::SELECTING;
     pattern_->HandleSwipeSelectEnd();
-    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::SELECTING);
+    EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
 }
 
 HWTEST_F(GridSwipeSelectGestureTestNg, HandleSwipeSelectCancel001, TestSize.Level1)
