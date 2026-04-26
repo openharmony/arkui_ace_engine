@@ -292,6 +292,8 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     void* objectNapi = nullptr;
     napi_unwrap(env, value, &objectNapi);
     if (!objectNapi) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "The drawableDescriptor have been released");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     ArkUI_DrawableDescriptor* drawable =
