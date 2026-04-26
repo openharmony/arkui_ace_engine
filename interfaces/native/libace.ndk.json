@@ -6661,6 +6661,42 @@
         "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetContentBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_ResetContentBlurOption"
+    },
+    {
  	    "first_introduced": "26.0.0",
  	    "name": "OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent"
     },

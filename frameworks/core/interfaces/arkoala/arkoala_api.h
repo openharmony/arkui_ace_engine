@@ -9103,6 +9103,12 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*getRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId);
     ArkUI_Int32 (*removeAdoptedChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*deleteInnerRenderNodeStruct)(ArkUIRenderNodeHandle node);
+    ArkUI_Int32 (*setBackgroundBlurOption)(ArkUIRenderNodeHandle node, ArkUI_Float32 blurRadius);
+    ArkUI_Int32 (*resetBackgroundBlurOption)(ArkUIRenderNodeHandle node);
+    ArkUI_Int32 (*setForegroundBlurOption)(ArkUIRenderNodeHandle node, ArkUI_Float32 blurRadius);
+    ArkUI_Int32 (*resetForegroundBlurOption)(ArkUIRenderNodeHandle node);
+    ArkUI_Int32 (*setContentBlurOption)(ArkUIRenderNodeHandle node, ArkUI_Float32 blurRadius);
+    ArkUI_Int32 (*resetContentBlurOption)(ArkUIRenderNodeHandle node);
 };
 
 struct ArkUIDynamicLayoutModifier {
