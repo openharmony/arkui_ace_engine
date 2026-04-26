@@ -885,10 +885,6 @@ ohos_source_set("ace_components_mock") {
 ohos_source_set("ace_components_pattern") {
   testonly = true
   sources = [
-    "$ace_root/frameworks/core/components/button/button_theme.cpp",
-    "$ace_root/frameworks/core/components/rating/rating_theme.cpp",
-    "$ace_root/frameworks/core/components/slider/slider_theme.cpp",
-    "$ace_root/frameworks/core/components/toggle/toggle_theme.cpp",
     "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
     "$ace_root/component_ext/movingphoto/movingphoto_layout_algorithm.cpp",
     "$ace_root/component_ext/movingphoto/movingphoto_model_ng.cpp",
@@ -896,6 +892,10 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/component_ext/movingphoto/movingphoto_pattern.cpp",
     "$ace_root/frameworks/core/animation/animation_util.cpp",
     "$ace_root/frameworks/core/common/statistic_event_reporter.cpp",
+    "$ace_root/frameworks/core/components/button/button_theme.cpp",
+    "$ace_root/frameworks/core/components/rating/rating_theme.cpp",
+    "$ace_root/frameworks/core/components/slider/slider_theme.cpp",
+    "$ace_root/frameworks/core/components/toggle/toggle_theme.cpp",
     "$ace_root/frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/action_sheet/action_sheet_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/animator/animator_model_ng.cpp",
@@ -1401,6 +1401,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scroller_observer_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/selectable_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/selectable_item_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/selectable_item_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/selectable_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_gesture_event_hub.cpp",

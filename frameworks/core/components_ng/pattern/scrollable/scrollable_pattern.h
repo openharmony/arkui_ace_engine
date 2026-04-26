@@ -1113,6 +1113,10 @@ protected:
     }
     void UpdateSelectScrollVsync(uint64_t currentVsync);
 
+    float IsInHotZone(const PointF& point, bool needExpandHotZone = false);
+    void HotZoneScroll(const float offset);
+    void StopHotzoneScroll();
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -1299,9 +1303,6 @@ private:
     RefPtr<VelocityMotion> fixedVelocityMotion_;
     std::function<void(void)> hotZoneScrollCallback_;
     void UnRegister2DragDropManager(FrameNode* frameNode);
-    float IsInHotZone(const PointF& point, bool needExpandHotZone = false);
-    void HotZoneScroll(const float offset);
-    void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);

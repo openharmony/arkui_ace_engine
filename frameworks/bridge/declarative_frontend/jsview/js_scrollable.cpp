@@ -175,6 +175,11 @@ void JSScrollable::ParseEditModeOptions(const JSCallbackInfo& info, NG::EditMode
             options.enableGatherSelectedItemsAnimation = gatherAnimation->ToBoolean();
         }
 
+        auto useDefaultMultiSelectStyle = obj->GetProperty("useDefaultMultiSelectStyle");
+        if (useDefaultMultiSelectStyle->IsBoolean()) {
+            options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle->ToBoolean();
+        }
+
         auto getPreviewBadge = obj->GetProperty("onGetPreviewBadge");
         if (getPreviewBadge->IsFunction()) {
             WeakPtr<NG::FrameNode> targetNode =

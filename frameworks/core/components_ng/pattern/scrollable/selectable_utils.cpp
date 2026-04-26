@@ -25,7 +25,22 @@ SINGLETON_INSTANCE_IMPL(NG::SelectableUtils);
 
 namespace OHOS::Ace::NG {
 namespace {
-RefPtr<FrameNode> FindItemParentNode(const RefPtr<FrameNode>& frameNode)
+PreviewBadge GetSelectedPreviewBadge(const RefPtr<FrameNode>& frameNode)
+{
+    PreviewBadge badge = {};
+    CHECK_NULL_RETURN(frameNode, badge);
+    auto parent = SelectableUtils::FindItemParentNode(frameNode);
+    CHECK_NULL_RETURN(parent, badge);
+    auto pattern = parent->GetPattern<SelectableContainerPattern>();
+    CHECK_NULL_RETURN(pattern, badge);
+    if (pattern->GetEditModeOptions().getPreviewBadge) {
+        return pattern->GetEditModeOptions().getPreviewBadge();
+    }
+    return badge;
+}
+} // namespace
+
+RefPtr<FrameNode> SelectableUtils::FindItemParentNode(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto parentType = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG ? V2::GRID_ETS_TAG : V2::LIST_ETS_TAG;
@@ -37,21 +52,6 @@ RefPtr<FrameNode> FindItemParentNode(const RefPtr<FrameNode>& frameNode)
     }
     return AceType::DynamicCast<FrameNode>(uiNode);
 }
-
-PreviewBadge GetSelectedPreviewBadge(const RefPtr<FrameNode>& frameNode)
-{
-    PreviewBadge badge = {};
-    CHECK_NULL_RETURN(frameNode, badge);
-    auto parent = FindItemParentNode(frameNode);
-    CHECK_NULL_RETURN(parent, badge);
-    auto pattern = parent->GetPattern<SelectableContainerPattern>();
-    CHECK_NULL_RETURN(pattern, badge);
-    if (pattern->GetEditModeOptions().getPreviewBadge) {
-        return pattern->GetEditModeOptions().getPreviewBadge();
-    }
-    return badge;
-}
-} // namespace
 
 bool SelectableUtils::IsSelectableItem(const RefPtr<FrameNode>& frameNode)
 {
@@ -119,6 +119,16 @@ bool SelectableUtils::IsGatherSelectedItemsAnimationEnabled(const RefPtr<FrameNo
     CHECK_NULL_RETURN(scrollableEvent, pattern->GetEditModeOptions().enableGatherSelectedItemsAnimation);
     return pattern->GetEditModeOptions().enableGatherSelectedItemsAnimation &&
            scrollableEvent->IsSwipeActionCollapsed();
+}
+
+bool SelectableUtils::IsDefaultMultiSelectStyleEnabled(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto parent = FindItemParentNode(frameNode);
+    CHECK_NULL_RETURN(parent, false);
+    auto pattern = parent->GetPattern<SelectableContainerPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsDefaultMultiSelectStyleEnabled();
 }
 
 void SelectableUtils::BindContextMenu(FrameNode* frameNode)

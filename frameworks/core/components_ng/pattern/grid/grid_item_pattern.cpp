@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
@@ -153,6 +154,12 @@ bool GridItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
 void GridItemPattern::MarkIsSelected(bool isSelected)
 {
+    MarkIsSelectedWithoutCheckbox(isSelected);
+    SyncCheckBoxFromItem();
+}
+
+void GridItemPattern::MarkIsSelectedWithoutCheckbox(bool isSelected)
+{
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
         auto eventHub = GetEventHub<GridItemEventHub>();
@@ -220,6 +227,7 @@ void GridItemPattern::SetAccessibilityAction()
 
 void GridItemPattern::BeforeCreateLayoutWrapper()
 {
+    SelectableItemPattern::BeforeCreateLayoutWrapper();
     if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
         shallowBuilder_->ExecuteDeepRender();
         shallowBuilder_.Reset();

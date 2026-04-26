@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,11 @@ COMMON_SRC = [
   "grid_scroller_testtwo_ng.cpp",
   "grid_test_ng.cpp",
   "grid_cache_layout_test_ng.cpp",
+  "grid_edit_mode_test_ng.cpp",
+  "grid_swipe_select_gesture_test_ng.cpp",
+  "grid_swipe_select_test_ng.cpp",
+  "grid_swipe_select_autoscroll_test_ng.cpp",
+  "grid_item_edit_mode_test.cpp",
   "grid_pattern_test_ng.cpp",
   "selectable_item_test.cpp",
 ]
@@ -64,13 +69,13 @@ ace_unittest("grid_test_ng") {
   sources = COMMON_SRC
   defines = [ "TEST_IRREGULAR_GRID" ]
   sources += [
+    "grid_generated_layout_info_test.cpp",
     "irregular/grid_irregular_filler_test.cpp",
     "irregular/grid_irregular_layout_test.cpp",
     "irregular/grid_irregular_layout_testtwo.cpp",
     "irregular/grid_layout_range_solver_test.cpp",
     "irregular/irregular_matrics.cpp",
     "layout_info_test.cpp",
-    "grid_generated_layout_info_test.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
@@ -101,12 +106,12 @@ ace_unittest("grid_test_custom") {
   module_name = "ScrollingSet-Scroll"
   type = "new"
   sources = [
-    "grid_test_ng.cpp",
     "custom/custom_layout_options.cpp",
-    "custom/grid_custom_layout_test_ng.cpp",
     "custom/grid_custom_algorithm_test_ng.cpp",
-    "custom/grid_custom_scroller_test_ng.cpp",
     "custom/grid_custom_layout_algorithm_test.cpp",
+    "custom/grid_custom_layout_test_ng.cpp",
+    "custom/grid_custom_scroller_test_ng.cpp",
+    "grid_test_ng.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
