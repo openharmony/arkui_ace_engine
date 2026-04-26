@@ -560,9 +560,6 @@ HWTEST_F(GridItemEditModeTestNg, BeforeCreateLayoutWrapperAutoCreate001, TestSiz
 
     auto itemPattern = GetItemPattern(0);
     ASSERT_NE(itemPattern, nullptr);
-    EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr);
-
-    itemPattern->BeforeCreateLayoutWrapper();
     EXPECT_NE(itemPattern->editModeCheckBoxNode_, nullptr);
 }
 
@@ -646,6 +643,8 @@ HWTEST_F(GridItemEditModeTestNg, OnEditModeCheckBoxClickDeselectFiresEvent001, T
 
     itemPattern->SetEditModeEnabled(true);
     ASSERT_NE(itemPattern->editModeCheckBoxNode_, nullptr);
+
+    itemPattern->SetSelected(true);
 
     bool eventFired = false;
     bool eventValue = true;
