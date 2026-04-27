@@ -215,6 +215,39 @@ void ApplyBridgeResult(const RefPtr<NGGestureRecognizer>& recognizer, const Weak
     bridgedResult = result;
 }
 
+std::vector<std::pair<WeakPtr<NGGestureRecognizer>, RefPtr<NGGestureRecognizer>>> CollectSortedPanRecognizers(
+    const ResponseLinkResult& currentRecognizers)
+{
+    std::vector<std::pair<WeakPtr<NGGestureRecognizer>, RefPtr<NGGestureRecognizer>>> sortedCurrentRecognizers;
+    for (const auto& item : currentRecognizers) {
+        if (item.Invalid()) {
+            continue;
+        }
+        auto recognizer = item.Upgrade();
+        if (!recognizer) {
+            continue;
+        }
+        if (recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+            continue;
+        }
+        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
+        if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
+            continue;
+        }
+        sortedCurrentRecognizers.emplace_back(item, recognizer);
+    }
+    std::stable_sort(
+        sortedCurrentRecognizers.begin(), sortedCurrentRecognizers.end(), [](const auto& a, const auto& b) {
+            return static_cast<int32_t>(a.second->GetPriority()) > static_cast<int32_t>(b.second->GetPriority());
+        });
+    auto highStart = std::find_if(sortedCurrentRecognizers.begin(), sortedCurrentRecognizers.end(),
+        [](const auto& item) { return item.second->GetPriority() == GesturePriority::High; });
+    auto highEnd = std::find_if(highStart, sortedCurrentRecognizers.end(),
+        [](const auto& item) { return item.second->GetPriority() != GesturePriority::High; });
+    std::reverse(highStart, highEnd);
+    return sortedCurrentRecognizers;
+}
+
 void GestureEventHub::TriggerShouldParallelWith(
     const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers)
 {
@@ -233,21 +266,8 @@ void GestureEventHub::TriggerShouldParallelWith(
         auto type = recognizer->GetRecognizerType();
         sortedResponseLinkRecognizers[type].emplace_back(recognizer);
     }
-    for (const auto& item : currentRecognizers) {
-        if (item.Invalid()) {
-            continue;
-        }
-        auto recognizer = item.Upgrade();
-        if (!recognizer) {
-            continue;
-        }
-        if (recognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
-            continue;
-        }
-        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
-        if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
-            continue;
-        }
+    auto sortedCurrentRecognizers = CollectSortedPanRecognizers(currentRecognizers);
+    for (const auto& [item, recognizer] : sortedCurrentRecognizers) {
         auto iter = sortedResponseLinkRecognizers.find(recognizer->GetRecognizerType());
         if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
             continue;

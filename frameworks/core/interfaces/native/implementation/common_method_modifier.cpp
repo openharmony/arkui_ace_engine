@@ -5374,16 +5374,17 @@ void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 void SetShouldRecognizerParallelWithImpl(Ark_NativePointer node,
-                                         const ShouldRecognizerParallelWithCallback* value)
+                                         const Opt_ShouldRecognizerParallelWithCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!value || !CallbackHelper(*value).IsValid()) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
         ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*value), node = weakNode](
+    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*optValue), node = weakNode](
         const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
     ) -> RefPtr<NG::NGGestureRecognizer> {
         PipelineContext::SetCallBackNode(node);

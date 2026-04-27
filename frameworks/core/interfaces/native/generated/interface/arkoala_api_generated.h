@@ -24823,7 +24823,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setShouldBuiltInRecognizerParallelWith)(Ark_NativePointer node,
                                                    const Opt_ShouldBuiltInRecognizerParallelWithCallback* value);
     void (*setShouldRecognizerParallelWith)(Ark_NativePointer node,
-                                            const ShouldRecognizerParallelWithCallback* value);
+                                            const Opt_ShouldRecognizerParallelWithCallback* value);
     void (*setMonopolizeEvents)(Ark_NativePointer node,
                                 const Opt_Boolean* value);
     void (*setOnTouchIntercept)(Ark_NativePointer node,
