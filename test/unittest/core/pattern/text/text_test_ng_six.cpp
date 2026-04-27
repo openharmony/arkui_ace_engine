@@ -1634,20 +1634,20 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent004, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
-    // Clear any existing spans
+    // Clear any existing spans.
     textPattern->spans_.clear();
 
-    // Create mixed spans: text + image + text
+    // Create mixed spans: text + image + text.
     auto span1 = AceType::MakeRefPtr<SpanItem>();
     span1->content = u"Text";
     span1->position = 4;
     span1->placeholderIndex = -1;
     span1->spanItemType = SpanItemType::NORMAL;
 
-    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image span
+    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image span.
     span2->content = u" ";
-    span2->position = 5;         // Image takes 1 position
-    span2->placeholderIndex = 0; // placeholderIndex != -1 indicates image/custom span
+    span2->position = 5;         // Image takes 1 position.
+    span2->placeholderIndex = 0; // placeholderIndex != -1 indicates image/custom span.
     span2->spanItemType = SpanItemType::CustomSpan;
 
     auto span3 = AceType::MakeRefPtr<SpanItem>();
@@ -1660,15 +1660,15 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent004, TestSize.Level1)
     textPattern->spans_.push_back(span2);
     textPattern->spans_.push_back(span3);
 
-    // Select including image span
+    // Select including image span.
     auto result1 = textPattern->TextHighlightSelectedContent(0, 10);
     EXPECT_EQ(result1, u"Text After");
 
-    // Select only image span
+    // Select only image span.
     auto result2 = textPattern->TextHighlightSelectedContent(4, 5);
     EXPECT_EQ(result2, u" ");
 
-    // Select from middle of first text to middle of last text (through image)
+    // Select from middle of first text to middle of last text (through image).
     auto result3 = textPattern->TextHighlightSelectedContent(2, 8);
     EXPECT_EQ(result3, u"xt Aft");
 }
