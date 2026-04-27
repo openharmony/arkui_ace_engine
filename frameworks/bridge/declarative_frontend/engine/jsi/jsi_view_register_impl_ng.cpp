@@ -97,6 +97,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_with_env.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
@@ -432,6 +433,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSEllipseShape::JSBind(globalObj);
     JSCircleShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
+    JSWithEnv::JSBind(globalObj);
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);

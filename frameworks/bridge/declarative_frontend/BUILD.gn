@@ -236,6 +236,7 @@ template("declarative_js_engine") {
       "ark_mock:mock",
       "ark_prefetcher:prefetcher",
       ":shape",
+      ":withenv",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
@@ -359,6 +360,7 @@ template("declarative_js_engine") {
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_lazy_grid.cpp",
       "jsview/js_line.cpp",
+      "jsview/js_with_env.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
       "jsview/js_linear_indicator_controller.cpp",
@@ -757,6 +759,7 @@ template("declarative_js_engine_ng") {
       "ark_mock:mock",
       "ark_prefetcher:prefetcher",
       ":shape",
+      ":withenv",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
@@ -885,6 +888,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_lazy_grid.cpp",
       "jsview/js_line.cpp",
+      "jsview/js_with_env.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
       "jsview/js_linear_indicator_controller.cpp",
@@ -1248,6 +1252,15 @@ ohos_abc("uicontext") {
 ohos_abc("ark_theme_control") {
   sources = [ "engine/arkThemeControl.js" ]
   output_name = "theme"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("withenv") {
+  sources = [ "engine/jsWithEnv.js" ]
+  output_name = "withenv"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem
