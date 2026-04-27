@@ -311,6 +311,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorParagraphStyle_SetLeadingMarginPixelMap(OH_Ar
     CHECK_NULL_RETURN(style && pixelmap, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<OHOS::Media::PixelMap> tmpPixel = pixelmap->GetInnerPixelmap();
     CHECK_NULL_RETURN(tmpPixel, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete style->leadingMarginPixelMap;
     style->leadingMarginPixelMap = new (std::nothrow) OH_PixelmapNative(tmpPixel);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -709,6 +710,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_SetTextShadows(OH_ArkUI_TextEditorT
     const OH_ArkUI_ShadowOptions** options, int32_t length)
 {
     CHECK_NULL_RETURN(style && options && length > 0, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    style->textShadow = {};
     for (int32_t i = 0; i < length; i++) {
         auto temp = options[i];
         OH_ArkUI_ShadowOptions opt = OH_ArkUI_ShadowOptions();
