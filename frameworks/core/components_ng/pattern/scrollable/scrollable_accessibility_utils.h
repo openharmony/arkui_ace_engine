@@ -26,7 +26,7 @@ struct MoveOffsetParam;
 std::optional<float> GetListAccessibilityCenterLimitMoveOffset(
     const RefPtr<FrameNode>& listFrameNode, const RefPtr<FrameNode>& curFrameNode, const MoveOffsetParam& param);
 std::optional<float> GetScrollAccessibilityCenterLimitMoveOffset(
-    const RefPtr<FrameNode>& parentFrameNode, float rawMoveOffset);
+    const RefPtr<FrameNode>& parentFrameNode, float moveOffset);
 }
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_ACCESSIBILITY_UTILS_H
