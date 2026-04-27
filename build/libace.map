@@ -1786,6 +1786,7 @@
       "OHOS::Ace::NG::ScrollablePattern::UpdateFadingEdge(OHOS::Ace::RefPtr<OHOS::Ace::NG::ScrollablePaintMethod> const&)";
       "OHOS::Ace::NG::ScrollablePattern::UpdateScrollBarRegion(float, float, OHOS::Ace::Size, OHOS::Ace::Offset)";
       "OHOS::Ace::NG::ScrollablePattern::GetGestureHub()";
+      "OHOS::Ace::NG::ScrollablePattern::ReportBackToTop()";
       "OHOS::Ace::NG::ScrollableUtils::CheckHeightExpansion(OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutProperty> const&, OHOS::Ace::Axis)";
       "OHOS::Ace::NG::ScrollAdjustmanager::AdjustCachedCount(int)";
       "OHOS::Ace::NG::ScrollAdjustmanager::AdjustEndIndex(int)";

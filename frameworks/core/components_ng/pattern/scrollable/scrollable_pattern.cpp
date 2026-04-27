@@ -64,6 +64,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/os_content.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -3104,6 +3105,17 @@ void ScrollablePattern::ResetBackToTop()
     SetBackToTop(backToTop);
 }
 
+void ScrollablePattern::ReportBackToTop()
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto nodeStr = std::to_string(static_cast<uint64_t>(node->GetId()));
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "ScrollablePattern::OnStatusBarClick node name: %{public}s",
+        node->GetInspectorIdValue("").c_str());
+    OsContent::CallSendAction("ace_action", "scroll_back_to_top", "{ \"nodeId\":" + nodeStr +
+        ", \"compId\": \"" + node->GetInspectorIdValue("") + "\"}");
+}
+
 void ScrollablePattern::OnStatusBarClick()
 {
     if (!backToTop_ || isBackToTopRunning_ || IsAtTop()) {
@@ -3136,9 +3148,7 @@ void ScrollablePattern::OnStatusBarClick()
 
     isBackToTopRunning_ = true; // set stop animation flag when click status bar.
     AnimateTo(0 - GetContentStartOffset(), -1, nullptr, true);
-    auto nodeStr = host->GetTag() + std::to_string(static_cast<uint64_t>(host->GetId()));
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
-        "backToTop start:%{public}s, distance:%{public}f", nodeStr.c_str(), -GetContentStartOffset());
+    ReportBackToTop();
 }
 
 void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
