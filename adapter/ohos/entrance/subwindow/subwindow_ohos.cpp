@@ -2409,10 +2409,9 @@ void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
 
 void SubwindowOhos::ResizeWindowForFoldStatus()
 {
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
-    CHECK_NULL_VOID(defaultDisplay);
     CHECK_NULL_VOID(window_);
-    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    auto windowSize = GetSubWindowSize(parentContainerId_, window_->GetDisplayId());
+    auto ret = window_->Resize(windowSize.Width(), windowSize.Height());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
             static_cast<int32_t>(ret));
