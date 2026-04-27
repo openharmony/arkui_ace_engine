@@ -16,9 +16,25 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("xcomponent_test_ng") {
   module_name = "DrawingSet-Path"
   type = "new"
+
+  include_dirs = [
+    "$ace_root/interfaces/native",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+  ]
+
   sources = [
+    "$ace_root/interfaces/native/native_interface_xcomponent.cpp",
+    "$ace_root/interfaces/native/node/event_converter.cpp",
+    "$ace_root/interfaces/native/node/gesture_impl.cpp",
+    "$ace_root/interfaces/native/node/node_extened.cpp",
+    "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_resolution_config.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
+    "$ace_root/test/mock/interfaces/native/mock_native_error_message_wrapper.cpp",
+    "native_interface_xcomponent_test.cpp",
     "xcomponent_layout_test_ng.cpp",
     "xcomponent_property_test_ng.cpp",
     "xcomponent_property_test_two_ng.cpp",
@@ -40,6 +56,7 @@ ace_unittest("xcomponent_test_ng") {
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "napi:ace_napi",
+    "ability_runtime:app_manager",
   ]
 }
 
