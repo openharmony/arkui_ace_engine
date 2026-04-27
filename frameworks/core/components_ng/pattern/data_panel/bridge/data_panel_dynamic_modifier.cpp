@@ -246,6 +246,10 @@ void ResetValueColors(ArkUINodeHandle node)
     std::vector<OHOS::Ace::NG::Gradient> colors;
     ConvertThemeColor(colors);
     DataPanelModelNG::SetValueColors(frameNode, colors);
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModelNG::SetValueColorsSetByUser(frameNode, false);
+        DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::VALUE_COLORS, nullptr);
+    }
 }
 
 void SetTrackShadow(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Float32 radius,
