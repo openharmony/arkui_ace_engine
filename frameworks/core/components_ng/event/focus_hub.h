@@ -691,6 +691,7 @@ public:
     void GetPaintPaddingVp(Dimension& focusPaddingVp);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
+    void ParentSortChildrenByZIndex(const RefPtr<FrameNode>& frameNode);
     void ClearFocusState(bool isNeedStateStyles = true, bool isNeedClearCallBack = true);
     void ClearAllFocusState();
 
