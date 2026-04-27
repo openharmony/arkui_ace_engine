@@ -128,6 +128,12 @@ let DpiFollowStrategy;
   DpiFollowStrategy[DpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
 })(DpiFollowStrategy || (DpiFollowStrategy = {}));
 
+let EmbeddedDpiFollowStrategy;
+(function (EmbeddedDpiFollowStrategy) {
+  EmbeddedDpiFollowStrategy[EmbeddedDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
+  EmbeddedDpiFollowStrategy[EmbeddedDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
+})(EmbeddedDpiFollowStrategy || (EmbeddedDpiFollowStrategy = {}));
+
 let SecurityDpiFollowStrategy;
 (function (SecurityDpiFollowStrategy) {
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
@@ -145,6 +151,12 @@ let WindowModeFollowStrategy;
   WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE = 0] = 'follow-host-window-mode';
   WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1] = 'follow-ui-extension-ability-window-mode';
 })(WindowModeFollowStrategy || (WindowModeFollowStrategy = {}));
+
+let EmbeddedWindowModeFollowStrategy;
+(function (EmbeddedWindowModeFollowStrategy) {
+  EmbeddedWindowModeFollowStrategy[EmbeddedWindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE = 0] = 'follow-host-window-mode';
+  EmbeddedWindowModeFollowStrategy[EmbeddedWindowModeFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1] = 'follow-ui-extension-ability-window-mode';
+})(EmbeddedWindowModeFollowStrategy || (EmbeddedWindowModeFollowStrategy = {}));
 
 let EllipsisMode;
 (function (EllipsisMode) {
