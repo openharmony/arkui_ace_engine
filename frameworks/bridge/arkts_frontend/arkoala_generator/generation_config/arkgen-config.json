@@ -1113,6 +1113,26 @@
                 "replaceImplementation": true
             }
         },
+        "TextInputModifier": {
+            "caretColor": {
+                "hookName": "hookTextInputModifierCaretColor",
+                "replaceImplementation": false
+            },
+            "caretStyle": {
+                "hookName": "hookTextInputModifierCaretStyle",
+                "replaceImplementation": false
+            }
+        },
+        "TextModifier": {
+            "font": {
+                "hookName": "hookTextModifierFont",
+                "replaceImplementation": false
+            },
+            "fontWeight": {
+                "hookName": "hookTextModifierFontWeight",
+                "replaceImplementation": false
+            }
+        },
         "WebAttribute": {
             "javaScriptProxy": {
                 "hookName": "hookJavaScriptProxy",
