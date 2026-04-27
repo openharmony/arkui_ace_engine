@@ -41,7 +41,7 @@ bool ScrollTouchExecutor::ExecuteTargetMode()
     float x = cmd_.actionInfo.coordinates.x1;
     float y = cmd_.actionInfo.coordinates.y1;
 
-    RefPtr<ScrollPattern> scroll = FindScrollPattern(x, y);
+    RefPtr<Pattern> scroll = FindScrollPattern(x, y);
     if (!scroll) {
         return false;
     }
@@ -68,7 +68,7 @@ bool ScrollTouchExecutor::ExecuteTargetMode()
     return true;
 }
 
-RefPtr<ScrollPattern> ScrollTouchExecutor::FindScrollPattern(float x, float y)
+RefPtr<Pattern> ScrollTouchExecutor::FindScrollPattern(float x, float y)
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -79,7 +79,7 @@ RefPtr<ScrollPattern> ScrollTouchExecutor::FindScrollPattern(float x, float y)
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "No FrameNode found at coordinates.");
         return nullptr;
     }
-    return AceType::DynamicCast<ScrollPattern>(result.GetNode()->GetPattern());
+    return result.GetNode()->GetPattern();
 }
 
 } // namespace OHOS::Ace::NG
