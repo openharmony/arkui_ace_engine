@@ -154,8 +154,8 @@ void AddDestinationToStack(const NavigationTestContext& context, const std::stri
     context.stack->Add(name, destination);
 }
 
-void MountDestinationToNavContent(
-    const NavigationTestContext& context, const RefPtr<NavDestinationGroupNode>& destination)
+void MountDestinationToNavContent(const NavigationTestContext& context,
+    const RefPtr<NavDestinationGroupNode>& destination)
 {
     CHECK_NULL_VOID(context.navNode);
     auto navContentNode = AceType::DynamicCast<FrameNode>(context.navNode->GetContentNode());
@@ -1238,30 +1238,30 @@ HWTEST_F(NavigationPatternTestEightNg, ForceSplitDisplayStateAndDiffTest001, Tes
 }
 
 /**
- * @tc.name: ForceSplitLifecycleFireTest001
- * @tc.desc: Test new force split lifecycle fire helpers update visible and active flags
+ * @tc.name: ForceSplitLifecycleFireShowTest001
+ * @tc.desc: Test force split will-show and show lifecycle update visible flags
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestEightNg, ForceSplitLifecycleFireTest001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestEightNg, ForceSplitLifecycleFireShowTest001, TestSize.Level1)
 {
     auto context = CreateNavigationTestContext(true);
-    auto manager = context.navNode->GetContextRefPtr()->GetForceSplitManager();
-    manager->SetPagePairs(std::unordered_map<std::string, std::unordered_set<std::string>> {
-        { "A", { "B" } }
-    });
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
     auto nodeA = CreateNavDestinationNode("A", 0);
-    auto nodeB = CreateNavDestinationNode("B", 1);
-    auto relatedDest = CreateNavDestinationNode("Related", 2);
-    AddDestinationToStack(context, PAGE01, nodeA);
-    AddDestinationToStack(context, PAGE02, nodeB);
+    auto relatedDest = CreateNavDestinationNode("Related", 1);
     context.navNode->SetRelatedPageDestNode(relatedDest);
-    context.navNode->lastStandardIndex_ = -1;
     context.pattern->forceSplitSuccess_ = true;
-    context.pattern->primaryNodes_ = { WeakPtr<NavDestinationGroupNode>(nodeA) };
-    context.pattern->secondaryNodes_ = { WeakPtr<NavDestinationGroupNode>(nodeB) };
+
     auto patternA = nodeA->GetPattern<NavDestinationPattern>();
-    auto patternB = nodeB->GetPattern<NavDestinationPattern>();
     auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(patternA, nullptr);
+    ASSERT_NE(relatedPattern, nullptr);
+
+    patternA->SetIsOnShow(false);
+    patternA->SetIsActive(false);
+    relatedPattern->SetIsOnShow(false);
+    relatedPattern->SetIsActive(false);
 
     NavigationPattern::ForceSplitLifecycleDiff showDiff;
     showDiff.willShowPages = { nodeA };
@@ -1270,11 +1270,42 @@ HWTEST_F(NavigationPatternTestEightNg, ForceSplitLifecycleFireTest001, TestSize.
     showDiff.relatedWillShow = true;
     showDiff.relatedShow = true;
     showDiff.relatedActive = true;
+
     context.pattern->FireForceSplitWillShowLifecycle(showDiff);
     context.pattern->FireForceSplitShowLifecycle(
         showDiff, NavDestVisibilityChangeReason::TRANSITION, NavDestinationActiveReason::TRANSITION);
+
     EXPECT_TRUE(patternA->GetIsOnShow());
+    EXPECT_TRUE(patternA->IsActive());
     EXPECT_TRUE(relatedPattern->GetIsOnShow());
+    EXPECT_TRUE(relatedPattern->IsActive());
+}
+
+/**
+ * @tc.name: ForceSplitLifecycleFireHideTest001
+ * @tc.desc: Test force split will-hide and hide lifecycle update visible flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, ForceSplitLifecycleFireHideTest001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto nodeA = CreateNavDestinationNode("A", 0);
+    auto relatedDest = CreateNavDestinationNode("Related", 1);
+    context.navNode->SetRelatedPageDestNode(relatedDest);
+    context.pattern->forceSplitSuccess_ = true;
+
+    auto patternA = nodeA->GetPattern<NavDestinationPattern>();
+    auto relatedPattern = relatedDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(patternA, nullptr);
+    ASSERT_NE(relatedPattern, nullptr);
+
+    patternA->SetIsOnShow(true);
+    patternA->SetIsActive(true);
+    relatedPattern->SetIsOnShow(true);
+    relatedPattern->SetIsActive(true);
 
     NavigationPattern::ForceSplitLifecycleDiff hideDiff;
     hideDiff.willHidePages = { nodeA };
@@ -1283,11 +1314,15 @@ HWTEST_F(NavigationPatternTestEightNg, ForceSplitLifecycleFireTest001, TestSize.
     hideDiff.relatedWillHide = true;
     hideDiff.relatedHide = true;
     hideDiff.relatedInactive = true;
+
     context.pattern->FireForceSplitWillHideLifecycle(hideDiff);
     context.pattern->FireForceSplitHideLifecycle(
         hideDiff, NavDestVisibilityChangeReason::TRANSITION, NavDestinationActiveReason::TRANSITION);
+
     EXPECT_FALSE(patternA->GetIsOnShow());
+    EXPECT_FALSE(patternA->IsActive());
     EXPECT_FALSE(relatedPattern->GetIsOnShow());
+    EXPECT_FALSE(relatedPattern->IsActive());
 }
 
 /**
@@ -1421,13 +1456,72 @@ HWTEST_F(NavigationPatternTestEightNg, CollectActiveNodesAndMoveToPrimaryTest001
 }
 
 /**
- * @tc.name: SplitDisplayReconfigureAndSyncTest001
- * @tc.desc: Test split-display reconfigure and stack-sync helper branches
+ * @tc.name: SplitDisplayReconfigureTest001
+ * @tc.desc: Test split-display and stack-display reconfigure branches
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestEightNg, SplitDisplayReconfigureAndSyncTest001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestEightNg, SplitDisplayReconfigureTest001, TestSize.Level1)
 {
     auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = context.navNode->GetContextRefPtr()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetPagePairs(std::unordered_map<std::string, std::unordered_set<std::string>> {
+        { "DetailA", { "DetailB" } }
+    });
+
+    auto navContentNode = AceType::DynamicCast<FrameNode>(context.navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto detailA = CreateNavDestinationNode("DetailA", 1);
+    auto detailB = CreateNavDestinationNode("DetailB", 2);
+    auto relatedDest = CreateNavDestinationNode("Related", 3);
+
+    detailA->SetNavDestinationType(NavDestinationType::DETAIL);
+    detailB->SetNavDestinationType(NavDestinationType::DETAIL);
+
+    AddDestinationToStack(context, PAGE01, homeDest);
+    AddDestinationToStack(context, PAGE02, detailA);
+    AddDestinationToStack(context, PAGE03, detailB);
+
+    MountDestinationToNavContent(context, homeDest);
+    MountDestinationToNavContent(context, detailA);
+    MountDestinationToNavContent(context, detailB);
+
+    context.navNode->SetRelatedPageDestNode(relatedDest);
+    context.navNode->lastStandardIndex_ = 2;
+    context.pattern->forceSplitSuccess_ = true;
+    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
+    context.pattern->navBarIsHome_ = false;
+
+    context.pattern->AdjustNodeForSplitDisplayReconfigure();
+
+    ASSERT_FALSE(context.pattern->primaryNodes_.empty());
+    EXPECT_EQ(context.pattern->primaryNodes_[0].Upgrade(), homeDest);
+
+    context.pattern->HandleSplitDisplaySyncWithoutHome(navContentNode);
+    EXPECT_EQ(context.pattern->primaryNodes_.size(), 3U);
+    EXPECT_TRUE(context.pattern->secondaryNodes_.empty());
+
+    context.pattern->forceSplitSuccess_ = false;
+    context.pattern->AdjustNodeForStackDisplayReconfigure();
+
+    EXPECT_TRUE(context.pattern->primaryNodes_.empty());
+    EXPECT_EQ(context.pattern->secondaryNodes_.size(), 3U);
+}
+
+/**
+ * @tc.name: SplitDisplayStackSyncTest001
+ * @tc.desc: Test split-display stack-sync scenario and sync helper branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, SplitDisplayStackSyncTest001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+
     auto manager = context.navNode->GetContextRefPtr()->GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
     manager->SetPagePairs(std::unordered_map<std::string, std::unordered_set<std::string>> {
@@ -1441,48 +1535,42 @@ HWTEST_F(NavigationPatternTestEightNg, SplitDisplayReconfigureAndSyncTest001, Te
     auto homeDest = CreateNavDestinationNode("Home", 0);
     auto detailA = CreateNavDestinationNode("DetailA", 1);
     auto detailB = CreateNavDestinationNode("DetailB", 2);
-    auto relatedDest = CreateNavDestinationNode("Related", 3);
+
     detailA->SetNavDestinationType(NavDestinationType::DETAIL);
     detailB->SetNavDestinationType(NavDestinationType::DETAIL);
+
     AddDestinationToStack(context, PAGE01, homeDest);
     AddDestinationToStack(context, PAGE02, detailA);
     AddDestinationToStack(context, PAGE03, detailB);
+
     MountDestinationToNavContent(context, homeDest);
     MountDestinationToNavContent(context, detailA);
     MountDestinationToNavContent(context, detailB);
-    context.navNode->SetRelatedPageDestNode(relatedDest);
+
     context.navNode->lastStandardIndex_ = 2;
-    context.pattern->forceSplitSuccess_ = true;
-    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
-    context.pattern->navBarIsHome_ = false;
-    context.pattern->AdjustNodeForSplitDisplayReconfigure();
-    EXPECT_EQ(context.pattern->primaryNodes_[0].Upgrade(), homeDest);
-
-    context.pattern->HandleSplitDisplaySyncWithoutHome(navContentNode);
-    EXPECT_EQ(context.pattern->primaryNodes_.size(), 3U);
-    EXPECT_TRUE(context.pattern->secondaryNodes_.empty());
-
-    context.pattern->forceSplitSuccess_ = false;
-    context.pattern->AdjustNodeForStackDisplayReconfigure();
-    EXPECT_TRUE(context.pattern->primaryNodes_.empty());
-    EXPECT_EQ(context.pattern->secondaryNodes_.size(), 3U);
-
     context.pattern->forceSplitSuccess_ = true;
     context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
     context.pattern->prePrimaryNodes_ = { WeakPtr<NavDestinationGroupNode>(homeDest) };
     context.pattern->SetTouchedSecondaryColumnDestination(detailA);
+
     auto scenario = context.pattern->BuildSplitDisplaySyncScenario(
         std::make_optional(std::make_pair(PAGE02, AceType::DynamicCast<UINode>(detailA))),
         std::make_optional(std::make_pair(PAGE03, AceType::DynamicCast<UINode>(detailB))));
+
     EXPECT_TRUE(scenario.isSecondaryPushToPrimaryScene);
+
     context.pattern->RebuildSplitDisplayNodes(navBarNode, navContentNode, primaryContentNode, scenario);
     EXPECT_TRUE(context.pattern->isSecondaryPushToPrimaryScene_);
+
     context.pattern->AdjustNodeForStackSyncWhenSplitDisplay(
         std::make_optional(std::make_pair(PAGE02, AceType::DynamicCast<UINode>(detailA))),
         std::make_optional(std::make_pair(PAGE03, AceType::DynamicCast<UINode>(detailB))));
+
     EXPECT_FALSE(context.pattern->primaryNodes_.empty());
+
     context.pattern->forceSplitSuccess_ = false;
     context.pattern->AdjustNodeForStackSyncWhenStackDisplay();
+
     EXPECT_EQ(context.pattern->secondaryNodes_.size(), 3U);
 }
 
