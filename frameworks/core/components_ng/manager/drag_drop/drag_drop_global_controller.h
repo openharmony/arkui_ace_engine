@@ -73,10 +73,6 @@ public:
     void SetCallAnsyncDragEnd(std::function<void(DragStartRequestStatus)> callSyncDragEnd);
 
     std::function<void(DragStartRequestStatus)> GetCallAnsyncEnd();
-    // app global drag
-    void SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled);
-    bool IsAppGlobalDragEnabled() const;
-    bool IsAlreadyGetAppGlobalDrag() const;
     bool IsCurrentDrag(int32_t requestId) const;
     uint64_t GetStartDragVsyncTime() const;
     void SetStartDragVsyncTime(uint64_t startDragVsyncTime);
@@ -112,10 +108,6 @@ private:
     DragRet dragResult_ = DragRet::DRAG_FAIL;
     DragBehavior suggestedDropOperation_ = DragBehavior::UNKNOWN;
     bool disableDropAnimation_ = false;
-
-    // app global drag
-    bool isAppGlobalDragEnabled_ = false;
-    bool isAlreadyGetAppGlobalDrag_ = false;
 
     DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
     std::function<void()> asyncDragCallback_;

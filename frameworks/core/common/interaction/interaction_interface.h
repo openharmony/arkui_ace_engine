@@ -81,12 +81,6 @@ public:
 
     virtual int32_t UnRegisterCoordinationListener() = 0;
 
-    virtual int32_t SetDraggableState(bool state) = 0;
-
-    virtual int32_t GetAppDragSwitchState(bool& state) = 0;
-
-    virtual void SetDraggableStateAsync(bool state, int64_t downTime) = 0;
-
     virtual int32_t EnableInternalDropAnimation(const std::string &animationInfo) = 0;
 
     virtual bool IsDragStart() const = 0;
