@@ -69,6 +69,7 @@
 #include "core/common/container.h"
 #include "base/include/ark_web_errno.h"
 #include "arkweb_utils.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace {
 

@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/implementation/navigation_context.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

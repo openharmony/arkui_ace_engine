@@ -102,6 +102,8 @@
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -7630,6 +7632,11 @@ void PipelineContext::FlushMouseEventForHover()
     eventManager_->DispatchMouseHoverAnimationNG(event, true);
 }
 
+const RefPtr<NavigationManager>& PipelineContext::GetNavigationManager() const
+{
+    return navigationMgr_;
+}
+
 void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)
 {
     if (point.sourceTool != SourceTool::FINGER || NearZero(point.force)) {
@@ -7987,6 +7994,7 @@ bool PipelineContext::FreeMouseStyleHoldNode()
 
 void PipelineContext::InitManagers()
 {
+    navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();

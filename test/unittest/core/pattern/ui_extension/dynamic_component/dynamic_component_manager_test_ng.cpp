@@ -23,6 +23,8 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 
+#include "core/components_ng/pattern/stage/stage_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 

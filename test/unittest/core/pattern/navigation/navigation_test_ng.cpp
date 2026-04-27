@@ -40,6 +40,8 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,9 +69,6 @@ void NavigationTestNg::SetUpTestSuite()
     MockContainer::SetUp();
     MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
     auto context = MockPipelineContext::GetCurrent();
-    if (context) {
-        context->stageManager_ = nullptr;
-    }
 }
 
 void NavigationTestNg::TearDownTestSuite()

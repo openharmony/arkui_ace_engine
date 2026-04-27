@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace OHOS::Ace::NG;
 

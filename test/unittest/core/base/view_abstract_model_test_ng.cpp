@@ -37,6 +37,8 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"

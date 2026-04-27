@@ -35,6 +35,7 @@
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "js_accessibility_manager_test.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;

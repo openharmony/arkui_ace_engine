@@ -24,6 +24,7 @@
 #include "core/common/ace_engine.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "page_switch_log.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace {
 namespace {

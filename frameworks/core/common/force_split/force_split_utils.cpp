@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 

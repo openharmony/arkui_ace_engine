@@ -14,6 +14,7 @@
  */
 
 #include "mock_navigation_stack.h"
+#include "mock_navigation_route.h"
 
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
@@ -28,6 +29,8 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "mock_navigation_stack.h"
+#include "mock_navigation_route.h"
 
 #define protected public
 #define private public
@@ -34,6 +35,8 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,9 +61,6 @@ void NavigationAnimationTest::SetUpTestSuite()
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     auto context = MockPipelineContext::GetCurrent();
-    if (context) {
-        context->stageManager_ = nullptr;
-    }
 }
 
 void NavigationAnimationTest::TearDownTestSuite()

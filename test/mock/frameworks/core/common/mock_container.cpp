@@ -22,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/common/container_handler.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace {
 namespace {
