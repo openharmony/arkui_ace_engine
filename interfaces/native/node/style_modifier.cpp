@@ -15066,23 +15066,11 @@ int32_t SetImageMatrix(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
 
     std::vector<float> matrixArray;
-    if (actualSize > 0) {
-        for (size_t i = 0; i < static_cast<uint32_t>(actualSize) && i < REQUIRED_SIXTEEN_PARAM; i++) {
-            matrixArray.emplace_back(item->value[i].f32);
-        }
+    for (size_t i = 0; i < static_cast<uint32_t>(actualSize) && i < REQUIRED_SIXTEEN_PARAM; i++) {
+        matrixArray.emplace_back(item->value[i].f32);
     }
-    if (isObject) {
-        ArkUI_Matrix4* matrix = reinterpret_cast<ArkUI_Matrix4*>(item->object);
-        if (!matrix) {
-            return ERROR_CODE_PARAM_INVALID;
-        }
-        float elements[ALLOW_SIZE_16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
-        fullImpl->getNodeModifiers()->getMatrix4Modifier()->getElements(matrix->matrix, elements);
-        for (int i = 0; i < NUM_16; i++) {
-            matrixArray.emplace_back(elements[i]);
-        }
-    }
-    fullImpl->getNodeModifiers()->getImageModifier()->setImageMatrix(node->uiNodeHandle, &matrixArray[0]);
+    fullImpl->getNodeModifiers()->getImageModifier()->setImageMatrix(
+        node->uiNodeHandle, &matrixArray[0]);
     return ERROR_CODE_NO_ERROR;
 }
 
