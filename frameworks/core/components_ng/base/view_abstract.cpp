@@ -28,6 +28,7 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/response_region.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -3767,9 +3768,10 @@ void ViewAbstract::ResetPosition()
     auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parentNode);
 
+    bool isStackOverflow = FeatureParam::IsPageOverflowEnabled() && parentNode->GetTag() == V2::STACK_ETS_TAG;
     // Row/Column/Flex measure and layout differently depending on whether the child nodes have position property.
     if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
-        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        parentNode->GetTag() == V2::FLEX_ETS_TAG || isStackOverflow) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         auto renderContext = frameNode->GetRenderContext();
@@ -7098,8 +7100,9 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     CHECK_NULL_VOID(parentNode);
     auto parentPattern = parentNode->GetPattern();
 
+    bool isStackOverflow = FeatureParam::IsPageOverflowEnabled() && parentNode->GetTag() == V2::STACK_ETS_TAG;
     if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
-        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        parentNode->GetTag() == V2::FLEX_ETS_TAG || isStackOverflow) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         auto renderContext = frameNode->GetRenderContext();
