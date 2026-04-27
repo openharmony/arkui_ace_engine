@@ -16,19 +16,16 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { Coordinate2D_serializer, Coordinate2D } from './units'
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
+import { InteractionHand } from './enums'
 import { GestureControl, GestureHandler } from '#handwritten'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { InteractionHand } from './enums'
 import { SourceTool, BaseEvent, BaseEventInternal } from './common'
-// instructive change start
-import { GlobalStateManager, MutableState } from '@koalaui/runtime'
-// instructive change end
 export interface EventLocationInfo {
     x: double
     y: double
@@ -45,35 +42,59 @@ export class EventLocationInfoInternal implements MaterializedBase,EventLocation
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public x: double
-    public y: double
-    public windowX: double
-    public windowY: double
-    public displayX: double
-    public displayY: double
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, EventLocationInfoInternal.getFinalizer())
-        this.x = this.getX()
-        this.y = this.getY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
     }
     constructor() {
         this(MaterializedBaseTag.NOP, EventLocationInfoInternal.construct())
-        this.x = this.getX()
-        this.y = this.getY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._EventLocationInfo_construct()
@@ -156,7 +177,8 @@ export class EventLocationInfoInternal implements MaterializedBase,EventLocation
         const retval = ArkUIGeneratedNativeModule._EventLocationInfo_getCurrentLocalPosition(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Coordinate2D = Coordinate2D_serializer.read(retvalDeserializer)
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as Coordinate2D)
     }
     private getX_serialize(): double {
         const retval = ArkUIGeneratedNativeModule._EventLocationInfo_getX(this.peer!.ptr)
@@ -209,7 +231,8 @@ export class EventLocationInfoInternal implements MaterializedBase,EventLocation
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -232,7 +255,8 @@ export class EventLocationInfoInternal implements MaterializedBase,EventLocation
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -281,7 +305,7 @@ export class EventTargetInfo implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private getUniqueId_serialize(): int32 {
         const retval = ArkUIGeneratedNativeModule._EventTargetInfo_getUniqueId(this.peer!.ptr)
@@ -306,41 +330,71 @@ export class FingerInfoInternal implements MaterializedBase,FingerInfo {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public id: int32
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
-    public globalX: double
-    public globalY: double
-    public localX: double
-    public localY: double
-    public displayX: double
-    public displayY: double
-    public hand?: InteractionHand | undefined
+    get id(): int32 {
+        return this.getId()
+    }
+    set id(id: int32) {
+        this.setId(id)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    get globalX(): double {
+        return this.getGlobalX()
+    }
+    set globalX(globalX: double) {
+        this.setGlobalX(globalX)
+    }
+    get globalY(): double {
+        return this.getGlobalY()
+    }
+    set globalY(globalY: double) {
+        this.setGlobalY(globalY)
+    }
+    get localX(): double {
+        return this.getLocalX()
+    }
+    set localX(localX: double) {
+        this.setLocalX(localX)
+    }
+    get localY(): double {
+        return this.getLocalY()
+    }
+    set localY(localY: double) {
+        this.setLocalY(localY)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get hand(): InteractionHand | undefined {
+        return this.getHand()
+    }
+    set hand(hand: InteractionHand | undefined) {
+        this.setHand(hand)
+    }
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, FingerInfoInternal.getFinalizer())
-        this.id = this.getId()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
-        this.globalX = this.getGlobalX()
-        this.globalY = this.getGlobalY()
-        this.localX = this.getLocalX()
-        this.localY = this.getLocalY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.hand = this.getHand()
     }
     constructor() {
         this(MaterializedBaseTag.NOP, FingerInfoInternal.construct())
-        this.id = this.getId()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
-        this.globalX = this.getGlobalX()
-        this.globalY = this.getGlobalY()
-        this.localX = this.getLocalX()
-        this.localY = this.getLocalY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.hand = this.getHand()
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._FingerInfo_construct()
@@ -439,7 +493,8 @@ export class FingerInfoInternal implements MaterializedBase,FingerInfo {
         const retval = ArkUIGeneratedNativeModule._FingerInfo_getCurrentLocalPosition(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Coordinate2D = Coordinate2D_serializer.read(retvalDeserializer)
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as Coordinate2D)
     }
     private getId_serialize(): int32 {
         const retval = ArkUIGeneratedNativeModule._FingerInfo_getId(this.peer!.ptr)
@@ -457,7 +512,8 @@ export class FingerInfoInternal implements MaterializedBase,FingerInfo {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -480,7 +536,8 @@ export class FingerInfoInternal implements MaterializedBase,FingerInfo {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -545,7 +602,8 @@ export class FingerInfoInternal implements MaterializedBase,FingerInfo {
             buffer = InteractionHand.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: InteractionHand | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as InteractionHand | undefined)
     }
     private setHand_serialize(hand: InteractionHand | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -628,7 +686,7 @@ export class GestureRecognizer implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private getType_serialize(): GestureControl.GestureType {
         const retval = ArkUIGeneratedNativeModule._GestureRecognizer_getType(this.peer!.ptr)
@@ -651,14 +709,8 @@ export class GestureRecognizer implements MaterializedBase {
     }
     private getEventTargetInfo_serialize(): EventTargetInfo {
         const retval = ArkUIGeneratedNativeModule._GestureRecognizer_getEventTargetInfo(this.peer!.ptr)
-        // instructive change start
-        const isScorllableComponent = ArkUIGeneratedNativeModule._GestureOps_isScrollableComponent(retval)
-        if (isScorllableComponent) {
-            const scrollableTargetInfoObj : ScrollableTargetInfo = ScrollableTargetInfoInternal.fromPtr(retval)
-            return scrollableTargetInfoObj
-        }
-        return EventTargetInfoInternal.fromPtr(retval)
-        // instructive change end
+        const obj: EventTargetInfo = EventTargetInfoInternal.fromPtr(retval)
+        return obj
     }
     private isValid_serialize(): boolean {
         const retval = ArkUIGeneratedNativeModule._GestureRecognizer_isValid(this.peer!.ptr)
@@ -926,31 +978,7 @@ export class BaseGestureEvent_serializer {
     public static read(buffer: DeserializerBase): BaseGestureEvent {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
-        // instructive change start
-        let type = Double.toInt(ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(ptr))
-        if (type === -1) {
-            return BaseGestureEventInternal.fromPtr(ptr)
-        }
-        let recognizerType = GestureControl.GestureType.fromValue(type)
-        switch(recognizerType) {
-            case GestureControl.GestureType.TAP_GESTURE:
-                return TapGestureEventInternal.fromPtr(ptr)
-            case GestureControl.GestureType.LONG_PRESS_GESTURE:
-                return LongPressGestureEventInternal.fromPtr(ptr)
-            case GestureControl.GestureType.PAN_GESTURE:
-                return PanGestureEventInternal.fromPtr(ptr)
-            case GestureControl.GestureType.PINCH_GESTURE:
-                return PinchGestureEventInternal.fromPtr(ptr)
-            case GestureControl.GestureType.SWIPE_GESTURE:
-                return SwipeGestureEventInternal.fromPtr(ptr)
-            case GestureControl.GestureType.ROTATION_GESTURE:
-                return RotationGestureEventInternal.fromPtr(ptr)
-            case GestureControl.GestureType.CLICK:
-            case GestureControl.GestureType.DRAG:
-            default:
-                return BaseGestureEventInternal.fromPtr(ptr)
-        }
-        // instructive change end
+        return BaseGestureEventInternal.fromPtr(ptr)
     }
 }
 export class EventLocationInfo_serializer {
@@ -1005,28 +1033,7 @@ export class GestureRecognizer_serializer {
     public static read(buffer: DeserializerBase): GestureRecognizer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
-        // instructive change start
-        const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getType(ptr)
-        let recognizerType =  GestureControl.GestureType.fromValue(Double.toInt(retval))
-        switch(recognizerType) {
-            case GestureControl.GestureType.TAP_GESTURE:
-                return TapRecognizerInternal.fromPtr(ptr)
-            case GestureControl.GestureType.LONG_PRESS_GESTURE:
-                return LongPressRecognizerInternal.fromPtr(ptr)
-            case GestureControl.GestureType.PAN_GESTURE:
-                return PanRecognizerInternal.fromPtr(ptr)
-            case GestureControl.GestureType.PINCH_GESTURE:
-                return PinchRecognizerInternal.fromPtr(ptr)
-            case GestureControl.GestureType.SWIPE_GESTURE:
-                return SwipeRecognizerInternal.fromPtr(ptr)
-            case GestureControl.GestureType.ROTATION_GESTURE:
-                return RotationRecognizerInternal.fromPtr(ptr)
-            case GestureControl.GestureType.CLICK:
-            case GestureControl.GestureType.DRAG:
-            default:
-                return GestureRecognizerInternal.fromPtr(ptr)
-        }
-        // instructive change end
+        return GestureRecognizerInternal.fromPtr(ptr)
     }
 }
 export class LongPressGestureEvent_serializer {
@@ -1323,7 +1330,6 @@ export interface BaseGestureEvent extends BaseEvent {
     fingerInfos?: Array<FingerInfo> | undefined
 }
 export class BaseGestureEventInternal extends BaseEventInternal implements MaterializedBase,BaseGestureEvent {
-    // instructive change begin
     get fingerList(): Array<FingerInfo> {
         return this.getFingerList()
     }
@@ -1336,20 +1342,11 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
     set fingerInfos(fingerInfos: Array<FingerInfo> | undefined) {
         this.setFingerInfos(fingerInfos)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        // instructive change begin
-        // this.fingerList = this.getFingerList()
-        // this.fingerInfos = this.getFingerInfos()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, BaseGestureEventInternal.construct())
-        // instructive change begin
-        // this.fingerList = this.getFingerList()
-        // this.fingerInfos = this.getFingerInfos()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._BaseGestureEvent_construct()
@@ -1386,7 +1383,7 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         })
         const returnResult: Array<FingerInfo> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<FingerInfo>)
     }
     private setFingerList_serialize(fingerList: Array<FingerInfo>): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1412,7 +1409,7 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         }
         const returnResult: Array<FingerInfo> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<FingerInfo> | undefined)
     }
     private setFingerInfos_serialize(fingerInfos: Array<FingerInfo> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1448,7 +1445,6 @@ export interface GestureEvent extends BaseEvent {
     tapLocation?: EventLocationInfo | undefined
 }
 export class GestureEventInternal extends BaseEventInternal implements MaterializedBase,GestureEvent {
-    // instructive change begin
     get repeat(): boolean {
         return this.getRepeat()
     }
@@ -1533,44 +1529,11 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     set tapLocation(tapLocation: EventLocationInfo | undefined) {
         this.setTapLocation(tapLocation)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        // instructive change begin
-        // this.repeat = this.getRepeat()
-        // this.fingerList = this.getFingerList()
-        // this.fingerInfos = this.getFingerInfos()
-        // this.offsetX = this.getOffsetX()
-        // this.offsetY = this.getOffsetY()
-        // this.angle = this.getAngle()
-        // this.speed = this.getSpeed()
-        // this.scale = this.getScale()
-        // this.pinchCenterX = this.getPinchCenterX()
-        // this.pinchCenterY = this.getPinchCenterY()
-        // this.velocityX = this.getVelocityX()
-        // this.velocityY = this.getVelocityY()
-        // this.velocity = this.getVelocity()
-        // this.tapLocation = this.getTapLocation()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, GestureEventInternal.construct())
-        // instructive change begin
-        // this.repeat = this.getRepeat()
-        // this.fingerList = this.getFingerList()
-        // this.fingerInfos = this.getFingerInfos()
-        // this.offsetX = this.getOffsetX()
-        // this.offsetY = this.getOffsetY()
-        // this.angle = this.getAngle()
-        // this.speed = this.getSpeed()
-        // this.scale = this.getScale()
-        // this.pinchCenterX = this.getPinchCenterX()
-        // this.pinchCenterY = this.getPinchCenterY()
-        // this.velocityX = this.getVelocityX()
-        // this.velocityY = this.getVelocityY()
-        // this.velocity = this.getVelocity()
-        // this.tapLocation = this.getTapLocation()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._GestureEvent_construct()
@@ -1710,7 +1673,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         })
         const returnResult: Array<FingerInfo> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<FingerInfo>)
     }
     private setFingerList_serialize(fingerList: Array<FingerInfo>): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1736,7 +1699,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         }
         const returnResult: Array<FingerInfo> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<FingerInfo> | undefined)
     }
     private setFingerInfos_serialize(fingerInfos: Array<FingerInfo> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1834,7 +1797,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         }
         const returnResult: EventLocationInfo | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EventLocationInfo | undefined)
     }
     private setTapLocation_serialize(tapLocation: EventLocationInfo | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1947,7 +1910,7 @@ export class PanRecognizer extends GestureRecognizer implements MaterializedBase
         }
         const returnResult: Map<SourceTool, double> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Map<SourceTool, double>)
     }
 }
 export class PinchRecognizerInternal {
@@ -2103,25 +2066,17 @@ export interface LongPressGestureEvent extends BaseGestureEvent {
     repeat: boolean
 }
 export class LongPressGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,LongPressGestureEvent {
-    // instructive change begin
     get repeat(): boolean {
         return this.getRepeat()
     }
     set repeat(repeat: boolean) {
         this.setRepeat(repeat)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        // instructive change begin
-        // this.repeat = this.getRepeat()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, LongPressGestureEventInternal.construct())
-        // instructive change begin
-        // this.repeat = this.getRepeat()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._LongPressGestureEvent_construct()
@@ -2157,7 +2112,6 @@ export interface PanGestureEvent extends BaseGestureEvent {
     velocity: double
 }
 export class PanGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,PanGestureEvent {
-    // instructive change begin
     get offsetX(): double {
         return this.getOffsetX()
     }
@@ -2188,26 +2142,11 @@ export class PanGestureEventInternal extends BaseGestureEventInternal implements
     set velocity(velocity: double) {
         this.setVelocity(velocity)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        // instructive change begin
-        // this.offsetX = this.getOffsetX()
-        // this.offsetY = this.getOffsetY()
-        // this.velocityX = this.getVelocityX()
-        // this.velocityY = this.getVelocityY()
-        // this.velocity = this.getVelocity()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, PanGestureEventInternal.construct())
-        // instructive change begin
-        // this.offsetX = this.getOffsetX()
-        // this.offsetY = this.getOffsetY()
-        // this.velocityX = this.getVelocityX()
-        // this.velocityY = this.getVelocityY()
-        // this.velocity = this.getVelocity()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._PanGestureEvent_construct()
@@ -2301,7 +2240,6 @@ export interface PinchGestureEvent extends BaseGestureEvent {
     pinchCenterY: double
 }
 export class PinchGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,PinchGestureEvent {
-    // instructive change begin
     get scale(): double {
         return this.getScale()
     }
@@ -2320,22 +2258,11 @@ export class PinchGestureEventInternal extends BaseGestureEventInternal implemen
     set pinchCenterY(pinchCenterY: double) {
         this.setPinchCenterY(pinchCenterY)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        // instructive change begin
-        // this.scale = this.getScale()
-        // this.pinchCenterX = this.getPinchCenterX()
-        // this.pinchCenterY = this.getPinchCenterY()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, PinchGestureEventInternal.construct())
-        // instructive change begin
-        // this.scale = this.getScale()
-        // this.pinchCenterX = this.getPinchCenterX()
-        // this.pinchCenterY = this.getPinchCenterY()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._PinchGestureEvent_construct()
@@ -2397,25 +2324,17 @@ export interface RotationGestureEvent extends BaseGestureEvent {
     angle: double
 }
 export class RotationGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,RotationGestureEvent {
-    // instructive change begin
     get angle(): double {
         return this.getAngle()
     }
     set angle(angle: double) {
         this.setAngle(angle)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        // instructive change begin
-        // this.angle = this.getAngle()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, RotationGestureEventInternal.construct())
-        // instructive change begin
-        // this.angle = this.getAngle()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._RotationGestureEvent_construct()
@@ -2448,7 +2367,6 @@ export interface SwipeGestureEvent extends BaseGestureEvent {
     speed: double
 }
 export class SwipeGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,SwipeGestureEvent {
-    // instructive change begin
     get angle(): double {
         return this.getAngle()
     }
@@ -2461,20 +2379,11 @@ export class SwipeGestureEventInternal extends BaseGestureEventInternal implemen
     set speed(speed: double) {
         this.setSpeed(speed)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        // instructive change begin
-        // this.angle = this.getAngle()
-        // this.speed = this.getSpeed()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, SwipeGestureEventInternal.construct())
-        // instructive change begin
-        // this.angle = this.getAngle()
-        // this.speed = this.getSpeed()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._SwipeGestureEvent_construct()
@@ -2521,25 +2430,17 @@ export interface TapGestureEvent extends BaseGestureEvent {
     tapLocation?: EventLocationInfo | undefined
 }
 export class TapGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,TapGestureEvent {
-    // instructive change begin
     get tapLocation(): EventLocationInfo | undefined {
         return this.getTapLocation()
     }
     set tapLocation(tapLocation: EventLocationInfo | undefined) {
         this.setTapLocation(tapLocation)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        // instructive change begin
-        // this.tapLocation = this.getTapLocation()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, TapGestureEventInternal.construct())
-        // instructive change begin
-        // this.tapLocation = this.getTapLocation()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._TapGestureEvent_construct()
@@ -2569,7 +2470,7 @@ export class TapGestureEventInternal extends BaseGestureEventInternal implements
         }
         const returnResult: EventLocationInfo | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EventLocationInfo | undefined)
     }
     private setTapLocation_serialize(tapLocation: EventLocationInfo | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
