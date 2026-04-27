@@ -14,6 +14,8 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_view.h"
+#include "frameworks/core/components_ng/syntax/with_env_node.h"
+#include "core/pipeline_ng/environment_manager.h"
 
 #include "base/log/ace_checker.h"
 #include "base/log/ace_scoring_log.h"
@@ -95,6 +97,44 @@ ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+RefPtr<NG::EnvironmentManager> GetEnvironmentManager(const RefPtr<NG::UINode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetEnvironmentManager();
+}
+
+void SetEnvironmentQueryReturnValue(const JSCallbackInfo& info, const NG::EnvironmentQueryResult& result)
+{
+    switch (result.type) {
+        case NG::EnvironmentValueType::BOOLEAN:
+            info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result.boolValue)));
+            return;
+        case NG::EnvironmentValueType::NUMBER:
+            info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result.numberValue)));
+            return;
+        case NG::EnvironmentValueType::STRING:
+            info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result.stringValue)));
+            return;
+        case NG::EnvironmentValueType::CUSTOM: {
+            auto* anyPtr = result.value;
+            if (anyPtr != nullptr) {
+                info.SetReturnValue(std::any_cast<JSRef<JSVal>>(*anyPtr));
+            } else {
+                info.SetReturnValue(JSVal::Undefined());
+            }
+            return;
+        }
+        case NG::EnvironmentValueType::NONE:
+        default:
+            info.SetReturnValue(JSVal::Undefined());
+            return;
+    }
+}
+} // namespace
 
 void JSView::JSBind(BindingTarget object)
 {
@@ -932,6 +972,14 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         }
     }
 
+    JSRef<JSVal> hasCustomEnv = jsViewObject_->GetProperty("__hasCustomEnvValue__");
+    if (hasCustomEnv->ToBoolean()) {
+        JSRef<JSVal> onCustomEnvUpdateFunc = jsViewObject_->GetProperty("__onCustomEnvValueUpdate__Internal");
+        if (onCustomEnvUpdateFunc->IsFunction()) {
+            RegisterOnCustomEnvUpdateCallback(JSRef<JSFunc>::Cast(onCustomEnvUpdateFunc));
+        }
+    }
+
     return node;
 }
 
@@ -1398,6 +1446,68 @@ void JSViewPartialUpdate::JSGetDialogController(const JSCallbackInfo& info)
     info.SetReturnValue(jsVal);
 }
 
+void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsString()) {
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+
+    ContainerScope scope(GetInstanceId());
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    if (!node) {
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+    auto environmentManager = GetEnvironmentManager(node);
+    if (!environmentManager) {
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+
+    auto key = info[0]->ToString();
+    auto withEnvNode = environmentManager->FindWithEnvNode(node);
+    NG::EnvironmentQueryResult queryResult;
+    bool found =
+        environmentManager->FindValueByKey(withEnvNode, node, NG::EnvironmentPropertyKind::CUSTOM, key, queryResult);
+    if (!found) {
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+    SetEnvironmentQueryReturnValue(info, queryResult);
+}
+
+void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>& onCustomEnvUpdateFunc)
+{
+    updateCustomEnvCallback_ = [weak = WeakClaim(this), func = std::move(onCustomEnvUpdateFunc)](
+                                   const std::string& key) {
+        JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        ContainerScope scope(self->GetInstanceId());
+        JSRef<JSVal> jsKey = JSRef<JSVal>::Make(ToJSValue(key));
+        JSRef<JSVal> params[1] = { jsKey };
+        auto jsFunc = JSRef<JSFunc>::Cast(func);
+        if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
+            jsFunc->Call(self->jsViewObject_, 1, params);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_STATE_MGMT,
+                "JSView %{public}s jsViewObject_ is empty, cannot invoke updateCustomEnvCallback_",
+                self->GetJSViewName().c_str());
+        }
+    };
+
+    auto customNode = AceType::DynamicCast<NG::CustomNode>(this->GetViewNode());
+    CHECK_NULL_VOID(customNode);
+    customNode->SetOnCustomEnvUpdateFunc([weak = WeakClaim(this)](const std::string& key) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        if (self->updateCustomEnvCallback_) {
+            self->updateCustomEnvCallback_(key);
+        }
+    });
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     JSClass<JSViewPartialUpdate>::Declare("NativeViewPartialUpdate");
@@ -1432,6 +1542,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "registerUpdateInstanceForEnvFunc", &JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc);
+    JSClass<JSViewPartialUpdate>::CustomMethod("findCustomValueByKey", &JSViewPartialUpdate::JSFindCustomValueByKey);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
