@@ -3524,6 +3524,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "OnTouchEvent type:%{public}d, isGenerate:%{public}d",
         static_cast<int32_t>(point.type), point.isGenerate);
     if (ConvertFromMouseAxis(point) && !point.isGenerate && compatibleManager_.NotifyNewEvent(point)) {
+        if (point.type == TouchType::MOVE) {
+            RequestFrame();
+        }
         return;
     }
 
