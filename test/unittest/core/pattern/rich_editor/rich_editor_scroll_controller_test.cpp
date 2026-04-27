@@ -384,14 +384,23 @@ HWTEST_F(RichEditorScrollControllerTest, GetAutoScrollOffsetDiff001, TestSize.Le
  */
 HWTEST_F(RichEditorScrollControllerTest, GetHotAreaOverflow001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. init frameRect and contentRect
+     */
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
 
+    /**
+     * @tc.steps: step3. GetHotAreaOverflow
+     */
     scrollController->isSingleLineMode_ = true;
     EXPECT_TRUE(scrollController->GetHotAreaOverflow(true, 100.0f));
     EXPECT_TRUE(scrollController->GetHotAreaOverflow(false, 100.0f));
