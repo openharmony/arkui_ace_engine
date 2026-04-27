@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "native_styled_string_descriptor.h"
+
+#include "base/utils/utils.h"
+#include "interfaces/native/native_error_message_macros.h"
 #include "interfaces/native/node/node_extened.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/span_style_native_impl.h"
@@ -30,8 +32,8 @@ ArkUI_StyledString_Descriptor* OH_ArkUI_StyledString_Descriptor_Create()
     return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->createArkUIStyledStringDescriptor();
 }
 
-ArkUI_StyledString_Descriptor* OH_ArkUI_StyledString_Descriptor_CreateWithString(const char* value,
-    const OH_ArkUI_SpanStyle** styles, int32_t length)
+ArkUI_StyledString_Descriptor* OH_ArkUI_StyledString_Descriptor_CreateWithString(
+    const char* value, const OH_ArkUI_SpanStyle** styles, int32_t length)
 {
     CHECK_NULL_RETURN(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), nullptr);
     CHECK_NULL_RETURN(value && styles && length > 0, nullptr);
@@ -40,8 +42,8 @@ ArkUI_StyledString_Descriptor* OH_ArkUI_StyledString_Descriptor_CreateWithString
         originalStyles.push_back(
             OHOS::Ace::SpanStyleModel::ConvertToOriginSpanStyle(const_cast<OH_ArkUI_SpanStyle*>(styles[i])));
     }
-    return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->createArkUIStyledStringDescriptorWithString(value, originalStyles);
+    return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->createArkUIStyledStringDescriptorWithString(
+        value, originalStyles);
 }
 
 ArkUI_StyledString_Descriptor* OH_ArkUI_StyledString_Descriptor_CreateWithImageAttachment(
@@ -49,17 +51,16 @@ ArkUI_StyledString_Descriptor* OH_ArkUI_StyledString_Descriptor_CreateWithImageA
 {
     CHECK_NULL_RETURN(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), nullptr);
     CHECK_NULL_RETURN(value, nullptr);
-    return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->createArkUIStyledStringDescriptorWithImage(OHOS::Ace::SpanStyleModel::ConvertToOriginImageAttachment(*value));
+    return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->createArkUIStyledStringDescriptorWithImage(
+        OHOS::Ace::SpanStyleModel::ConvertToOriginImageAttachment(*value));
 }
 
-ArkUI_StyledString_Descriptor* OH_ArkUI_StyledString_Descriptor_CreateWithCustomSpan(
-    const OH_ArkUI_CustomSpan* value)
+ArkUI_StyledString_Descriptor* OH_ArkUI_StyledString_Descriptor_CreateWithCustomSpan(const OH_ArkUI_CustomSpan* value)
 {
     CHECK_NULL_RETURN(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), nullptr);
     CHECK_NULL_RETURN(value, nullptr);
-    return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->
-        createArkUIStyledStringDescriptorWithCustomSpan(OHOS::Ace::SpanStyleModel::ConvertToOriginCustomSpan(*value));
+    return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->createArkUIStyledStringDescriptorWithCustomSpan(
+        OHOS::Ace::SpanStyleModel::ConvertToOriginCustomSpan(*value));
 }
 
 void OH_ArkUI_StyledString_Descriptor_Destroy(ArkUI_StyledString_Descriptor* descriptor)
@@ -71,8 +72,8 @@ void OH_ArkUI_StyledString_Descriptor_Destroy(ArkUI_StyledString_Descriptor* des
 int32_t OH_ArkUI_UnmarshallStyledStringDescriptor(
     uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor)
 {
-    CHECK_NULL_RETURN(
-        OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(),
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
     return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->unmarshallStyledStringDescriptor(
         buffer, bufferSize, descriptor);
 }
@@ -80,26 +81,25 @@ int32_t OH_ArkUI_UnmarshallStyledStringDescriptor(
 int32_t OH_ArkUI_MarshallStyledStringDescriptor(
     uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor, size_t* resultSize)
 {
-    CHECK_NULL_RETURN(
-        OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(),
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
     return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->marshallStyledStringDescriptor(
         buffer, bufferSize, descriptor, resultSize);
 }
 
 const char* OH_ArkUI_ConvertToHtml(ArkUI_StyledString_Descriptor* descriptor)
 {
-    CHECK_NULL_RETURN(
-        OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), "");
+    CHECK_NULL_RETURN(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), "");
     return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->convertToHtml(descriptor);
 }
 
-ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_GetLength(const ArkUI_StyledString_Descriptor* descriptor,
-    int32_t* length)
+ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_GetLength(
+    const ArkUI_StyledString_Descriptor* descriptor, int32_t* length)
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->getLength(descriptor, length));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->getLength(descriptor, length));
 }
 
 ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_GetString(
@@ -107,8 +107,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_GetString(
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->getString(descriptor, buffer, bufferSize, writeLength));
+    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->getString(
+        descriptor, buffer, bufferSize, writeLength));
 }
 
 ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_IsEqual(const ArkUI_StyledString_Descriptor* firstDescriptor,
@@ -116,8 +116,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_IsEqual(const ArkUI_StyledStrin
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->isEqual(firstDescriptor, secondDescriptor, isEqual));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->isEqual(firstDescriptor, secondDescriptor, isEqual));
 }
 
 ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_SubStyledString(const ArkUI_StyledString_Descriptor* descriptor,
@@ -125,8 +125,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_SubStyledString(const ArkUI_Sty
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->subStyledString(descriptor, subDescriptor, start, length));
+    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->subStyledString(
+        descriptor, subDescriptor, start, length));
 }
 
 // getStyles
@@ -138,8 +138,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_GetStyles(const ArkUI_StyledStr
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(descriptor && styles && stylesSize >= 0 && writeLength, ARKUI_ERROR_CODE_PARAM_INVALID);
     std::vector<ArkUISpanStyle> originalStyles;
-    auto result = static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->getStyles(descriptor, start, length, styledKey, originalStyles));
+    auto result = static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->getStyles(
+        descriptor, start, length, styledKey, originalStyles));
     CHECK_NULL_RETURN(result == ARKUI_ERROR_CODE_NO_ERROR, result);
     auto size = originalStyles.size();
     *writeLength = size;
@@ -158,8 +158,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_FromHtml(ArkUI_StyledString_Des
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->fromHtml(descriptor, html));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->fromHtml(descriptor, html));
 }
 
 // replaceString
@@ -168,8 +168,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_ReplaceString(
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->replaceString(descriptor, start, length, string));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->replaceString(descriptor, start, length, string));
 }
 
 // insertString
@@ -178,8 +178,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_InsertString(
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->insertString(descriptor, start, string));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->insertString(descriptor, start, string));
 }
 
 // removeString
@@ -188,8 +188,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_RemoveString(
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->removeString(descriptor, start, length));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->removeString(descriptor, start, length));
 }
 
 // replaceStyle
@@ -199,8 +199,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_ReplaceStyle(
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
     auto originSpanStyle = OHOS::Ace::SpanStyleModel::ConvertToOriginSpanStyle(spanStyle);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->replaceStyle(descriptor, originSpanStyle));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->replaceStyle(descriptor, originSpanStyle));
 }
 
 // setStyle
@@ -210,8 +210,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_SetStyle(
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
     auto originSpanStyle = OHOS::Ace::SpanStyleModel::ConvertToOriginSpanStyle(spanStyle);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->setStyle(descriptor, originSpanStyle));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->setStyle(descriptor, originSpanStyle));
 }
 
 // removeStyle
@@ -220,8 +220,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_RemoveStyle(
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->removeStyle(descriptor, start, length, styledKey));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->removeStyle(descriptor, start, length, styledKey));
 }
 
 // clearStyles
@@ -229,8 +229,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_ClearStyles(ArkUI_StyledString_
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->clearStyles(descriptor));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->clearStyles(descriptor));
 }
 
 // replaceStyledString
@@ -239,8 +239,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_ReplaceStyledString(ArkUI_Style
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->replaceStyledString(descriptor, start, length, other));
+    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->replaceStyledString(
+        descriptor, start, length, other));
 }
 
 // insertStyledString
@@ -249,8 +249,8 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_InsertStyledString(
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->insertStyledString(descriptor, start, other));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->insertStyledString(descriptor, start, other));
 }
 
 // appendStyledString
@@ -259,20 +259,20 @@ ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_AppendStyledString(
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->appendStyledString(descriptor, other));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->appendStyledString(descriptor, other));
 }
 
 ArkUI_ErrorCode OH_ArkUI_StyledString_Descriptor_InvalidateCustomSpan(const ArkUI_StyledString_Descriptor* descriptor)
 {
     CHECK_NULL_RETURN(
         OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
-    return static_cast<ArkUI_ErrorCode>(OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()
-        ->invalidateCustomSpan(descriptor));
+    return static_cast<ArkUI_ErrorCode>(
+        OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->invalidateCustomSpan(descriptor));
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextEditorChangeEvent_GetRangeBefore(const OH_ArkUI_TextEditorChangeEvent* event,
-    uint32_t* start, uint32_t* end)
+ArkUI_ErrorCode OH_ArkUI_TextEditorChangeEvent_GetRangeBefore(
+    const OH_ArkUI_TextEditorChangeEvent* event, uint32_t* start, uint32_t* end)
 {
     CHECK_NULL_RETURN(event && start && end, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     auto* changeEvent = reinterpret_cast<const ArkUITextEditorChangeEvent*>(event);
