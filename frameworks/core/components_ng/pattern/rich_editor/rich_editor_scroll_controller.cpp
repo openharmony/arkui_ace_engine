@@ -991,4 +991,46 @@ bool RichEditorScrollController::UpdateHorizontalScrollState()
     textRect_.SetLeft(contentRect_.GetX());
     return true;
 }
+
+bool RichEditorScrollController::IsSupportHorizontalScroll()
+{
+    return isSingleLineMode_ || IsFreeScrollEnabled();
+}
+
+OffsetF RichEditorScrollController::CalculateDestination(int32_t start, int32_t end, bool isRTL)
+{
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, OffsetF(0.0f, 0.0f));
+    if (start == end) {
+        float caretHeight = 0.0f;
+        auto caretOffset = pattern->CalcCursorOffsetByPosition(start, caretHeight, true);
+        return OffsetF(caretOffset.GetX(), caretOffset.GetY());
+    }
+    auto textBoxes = pattern->CalculateSelectedRect(start, end);
+    CHECK_NULL_RETURN(!textBoxes.empty(), OffsetF(0.0f, 0.0f));
+    float destX = isRTL ? textBoxes[0].Right() : textBoxes[0].Left();
+    float destY = textBoxes[0].Top();
+    for (const auto& rect : textBoxes) {
+        destX = isRTL ? std::max(destX, rect.Right()) : std::min(destX, rect.Left());
+        destY = std::min(destY, rect.Top());
+    }
+    return OffsetF(destX + textRect_.Left(), destY + textRect_.Top());
+}
+
+void RichEditorScrollController::ScrollToVisible(int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(end >= start);
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto layoutProperty = pattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    pattern->StopScrolling();
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto destOffset = CalculateDestination(start, end, isRTL);
+    auto contentEdgeX = isRTL ? contentRect_.Right() : contentRect_.Left();
+    float distanceX = contentEdgeX - destOffset.GetX();
+    float distanceY = contentRect_.Top() - destOffset.GetY();
+    OnScrollWithAxisCallback(distanceY, SCROLL_FROM_NONE, Axis::VERTICAL);
+    IF_TRUE(IsSupportHorizontalScroll(), OnScrollWithAxisCallback(distanceX, SCROLL_FROM_NONE, Axis::HORIZONTAL));
+}
 } // namespace OHOS::Ace::NG

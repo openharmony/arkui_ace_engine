@@ -31163,6 +31163,8 @@ typedef struct GENERATED_ArkUIRichEditorBaseControllerAccessor {
     Opt_LayoutManager (*getLayoutManager)(Ark_RichEditorBaseController peer);
     Opt_PreviewText (*getPreviewText)(Ark_RichEditorBaseController peer);
     Opt_RectResult (*getCaretRect)(Ark_RichEditorBaseController peer);
+    void (*scrollToVisible)(Ark_RichEditorBaseController peer,
+                            const Opt_TextRange* range);
     void (*deleteBackward)(Ark_RichEditorBaseController peer);
     void (*setStyledPlaceholder)(Ark_RichEditorBaseController peer,
                                  Ark_StyledString styledString);

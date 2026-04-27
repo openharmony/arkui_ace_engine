@@ -1007,6 +1007,15 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetStyledPlaceholder(
         getRichEditorModifier()->setStyledPlaceholder(controller->node->uiNodeHandle, descriptor);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_ScrollToVisible(
+    const OH_ArkUI_TextEditorStyledStringController* controller, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(controller && controller->node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->
+        getRichEditorModifier()->scrollToVisible(controller->node->uiNodeHandle, start, end);
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
 #ifdef __cplusplus
 }
 #endif

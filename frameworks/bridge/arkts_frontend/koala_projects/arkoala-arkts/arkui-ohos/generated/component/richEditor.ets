@@ -216,6 +216,11 @@ export class RichEditorBaseController implements MaterializedBase {
     public getCaretRect(): RectResult | undefined {
         return this.getCaretRect_serialize()
     }
+    public scrollToVisible(range?: TextRange): void {
+        const range_casted = range as (TextRange | undefined)
+        this.scrollToVisible_serialize(range_casted)
+        return
+    }
     public deleteBackward(): void {
         this.deleteBackward_serialize()
         return
@@ -344,6 +349,18 @@ export class RichEditorBaseController implements MaterializedBase {
         const returnResult: RectResult | undefined = buffer
         retvalDeserializer.dispose()
         return (returnResult as RectResult | undefined)
+    }
+    private scrollToVisible_serialize(range?: TextRange): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (range !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const rangeTmpValue = range!
+            TextRange_serializer.write(thisSerializer, rangeTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorBaseController_scrollToVisible(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     private deleteBackward_serialize(): void {
         ArkUIGeneratedNativeModule._RichEditorBaseController_deleteBackward(this.peer!.ptr)

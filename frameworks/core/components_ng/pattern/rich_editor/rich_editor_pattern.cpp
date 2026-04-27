@@ -10738,6 +10738,24 @@ void RichEditorPattern::StopScrolling()
     StopScrollable();
 }
 
+std::vector<RectF> RichEditorPattern::CalculateSelectedRect(int32_t start, int32_t end)
+{
+    bool hasSelection = start != end && GetTextContentLength() > 0;
+    CHECK_NULL_RETURN(hasSelection, {});
+    auto contentWidth = isHorizontalScrolling_ ? richTextRect_.Width() : contentRect_.Width();
+    auto rects = paragraphs_.GetRichEditorBoxesForSelect(start, end);
+    return RichEditorPaintMethod::CalculateSelectedRect(rects, contentWidth);
+}
+
+void RichEditorPattern::ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end)
+{
+    auto maxLen = GetTextContentLength();
+    int32_t rangeStart = std::clamp(start.value_or(0), 0, maxLen);
+    int32_t rangeEnd = std::clamp(end.value_or(maxLen), 0, maxLen);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ScrollToVisible, start=%{public}d, end=%{public}d", rangeStart, rangeEnd);
+    scrollController_->ScrollToVisible(rangeStart, rangeEnd);
+}
+
 void RichEditorPattern::ClearAISpanRects()
 {
     dataDetectorAdapter_->aiSpanRects_.clear();

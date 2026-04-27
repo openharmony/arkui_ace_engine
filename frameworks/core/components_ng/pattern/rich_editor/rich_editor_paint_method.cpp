@@ -71,17 +71,11 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     overlayMod->SetSingleLine(richEditorPattern->isSingleLineMode_);
     overlayMod->SetHorizontalScrolling(richEditorPattern->isHorizontalScrolling_);
     SetPreviewTextDecoration(paintWrapper);
-    auto contentWidth = richEditorPattern->isHorizontalScrolling_ ? richEditorPattern->GetTextRect().Width()
-        : richEditorPattern->GetTextContentRect().Width();
+    const auto& selection = richEditorPattern->GetTextSelector();
+    auto selectedRects = richEditorPattern->CalculateSelectedRect(selection.GetTextStart(), selection.GetTextEnd());
     if (!richEditorPattern->HasFocus()) {
         overlayMod->SetCaretVisible(false);
         overlayMod->SetFloatingCaretVisible(false);
-        const auto& selection = richEditorPattern->GetTextSelector();
-        std::vector<RectF> selectedRects;
-        if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-            auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
-            selectedRects = CalculateSelectedRect(rects, contentWidth);
-        }
         overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
         overlayMod->SetSelectedRects(selectedRects);
         return;
@@ -89,13 +83,7 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
     overlayMod->SetSelectedColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
     SetCaretState(paintWrapper);
-    std::vector<RectF> selectedRects;
-    const auto& selection = richEditorPattern->GetTextSelector();
     auto contentRect = richEditorPattern->GetTextContentRect();
-    if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-        auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
-        selectedRects = CalculateSelectedRect(rects, contentWidth);
-    }
     overlayMod->SetContentRect(contentRect);
     overlayMod->SetSelectedRects(selectedRects);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();

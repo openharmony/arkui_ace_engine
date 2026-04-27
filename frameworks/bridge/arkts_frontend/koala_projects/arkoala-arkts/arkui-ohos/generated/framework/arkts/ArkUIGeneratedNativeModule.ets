@@ -6218,6 +6218,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _RichEditorBaseController_getCaretRect(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
+    native static _RichEditorBaseController_scrollToVisible(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _RichEditorBaseController_deleteBackward(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _RichEditorBaseController_setStyledPlaceholder(ptr: KPointer, styledString: KPointer): void

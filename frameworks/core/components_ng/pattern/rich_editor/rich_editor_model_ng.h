@@ -208,6 +208,7 @@ public:
     static void SetStyledString(FrameNode* frameNode, const SpanString* value);
     static SpanStringBase* GetStyledString(FrameNode* frameNode);
     static void SetStyledPlaceholder(FrameNode* frameNode, const SpanString* value);
+    static void ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end);
     static void SetOnStyledStringWillChange(FrameNode* frameNode,
         std::function<bool(const NG::StyledStringChangeValue&)>&& func);
     static void SetOnStyledStringDidChange(FrameNode* frameNode,
