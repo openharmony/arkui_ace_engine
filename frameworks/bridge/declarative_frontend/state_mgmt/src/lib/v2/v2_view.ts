@@ -1268,7 +1268,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
     public __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined {
         const meta = this[ObserveV2.V2_DECO_META];
-        if (!meta || !Object.prototype.hasOwnProperty.call(meta, propertyName)) {
+        const methodMeta = this[ObserveV2.V2_DECO_METHOD_META];
+        const isInMeta = meta && Object.prototype.hasOwnProperty.call(meta, propertyName);
+        const isInMethodMeta = methodMeta && Object.prototype.hasOwnProperty.call(methodMeta, propertyName);
+        if (!isInMeta && !isInMethodMeta) {
             return undefined;
         }
         const prop = Reflect.get(this, propertyName);
