@@ -1815,7 +1815,7 @@ ArkUINativeModuleValue ListBridge::SetSupportEmptyBranchInLazyLoading(ArkUIRunti
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ListBridge::SetBackPressBehavior(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue ListBridge::SetBackPressCloseSwipeAction(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
