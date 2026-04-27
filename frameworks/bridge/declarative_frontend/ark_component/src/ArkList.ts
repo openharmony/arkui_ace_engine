@@ -697,16 +697,17 @@ class ListSupportEmptyBranchInLazyLoading  extends ModifierWithKey<boolean> {
   }
 }
 
-class ListBackPressCloseSwipeActionModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class ListBackPressBehaviorModifier extends ModifierWithKey<ListBackPressBehavior | undefined> {
+  constructor(value: ListBackPressBehavior | undefined) {
     super(value);
   }
-  static identity: Symbol = Symbol('listBackPressCloseSwipeAction');
+  static identity: Symbol = Symbol('listBackPressBehavior');
   applyPeer(node: KNode, reset: boolean): void {
+    const closeSwipeAction = this.value?.closeSwipeAction ?? true;
     if (reset) {
-      getUINativeModule().list.setBackPressCloseSwipeAction(node, true);
+      getUINativeModule().list.setBackPressBehavior(node, true);
     } else {
-      getUINativeModule().list.setBackPressCloseSwipeAction(node, this.value);
+      getUINativeModule().list.setBackPressBehavior(node, closeSwipeAction);
     }
   }
 }
@@ -934,9 +935,9 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
     return this;
   }
-  backPressCloseSwipeAction(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, ListBackPressCloseSwipeActionModifier.identity,
-      ListBackPressCloseSwipeActionModifier, value);
+  backPressBehavior(value: ListBackPressBehavior | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, ListBackPressBehaviorModifier.identity,
+      ListBackPressBehaviorModifier, value);
     return this;
   }
 }
