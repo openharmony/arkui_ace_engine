@@ -2203,14 +2203,14 @@ HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex003, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     /**
-     * @tc.steps: step1. Set textForDisplay_ to "Line1\nLine2\tLine3"
-     * @tc.expected: The textForDisplay_ is set correctly
+     * @tc.steps: step1. Set textForDisplay_ to "Line1\nLine2\tLine3".
+     * @tc.expected: The textForDisplay_ is set correctly.
      */
     pattern->textForDisplay_ = u"Line1\nLine2\tLine3";
 
     /**
-     * @tc.steps: step2. Call GetSpecifiedContentIndex with "Line" and isFirst=false
-     * @tc.expected: Return vector with three elements [0, 6, 12]
+     * @tc.steps: step2. Call GetSpecifiedContentIndex with "Line" and isFirst=false.
+     * @tc.expected: Return vector with three elements [0, 6, 12].
      */
     auto result = pattern->GetSpecifiedContentIndex("Line", false);
     ASSERT_EQ(result.size(), 3);
@@ -2231,18 +2231,18 @@ HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex004, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     /**
-     * @tc.steps: step1. Set textForDisplay_ to "aaaaa"
-     * @tc.expected: The textForDisplay_ is set correctly
+     * @tc.steps: step1. Set textForDisplay_ to "aaaaa".
+     * @tc.expected: The textForDisplay_ is set correctly.
      */
     pattern->textForDisplay_ = u"你好你好鸭你好你好";
 
     /**
-     * @tc.steps: step2. Call GetSpecifiedContentIndex with "aa" and isFirst=false
-     * @tc.expected: Return vector with elements [0, 2, 4] or [0, 2] depending on algorithm
+     * @tc.steps: step2. Call GetSpecifiedContentIndex with "aa" and isFirst=false.
+     * @tc.expected: Return vector with elements [0, 2, 4] or [0, 2] depending on algorithm.
      */
     auto result = pattern->GetSpecifiedContentIndex("你好", false);
-    // 根据当前算法，会找到位置0, 2, 4
-    // 因为每次找到后pos += content.length()，不会重叠查找
+    // 根据当前算法，会找到位置0, 2, 4.
+    // 因为每次找到后pos += content.length()，不会重叠查找.
     ASSERT_EQ(result.size(), 4);
     EXPECT_EQ(result[0], 0);
     EXPECT_EQ(result[1], 2);

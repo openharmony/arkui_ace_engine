@@ -463,7 +463,7 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
     auto aiSpanIterator = aiSpanMap_.begin();
     while (aiSpanIterator != aiSpanMap_.end()) {
         if (aiSpanIterator->second.type == TextDataDetectType::DATE_TIME &&
-            aiSpanIterator->first >= startPos && aiSpanIterator->first < startPos + AI_TEXT_MAX_LENGTH) {
+            aiSpanIterator->first >= startPos && aiSpanIterator->second.end <= startPos + AI_TEXT_MAX_LENGTH) {
             aiSpanIterator = aiSpanMap_.erase(aiSpanIterator);
         } else {
             ++aiSpanIterator;
