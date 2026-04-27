@@ -1085,7 +1085,7 @@ public:
         return false;
     }
 
-    ScrollOffsetAbility GetScrollOffsetAbility() override
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override
     {
         return { nullptr, Axis::NONE };
     }

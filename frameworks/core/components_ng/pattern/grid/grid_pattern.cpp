@@ -19,6 +19,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/system_properties.h"
+#include "core/animation/curves.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -796,8 +798,9 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return ret;
 }
 
-ScrollOffsetAbility GridPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility GridPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
+    (void)isAccessibility;
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
@@ -899,7 +902,12 @@ void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType 
     }
     if (smooth) {
         float position = -info_.currentHeight_ + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+        if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+            ScrollablePattern::AnimateTo(
+                -position, HALF_PAGE_SCROLL_DURATION, Curves::LINEAR, false, false, false);
+        } else {
+            ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+        }
         return;
     } else {
         if (!isConfigScrollable_) {

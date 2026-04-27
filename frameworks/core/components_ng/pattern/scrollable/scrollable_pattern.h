@@ -811,7 +811,7 @@ public:
         return isScrollToSafeAreaHelper_;
     }
 
-    virtual ScrollOffsetAbility GetScrollOffsetAbility()
+    virtual ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false)
     {
         return { nullptr, Axis::NONE };
     }

@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
 #include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
@@ -22,6 +23,18 @@
 namespace OHOS::Ace::NG {
 namespace {
 Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
+
+std::optional<float> GetAccessibilityCenterLimitMoveOffset(
+    const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& curFrameNode, const MoveOffsetParam& param,
+    float rawMoveOffset)
+{
+    auto scrollMoveOffset = GetScrollAccessibilityCenterLimitMoveOffset(parentFrameNode, rawMoveOffset);
+    if (scrollMoveOffset.has_value()) {
+        return scrollMoveOffset;
+    }
+    return GetListAccessibilityCenterLimitMoveOffset(parentFrameNode, curFrameNode, param);
+}
+
 std::vector<RefPtr<ForEachBaseNode>> GetForEachNodes(RefPtr<FrameNode>& host)
 {
     std::vector<RefPtr<ForEachBaseNode>> foreachNodes;
@@ -207,14 +220,22 @@ float ScrollableUtils::GetMoveOffset(
     float focusMarginStart = std::max(focusMargin, param.contentStartOffset);
     float focusMarginEnd = std::max(focusMargin, param.contentEndOffset);
 
-    bool totallyShow = LessOrEqual(curFrameLength + focusMarginStart + focusMarginEnd, (parentFrameLength));
+    bool totallyShow = LessOrEqual(curFrameLength + focusMarginStart + focusMarginEnd, parentFrameLength);
     float startAlignOffset = -diffToTarFrame + focusMarginStart;
     float endAlignOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusMarginEnd;
     bool start2End = LessOrEqual(diffToTarFrame, focusMarginStart);
     bool needScroll = !NearZero(startAlignOffset, 1.0f) && !NearZero(endAlignOffset, 1.0f) &&
                       (std::signbit(startAlignOffset) == std::signbit(endAlignOffset));
     if (needScroll) {
-        return (totallyShow ^ start2End) ? endAlignOffset : startAlignOffset;
+        float moveOffset = (totallyShow ^ start2End) ? endAlignOffset : startAlignOffset;
+        if (!param.isFromAccessibility) {
+            return moveOffset;
+        }
+        auto limitMoveOffset = GetAccessibilityCenterLimitMoveOffset(parentFrameNode, curFrameNode, param, moveOffset);
+        if (!limitMoveOffset.has_value()) {
+            return moveOffset;
+        }
+        return NearZero(limitMoveOffset.value(), 1.0f) ? notMove : limitMoveOffset.value();
     }
     return notMove;
 }

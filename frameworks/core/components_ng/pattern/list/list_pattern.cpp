@@ -21,6 +21,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/memory/referenced.h"
+#include "core/animation/curves.h"
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
@@ -38,6 +39,8 @@
 #include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -62,7 +65,67 @@ constexpr int DEFAULT_PREDICT_ERROR_TIMES = 50;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
+
+bool GetNodeRangeInParent(
+    const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& targetFrameNode, const MoveOffsetParam& param,
+    float& startPos, float& endPos)
+{
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    CHECK_NULL_RETURN(targetFrameNode, false);
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, false);
+    auto targetGeometryNode = targetFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(targetGeometryNode, false);
+    auto parentPaddingOffset = parentGeometryNode->GetPaddingOffset(true) - parentGeometryNode->GetFrameOffset();
+    auto targetFrameOffsetToWindow = targetFrameNode->GetTransformRelativeOffset();
+    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset() + parentPaddingOffset;
+    auto offsetToParentFrame = targetFrameOffsetToWindow - parentFrameOffsetToWindow;
+    auto targetFrameSize = targetGeometryNode->GetFrameSize();
+    startPos = param.isVertical ? offsetToParentFrame.GetY() : offsetToParentFrame.GetX();
+    endPos = startPos + (param.isVertical ? targetFrameSize.Height() : targetFrameSize.Width());
+    return true;
+}
+
+float GetMoveOffsetFromTargetPos(float targetPos)
+{
+    return NearZero(targetPos, 1.0f) ? 0.0f : -targetPos;
+}
+
+RefPtr<FrameNode> GetListTargetFrameNode(
+    const RefPtr<FrameNode>& listFrameNode, const RefPtr<FrameNode>& curFrameNode)
+{
+    CHECK_NULL_RETURN(listFrameNode, nullptr);
+    CHECK_NULL_RETURN(curFrameNode, nullptr);
+    auto frameNode = curFrameNode;
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
+    while (parent && parent != listFrameNode) {
+        frameNode = parent;
+        parent = frameNode->GetAncestorNodeOfFrame(false);
+    }
+    return parent == listFrameNode ? frameNode : nullptr;
+}
 } // namespace
+
+std::optional<float> GetListAccessibilityCenterLimitMoveOffset(
+    const RefPtr<FrameNode>& listFrameNode, const RefPtr<FrameNode>& curFrameNode, const MoveOffsetParam& param)
+{
+    CHECK_NULL_RETURN(listFrameNode, std::nullopt);
+    auto listPattern = listFrameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, std::nullopt);
+    if (listPattern->GetScrollSnapAlign() != ScrollSnapAlign::CENTER) {
+        return std::nullopt;
+    }
+    auto targetFrameNode = GetListTargetFrameNode(listFrameNode, curFrameNode);
+    CHECK_NULL_RETURN(targetFrameNode, std::nullopt);
+
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    if (!GetNodeRangeInParent(listFrameNode, targetFrameNode, param, startPos, endPos)) {
+        return std::nullopt;
+    }
+    float targetPos = (startPos + endPos) / 2.0f - listPattern->GetMainContentSize() / 2.0f;
+    return GetMoveOffsetFromTargetPos(targetPos);
+}
 
 // Just used for only read
 PaddingPropertyF* GetPaddingFromHost(RefPtr<FrameNode> node)
@@ -1775,8 +1838,9 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return true;
 }
 
-ScrollOffsetAbility ListPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ListPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
+    (void)isAccessibility;
     return {
         [wp = WeakClaim(this)](float moveOffset) -> bool {
             auto pattern = wp.Upgrade();
@@ -2277,7 +2341,11 @@ void ListPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType 
     }
     if (smooth) {
         float position = -GetTotalOffset() + distance;
-        AnimateTo(-position, -1, nullptr, true, false, false);
+        if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+            AnimateTo(-position, HALF_PAGE_SCROLL_DURATION, Curves::LINEAR, false, false, false);
+        } else {
+            AnimateTo(-position, -1, nullptr, true, false, false);
+        }
     } else {
         StopAnimate();
         UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
