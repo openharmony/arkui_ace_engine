@@ -956,7 +956,7 @@ void CalendarPickerModelNG::ParseEdgeAlignResObj(FrameNode* frameNode,
 
         DimensionOffset offsetNew = DimensionOffset(dx, dy);
         calendarPickerPattern->SetCalendarDialogOffset(offsetNew);
-        ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offsetNew);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offsetNew, frameNode);
     };
 
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();

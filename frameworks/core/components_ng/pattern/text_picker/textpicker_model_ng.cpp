@@ -1979,9 +1979,9 @@ void TextPickerModelNG::ParseSingleRangeResourceObj(const RefPtr<ResourceObject>
                 pickerPattern->SetSelected(index);
                 std::vector<uint32_t> values;
                 values.emplace_back(index);
-                ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Value, result);
-                ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, index);
-                ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values);
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Value, result, frameNode);
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, index, frameNode);
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values, frameNode);
                 break;
             }
         }
