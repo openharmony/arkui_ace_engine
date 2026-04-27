@@ -841,6 +841,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_path_painter.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_pixmap_image.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_ui_material_filter_creator.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_rosen_effect_converter.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_canvas_image.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_font_collection.cpp",
