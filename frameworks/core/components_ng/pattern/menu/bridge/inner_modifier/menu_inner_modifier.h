@@ -167,6 +167,7 @@ struct ArkUIMenuInnerModifier {
     RefPtr<FrameNode> (*menuCreateFrameNode)(int32_t innerMenuId, int32_t nodeId);
     void (*menuSetNeedDivider)(const RefPtr<FrameNode>& node);
     void (*menuOnModifyDone)(const RefPtr<FrameNode>& node);
+    void (*textMenuOnThemeScopeUpdate)(const RefPtr<FrameNode>& node, int32_t themeScopeId);
 };
 
 namespace InnerModifier {
