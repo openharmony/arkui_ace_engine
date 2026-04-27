@@ -2199,7 +2199,7 @@ export struct CounterComponent {
                 ['0vp', '0vp'],
                 ['0vp', '0vp']])
               .strokeWidth(this.addBtnFocusWidth)
-              // .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ end: LengthMetrics.vp(2) } as LocalizedMargin)
               .fillOpacity(0)
             Image(CounterResource.BUTTON_ARROW_UP)
@@ -2303,7 +2303,7 @@ export struct CounterComponent {
                 ['0vp', '0vp']
               ])
               .strokeWidth(this.subBtnFocusWidth)
-              // .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) } as LocalizedMargin)
               .fillOpacity(0)
             Image(CounterResource.BUTTON_ARROW_DOWN)
@@ -2853,7 +2853,7 @@ export struct CounterComponent {
                 ['0vp', '0vp'],
                 ['0vp', '0vp']])
               .strokeWidth(this.addBtnFocusWidth)
-              // .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ end: LengthMetrics.vp(1) } as LocalizedMargin)
               .fillOpacity(0)
             Image(CounterResource.BUTTON_ARROW_UP)
@@ -2923,7 +2923,7 @@ export struct CounterComponent {
                 ['0vp', '0vp']
               ])
               .strokeWidth(this.subBtnFocusWidth)
-              // .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) } as LocalizedMargin)
               .fillOpacity(0)
             Image(CounterResource.BUTTON_ARROW_DOWN)
