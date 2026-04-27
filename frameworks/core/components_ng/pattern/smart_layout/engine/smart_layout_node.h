@@ -171,6 +171,7 @@ public:
     const SmartLayoutSize& GetLayoutSize() const { return context_.size; }
     void SetLayoutSize(const SmartLayoutSize& size) { context_.size = size; }
     void SetLayoutSize(double width, double height) { context_.size = SmartLayoutSize(width, height); }
+    void SetAvoidSafeArea(bool avoid) { context_.avoidSafeArea = avoid; }
 
 private:
     std::shared_ptr<localsmt::Engine> engine_ = nullptr;

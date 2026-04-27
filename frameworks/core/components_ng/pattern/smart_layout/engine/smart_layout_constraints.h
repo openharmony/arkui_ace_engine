@@ -69,34 +69,6 @@ public:
      */
     static ChildStatistics CalculateChildStatistics(const SmartLayoutNode& parent);
 
-    /**
-     * @brief Get sum of all child heights (deprecated, use CalculateChildStatistics)
-     * @param parent Parent node containing children
-     * @return Sum of child heights
-     */
-    static double GetSumOfAllChildHeight(const SmartLayoutNode& parent);
-
-    /**
-     * @brief Get sum of all child widths
-     * @param parent Parent node containing children
-     * @return Sum of child widths
-     */
-    static double GetSumOfAllChildWidth(const SmartLayoutNode& parent);
-
-    /**
-     * @brief Get maximum width of all child nodes
-     * @param parent Parent node containing children
-     * @return Maximum child width
-     */
-    static double GetMaxWidthOfAllChild(const SmartLayoutNode& parent);
-
-    /**
-     * @brief Get maximum height of all child nodes
-     * @param parent Parent node containing children
-     * @return Maximum child height
-     */
-    static double GetMaxHeightOfAllChild(const SmartLayoutNode& parent);
-
 private:
     /**
      * @brief Calculate and add size scale constraint

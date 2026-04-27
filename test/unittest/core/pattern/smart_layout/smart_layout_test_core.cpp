@@ -69,47 +69,10 @@ HWTEST_F(SmartLayoutTestCore, SmartLayoutTestCore002, TestSize.Level1)
 
 /**
  * @tc.name: SmartLayoutTestCore003
- * @tc.desc: Test SmartLayoutConstraints static methods
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutTestCore, SmartLayoutTestCore003, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
-    rootNode->SetLayoutSize(200.0, 200.0);
-
-    std::vector<ChildLayoutInfo> childInfos;
-
-    ChildLayoutInfo info1;
-    info1.id = 1;
-    info1.width = 100.0;
-    info1.height = 60.0;
-    childInfos.push_back(info1);
-
-    ChildLayoutInfo info2;
-    info2.id = 2;
-    info2.width = 80.0;
-    info2.height = 40.0;
-    childInfos.push_back(info2);
-
-    rootNode->CreateChildrenFromInfos(childInfos);
-
-    double sumHeight = SmartLayoutConstraints::GetSumOfAllChildHeight(*rootNode);
-    EXPECT_EQ(sumHeight, 100.0);
-
-    double sumWidth = SmartLayoutConstraints::GetSumOfAllChildWidth(*rootNode);
-    EXPECT_EQ(sumWidth, 180.0);
-
-    double maxWidth = SmartLayoutConstraints::GetMaxWidthOfAllChild(*rootNode);
-    EXPECT_EQ(maxWidth, 100.0);
-}
-
-/**
- * @tc.name: SmartLayoutTestCore004
  * @tc.desc: Test SmartLayoutTypes default values
  * @tc.type: FUNC
  */
-HWTEST_F(SmartLayoutTestCore, SmartLayoutTestCore004, TestSize.Level1)
+HWTEST_F(SmartLayoutTestCore, SmartLayoutTestCore003, TestSize.Level1)
 {
     SmartLayoutSize size;
     EXPECT_EQ(size.Width(), 0.0);
@@ -132,11 +95,11 @@ HWTEST_F(SmartLayoutTestCore, SmartLayoutTestCore004, TestSize.Level1)
 }
 
 /**
- * @tc.name: SmartLayoutTestCore005
+ * @tc.name: SmartLayoutTestCore004
  * @tc.desc: Test SmartLayoutNode child creation
  * @tc.type: FUNC
  */
-HWTEST_F(SmartLayoutTestCore, SmartLayoutTestCore005, TestSize.Level1)
+HWTEST_F(SmartLayoutTestCore, SmartLayoutTestCore004, TestSize.Level1)
 {
     auto rootNode = SmartLayoutNode::CreateRootNode();
     rootNode->SetLayoutType(SmartLayoutType::COLUMN);

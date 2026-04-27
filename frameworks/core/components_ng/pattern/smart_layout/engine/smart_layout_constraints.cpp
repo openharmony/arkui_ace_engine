@@ -27,14 +27,16 @@ void SmartLayoutConstraints::AddSizeScaleConstraint(SmartLayoutNode& parent,
     const auto& context = parent.GetContext();
 
     double sizeScale = 1.0;
-    bool heightOverflow = GreatNotEqual(sumOfAllChildHeight, context.size.Height());
+    double heightWithoutSafeArea = context.avoidSafeArea ?
+        context.size.Height() - parent.GetChildren()[0]->GetSpace().top : context.size.Height();
+    bool heightOverflow = GreatNotEqual(sumOfAllChildHeight, heightWithoutSafeArea);
     bool widthOverflow = GreatNotEqual(maxChildWidth, context.size.Width());
     if (heightOverflow && !widthOverflow) {
-        sizeScale = context.size.Height() / sumOfAllChildHeight;
+        sizeScale = heightWithoutSafeArea / sumOfAllChildHeight;
     } else if (!heightOverflow && widthOverflow) {
         sizeScale = context.size.Width() / maxChildWidth;
     } else if (heightOverflow && widthOverflow) {
-        double heightScale = context.size.Height() / sumOfAllChildHeight;
+        double heightScale = heightWithoutSafeArea / sumOfAllChildHeight;
         double widthScale = context.size.Width() / maxChildWidth;
         sizeScale = std::min(heightScale, widthScale);
     }
@@ -111,6 +113,7 @@ void SmartLayoutConstraints::AddChildMainAxisPosition(SmartLayoutNode& parent, S
         return;
     }
     const auto& scaleInfo = parent.GetScaleInfo();
+    const auto& context = parent.GetContext();
 
     // For column: main axis is Y (vertical); for row: main axis is X (horizontal)
     auto& childOffset = isRow ? child.GetPosition().offsetX : child.GetPosition().offsetY;
@@ -118,7 +121,11 @@ void SmartLayoutConstraints::AddChildMainAxisPosition(SmartLayoutNode& parent, S
     auto& childSpace = isRow ? child.GetSpace().left : child.GetSpace().top;
 
     if (index == 0) {
-        engine->Add(childOffset.expr == parentOffset.expr + childSpace * scaleInfo.mainAxisSpaceScale.expr);
+        if (context.avoidSafeArea) {
+            engine->Add(childOffset.expr == parentOffset.expr + childSpace);
+        } else {
+            engine->Add(childOffset.expr == parentOffset.expr + childSpace * scaleInfo.mainAxisSpaceScale.expr);
+        }
     } else if (prev != nullptr) {
         auto& prevOffset = isRow ? prev->GetPosition().offsetX : prev->GetPosition().offsetY;
         auto& prevSize = isRow ? prev->GetSize().width : prev->GetSize().height;
@@ -131,7 +138,7 @@ void SmartLayoutConstraints::AddChildMainAxisPosition(SmartLayoutNode& parent, S
 void SmartLayoutConstraints::AddColumnConstraints(SmartLayoutNode& parent)
 {
     auto* engine = parent.GetEngine();
-    if (engine == nullptr) {
+    if (engine == nullptr || parent.GetChildren().empty()) {
         return;
     }
     AddDefaultConstraints(parent);
@@ -165,7 +172,7 @@ void SmartLayoutConstraints::AddColumnConstraints(SmartLayoutNode& parent)
 void SmartLayoutConstraints::AddRowConstraints(SmartLayoutNode& parent)
 {
     auto* engine = parent.GetEngine();
-    if (engine == nullptr) {
+    if (engine == nullptr || parent.GetChildren().empty()) {
         return;
     }
     AddDefaultConstraints(parent);
@@ -234,26 +241,6 @@ ChildStatistics SmartLayoutConstraints::CalculateChildStatistics(const SmartLayo
         }
     }
     return stats;
-}
-
-double SmartLayoutConstraints::GetSumOfAllChildHeight(const SmartLayoutNode& parent)
-{
-    return CalculateChildStatistics(parent).sumOfAllChildHeight;
-}
-
-double SmartLayoutConstraints::GetSumOfAllChildWidth(const SmartLayoutNode& parent)
-{
-    return CalculateChildStatistics(parent).sumOfAllChildWidth;
-}
-
-double SmartLayoutConstraints::GetMaxWidthOfAllChild(const SmartLayoutNode& parent)
-{
-    return CalculateChildStatistics(parent).maxChildWidth;
-}
-
-double SmartLayoutConstraints::GetMaxHeightOfAllChild(const SmartLayoutNode& parent)
-{
-    return CalculateChildStatistics(parent).maxChildHeight;
 }
 
 } // namespace OHOS::Ace::NG

@@ -278,6 +278,8 @@ public:
         return SmartLayoutRect(minX, minY, maxRight - minX, maxBottom - minY);
     }
 
+    void SetAvoidSafeArea(bool avoid) override {}
+
     LayoutContext& GetContext() override
     {
         return context_;
@@ -590,17 +592,17 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest008, TestSize.Level1)
     child.SetPosition(5.0, 7.0);
 
     root->SetLayoutType(SmartLayoutType::ROW);
-    auto offsetRow = algorithm.CalculateOffsetWithMargin(child, nullptr);
+    auto offsetRow = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0);
     EXPECT_FLOAT_EQ(offsetRow.GetX(), 5.0f);
     EXPECT_FLOAT_EQ(offsetRow.GetY(), 17.0f);
 
     root->SetLayoutType(SmartLayoutType::COLUMN);
-    auto offsetColumn = algorithm.CalculateOffsetWithMargin(child, nullptr);
+    auto offsetColumn = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0);
     EXPECT_FLOAT_EQ(offsetColumn.GetX(), 55.0f);
     EXPECT_FLOAT_EQ(offsetColumn.GetY(), 7.0f);
 
     root->SetLayoutType(SmartLayoutType::UNKNOWN);
-    auto offsetUnknown = algorithm.CalculateOffsetWithMargin(child, nullptr);
+    auto offsetUnknown = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0);
     EXPECT_FLOAT_EQ(offsetUnknown.GetX(), 5.0f);
     EXPECT_FLOAT_EQ(offsetUnknown.GetY(), 7.0f);
 }
@@ -778,7 +780,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest014, TestSize.Level1)
     childWrapper->SetGeometry(geo);
 
     std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>> emptyNodeMap;
-    algorithm.ApplyChildLayout(childWrapper, emptyNodeMap, 1.0);
+    algorithm.ApplyChildLayout(childWrapper, emptyNodeMap, 1.0, 0.0, 0.0);
     EXPECT_FALSE(childWrapper->layoutCalled_);
     EXPECT_FLOAT_EQ(geo->GetFrameOffset().GetX(), 1.0f);
     EXPECT_FLOAT_EQ(geo->GetFrameOffset().GetY(), 2.0f);
@@ -809,7 +811,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest015, TestSize.Level1)
         WeakPtr<FrameNode>(childHost), V2::TEXT_ETS_TAG);
     childWrapper->SetGeometry(nullptr);
 
-    algorithm.ApplyChildLayout(childWrapper, nodeMap, 1.0);
+    algorithm.ApplyChildLayout(childWrapper, nodeMap, 1.0, 0.0, 0.0);
     EXPECT_FALSE(childWrapper->layoutCalled_);
 }
 
@@ -891,7 +893,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest018, TestSize.Level1)
     algorithm.rootNode_ = root;
 
     std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>> nodeMap;
-    algorithm.ApplyChildLayout(nullptr, nodeMap, 1.0);
+    algorithm.ApplyChildLayout(nullptr, nodeMap, 1.0, 0.0, 0.0);
     EXPECT_TRUE(nodeMap.empty());
     EXPECT_TRUE(root->GetChildren().empty());
     EXPECT_TRUE(root->createdInfos_.empty());
@@ -914,7 +916,7 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest019, TestSize.Level1)
     auto wrapperWithoutHost = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(
         WeakPtr<FrameNode>(), V2::TEXT_ETS_TAG);
     std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>> nodeMap;
-    algorithm.ApplyChildLayout(wrapperWithoutHost, nodeMap, 1.0);
+    algorithm.ApplyChildLayout(wrapperWithoutHost, nodeMap, 1.0, 0.0, 0.0);
     EXPECT_FALSE(wrapperWithoutHost->layoutCalled_);
 }
 

@@ -70,8 +70,10 @@ SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* la
 
 void SmartLayoutAlgorithm::PerformSmartLayout(LayoutWrapper* layoutWrapper)
 {
+    AceTraceBegin("PerformSmartLayout");
     auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
     ExecuteLayout(layoutWrapper, layoutType);
+    AceTraceEnd();
 }
 
 void SmartLayoutAlgorithm::ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayoutType layoutType)
@@ -296,6 +298,14 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
     }
 
     rootNode_->SetFixedSizeConstraints(context.size.Width(), context.size.Height());
+
+    auto hostNode = layoutWrapper->GetHostNode();
+    if (hostNode) {
+        OffsetF absoluteOffset = hostNode->GetTransformRelativeOffset();
+        if (absoluteOffset.GetY() == 0) {
+            rootNode_->SetAvoidSafeArea(true);
+        }
+    }
     return true;
 }
 
