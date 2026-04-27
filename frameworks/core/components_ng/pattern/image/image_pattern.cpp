@@ -1161,6 +1161,10 @@ void ImagePattern::LoadImageDataIfNeed()
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageReloadNeeded_ || isOrientationChange_) {
         loadFailed_ = false;
+        // When only reloadKey changes (same URL), skip cache read to force reload from source
+        if (loadingCtx_ && loadingCtx_->GetSourceInfo().IsReloadKeyChanged(src)) {
+            src.SetSkipCacheRead(true);
+        }
         bool needLayout = host->CheckNeedForceMeasureAndLayout() &&
                           imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE;
         LoadImage(src, needLayout);
@@ -2025,6 +2029,8 @@ void ImagePattern::DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutPr
         std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
     DumpLog::GetInstance().AddDesc(
         std::string("LocalColorMode: ").append(std::to_string(static_cast<int32_t>(src.GetLocalColorMode()))));
+    DumpLog::GetInstance().AddDesc(
+        std::string("reloadKey: ").append(src.GetReloadKey().value_or("N/A")));
 }
 
 inline void ImagePattern::DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)

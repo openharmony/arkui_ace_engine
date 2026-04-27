@@ -54,6 +54,7 @@ struct ACE_FORCE_EXPORT ImageInfoConfig {
     std::string moduleName;
     bool isUriPureNumber = false;
     bool isImageSpan = false;
+    std::optional<std::string> reloadKey;
 };
 
 class ACE_FORCE_EXPORT ImageModel {

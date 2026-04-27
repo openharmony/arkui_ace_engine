@@ -1489,4 +1489,23 @@ ArkUINativeModuleValue ImageBridge::ResetAntiAlias(ArkUIRuntimeCallInfo *runtime
     nodeModifiers->getImageModifier()->resetAntiAlias(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ImageBridge::SetReloadKey(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    std::string reloadKey;
+    if (secondArg->IsString(vm)) {
+        panda::Local<panda::StringRef> keyRef = secondArg->ToString(vm);
+        reloadKey = keyRef->ToString(vm);
+    }
+    nodeModifiers->getImageModifier()->setReloadKey(nativeNode, reloadKey.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

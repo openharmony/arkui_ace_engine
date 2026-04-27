@@ -75,6 +75,7 @@ public:
     // operators
     bool operator==(const ImageSourceInfo& info) const;
     bool operator!=(const ImageSourceInfo& info) const;
+    bool IsReloadKeyChanged(const ImageSourceInfo& other) const;
 
     // interfaces to change [ImageSourceInfo]
     void SetSrc(const std::string& src, std::optional<Color> fillColor = std::nullopt);
@@ -115,6 +116,8 @@ public:
     bool GetIsUriPureNumber() const;
     bool SupportObjCache() const;
     void SetNeedCache(bool needCache);
+    void SetSkipCacheRead(bool skipCacheRead);
+    bool IsSkipCacheRead() const;
     ColorMode GetLocalColorMode() const;
     
     void UpdateLocalColorMode(ColorMode localColorMode);
@@ -132,6 +135,9 @@ public:
 
     void SetSupportSvg2(bool enable);
     bool IsSupportSvg2() const;
+
+    void SetReloadKey(const std::optional<std::string>& reloadKey);
+    const std::optional<std::string>& GetReloadKey() const;
 
 private:
     SrcType ResolveSrcType() const;
@@ -151,6 +157,7 @@ private:
     size_t bufferSize_ = 0;
     bool isSvg_ = false;
     bool needCache_ = true;
+    bool skipCacheRead_ = false;
     bool isUriPureNumber_ = false;
     bool isFromReset_ = false;
     [[deprecated("in NG")]] std::optional<Color> fillColor_;
@@ -163,6 +170,7 @@ private:
 
     ColorMode localColorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
     bool supportSvg2_ = false;
+    std::optional<std::string> reloadKey_;
 };
 
 } // namespace OHOS::Ace

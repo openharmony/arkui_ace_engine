@@ -245,7 +245,8 @@ void ImageSourceInfo::GenerateCacheKey()
         .append(std::to_string(static_cast<int32_t>(resourceId_)))
         .append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode())))
         .append(std::to_string(static_cast<int32_t>(localColorMode_)))
-        .append(std::to_string(reinterpret_cast<std::size_t>(buffer_.get())));
+        .append(std::to_string(reinterpret_cast<std::size_t>(buffer_.get())))
+        .append(reloadKey_.value_or(""));
     if (srcType_ == SrcType::BASE64) {
         name.append("SrcType:BASE64");
     }
@@ -270,6 +271,9 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
     if (buffer_ != info.buffer_) {
         return false;
     }
+    if (reloadKey_ != info.reloadKey_) {
+        return false;
+    }
     return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmapBuffer_ == info.pixmap_->GetPixels() &&
                                                pixmap_->GetRawPixelMapPtr() == info.pixmap_->GetRawPixelMapPtr())) &&
            GetSrc() == info.GetSrc() && resourceId_ == info.resourceId_;
@@ -278,6 +282,12 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
 bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
 {
     return !(operator==(info));
+}
+
+bool ImageSourceInfo::IsReloadKeyChanged(const ImageSourceInfo& other) const
+{
+    return GetSrc() == other.GetSrc() && resourceId_ == other.resourceId_ &&
+           reloadKey_ != other.reloadKey_;
 }
 
 void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillColor)
@@ -546,6 +556,16 @@ void ImageSourceInfo::SetNeedCache(bool needCache)
     needCache_ = needCache;
 }
 
+void ImageSourceInfo::SetSkipCacheRead(bool skipCacheRead)
+{
+    skipCacheRead_ = skipCacheRead;
+}
+
+bool ImageSourceInfo::IsSkipCacheRead() const
+{
+    return skipCacheRead_;
+}
+
 ColorMode ImageSourceInfo::GetLocalColorMode() const
 {
     return localColorMode_;
@@ -584,5 +604,15 @@ void ImageSourceInfo::SetSupportSvg2(bool enable)
 bool ImageSourceInfo::IsSupportSvg2() const
 {
     return supportSvg2_;
+}
+
+void ImageSourceInfo::SetReloadKey(const std::optional<std::string>& reloadKey)
+{
+    reloadKey_ = reloadKey;
+}
+
+const std::optional<std::string>& ImageSourceInfo::GetReloadKey() const
+{
+    return reloadKey_;
 }
 } // namespace OHOS::Ace

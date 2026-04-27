@@ -9130,6 +9130,21 @@ class ImageSrcModifier extends ModifierWithKey {
 }
 ImageSrcModifier.identity = Symbol('imageShowSrc');
 
+class ImageReloadKeyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.setReloadKey(node, "");
+    }
+    else {
+      getUINativeModule().image.setReloadKey(node, this.value);
+    }
+  }
+}
+ImageReloadKeyModifier.identity = Symbol('reloadKey');
+
 class ImageEnableAnalyzerModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9276,6 +9291,22 @@ class ArkImageComponent extends ArkComponent {
   }
   initialize(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
+    if (value.length >= 2) {
+      if (typeof value[1] === 'string') {
+        // Overload: (src, reloadKey?)
+        modifierWithKey(this._modifiersWithKeys, ImageReloadKeyModifier.identity, ImageReloadKeyModifier, value[1]);
+      } else if (value[1] !== undefined && value[1] !== null) {
+        // Overload: (src, imageAIOptions?) or (src, imageAIOptions?, reloadKey?)
+        modifierWithKey(this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value[1]);
+        if (value.length >= 3) {
+          let reloadKeyValue = (typeof value[2] === 'string') ? value[2] : '';
+          modifierWithKey(this._modifiersWithKeys, ImageReloadKeyModifier.identity, ImageReloadKeyModifier, reloadKeyValue);
+        }
+      } else {
+        // value[1] is undefined/null, reset reloadKey to empty string
+        modifierWithKey(this._modifiersWithKeys, ImageReloadKeyModifier.identity, ImageReloadKeyModifier, '');
+      }
+    }
     return this;
   }
   allowChildCount() {
