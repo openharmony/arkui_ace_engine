@@ -214,6 +214,8 @@ void GetRSColorSpaceByGradientColors(
             matrixType = RSCMSMatrixType::REC2020;
             break;
         case ColorSpace::DISPLAY_P3:
+            matrixType = RSCMSMatrixType::DCIP3;
+            break;
         case ColorSpace::SRGB:
         default:
             matrixType = RSCMSMatrixType::SRGB;
