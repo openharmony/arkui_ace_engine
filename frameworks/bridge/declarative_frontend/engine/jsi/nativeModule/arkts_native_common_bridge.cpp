@@ -5167,7 +5167,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityCustomActions(ArkUIRuntimeC
                     panda::LocalScope pandaScope(vm);
                     panda::TryCatch trycatch(vm);
                     ContainerScope scope(containerId);
-                    auto function = func.Local();
+                    auto function = func.Lock();
                     CHECK_NULL_VOID(!function.IsEmpty());
                     CHECK_NULL_VOID(function->IsFunction(vm));
                     PipelineContext::SetCallBackNode(node);
