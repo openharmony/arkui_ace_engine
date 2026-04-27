@@ -745,7 +745,7 @@ bool RosenRenderContext::IsGeometryTransitionAnimating() const
     return animatingGeometryTransitionCount_ > 0;
 }
 
-void RosenRenderContext::SetSandbox(const std::optional<OffsetF>& parentPosition)
+void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition)
 {
     FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition);
     CHECK_NULL_VOID(rsNode_);
@@ -753,11 +753,11 @@ void RosenRenderContext::SetSandbox(const std::optional<OffsetF>& parentPosition
 
     if (parentPosition.has_value()) {
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox [%{public}f, %{public}f]",
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox [%{public}f, %{public}f]",
             std::to_string(rsNode_->GetId()).c_str(), value.x_, value.y_);
         rsNode_->SetSandBox(value);
     } else {
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
         rsNode_->SetSandBox(std::nullopt);
     }

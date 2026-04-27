@@ -199,7 +199,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         }
     }
 
-    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
+    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
         "inNode: %{public}d, %{public}s, outNode: %{public}d, %{public}s", hasInAnim_, hasOutAnim_, follow,
         inNode->GetId(), inNode->GetTag().c_str(), outNode->GetId(), outNode->GetTag().c_str());
 
@@ -317,7 +317,7 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     }
     auto targetSize = CalcSize(NG::CalcLength(size.Width()), NG::CalcLength(size.Height()));
     layoutProperty->UpdateUserDefinedIdealSize(targetSize);
-    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d modify size to: %{public}s",
+    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d modify size to: %{public}s",
         self->GetId(), targetSize.ToString().c_str());
     // if node has aspect ratio we'll ignore it in active state
     auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
@@ -398,31 +398,31 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         if (!isNodeIn && outNodeParentHasScales_) {
             renderContext->ClearGeometryTransitionCounter();
             if (doRegisterSharedTransition_) {
-                renderContext->SetSandbox(std::nullopt);
+                renderContext->SetSandBox(std::nullopt);
                 renderContext->UnregisterSharedTransition(targetRenderContext);
             }
         } else {
             renderContext->IncrementGeometryTransitionCounter();
             if (doRegisterSharedTransition_) {
-                renderContext->SetSandbox(parentPos);
+                renderContext->SetSandBox(parentPos);
             }
         }
         std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(nodeId) + " animation";
         AceAsyncTraceBeginCommercial(currentTraceTaskId, traceTag.c_str());
     };
-    auto doRegisterSharedTransition = doRegisterSharedTransition_;
+
     auto finishCallback = [currentTraceTaskId, nodeWeak = WeakClaim(RawPtr(self)),
         targetNodeWeak = WeakClaim(RawPtr(target)), weak = WeakClaim(this),
-        doRegisterSharedTransition]() {
+        doRegisterSharedTransition = doRegisterSharedTransition_]() {
         auto node = nodeWeak.Upgrade();
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->DecrementGeometryTransitionCounter();
-        if (!IsGeometryTransitionAnimating()) {
+        if (!renderContext->IsGeometryTransitionAnimating()) {
             renderContext->ClearGeometryTransitionCounter();
             if (doRegisterSharedTransition) {
-                renderContext->SetSandbox(std::nullopt);
+                renderContext->SetSandBox(std::nullopt);
                 if (auto targetNode = targetNodeWeak.Upgrade()) {
                     auto targetRenderContext = targetNode->GetRenderContext();
                     renderContext->UnregisterSharedTransition(targetRenderContext);
@@ -585,33 +585,34 @@ void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool
     auto inRenderContext = inNode->GetRenderContext();
     CHECK_NULL_VOID(inRenderContext);
     auto pipeline = inNode->GetContextRefPtr();
-    auto doRegisterSharedTransition = doRegisterSharedTransition_;
-    auto otherNodeWeak = outNode_;
     AnimationUtils::Animate(option, [&]() {
-        if (inRenderContext->IsGeometryTransitionAnimating()) {
-            inRenderContext->IncrementGeometryTransitionCounter();
-            auto parent = inNode->GetAncestorNodeOfFrame(false);
-            if (doRegisterSharedTransition_) {
-                if (inNodeParentHasScales && parent) {
-                    inRenderContext->SetSandBox(parent->GetTransformRectRelativeToWindow(true).GetOffset());
-                } else {
-                    inRenderContext->SetSandBox(inNodeParentPos);
-                }
+        if (!inRenderContext->IsGeometryTransitionAnimating()) {
+            propertyCallback();
+            return;
+        }
+        inRenderContext->IncrementGeometryTransitionCounter();
+        auto parent = inNode->GetAncestorNodeOfFrame(false);
+        if (doRegisterSharedTransition_) {
+            if (inNodeParentHasScales && parent) {
+                inRenderContext->SetSandBox(parent->GetTransformRectRelativeToWindow(true).GetOffset());
+            } else {
+                inRenderContext->SetSandBox(inNodeParentPos);
             }
         }
         propertyCallback();
-    }, [nodeWeak = WeakClaim(RawPtr(inNode)), otherNodeWeak, doRegisterSharedTransition]() {
+    }, [nodeWeak = WeakClaim(RawPtr(inNode)), otherNodeWeak = outNode_,
+        doRegisterSharedTransition = doRegisterSharedTransition_]() {
         auto node = nodeWeak.Upgrade();
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d resync animation completed", node->GetId());
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d resync animation completed", node->GetId());
         if (!renderContext->IsGeometryTransitionAnimating()) {
             return;
         }
         renderContext->ClearGeometryTransitionCounter();
         if (doRegisterSharedTransition) {
-            renderContext->SetSandbox(std::nullopt);
+            renderContext->SetSandBox(std::nullopt);
             if (auto otherNode = otherNodeWeak.Upgrade()) {
                 auto outRenderContext = otherNode->GetRenderContext();
                 renderContext->UnregisterSharedTransition(outRenderContext);

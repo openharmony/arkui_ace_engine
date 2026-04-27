@@ -125,7 +125,7 @@ public:
     void ClearGeometryTransitionCounter() override;
     bool IsGeometryTransitionAnimating() const override;
 
-    void SetSandbox(const std::optional<OffsetF>& parentPosition) override;
+    void SetSandBox(const std::optional<OffsetF>& parentPosition) override;
 
     size_t GetAnimationsCount() const override
     {
@@ -777,9 +777,6 @@ protected:
 
     void AddModifier(const std::shared_ptr<Rosen::ModifierNG::RSModifier>& modifier);
     void RemoveModifier(const std::shared_ptr<Rosen::ModifierNG::RSModifier>& modifier);
-
-    // Private helper functions for sandbox operations
-    bool ApplySandBoxToRsNode(const std::optional<OffsetF>& parentPosition);
 
     // helper function to update one of the graphic effects
     template<typename T, typename D>

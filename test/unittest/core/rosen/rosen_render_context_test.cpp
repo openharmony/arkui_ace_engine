@@ -135,27 +135,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RosenRenderContextTest003
- * @tc.desc: SetSandBox().
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTest003, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(100.0, 100.0));
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, false));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, true));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(std::nullopt, false, true));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
-    rosenRenderContext->animatingGeometryTransitionCount_ = 2;
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(std::nullopt, false, true));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
-}
-
-/**
  * @tc.name: RosenRenderContextTest004
  * @tc.desc: SetFrameWithoutAnimation().
  * @tc.type: FUNC
@@ -2685,104 +2664,163 @@ HWTEST_F(RosenRenderContextTest, GetModalNode001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSandBox001
- * @tc.desc: Test SetSandBox with normal position - increment counter and set sandbox.
+ * @tc.name: IncrementGeometryTransitionCounter001
+ * @tc.desc: Test IncrementGeometryTransitionCounter increases counter.
  * @tc.type: FUNC
  */
-HWTEST_F(RosenRenderContextTest, SetSandBox001, TestSize.Level1)
+HWTEST_F(RosenRenderContextTest, IncrementGeometryTransitionCounter001, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     ASSERT_NE(rosenRenderContext, nullptr);
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(100.0, 100.0));
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, false));
+
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
+    rosenRenderContext->IncrementGeometryTransitionCounter();
     EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
 }
 
 /**
- * @tc.name: SetSandBox002
- * @tc.desc: Test SetSandBox with remove position - decrement counter and remove sandbox.
+ * @tc.name: IncrementGeometryTransitionCounter002
+ * @tc.desc: Test IncrementGeometryTransitionCounter multiple times.
  * @tc.type: FUNC
  */
-HWTEST_F(RosenRenderContextTest, SetSandBox002, TestSize.Level1)
+HWTEST_F(RosenRenderContextTest, IncrementGeometryTransitionCounter002, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     ASSERT_NE(rosenRenderContext, nullptr);
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(100.0, 100.0));
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, false));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, false));
+
+    rosenRenderContext->IncrementGeometryTransitionCounter();
+    rosenRenderContext->IncrementGeometryTransitionCounter();
+    rosenRenderContext->IncrementGeometryTransitionCounter();
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 3);
+}
+
+/**
+ * @tc.name: DecrementGeometryTransitionCounter001
+ * @tc.desc: Test DecrementGeometryTransitionCounter decreases counter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, DecrementGeometryTransitionCounter001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 3;
+    rosenRenderContext->DecrementGeometryTransitionCounter();
     EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 2);
-    EXPECT_FALSE(rosenRenderContext->SetSandBox(std::nullopt, false, false));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(std::nullopt, false, false));
+}
+
+/**
+ * @tc.name: DecrementGeometryTransitionCounter002
+ * @tc.desc: Test DecrementGeometryTransitionCounter to zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, DecrementGeometryTransitionCounter002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 1;
+    rosenRenderContext->DecrementGeometryTransitionCounter();
     EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
 }
 
 /**
- * @tc.name: SetSandBox003
- * @tc.desc: Test SetSandBox in onlyCountMode - increment counter but not set sandbox.
+ * @tc.name: ClearGeometryTransitionCounter001
+ * @tc.desc: Test ClearGeometryTransitionCounter resets counter to zero.
  * @tc.type: FUNC
  */
-HWTEST_F(RosenRenderContextTest, SetSandBox003, TestSize.Level1)
+HWTEST_F(RosenRenderContextTest, ClearGeometryTransitionCounter001, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     ASSERT_NE(rosenRenderContext, nullptr);
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(50.0, 50.0));
-    EXPECT_FALSE(rosenRenderContext->SetSandBox(parentPosition, true, false));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
-}
 
-/**
- * @tc.name: SetSandBox004
- * @tc.desc: Test SetSandBox in onlyCountMode with remove - decrement counter but not remove sandbox.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, SetSandBox004, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    ASSERT_NE(rosenRenderContext, nullptr);
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(50.0, 50.0));
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, false));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
-    EXPECT_FALSE(rosenRenderContext->SetSandBox(std::nullopt, true, false));
+    rosenRenderContext->animatingGeometryTransitionCount_ = 5;
+    rosenRenderContext->ClearGeometryTransitionCounter();
     EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
 }
 
 /**
- * @tc.name: SetSandBox005
- * @tc.desc: Test SetSandBox in force mode - set sandbox without incrementing counter.
+ * @tc.name: IsGeometryTransitionAnimating001
+ * @tc.desc: Test IsGeometryTransitionAnimating when counter is zero.
  * @tc.type: FUNC
  */
-HWTEST_F(RosenRenderContextTest, SetSandBox005, TestSize.Level1)
+HWTEST_F(RosenRenderContextTest, IsGeometryTransitionAnimating001, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     ASSERT_NE(rosenRenderContext, nullptr);
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(200.0, 200.0));
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, true));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 0;
+    EXPECT_FALSE(rosenRenderContext->IsGeometryTransitionAnimating());
 }
 
 /**
- * @tc.name: SetSandBox006
- * @tc.desc: Test SetSandBox in force mode with remove - remove sandbox and reset counter.
+ * @tc.name: IsGeometryTransitionAnimating002
+ * @tc.desc: Test IsGeometryTransitionAnimating when counter is positive.
  * @tc.type: FUNC
  */
-HWTEST_F(RosenRenderContextTest, SetSandBox006, TestSize.Level1)
+HWTEST_F(RosenRenderContextTest, IsGeometryTransitionAnimating002, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 2;
+    EXPECT_TRUE(rosenRenderContext->IsGeometryTransitionAnimating());
+}
+
+/**
+ * @tc.name: SetSandbox001
+ * @tc.desc: Test SetSandBox with valid position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetSandbox001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
     std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(100.0, 100.0));
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, false));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(parentPosition, false, false));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 2);
-    EXPECT_TRUE(rosenRenderContext->SetSandBox(std::nullopt, false, true));
-    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
+    rosenRenderContext->SetSandBox(parentPosition);
+    auto modifier = rosenRenderContext->rsNode_->GetModifierByType(Rosen::ModifierNG::RSModifierType::TRANSFORM);
+    EXPECT_NE(modifier, nullptr);
+}
+
+/**
+ * @tc.name: SetSandbox002
+ * @tc.desc: Test SetSandBox with nullopt to remove sandbox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetSandbox002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->SetSandBox(std::nullopt);
+    auto modifier = rosenRenderContext->rsNode_->GetModifierByType(Rosen::ModifierNG::RSModifierType::TRANSFORM);
+    EXPECT_EQ(modifier, nullptr);
+}
+
+/**
+ * @tc.name: SetSandbox003
+ * @tc.desc: Test SetSandBox with zero offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetSandbox003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(0.0, 0.0));
+    rosenRenderContext->SetSandBox(parentPosition);
+    auto modifier = rosenRenderContext->rsNode_->GetModifierByType(Rosen::ModifierNG::RSModifierType::TRANSFORM);
+    EXPECT_NE(modifier, nullptr);
 }
 } // namespace OHOS::Ace::NG
