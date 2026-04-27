@@ -5255,8 +5255,8 @@ let SystemProperties;
   SystemProperties.WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px';
   SystemProperties.WINDOW_IS_FOCUSED = 'system.window.focused';
   SystemProperties.WINDOW_IS_HIGHLIGHTED = 'system.window.highlighted';
-  SystemProperties.SYSTEM_DENSITY = 'system.window.systemdensity';
-  SystemProperties.DISPLAY_ID = 'system.window.displayid';
+  SystemProperties.WINDOW_SYSTEM_DENSITY = 'system.window.density.system';
+  SystemProperties.WINDOW_DISPLAY_ID = 'system.window.displayid';
 })(SystemProperties || (SystemProperties = {}));
 
 let PinVerifyResult;
