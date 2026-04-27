@@ -776,4 +776,11 @@ void LazyForEachNode::DumpInfo()
         builder_->DumpInfo();
     }
 }
+
+void LazyForEachNode::UpdateThemeScopeUpdate(int32_t themeScopeId)
+{
+    if (builder_) {
+        builder_->UpdateThemeScopeUpdate(themeScopeId);
+    }
+}
 } // namespace OHOS::Ace::NG
