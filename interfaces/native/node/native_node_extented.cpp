@@ -1960,6 +1960,8 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
     CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
     ArkUI_NodeHandle node = layoutManager->node;
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(charRange, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange", "Parameter charRange is null");
     int32_t start = static_cast<int32_t>(OH_Drawing_GetStartFromRange(charRange));
     int32_t end = static_cast<int32_t>(OH_Drawing_GetEndFromRange(charRange));
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1972,10 +1974,15 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
             node->uiNodeHandle, start, end, &range);
     }
     ArkUI_Boundary* glyphRange = new (std::nothrow) ArkUI_Boundary(range.glyphStart, range.glyphEnd);
-    CHECK_NULL_RETURN(glyphRange, ARKUI_ERROR_CODE_PARAM_INVALID);
-    *outGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
     ArkUI_Boundary* actualCharRange = new (std::nothrow) ArkUI_Boundary(range.charStart, range.charEnd);
-    CHECK_NULL_RETURN(actualCharRange, ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (glyphRange == nullptr || actualCharRange == nullptr) {
+        delete glyphRange;
+        delete actualCharRange;
+        glyphRange = nullptr;
+        actualCharRange = nullptr;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *outGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
     *outActualCharRange = reinterpret_cast<OH_Drawing_Range*>(actualCharRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1986,6 +1993,8 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
     CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
     ArkUI_NodeHandle node = layoutManager->node;
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(glyphRange, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange", "Parameter glyphRange is null");
     int32_t start = static_cast<int32_t>(OH_Drawing_GetStartFromRange(glyphRange));
     int32_t end = static_cast<int32_t>(OH_Drawing_GetEndFromRange(glyphRange));
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1998,10 +2007,15 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
             node->uiNodeHandle, start, end, &range);
     }
     ArkUI_Boundary* charRange = new (std::nothrow) ArkUI_Boundary(range.charStart, range.charEnd);
-    CHECK_NULL_RETURN(charRange, ARKUI_ERROR_CODE_PARAM_INVALID);
-    *outCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
     ArkUI_Boundary* actualGlyphRange = new (std::nothrow) ArkUI_Boundary(range.glyphStart, range.glyphEnd);
-    CHECK_NULL_RETURN(actualGlyphRange, ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (charRange == nullptr || actualGlyphRange == nullptr) {
+        delete charRange;
+        delete actualGlyphRange;
+        charRange = nullptr;
+        actualGlyphRange = nullptr;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *outCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
     *outActualGlyphRange = reinterpret_cast<OH_Drawing_Range*>(actualGlyphRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
