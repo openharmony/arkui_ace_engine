@@ -27,6 +27,20 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool ShouldSkipMagnifierBottomConstraint(const RefPtr<PipelineContext>& pipelineContext, float patternVisibleBottom)
+{
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    auto safeArea = safeAreaManager->GetNavSafeArea();
+    return windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+           safeArea.bottom_.IsValid() && patternVisibleBottom < safeArea.bottom_.start;
+}
+} // namespace
+
 void MagnifierController::SetLocalOffset(
     const OffsetF& localOffset, const std::optional<OffsetF>& localOffsetWithoutTrans)
 {
@@ -98,8 +112,12 @@ bool MagnifierController::UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pi
     if (GreatNotEqual(patternBottom, screenHeight) && LessNotEqual(windowScale, 1.f)) {
         patternVisibleBottom = visibleRect.GetY() + (screenHeight - patternFrameTop) / windowScale;
     }
-    magnifierY =
-        std::clamp(magnifierY, 0.f, static_cast<float>(patternVisibleBottom - magnifierNodeHeight_.ConvertToPx()));
+    bool shouldSkipBottomConstraint = ShouldSkipMagnifierBottomConstraint(pipelineContext, patternVisibleBottom);
+    if (!shouldSkipBottomConstraint &&
+        GreatNotEqual(patternVisibleBottom, magnifierNodeHeight_.ConvertToPx())) {
+        magnifierY =
+            std::clamp(magnifierY, 0.f, static_cast<float>(patternVisibleBottom - magnifierNodeHeight_.ConvertToPx()));
+    }
     return true;
 }
 
@@ -129,8 +147,7 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
     auto windowGlobalRect = pipeline->GetDisplayWindowRectInfo();
     auto patternFrameLeft = static_cast<float>(windowGlobalRect.Left() + patternOffset_.GetX() * windowScale);
     auto patternWidth = parentGeometryNode->GetFrameSize().Width() * windowScale;
-    float magnifierInnerPaddingX = static_cast<float>(
-        (MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * MAGNIFIER_SHADOW_SIZE_SCALE).ConvertToPx());
+    float magnifierInnerPaddingX = static_cast<float>((MAGNIFIER_SHADOWSIZE * 2).ConvertToPx());
     if ((GreatNotEqual(patternWidth + patternFrameLeft, screenWidth) || LessNotEqual(patternFrameLeft, 0.f)) &&
         LessNotEqual(windowScale, 1.f)) {
         auto maxPatternWidth = (patternOffset_.GetX() * windowScale + screenWidth - patternFrameLeft) / windowScale;
@@ -178,10 +195,11 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     auto rootFrameSize = rootGeometryNode->GetFrameSize();
     CHECK_NULL_RETURN(
         UpdateMagnifierEdgeY(pipeline, magnifierY, patternVisibleBottom, windowScale, screenHeight), false);
+    bool shouldSkipBottomConstraint = ShouldSkipMagnifierBottomConstraint(pipeline, patternVisibleBottom);
     float maxOffsetY = static_cast<float>(MAGNIFIER_OFFSETY.ConvertToPx());
     float patternBottomLimit = static_cast<float>(patternVisibleBottom - menuHeight);
     float offsetY = std::clamp(magnifierY, 0.f, maxOffsetY);
-    if (GreatNotEqual(rawMagnifierY, patternBottomLimit)) {
+    if (GreatNotEqual(rawMagnifierY, patternBottomLimit) && !shouldSkipBottomConstraint) {
         float exceedBottom = rawMagnifierY - patternBottomLimit;
         float edgeOffsetY = std::clamp(maxOffsetY - exceedBottom, 0.f, maxOffsetY);
         offsetY = std::min(offsetY, edgeOffsetY);
@@ -191,8 +209,7 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     magnifierOffset.y = offsetY;
     zoomOffset.y = (globalOffset_.GetY() - (magnifierY + halfMenuHeight)) * windowScale;
     float preScaledMagnifierHeight = static_cast<float>(MAGNIFIER_HEIGHT.ConvertToPx() / MAGNIFIER_FACTOR);
-    float halfMagnifierInnerPaddingY = static_cast<float>(
-        (MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * MAGNIFIER_SHADOW_SIZE_SCALE).ConvertToPx() / 2);
+    float halfMagnifierInnerPaddingY = static_cast<float>(MAGNIFIER_SHADOWSIZE.ConvertToPx());
     float maxZoomOffsetY = (menuHeight - preScaledMagnifierHeight) * windowScale / 2 +
                           halfMagnifierInnerPaddingY / MAGNIFIER_FACTOR;
     zoomOffset.y = std::clamp(zoomOffset.y, -maxZoomOffsetY, maxZoomOffsetY);

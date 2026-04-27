@@ -718,6 +718,61 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
 }
 
 /**
+ * @tc.name: MagnifierController_UpdateMagnifierOffset004
+ * @tc.desc: test UpdateMagnifierOffsetY skips bottom constraint in fullscreen nav safe area scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset004, TestSize.Level1)
+{
+    auto frameSize = SizeF(400.f, 400.f);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto windowManager = pipeline->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+    windowManager->SetWindowGetModeCallBack([]() -> WindowMode { return WindowMode::WINDOW_MODE_FULLSCREEN; });
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->UpdateNavSafeArea(SafeAreaInsets { {}, {}, {}, { .start = 500, .end = 600 } });
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    RectF paintRect(0, 0, frameSize.Width(), frameSize.Height());
+    mockParentRenderContext->SetPaintRectWithTransform(paintRect);
+    auto rootUINodeRenderContext = rootUINode->renderContext_;
+    rootUINode->renderContext_ = mockParentRenderContext;
+    windowNode->renderContext_ = mockParentRenderContext;
+    columnNode->renderContext_ = mockParentRenderContext;
+    windowNode->MountToParent(rootUINode);
+    columnNode->MountToParent(windowNode);
+
+    controller.magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5;
+    controller.magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5;
+    OffsetF localOffset(380.f, 380.f);
+    controller.SetLocalOffset(localOffset);
+    EXPECT_EQ(controller.globalOffset_, localOffset);
+
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_TRUE(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset));
+    EXPECT_EQ(magnifierOffset.y, MAGNIFIER_OFFSETY.ConvertToPx());
+
+    safeAreaManager->UpdateNavSafeArea(SafeAreaInsets {});
+    rootUINode->RemoveChild(windowNode);
+    rootUINode->renderContext_ = rootUINodeRenderContext;
+}
+
+/**
  * @tc.name: TextMenuController.disableSystemServiceMenuItems
  * @tc.desc: test disableSystemServiceMenuItems
  * @tc.type: FUNC
