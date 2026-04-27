@@ -1917,7 +1917,8 @@ HWTEST_F(ParallelStageTestThreeNg, SetNeedClearSecondaryPage_False001, TestSize.
 
 /**
  * @tc.name: UpdateSecondaryPageNeedRemovedEffectivePageTest001
- * @tc.desc: Test UpdateSecondaryPageNeedRemoved skips non page, placeholder and related pages, and collects detail pages.
+ * @tc.desc: Test UpdateSecondaryPageNeedRemoved skips non page
+ *      placeholder and related pages, and collects detail pages.
  * @tc.type: FUNC
  */
 HWTEST_F(ParallelStageTestThreeNg, UpdateSecondaryPageNeedRemovedEffectivePageTest001, TestSize.Level1)
@@ -2187,7 +2188,8 @@ HWTEST_F(ParallelStageTestThreeNg, VirtualStackModeChangeAndWindowStateTest001, 
     });
 
     auto primaryPage = CreateRouterPage("primary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::PRIMARY);
-    auto secondaryPage = CreateRouterPage("secondary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::SECONDARY);
+    auto secondaryPage = CreateRouterPage(
+        "secondary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::SECONDARY);
     MountRouterPage(stageNode, primaryPage);
     MountRouterPage(stageNode, secondaryPage);
     stagePattern->mode_ = PageMode::SPLIT;
