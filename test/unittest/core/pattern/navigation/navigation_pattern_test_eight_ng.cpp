@@ -1162,42 +1162,30 @@ HWTEST_F(NavigationPatternTestEightNg, CreateHomeAndRelatedDestinationTest001, T
 }
 
 /**
- * @tc.name: ForceSplitDisplayStateAndDiffTest001
- * @tc.desc: Test force split display state builders and lifecycle diff ordering
+ * @tc.name: CollectForceSplitDisplayStateFromLifecycleFlagsTest001
+ * @tc.desc: Test collecting force split display state from lifecycle flags
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestEightNg, ForceSplitDisplayStateAndDiffTest001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestEightNg, CollectForceSplitDisplayStateFromLifecycleFlagsTest001, TestSize.Level1)
 {
     auto context = CreateNavigationTestContext(true);
-    auto manager = context.navNode->GetContextRefPtr()->GetForceSplitManager();
-    manager->SetPagePairs(std::unordered_map<std::string, std::unordered_set<std::string>> {
-        { "DetailA", { "DetailB" } }
-    });
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
 
     auto homeDest = CreateNavDestinationNode("Home", 0);
-    auto dialogDest = CreateNavDestinationNode("Dialog", 1, NavDestinationMode::DIALOG);
-    auto detailDest = CreateNavDestinationNode("DetailA", 2);
-    auto hiddenDest = CreateNavDestinationNode("Hidden", 3);
-    auto relatedDest = CreateNavDestinationNode("Related", 4);
+    auto detailDest = CreateNavDestinationNode("DetailA", 1);
+    auto hiddenDest = CreateNavDestinationNode("Hidden", 2);
+    auto relatedDest = CreateNavDestinationNode("Related", 3);
 
     AddDestinationToStack(context, PAGE01, homeDest);
-    AddDestinationToStack(context, PAGE02, dialogDest);
-    AddDestinationToStack(context, PAGE03, detailDest);
+    AddDestinationToStack(context, PAGE02, detailDest);
     MountDestinationToNavContent(context, homeDest);
-    MountDestinationToNavContent(context, dialogDest);
     MountDestinationToNavContent(context, detailDest);
     context.navNode->SetRelatedPageDestNode(relatedDest);
     context.navNode->hideNodes_.emplace_back(hiddenDest, true);
-    context.navNode->lastStandardIndex_ = 2;
-    context.pattern->forceSplitSuccess_ = true;
-    context.pattern->primaryNodes_ = { WeakPtr<NavDestinationGroupNode>(homeDest),
-        WeakPtr<NavDestinationGroupNode>(dialogDest) };
-    context.pattern->secondaryNodes_ = { WeakPtr<NavDestinationGroupNode>(detailDest) };
 
     homeDest->GetPattern<NavDestinationPattern>()->SetIsOnShow(true);
     homeDest->GetPattern<NavDestinationPattern>()->SetIsActive(false);
-    dialogDest->GetPattern<NavDestinationPattern>()->SetIsOnShow(false);
-    dialogDest->GetPattern<NavDestinationPattern>()->SetIsActive(false);
     detailDest->GetPattern<NavDestinationPattern>()->SetIsOnShow(false);
     detailDest->GetPattern<NavDestinationPattern>()->SetIsActive(false);
     hiddenDest->GetPattern<NavDestinationPattern>()->SetIsOnShow(true);
@@ -1209,32 +1197,98 @@ HWTEST_F(NavigationPatternTestEightNg, ForceSplitDisplayStateAndDiffTest001, Tes
     context.pattern->CollectForceSplitLifecycleCandidates(candidates, homeDest, detailDest);
     EXPECT_GE(candidates.size(), 3U);
 
-    auto beforeState = context.pattern->CollectForceSplitDisplayStateFromLifecycleFlags(homeDest, detailDest);
-    EXPECT_EQ(beforeState.shownPages.size(), 2U);
-    EXPECT_FALSE(beforeState.relatedActive);
+    auto state = context.pattern->CollectForceSplitDisplayStateFromLifecycleFlags(homeDest, detailDest);
+    EXPECT_EQ(state.shownPages.size(), 2U);
+    EXPECT_EQ(state.activePages.size(), 1U);
+    EXPECT_TRUE(state.relatedVisible);
+    EXPECT_FALSE(state.relatedActive);
+}
+
+/**
+ * @tc.name: BuildForceSplitDisplayStateFromLogicalStacksTest001
+ * @tc.desc: Test building force split display state from logical stacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, BuildForceSplitDisplayStateFromLogicalStacksTest001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto dialogDest = CreateNavDestinationNode("Dialog", 1, NavDestinationMode::DIALOG);
+    auto detailDest = CreateNavDestinationNode("DetailA", 2);
+    auto relatedDest = CreateNavDestinationNode("Related", 3);
+
+    AddDestinationToStack(context, PAGE01, homeDest);
+    AddDestinationToStack(context, PAGE02, dialogDest);
+    AddDestinationToStack(context, PAGE03, detailDest);
+    MountDestinationToNavContent(context, homeDest);
+    MountDestinationToNavContent(context, dialogDest);
+    MountDestinationToNavContent(context, detailDest);
+
+    context.navNode->SetRelatedPageDestNode(relatedDest);
+    context.navNode->lastStandardIndex_ = 2;
+    context.pattern->forceSplitSuccess_ = true;
+    context.pattern->primaryNodes_ = {
+        WeakPtr<NavDestinationGroupNode>(homeDest),
+        WeakPtr<NavDestinationGroupNode>(dialogDest)
+    };
+    context.pattern->secondaryNodes_ = {
+        WeakPtr<NavDestinationGroupNode>(detailDest)
+    };
 
     auto logicalState = context.pattern->BuildForceSplitDisplayStateFromLogicalStacks();
     ASSERT_EQ(logicalState.shownPages.size(), 3U);
+    ASSERT_EQ(logicalState.activePages.size(), 2U);
+    EXPECT_EQ(logicalState.shownPages[0], homeDest);
+    EXPECT_EQ(logicalState.shownPages[1], dialogDest);
+    EXPECT_EQ(logicalState.shownPages[2], detailDest);
+    EXPECT_TRUE(logicalState.relatedVisible);
     EXPECT_TRUE(logicalState.relatedActive);
 
     context.pattern->isSplitDisplay_ = false;
     auto stackModeState = context.pattern->BuildForceSplitDisplayStateForModeChange();
-    ASSERT_EQ(stackModeState.shownPages.size(), 1U);
-    context.pattern->isSplitDisplay_ = true;
+    EXPECT_EQ(stackModeState.shownPages.size(), 1U);
+    EXPECT_EQ(stackModeState.shownPages[0], detailDest);
+}
 
-    NavigationPattern::ForceSplitDisplayState manualBefore;
-    manualBefore.shownPages = { detailDest, homeDest };
-    manualBefore.activePages = { homeDest };
-    manualBefore.relatedVisible = false;
-    manualBefore.relatedActive = false;
-    NavigationPattern::ForceSplitDisplayState manualAfter;
-    manualAfter.shownPages = { homeDest, dialogDest, detailDest };
-    manualAfter.activePages = { dialogDest, detailDest };
-    manualAfter.relatedVisible = true;
-    manualAfter.relatedActive = true;
-    auto diff = context.pattern->BuildForceSplitLifecycleDiff(manualBefore, manualAfter);
+/**
+ * @tc.name: BuildForceSplitLifecycleDiffTest001
+ * @tc.desc: Test force split lifecycle diff calculation and ordering
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, BuildForceSplitLifecycleDiffTest001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto dialogDest = CreateNavDestinationNode("Dialog", 1, NavDestinationMode::DIALOG);
+    auto detailDest = CreateNavDestinationNode("DetailA", 2);
+
+    NavigationPattern::ForceSplitDisplayState beforeState;
+    beforeState.shownPages = { detailDest, homeDest };
+    beforeState.activePages = { homeDest };
+    beforeState.relatedVisible = false;
+    beforeState.relatedActive = false;
+
+    NavigationPattern::ForceSplitDisplayState afterState;
+    afterState.shownPages = { homeDest, dialogDest, detailDest };
+    afterState.activePages = { dialogDest, detailDest };
+    afterState.relatedVisible = true;
+    afterState.relatedActive = true;
+
+    auto diff = context.pattern->BuildForceSplitLifecycleDiff(beforeState, afterState);
     ASSERT_EQ(diff.willShowPages.size(), 1U);
+    ASSERT_EQ(diff.activePages.size(), 2U);
+    ASSERT_EQ(diff.inactivePages.size(), 1U);
+    EXPECT_EQ(diff.willShowPages[0], dialogDest);
+    EXPECT_EQ(diff.activePages[0], dialogDest);
+    EXPECT_EQ(diff.activePages[1], detailDest);
     EXPECT_EQ(diff.inactivePages[0], homeDest);
+    EXPECT_TRUE(diff.relatedWillShow);
+    EXPECT_TRUE(diff.relatedActive);
 }
 
 /**
