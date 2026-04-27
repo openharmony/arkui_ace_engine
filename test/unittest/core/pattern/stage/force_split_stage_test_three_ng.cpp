@@ -1354,8 +1354,10 @@ HWTEST_F(ParallelStageTestThreeNg, NormalizeRouterColumnsAfterStackChange_WithVi
     ASSERT_NE(stageManager, nullptr);
 
     auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
-    auto primaryPage = CreateRouterPage("primary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::NONE);
-    auto secondaryPage = CreateRouterPage("secondary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::NONE);
+    auto primaryPage = CreateRouterPage("primary",
+        RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::NONE);
+    auto secondaryPage = CreateRouterPage("secondary",
+        RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::NONE);
     MountRouterPage(stageNode, homePage);
     MountRouterPage(stageNode, primaryPage);
     MountRouterPage(stageNode, secondaryPage);
@@ -2187,7 +2189,8 @@ HWTEST_F(ParallelStageTestThreeNg, VirtualStackModeChangeAndWindowStateTest001, 
         { "primary", { "secondary" } }
     });
 
-    auto primaryPage = CreateRouterPage("primary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::PRIMARY);
+    auto primaryPage = CreateRouterPage(
+        "primary",RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::PRIMARY);
     auto secondaryPage = CreateRouterPage(
         "secondary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::SECONDARY);
     MountRouterPage(stageNode, primaryPage);
