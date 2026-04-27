@@ -171,17 +171,14 @@ public:
 
     virtual void SetExtraOffset(const std::optional<OffsetF>& offset) {};
 
+    virtual void IncrementGeometryTransitionCounter() {};
+    virtual void DecrementGeometryTransitionCounter() {};
+    virtual void ClearGeometryTransitionCounter() {};
+    virtual bool IsGeometryTransitionAnimating() { return false };
+
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
-    virtual bool SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force = false)
-    {
-        return false;
-    }
-
-    virtual bool HasAnimatingGeometryTransition() const
-    {
-        return false;
-    }
+    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
 
     virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
 

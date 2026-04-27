@@ -119,12 +119,13 @@ public:
 
     void SetExtraOffset(const std::optional<OffsetF>& offset) override;
 
-    bool SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force = false) override;
+    // Geometry transition counter management
+    void IncrementGeometryTransitionCounter() override;
+    void DecrementGeometryTransitionCounter() override;
+    void ClearGeometryTransitionCounter() override;
+    bool IsGeometryTransitionAnimating() const override;
 
-    bool HasAnimatingGeometryTransition() const override
-    {
-        return animatingGeometryTransitionCount_ > 0;
-    }
+    void SetSandbox(const std::optional<OffsetF>& parentPosition) override;
 
     size_t GetAnimationsCount() const override
     {
@@ -776,6 +777,9 @@ protected:
 
     void AddModifier(const std::shared_ptr<Rosen::ModifierNG::RSModifier>& modifier);
     void RemoveModifier(const std::shared_ptr<Rosen::ModifierNG::RSModifier>& modifier);
+
+    // Private helper functions for sandbox operations
+    bool ApplySandBoxToRsNode(const std::optional<OffsetF>& parentPosition);
 
     // helper function to update one of the graphic effects
     template<typename T, typename D>

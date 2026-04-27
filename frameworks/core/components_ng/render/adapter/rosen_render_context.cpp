@@ -725,39 +725,42 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
 }
 #endif
 
-bool RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force)
+void RosenRenderContext::IncrementGeometryTransitionCounter()
 {
-    FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition, force);
+    animatingGeometryTransitionCount_++;
+}
+
+void RosenRenderContext::DecrementGeometryTransitionCounter()
+{
+    animatingGeometryTransitionCount_--;
+}
+
+void RosenRenderContext::ClearGeometryTransitionCounter()
+{
+    animatingGeometryTransitionCount_ = 0;
+}
+
+bool RosenRenderContext::IsGeometryTransitionAnimating() const
+{
+    return animatingGeometryTransitionCount_ > 0;
+}
+
+void RosenRenderContext::SetSandbox(const std::optional<OffsetF>& parentPosition)
+{
+    FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition);
     CHECK_NULL_VOID(rsNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetHost());
+
     if (parentPosition.has_value()) {
-        if (!force) {
-            animatingGeometryTransitionCount_++;
-        }
-        if (onlyCountMode) {
-            return false;
-        }
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox [%{public}f, %{public}f]",
             std::to_string(rsNode_->GetId()).c_str(), value.x_, value.y_);
         rsNode_->SetSandBox(value);
     } else {
-        if (!force) {
-            animatingGeometryTransitionCount_--;
-            if (animatingGeometryTransitionCount_ > 0) {
-                return false;
-            }
-        }
-        animatingGeometryTransitionCount_ = 0;
-        if (onlyCountMode) {
-            return false;
-        }
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
         rsNode_->SetSandBox(std::nullopt);
     }
-    return true;
 }
 
 void RosenRenderContext::SetDrawContentAtLast(bool useDrawContentLastOrder)
