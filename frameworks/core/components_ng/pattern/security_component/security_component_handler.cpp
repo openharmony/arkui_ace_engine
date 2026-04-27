@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"
+#include "session/host/include/session.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/dimension.h"

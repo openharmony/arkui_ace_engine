@@ -17,6 +17,9 @@
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
 #include "ui/rs_surface_node.h"
+#include "common/rs_vector4.h"
+
+#include "session/host/include/session.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -39,6 +42,8 @@ SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : sess
         self->OnBoundsChanged(bounds);
     };
 }
+
+SystemWindowScene::~SystemWindowScene() = default;
 
 sptr<Rosen::Session> SystemWindowScene::GetSession()
 {

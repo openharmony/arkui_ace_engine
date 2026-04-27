@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/common/window_ng/window_extension_connection_proxy_ng.h"
 
-#include "window_extension_connection_ohos_ng.h"
+#include "core/common/window_ng/window_extension_connection_adapter_ng.h"
 #include "session/host/include/extension_session.h"
 
 namespace OHOS::Ace {
-RefPtr<WindowExtensionConnectionAdapterNG> WindowExtensionConnectionProxyNG::CreateAdapter()
+
+WindowExtensionConnectionAdapterNG::~WindowExtensionConnectionAdapterNG() = default;
+
+void WindowExtensionConnectionAdapterNG::SetExtensionSession(const sptr<Rosen::ExtensionSession>& extensionSession)
 {
-    return AceType::MakeRefPtr<WindowExtensionConnectionAdapterOhosNG>();
+    extensionSession_ = extensionSession;
 }
+
 } // namespace OHOS::Ace

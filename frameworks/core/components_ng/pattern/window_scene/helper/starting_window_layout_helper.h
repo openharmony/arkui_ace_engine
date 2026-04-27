@@ -23,8 +23,10 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include "interfaces/include/ws_common.h"
-#include "session/host/include/session.h"
 
+namespace OHOS::Rosen {
+    class Session;
+}
 namespace OHOS::Ace::NG {
 struct LayoutParams {
     Dimension iconSize { 128.0_vp };

@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
+#include "session/host/include/session.h"
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
 
