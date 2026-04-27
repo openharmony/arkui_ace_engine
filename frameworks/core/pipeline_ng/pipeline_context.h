@@ -98,6 +98,7 @@ class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
 class DynamicComponentSafeManager;
+class EnvironmentManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -550,6 +551,11 @@ public:
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
         return frameRateManager_;
+    }
+
+    const RefPtr<EnvironmentManager>& GetEnvironmentManager() const
+    {
+        return environmentManager_;
     }
 
     void FlushBuild() override;
@@ -1703,6 +1709,7 @@ private:
     RefPtr<FormVisibleManager> formVisibleMgr_;
     RefPtr<FormEventManager> formEventMgr_;
     RefPtr<FormGestureManager> formGestureMgr_;
+    RefPtr<EnvironmentManager> environmentManager_;
     std::unique_ptr<RecycleManager> recycleManager_;
     ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);

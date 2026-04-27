@@ -132,6 +132,7 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest004, TestSize.Level1)
 
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
+
     EXPECT_TRUE(node->HasEnvProperty(ENV_KEY_DIRECTION));
     EXPECT_FALSE(node->HasEnvProperty("non.existent.key"));
 }
@@ -150,6 +151,7 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest005, TestSize.Level1)
 
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
+
     EXPECT_TRUE(node->HasEnvProperty(CUSTOM_KEY_THEME));
 }
 
@@ -167,6 +169,7 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest006, TestSize.Level1)
 
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
+
     EXPECT_TRUE(node->HasEnvProperty(ENV_KEY_DIRECTION));
 }
 
@@ -184,10 +187,12 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest007, TestSize.Level1)
 
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
+
     EXPECT_TRUE(node->HasEnvProperty(CUSTOM_KEY_THEME));
 
     auto* anyPtr = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
     ASSERT_NE(anyPtr, nullptr);
+
     auto retrieved = std::any_cast<std::string>(*anyPtr);
     EXPECT_EQ(retrieved, CUSTOM_VALUE_DARK);
 }
@@ -226,6 +231,7 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest009, TestSize.Level1)
 
     auto* anyPtr = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
     ASSERT_NE(anyPtr, nullptr);
+
     auto retrieved = std::any_cast<double>(*anyPtr);
     EXPECT_DOUBLE_EQ(retrieved, CUSTOM_DOUBLE_VALUE);
 }
