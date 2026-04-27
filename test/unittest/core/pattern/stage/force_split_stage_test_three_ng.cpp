@@ -2190,7 +2190,7 @@ HWTEST_F(ParallelStageTestThreeNg, VirtualStackModeChangeAndWindowStateTest001, 
     });
 
     auto primaryPage = CreateRouterPage(
-        "primary",RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::PRIMARY);
+        "primary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::PRIMARY);
     auto secondaryPage = CreateRouterPage(
         "secondary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::SECONDARY);
     MountRouterPage(stageNode, primaryPage);
