@@ -18,7 +18,7 @@
 
 #include <atomic>
 #include "common/rs_vector4.h"
-#include "foundation/window/window_manager/interfaces/innerkits/wm/wm_common.h"
+#include "wm/wm_common.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include "refbase.h"
