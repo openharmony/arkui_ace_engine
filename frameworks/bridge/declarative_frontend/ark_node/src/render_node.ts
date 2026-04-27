@@ -411,9 +411,9 @@ class ColorMetrics {
     return this.headRoom_;
   }
   static createHDRColorWithLinearExposure(linearExposure: number, colorSpace: ColorSpace,
-    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    red: number, green: number, blue: number, alpha: number = 1.0): ColorMetrics {
     const clampedLinearExposure = Math.max(linearExposure, 1);
-    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    const clampedAlpha = Math.min(Math.max(alpha, 0), 1);
     const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
     colorMetrics.setIsHDR(true);
     colorMetrics.setColorSpace(colorSpace);
@@ -424,9 +424,9 @@ class ColorMetrics {
     return colorMetrics;
   }
   static createHDRColorWithLogExposure(exposure: number, colorSpace: ColorSpace,
-    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    red: number, green: number, blue: number, alpha: number = 1.0): ColorMetrics {
     const clampedExposure = Math.max(exposure, 0);
-    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    const clampedAlpha = Math.min(Math.max(alpha, 0), 1);
     const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
     colorMetrics.setIsHDR(true);
     colorMetrics.setColorSpace(colorSpace);
@@ -438,8 +438,8 @@ class ColorMetrics {
     return colorMetrics;
   }
   static createHDRColor(colorSpace: ColorSpace,
-    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
-    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    red: number, green: number, blue: number, alpha: number = 1.0): ColorMetrics {
+    const clampedAlpha = Math.min(Math.max(alpha, 0), 1);
     const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
     colorMetrics.setIsHDR(true);
     colorMetrics.setColorSpace(colorSpace);

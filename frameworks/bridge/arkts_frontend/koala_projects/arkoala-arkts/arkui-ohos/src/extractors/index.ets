@@ -686,6 +686,11 @@ export namespace extractors {
     colorMetricsExt.alpha = colorMetrics.alpha
     colorMetricsExt.resourceId = colorMetrics.getResourceId()
     colorMetricsExt.colorSpace = colorMetrics.getColorSpace()
+    colorMetricsExt.redValue = colorMetrics.redValue
+    colorMetricsExt.greenValue = colorMetrics.greenValue
+    colorMetricsExt.blueValue = colorMetrics.blueValue
+    colorMetricsExt.headRoom = colorMetrics.headRoom
+    colorMetricsExt.isHDR = colorMetrics.isHDR();
     return colorMetricsExt
   }
 
@@ -697,7 +702,10 @@ export namespace extractors {
       colorMetricsExt.blue,
       colorMetricsExt.alpha
     )
+    colorMetrics.setColorWithHeadRoom(colorMetricsExt.redValue, colorMetricsExt.greenValue, colorMetricsExt.blueValue,
+      colorMetricsExt.headRoom = colorMetrics.headRoom);
     colorMetrics.setResourceId(colorMetricsExt.resourceId)
+    colorMetrics.setIsHDR(colorMetricsExt.isHDR);
     return colorMetrics
   }
 
