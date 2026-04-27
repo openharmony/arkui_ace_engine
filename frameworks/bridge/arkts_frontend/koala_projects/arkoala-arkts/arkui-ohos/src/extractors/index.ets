@@ -124,6 +124,10 @@ export namespace extractors {
     return ArkUIAniModule._Extractors_ToInputMethodExtraConfigPtr(config);
   }
 
+  export function fromInputMethodExtraConfigPtr(config: KPointer): InputMethodExtraConfig {
+    throw new Error("fromInputMethodExtraConfigPtr is not implemented in ANI")
+  }
+
   export function toTextParagraphPtr(paragraph: text.Paragraph): KPointer {
     return ArkUIAniModule._Extractors_ToTextParagraphPtr(paragraph);
   }

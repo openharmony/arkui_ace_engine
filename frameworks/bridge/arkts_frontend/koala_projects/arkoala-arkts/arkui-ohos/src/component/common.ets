@@ -6,6 +6,7 @@ import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
 import { GestureOps } from "./idlize"
 import { ArkUIAniModule } from "arkui.ani"
 import { Bindable, Callback } from "#generated"
+import { hookTouchEventGetModifierKeyState } from "../"
 
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}

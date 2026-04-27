@@ -7,13 +7,9 @@
             "SwiperModifier.ets",
             "SymbolGlyphModifier.ets",
             "WebModifier.ets",
-            "component/actionSheet.ets",
-            "component/checkboxgroup.ets",
             "component/common.ets",
-            "component/containerSpan.ets",
             "component/contentSlot.ets",
             "component/gesture.ets",
-            "component/idlize.ets",
             "component/lazyGridLayout.ets",
             "component/navigation.ets",
             "component/styledString.ets",
@@ -23,9 +19,6 @@
             "component/waterFlow.ets",
             "component/withTheme.ets",
             "component/xcomponent.ets",
-            "component/depthComponent.ets",
-            "framework/ohos.arkui.theme.ets",
-            "framework/stdlib.ets",
             "framework/index.ets",
             "#handwritten.ets"
         ]
