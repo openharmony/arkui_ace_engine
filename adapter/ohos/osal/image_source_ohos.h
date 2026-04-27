@@ -49,6 +49,7 @@ public:
     std::string GetEncodedFormat() override;
     bool IsHeifWithoutAlpha() override;
     ImageRotateOrientation GetImageOrientation() override;
+    bool IsSvg() const override;
 
 private:
     std::unique_ptr<Media::ImageSource> imageSource_;
