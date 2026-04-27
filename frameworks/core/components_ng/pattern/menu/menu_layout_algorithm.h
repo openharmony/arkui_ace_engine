@@ -340,9 +340,6 @@ private:
     std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFTriangleShape(
         const OHOS::Rosen::Vector2f& vertex0, const OHOS::Rosen::Vector2f& vertex1,
         const OHOS::Rosen::Vector2f& vertex2);
-    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSmoothUnionShape(
-        const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
-        const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY);
 #endif
     std::string BuildTopLinePath(const OffsetF& arrowPosition, float radiusPx,
         Placement arrowBuildPlacement, bool didNeedArrow);

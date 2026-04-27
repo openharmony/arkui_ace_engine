@@ -4250,43 +4250,37 @@ std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::CreateSDFTriang
     return triangleShape0;
 }
 
-std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::CreateSmoothUnionShape(
-    const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
-    const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY)
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::GetMenuSDFShape(bool didNeedArrow)
 {
     auto unionShape0 = OHOS::Rosen::RSNGShapeBase::Create(
         OHOS::Rosen::RSNGEffectType::SDF_SMOOTH_UNION_OP_SHAPE);
     auto unionShape =
         std::static_pointer_cast<OHOS::Rosen::RSNGSDFSmoothUnionOpShape>(unionShape0);
     CHECK_NULL_RETURN(unionShape, nullptr);
-
-    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeXTag>(shapeX);
-    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeYTag>(shapeY);
-    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeSpacingTag>(0.1f);
-
-    return unionShape0;
-}
-
-std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::GetMenuSDFShape(bool didNeedArrow)
-{
-    if (!didNeedArrow || !pathParams_.has_value()) {
-        return CreateSDFRRectShape();
-    }
-
     auto rrectShape = CreateSDFRRectShape();
     CHECK_NULL_RETURN(rrectShape, nullptr);
-    if (arrowPlacement_ == Placement::NONE) {
-        return rrectShape;
-    }
+
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeXTag>(rrectShape);
 
     OHOS::Rosen::Vector2f vertex0;
     OHOS::Rosen::Vector2f vertex1;
     OHOS::Rosen::Vector2f vertex2;
-    CalculateArrowVertices(vertex0, vertex1, vertex2);
-    auto triangleShape = CreateSDFTriangleShape(vertex0, vertex1, vertex2);
-    CHECK_NULL_RETURN(triangleShape, nullptr);
+    if (!didNeedArrow || !pathParams_.has_value() || arrowPlacement_ == Placement::NONE) {
+        vertex0 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childMarginFrameSize_.Width() / HALF,
+            childOffset_.GetY() + childMarginFrameSize_.Height() / HALF);
+        vertex1 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childMarginFrameSize_.Width() / HALF,
+            childOffset_.GetY() + childMarginFrameSize_.Height() / HALF);
+        vertex2 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childMarginFrameSize_.Width() / HALF,
+            childOffset_.GetY() + childMarginFrameSize_.Height() / HALF);
+    } else {
+        CalculateArrowVertices(vertex0, vertex1, vertex2);
+    }
 
-    return CreateSmoothUnionShape(rrectShape, triangleShape);
+    auto triangleShape = CreateSDFTriangleShape(vertex0, vertex1, vertex2);
+    CHECK_NULL_RETURN(triangleShape, unionShape0);
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeYTag>(triangleShape);
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeSpacingTag>(0.1f);
+    return unionShape0;
 }
 #endif
 
