@@ -672,7 +672,6 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
     template<> ACE_FORCE_EXPORT DimensionRect Convert(const Ark_Rectangle &src);
-    template<> DragPreviewOption Convert(const Ark_DragPreviewOptions &src);
     template<> EdgesParam Convert(const Ark_Edges& src);
     template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
     template<> ACE_FORCE_EXPORT EffectOption Convert(const Ark_BackgroundEffectOptions& src);
@@ -819,7 +818,6 @@ namespace Converter {
     template<> SourceTool Convert(const Ark_SourceTool& src);
     template<> SourceType Convert(const Ark_SourceType& src);
     template<> std::set<SourceTool> Convert(const Array_SourceTool& src);
-    template<> std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src);
     template<> std::string Convert(const Ark_CommandPath& src);
     template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT std::u16string Convert(const Ark_String& src);
@@ -1100,7 +1098,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_UIContext& src);
     template<> void AssignCast(std::optional<SuperscriptStyle>& dst, const Ark_SuperscriptStyle& src);
     template<> void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src);
-    template<> void AssignCast(std::optional<std::string>& dst, const Ark_uniformTypeDescriptor_UniformDataType& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<uint32_t>& dst, const Ark_Number& src);
 
