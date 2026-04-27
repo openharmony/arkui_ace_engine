@@ -51,16 +51,21 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         return !!(this.owningComponent_ && !this.owningComponent_!.__isViewActive__Internal());
     }
 
+    // Wildcard monitor values do not represent a single property change —
+    // the wildcard binding fans out to multiple metas, so before/now/path
+    // on a wildcard MonitorValueInternal don't correspond to a single
+    // observable read. Return undefined for them; only non-wildcard dirty
+    // values are surfaced to the user.
     public value<T>(path?: string): IMonitorValue<T> | undefined {
         if (path) {
             for (let monitorValue of this.values_) {
-                if (monitorValue.dirty && monitorValue.path === path) {
+                if (monitorValue.dirty && !monitorValue.enableWildcard && monitorValue.path === path) {
                     return new MonitorValuePublic<T>(monitorValue);
                 }
             }
         } else {
             for (let monitorValue of this.values_) {
-                if (monitorValue.dirty) {
+                if (monitorValue.dirty && !monitorValue.enableWildcard) {
                     return new MonitorValuePublic<T>(monitorValue);
                 }
             }
@@ -119,7 +124,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
 
         let dirty = isReuse ? monitorValue.readValueWhenReuse() : monitorValue.readValue(isFirstRun);
 
-        if (monitorValue.isWildcard) {
+        if (monitorValue.enableWildcard) {
             if (monitorValue.now instanceof ObserveWrappedKeyedMeta) {
                 (monitorValue.now as ObserveWrappedKeyedMeta).addRefAnyKey();
             } else if (monitorValue.now instanceof IObservedAnyProp) {
@@ -163,19 +168,19 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
     public now: Any;
     public path: string;
     public monitor: MonitorFunctionDecorator;
-    public isWildcard: boolean;
+    public enableWildcard: boolean;
 
     private dirty_: boolean = false;
     private readonly lambda: () => Any;
 
     constructor(path: string, lambda: () => Any, monitor: MonitorFunctionDecorator,
-        isSync: boolean, isWildcard?: boolean) {
+        isSync: boolean, enableWildcard?: boolean) {
         this.id = isSync ? MonitorFunctionDecorator.nextSyncWatchId_++ : MonitorFunctionDecorator.nextWatchId_++;
         this.path = path;
         this.lambda = lambda;
         this.weakThis = new WeakRef<ITrackedDecoratorRef>(this);
         this.monitor = monitor;
-        this.isWildcard = isWildcard === undefined? false : isWildcard; // isWildcard ?? false
+        this.enableWildcard = enableWildcard === undefined? false : enableWildcard; // isWildcard ?? false
         ObserveSingleton.instance.addToTrackedRegistry(this, this.reverseBindings);
     }
 
@@ -201,7 +206,7 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
                 this.before = this.now;
                 return false;
             }
-            this.dirty_ = this.isWildcard || (this.before !== this.now);
+            this.dirty_ = this.enableWildcard || (this.before !== this.now);
             return this.dirty_;
         } catch (e) {
             StateMgmtConsole.log(`Caught exception while reading monitor path ${this.path} value: ${e}.`);

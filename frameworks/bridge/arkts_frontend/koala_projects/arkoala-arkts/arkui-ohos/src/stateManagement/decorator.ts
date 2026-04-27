@@ -18,7 +18,6 @@ import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
-import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 import { IncrementalNode } from '@koalaui/runtime';
 import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
@@ -136,7 +135,11 @@ export interface IMutableKeyedStateMeta {
     // OB_ARRAY_ANY_KEY) fire ONCE total instead of once per key. Each key
     // still goes through the per-key fireChange, so non-overlapping bindings
     // still see their own notification.
-    fireChangeBatch(keys: Array<string>): void;
+    // ReadonlyArray<string> at the boundary so callers can pass hoisted
+    // immutable batches (e.g. WrappedArray.LENGTH_AND_ANY_KEY) without
+    // worrying about a future mutation slipping in. Array<string> still
+    // satisfies the type since Array implements ReadonlyArray.
+    fireChangeBatch(keys: ReadonlyArray<string>): void;
 }
 
 export interface IObserve {
@@ -297,7 +300,9 @@ export interface ISubscribedWatches extends IWatchSubscriberRegister {
     executeOnSubscribingWatches(propertyName: string): void;
 }
 
-export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {
+export interface IComputedDecoratedVariable<T> extends ITrackedDecoratorRef, IDecoratedImmutableVariable<T> {
+    isFreeze(): boolean;
+    fireChange(): void;
     setOwner(owningView: IVariableOwner);
     resetOnReuse(): void;
 }

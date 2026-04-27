@@ -248,7 +248,7 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
     // mutation, not once per key. Each key still goes through the per-key
     // fireChange, so non-overlapping bindings still see their own
     // notification.
-    public fireChangeBatch(keys: Array<string>): void {
+    public fireChangeBatch(keys: ReadonlyArray<string>): void {
         ObserveSingleton.instance.beginSyncMonitorBatch();
         try {
             keys.forEach((key: string) => this.fireChange(key));

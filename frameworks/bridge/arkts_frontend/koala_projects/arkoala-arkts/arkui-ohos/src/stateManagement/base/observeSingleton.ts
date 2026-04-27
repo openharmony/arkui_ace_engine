@@ -19,7 +19,7 @@ import { IBindingSource, ITrackedDecoratorRef } from './mutableStateMeta';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
 import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
-import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
+import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { PersistenceV2Impl } from '../storage/persistenceV2';
 import { GlobalStateManager } from '@koalaui/runtime';
 
@@ -252,7 +252,11 @@ export class ObserveSingleton implements IObserve {
             if (!computedPropRef) {
                 return;
             }
-            const computed = computedPropRef as IComputedDecoratorRef;
+            // Cast to the concrete @Computed class (mirrors how the monitor
+            // drain casts to MonitorFunctionDecorator) — this is the only
+            // call site that needs isFreeze/fireChange on a tracked ref, so
+            // a one-purpose interface earns its keep less than the symmetry.
+            const computed = computedPropRef as ComputedDecoratedVariable<Any>;
             if (computed.isFreeze()) {
                 this.computedPropRefsDelayed_.add(computedPropWeak);
             } else {
