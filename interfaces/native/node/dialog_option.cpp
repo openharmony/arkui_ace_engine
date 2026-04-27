@@ -19,6 +19,7 @@
 #include "node_model.h"
 
 #include "base/error/error_code.h"
+#include "interfaces/native/native_error_message_macros.h"
 #include "base/utils/utils.h"
 
 #ifdef __cplusplus
@@ -192,7 +193,11 @@ uint32_t ParseColor(const ArkUI_AttributeItem* item, int32_t index, bool& isColo
 ArkUI_CustomDialogOptions* OH_ArkUI_CustomDialog_CreateOptions(ArkUI_NodeHandle content)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !content) {
+    if (!impl) {
+        return nullptr;
+    }
+    if (!content) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "content is null");
         return nullptr;
     }
     auto dialog = impl->getDialogAPI()->create();
@@ -204,7 +209,11 @@ ArkUI_CustomDialogOptions* OH_ArkUI_CustomDialog_CreateOptions(ArkUI_NodeHandle 
 void OH_ArkUI_CustomDialog_DisposeOptions(ArkUI_CustomDialogOptions* options)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
+        return;
+    }
+    if (!options) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
         return;
     }
     impl->getDialogAPI()->dispose(options->handle);
@@ -215,19 +224,29 @@ void OH_ArkUI_CustomDialog_DisposeOptions(ArkUI_CustomDialogOptions* options)
 int32_t OH_ArkUI_CustomDialog_OpenDialog(ArkUI_CustomDialogOptions* options, void (*callback)(int32_t dialogId))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->openCustomDialog(options->handle, callback);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->openCustomDialog(options->handle, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_UpdateDialog(ArkUI_CustomDialogOptions* options, void (*callback)(int32_t dialogId))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->updateCustomDialog(options->handle, callback);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->updateCustomDialog(options->handle, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_CloseDialog(int32_t dialogId)
@@ -236,137 +255,204 @@ int32_t OH_ArkUI_CustomDialog_CloseDialog(int32_t dialogId)
     if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->closeCustomDialog(dialogId);
+    auto result = impl->getDialogAPI()->closeCustomDialog(dialogId);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetLevelMode(ArkUI_CustomDialogOptions* options, ArkUI_LevelMode levelMode)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     if (static_cast<int32_t>(levelMode) < static_cast<int32_t>(ARKUI_LEVEL_MODE_OVERLAY) ||
         static_cast<int32_t>(levelMode) > static_cast<int32_t>(ARKUI_LEVEL_MODE_EMBEDDED)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "levelMode is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setLevelMode(options->handle, static_cast<int32_t>(levelMode));
+    auto result = impl->getDialogAPI()->setLevelMode(options->handle, static_cast<int32_t>(levelMode));
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetLevelUniqueId(ArkUI_CustomDialogOptions* options, int32_t uniqueId)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     if (uniqueId < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "uniqueId is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setLevelUniqueId(options->handle, uniqueId);
+    auto result = impl->getDialogAPI()->setLevelUniqueId(options->handle, uniqueId);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetImmersiveMode(ArkUI_CustomDialogOptions* options, ArkUI_ImmersiveMode immersiveMode)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     if (static_cast<int32_t>(immersiveMode) < static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_DEFAULT) ||
         static_cast<int32_t>(immersiveMode) > static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_EXTEND)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "immersiveMode is invalid");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setImmersiveMode(options->handle, static_cast<int32_t>(immersiveMode));
+    auto result = impl->getDialogAPI()->setImmersiveMode(options->handle, static_cast<int32_t>(immersiveMode));
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetBackgroundColor(ArkUI_CustomDialogOptions* options, uint32_t backgroundColor)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setBackgroundColor(options->handle, backgroundColor);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setBackgroundColor(options->handle, backgroundColor);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetCornerRadius(
     ArkUI_CustomDialogOptions* options, float topLeft, float topRight, float bottomLeft, float bottomRight)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setCornerRadius(options->handle, topLeft, topRight, bottomLeft, bottomRight);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setCornerRadius(options->handle, topLeft, topRight, bottomLeft, bottomRight);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetBorderWidth(
     ArkUI_CustomDialogOptions* options, float top, float right, float bottom, float left, ArkUI_LengthMetricUnit unit)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setBorderWidth(options->handle, top, right, bottom, left, unit);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setBorderWidth(options->handle, top, right, bottom, left, unit);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetBorderColor(
     ArkUI_CustomDialogOptions* options, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setBorderColor(options->handle, top, right, bottom, left);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setBorderColor(options->handle, top, right, bottom, left);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetBorderStyle(
     ArkUI_CustomDialogOptions* options, int32_t top, int32_t right, int32_t bottom, int32_t left)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setBorderStyle(options->handle, top, right, bottom, left);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setBorderStyle(options->handle, top, right, bottom, left);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetWidth(ArkUI_CustomDialogOptions* options, float width, ArkUI_LengthMetricUnit unit)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setWidth(options->handle, width, unit);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setWidth(options->handle, width, unit);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetHeight(ArkUI_CustomDialogOptions* options, float height, ArkUI_LengthMetricUnit unit)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setHeight(options->handle, height, unit);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setHeight(options->handle, height, unit);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetShadow(ArkUI_CustomDialogOptions* options, ArkUI_ShadowStyle shadow)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setShadow(options->handle, shadow);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setShadow(options->handle, shadow);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetCustomShadow(
     ArkUI_CustomDialogOptions* options, const ArkUI_AttributeItem* customShadow)
 {
+    CHECK_NULL_RETURN_WITH_MESSAGE(customShadow, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "customShadow is null");
     if (customShadow->size == 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow size is 0");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     ArkUIInt32orFloat32 shadows[ALLOW_SIZE_7] = { 0, { .i32 = NUM_2 }, 0, 0, { .i32 = 0 }, { .u32 = 0 }, { .i32 = 0 } };
     int length = customShadow->size;
     if (length > NUM_0) {
         if (OHOS::Ace::LessNotEqual(customShadow->value[NUM_0].f32, 0.0f)) {
+            SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow radius is less than 0");
             return ARKUI_ERROR_CODE_PARAM_INVALID;
         }
         shadows[NUM_0].f32 = customShadow->value[NUM_0].f32; // radius
@@ -379,6 +465,7 @@ int32_t OH_ArkUI_CustomDialog_SetCustomShadow(
     }
     if (length > NUM_4) {
         if (!OHOS::Ace::InRegion(NUM_0, NUM_1, customShadow->value[NUM_4].i32)) {
+            SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow colorStrategy is invalid");
             return ARKUI_ERROR_CODE_PARAM_INVALID;
         }
         shadows[NUM_4].i32 = customShadow->value[NUM_4].i32;
@@ -386,6 +473,7 @@ int32_t OH_ArkUI_CustomDialog_SetCustomShadow(
     if (length > NUM_5) {
         if (customShadow->value[NUM_1].i32) {
             if (!OHOS::Ace::InRegion(NUM_0, NUM_2, customShadow->value[NUM_5].i32)) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "customShadow shadowColorStrategy is invalid");
                 return ARKUI_ERROR_CODE_PARAM_INVALID;
             }
             shadows[NUM_1].i32 = COLOR_STRATEGY_STYLE;
@@ -398,67 +486,105 @@ int32_t OH_ArkUI_CustomDialog_SetCustomShadow(
     if (length > NUM_6) {
         shadows[NUM_6].i32 = customShadow->value[NUM_6].i32;
     }
-    return impl->getDialogAPI()->setCustomShadow(options->handle, shadows, ALLOW_SIZE_7);
+    auto result = impl->getDialogAPI()->setCustomShadow(options->handle, shadows, ALLOW_SIZE_7);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetBackgroundBlurStyle(ArkUI_CustomDialogOptions* options, ArkUI_BlurStyle blurStyle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setBackgroundBlurStyle(options->handle, blurStyle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setBackgroundBlurStyle(options->handle, blurStyle);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetAlignment(
     ArkUI_CustomDialogOptions* options, int32_t alignment, float offsetX, float offsetY)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setContentAlignment(options->handle, alignment, offsetX, offsetY);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setContentAlignment(options->handle, alignment, offsetX, offsetY);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetModalMode(ArkUI_CustomDialogOptions* options, bool isModal)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setModalMode(options->handle, isModal);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setModalMode(options->handle, isModal);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetAutoCancel(ArkUI_CustomDialogOptions* options, bool autoCancel)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setAutoCancel(options->handle, autoCancel);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setAutoCancel(options->handle, autoCancel);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetSubwindowMode(ArkUI_CustomDialogOptions* options, bool showInSubwindow)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setSubwindowMode(options->handle, showInSubwindow);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setSubwindowMode(options->handle, showInSubwindow);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetMask(
     ArkUI_CustomDialogOptions* options, uint32_t maskColor, const ArkUI_Rect* maskRect)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     if (maskRect) {
         ArkUIRect rect = { maskRect->x, maskRect->y, maskRect->width, maskRect->height };
-        return impl->getDialogAPI()->setMask(options->handle, maskColor, &rect);
+        auto result = impl->getDialogAPI()->setMask(options->handle, maskColor, &rect);
+        if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+            SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+        }
+        return result;
     } else {
-        return impl->getDialogAPI()->setMask(options->handle, maskColor, nullptr);
+        auto result = impl->getDialogAPI()->setMask(options->handle, maskColor, nullptr);
+        if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+            SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+        }
+        return result;
     }
 }
 
@@ -466,90 +592,134 @@ int32_t OH_ArkUI_CustomDialog_SetKeyboardAvoidMode(
     ArkUI_CustomDialogOptions* options, ArkUI_KeyboardAvoidMode keyboardAvoidMode)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setKeyboardAvoidMode(options->handle, keyboardAvoidMode);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setKeyboardAvoidMode(options->handle, keyboardAvoidMode);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetHoverModeEnabled(ArkUI_CustomDialogOptions* options, bool enabled)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->enableHoverMode(options->handle, enabled);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->enableHoverMode(options->handle, enabled);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetHoverModeArea(
     ArkUI_CustomDialogOptions* options, ArkUI_HoverModeAreaType hoverModeAreaType)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->setHoverModeArea(options->handle, hoverModeAreaType);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->setHoverModeArea(options->handle, hoverModeAreaType);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_RegisterOnWillDismissCallback(
     ArkUI_CustomDialogOptions* options, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->registerOnWillDismissWithUserData(options->handle, userData, callback);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->registerOnWillDismissWithUserData(options->handle, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_RegisterOnWillAppearCallback(
     ArkUI_CustomDialogOptions* options, void* userData, void (*callback)(void* userData))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->registerOnWillAppear(options->handle, userData, callback);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->registerOnWillAppear(options->handle, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_RegisterOnDidAppearCallback(
     ArkUI_CustomDialogOptions* options, void* userData, void (*callback)(void* userData))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->registerOnDidAppear(options->handle, userData, callback);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->registerOnDidAppear(options->handle, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_RegisterOnWillDisappearCallback(
     ArkUI_CustomDialogOptions* options, void* userData, void (*callback)(void* userData))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->registerOnWillDisappear(options->handle, userData, callback);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->registerOnWillDisappear(options->handle, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback(
     ArkUI_CustomDialogOptions* options, void* userData, void (*callback)(void* userData))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    return impl->getDialogAPI()->registerOnDidDisappear(options->handle, userData, callback);
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    auto result = impl->getDialogAPI()->registerOnDidDisappear(options->handle, userData, callback);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions(
     ArkUI_CustomDialogOptions* options, const ArkUI_AttributeItem* backgroundBlurStyleOptions)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(backgroundBlurStyleOptions, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "backgroundBlurStyleOptions is null");
     auto size = backgroundBlurStyleOptions->size;
     if (size < REQUIRED_ONE_PARAM) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "backgroundBlurStyleOptions size is less than 1");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int32_t colorMode = ParseColorMode(backgroundBlurStyleOptions, BLURSTYLE_COLOR_MODE);
@@ -572,19 +742,27 @@ int32_t OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions(
     uintArray[NUM_0] = grayScaleBlack;
     uintArray[NUM_1] = grayScaleWhite;
     uintArray[NUM_2] = inactiveColor;
-    return impl->getDialogAPI()->setBackgroundBlurStyleOptions(
+    auto result = impl->getDialogAPI()->setBackgroundBlurStyleOptions(
         options->handle, &intArray, scale, &uintArray, isValidColor);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_CustomDialog_SetBackgroundEffect(
     ArkUI_CustomDialogOptions* options, const ArkUI_AttributeItem* backgroundEffect)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !options) {
+    if (!impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    CHECK_NULL_RETURN_WITH_MESSAGE(options, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(backgroundEffect, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "backgroundEffect is null");
     auto size = backgroundEffect->size;
     if (size < REQUIRED_ONE_PARAM) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "backgroundEffect size is less than 1");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     float radius = ParseRadius(backgroundEffect, EFFECT_RADIUS);
@@ -613,7 +791,11 @@ int32_t OH_ArkUI_CustomDialog_SetBackgroundEffect(
     int boolArray[NUM_2];
     boolArray[NUM_0] = isColor;
     boolArray[NUM_1] = isValidColor;
-    return impl->getDialogAPI()->setBackgroundEffect(options->handle, &floatArray, &intArray, &uintArray, &boolArray);
+    auto result = impl->getDialogAPI()->setBackgroundEffect(options->handle, &floatArray, &intArray, &uintArray, &boolArray);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 #ifdef __cplusplus

@@ -712,3 +712,600 @@ HWTEST_F(DialogModelTest, DialogModelTest046, TestSize.Level1)
     Dispose(nativeDialogHandle);
     nativeDialogHandle = nullptr;
 }
+
+/**
+ * @tc.name: DialogModelTest047
+ * @tc.desc: Test SetContent error message when handle is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest047, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle nodeHandle = new ArkUI_Node();
+    int32_t ret = SetContent(nullptr, nodeHandle);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("handle is null"), std::string::npos);
+    delete nodeHandle;
+}
+
+/**
+ * @tc.name: DialogModelTest048
+ * @tc.desc: Test SetContent error message when content is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest048, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetContent(nativeDialogHandle, nullptr);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("content is null"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest049
+ * @tc.desc: Test SetCustomShadow error message when customShadow is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest049, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetCustomShadow(nativeDialogHandle, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("customShadow is null"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest050
+ * @tc.desc: Test SetCustomShadow error message when customShadow size is 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest050, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    ArkUI_AttributeItem item = { nullptr, 0 };
+    int32_t ret = SetCustomShadow(nativeDialogHandle, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("customShadow size is 0"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest051
+ * @tc.desc: Test SetBackgroundBlurStyleOptions error message when parameter is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest051, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetBackgroundBlurStyleOptions(nativeDialogHandle, nullptr);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("backgroundBlurStyleOptions is null"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest052
+ * @tc.desc: Test SetBackgroundEffect error message when parameter is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest052, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetBackgroundEffect(nativeDialogHandle, nullptr);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("backgroundEffect is null"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest053
+ * @tc.desc: Test OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss error message when event is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest053, TestSize.Level1)
+{
+    OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(nullptr, true);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("event is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: DialogModelTest054
+ * @tc.desc: Test OH_ArkUI_DialogDismissEvent_GetUserData error message when event is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest054, TestSize.Level1)
+{
+    void* ret = OH_ArkUI_DialogDismissEvent_GetUserData(nullptr);
+    EXPECT_EQ(ret, nullptr);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("event is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: DialogModelTest055
+ * @tc.desc: Test OH_ArkUI_DialogDismissEvent_GetDismissReason error message when event is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest055, TestSize.Level1)
+{
+    int32_t ret = OH_ArkUI_DialogDismissEvent_GetDismissReason(nullptr);
+    EXPECT_EQ(ret, -1);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("event is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: DialogModelTest056
+ * @tc.desc: Test SetLevelMode error message when levelMode is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest056, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetLevelMode(nativeDialogHandle, static_cast<ArkUI_LevelMode>(-1));
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("levelMode is invalid"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest057
+ * @tc.desc: Test SetImmersiveMode error message when immersiveMode is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest057, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetImmersiveMode(nativeDialogHandle, static_cast<ArkUI_ImmersiveMode>(-1));
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("immersiveMode is invalid"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest058
+ * @tc.desc: Test SetLevelOrder error message when levelOrder is out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest058, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetLevelOrder(nativeDialogHandle, -200000.0);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("levelOrder is out of range"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest059
+ * @tc.desc: Test SetContent SET_ERROR_FUNCTION_NAME when backend returns error.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest059, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    ArkUI_NodeHandle nodeHandle = new ArkUI_Node();
+    int32_t ret = SetContent(nativeDialogHandle, nodeHandle);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetContent"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+    delete nodeHandle;
+}
+
+/**
+ * @tc.name: DialogModelTest060
+ * @tc.desc: Test Show SET_ERROR_FUNCTION_NAME when backend returns error.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest060, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = Show(nativeDialogHandle, false);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("Show"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest061
+ * @tc.desc: Test Close SET_ERROR_FUNCTION_NAME when backend returns error.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest061, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = Close(nativeDialogHandle);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("Close"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest062
+ * @tc.desc: Test SetShadow SET_ERROR_FUNCTION_NAME when backend returns error for invalid shadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest062, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetShadow(nativeDialogHandle, static_cast<ArkUI_ShadowStyle>(-1));
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetShadow"), std::string::npos);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest063
+ * @tc.desc: Test SetContent SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest063, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    ArkUI_NodeHandle nodeHandle = new ArkUI_Node();
+    int32_t ret = SetContent(nativeDialogHandle, nodeHandle);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetContent"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+    delete nodeHandle;
+}
+
+/**
+ * @tc.name: DialogModelTest064
+ * @tc.desc: Test RegisterOnWillDismissWithUserData SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest064, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = RegisterOnWillDismissWithUserData(nativeDialogHandle, nullptr, nullptr);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("RegisterOnWillDismissWithUserData"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest065
+ * @tc.desc: Test RemoveContent SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest065, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = RemoveContent(nativeDialogHandle);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("RemoveContent"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest066
+ * @tc.desc: Test SetModalMode SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest066, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetModalMode(nativeDialogHandle, true);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetModalMode"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest067
+ * @tc.desc: Test SetAutoCancel SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest067, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetAutoCancel(nativeDialogHandle, true);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetAutoCancel"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest068
+ * @tc.desc: Test SetBackgroundColor SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest068, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetBackgroundColor(nativeDialogHandle, 0);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetBackgroundColor"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest069
+ * @tc.desc: Test SetCornerRadius SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest069, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetCornerRadius(nativeDialogHandle, 1.0f, 2.0f, 3.0f, 4.0f);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetCornerRadius"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest070
+ * @tc.desc: Test SetGridColumnCount SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest070, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetGridColumnCount(nativeDialogHandle, 4);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetGridColumnCount"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest071
+ * @tc.desc: Test EnableCustomStyle SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest071, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = EnableCustomStyle(nativeDialogHandle, true);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("EnableCustomStyle"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest072
+ * @tc.desc: Test EnableCustomAnimation SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest072, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = EnableCustomAnimation(nativeDialogHandle, true);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("EnableCustomAnimation"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest073
+ * @tc.desc: Test RegisterOnWillDismiss SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest073, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    ArkUI_OnWillDismissEvent eventHandler = OnWillDismissEvent;
+    int32_t ret = RegisterOnWillDismiss(nativeDialogHandle, eventHandler);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("RegisterOnWillDismiss"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest074
+ * @tc.desc: Test SetFocusable SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest074, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetFocusable(nativeDialogHandle, true);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetFocusable"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest075
+ * @tc.desc: Test SetBackgroundBlurStyle SET_ERROR_FUNCTION_NAME when controller is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest075, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = new ArkUI_NativeDialog({ nullptr });
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetBackgroundBlurStyle(nativeDialogHandle, ARKUI_BLUR_STYLE_COMPONENT_THIN);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find("SetBackgroundBlurStyle"), std::string::npos);
+    delete nativeDialogHandle;
+    nativeDialogHandle = nullptr;
+}
