@@ -158,7 +158,7 @@ RefPtr<FrameNode> CalendarDialogViewTestNg::CalendarDialogShow(RefPtr<FrameNode>
  * @tc.desc: DisableResetOptionButtonColor Function Test
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor001, TestSize.Level1)
+HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor001, TestSize.Level0)
 {
     CreateCalendarPicker();
     auto dialogPattern = AceType::MakeRefPtr<CalendarDialogPattern>();
@@ -202,7 +202,7 @@ HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor001, TestSize.Le
  * @tc.desc: DisableResetOptionButtonColor Function Test
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor002, TestSize.Level1)
+HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor002, TestSize.Level0)
 {
     CreateCalendarPicker();
     auto dialogPattern = AceType::MakeRefPtr<CalendarDialogPattern>();
@@ -241,7 +241,7 @@ HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor002, TestSize.Le
  * @tc.desc: DisableResetOptionButtonColor Function Test
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor003, TestSize.Level1)
+HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor003, TestSize.Level0)
 {
     CreateCalendarPicker();
     auto dialogPattern = AceType::MakeRefPtr<CalendarDialogPattern>();
@@ -280,7 +280,7 @@ HWTEST_F(CalendarDialogViewTestNg, DisableResetOptionButtonColor003, TestSize.Le
  * @tc.desc: SetTitleIdealSize Function Test
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarDialogViewTestNg, SetTitleIdealSize001, TestSize.Level1)
+HWTEST_F(CalendarDialogViewTestNg, SetTitleIdealSize001, TestSize.Level0)
 {
     MockContainer::Current()->SetApiTargetVersion(-99);
     CreateCalendarPicker();
@@ -329,7 +329,7 @@ HWTEST_F(CalendarDialogViewTestNg, SetTitleIdealSize001, TestSize.Level1)
  * @tc.desc: SetCalendarIdealSize Function Test
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarDialogViewTestNg, SetCalendarIdealSize001, TestSize.Level1)
+HWTEST_F(CalendarDialogViewTestNg, SetCalendarIdealSize001, TestSize.Level0)
 {
     MockContainer::Current()->SetApiTargetVersion(99);
     CreateCalendarPicker();
@@ -371,7 +371,7 @@ HWTEST_F(CalendarDialogViewTestNg, SetCalendarIdealSize001, TestSize.Level1)
  * @tc.desc: CreateButtonNode Function Test
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarDialogViewTestNg, CreateButtonNode001, TestSize.Level1)
+HWTEST_F(CalendarDialogViewTestNg, CreateButtonNode001, TestSize.Level0)
 {
     CreateCalendarPicker();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -415,7 +415,7 @@ HWTEST_F(CalendarDialogViewTestNg, CreateButtonNode001, TestSize.Level1)
  * @tc.desc: UpdateButtonLayoutProperty Function Test
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarDialogViewTestNg, UpdateButtonLayoutProperty001, TestSize.Level1)
+HWTEST_F(CalendarDialogViewTestNg, UpdateButtonLayoutProperty001, TestSize.Level0)
 {
     MockContainer::Current()->SetApiTargetVersion(99);
     CreateCalendarPicker();

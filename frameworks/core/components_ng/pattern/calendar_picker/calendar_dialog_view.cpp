@@ -1150,8 +1150,9 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
     } else {
         ApplyBlurStyleColorModeForApi26(dialogNode, styleOption);
     }
-
-    renderContext->UpdateBackBlurStyle(styleOption);
+    if (!renderContext->GetSystemMaterial()) {
+        renderContext->UpdateBackBlurStyle(styleOption);
+    }
     if (dialogProperties.effectOption.has_value()) {
         if (dialogProperties.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
             pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
