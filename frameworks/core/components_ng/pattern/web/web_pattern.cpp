@@ -6479,6 +6479,9 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 bool WebPattern::OnCursorChange(
     const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo)
 {
+    if (ShouldBlockCursorChangeWhenInvisible(cursorType)) {
+        return true;
+    }
     auto [type, info] = GetAndUpdateCursorStyleInfo(cursorType, cursorInfo);
     if (mouseEventDeviceId_ == RESERVED_DEVICEID1 || mouseEventDeviceId_ == RESERVED_DEVICEID2) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
@@ -6516,6 +6519,23 @@ bool WebPattern::OnCursorChange(
             mouseStyle->SetPointerStyle(windowId, pointStyle);
         }
     }
+    return true;
+}
+
+bool WebPattern::ShouldBlockCursorChangeWhenInvisible(const OHOS::NWeb::CursorType& cursorType)
+{
+    if (isVisible_ || cursorType == OHOS::NWeb::CursorType::CT_POINTER) {
+        return false;
+    }
+    if (cursorType == OHOS::NWeb::CursorType::CT_LOCK) {
+        isMouseLocked_ = true;
+    } else if (cursorType == OHOS::NWeb::CursorType::CT_UNLOCK) {
+        isMouseLocked_ = false;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "Block cursor change when web invisible, webId: %{public}d, type: %{public}d, currentType: %{public}d, "
+        "isMouseLocked: %{public}d", GetWebId(), cursorType, cursorType_, isMouseLocked_);
+
     return true;
 }
 

@@ -1446,6 +1446,7 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    bool ShouldBlockCursorChangeWhenInvisible(const OHOS::NWeb::CursorType& type);
     void ProcessCustomCursor(std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
     int32_t GetVisibleViewportAvoidHeight();
