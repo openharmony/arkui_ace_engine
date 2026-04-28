@@ -322,7 +322,7 @@ const GENERATED_ArkUINumericTextTransitionAccessor* GetNumericTextTransitionAcce
 const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor();
 const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor();
 const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor();
-const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
+const GENERATED_ArkUIPanGestureOptionsProxyAccessor* GetPanGestureOptionsProxyAccessor();
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor();
 const GENERATED_ArkUIParticleHelperAccessor* GetParticleHelperAccessor();
@@ -674,7 +674,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetOffscreenCanvasAccessor,
         GetOffscreenCanvasRenderingContext2DAccessor,
         GetPanGestureEventAccessor,
-        GetPanGestureOptionsAccessor,
+        GetPanGestureOptionsProxyAccessor,
         GetPanRecognizerAccessor,
         GetParagraphStyleAccessor,
         GetParticleHelperAccessor,

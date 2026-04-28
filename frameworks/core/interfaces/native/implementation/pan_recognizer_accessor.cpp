@@ -16,7 +16,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "pan_recognizer_peer.h"
-#include "pan_gesture_options_peer.h"
+#include "pan_gesture_options_proxy_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -34,14 +34,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_PanGestureOptions GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
+Ark_PanGestureOptionsProxy GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     auto options = peer->GetPanGestureOptions();
     CHECK_NULL_RETURN(options, nullptr);
-    auto panGestureOptionsPeer = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
+    auto panGestureOptionsPeer = PeerUtils::CreatePeer<PanGestureOptionsProxyPeer>();
     panGestureOptionsPeer->handler = options;
-    return reinterpret_cast<Ark_PanGestureOptions>(panGestureOptionsPeer);
+    return reinterpret_cast<Ark_PanGestureOptionsProxy>(panGestureOptionsPeer);
 }
 Ark_PanDirection GetDirectionImpl(Ark_PanRecognizer peer)
 {

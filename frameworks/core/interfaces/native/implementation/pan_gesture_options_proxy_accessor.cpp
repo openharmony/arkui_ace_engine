@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
+#include "core/interfaces/native/implementation/pan_gesture_options_proxy_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -41,20 +41,20 @@ void AssignCast(std::optional<PanGestureOptionsInfo>& dst, const Ark_PanGestureH
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace PanGestureOptionsAccessor {
+namespace PanGestureOptionsProxyAccessor {
 namespace {
     constexpr int32_t DEFAULT_PAN_FINGERS = 1;
     constexpr int32_t DEFAULT_MAX_PAN_FINGERS = 10;
     Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
     constexpr auto DEFAULT_PAN_DIRECTION = PanDirection{};
 }
-void DestroyPeerImpl(Ark_PanGestureOptions peer)
+void DestroyPeerImpl(Ark_PanGestureOptionsProxy peer)
 {
     delete peer;
 }
-Ark_PanGestureOptions ConstructImpl(const Opt_PanGestureHandlerOptions* value)
+Ark_PanGestureOptionsProxy ConstructImpl(const Opt_PanGestureHandlerOptions* value)
 {
-    auto peer = new PanGestureOptionsPeer();
+    auto peer = new PanGestureOptionsProxyPeer();
     peer->handler = Referenced::MakeRefPtr<PanGestureOption>();
     auto fingers = DEFAULT_PAN_FINGERS;
     auto distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
@@ -84,7 +84,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<Ark_NativePointer>(&DestroyPeerImpl);
 }
-void SetDirectionImpl(Ark_PanGestureOptions peer,
+void SetDirectionImpl(Ark_PanGestureOptionsProxy peer,
                       Ark_PanDirection value)
 {
     CHECK_NULL_VOID(peer);
@@ -92,7 +92,7 @@ void SetDirectionImpl(Ark_PanGestureOptions peer,
     auto convDirection = Converter::OptConvert<PanDirection>(value);
     peer->handler->SetDirection(convDirection.value_or(DEFAULT_PAN_DIRECTION));
 }
-void SetDistanceImpl(Ark_PanGestureOptions peer,
+void SetDistanceImpl(Ark_PanGestureOptionsProxy peer,
                      Ark_Float64 value)
 {
     CHECK_NULL_VOID(peer);
@@ -106,7 +106,7 @@ void SetDistanceImpl(Ark_PanGestureOptions peer,
     }
     peer->handler->SetDistance(distance);
 }
-void SetFingersImpl(Ark_PanGestureOptions peer,
+void SetFingersImpl(Ark_PanGestureOptionsProxy peer,
                     Ark_Int32 value)
 {
     CHECK_NULL_VOID(peer);
@@ -117,14 +117,14 @@ void SetFingersImpl(Ark_PanGestureOptions peer,
     fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
     peer->handler->SetFingers(fingers);
 }
-Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
+Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptionsProxy peer)
 {
     CHECK_NULL_RETURN(peer, Converter::INVALID_ENUM_VAL<Ark_PanDirection>);
     CHECK_NULL_RETURN(peer->handler,  Converter::INVALID_ENUM_VAL<Ark_PanDirection>);
     auto direction = peer->handler->GetDirection();
     return Converter::ArkValue<Ark_PanDirection>(direction, Converter::FC);
 }
-Ark_Float64 GetDistanceImpl(Ark_PanGestureOptions peer)
+Ark_Float64 GetDistanceImpl(Ark_PanGestureOptionsProxy peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, errValue);
@@ -135,20 +135,20 @@ Ark_Float64 GetDistanceImpl(Ark_PanGestureOptions peer)
     auto distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
     return Converter::ArkValue<Ark_Float64>(distance_new);
 }
-} // PanGestureOptionsAccessor
-const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
+} // PanGestureOptionsProxyAccessor
+const GENERATED_ArkUIPanGestureOptionsProxyAccessor* GetPanGestureOptionsProxyAccessor()
 {
-    static const GENERATED_ArkUIPanGestureOptionsAccessor PanGestureOptionsAccessorImpl {
-        PanGestureOptionsAccessor::DestroyPeerImpl,
-        PanGestureOptionsAccessor::ConstructImpl,
-        PanGestureOptionsAccessor::GetFinalizerImpl,
-        PanGestureOptionsAccessor::SetDirectionImpl,
-        PanGestureOptionsAccessor::SetDistanceImpl,
-        PanGestureOptionsAccessor::SetFingersImpl,
-        PanGestureOptionsAccessor::GetDirectionImpl,
-        PanGestureOptionsAccessor::GetDistanceImpl,
+    static const GENERATED_ArkUIPanGestureOptionsProxyAccessor PanGestureOptionsProxyAccessorImpl {
+        PanGestureOptionsProxyAccessor::DestroyPeerImpl,
+        PanGestureOptionsProxyAccessor::ConstructImpl,
+        PanGestureOptionsProxyAccessor::GetFinalizerImpl,
+        PanGestureOptionsProxyAccessor::SetDirectionImpl,
+        PanGestureOptionsProxyAccessor::SetDistanceImpl,
+        PanGestureOptionsProxyAccessor::SetFingersImpl,
+        PanGestureOptionsProxyAccessor::GetDirectionImpl,
+        PanGestureOptionsProxyAccessor::GetDistanceImpl,
     };
-    return &PanGestureOptionsAccessorImpl;
+    return &PanGestureOptionsProxyAccessorImpl;
 }
 
 }

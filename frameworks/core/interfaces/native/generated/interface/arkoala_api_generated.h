@@ -730,9 +730,9 @@ typedef struct Opt_OnShowFileSelectorEvent Opt_OnShowFileSelectorEvent;
 typedef struct PanGestureEventPeer PanGestureEventPeer;
 typedef struct PanGestureEventPeer* Ark_PanGestureEvent;
 typedef struct Opt_PanGestureEvent Opt_PanGestureEvent;
-typedef struct PanGestureOptionsPeer PanGestureOptionsPeer;
-typedef struct PanGestureOptionsPeer* Ark_PanGestureOptions;
-typedef struct Opt_PanGestureOptions Opt_PanGestureOptions;
+typedef struct PanGestureOptionsProxyPeer PanGestureOptionsProxyPeer;
+typedef struct PanGestureOptionsProxyPeer* Ark_PanGestureOptionsProxy;
+typedef struct Opt_PanGestureOptionsProxy Opt_PanGestureOptionsProxy;
 typedef struct PanRecognizerPeer PanRecognizerPeer;
 typedef struct PanRecognizerPeer* Ark_PanRecognizer;
 typedef struct Opt_PanRecognizer Opt_PanRecognizer;
@@ -8781,10 +8781,10 @@ typedef struct Opt_PanGestureEvent {
     Ark_Tag tag;
     Ark_PanGestureEvent value;
 } Opt_PanGestureEvent;
-typedef struct Opt_PanGestureOptions {
+typedef struct Opt_PanGestureOptionsProxy {
     Ark_Tag tag;
-    Ark_PanGestureOptions value;
-} Opt_PanGestureOptions;
+    Ark_PanGestureOptionsProxy value;
+} Opt_PanGestureOptionsProxy;
 typedef struct Opt_PanRecognizer {
     Ark_Tag tag;
     Ark_PanRecognizer value;
@@ -30275,25 +30275,25 @@ typedef struct GENERATED_ArkUIPanGestureEventAccessor {
                         Ark_Float64 velocity);
 } GENERATED_ArkUIPanGestureEventAccessor;
 
-typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
-    void (*destroyPeer)(Ark_PanGestureOptions peer);
-    Ark_PanGestureOptions (*construct)(const Opt_PanGestureHandlerOptions* value);
+typedef struct GENERATED_ArkUIPanGestureOptionsProxyAccessor {
+    void (*destroyPeer)(Ark_PanGestureOptionsProxy peer);
+    Ark_PanGestureOptionsProxy (*construct)(const Opt_PanGestureHandlerOptions* value);
     Ark_NativePointer (*getFinalizer)();
-    void (*setDirection)(Ark_PanGestureOptions peer,
+    void (*setDirection)(Ark_PanGestureOptionsProxy peer,
                          Ark_PanDirection value);
-    void (*setDistance)(Ark_PanGestureOptions peer,
+    void (*setDistance)(Ark_PanGestureOptionsProxy peer,
                         Ark_Float64 value);
-    void (*setFingers)(Ark_PanGestureOptions peer,
+    void (*setFingers)(Ark_PanGestureOptionsProxy peer,
                        Ark_Int32 value);
-    Ark_PanDirection (*getDirection)(Ark_PanGestureOptions peer);
-    Ark_Float64 (*getDistance)(Ark_PanGestureOptions peer);
-} GENERATED_ArkUIPanGestureOptionsAccessor;
+    Ark_PanDirection (*getDirection)(Ark_PanGestureOptionsProxy peer);
+    Ark_Float64 (*getDistance)(Ark_PanGestureOptionsProxy peer);
+} GENERATED_ArkUIPanGestureOptionsProxyAccessor;
 
 typedef struct GENERATED_ArkUIPanRecognizerAccessor {
     void (*destroyPeer)(Ark_PanRecognizer peer);
     Ark_PanRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_PanGestureOptions (*getPanGestureOptions)(Ark_PanRecognizer peer);
+    Ark_PanGestureOptionsProxy (*getPanGestureOptions)(Ark_PanRecognizer peer);
     Ark_PanDirection (*getDirection)(Ark_PanRecognizer peer);
     Ark_Float64 (*getDistance)(Ark_PanRecognizer peer);
     Map_SourceTool_F64 (*getDistanceMap)(Ark_PanRecognizer peer);
@@ -32125,7 +32125,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIOffscreenCanvasAccessor* (*getOffscreenCanvasAccessor)();
     const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* (*getOffscreenCanvasRenderingContext2DAccessor)();
     const GENERATED_ArkUIPanGestureEventAccessor* (*getPanGestureEventAccessor)();
-    const GENERATED_ArkUIPanGestureOptionsAccessor* (*getPanGestureOptionsAccessor)();
+    const GENERATED_ArkUIPanGestureOptionsProxyAccessor* (*getPanGestureOptionsProxyAccessor)();
     const GENERATED_ArkUIPanRecognizerAccessor* (*getPanRecognizerAccessor)();
     const GENERATED_ArkUIParagraphStyleAccessor* (*getParagraphStyleAccessor)();
     const GENERATED_ArkUIParticleHelperAccessor* (*getParticleHelperAccessor)();
