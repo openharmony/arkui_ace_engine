@@ -1120,6 +1120,7 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(pattern);
+        pattern->ClearParagraphCache();
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);

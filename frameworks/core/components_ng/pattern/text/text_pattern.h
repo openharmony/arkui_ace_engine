@@ -1036,6 +1036,7 @@ public:
 
     bool GetFallbackLineSpacingStyleOptimizeFlag();
     bool SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
+    virtual void ClearParagraphCache() {};
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();

@@ -1284,6 +1284,7 @@ private:
     void HandleBlurEventReset();
     void ReportComponentChangeEvent();
     void HandleTouchedFingersCount(TouchEventInfo& info);
+    void ClearParagraphCache() override;
     // hostOverlayMod_ is the overlay modifier of rich editor,
     // while overlayMod_ is the overlay modifier of rich editor content node.
     RefPtr<TextOverlayModifier> hostOverlayMod_;
