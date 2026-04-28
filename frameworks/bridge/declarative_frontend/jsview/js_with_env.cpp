@@ -23,6 +23,8 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr int NUM_SECOND = 2;
+
 void JSWithEnv::Create(const JSCallbackInfo& info)
 {
     WithEnvModel::GetInstance()->Create();
@@ -35,7 +37,7 @@ void JSWithEnv::Pop()
 
 void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
 {
-    if (info.Length() < 2 || !info[0]->IsString()) {
+    if (info.Length() < NUM_SECOND || !info[0]->IsString()) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetEnvProperty invalid args");
         return;
     }
@@ -57,7 +59,7 @@ void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
 
 void JSWithEnv::SetCustomEnvProperty(const JSCallbackInfo& info)
 {
-    if (info.Length() < 2 || !info[0]->IsString()) {
+    if (info.Length() < NUM_SECOND || !info[0]->IsString()) {
         TAG_LOGW(AceLogTag::ACE_FOREACH, "JSWithEnv::SetCustomEnvProperty invalid args");
         return;
     }
