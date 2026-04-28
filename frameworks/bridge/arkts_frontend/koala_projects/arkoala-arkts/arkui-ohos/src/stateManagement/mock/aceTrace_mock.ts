@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 
-export type int32 = int;
-
-export function propDeepCopy<T>(value: T): T {
-  console.log('Mock variant of propDeepCopy not supported');
-  return value;
-}
-
-export function functionOverValue<Value>(value: Value | (() => Value)): boolean {
-  return value instanceof Function;
+export class AceTrace {
+    static begin(name: string): void {}
+    static start(name: string): void {}
+    static end(): void {}
 }

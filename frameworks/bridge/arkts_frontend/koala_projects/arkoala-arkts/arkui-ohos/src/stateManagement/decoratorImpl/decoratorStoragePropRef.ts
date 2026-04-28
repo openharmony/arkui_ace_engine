@@ -31,7 +31,7 @@ import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { getObservedObject, isDynamicObject } from '../../component/interop';
+import { getObservedObject, isDynamicObject } from '@component/interop';
 import { ObservedObjectRegistry, StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 export class StoragePropRefDecoratedVariable<T>

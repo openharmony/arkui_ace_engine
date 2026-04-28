@@ -26,7 +26,7 @@ interface NumberInterface {
     prop: Double;
 }
 
-interface JsonSerializable {
+interface TestJsonSerializable {
     toJson(): jsonx.JsonElement;
 }
 
@@ -49,7 +49,7 @@ const NumberInterfaceType = Class.from<NumberInterface>();
 
 class NonObservedPerson //implements JsonSerializable, JsonDeserializable
 {
-    public personname: string = "John Malkovich";
+    public personname: string = 'John Malkovich';
 
     public toJson(): jsonx.JsonElement {
         let se = jsonx.JsonElement.createString(this.personname);
@@ -65,12 +65,12 @@ export function run_persistent_storage_v2_simple(): Boolean {
     let storageBackend = new PersistentStorageMocked();
 
     const toJsonPerson = (person: NonObservedPerson) => {
-        stateMgmtConsole.log("user1 toJson, username: " + person.personname);
+        stateMgmtConsole.log('user1 toJson, username: ' + person.personname);
         return person.toJson();
     };
 
     const fromJsonPerson = (json: jsonx.JsonElement): NonObservedPerson => {
-        stateMgmtConsole.log("user1 fromJson, JSON: " + JSON.stringifyJsonElement(json));
+        stateMgmtConsole.log('user1 fromJson, JSON: ' + JSON.stringifyJsonElement(json));
         let person = new NonObservedPerson();
         person.fromJson(json);
         return person;
@@ -78,11 +78,11 @@ export function run_persistent_storage_v2_simple(): Boolean {
 
 
 
-    const ttest = tsuite("PersistenceV2Impl API ") {
+    const ttest = tsuite('PersistenceV2Impl API ') {
 
-    tcase("Saving non observed object to persistent storage") {
+    tcase('Saving non observed object to persistent storage') {
         PersistenceV2Impl.backendUpdateCountForTesting = 0;
-        let key = "PersonKey";
+        let key = 'PersonKey';
         let person = PersistenceV2.connect<NonObservedPerson>(
             NonObservedPersonType,
             key,
@@ -90,23 +90,23 @@ export function run_persistent_storage_v2_simple(): Boolean {
             fromJsonPerson,
             () => new NonObservedPerson()
         )
-        test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
-        test("Key Count 1", eq(PersistenceV2.keys().length, 1));
+        test('backendUpdateCount', eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
+        test('Key Count 1', eq(PersistenceV2.keys().length, 1));
         ObserveSingleton.instance.updateDirty();
         PersistenceV2.remove(key);
         ObserveSingleton.instance.updateDirty();
-        test("Key Count 0", eq(PersistenceV2.keys().length, 0));
+        test('Key Count 0', eq(PersistenceV2.keys().length, 0));
 
         ObserveSingleton.instance.updateDirty();
-        test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
+        test('backendUpdateCount', eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
-        test("person created", not_eq(person, undefined));
-        person!.personname = "newName";
+        test('person created', not_eq(person, undefined));
+        person!.personname = 'newName';
 
         // Trigger writing to the backend
         ObserveSingleton.instance.updateDirty();
         // Nothing was actually processed
-        test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
+        test('backendUpdateCount', eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
         PersistenceV2.remove(key);
     }

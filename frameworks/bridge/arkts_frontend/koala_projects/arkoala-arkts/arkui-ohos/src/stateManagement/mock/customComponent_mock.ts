@@ -13,13 +13,6 @@
  * limitations under the License.
  */
 
-export type int32 = int;
+export interface CustomComponentLifecycle {}
 
-export function propDeepCopy<T>(value: T): T {
-  console.log('Mock variant of propDeepCopy not supported');
-  return value;
-}
-
-export function functionOverValue<Value>(value: Value | (() => Value)): boolean {
-  return value instanceof Function;
-}
+export class CustomComponentV2<T, T_Options> {}

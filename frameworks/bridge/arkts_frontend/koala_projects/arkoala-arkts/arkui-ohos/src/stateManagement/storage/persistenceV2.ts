@@ -308,7 +308,7 @@ export class PersistenceV2Impl {
             Class.from<ArrayBuffer>()
         ];
 
-    public static readonly MIN_PERSISTENCE_ID = 0x30000000;
+    public static readonly MIN_PERSISTENCE_ID: RenderIdType = 0x30000000;
     public static nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
 
     private storageBackend_: IAniStorage | undefined = undefined;

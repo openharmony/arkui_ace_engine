@@ -221,7 +221,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public sort(comparator?: (a: T, b: T) => int): this {
         this.store_.sort(comparator);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        // We do not need to fire length change
+        // the length does not change here, closing fireChange on CONSTANT.OB_LENGTH
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch

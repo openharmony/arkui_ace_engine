@@ -15,7 +15,7 @@
 
 import { uiUtils } from './base/uiUtilsImpl';
 import { MonitorFunctionDecorator } from './decoratorImpl/decoratorMonitor';
-import { ExtendableComponent } from '../component/extendableComponent';
+import { ExtendableComponent } from '@component/extendableComponent';
 import { BusinessError } from '@ohos.base';
 import { canBeObserved as canBeObservedImpl } from './tools/stateMgmtDFX';
 import { CustomComponentV2, CustomComponentLifecycle } from '@component/customComponent';
@@ -62,6 +62,12 @@ export interface ObservedResult {
     decoratorInfo: Array<DecoratorInfo>;
 }
 
+export interface MonitorValueInfo {
+    valueCallback: () => Any;
+    path?: string;
+    observeProps?: boolean;
+}
+
 export class UIUtils {
     static makeObserved<T extends object | null | undefined>(source: T): T {
         return uiUtils.makeObserved(source, true) as T;
@@ -103,8 +109,8 @@ export class UIUtils {
 
         const callbackArray = UIUtils.unionToArray(valueCallback);
         const pathArray = UIUtils.pathToArray(options?.path);
-        const pathLambda = UIUtils.generatePathLambda(callbackArray, pathArray);
 
+        const pathLambda = UIUtils.generatePathLambda(callbackArray, pathArray, options?.isSynchronous);
         return new MonitorFunctionDecorator(pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
     }
 
@@ -152,22 +158,57 @@ export class UIUtils {
         }
     }
 
-    private static createPathInfo(callback: () => Any, path?: string): IMonitorPathInfo {
+    private static createPathInfo(callback: () => Any, path: string, observeProps: boolean): IMonitorPathInfo {
         return {
             path: path ?? '',
-            valueCallback: callback
+            valueCallback: callback,
+            enableWildcard: observeProps
         };
     }
 
-    private static generatePathLambda(callbacks: (() => Any)[], paths?: string[]): IMonitorPathInfo[] {
+    // Loops through the callbacks array and returns array of IMonitorPathInfo.
+    // The callback+options overload cannot express observeProps, so all entries
+    // are created with isWildcard=false. Callers that need props-wide observation
+    // should use the MonitorValueInfo overload and set observeProps=true.
+    private static generatePathLambda(callbacks: (() => Any)[], paths?: string[], isSynchronous?: boolean): IMonitorPathInfo[] {
         return callbacks.map((callback: () => Any, index: int): IMonitorPathInfo => {
             const currentPath: string = !paths || index >= paths.length
                 ? `${UIUtils.DEFAULT_PATH}${UIUtils.currentIndex_++}`
                 : paths[index];
-
-            return UIUtils.createPathInfo(callback, currentPath);
+            return UIUtils.createPathInfo(callback, currentPath, false);
         });
     }
+
+    private static createPathInfoArray(valueInfo: MonitorValueInfo | Array<MonitorValueInfo>,
+        isSynchronous?: boolean): IMonitorPathInfo[] {
+        // We ignore paths passed in options if any, assume path passed only as a part of MonitorValueInfo
+        // Single value
+        if(valueInfo instanceof MonitorValueInfo) {
+            const v = valueInfo as MonitorValueInfo;
+            const path = v.path ?? `${UIUtils.DEFAULT_PATH}${UIUtils.currentIndex_++}`;
+            return new Array<IMonitorPathInfo>(
+                UIUtils.createPathInfo(v.valueCallback, path, v.observeProps ?? false)
+            );
+        }
+        // Array passed
+        return valueInfo.map((value: MonitorValueInfo, _: int): IMonitorPathInfo => {
+            const currentPath: string = value.path ?? `${UIUtils.DEFAULT_PATH}${UIUtils.currentIndex_++}`;
+            return UIUtils.createPathInfo(value.valueCallback, currentPath, value.observeProps ?? false);
+        });
+    }
+
+    // New API to accept MonitorValueInfo. Wildcard-ness is carried explicitly
+    // on MonitorValueInfo.observeProps — the framework no longer parses path
+    // strings for wildcard syntax, so the path may be any user-supplied string
+    // (typically the dotted access chain the callback returns).
+    static addMonitor(valueInfo: MonitorValueInfo | Array<MonitorValueInfo>,
+        monitorCallback: (m: IMonitor) => void,
+        options?: MonitorBaseOptions): IMonitorDecoratedVariable {
+
+        const pathLambda = UIUtils.createPathInfoArray(valueInfo, options?.isSynchronous);
+        return new MonitorFunctionDecorator(pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+    }
+
 }
 
 export interface MonitorBaseOptions {

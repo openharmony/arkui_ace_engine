@@ -147,6 +147,24 @@
             ],
             "#arktheme": [
                 "./arkui/theme"
+            ],
+            "@component/customComponent": [
+                "./arkui/component/customComponent.ets"
+            ],
+            "@component/extendableComponent": [
+                "./arkui/component/extendableComponent.ets"
+            ],
+            "@component/interop": [
+                "./arkui/component/interop"
+            ],
+            "@peerNode": [
+                "./arkui/PeerNode.ets"
+            ],
+            "@aceTrace": [
+                "./arkui/base/AceTrace.ets"
+            ],
+            "@decoratorEnv": [
+                "./arkui/stateManagement/decoratorImpl/decoratorEnv.ets"
             ]
         }
     },
