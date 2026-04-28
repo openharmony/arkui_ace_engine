@@ -26,6 +26,7 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
 #include "core/common/udmf/data_load_params.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"

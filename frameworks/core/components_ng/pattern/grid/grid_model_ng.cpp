@@ -18,6 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"

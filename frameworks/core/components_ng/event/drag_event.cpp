@@ -19,6 +19,7 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"

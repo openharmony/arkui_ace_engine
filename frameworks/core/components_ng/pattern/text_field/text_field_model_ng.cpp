@@ -26,6 +26,7 @@
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"

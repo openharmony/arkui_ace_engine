@@ -28,6 +28,7 @@
 #include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/animation/select_motion.h"
 #include "core/animation/velocity_motion.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/base/inspector_filter.h"
