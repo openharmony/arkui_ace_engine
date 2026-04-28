@@ -3589,22 +3589,7 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
         return;
     }
     auto info = pattern->GetSelectOverlayInfo();
-    auto caller = info->callerFrameNode.Upgrade();
-    bool needRebuildMenu = menuItemChanged;
-    if (caller && caller->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        auto newThemeScopeId = caller->GetThemeScopeId();
-        if (newThemeScopeId != cachedThemeScopeId_) {
-            cachedThemeScopeId_ = newThemeScopeId;
-            needRebuildMenu = true;
-        } else if (newThemeScopeId != 0) {
-            needRebuildMenu = true;
-        }
-        selectMenu_->SetThemeScopeId(newThemeScopeId);
-        if (selectMenuInner_) {
-            selectMenuInner_->SetThemeScopeId(newThemeScopeId);
-        }
-    }
-    if (needRebuildMenu && info->menuInfo.menuBuilder == nullptr) {
+    if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
         UpdateMenuInner(info, noAnimation, false);
     }
     selectMenu_->MarkModifyDone();
@@ -4153,6 +4138,120 @@ void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
     styleOption.colorMode = ConvertColorMode(colorMode);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdateBackBlurStyle(styleOption);
+}
+
+void UpdateButtonColor(const RefPtr<FrameNode>& button, const Color& clickedColor, const Color& hoverColor)
+{
+    CHECK_NULL_VOID(button);
+    if (auto buttonPattern = button->GetPatternPtr<ButtonPattern>()) {
+        buttonPattern->SetClickedColor(clickedColor);
+        buttonPattern->SetBlendColor(clickedColor, hoverColor);
+    }
+}
+
+void UpdateTextColor(const RefPtr<FrameNode>& textNode, const Color& textColor)
+{
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->UpdateTextColor(textColor);
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void UpdatePasteButtonColor(const RefPtr<FrameNode>& button, const Color& textColor,
+    const Color& clickedColor, const Color& hoverColor)
+{
+    auto pastePaintProperty = button->GetPaintProperty<SecurityComponentPaintProperty>();
+    if (pastePaintProperty) {
+        pastePaintProperty->UpdateFontColor(textColor);
+        button->MarkModifyDone();
+        button->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    RefPtr<FrameNode> buttonNode = button;
+    auto innerButton = GetSecCompChildNode(buttonNode, V2::BUTTON_ETS_TAG);
+    if (innerButton) {
+        UpdateButtonColor(innerButton, clickedColor, hoverColor);
+        innerButton->MarkModifyDone();
+        innerButton->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void UpdateNormalButtonColor(const RefPtr<FrameNode>& button, const Color& textColor,
+    const Color& clickedColor, const Color& hoverColor)
+{
+    UpdateButtonColor(button, clickedColor, hoverColor);
+
+    auto buttonChild = button->GetFirstChild();
+    auto textNode = AceType::DynamicCast<FrameNode>(buttonChild);
+    if (textNode) {
+        UpdateTextColor(textNode, textColor);
+    }
+    button->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void UpdateMenuItemsColors(const RefPtr<FrameNode>& menuNode, const Color& textColor,
+    const Color& clickedColor, const Color& hoverColor)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto children = menuNode->GetChildren();
+    for (const auto& child : children) {
+        auto button = AceType::DynamicCast<FrameNode>(child);
+        if (!button) {
+            continue;
+        }
+        if (button->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+            UpdatePasteButtonColor(button, textColor, clickedColor, hoverColor);
+        } else {
+            UpdateNormalButtonColor(button, textColor, clickedColor, hoverColor);
+        }
+    }
+    menuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void UpdateFuncButtonsColors(const RefPtr<FrameNode>& moreButton, const RefPtr<FrameNode>& backButton,
+    const Color& clickedColor, const Color& hoverColor)
+{
+    if (moreButton) {
+        UpdateButtonColor(moreButton, clickedColor, hoverColor);
+        moreButton->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    if (backButton) {
+        UpdateButtonColor(backButton, clickedColor, hoverColor);
+        backButton->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void SelectOverlayNode::UpdateMenuColors()
+{
+    CHECK_NULL_VOID(selectMenuInner_);
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto info = pattern->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(info);
+    auto caller = info->callerFrameNode.Upgrade();
+    CHECK_NULL_VOID(caller);
+
+    auto textOverlayTheme = caller->GetTheme<TextOverlayTheme>(true);
+    CHECK_NULL_VOID(textOverlayTheme);
+    auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
+    auto textColor = textStyle.GetTextColor();
+    auto clickedColor = textOverlayTheme->GetButtonClickedColor();
+    auto hoverColor = textOverlayTheme->GetButtonHoverColor();
+    auto newMoreOrBackSymbolColor = textOverlayTheme->GetSymbolColor();
+
+    UpdateMenuItemsColors(selectMenuInner_, textColor, clickedColor, hoverColor);
+    UpdateFuncButtonsColors(moreButton_, backButton_, clickedColor, hoverColor);
+
+    if (moreOrBackSymbol_) {
+        auto layoutProperty = moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
+        if (layoutProperty) {
+            layoutProperty->UpdateSymbolColorList({ newMoreOrBackSymbolColor });
+            moreOrBackSymbol_->MarkModifyDone();
+            moreOrBackSymbol_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
+    UpdateSelectMenuBg(caller);
 }
 
 void SelectOverlayNode::AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info)

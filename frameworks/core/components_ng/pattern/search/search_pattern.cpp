@@ -2350,6 +2350,12 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     PaintSearchFocusState();
     UpdateTextFieldColor();
 
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, result);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, result);
+    textFieldPattern->UpdateSelectionMenu(themeScopeId);
+
     return result;
 }
 

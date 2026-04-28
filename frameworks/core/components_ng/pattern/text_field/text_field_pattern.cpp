@@ -6286,7 +6286,8 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     }
 
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        if (selectOverlay_) {
+        if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+            selectOverlay_->UpdateMenuFromThemeChange(themeScopeId);
             selectOverlay_->UpdateHandleColor();
         }
     }

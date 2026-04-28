@@ -5825,6 +5825,9 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         UpdateStyledStringByColorMode();
+        if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+            selectOverlay_->UpdateMenuFromThemeChange(themeScopeId);
+        }
     }
     return false;
 }
