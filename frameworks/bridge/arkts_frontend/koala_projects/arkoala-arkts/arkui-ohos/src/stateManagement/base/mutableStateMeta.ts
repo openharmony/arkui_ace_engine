@@ -240,4 +240,20 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
             metaDependency.fireChange();
         }
     }
+
+    // Fire several keys as one logical mutation. The sync-monitor drain is
+    // deferred via beginSyncMonitorBatch / endSyncMonitorBatch so a wildcard
+    // monitor bound to multiple of the keys (e.g. OB_LENGTH and
+    // OB_ARRAY_ANY_KEY for an array push) fires its callback ONCE per
+    // mutation, not once per key. Each key still goes through the per-key
+    // fireChange, so non-overlapping bindings still see their own
+    // notification.
+    public fireChangeBatch(keys: Array<string>): void {
+        ObserveSingleton.instance.beginSyncMonitorBatch();
+        try {
+            keys.forEach((key: string) => this.fireChange(key));
+        } finally {
+            ObserveSingleton.instance.endSyncMonitorBatch();
+        }
+    }
 }

@@ -131,6 +131,12 @@ export interface IMutableStateMeta {
 export interface IMutableKeyedStateMeta {
     addRef(key: string): void;
     fireChange(key: string): void;
+    // Fire several keys as one logical mutation. Sync-monitor callbacks that
+    // bind multiple of the keys (e.g. wildcard binding on both OB_LENGTH and
+    // OB_ARRAY_ANY_KEY) fire ONCE total instead of once per key. Each key
+    // still goes through the per-key fireChange, so non-overlapping bindings
+    // still see their own notification.
+    fireChangeBatch(keys: Array<string>): void;
 }
 
 export interface IObserve {

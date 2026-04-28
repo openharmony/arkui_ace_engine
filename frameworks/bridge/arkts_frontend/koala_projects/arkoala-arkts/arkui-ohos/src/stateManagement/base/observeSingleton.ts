@@ -133,6 +133,25 @@ export class ObserveSingleton implements IObserve {
     }
 
     /**
+     * Sync-monitor batch nesting depth. While > 0, calls to
+     * updateDirtySyncMonitorPaths() defer the drain so a logically-single
+     * mutation (e.g. WrappedArray.push, which fires both OB_LENGTH and
+     * OB_ARRAY_ANY_KEY) coalesces into ONE sync callback per monitor instead
+     * of one per fireChange. The drain runs when the outermost batch ends.
+     */
+    private syncMonitorBatchDepth_: int = 0;
+
+    public beginSyncMonitorBatch(): void {
+        this.syncMonitorBatchDepth_++;
+    }
+
+    public endSyncMonitorBatch(): void {
+        if (--this.syncMonitorBatchDepth_ === 0) {
+            this.drainSyncMonitorPaths();
+        }
+    }
+
+    /**
      * Process synchronous monitor paths that have been marked as dirty.
      *
      * Synchronous monitors (those with id >= MIN_SYNC_MONITOR_ID) need to be
@@ -140,9 +159,16 @@ export class ObserveSingleton implements IObserve {
      * which are processed during the next updateDirty() cycle.
      *
      * Called from MutableStateMeta.fireChange() to ensure real-time tracking
-     * for synchronous monitors.
+     * for synchronous monitors. Defers while inside a sync-monitor batch.
      */
     public updateDirtySyncMonitorPaths(): void {
+        if (this.syncMonitorBatchDepth_ > 0) {
+            return;
+        }
+        this.drainSyncMonitorPaths();
+    }
+
+    private drainSyncMonitorPaths(): void {
         const monitors = this.syncMonitorPathRefsChanged_;
         this.syncMonitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
         const monitorsToRun = this.notifyDirtyMonitorPaths(monitors);

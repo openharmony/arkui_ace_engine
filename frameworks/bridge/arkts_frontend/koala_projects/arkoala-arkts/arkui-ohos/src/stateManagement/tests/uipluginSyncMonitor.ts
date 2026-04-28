@@ -302,7 +302,7 @@ function testWildcardOnArrayWithPush(): void {
 // wildcard monitor EXACTLY ONCE per call. Each of these methods internally
 // fires both OB_LENGTH and OB_ARRAY_ANY_KEY; addRefAnyKey() binds the wildcard
 // to both, so without sync-monitor batching the monitor would fire twice per
-// call. fireChangeMany batches the sync drain so both fires coalesce into one
+// call. fireChangeBatch batches the sync drain so both fires coalesce into one
 // callback per logical mutation.
 function testSyncMonitorPushVariants(): void {
     const counter = new CallCounter();
@@ -670,7 +670,7 @@ function testSyncMonitorDateSetTime(): void {
 
 // A wildcard sync monitor over a WrappedMap fires once per logical mutation.
 // addRefAnyKey() binds OB_LENGTH AND OB_MAP_ANY_PROPERTY, so without
-// fireChangeMany batching set/delete/clear would fire multiple sync drains
+// fireChangeBatch batching set/delete/clear would fire multiple sync drains
 // per call.
 function testSyncMonitorOnMapWildcardFiresOnce(): void {
     const counter = new CallCounter();
@@ -794,7 +794,7 @@ function testSyncMonitorOnMapSize(): void {
 
 // A wildcard sync monitor over a WrappedSet fires once per logical mutation.
 // addRefAnyKey() binds OB_SET_ANY_PROPERTY AND OB_LENGTH, so without
-// fireChangeMany batching add/delete/clear would fire multiple sync drains
+// fireChangeBatch batching add/delete/clear would fire multiple sync drains
 // per call.
 function testSyncMonitorOnSetWildcardFiresOnce(): void {
     const counter = new CallCounter();
