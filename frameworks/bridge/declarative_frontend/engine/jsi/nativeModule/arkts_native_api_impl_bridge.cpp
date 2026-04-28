@@ -111,6 +111,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
+constexpr int32_t NUM_2 = 2;
+
 enum class RawInputEventType : int32_t {
     TOUCH = 0,
     MOUSE = 1,
@@ -414,13 +417,21 @@ ArkUINativeModuleValue ArkUINativeModule::EnableEventPassthrough(ArkUIRuntimeCal
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
 
+    if (runtimeCallInfo->GetArgsNumber() < NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
-    if (!firstArg->IsBoolean() || !secondArg->IsNumber()) {
+    if (firstArg.IsEmpty() || secondArg.IsEmpty()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    bool enabled = firstArg->ToBoolean(vm)->Value();
+
+    if ((!firstArg->IsBoolean() && !firstArg->IsUndefined()) || !secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool enabled = firstArg->IsBoolean() ? firstArg->ToBoolean(vm)->Value() : false;
     auto eventType = static_cast<RawInputEventType>(secondArg->Int32Value(vm));
     auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
