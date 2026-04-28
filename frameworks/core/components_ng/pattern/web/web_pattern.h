@@ -1054,6 +1054,7 @@ public:
     int ExecuteInputCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteSelectCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteInputMethodCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteCommand(const std::string& eventTypeStr, const std::string& xpathStr, int32_t durationInt,
                         const std::string& alignStr, int32_t offsetInt);
     int HandleTapCommand(double x, double y, int32_t duration, int32_t tapCount);
