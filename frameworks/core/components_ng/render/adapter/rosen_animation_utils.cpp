@@ -162,10 +162,11 @@ CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus()
     return CloseImplicitCancelAnimationReturnStatus(nullptr);
 }
 
-CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(
+    const RefPtr<PipelineBase>& context, bool nodeExceptionSensitive)
 {
     auto rsUIContext = GetRSUIContext(context);
-    auto status = Rosen::RSNode::CloseImplicitCancelAnimationReturnStatus(rsUIContext);
+    auto status = Rosen::RSNode::CloseImplicitCancelAnimationReturnStatus(rsUIContext, nodeExceptionSensitive);
     return static_cast<CancelAnimationStatus>(status);
 }
 

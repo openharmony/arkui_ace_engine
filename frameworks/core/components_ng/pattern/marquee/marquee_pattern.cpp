@@ -333,7 +333,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
         };
         AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
         cancelAnimationCallbacl();
-        auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus();
+        auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus(nullptr, true);
         if (status != CancelAnimationStatus::SUCCESS &&
             status != CancelAnimationStatus::EMPTY_PENDING_SYNC_LIST) {
             ACE_SCOPED_TRACE("Marquee stop property sync failed");

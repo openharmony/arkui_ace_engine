@@ -67,7 +67,8 @@ public:
     static bool CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& context);
 
     static CancelAnimationStatus CloseImplicitCancelAnimationReturnStatus();
-    static CancelAnimationStatus CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context);
+    static CancelAnimationStatus CloseImplicitCancelAnimationReturnStatus(
+        const RefPtr<PipelineBase>& context, bool nodeExceptionSensitive = false);
 
     static bool IsImplicitAnimationOpen();
     static bool IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context);
