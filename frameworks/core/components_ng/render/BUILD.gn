@@ -135,7 +135,11 @@ build_component_ng("render_ng") {
 
   if (is_arkui_x) {
     sources += [ "adapter/render_texture_impl.cpp" ]
-    deps = [ "$arkuix_graphic_surface/surface:arkuix_surface" ]
+    deps = [
+      "$arkuix_graphic_surface/surface:arkuix_surface",
+      "//foundation/arkui/napi:ace_napi",
+      "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
+    ]
   }
 
   gesture_debug_sources = [ "gesture_debug_boundary_painter.cpp" ]
