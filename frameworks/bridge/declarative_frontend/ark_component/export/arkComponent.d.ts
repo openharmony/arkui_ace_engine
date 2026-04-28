@@ -2209,3 +2209,10 @@ declare class ArkLazyVGridLayoutComponent extends ArkComponent implements LazyVG
     columnsGap(value: LengthMetrics): this;
     rowsGap(value: LengthMetrics): this;
 }
+
+declare class ArkLazyColumnLayoutComponent extends ArkComponent implements LazyColumnLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    space(value: LengthMetrics | undefined): this;
+    alignItems(value: HorizontalAlign | undefined): this;
+    onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
+}

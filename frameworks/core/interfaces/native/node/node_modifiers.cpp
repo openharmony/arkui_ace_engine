@@ -38,6 +38,7 @@
 #include "core/interfaces/native/node/grid_row_modifier.h"
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
+#include "core/interfaces/native/node/lazy_column_layout_modifier.h"
 #include "core/interfaces/native/node/lazy_grid_layout_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
@@ -314,6 +315,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getAtomicServiceModifier = NodeModifier::GetAtomicServiceModifier,
         .getMatrix4Modifier = NodeModifier::GetMatrix4Modifier,
         .getDynamicLayoutModifier = NodeModifier::GetDynamicLayoutModifier,
+        .getLazyColumnLayoutModifier = NodeModifier::GetLazyColumnLayoutModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

@@ -4153,6 +4153,7 @@
       VTT?for?OHOS::Ace::V2::WaterFlowComponent;
       VTT?for?OHOS::Ace::V2::WaterFlowItemComponent;
       VTT?for?OHOS::Ace::V2::WaterFlowPositionController;
+      OHOS::Ace::NG::LazyLayoutUtils*;
     };
   local:
     *;

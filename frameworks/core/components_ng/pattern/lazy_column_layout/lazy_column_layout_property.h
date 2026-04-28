@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_COLUMN_LAYOUT_LAZY_COLUMN_LAYOUT_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_COLUMN_LAYOUT_LAZY_COLUMN_LAYOUT_PROPERTY_H
+
+#include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/property.h"
+#include "core/components/common/layout/constants.h"
+
+namespace OHOS::Ace::NG {
+class ACE_EXPORT LazyColumnLayoutProperty : public LayoutProperty {
+    DECLARE_ACE_TYPE(LazyColumnLayoutProperty, LayoutProperty);
+
+public:
+    LazyColumnLayoutProperty() = default;
+
+    ~LazyColumnLayoutProperty() override = default;
+
+    RefPtr<LayoutProperty> Clone() const override
+    {
+        auto value = MakeRefPtr<LazyColumnLayoutProperty>();
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propSpace_ = CloneSpace();
+        value->propHorizontalAlign_ = CloneHorizontalAlign();
+        return value;
+    }
+
+    void Reset() override
+    {
+        LayoutProperty::Reset();
+        ResetSpace();
+        ResetHorizontalAlign();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("alignItems",
+            propHorizontalAlign_.value_or(HorizontalAlign::START) == HorizontalAlign::START ? "HorizontalAlign.Start"
+            : propHorizontalAlign_.value_or(HorizontalAlign::START) == HorizontalAlign::CENTER
+                ? "HorizontalAlign.Center"
+                : "HorizontalAlign.End",
+            filter);
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HorizontalAlign, HorizontalAlign, PROPERTY_UPDATE_MEASURE);
+};
+} // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_COLUMN_LAYOUT_LAZY_COLUMN_LAYOUT_PROPERTY_H
