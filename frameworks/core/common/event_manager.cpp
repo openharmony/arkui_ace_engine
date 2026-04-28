@@ -52,15 +52,29 @@ constexpr int32_t COUNT_PARAM_SIZE = 3;
 constexpr int32_t EVENT_HANDLE = 100000;
 constexpr int32_t POST_ONCE = 1;
 
+std::function<Offset()> CreateCurrentLocalLocationGetter(const Offset& globalOffset, const Offset& localOffset,
+    const WeakPtr<NG::FrameNode>& weakNode, bool needPostEvent, int32_t postEventNodeId)
+{
+    return [weakNode, needPostEvent, postEventNodeId, globalOffset, localOffset]() -> Offset {
+        CHECK_NULL_RETURN(weakNode.Upgrade(), localOffset);
+        NG::PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NG::NGGestureRecognizer::Transform(currentLocalPoint, weakNode, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    };
+}
+
 std::list<FingerInfo> BuildTouchFingerList(const TouchEvent& touchEvent, const WeakPtr<NG::FrameNode>& weakNode)
 {
     std::list<FingerInfo> fingerList;
     for (const auto& point : touchEvent.pointers) {
         NG::PointF localPoint(point.x, point.y);
         NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
+        auto localOffset = Offset(localPoint.GetX(), localPoint.GetY());
         fingerList.emplace_back(FingerInfo { point.originalId, point.operatingHand, Offset(point.x, point.y),
-            Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
-            Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool });
+            localOffset, Offset(point.screenX, point.screenY), Offset(point.globalDisplayX, point.globalDisplayY),
+            touchEvent.sourceType, touchEvent.sourceTool,
+            CreateCurrentLocalLocationGetter(
+                Offset(point.x, point.y), localOffset, weakNode, touchEvent.passThrough, touchEvent.postEventNodeId) });
     }
     return fingerList;
 }
@@ -678,9 +692,13 @@ void EventManager::ExecuteTouchTestDoneCallback(
         std::list<FingerInfo> fingerList;
         NG::PointF localPoint(axisEvent.x, axisEvent.y);
         NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
-        FingerInfo fingerInfo = { axisEvent.originalId, 0, Offset(axisEvent.x, axisEvent.y),
-            Offset(localPoint.GetX(), localPoint.GetY()), Offset(axisEvent.screenX, axisEvent.screenY),
-            Offset(axisEvent.globalDisplayX, axisEvent.globalDisplayY), axisEvent.sourceType, axisEvent.sourceTool };
+        auto localOffset = Offset(localPoint.GetX(), localPoint.GetY());
+        FingerInfo fingerInfo = { axisEvent.originalId, 0, Offset(axisEvent.x, axisEvent.y), localOffset,
+            Offset(axisEvent.screenX, axisEvent.screenY), Offset(axisEvent.globalDisplayX, axisEvent.globalDisplayY),
+            axisEvent.sourceType, axisEvent.sourceTool,
+            CreateCurrentLocalLocationGetter(
+                Offset(axisEvent.x, axisEvent.y), localOffset, weakNode, axisEvent.passThrough,
+                axisEvent.postEventNodeId) };
         fingerList.emplace_back(fingerInfo);
         info->SetFingerList(fingerList);
         if (touchTestDoneCallbackForInner) {

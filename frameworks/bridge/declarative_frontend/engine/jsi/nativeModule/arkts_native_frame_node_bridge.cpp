@@ -223,8 +223,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateEventTargetObject(EcmaVM* vm, con
     return target;
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
-    EcmaVM* vm, const TouchLocationInfo& touchInfo, TouchEventInfo& info)
+Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(EcmaVM* vm, const TouchLocationInfo& touchInfo)
 {
     double density = PipelineBase::GetCurrentDensity();
     const Offset& globalOffset = touchInfo.GetGlobalLocation();
@@ -253,7 +252,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
     touchInfoObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
-    touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<TouchLocationInfo*>(&touchInfo)));
     return touchInfoObj;
 }
 
@@ -1251,14 +1250,14 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     const std::list<TouchLocationInfo>& touchList = infoPtr->GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {
-        panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location, *infoPtr));
+        panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location));
     }
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "touches"), touchArr);
     auto changeTouchArr = panda::ArrayRef::New(vm);
     idx = 0; // reset index counter
     const std::list<TouchLocationInfo>& changeTouch = infoPtr->GetChangedTouches();
     for (const TouchLocationInfo& change : changeTouch) {
-        panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change, *infoPtr));
+        panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change));
     }
     if (changeTouch.size() > 0) {
         eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "type"),

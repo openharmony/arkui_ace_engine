@@ -96,7 +96,7 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
     if (!eventInfo) {
         return JSValueRef::Undefined(info->GetVM());
     }
-    std::list<TouchLocationInfo> history = eventInfo->GetHistory();
+    const auto& history = eventInfo->GetHistory();
     Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
     auto index = 0;
     for (auto const &point : history) {
@@ -133,6 +133,11 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
         touchObject->Set(info->GetVM(),
             ToJSValue("height"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.GetHeight())));
         touchObject->Set(info->GetVM(), ToJSValue("hand"), ToJSValue(point.GetOperatingHand()));
+        touchObject->Set(info->GetVM(), ToJSValue("getCurrentLocalPosition"),
+            panda::FunctionRef::New(info->GetVM(), JsGetCurrentLocalPosition));
+        touchObject->SetNativePointerFieldCount(info->GetVM(), 1);
+        touchObject->SetNativePointerField(
+            info->GetVM(), 0, static_cast<void*>(const_cast<TouchLocationInfo*>(&point)));
 
         Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
         objRef->Set(info->GetVM(), ToJSValue("touchObject"), (touchObject));
@@ -235,6 +240,10 @@ bool GetBaseGestureEventCurrentLocal(BaseGestureEvent* baseGestureEvent, Offset&
 bool GetCurrentLocalFromEventInfo(panda::EcmaVM* vm, const panda::Local<panda::ObjectRef>& thisObjRef,
     BaseEventInfo* eventInfo, Offset& currentLocal)
 {
+    if (auto touchLocationInfo = TypeInfoHelper::DynamicCast<TouchLocationInfo>(eventInfo); touchLocationInfo) {
+        currentLocal = touchLocationInfo->GetCurrentLocalLocation();
+        return true;
+    }
     if (auto gestureEvent = TypeInfoHelper::DynamicCast<GestureEvent>(eventInfo); gestureEvent) {
         currentLocal = gestureEvent->GetCurrentLocalLocation();
         return true;

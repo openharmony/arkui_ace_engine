@@ -42,8 +42,8 @@ constexpr float CURRENT_LOCAL_WINDOW_X = 21.0f;
 constexpr float CURRENT_LOCAL_WINDOW_Y = 31.0f;
 constexpr float CURRENT_LOCAL_FALLBACK_X = 4.0f;
 constexpr float CURRENT_LOCAL_FALLBACK_Y = 6.0f;
-constexpr float CURRENT_LOCAL_POINTER_X = 8.0f;
-constexpr float CURRENT_LOCAL_POINTER_Y = 10.0f;
+constexpr float CURRENT_LOCAL_POINTER_X = 0.0f;
+constexpr float CURRENT_LOCAL_POINTER_Y = 0.0f;
 constexpr int32_t INVALID_NODE_ID = -1;
 
 class ScopedCurrentLocalNode final {
@@ -927,11 +927,7 @@ HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest003, TestSize.Level1)
  */
 HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest004, TestSize.Level1)
 {
-    ArkUITouchPoint points[] = {
-        MakeTouchPoint(CURRENT_LOCAL_POINTER_X, CURRENT_LOCAL_POINTER_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y)
-    };
     ArkUITouchEvent touchEvent {};
-    touchEvent.touchPointes = points;
     touchEvent.touchPointSize = 1;
     auto uiInputEvent = MakeUiInputEvent(&touchEvent, C_TOUCH_EVENT_ID, INVALID_NODE_ID);
 
