@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -140,7 +141,13 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     auto ringColor = color_->Get();
     ringColor.BlendOpacity(RING_ALPHA);
     pen.SetColor(ToRSColor(ringColor));
-    if (Container::CurrentColorMode() == ColorMode::DARK) {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto frameNode = pattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetLocalColorMode() == ColorMode::DARK ||
+        (frameNode->GetLocalColorMode() == ColorMode::COLOR_MODE_UNDEFINED &&
+            Container::CurrentColorMode() == ColorMode::DARK)) {
         if (ringColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
             ringColor = LinearColor::WHITE;
         }
