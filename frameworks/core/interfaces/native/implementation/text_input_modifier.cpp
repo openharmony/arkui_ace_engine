@@ -1153,6 +1153,9 @@ void SetVoiceButtonImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    auto isShowVoiceButton = optValue ? Converter::OptConvert<bool>(optValue->enabled).value_or(true) : false;
+    TextFieldModelNG::SetIsShowVoiceButton(frameNode, isShowVoiceButton);
 }
 void SetInputFilterImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,
