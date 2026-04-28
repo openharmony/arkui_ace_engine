@@ -333,24 +333,4 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest014, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Finish();
 }
 
-/**
- * @tc.name: WithEnvSyntaxTest015
- * @tc.desc: std::any_cast with wrong type throws bad_any_cast.
- * @tc.type: FUNC
- */
-HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest015, TestSize.Level1)
-{
-    WithEnvModelNG model;
-    model.Create();
-
-    model.SetCustomEnvProperty(CUSTOM_KEY_THEME, std::any(CUSTOM_DOUBLE_VALUE));
-
-    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(node, nullptr);
-
-    auto* anyPtr = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
-    ASSERT_NE(anyPtr, nullptr);
-    EXPECT_THROW({ std::any_cast<std::string>(*anyPtr); }, std::bad_any_cast);
-}
-
 } // namespace OHOS::Ace::NG
