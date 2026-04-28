@@ -839,7 +839,7 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
     double gain = GetGain(GetDragOffset());
     bool isReverse = isReverseCallback_ && isReverseCallback_();
     if (GreatNotEqualCustomPrecision(gain, 1.0f, 0.01f)) {
-        if ((isReverse && gestureVelocity > 0) || (!isReverse && gestureVelocity < 0)) {
+        if ((isReverse && gestureVelocity < 0) || (!isReverse && gestureVelocity > 0)) {
             auto node = weakHost_.Upgrade();
             if (node) {
                 auto nodeIdStr = std::to_string(static_cast<uint64_t>(node->GetId()));
