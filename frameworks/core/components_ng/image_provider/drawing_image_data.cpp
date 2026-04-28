@@ -32,8 +32,6 @@ inline void RSDataWrapperReleaseProc(const void*, void* context)
     RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
     delete wrapper;
 }
-
-constexpr char IMAGE_SVG_MIME[] = "image/svg+xml";
 } // namespace
 
 constexpr int32_t ASTC_FRAME_COUNT = 1;
@@ -130,9 +128,8 @@ ImageCodec DrawingImageData::Parse() const
         TAG_LOGE(AceLogTag::ACE_IMAGE, "image source create failed in drawing data parsing.");
         return {};
     }
-    auto format = imageSource->GetEncodedFormat();
-    if (format == IMAGE_SVG_MIME) {
-        return {};
+    if (imageSource->IsSvg()) {
+        return { SizeF(-1, -1), 1, ImageRotateOrientation::UP, true };
     }
     auto originImageSize = imageSource->GetImageSize();
     auto orientation = imageSource->GetImageOrientation();

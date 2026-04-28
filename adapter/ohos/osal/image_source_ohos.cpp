@@ -247,6 +247,16 @@ bool ImageSourceOhos::IsHeifWithoutAlpha()
     return imageSource_->IsHeifWithoutAlpha();
 }
 
+bool ImageSourceOhos::IsSvg() const
+{
+    uint32_t errorCode;
+    auto sourceInfo = imageSource_->GetSourceInfo(errorCode);
+    if (errorCode != Media::SUCCESS) {
+        return true;
+    }
+    return sourceInfo.encodedFormat == IMAGE_SVG_MIME;
+}
+
 ImageRotateOrientation ImageSourceOhos::GetImageOrientation()
 {
     auto origin = GetProperty("Orientation");

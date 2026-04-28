@@ -114,7 +114,7 @@ public:
     static bool CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
     static RefPtr<ImageObject> BuildImageObject(
-        const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const RefPtr<ImageData>& data);
+        ImageSourceInfo& src, ImageErrorInfo& errorInfo, const RefPtr<ImageData>& data);
 
     static void CacheImageObject(const RefPtr<ImageObject>& obj);
 
@@ -137,13 +137,13 @@ private:
     static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
 
     // helper function to create image object from ImageSourceInfo
-    static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false, bool isSceneBoardWindow = false);
+    static void CreateImageObjHelper(ImageSourceInfo& src, bool sync = false, bool isSceneBoardWindow = false);
 
     static void DownLoadSuccessCallback(
         const RefPtr<ImageObject>& imageObj, const std::string& key, bool sync = false, int32_t containerId = 0);
     static void DownLoadOnProgressCallback(
         const std::string& key, bool sync, const uint32_t& dlNow, const uint32_t& dlTotal, int32_t containerId = 0);
-    static void DownLoadImage(const UriDownLoadConfig& downLoadConfig);
+    static void DownLoadImage(UriDownLoadConfig& downLoadConfig);
 
     static void MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& targetSize, const std::string& key,
         const ImageDecoderOptions& imagedecoderOptions);
