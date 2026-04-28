@@ -1,6 +1,6 @@
 {
     "files": [
-        "src/WithEnv.ts",
+        "src/WithEnv.ts"
     ],
     "compilerOptions": {
         "module": "none",
@@ -13,6 +13,6 @@
         "experimentalDecorators": true,
         "lib": [
             "ES2016"
-        ],
+        ]
     }
 }
