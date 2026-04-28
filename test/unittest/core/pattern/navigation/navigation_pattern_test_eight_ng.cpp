@@ -956,4 +956,36 @@ HWTEST_F(NavigationPatternTestEightNg, GetNavDestinationJsViewNameTestNg008, Tes
     auto jsViewNames = NavigationPattern::GetNavDestinationJsViewName(stackNode);
     EXPECT_TRUE(jsViewNames.empty());
 }
+
+/**
+ * @tc.name: FirePrimaryNodesLifecycleNeedTriggerActive001
+ * @tc.desc: Branch: if (needTriggerActive) { continue; } => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, FirePrimaryNodesLifecycleNeedTriggerActive001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto primaryDest = CreateNavDestinationNode("Primary", 1);
+    ASSERT_NE(homeDest, nullptr);
+    ASSERT_NE(primaryDest, nullptr);
+
+    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
+    context.pattern->primaryNodes_ = { WeakPtr<NavDestinationGroupNode>(primaryDest) };
+    context.navNode->lastStandardIndex_ = 2;
+
+    auto primaryPattern = primaryDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(primaryPattern, nullptr);
+    primaryPattern->SetIsOnShow(false);
+    primaryPattern->SetIsActive(false);
+
+    context.pattern->FirePrimaryNodesLifecycle(
+        NavDestinationLifecycle::ON_SHOW, NavDestVisibilityChangeReason::TRANSITION, true);
+
+    EXPECT_TRUE(primaryPattern->GetIsOnShow());
+    EXPECT_FALSE(primaryPattern->IsActive());
+}
 } // namespace OHOS::Ace::NG

@@ -753,7 +753,8 @@ private:
     void ClearNavigationCustomTransition();
     bool IsDestinationNeedHideInPush(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavDestinationGroupNode>& destNode) const;
-    void FirePrimaryNodesLifecycle(NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason);
+    void FirePrimaryNodesLifecycle(
+        NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason, bool needTriggerActive = false);
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -1122,6 +1123,7 @@ private:
     WeakPtr<NavDestinationNodeBase> splitPopExitNode_ = nullptr;
     WeakPtr<NavDestinationNodeBase> splitPopMoveNode_ = nullptr;
     WeakPtr<NavDestinationNodeBase> splitPopEnterNode_ = nullptr;
+    static const bool needTriggerActice_ = true;
     //-------for force split------- end  ------
 };
 

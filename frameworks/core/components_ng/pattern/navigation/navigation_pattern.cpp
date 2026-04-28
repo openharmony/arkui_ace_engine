@@ -2359,7 +2359,8 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
 
     if (isOnShow) {
         if (needHideOrShowPrimaryNodes) {
-            navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW, visibilityReason);
+            navigationPattern->FirePrimaryNodesLifecycle(
+                NavDestinationLifecycle::ON_SHOW, visibilityReason, needTriggerActive_);
         }
         navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
             NavDestinationLifecycle::ON_SHOW, false, visibilityReason);
@@ -2418,7 +2419,8 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
         NavDestinationLifecycle::ON_HIDE, false, visibilityReason);
     if (needHideOrShowPrimaryNodes) {
-        navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, visibilityReason);
+        navigationPattern->FirePrimaryNodesLifecycle(
+            NavDestinationLifecycle::ON_HIDE, visibilityReason, needTriggerActive_);
     }
 }
 
@@ -7296,7 +7298,7 @@ bool NavigationPattern::IsDestinationNeedHideInPush(
 }
 
 void NavigationPattern::FirePrimaryNodesLifecycle(
-    NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason)
+    NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason, bool needTriggerActive)
 {
     if (lifecycle != NavDestinationLifecycle::ON_SHOW && lifecycle != NavDestinationLifecycle::ON_HIDE) {
         return;
@@ -7319,6 +7321,9 @@ void NavigationPattern::FirePrimaryNodesLifecycle(
             if (!pattern->GetIsOnShow()) {
                 NotifyDestinationLifecycle(node, NavDestinationLifecycle::ON_SHOW);
                 pattern->SetIsOnShow(true);
+                if (needTriggerActive) {
+                    continue;
+                }
             }
             if (idx == primaryNodes.size() - 1 && !pattern->IsActive()) {
                 NotifyDestinationLifecycle(node,
