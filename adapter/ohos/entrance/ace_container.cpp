@@ -3597,6 +3597,7 @@ void AceContainer::BuildResConfig(
         resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
+        CHECK_NULL_VOID(pipelineContext_);
         auto fontManager = pipelineContext_->GetFontManager();
         CHECK_NULL_VOID(fontManager);
         configurationChange.fontUpdate = true;
@@ -4578,6 +4579,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 
 bool AceContainer::NeedFullUpdate(uint32_t limitKey)
 {
+    CHECK_NULL_RETURN(pipelineContext_, false);
     auto themeManager = pipelineContext_->GetThemeManager();
     if (!themeManager || (themeManager->GetResourceLimitKeys() & limitKey) == 0) {
         return false;
@@ -4587,6 +4589,7 @@ bool AceContainer::NeedFullUpdate(uint32_t limitKey)
 
 void AceContainer::NotifyDensityUpdate(double density)
 {
+    CHECK_NULL_VOID(pipelineContext_);
     bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
@@ -4602,6 +4605,7 @@ void AceContainer::NotifyDensityUpdate(double density)
 
 void AceContainer::NotifyDirectionUpdate()
 {
+    CHECK_NULL_VOID(pipelineContext_);
     bool fullUpdate = NeedFullUpdate(DIRECTION_KEY);
     if (fullUpdate) {
         ConfigurationChange configurationChange { .directionUpdate = true };
