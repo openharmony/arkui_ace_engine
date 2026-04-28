@@ -66,7 +66,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr float DEFAULT_ICON_SIZE = 16.0f;
-constexpr float DEFAULT_SYMBOL_FONT_SIZE = 24.0f;
+constexpr float DEFAULT_SYMBOL_FONT_SIZE = 16.0f;
 constexpr uint32_t DEFAULT_SYMBOL_ICON_COLOR = 0xFF000000;
 constexpr float DEFAULT_FONT_SIZE = 16.0f;
 constexpr float DEFAULT_ICON_MIN_SIZE = 12.0f;
