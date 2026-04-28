@@ -2168,6 +2168,8 @@ void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOpt
 void ScrollablePattern::PlayCurveAnimation(
     float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     InitOption(option, duration, curve);
     if (!curveOffsetProperty_) {
@@ -2190,7 +2192,7 @@ void ScrollablePattern::PlayCurveAnimation(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateFinish();
-        });
+        }, nullptr, host->GetContextRefPtr());
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
 
