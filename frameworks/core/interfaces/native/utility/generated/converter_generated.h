@@ -1025,6 +1025,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ColumnOptions_ColumnOptionsV2& src)
 {
     switch (src.selector) {
@@ -5067,6 +5083,7 @@ ASSIGN_OPT(Opt_Union_Boolean_Callback_DismissPopupAction_Void)
 ASSIGN_OPT(Opt_Union_Boolean_Resource)
 ASSIGN_OPT(Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_BorderStyle_EdgeStyles)
+ASSIGN_OPT(Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor)
 ASSIGN_OPT(Opt_Union_ColumnOptions_ColumnOptionsV2)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_ComponentContentBase)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_DragItemInfo)

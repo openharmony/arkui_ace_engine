@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAWING_COLOR_FILTER_OHOS_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAWING_COLOR_FILTER_OHOS_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_DRAWING_COLOR_FILTER_IMPL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_DRAWING_COLOR_FILTER_IMPL_H
 
 #include "effect/color_filter.h"
 
@@ -22,11 +22,11 @@
 
 namespace OHOS::Ace {
 
-class DrawingColorFilterOhos : public DrawingColorFilter {
+class DrawingColorFilterImpl : public DrawingColorFilter {
 public:
-    explicit DrawingColorFilterOhos(std::shared_ptr<Rosen::Drawing::ColorFilter> colorFilter)
+    explicit DrawingColorFilterImpl(const std::shared_ptr<Rosen::Drawing::ColorFilter>& colorFilter)
         : colorFilter_(std::move(colorFilter)) {}
-    ~DrawingColorFilterOhos() override = default;
+    ~DrawingColorFilterImpl() override = default;
     void* GetDrawingColorFilterSptrAddr() override;
     napi_value GetDrawingColorFilterNapiValue(NativeEngine* nativeEngine) override;
 
@@ -36,4 +36,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAWING_COLOR_FILTER_OHOS_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_DRAWING_COLOR_FILTER_IMPL_H

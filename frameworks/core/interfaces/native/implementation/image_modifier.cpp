@@ -95,6 +95,7 @@ void AssignCast(std::optional<Color>& dst, const Ark_ColorContent& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageModifier {
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0};
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
@@ -103,6 +104,43 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
+}
+
+void ApplyResourceColorValues(
+    Ark_NativePointer node, const Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool isValid = false;
+    Converter::VisitUnionPtr(
+        value,
+        [frameNode, &isValid](const Ark_ColorFilter& filter) {
+            if (filter && filter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+                isValid = true;
+                ImageModelNG::SetColorFilterMatrix(frameNode, filter->GetColorFilterMatrix());
+                return;
+            }
+        },
+        [frameNode, &isValid](const Ark_drawing_ColorFilter& colorStrategy) {
+            if (colorStrategy->drawingColorFilter) {
+                isValid = true;
+                ImageModelNG::SetDrawingColorFilter(frameNode, colorStrategy->drawingColorFilter);
+                drawing_ColorFilterPeer::Destroy(colorStrategy);
+            }
+        },
+        [frameNode, &isValid](const Ark_ResourceColor& color) {
+            auto colorValue = Converter::OptConvert<Color>(color);
+            if (colorValue.has_value()) {
+                auto colorFilter =
+                    DrawingColorFilter::CreateDrawingColorFilter(colorValue.value(), BlendMode::SRC_ATOP);
+                ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
+            }
+        },
+        []() {});
+    if (isValid) {
+        return;
+    }
+    ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLORFILTER_MATRIX);
 }
 } // ImageModifier
 namespace ImageInterfaceModifier {
@@ -290,9 +328,9 @@ void SetSyncLoadImpl(Ark_NativePointer node,
     ImageModelNG::SetSyncMode(frameNode, *convValue);
 }
 void SetColorFilterImpl(Ark_NativePointer node,
-                        const Opt_Union_ColorFilter_drawing_ColorFilter* value)
+                        const Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor* value)
 {
-    ImageCommonMethods::ApplyColorFilterValues(node, value);
+    ImageModifier::ApplyResourceColorValues(node, value);
 }
 void SetCopyOptionImpl(Ark_NativePointer node,
                        const Opt_CopyOptions* value)

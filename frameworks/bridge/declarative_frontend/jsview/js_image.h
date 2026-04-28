@@ -102,6 +102,7 @@ protected:
     static void SetAutoResize(bool autoResize);
     static void UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult);
     static void ParseImageAIOptions(const JSCallbackInfo& info);
+    static void SetColorFilterMatrix(const JSRef<JSVal>& jsValue);
 };
 
 } // namespace OHOS::Ace::Framework
