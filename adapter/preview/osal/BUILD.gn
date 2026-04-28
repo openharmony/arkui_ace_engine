@@ -134,9 +134,7 @@ ohos_source_set("preview_osal_source") {
     ]
 
     if (ace_use_rosen_drawing) {
-      external_deps += [
-        "graphic_2d:2d_graphics",
-      ]
+      external_deps += [ "graphic_2d:2d_graphics" ]
     }
     include_dirs = [ ability_runtime_path ]
     configs = [ "$ace_root:ace_config" ]
