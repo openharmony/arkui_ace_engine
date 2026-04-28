@@ -128,6 +128,11 @@ struct CaretSetInfo {
     std::string text;
 };
 
+struct PendingSubmitActionInfo {
+    TextInputAction action = TextInputAction::UNSPECIFIED;
+    bool forceCloseKeyboard = false;
+};
+
 struct PasswordModeStyle {
     Color bgColor;
     Color textColor;
@@ -1922,6 +1927,10 @@ public:
         placeholderColorInfo_.append("[" + info + "]");
     }
 
+    bool TryDelaySubmitAction(TextInputAction action, bool forceCloseKeyboard);
+    void ProcessPendingSubmitAction();
+    virtual void FireSubmitAction(TextInputAction action, bool forceCloseKeyboard);
+
     // tv function
     bool IsTV() const
     {
@@ -2227,6 +2236,7 @@ private:
     void ProcessCancelButton();
     void ProcessVoiceButton();
     bool HasInputOperation();
+    bool HasPendingTextMutationForSubmit() const;
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill(bool ignoreFillType = false,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
@@ -2500,6 +2510,7 @@ private:
     std::queue<InsertCommandInfo> insertCommands_;
     std::queue<InputCommandInfo> inputCommands_;
     std::queue<InputOperation> inputOperations_;
+    std::optional<PendingSubmitActionInfo> pendingSubmitActionInfo_;
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
     bool isEdit_ = false;

@@ -827,16 +827,23 @@ HWTEST_F(SearchTestTwoNg, OnSubmitEvent001, TestSize.Level1)
     };
     eventHub->SetOnSubmit(std::move(callback));
 
+    /*
+     * @tc.step: step1. get focus
+     */
+    auto focushHub = textFieldPattern->GetFocusHub();
+    focushHub->currentFocus_ = true;
+    textFieldPattern->insertCommands_ = std::queue<InsertCommandInfo>();
+
     bool forceCloseKeyboard = true;
     TextInputAction action2 = TextInputAction::SEARCH;
     textFieldPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 1);
+    EXPECT_EQ(count, 0);
     action2 = TextInputAction::NEW_LINE;
     textFieldPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 2);
+    EXPECT_EQ(count, 0);
     action2 = TextInputAction::DONE;
     textFieldPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 3);
+    EXPECT_EQ(count, 0);
 }
 
 /**
