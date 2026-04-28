@@ -2360,7 +2360,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     if (isOnShow) {
         if (needHideOrShowPrimaryNodes) {
             navigationPattern->FirePrimaryNodesLifecycle(
-                NavDestinationLifecycle::ON_SHOW, visibilityReason, needTriggerActive_);
+                NavDestinationLifecycle::ON_SHOW, visibilityReason, true);
         }
         navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
             NavDestinationLifecycle::ON_SHOW, false, visibilityReason);
@@ -2419,8 +2419,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
         NavDestinationLifecycle::ON_HIDE, false, visibilityReason);
     if (needHideOrShowPrimaryNodes) {
-        navigationPattern->FirePrimaryNodesLifecycle(
-            NavDestinationLifecycle::ON_HIDE, visibilityReason, needTriggerActive_);
+        navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, visibilityReason, true);
     }
 }
 
