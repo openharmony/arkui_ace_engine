@@ -613,3 +613,15 @@ export function borderRadiuses(all: double): Corners<double> {
 
 export type NodeBorderRadiuses = Corners<double>;
 export type NodeOffset = Vector2;
+
+export interface BackgroundBlur {
+    radius: double;
+    grayscale?: [int32, int32];
+}
+export interface ContentBlur {
+    radius: double;
+    grayscale?: [int32, int32];
+}
+export interface ForegroundBlur {
+    radius: double;
+}

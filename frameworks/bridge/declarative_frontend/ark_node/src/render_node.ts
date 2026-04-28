@@ -514,6 +514,20 @@ function checkCornerRadiusValid(corners: CornerRadius): boolean {
   return !!(corners && (corners.topLeft) && (corners.topRight) && (corners.bottomRight) && (corners.bottomLeft));
 }
 
+interface BackgroundBlur {
+  radius: number,
+  grayscale?: [number, number]
+}
+
+interface ContentBlur {
+  radius: number,
+  grayscale?: [number, number]
+}
+
+interface ForegroundBlur {
+  radius: number
+}
+
 class RenderNode {
   private _isDisposed: boolean;
   private childrenList: Array<RenderNode>;
@@ -547,6 +561,9 @@ class RenderNode {
   private lengthMetricsUnitValue: LengthMetricsUnit;
   private markNodeGroupValue: boolean;
   private apiTargetVersion: number;
+  private backgroundBlurValue: BackgroundBlur;
+  private contentBlurValue: ContentBlur;
+  private foregroundBlurValue: ForegroundBlur;
 
   constructor(type: string, cptrVal: number = 0) {
     this._isDisposed = false;
@@ -578,6 +595,9 @@ class RenderNode {
     this.translationValue = { x: 0, y: 0 };
     this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
     this.markNodeGroupValue = false;
+    this.backgroundBlurValue = { radius: 0, grayscale: [0, 0] };
+    this.contentBlurValue = { radius: 0, grayscale: [0, 0] };
+    this.foregroundBlurValue = { radius: 0 };
     if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
       return;
     }
@@ -737,6 +757,52 @@ class RenderNode {
     }
     getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
   }
+  set backgroundBlur(blurValue: BackgroundBlur | undefined) {
+    if (blurValue === undefined || blurValue === null) {
+      this.backgroundBlurValue = { radius: 0, grayscale: [0, 0] as [number, number] };
+      getUINativeModule().renderNode.setBackgroundBlur(this.nodePtr, 0, 0, 0);
+      return;
+    }
+    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    const grayscale = blurValue.grayscale;
+    let grayscale1 = 0;
+    let grayscale2 = 0;
+    if (grayscale) {
+      grayscale1 = (grayscale[0] >= 0 && grayscale[0] <= 127) ? grayscale[0] : 0;
+      grayscale2 = (grayscale[1] >= 0 && grayscale[1] <= 127) ? grayscale[1] : 0;
+    }
+    this.backgroundBlurValue = { radius: radius, grayscale: [grayscale1, grayscale2] as [number, number] };
+    getUINativeModule().renderNode.setBackgroundBlur(
+      this.nodePtr, radius, grayscale1, grayscale2);
+  }
+  set contentBlur(blurValue: ContentBlur | undefined) {
+    if (blurValue === undefined || blurValue === null) {
+      this.contentBlurValue = { radius: 0, grayscale: [0, 0] as [number, number] };
+      getUINativeModule().renderNode.setContentBlur(this.nodePtr, 0, 0, 0);
+      return;
+    }
+    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    const grayscale = blurValue.grayscale;
+    let grayscale1 = 0;
+    let grayscale2 = 0;
+    if (grayscale) {
+      grayscale1 = (grayscale[0] >= 0 && grayscale[0] <= 127) ? grayscale[0] : 0;
+      grayscale2 = (grayscale[1] >= 0 && grayscale[1] <= 127) ? grayscale[1] : 0;
+    }
+    this.contentBlurValue = { radius: radius, grayscale: [grayscale1, grayscale2] as [number, number] };
+    getUINativeModule().renderNode.setContentBlur(
+      this.nodePtr, radius, grayscale1, grayscale2);
+  }
+  set foregroundBlur(blurValue: ForegroundBlur | undefined) {
+    if (blurValue === undefined || blurValue === null) {
+      this.foregroundBlurValue = { radius: 0 };
+      getUINativeModule().renderNode.setForegroundBlur(this.nodePtr, 0);
+      return;
+    }
+    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    this.foregroundBlurValue = { radius: radius };
+    getUINativeModule().renderNode.setForegroundBlur(this.nodePtr, radius);
+  }
   get backgroundColor(): number {
     return this.backgroundColorValue;
   }
@@ -793,6 +859,15 @@ class RenderNode {
   }
   get markNodeGroup() {
     return this.markNodeGroupValue;
+  }
+  get backgroundBlur(): BackgroundBlur {
+    return this.backgroundBlurValue;
+  }
+  get contentBlur(): ContentBlur {
+    return this.contentBlurValue;
+  }
+  get foregroundBlur(): ForegroundBlur {
+    return this.foregroundBlurValue;
   }
   checkUndefinedOrNullWithDefaultValue<T>(arg: T, defaultValue: T): T {
     if (arg === undefined || arg === null) {

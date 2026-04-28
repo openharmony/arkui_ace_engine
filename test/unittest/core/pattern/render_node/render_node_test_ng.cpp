@@ -31,6 +31,7 @@
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components/common/properties/blur_style_option.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -346,5 +347,120 @@ HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithmTest006, TestSize.Level1)
         CalcSize(CalcLength(1.0), CalcLength(0.0));
     renderNodeLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().ToString(), "[1.00 x 0.00]");
+}
+
+/**
+ * @tc.name: RenderNodeBackgroundBlur001
+ * @tc.desc: Test RenderContext UpdateBackBlur with valid radius and grayscale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeBackgroundBlur001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("Blur", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    BlurOption blurOption;
+    blurOption.grayscale = { 0.0f, 0.0f };
+    renderContext->UpdateBackBlur(Dimension(10.0), blurOption);
+    auto radius = renderContext->GetBackBlurRadius();
+    ASSERT_TRUE(radius.has_value());
+    EXPECT_EQ(radius.value().ConvertToVp(), 10.0f);
+}
+
+/**
+ * @tc.name: RenderNodeBackgroundBlur002
+ * @tc.desc: Test RenderContext UpdateBackBlur with zero radius resets blur.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeBackgroundBlur002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("Blur", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    BlurOption blurOption;
+    blurOption.grayscale = { 0.0f, 0.0f };
+    renderContext->UpdateBackBlur(Dimension(10.0), blurOption);
+
+    renderContext->UpdateBackBlur(Dimension(0.0), blurOption);
+    auto radius = renderContext->GetBackBlurRadius();
+    ASSERT_TRUE(radius.has_value());
+    EXPECT_EQ(radius.value().ConvertToVp(), 0.0f);
+}
+
+/**
+ * @tc.name: RenderNodeBackgroundBlur003
+ * @tc.desc: Test RenderContext background blur clears BackgroundEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeBackgroundBlur003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("Blur", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    EffectOption effectOption;
+    renderContext->UpdateBackgroundEffect(effectOption);
+    EXPECT_TRUE(renderContext->GetBackgroundEffect().has_value());
+
+    renderContext->UpdateBackgroundEffect(std::nullopt);
+    EXPECT_FALSE(renderContext->GetBackgroundEffect().has_value());
+}
+
+/**
+ * @tc.name: RenderNodeContentBlur001
+ * @tc.desc: Test RenderContext UpdateFrontBlur with valid radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeContentBlur001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("Blur", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    BlurOption blurOption;
+    blurOption.grayscale = { 50.0f, 60.0f };
+    renderContext->UpdateFrontBlur(Dimension(20.0), blurOption);
+    auto radius = renderContext->GetFrontBlurRadius();
+    ASSERT_TRUE(radius.has_value());
+    EXPECT_EQ(radius.value().ConvertToVp(), 20.0f);
+}
+
+/**
+ * @tc.name: RenderNodeForegroundBlur001
+ * @tc.desc: Test RenderContext UpdateForegroundEffect with valid radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeForegroundBlur001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("Blur", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    renderContext->UpdateForegroundEffect(15.0);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: RenderNodeForegroundBlur002
+ * @tc.desc: Test RenderContext UpdateForegroundEffect with zero radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeForegroundBlur002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("Blur", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    renderContext->UpdateForegroundEffect(15.0);
+    renderContext->UpdateForegroundEffect(0.0);
+    SUCCEED();
 }
 } // namespace OHOS::Ace::NG

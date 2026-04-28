@@ -31062,6 +31062,16 @@ typedef struct GENERATED_ArkUIRenderNodeExtenderAccessor {
                         Ark_RenderNode node);
     void (*clearChildren)(Ark_RenderNode peer);
     void (*invalidate)(Ark_RenderNode peer);
+    void (*setBackgroundBlur)(Ark_RenderNode peer,
+                              Ark_Float64 radius,
+                              Ark_Int32 grayscale1,
+                              Ark_Int32 grayscale2);
+    void (*setContentBlur)(Ark_RenderNode peer,
+                           Ark_Float64 radius,
+                           Ark_Int32 grayscale1,
+                           Ark_Int32 grayscale2);
+    void (*setForegroundBlur)(Ark_RenderNode peer,
+                              Ark_Float64 radius);
 } GENERATED_ArkUIRenderNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIRenderServiceNodeAccessor {

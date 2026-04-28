@@ -4891,6 +4891,21 @@ export class RenderNodeExtender {
         RenderNodeExtender.invalidate_serialize(peer_casted)
         return
     }
+    public static setBackgroundBlur(peer: RenderNode, radius: double, grayscale1: int32, grayscale2: int32): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.setBackgroundBlur_serialize(peer_casted, radius, grayscale1, grayscale2)
+        return
+    }
+    public static setContentBlur(peer: RenderNode, radius: double, grayscale1: int32, grayscale2: int32): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.setContentBlur_serialize(peer_casted, radius, grayscale1, grayscale2)
+        return
+    }
+    public static setForegroundBlur(peer: RenderNode, radius: double): void {
+        const peer_casted = peer as (RenderNode)
+        RenderNodeExtender.setForegroundBlur_serialize(peer_casted, radius)
+        return
+    }
     private static constructorRenderNode_serialize(nodeId: int32): KPointer {
         const retval = ArkUIGeneratedNativeModule._RenderNodeExtender_constructorRenderNode(nodeId)
         return retval
@@ -5112,6 +5127,15 @@ export class RenderNodeExtender {
     }
     private static invalidate_serialize(peer: RenderNode): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_invalidate(extractors.toRenderNodePtr(peer))
+    }
+    private static setBackgroundBlur_serialize(peer: RenderNode, radius: double, grayscale1: int32, grayscale2: int32): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setBackgroundBlur(extractors.toRenderNodePtr(peer), radius, grayscale1, grayscale2)
+    }
+    private static setContentBlur_serialize(peer: RenderNode, radius: double, grayscale1: int32, grayscale2: int32): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setContentBlur(extractors.toRenderNodePtr(peer), radius, grayscale1, grayscale2)
+    }
+    private static setForegroundBlur_serialize(peer: RenderNode, radius: double): void {
+        ArkUIGeneratedNativeModule._RenderNodeExtender_setForegroundBlur(extractors.toRenderNodePtr(peer), radius)
     }
 }
 export class RenderServiceNode {

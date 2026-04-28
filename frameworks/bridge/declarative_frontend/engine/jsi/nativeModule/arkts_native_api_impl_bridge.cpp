@@ -168,6 +168,12 @@ void RegisterRenderNodeCommonAttributes(Local<panda::ObjectRef> renderNode, Ecma
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetMarkNodeGroup));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::GetNodeType));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBackgroundBlur));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetContentBlur));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetForegroundBlur));
 }
 void RegisterRenderNodeBuilderNodeAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
 {
