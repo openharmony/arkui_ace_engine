@@ -238,4 +238,33 @@ void VerticalOverflowHandler::HandleContentOverflow()
         UnRegisterScrollableEvent();
     }
 }
+
+void VerticalOverflowHandler::RestoreScales(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
+    for (const auto& child : children) {
+        CHECK_NULL_CONTINUE(child);
+        auto hostNode = child->GetHostNode();
+        CHECK_NULL_CONTINUE(hostNode);
+
+        auto renderContext = hostNode->GetRenderContext();
+        CHECK_NULL_CONTINUE(renderContext);
+
+        auto scale = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+        renderContext->SetScale(scale.x, scale.y);
+    }
+}
+
+void VerticalOverflowHandler::SetSmartLayoutExecuted(bool executed)
+{
+    smartLayoutExecuted_ = executed;
+}
+
+bool VerticalOverflowHandler::WasSmartLayoutExecuted() const
+{
+    return smartLayoutExecuted_;
+}
+
 } // namespace OHOS::Ace::NG

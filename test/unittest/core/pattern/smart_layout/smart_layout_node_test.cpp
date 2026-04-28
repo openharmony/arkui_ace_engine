@@ -197,7 +197,7 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest010, TestSize.Level1)
     spaces.top = 10.0;
     spaces.bottom = 10.0;
 
-    auto childNode = rootNode->CreateChildNode(info, spaces);
+    auto childNode = rootNode->CreateChildNode(info, spaces, false);
     EXPECT_NE(childNode, nullptr);
     EXPECT_EQ(childNode->GetNodeId(), 100);
     EXPECT_EQ(childNode->GetSize().width.value, 50.0);
@@ -221,7 +221,7 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest011, TestSize.Level1)
     info.isBlank = true;
 
     EdgesSpaces spaces;
-    auto childNode = rootNode->CreateChildNode(info, spaces);
+    auto childNode = rootNode->CreateChildNode(info, spaces, false);
 
     EXPECT_NE(childNode, nullptr);
     EXPECT_EQ(childNode->GetSize().width.value, 50.0);
@@ -245,7 +245,7 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest012, TestSize.Level1)
     info.isBlank = true;
 
     EdgesSpaces spaces;
-    auto childNode = rootNode->CreateChildNode(info, spaces);
+    auto childNode = rootNode->CreateChildNode(info, spaces, false);
 
     EXPECT_NE(childNode, nullptr);
     EXPECT_EQ(childNode->GetSize().width.value, 0.0);
@@ -273,8 +273,8 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest013, TestSize.Level1)
     info2.height = 50.0;
 
     EdgesSpaces spaces;
-    auto child1 = rootNode->CreateChildNode(info1, spaces);
-    auto child2 = rootNode->CreateChildNode(info2, spaces);
+    auto child1 = rootNode->CreateChildNode(info1, spaces, false);
+    auto child2 = rootNode->CreateChildNode(info2, spaces, false);
 
     std::vector<std::shared_ptr<SmartLayoutNode>> children = {child1, child2};
     rootNode->SetChildren(children);
@@ -675,6 +675,33 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest026, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SmartLayoutNodeTest027
+ * @tc.desc: Test CreateChildNode with Blank child as first child in Column layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest027, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
+
+    ChildLayoutInfo info;
+    info.id = 400;
+    info.width = 50.0;
+    info.height = 30.0;
+    info.isBlank = true;
+
+    EdgesSpaces spaces;
+    // Test firstChild=true for blank node
+    auto childNode = rootNode->CreateChildNode(info, spaces, true);
+
+    EXPECT_NE(childNode, nullptr);
+    EXPECT_EQ(childNode->GetNodeId(), 400);
+    // When avoidSafeArea is false (default), blank child height is still 0
+    EXPECT_EQ(childNode->GetSize().width.value, 50.0);
+    EXPECT_EQ(childNode->GetSize().height.value, 0.0);
+}
+
+/**
  * @tc.name: SmartLayoutNodeTest030
  * @tc.desc: Test CENTER alignment for main axis
  * @tc.type: FUNC
@@ -717,6 +744,141 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest030, TestSize.Level1)
         child->SyncData();
     }
     EXPECT_EQ(children.size(), 2);
+}
+
+/**
+ * @tc.name: SmartLayoutNodeTest031
+ * @tc.desc: Test GetChildrenBoundingBox with multiple children
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest031, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
+
+    std::vector<ChildLayoutInfo> childInfos;
+
+    ChildLayoutInfo info1;
+    info1.id = 1;
+    info1.width = 80.0;
+    info1.height = 60.0;
+    info1.offsetX = 10.0;
+    info1.offsetY = 20.0;
+    childInfos.push_back(info1);
+
+    ChildLayoutInfo info2;
+    info2.id = 2;
+    info2.width = 100.0;
+    info2.height = 40.0;
+    info2.offsetX = 5.0;
+    info2.offsetY = 100.0;
+    childInfos.push_back(info2);
+
+    rootNode->CreateChildrenFromInfos(childInfos);
+
+    // Sync children data so positions and sizes are available
+    rootNode->SyncData();
+    for (const auto& child : rootNode->GetChildren()) {
+        if (child != nullptr) {
+            child->SyncData();
+        }
+    }
+
+    auto boundingBox = rootNode->GetChildrenBoundingBox();
+
+    // minX=5, minY=20, width=85 (5 to 10+80=90), height=120 (20 to 100+40=140, but max(60,40) depends)
+    // Actual: minX=5, minY=20, maxRight=max(10+80, 5+100)=105, maxBottom=max(20+60, 100+40)=140
+    // width=105-5=100, height=140-20=120
+    EXPECT_EQ(boundingBox.offsetX, 5.0);
+    EXPECT_EQ(boundingBox.offsetY, 20.0);
+    EXPECT_EQ(boundingBox.width, 100.0);
+    EXPECT_EQ(boundingBox.height, 120.0);
+    EXPECT_TRUE(boundingBox.IsValid());
+}
+
+/**
+ * @tc.name: SmartLayoutNodeTest032
+ * @tc.desc: Test CreateChildNode with avoidSafeArea=true + firstChild=true + blank=true in Column layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest032, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
+    rootNode->SetAvoidSafeArea(true);
+
+    ChildLayoutInfo info;
+    info.id = 500;
+    info.width = 50.0;
+    info.height = 30.0;
+    info.isBlank = true;
+
+    EdgesSpaces spaces;
+    // Test firstChild=true for blank node with avoidSafeArea=true
+    auto childNode = rootNode->CreateChildNode(info, spaces, true);
+
+    EXPECT_NE(childNode, nullptr);
+    EXPECT_EQ(childNode->GetNodeId(), 500);
+    // When avoidSafeArea=true and firstChild=true, blank child should NOT have height set to 0
+    EXPECT_EQ(childNode->GetSize().width.value, 50.0);
+    EXPECT_EQ(childNode->GetSize().height.value, 30.0);
+}
+
+/**
+ * @tc.name: SmartLayoutNodeTest033
+ * @tc.desc: Test CreateChildNode with avoidSafeArea=true + firstChild=true + blank=true in Row layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest033, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    rootNode->SetLayoutType(SmartLayoutType::ROW);
+    rootNode->SetAvoidSafeArea(true);
+
+    ChildLayoutInfo info;
+    info.id = 600;
+    info.width = 50.0;
+    info.height = 30.0;
+    info.isBlank = true;
+
+    EdgesSpaces spaces;
+    // Test firstChild=true for blank node with avoidSafeArea=true in Row layout
+    auto childNode = rootNode->CreateChildNode(info, spaces, true);
+
+    EXPECT_NE(childNode, nullptr);
+    EXPECT_EQ(childNode->GetNodeId(), 600);
+    // When avoidSafeArea=true and firstChild=true, blank child should NOT have width set to 0
+    EXPECT_EQ(childNode->GetSize().width.value, 50.0);
+    EXPECT_EQ(childNode->GetSize().height.value, 30.0);
+}
+
+/**
+ * @tc.name: SmartLayoutNodeTest034
+ * @tc.desc: Test CreateChildNode with avoidSafeArea=true but firstChild=false for blank node
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest034, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
+    rootNode->SetAvoidSafeArea(true);
+
+    ChildLayoutInfo info;
+    info.id = 700;
+    info.width = 50.0;
+    info.height = 30.0;
+    info.isBlank = true;
+
+    EdgesSpaces spaces;
+    // Test firstChild=false for blank node with avoidSafeArea=true
+    // Should still have height=0 since it's not first child
+    auto childNode = rootNode->CreateChildNode(info, spaces, false);
+
+    EXPECT_NE(childNode, nullptr);
+    EXPECT_EQ(childNode->GetNodeId(), 700);
+    // When avoidSafeArea=true but firstChild=false, blank child height is still 0
+    EXPECT_EQ(childNode->GetSize().width.value, 50.0);
+    EXPECT_EQ(childNode->GetSize().height.value, 0.0);
 }
 
 } // namespace OHOS::Ace::NG
