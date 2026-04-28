@@ -252,6 +252,8 @@ private:
     void OnVisibleAreaChange(bool isVisible, double ratio);
     void RegisterVisibleAreaChange();
     void UnregisterVisibleAreaChange();
+    void NotifyColorHDRColorHeadRoom(const Color& color);
+    void NotifyGradientHDRColorHeadRoom(const std::shared_ptr<Ace::Gradient>& gradient);
     std::string GetDumpInfo();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
 

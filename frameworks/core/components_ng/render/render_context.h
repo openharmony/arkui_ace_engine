@@ -324,6 +324,7 @@ public:
     virtual void SetHDRBrightness(float hdrBrightness, uint32_t type) {}
     virtual void SetImageHDRBrightness(float hdrBrightness) {}
     virtual void SetImageHDRPresent(bool hdrPresent) {}
+    virtual void SetHDRColorHeadRoom(float headRoom) {}
     virtual void SetTransparentLayer(bool isTransparentLayer) {}
     virtual void SetSurfaceBufferOpaque(bool isOpaque) {}
     virtual void SetScreenId(uint64_t screenId) {}
