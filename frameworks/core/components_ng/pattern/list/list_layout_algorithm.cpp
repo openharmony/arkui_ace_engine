@@ -213,6 +213,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // calculate child layout constraint.
         UpdateListItemConstraint(axis_, contentIdealSize, childLayoutConstraint_);
         MeasureList(layoutWrapper);
+        PostClipContentSafeAreaBundle(layoutWrapper);
     } else {
         itemPosition_.clear();
         if (childrenSize_ && posMap_) {
@@ -1392,6 +1393,16 @@ void ListLayoutAlgorithm::CalculateFixOffset(const ScaleProperty& scaleProperty)
     }
     if (LessNotEqual(clipStart, contentStart)) {
         startFixOffset_ = (contentStart - clipStart);
+    }
+}
+
+void ListLayoutAlgorithm::PostClipContentSafeAreaBundle(LayoutWrapper* layoutWrapper)
+{
+    if (contentClipMode_ == ContentClipMode::SAFE_AREA) {
+        CHECK_NULL_VOID(layoutWrapper);
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        host->PostBundle({}, false, LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA);
     }
 }
 
