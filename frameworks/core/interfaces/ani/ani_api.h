@@ -512,6 +512,13 @@ struct ArkUIColumnLayoutAlgorithm {
     ani_boolean isReverse = false;
 };
 
+struct ArkUIGridLayoutAlgorithm {
+    const char* columnsTemplate = nullptr;
+    ArkUI_Int32 itemFillPolicy = -1;
+    ArkUILayoutAlgorithmLengthMetrics rowsGap;
+    ArkUILayoutAlgorithmLengthMetrics columnsGap;
+};
+
 struct ArkUIAniWebModifier {
     void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
@@ -751,6 +758,7 @@ struct ArkUIAniDynamicLayoutModifier {
     bool (*setDynamicLayoutRowOptions)(ArkUINodeHandle node, ArkUIRowLayoutAlgorithm algorithm);
     bool (*setDynamicLayoutColumnOptions)(ArkUINodeHandle node, ArkUIColumnLayoutAlgorithm algorithm);
     bool (*setDynamicLayoutCustomOptions)(ArkUINodeHandle node, const ArkUICustomLayoutAlgorithm& algorithm);
+    bool (*setDynamicLayoutGridOptions)(ArkUINodeHandle node, ArkUIGridLayoutAlgorithm algorithm);
 };
 
 struct ArkUIAniListItemGroupModifier {

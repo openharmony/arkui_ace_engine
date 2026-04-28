@@ -15,7 +15,7 @@
 
 import { ArkUIAniModule } from 'arkui.ani'
 import { ArkDynamicLayoutPeer } from '@ohos.arkui.components.ArkDynamicLayout';
-import { LayoutAlgorithm, StackLayoutAlgorithm, RowLayoutAlgorithm, ColumnLayoutAlgorithm, CustomLayoutAlgorithm } from './../LayoutAlgorithm'
+import { LayoutAlgorithm, StackLayoutAlgorithm, RowLayoutAlgorithm, ColumnLayoutAlgorithm, CustomLayoutAlgorithm, GridLayoutAlgorithm } from './../LayoutAlgorithm'
 import { FrameNode } from 'arkui.FrameNode'
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -35,6 +35,8 @@ export class DynamicLayoutHandWritten {
             if (frameNode) {
                 ArkUIAniModule._SetDynamicLayoutCustomLayoutAlgorithm(peer.peer.ptr, value, frameNode as FrameNode)
             }
+        } else if (value instanceof GridLayoutAlgorithm) {
+            ArkUIAniModule._SetDynamicLayoutGridLayoutAlgorithm(peer.peer.ptr, value)
         }
     }
 }
