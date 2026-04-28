@@ -22,7 +22,6 @@ import { StateTracker } from './lib/stateTracker'
 import { tsuite, tcase, test, eq } from './lib/testFramework'
 import { ObserveSingleton } from '../base/observeSingleton';
 import { STATE_MGMT_FACTORY } from '../decorator'
-import { IObservedAnyProp } from '../decorator';
 let StateMgmtFactory = STATE_MGMT_FACTORY;
 let stateMgmtConsole=console;
 
@@ -54,22 +53,6 @@ let stateMgmtConsole=console;
 */
 
 export class ClassA implements IObservedObject, IWatchSubscriberRegister {
-    // propA : number (no @Track)
-    public propA: number
-
-    // @Track classB : ClassB
-    // @JsonRename("classB")
-    private __backing_classB: ClassB;
-    // @JsonIgnore
-    private readonly __meta_classB: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
-
-    // @Track classC : ClassC = new ClassC();
-    // @JsonRename("classC")
-    private __backing_classC: ClassC = new ClassC
-    // @JsonIgnore
-    private readonly __meta_classC: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
 
     constructor() {
         // init in constructor
@@ -112,112 +95,14 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
         }
     }
 
-    public get classB(): ClassB {
-        this.conditionalAddRef(this.__meta_classB);
-        return this.__backing_classB;
-    }
-    public set classB(newValue: ClassB) {
-        stateMgmtConsole.log(`ClassA: set @Track classB`);
-        if (this.__backing_classB !== newValue) {
-            this.__backing_classB = newValue;
-            this.__meta_classB.fireChange();
-            this.executeOnSubscribingWatches('classB');
-        }
-    }
-
-    public get classC(): ClassC {
-        stateMgmtConsole.log(`ClassA: get @Track classC`);
-        this.conditionalAddRef(this.__meta_classC);
-        return this.__backing_classC;
-    }
-    public set classC(newValue: ClassC) {
-        stateMgmtConsole.log(`ClassA: set @Track classC`);
-        if (this.__backing_classC !== newValue) {
-            this.__backing_classC = newValue;
-            this.__meta_classB.fireChange();
-            this.executeOnSubscribingWatches('classC');
-        }
-    }
-}
-
-// TODO: drop that class, we do not implement solution with additional mete
-export class ClassAWithAnyMeta implements IObservedObject, IWatchSubscriberRegister
-    , IObservedAnyProp
-{
-
-    // propA : number (no @Track)
-    public propA: number
-
     // @Track classB : ClassB
-    // @JsonRename("classB")
+    //@JsonRename("classB")
     private __backing_classB: ClassB;
-
-    // @Track classC : ClassC = new ClassC();
-    // @JsonRename("classC")
-    private __backing_classC: ClassC = new ClassC
 
     // @JsonIgnore
     private readonly __meta_classB: IMutableStateMeta
         = StateMgmtFactory.makeMutableStateMeta();
 
-    // @JsonIgnore
-    private readonly __meta_classC: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
-
-    // Solution NN, wildcard support, V1 compatible
-    // Uses one mutable meta to track multiple properties
-    private readonly __meta_any_property: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
-
-    public addRefAnyProp(): void {
-        this.__meta_any_property.addRef();
-    }
-    // Solution NN, end
-
-    constructor() {
-        // init in constructor
-        // need to change to _backing,
-        // otherwise compiler warns about uninitialized
-        // __backing
-        this.__backing_classB = new ClassB();
-        this.propA = 8;
-    }
-
-    // @Watch
-    // Watches firing when this object's property changes
-    // @JsonIgnore
-    private readonly subscribedWatches_: ISubscribedWatches = StateMgmtFactory.makeSubscribedWatches();
-
-    // implementation of ISubscribedWatches by forwarding to subscribedWatches
-    public addWatchSubscriber(watchId: WatchIdType): void {
-        this.subscribedWatches_.addWatchSubscriber(watchId);
-    }
-    public removeWatchSubscriber(watchId: WatchIdType): boolean {
-        return this.subscribedWatches_.removeWatchSubscriber(watchId);
-    }
-    protected executeOnSubscribingWatches(changedPropName: string): void {
-        this.subscribedWatches_.executeOnSubscribingWatches(changedPropName);
-    }
-
-    // IObservedObject interface
-    // @JsonIgnore
-    private ____V1RenderId: RenderIdType = 0;
-    public setV1RenderId(renderId: RenderIdType): void {
-        this.____V1RenderId = renderId;
-    }
-
-    // helper
-    // do not inline, will not work for
-    // inherited classes.
-    protected conditionalAddRef(meta: IMutableStateMeta): void {
-        if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
-            meta.addRef();
-            // Solution2, wildcard support
-            this.addRefAnyProp();
-            // Solution2, end
-        }
-    }
-
     public get classB(): ClassB {
         this.conditionalAddRef(this.__meta_classB);
         return this.__backing_classB;
@@ -226,14 +111,18 @@ export class ClassAWithAnyMeta implements IObservedObject, IWatchSubscriberRegis
         stateMgmtConsole.log(`ClassA: set @Track classB`);
         if (this.__backing_classB !== newValue) {
             this.__backing_classB = newValue;
-            // Solution2, wildcard support
-            this.__meta_any_property.fireChange();
-            // Solution2, end
             this.__meta_classB.fireChange();
-            this.executeOnSubscribingWatches('classB');
+            this.executeOnSubscribingWatches("classB");
         }
     }
 
+    // @Track classC : ClassC = new ClassC();
+    //@JsonRename("classC")
+    private __backing_classC: ClassC = new ClassC
+
+    // @JsonIgnore
+    private readonly __meta_classC: IMutableStateMeta
+        = StateMgmtFactory.makeMutableStateMeta();
     public get classC(): ClassC {
         stateMgmtConsole.log(`ClassA: get @Track classC`);
         this.conditionalAddRef(this.__meta_classC);
@@ -243,113 +132,14 @@ export class ClassAWithAnyMeta implements IObservedObject, IWatchSubscriberRegis
         stateMgmtConsole.log(`ClassA: set @Track classC`);
         if (this.__backing_classC !== newValue) {
             this.__backing_classC = newValue;
-            // Solution2, wildcard support
-            this.__meta_any_property.fireChange();
-            // Solution2, end
             this.__meta_classB.fireChange();
-            this.executeOnSubscribingWatches('classC');
+            this.executeOnSubscribingWatches("classC");
         }
     }
-}
-
-export class ClassA_ObserveAnyProp_NoAnyMeta implements IObservedObject, IWatchSubscriberRegister
-    , IObservedAnyProp
-{
 
     // propA : number (no @Track)
     public propA: number
 
-    // @Track classB : ClassB
-    // @JsonRename("classB")
-    private __backing_classB: ClassB;
-
-    // @Track classC : ClassC = new ClassC();
-    // @JsonRename("classC")
-    private __backing_classC: ClassC = new ClassC
-
-    // @JsonIgnore
-    private readonly __meta_classB: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
-
-    // @JsonIgnore
-    private readonly __meta_classC: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
-
-    public addRefAnyProp(): void {
-        // "Read" all  tracked variables here
-        console.log('ClassA_ObserveAnyProp_NoAnyMeta addRefAnyProp');
-        this.__meta_classB.addRef();
-        this.__meta_classC.addRef();
-    }
-
-    constructor() {
-        // init in constructor
-        // need to change to _backing,
-        // otherwise compiler warns about uninitialized
-        // __backing
-        this.__backing_classB = new ClassB();
-        this.propA = 8;
-    }
-
-    // @Watch
-    // Watches firing when this object's property changes
-    // @JsonIgnore
-    private readonly subscribedWatches_: ISubscribedWatches = StateMgmtFactory.makeSubscribedWatches();
-
-    // implementation of ISubscribedWatches by forwarding to subscribedWatches
-    public addWatchSubscriber(watchId: WatchIdType): void {
-        this.subscribedWatches_.addWatchSubscriber(watchId);
-    }
-    public removeWatchSubscriber(watchId: WatchIdType): boolean {
-        return this.subscribedWatches_.removeWatchSubscriber(watchId);
-    }
-    protected executeOnSubscribingWatches(changedPropName: string): void {
-        this.subscribedWatches_.executeOnSubscribingWatches(changedPropName);
-    }
-
-    // IObservedObject interface
-    // @JsonIgnore
-    private ____V1RenderId: RenderIdType = 0;
-    public setV1RenderId(renderId: RenderIdType): void {
-        this.____V1RenderId = renderId;
-    }
-
-    // helper
-    // do not inline, will not work for
-    // inherited classes.
-    protected conditionalAddRef(meta: IMutableStateMeta): void {
-        if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
-            meta.addRef();
-        }
-    }
-
-    public get classB(): ClassB {
-        console.log('ClassA_ObserveAnyProp_NoAnyMeta(), get classB');
-        this.conditionalAddRef(this.__meta_classB);
-        return this.__backing_classB;
-    }
-    public set classB(newValue: ClassB) {
-        stateMgmtConsole.log(`ClassA: set @Track classB`);
-        if (this.__backing_classB !== newValue) {
-            this.__backing_classB = newValue;
-            this.__meta_classB.fireChange();
-            this.executeOnSubscribingWatches('classB');
-        }
-    }
-
-    public get classC(): ClassC {
-        stateMgmtConsole.log(`ClassA: get @Track classC`);
-        this.conditionalAddRef(this.__meta_classC);
-        return this.__backing_classC;
-    }
-    public set classC(newValue: ClassC) {
-        stateMgmtConsole.log(`ClassA: set @Track classC`);
-        if (this.__backing_classC !== newValue) {
-            this.__backing_classC = newValue;
-            this.__meta_classB.fireChange();
-            this.executeOnSubscribingWatches('classC');
-        }
-    }
 }
 
 export class ClassB implements IObservedObject, IWatchSubscriberRegister {
@@ -369,7 +159,7 @@ export class ClassB implements IObservedObject, IWatchSubscriberRegister {
         return this.subscribedWatches_.removeWatchSubscriber(watchId);
     }
     protected executeOnSubscribingWatches(changedPropName: string): void {
-        this.subscribedWatches_.executeOnSubscribingWatches('propE');
+        this.subscribedWatches_.executeOnSubscribingWatches("propE");
     }
 
     // IObservedObject interface
@@ -394,16 +184,18 @@ export class ClassB implements IObservedObject, IWatchSubscriberRegister {
 
     // propB1 : string = "BBB111";
     // @JsonRename("classC")
-    private __backing_propB1: string = 'BBB111';
+    private __backing_propB1: string = "BBB111";
     public get propB1(): string {
+        stateMgmtConsole.log(`ClassB (@Observe compat): get propB1`);
         this.conditionalAddRef();
         return this.__backing_propB1;
     }
     public set propB1(newValue: string) {
+        stateMgmtConsole.log(`ClassB (@Observe compat): set propB1`);
         if (this.__backing_propB1 !== newValue) {
             this.__backing_propB1 = newValue;
             this.__meta.fireChange();
-            this.executeOnSubscribingWatches('propB1');
+            this.executeOnSubscribingWatches("propB1");
         }
     }
 
@@ -420,13 +212,13 @@ export class ClassB implements IObservedObject, IWatchSubscriberRegister {
         if (this.__backing_propB2 !== newValue) {
             this.__backing_propB2 = newValue;
             this.__meta.fireChange();
-            this.executeOnSubscribingWatches('propB2');
+            this.executeOnSubscribingWatches("propB2");
         }
     }
 }
 
 // non-observed, no change
-export class ClassC {
+class ClassC {
     propC: number = 888;
 }
 
@@ -434,27 +226,27 @@ export function run_observed_object3(): Boolean {
 
     // some quick and dirty way to test if
     // init , read and modify properties works
-    const ttest = tsuite('@Observe @Track and @Observe compat, plain class: nested objects') {
+    const ttest = tsuite("@Observe @Track and @Observe compat, plain class: nested objects") {
 
-        tcase('Test 1: init, read and modify properties') {
+        tcase("Test 1: init, read and modify properties") {
 
             let classA = new ClassA()
-            test('read classA.propA - expect 8', eq(classA.propA, 8))
-            test('read classA.classB.propB1 - expect BBB111', eq(classA.classB.propB1, 'BBB111'))
-            test('read classA.classB.propB2 - expect false', eq(classA.classB.propB2, false))
-            test('read classA.classC.propC - expect 888', eq(classA.classC.propC, 888))
+            test("read classA.propA - expect 8", eq(classA.propA, 8))
+            test("read classA.classB.propB1 - expect BBB111", eq(classA.classB.propB1, "BBB111"))
+            test("read classA.classB.propB2 - expect false", eq(classA.classB.propB2, false))
+            test("read classA.classC.propC - expect 888", eq(classA.classC.propC, 888))
 
             classA.propA += 1;
 
-            classA.classB.propB1 = '****';
+            classA.classB.propB1 = "****";
 
             ObserveSingleton.instance.updateDirty();
 
-            test('read classA.propA - expect 9', eq(classA.propA, 9))
-            test('read classA.classB.propB1 - expect ****', eq(classA.classB.propB1, '****'))
+            test("read classA.propA - expect 9", eq(classA.propA, 9))
+            test("read classA.classB.propB1 - expect ****", eq(classA.classB.propB1, "****"))
         }
 
-        tcase('Test 2: Verify AddRef for V1') {
+        tcase("Test 2: Verify AddRef for V1") {
 
             ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
             let classA = new ClassA()
@@ -462,10 +254,10 @@ export function run_observed_object3(): Boolean {
             StateTracker.reset();
             // Cause addRef
             classA.classB;
-            test('Use classA.classB expect 1 add ref for classB', eq(StateTracker.getRefCnt(), 1))
+            test("Use classA.classB expect 1 add ref for classB", eq(StateTracker.getRefCnt(), 1))
         }
 
-        tcase('Test 3: Verify AddRef for V2') {
+        tcase("Test 3: Verify AddRef for V2") {
 
             ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV2;
             let classA = new ClassA()
@@ -473,10 +265,10 @@ export function run_observed_object3(): Boolean {
             StateTracker.reset();
             // Cause addRef
             classA.classB;
-            test('Use classA.classB expect 1 add ref for classB', eq(StateTracker.getRefCnt(), 1))
+            test("Use classA.classB expect 1 add ref for classB", eq(StateTracker.getRefCnt(), 1))
         }
 
-        tcase('Test 4: Verify 2*AddRef and FireChange for V1') {
+        tcase("Test 4: Verify 2*AddRef and FireChange for V1") {
 
             ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
             let classA = new ClassA()
@@ -484,23 +276,23 @@ export function run_observed_object3(): Boolean {
             StateTracker.reset();
             // Cause addRef
             classA.classB.propB1;
-            test('Use classA.classB.probB1 expect 2 add refs. classB and propB1', eq(StateTracker.getRefCnt(), 2))
+            test("Use classA.classB.probB1 expect 2 add refs. classB and propB1", eq(StateTracker.getRefCnt(), 2))
             // This causes fireChange event
             classA.classB = new ClassB();
-            test('New classA.classB expect fire change', eq(StateTracker.getFireChangeCnt(), 1))
+            test("New classA.classB expect fire change", eq(StateTracker.getFireChangeCnt(), 1))
         }
 
-        tcase('Test 5: Verify 2*AddRef and FireChange for V2') {
+        tcase("Test 5: Verify 2*AddRef and FireChange for V2") {
 
             ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV2;
             let classA = new ClassA()
             StateTracker.reset();
             // Cause addRefs
             classA.classB.propB1;
-            test('Use classA.classB.probB1 expect 2 add refs. classB and propB1', eq(StateTracker.getRefCnt(), 2))
+            test("Use classA.classB.probB1 expect 2 add refs. classB and propB1", eq(StateTracker.getRefCnt(), 2))
             // This causes fireChange event
             classA.classB = new ClassB();
-            test('New classA.classB expect fire change', eq(StateTracker.getFireChangeCnt(), 1))
+            test("New classA.classB expect fire change", eq(StateTracker.getFireChangeCnt(), 1))
 
         }
     }

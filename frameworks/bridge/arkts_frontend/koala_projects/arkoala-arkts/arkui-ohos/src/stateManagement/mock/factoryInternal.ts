@@ -20,7 +20,6 @@ import { IBackingValue } from '../base/iBackingValue';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { DecoratorBackingValue } from '../base/backingValue';
 import { MutableKeyedStateMeta, MutableStateMeta } from '../base/mutableStateMeta';
-import { TestMutableKeyedStateMeta } from '../tests/lib/testAddRefFireChange';
 
 // FactoryInternalImpl contains implementation needed by unit test framework tracking
 export class FactoryInternalImpl implements IFactoryInternal {
@@ -31,18 +30,9 @@ export class FactoryInternalImpl implements IFactoryInternal {
         return new TrackedMutableStateMeta(info);
     }
     public mkMutableKeyedStateMeta(info: string): IMutableKeyedStateMeta {
-        return new TestMutableKeyedStateMeta(info);
-    }
-    public mkMutableKeyedStateMeta(info: string, observed: Object): IMutableKeyedStateMeta {
         return new MutableKeyedStateMeta(info);
     }
     public mkObservedInterfaceProxy<T extends Object>(x: T): T {
         return StateMgmtTool.createProxy<T>(x);
-    }
-    public mkInteropDecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
-        return new DecoratorBackingValue<T>(info, initValue);
-    }
-    public mkInteropV2DecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
-        return new DecoratorBackingValue<T>(info, initValue);
     }
 }

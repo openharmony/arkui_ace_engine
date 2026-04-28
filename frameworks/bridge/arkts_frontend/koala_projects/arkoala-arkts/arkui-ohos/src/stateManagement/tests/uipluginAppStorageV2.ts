@@ -86,7 +86,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
         if (this.__backing_classB !== newValue) {
             this.__backing_classB = newValue;
             this.__meta_classB.fireChange();
-            this.executeOnSubscribingWatches('classB');
+            this.executeOnSubscribingWatches("classB");
         }
     }
 
@@ -107,7 +107,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
         if (this.__backing_classC !== newValue) {
             this.__backing_classC = newValue;
             this.__meta_classB.fireChange();
-            this.executeOnSubscribingWatches('classC');
+            this.executeOnSubscribingWatches("classC");
         }
     }
 
@@ -141,26 +141,26 @@ export function run_app_storage_v2(): Boolean {
     const ClassIBTypeValue = Class.from<ClassIB>();
     const InfBType = Class.from<InfB>();
 
-    const ttest = tsuite('AppStorageV2 API - FULL') {
-        tcase('connect, delete different ttypes') {
+    const ttest = tsuite("AppStorageV2 API - FULL") {
+        tcase("connect, delete different ttypes") {
             let valA1 = AppStorageV2.connect<ClassA>(
-                ClassATypeValue, 'ca', () => { return new ClassA; })
+                ClassATypeValue, "ca", () => { return new ClassA; })
 
             let valA2 = AppStorageV2.connect<ClassA>(
-                ClassATypeValue, 'ca', () => { return new ClassA; })
+                ClassATypeValue, "ca", () => { return new ClassA; })
 
             let valA3 = AppStorageV2.connect<ClassA>(
-                ClassATypeValue, 'ca3', () => { return new ClassA; })
+                ClassATypeValue, "ca3", () => { return new ClassA; })
     
-            test('ClassA type: has check', eq(valA1, valA2));
-            test('ClassA propA: has check', eq(valA1?.propA, valA2?.propA));
-            test('ClassA type: not eq', not_eq(valA1, valA3));
+            test("ClassA type: has check", eq(valA1, valA2));
+            test("ClassA propA: has check", eq(valA1?.propA, valA2?.propA));
+            test("ClassA type: not eq", not_eq(valA1, valA3));
 
-            AppStorageV2.remove('ca');
+            AppStorageV2.remove("ca");
 
             let detected = false;
             try {
-                let valAD = AppStorageV2.connect<ClassA>(ClassATypeValue, 'ca')
+                let valAD = AppStorageV2.connect<ClassA>(ClassATypeValue, "ca")
             } catch (e) {
                 detected = true;
             } finally {
@@ -170,7 +170,7 @@ export function run_app_storage_v2(): Boolean {
             // Access with the wrong type
             detected = false;
             try {
-                let valAx = AppStorageV2.connect<ClassB>(ClassBTypeValue, 'ca3')
+                let valAx = AppStorageV2.connect<ClassB>(ClassBTypeValue, "ca3")
             } catch (e) {
                 detected = true;
             } finally {
@@ -178,20 +178,20 @@ export function run_app_storage_v2(): Boolean {
             }
 
             let valB1 = AppStorageV2.connect<ClassB>(
-                ClassBTypeValue, 'keyb', () => { return new ClassB; })
+                ClassBTypeValue, "keyb", () => { return new ClassB; })
             let valB2 = AppStorageV2.connect<ClassB>(
-                ClassBTypeValue, 'keyb', () => { return new ClassB; })
+                ClassBTypeValue, "keyb", () => { return new ClassB; })
             let valB3 = AppStorageV2.connect<ClassB>(
-                ClassBTypeValue, 'keyb3', () => { return new ClassB; })
+                ClassBTypeValue, "keyb3", () => { return new ClassB; })
 
-            test('ClassA type: has check', eq(valB1, valB2));
-            test('ClassA propA: has check', eq(valB1?.propB, valB2?.propB));
-            test('ClassA type: not eq', not_eq(valB1, valB3));
+            test("ClassA type: has check", eq(valB1, valB2));
+            test("ClassA propA: has check", eq(valB1?.propB, valB2?.propB));
+            test("ClassA type: not eq", not_eq(valB1, valB3));
 
             // Check that we can get Class that implements interface
             // as an interface, not as a class
             let valCIB1 = AppStorageV2.connect<ClassIB>(
-                ClassIBTypeValue, 'keycib', () => { return new ClassIB; })
+                ClassIBTypeValue, "keycib", () => { return new ClassIB; })
 
             // Access via interface
             // test below **fails**
@@ -201,7 +201,7 @@ export function run_app_storage_v2(): Boolean {
             // So InfBType in reality is type of interface instance
             detected = false;
             try {
-                let valIB1 = AppStorageV2.connect<InfB>(InfBType, 'keycib')
+                let valIB1 = AppStorageV2.connect<InfB>(InfBType, "keycib")
             } catch (e) {
                 detected = true;
             } finally {

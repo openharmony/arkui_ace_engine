@@ -14,16 +14,9 @@
  */
 
 import { LocalStorage } from '../storage/localStorage';
-import {
-    IDecoratorBaseRegistry,
-    IProvideDecoratedVariable,
-    IProviderDecoratedVariable,
-    IVariableOwner,
-} from '../decorator';
-import { CustomComponentLifecycle } from '@component/customComponent';
-import { IEnvVariable } from '@decoratorEnv';
+import { IProvideDecoratedVariable, IProviderDecoratedVariable, IVariableOwner } from '../decorator';
 
-export class ExtendableComponent implements IVariableOwner {
+export class ExtendableComponent implements IVariableOwner { // implements IExtendableComponent {
     protected parent_: ExtendableComponent | null;
     public localStorage_: LocalStorage;
     public isActive_: int = 1;
@@ -34,45 +27,31 @@ export class ExtendableComponent implements IVariableOwner {
         this.localStorage_ = (storage !== undefined)? storage : new LocalStorage();
     }
 
-    static current: Object | undefined = undefined;
-
-    getUniqueId(): int {
-        return ExtendableComponent.uniqueId_++;
-    }
-
-    getownedStateVariables(): Array<Object> {
-        return new Array<Object>();
-    }
-
-    __getLifecycle__Internal(): CustomComponentLifecycle {
-        return {} as CustomComponentLifecycle;
-    }
-
-    __isViewActive__Internal(): boolean {
+    isViewActive(): boolean {
         return true;
     }
 
-    __getLocalStorage__Internal(): LocalStorage {
-        return this.localStorage_;
+    getUniqueId(): int
+    {
+        return ExtendableComponent.uniqueId_++;
     }
 
-    __addProvide__Internal<T>(alias: string, v: IProvideDecoratedVariable<T>, allowOverride?: boolean): void {
+    getLocalStorage(): LocalStorage {
+        return new LocalStorage();
     }
 
-    __findProvide__Internal<T>(alias: string): IProvideDecoratedVariable<T> | undefined {
+    addProvide<T>(alias: String, v: IProvideDecoratedVariable<T>, allowOverride: Boolean|undefined): void {
+        console.log("addProvide not implemented");
+    }
+    addProvider<T>(alias: String, v: IProviderDecoratedVariable<T>): void {
+        console.log("addProvider not implemented");
+    }
+    findProvide<T>(alias: String): IProvideDecoratedVariable<T>|undefined {
+        console.log("findProvide not implemented");
         return undefined;
     }
-
-    __addProvider__Internal<T>(alias: string, v: IProviderDecoratedVariable<T>): void {
-    }
-
-    __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined {
+    findProvider<T>(alias: String): IProviderDecoratedVariable<T>|undefined {
+        console.log("findProvider not implemented");
         return undefined;
     }
-
-    __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void {
-    }
-
-    __addEnvInstance__Internal(envProperty: IEnvVariable): void {
-    }
-}
+ }

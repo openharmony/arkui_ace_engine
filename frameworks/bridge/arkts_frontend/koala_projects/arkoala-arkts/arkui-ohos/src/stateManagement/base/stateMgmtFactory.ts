@@ -69,7 +69,7 @@ import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
 import { uiUtils } from './uiUtilsImpl';
 import { FactoryInternal } from './iFactoryInternal';
-import { EnvDecoratedVariable } from '@decoratorEnv';
+import { EnvDecoratedVariable } from '../decoratorImpl/decoratorEnv';
 import { ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
@@ -627,19 +627,5 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             varName,
             envOptions
         ) as IEnvDecoratedVariable<T>;
-    }
-
-    makeSyncMonitor(
-        pathInfos: Array<IMonitorPathInfo>,
-        monitorCallback: (m: IMonitor) => void,
-        options?: MakeMonitorOptions
-    ): IMonitorDecoratedVariable {
-        return new MonitorFunctionDecorator(
-            pathInfos,
-            monitorCallback,
-            options?.owner,
-            true,
-            options?.functionName
-        );
     }
 }

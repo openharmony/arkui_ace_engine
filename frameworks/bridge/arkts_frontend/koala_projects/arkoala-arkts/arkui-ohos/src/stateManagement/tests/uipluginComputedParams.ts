@@ -187,7 +187,7 @@ export class IndexComputedParamsComponent extends ExtendableComponent {
          */
         this._backing_shoppingBasket = StateMgmtFactory.makeLocal<Array<Article>>(
             this,
-            'shoppingBasket',
+            "shoppingBasket",
             UIUtils.makeObserved(
               new Array<Article>(new Article(1, 20), new Article(5, 2))) as Array<Article>
         );
@@ -201,13 +201,13 @@ export class IndexComputedParamsComponent extends ExtendableComponent {
                     return acc + (item.quantity * item.unitPrice)
                 }, 0);
             },
-            'total'
+            "total"
         )
         this._computed_qualifiesForDiscount = StateMgmtFactory.makeComputed<boolean>(
             () : boolean => {
                 return this.total >= 100;
             },
-            'qualifiesForDiscount'
+            "qualifiesForDiscount"
         )
     }
 
@@ -258,13 +258,13 @@ class ChildComponent extends ExtendableComponent{
         // @Param can init from parent, can have local value;
         this._backing_total = StateMgmtFactory.makeParam<int32>(
             this,
-            'total',
+            "total",
             param.total
         );
 
         this._backing_qualifiesForDiscount = StateMgmtFactory.makeParam<boolean>(
             this,
-            'qualifiesForDiscount',
+            "qualifiesForDiscount",
             param.qualifiesForDiscount
         );
     }
@@ -277,9 +277,9 @@ class ChildComponent extends ExtendableComponent{
 
 
 export function run_computed_params() : Boolean {
-    const tests = tsuite('@Computed params', () => {
+    const tests = tsuite("@Computed params", () => {
 
-    tcase('Test 1: @Computed param', () => {
+    tcase("Test 1: @Computed param", () => {
         let indexComponent = new IndexComputedParamsComponent(null, {})
         indexComponent.build()
         test(`total = ${indexComponent.total} `, indexComponent.total === 30);

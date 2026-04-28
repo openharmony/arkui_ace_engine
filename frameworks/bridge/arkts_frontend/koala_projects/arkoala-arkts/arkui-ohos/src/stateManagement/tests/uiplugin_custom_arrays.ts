@@ -67,7 +67,7 @@ export class MyArray<T> extends WrappedArray<T> {
     // construct an Array<T>, so create the Array before passing it on to the WrappedArray!
     constructor(first: T, ...rest: T[]) {
         super(new Array<T>(first, ...rest));
-        this.__backing_arrProp = 'test';
+        this.__backing_arrProp = "test";
     }
     // ...could be e.g. constructor() { super(new Array<T>()); } etc.
 
@@ -79,25 +79,23 @@ export class MyArray<T> extends WrappedArray<T> {
     public readonly __meta_arrProp: IMutableStateMeta = StateMgmtFactory.makeMutableStateMeta();
 
     public get arrProp(): string {
-        console.log(`MyArray: get @Trace arrProp`);
+        stateMgmtConsole.log(`MyArray: get @Trace arrProp`);
         this.conditionalAddRef(this.__meta_arrProp);
         return this.__backing_arrProp;
     }
     public set arrProp(newValue: string) {
-        console.log(`MyArray: set @Trace arrProp`);
+        stateMgmtConsole.log(`MyArray: set @Trace arrProp`);
         if (this.__backing_arrProp !== newValue) {
             this.__backing_arrProp = newValue;
             this.__meta_arrProp.fireChange();
-            this.executeOnSubscribingWatches('arrProp');
+            this.executeOnSubscribingWatches("arrProp");
         }
     }
 
     // helper
     // do not inline, will not work for inherited classes.
     protected conditionalAddRef(meta: IMutableStateMeta): void {
-        console.log('conditionalAddRef start...');
         if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
-            console.log('conditionalAddRef, adding ref');
             meta.addRef();
         }
     }
@@ -123,7 +121,6 @@ interface ParentComponent_init_update_struct {
 class ParentComponent extends ExtendableComponent {
     private _backing_state_arr: ILocalDecoratedVariable<MyArray<number>>;
     get arr(): MyArray<number> {
-        console.log('ParentComponent.arr()');
         return this._backing_state_arr!.get() as MyArray<number>;
     }
     set arr(newArr: MyArray<number>) {
@@ -147,7 +144,7 @@ class ParentComponent extends ExtendableComponent {
 
         this._backing_state_arr = StateMgmtFactory.makeLocal<MyArray<number>>(
             this,
-            'arr',
+            "arr",
             (param.arr !== undefined)
                 ? param.arr!
                 : new MyArray<number>(1,2,3)
@@ -156,28 +153,25 @@ class ParentComponent extends ExtendableComponent {
 }
 
 export function run_custom_arrays(): boolean {
-    const ttest = tsuite('Custom arrays') {
+    const ttest = tsuite("Custom arrays") {
 
         const comp = new ParentComponent(null, {});
 
-        tcase('Read custom array properties while rendering') {
+        tcase("Read custom array properties while rendering") {
             // rendering
             ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV2;
             ObserveSingleton.instance.renderingId = 5;
 
             let len = comp.arr.length;
-            test('length value', eq(len, 3));
-            test('length refCnt', eq(comp.getRefCnt('__OB_LENGTH'), 3)); // '__OB_LENGTH', changed to 4
+            test("length value", eq(len, 3));
+            test("length refCnt", eq(comp.getRefCnt('__OB_LENGTH'), 1));
 
-            console.log('READING comp.arr.arrProp');
             let prop = comp.arr.arrProp;
-            test('arrProp value', eq(prop, 'test'));
-
-            console.log('comp.arr.arrProp, getCnt...');
-            test('arrProp refCnt', eq(comp.arr.getRefCnt(), 1));
+            test("arrProp value", eq(prop, "test"));
+            test("arrProp refCnt", eq(comp.arr.getRefCnt(), 1));
 
             let str = comp.arr.toString();
-            test('arr.toString() OB_ANY_INDEX refCnt', eq(comp.getRefCnt('__OB_ANY_INDEX'), 1));
+            test("arr.toString() OB_ANY_INDEX refCnt", eq(comp.getRefCnt('__OB_ANY_INDEX'), 1));
 
             // stop rendering
             ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponent;

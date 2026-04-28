@@ -20,10 +20,8 @@ import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 import { IncrementalNode } from '@koalaui/runtime';
-import { CustomComponentLifecycle } from '@component/customComponent';
-import { IEnvVariable } from '@decoratorEnv';
-import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
-export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
+import { CustomComponentLifecycle } from '../component/customComponent';
+import { IEnvVariable } from './decoratorImpl/decoratorEnv'
 
 export interface IDecoratorBaseRegistry {
     registerToOwningView(): void;
@@ -275,7 +273,6 @@ export interface IStateMgmtFactory {
         varName: string,
         envOptions?: EnvOptions<T>
     ): IEnvDecoratedVariable<T>;
-    makeSyncMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-let report : string = '';
-let shortReport : string = '';
+let report : string = "";
+let shortReport : string = "";
 
 let tCases_ : number = 0;
 let tests_ : number = 0;
 let failed_ : number = 0;
-let failedAssertionsList : string = '';
+let failedAssertionsList : string = "";
 
 export interface ITestResults {
   tCases_: number;
@@ -77,7 +77,7 @@ export function eq<T>(a : T, b : T) : boolean  {
   const ok : boolean = (a === b);
   if (!ok) {
     console.error(`WRONG actual value '${a}' expected equal to value '${b}'`);
-    console.error(`WRONG class value '${Class.of(a as Object).getName()}' expected equal to value '${Class.of(b as Object).getName()}'`);
+    console.error(`WRONG class value '${Class.of(a).getName()}' expected equal to value '${Class.of(b).getName()}'`);
   }
   return ok;
 }

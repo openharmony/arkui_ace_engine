@@ -102,7 +102,7 @@ class ClassA implements IObservedObject, IWatchSubscriberRegister
             stateMgmtConsole.log(`ClassD: set @Track propA`);
             this.__backing_propA = newValue;
             this.__meta_propA.fireChange();
-            this.executeOnSubscribingWatches('propA');
+            this.executeOnSubscribingWatches("propA");
         }
     }    
 
@@ -122,7 +122,7 @@ class ClassA implements IObservedObject, IWatchSubscriberRegister
         if (this.__backing_propB !== newValue) {
             this.__backing_propB = newValue;
             this.__meta_propB.fireChange();
-            this.executeOnSubscribingWatches('propB');
+            this.executeOnSubscribingWatches("propB");
         }
     }
 }
@@ -228,16 +228,16 @@ class EntryComputedComponent extends ExtendableComponent implements IVariableOwn
         // StateDecoratedVariable
         this._backing_stateA = StateMgmtFactory.makeState<ClassA>(
             this,
-            'stateA',
+            "stateA",
             param.stateA !== undefined
                 ? param.stateA!
-                : new ClassA('name1', 100),
+                : new ClassA("name1", 100),
             undefined
          );
 
          this._backing_stateN = StateMgmtFactory.makeLocal<int32>(
             this,
-            'stateN',
+            "stateN",
             param.stateN !== undefined
             ? param.stateN!
             :  3
@@ -245,7 +245,7 @@ class EntryComputedComponent extends ExtendableComponent implements IVariableOwn
 
         this._backing_stateM = StateMgmtFactory.makeLocal<int32>(
             this,
-            'stateM',
+            "stateM",
             param.stateM !== undefined
             ? param.stateM!
             :  100
@@ -254,18 +254,18 @@ class EntryComputedComponent extends ExtendableComponent implements IVariableOwn
         // We have to define all state variables first
         this._computed_squareN = StateMgmtFactory.makeComputed<int32>(
             () : int32 => {
-                stateMgmtConsole.log('_computed_squareN lambda')
+                stateMgmtConsole.log("_computed_squareN lambda")
                 return this.stateN * this.stateN
             },
-            'SquareN'
+            "SquareN"
         )
 
         this._computed_sum = StateMgmtFactory.makeComputed<int32>(
             () : int32 => {
-                stateMgmtConsole.log('_computed_sum lambda')
+                stateMgmtConsole.log("_computed_sum lambda")
                 return this.stateN + this.stateM
             },
-            'sum'
+            "sum"
         )
     }
 
@@ -281,8 +281,8 @@ class EntryComputedComponent extends ExtendableComponent implements IVariableOwn
       this.stateA.propA = this.stateA.propA+'_A'
     }
 
-    assignNewA(): void {
-      this.stateA = new ClassA('newObject', 1101)
+    assignNewA() {
+      this.stateA = new ClassA("newObject", 1101)
     }
 
     build() {
@@ -340,7 +340,7 @@ class ChainedComputedComponent extends ExtendableComponent {
          */
         this._backing_celcius = StateMgmtFactory.makeLocal<number>(
             this,
-            'celcius',
+            "celcius",
             param.celcius !== undefined ? param.celcius! :  3
         );
 
@@ -351,18 +351,18 @@ class ChainedComputedComponent extends ExtendableComponent {
          */
         this._computed_fahrenheit = StateMgmtFactory.makeComputed<number>(
             () : number => {
-                stateMgmtConsole.log('computing fahrenheit')
+                stateMgmtConsole.log("computing fahrenheit")
                 return this.celcius * 9 / 5 + 32; // C -> F
             },
-            'fahrenheit'
+            "fahrenheit"
         )
 
         this._computed_kelvin = StateMgmtFactory.makeComputed<number>(
             () : number => {
-                stateMgmtConsole.log('computing kelvin')
+                stateMgmtConsole.log("computing kelvin")
                 return (this.fahrenheit - 32) * 5/9 + 273.15; // F -> K
             },
-            'Kelvin'
+            "Kelvin"
         )
 
         /*
@@ -418,7 +418,7 @@ export class ClassWithComputed implements IObservedObject {
     // IObservedObject interface
     // @JsonIgnore
 
-    private __backing_propB1: string = 'Kelvinkatu';
+    private __backing_propB1: string = "Kelvinkatu";
 
     public get propB1(): string {
         this.__meta.addRef();
@@ -460,10 +460,10 @@ export class ClassWithComputed implements IObservedObject {
          */
         this.__computed_homeAddress = StateMgmtFactory.makeComputed<string>(
             () : string => {
-                stateMgmtConsole.log('computing fahrenheit')
-                return 'Home address: ' + this.propB1
+                stateMgmtConsole.log("computing fahrenheit")
+                return "Home address: " + this.propB1
             },
-            'homeAddress'
+            "homeAddress"
         )
     }
 }
@@ -479,25 +479,25 @@ class Point
   x: number
   y: number = 0;
   @Computed get d(): number {
-    console.log("@Computed d() start " + this.y)
+    console.log("### @Computed d() start " + this.y)
     let r =  1./this.y
-    console.log("@Computed d() end " + this.y)
+    console.log("### @Computed d() end " + this.y)
     return r
   }
 
   @Computed get e(): number {
-    console.log("@Computed e() start " + this.x)
+    console.log("### @Computed e() start " + this.x)
     let r =  1./this.x + this.d
-    console.log("@Computed f() end " + this.x)
+    console.log("### @Computed f() end " + this.x)
     return r
   }
 
   constructor(x: number)
   {
-    console.log("@Computed CTOR start")
+    console.log("### @Computed CTOR start")
     this.x = x
     this.y = 1;
-    console.log("@Computed CTOR end")
+    console.log("### @Computed CTOR end")
   }
 }
 
@@ -542,7 +542,7 @@ class ComputedComponentWithException extends ExtendableComponent {
         // StateDecoratedVariable
          this._backing_stateN = StateMgmtFactory.makeLocal<int32>(
             this,
-            'stateN',
+            "stateN",
             param.stateN !== undefined
             ? param.stateN!
             :  3
@@ -550,11 +550,11 @@ class ComputedComponentWithException extends ExtendableComponent {
 
         this._computed_sumWithError = StateMgmtFactory.makeComputed<int32>(
             () : int32 => {
-                stateMgmtConsole.log('_computed_sumWithError lambda')
+                stateMgmtConsole.log("_computed_sumWithError lambda")
                 this.stateN = this.stateN + 1; // That is not allowed to do
                 return this.stateN + this.stateN
             },
-            'sumWithError'
+            "sumWithError"
         )
     }
 
@@ -597,19 +597,19 @@ class ComputedComponentWithInterfaceLiteral extends ExtendableComponent {
         // StateDecoratedVariable
          this._backing_person_interface = StateMgmtFactory.makeState<InterfacePerson>(
             this,
-            'PersonInterface',
+            "PersonInterface",
             UIUtils.makeObserved(
                 param.person !== undefined
                     ? param.person!
-                    : {first: 'first', last: 'last'} as InterfacePerson
+                    : {first: "first", last: "last"} as InterfacePerson
             )
         );
 
         this.__computed_fullName = StateMgmtFactory.makeComputed<string>(
             () : string => {
-                return this.PersonInterface.first + '-' + this.PersonInterface.last;
+                return this.PersonInterface.first + "-" + this.PersonInterface.last;
             },
-            'fullName'
+            "fullName"
         )
     }
 
@@ -653,7 +653,7 @@ class ComputedComponentWithDate extends ExtendableComponent {
                 d.setDate(d.getDate() + 1)
                 return d;
             },
-            'tomorrow'
+            "tomorrow"
         )
     }
 
@@ -672,17 +672,17 @@ interface ComputedComponentWithDate_init_update_struct {
 export function run_computed() : Boolean {
     StateMgmtFactory = STATE_MGMT_FACTORY;
 
-    const tests = tsuite('@Computed tests', () => {
+    const tests = tsuite("@Computed tests", () => {
     const entryComponent = new EntryComputedComponent(null, 
         {stateN: 2, stateM: 100} as EntryComponent_init_update_struct);
 
-    tcase('Test 1: @Computed square 25', () => {
+    tcase("Test 1: @Computed square 25", () => {
         entryComponent.stateN = 5
         ObserveSingleton.instance.updateDirty()
         test(`entryComponent.squareN = ${entryComponent.squareN} === 25`, entryComponent.squareN === 25);
     })
 
-    tcase('Test 2: @Computed square 36, after update', () => {
+    tcase("Test 2: @Computed square 36, after update", () => {
         entryComponent.stateN = 5
         ObserveSingleton.instance.updateDirty()
         entryComponent.stateN = 6
@@ -690,13 +690,13 @@ export function run_computed() : Boolean {
         test(`entryComponent.squareN = ${entryComponent.squareN} === 36`, entryComponent.squareN === 36);
     })
 
-    tcase('Test 3: @Computed sumMN ', () => {
+    tcase("Test 3: @Computed sumMN ", () => {
         entryComponent.stateN = 5
         ObserveSingleton.instance.updateDirty()
         test(`entryComponent.squareN = ${entryComponent.sumNM} === 105`, entryComponent.sumNM === 105);
     })
 
-    tcase('Test 4: @Computed 2nd sumMN ', () => {
+    tcase("Test 4: @Computed 2nd sumMN ", () => {
         entryComponent.stateN = 5
         ObserveSingleton.instance.updateDirty()
 
@@ -705,7 +705,7 @@ export function run_computed() : Boolean {
         test(`entryComponent.squareN = ${entryComponent.sumNM} === 205`, entryComponent.sumNM === 205);
     })
 
-    tcase('Test 5: @Computed chained ', () => {
+    tcase("Test 5: @Computed chained ", () => {
         const chainedComponent = new ChainedComputedComponent(null, {celcius: 10});
         ObserveSingleton.instance.updateDirty()
         test(`chainedComponent.fahrenheit = ${chainedComponent.fahrenheit} === 50`, eq(chainedComponent.fahrenheit, 50));
@@ -717,7 +717,7 @@ export function run_computed() : Boolean {
         test(`chainedComponent.kelvin = ${chainedComponent.kelvin} === 293.15`, eq(chainedComponent.kelvin, 293.15));
     })
 
-    tcase('Test 5: @Computed chained with Kelvin Monitor', () => {
+    tcase("Test 5: @Computed chained with Kelvin Monitor", () => {
         const chainedComponent = new ChainedComputedComponent(null, {celcius: 10});
         ObserveSingleton.instance.updateDirty()
         test(`chainedComponent.fahrenheit = ${chainedComponent.fahrenheit} === 50`, eq(chainedComponent.fahrenheit, 50));
@@ -737,13 +737,13 @@ export function run_computed() : Boolean {
         //test(`monitor count = ${chainedComponent.monitorFunctionRunCount} === 1`, eq(chainedComponent.monitorFunctionRunCount, 1));
     })
 
-    tcase('Test 6: @Computed in the class', () => {
-        const classWithComputed = new ClassWithComputed('Celciuskatu')
-        test(`classWithComputed.propB1 = ${classWithComputed.propB1} === Celciuskatu`, eq(classWithComputed.propB1, 'Celciuskatu'));
-        test(`classWithComputed.propB1 = ${classWithComputed.homeAddress} === Home Address: Celciuskatu`, eq(classWithComputed.homeAddress, 'Home address: Celciuskatu'));
+    tcase("Test 6: @Computed in the class", () => {
+        const classWithComputed = new ClassWithComputed("Celciuskatu")
+        test(`classWithComputed.propB1 = ${classWithComputed.propB1} === Celciuskatu`, eq(classWithComputed.propB1, "Celciuskatu"));
+        test(`classWithComputed.propB1 = ${classWithComputed.homeAddress} === Home Address: Celciuskatu`, eq(classWithComputed.homeAddress, "Home address: Celciuskatu"));
     })
 
-    tcase('Test 7: @Computed that changes state -> Exception', () => {
+    tcase("Test 7: @Computed that changes state -> Exception", () => {
         let detected:Boolean = false;
         try {
             let comp = new ComputedComponentWithException(null, {stateN: 2})
@@ -755,17 +755,17 @@ export function run_computed() : Boolean {
         }
     })
     
-    tcase('Test 8: @Computed using Observed Interface object', () => {
+    tcase("Test 8: @Computed using Observed Interface object", () => {
         let ObjLiteral = new ComputedComponentWithInterfaceLiteral(null,
-            {person: {first: 'Jack', last: 'Ripper'} as InterfacePerson})
-        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === Jack-Ripper`, eq(ObjLiteral.fullName, 'Jack-Ripper'));
-        ObjLiteral.PersonInterface.first = 'John'
-        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === Jack-Ripper`, eq(ObjLiteral.fullName, 'Jack-Ripper'));
+            {person: {first: "Jack", last: "Ripper"} as InterfacePerson})
+        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === Jack-Ripper`, eq(ObjLiteral.fullName, "Jack-Ripper"));
+        ObjLiteral.PersonInterface.first = "John"
+        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === Jack-Ripper`, eq(ObjLiteral.fullName, "Jack-Ripper"));
         ObserveSingleton.instance.updateDirty()
-        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === John-Ripper`, eq(ObjLiteral.fullName, 'John-Ripper'));
+        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === John-Ripper`, eq(ObjLiteral.fullName, "John-Ripper"));
     })
     
-    tcase('Test 9: @Computed using wrapped Date', () => {
+    tcase("Test 9: @Computed using wrapped Date", () => {
         let d = new Date();
         let comp = new ComputedComponentWithDate(null, {})
         comp.current = d;

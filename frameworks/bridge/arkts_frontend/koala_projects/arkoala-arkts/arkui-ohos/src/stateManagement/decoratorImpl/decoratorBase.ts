@@ -32,7 +32,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { IDecoratorBaseRegistry } from '../../stateManagement/decorator';
 import { IncrementalNode } from '@koalaui/runtime';
 import { FactoryInternal } from '../base/iFactoryInternal';
-import { ExtendableComponent } from '@component/extendableComponent';
+import { ExtendableComponent } from '../../component/extendableComponent';
 
 /**
 It is useful to have separate class implement each variable decoratore,  e.g. for DFX, not use `MutableState` as currently done.

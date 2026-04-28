@@ -26,12 +26,6 @@ import { run_state } from './uipluginState'
 import { run_custom_arrays } from './uiplugin_custom_arrays'
 import { run_observed_object3 } from './uipluginObservedObject3'
 import { run_makeobserved, run_makeobserved_short } from './uipluginUiUtils'
-import { run_monitor } from './uipluginMonitor'
-import { run_monitor_wildcard } from './uipluginMonitorWithWildcard'
-import { run_monitor_object } from './uipluginMonitorObject'
-import { run_sync_monitor } from './uipluginSyncMonitor'
-import { run_addmonitor } from './uipluginAddMonitorWildcards'
-
 
 type TestCase = () => boolean;
 
@@ -47,25 +41,11 @@ const tests: TestCase[] = [
     run_makeobserved_short,
     run_persistent_storage_v2,
     run_persistent_storage_v2_simple,
-    run_monitor,
-    run_monitor_object,
-    run_sync_monitor,
-    run_addmonitor,
-    run_monitor_wildcard,
-  ]
-
-const tests2: TestCase[] = [
-  //run_monitor,
-  run_monitor_wildcard,
-  //run_addmonitor,
-  //run_sync_monitor,
-  //run_monitor_array,
-  //run_custom_arrays,
 ]
 
 export function runTests(): void {
-  console.error('runTests start')
-  StateMgmtConsole.log('Creating special FactoryInternal instance for testing ...')
+  console.error("runTests start")
+  StateMgmtConsole.log("Creating special FactoryInternal instance for testing ...")
 
   let passed = 0
   let totalRuns = 0
@@ -104,7 +84,7 @@ export function runTests(): void {
       totalRuns += stats.tests_;
 
       if (stopAllOnErrorToDebugAnIssue) {
-        console.log('Stopping all tests on error');
+        console.log("Stopping all tests on error");
         break;
       }
     }
@@ -112,7 +92,7 @@ export function runTests(): void {
 
   const endTime = Date.now();
   const durationMs = endTime - startTime;
-  console.log('\x1b[34m\n\nTest Results:\x1b[0m\n');
+  console.log("\x1b[34m\n\nTest Results:\x1b[0m\n");
 
   for (const line of results) {
     console.log('  ' + line)

@@ -48,7 +48,7 @@ class EntryComponent extends ExtendableComponent {
         const watchFunc : WatchFuncType =  (propName: string) => { this.onStateAChanged(propName) };
         this._backing_stateA = StateMgmtFactory.makeState<number>(
             this,
-            'stateA',
+            "stateA",
             param.stateA !== undefined
             ? param.stateA!
             : 100,
@@ -73,17 +73,17 @@ class EntryComponent extends ExtendableComponent {
 }
 
 export function run_stateNumber() : Boolean {
-  const tests = tsuite('@State tests', () => {
+  const tests = tsuite("@State tests", () => {
 
     const compA = new EntryComponent(null, {});
     ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
 
-    tcase('Test 1: @State init value ', () => {
+    tcase("Test 1: @State init value ", () => {
         compA.build();
         test(`compA.stateA = ${compA.stateA} === 100`, eq(compA.stateA, 100));
 
     })
-    tcase('Test 2: @State update value ', () => {
+    tcase("Test 2: @State update value ", () => {
         compA.assignA200()
         test(`compA.stateA = ${compA.stateA} === 200`, eq(compA.stateA, 200));
 
