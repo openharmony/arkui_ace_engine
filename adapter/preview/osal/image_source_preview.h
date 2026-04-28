@@ -40,12 +40,9 @@ public:
     std::vector<int32_t> GetDelayTime() override;
     bool IsHeifWithoutAlpha() override;
     ImageRotateOrientation GetImageOrientation() override;
-    bool IsSvg() const override { return isSvg_; }
-    void SetSvg(bool isSvg) { isSvg_ = isSvg; }
 
 private:
     std::unique_ptr<SkCodec> codec_;
-    bool isSvg_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H

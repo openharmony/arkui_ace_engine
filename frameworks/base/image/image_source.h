@@ -79,7 +79,6 @@ public:
     virtual int32_t GetLoopCount() = 0;
     virtual std::vector<int32_t> GetDelayTime() = 0;
     virtual bool IsHeifWithoutAlpha() = 0;
-    virtual bool IsSvg() const { return false; }
 
     static constexpr const char* IMAGE_SVG_MIME = "image/svg+xml";
 };

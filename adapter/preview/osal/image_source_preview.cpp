@@ -72,16 +72,6 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint
         errorCode = static_cast<uint32_t>(ImageInnerErrorCode::SK_DATA_CREATE_ERROR);
         return nullptr;
     }
-    // Try to detect SVG by creating SkSVGDOM
-    auto svgStream = std::make_unique<SkMemoryStream>(skData);
-    if (svgStream) {
-        auto svgDom = SkSVGDOM::MakeFromStream(*svgStream);
-        if (svgDom) {
-            auto source = MakeRefPtr<ImageSourcePreview>(nullptr);
-            source->SetSvg(true);
-            return source;
-        }
-    }
     auto codec = SkCodec::MakeFromData(skData);
     if (!codec) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "codec is null");
