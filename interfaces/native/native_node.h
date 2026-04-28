@@ -2302,6 +2302,18 @@ typedef enum {
      */
     NODE_BORDER_RADIUS_TYPE = 123,
     /**
+     * @brief Defines the inspector label attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: inspector label.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: inspector label.\n
+     * \n
+     * @since 26.0.0
+     */
+    NODE_INSPECTOR_LABEL = 126,
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

@@ -5564,6 +5564,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetId));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetId"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInspectorLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetInspectorLabel));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInspectorLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetInspectorLabel));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKey"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetKey));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKey"),

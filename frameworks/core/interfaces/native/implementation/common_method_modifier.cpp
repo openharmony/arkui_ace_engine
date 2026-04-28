@@ -6963,6 +6963,15 @@ void SetDebugLineImpl(Ark_NativePointer node,
     
     ViewAbstractModelNG::SetDebugLineSta(uiNode, debugLine);
 }
+
+void SetInspectorLabelImpl(Ark_NativePointer node,
+                           const Opt_String* label)
+{
+    auto uiNode = static_cast<UINode *>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto labelOpt = Converter::OptConvertPtr<std::string>(label);
+    ViewAbstractModelStatic::SetInspectorLabelSta(uiNode, labelOpt.value_or(""));
+}
 } // CommonMethodModifier
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
 {
@@ -7134,6 +7143,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
         CommonMethodModifier::SetSmartGestureShortcutImpl,
+        CommonMethodModifier::SetInspectorLabelImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

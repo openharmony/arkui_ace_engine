@@ -453,6 +453,7 @@ public:
     virtual void SetAutoEventParam(const std::string& param) {}
     virtual void SetRestoreId(int32_t restoreId) = 0;
     virtual void SetDebugLine(const std::string& line) = 0;
+    virtual void SetInspectorLabel(const std::string& inspectorLabel) {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest) = 0;

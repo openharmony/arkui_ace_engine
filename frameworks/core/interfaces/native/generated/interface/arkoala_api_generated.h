@@ -24846,6 +24846,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                           const Opt_AccessibilityActionOptions* value);
     void (*setSmartGestureShortcut)(Ark_NativePointer node,
                                     const Ark_SmartGestureShortcutOptions* value);
+    void (*setInspectorLabel)(Ark_NativePointer node,
+                              const Opt_String* value);
     void (*setExpandSafeArea)(Ark_NativePointer node,
                               const Opt_Array_SafeAreaType* types,
                               const Opt_Array_SafeAreaEdge* edges);

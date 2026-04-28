@@ -1524,6 +1524,11 @@ public:
         ViewAbstract::SetDebugLine(line);
     }
 
+    void SetInspectorLabel(const std::string& inspectorLabel) override
+    {
+        ViewAbstract::SetInspectorLabel(inspectorLabel);
+    }
+
     void SetHoverEffect(HoverEffectType hoverEffect) override
     {
         ViewAbstract::SetHoverEffect(hoverEffect);

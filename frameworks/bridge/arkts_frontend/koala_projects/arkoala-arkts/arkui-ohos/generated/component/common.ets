@@ -6992,6 +6992,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setInspectorLabelAttribute(label: string | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (label !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const labelTmpValue = label!
+            thisSerializer.writeString(labelTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setInspectorLabel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
     commonShapeMethodAttributeSet?: CommonShapeMethodModifier;
@@ -11340,6 +11352,18 @@ export interface CommonMethod {
         }
         throw new Error("Unimplemented method debugLine")
     }
+    inspectorLabel(label: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.inspectorLabel(label));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'inspectorLabel' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error("Unimplemented method inspectorLabel")
+    }
     accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -12849,6 +12873,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const sourceLine_casted = sourceLine as (string)
             const moduleName_casted = moduleName as (string | undefined)
             this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
+            return this
+        }
+        return this
+    }
+    public inspectorLabel(label: string | undefined): this {
+        if (this.checkPriority("inspectorLabel")) {
+            const label_casted = label as (string | undefined)
+            this.getPeer()?.setInspectorLabelAttribute(label_casted)
             return this
         }
         return this

@@ -558,6 +558,7 @@ public:
     static void SetRestoreId(int32_t restoreId);
     // inspector debugLine
     static void SetDebugLine(const std::string &line);
+    static void SetInspectorLabel(const std::string& inspectorLabel);
     // transition
     static void SetTransition(const TransitionOptions &options);
     static void CleanTransition();

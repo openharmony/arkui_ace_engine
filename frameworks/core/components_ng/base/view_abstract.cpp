@@ -5278,6 +5278,14 @@ void ViewAbstract::SetDebugLine(const std::string& line)
     }
 }
 
+void ViewAbstract::SetInspectorLabel(const std::string& inspectorLabel)
+{
+    auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetInspectorLabel(inspectorLabel);
+    }
+}
+
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

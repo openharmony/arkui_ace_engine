@@ -239,6 +239,8 @@ struct CJUICommonModifier {
     void (*resetAccessibilityDescription)(ArkUINodeHandle node);
     void (*setId)(ArkUINodeHandle node, ArkUI_CharPtr id);
     void (*resetId)(ArkUINodeHandle node);
+    void (*setInspectorLabel)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetInspectorLabel)(ArkUINodeHandle node);
     void (*setKey)(ArkUINodeHandle node, ArkUI_CharPtr key);
     void (*resetKey)(ArkUINodeHandle node);
     void (*setRestoreId)(ArkUINodeHandle node, ArkUI_Uint32 id);

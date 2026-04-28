@@ -628,6 +628,16 @@ public:
         return debugLine_;
     }
 
+    void SetInspectorLabel(const std::string& inspectorLabel)
+    {
+        inspectorLabel_ = inspectorLabel;
+    }
+
+    std::string GetInspectorLabel() const
+    {
+        return inspectorLabel_;
+    }
+
     void SetViewId(const std::string& viewId)
     {
         viewId_ = viewId;
@@ -1494,6 +1504,7 @@ private:
 
     bool isStaticNode_ = false;
     bool isAdopted_ = false;
+    std::string inspectorLabel_;
 };
 
 } // namespace OHOS::Ace::NG
