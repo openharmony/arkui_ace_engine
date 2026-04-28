@@ -1601,11 +1601,13 @@ HWTEST_F(ParallelStageTestThreeNg, ShouldCurrentPushPageToPrimary_NoHomePage001,
     RefPtr<ParallelStagePattern> stagePattern;
     auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
     ASSERT_NE(stageManager, nullptr);
+    auto oldPage = CreateRouterPage("old");
+    MountRouterPage(stageNode, oldPage);
 
     auto newPage = CreateRouterPage("new");
     MountRouterPage(stageNode, newPage);
 
-    EXPECT_FALSE(stageManager->ShouldCurrentPushPageToPrimary(newPage));
+    EXPECT_FALSE(stageManager->ShouldCurrentPushPageToPrimary(oldPage, newPage));
 }
 
 /**
@@ -1627,10 +1629,7 @@ HWTEST_F(ParallelStageTestThreeNg, ShouldCurrentPushPageToPrimary_HasHomePage001
     stagePattern->SetHomePage(homePage);
     stageManager->InvalidateRouterColumnNodes();
 
-    auto forceSplitMgr = GetForceSplitManager();
-    ASSERT_NE(forceSplitMgr, nullptr);
-
-    EXPECT_FALSE(stageManager->ShouldCurrentPushPageToPrimary(newPage));
+    EXPECT_FALSE(stageManager->ShouldCurrentPushPageToPrimary(homePage, newPage));
 }
 
 /**

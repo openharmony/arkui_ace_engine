@@ -6349,20 +6349,19 @@ bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
 {
     CHECK_NULL_RETURN(preTopDest, false);
     CHECK_NULL_RETURN(curTopDest, false);
+    if (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
+            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        // In navigation displace mode, treat dialog destinations as transPages by default even
+        // when developers do not configure them explicitly. This prevents dialog push/pop from
+        // being misidentified as secondary-push-primary transitions.
+        return false;
+    }
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_RETURN(forceSplitMgr, false);
-    if (forceSplitMgr->GetBehaviorMode() == ForceSplitBehaviorMode::DISPLACE &&
-        (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
-            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG)) {
-        // In navigation displace mode, treat dialog destinations as transPages by default even
-        // when developers do not configure them explicitly. This prevents dialog push/pop from
-        // being misidentified as secondary-push-primary transitions.
-        return false;
-    }
     auto preTopPattern = preTopDest->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(preTopPattern, false);
     auto curTopPattern = curTopDest->GetPattern<NavDestinationPattern>();

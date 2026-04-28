@@ -202,8 +202,7 @@ private:
     bool IsVirtualStackBasedSplit() const;
     void OnModeChangeInVirtualStackBasedSplit(const RefPtr<FrameNode>& lastPage);
     void OnWindowStateChangeInVirtualStackBasedSplit(bool show);
-    bool PushPageInVirtualStackBasedSplit(
-        const RefPtr<FrameNode>& node, bool isNewLifecycle, bool needHideLast, bool needTransition);
+    bool PushPageInVirtualStackBasedSplit(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition);
     bool PopPageInVirtualStackBasedSplit(bool needShowNext, bool needTransition);
     bool PopPageToIndexInVirtualStackBasedSplit(int32_t index, bool needShowNext, bool needTransition);
     bool CleanPageStackInVirtualStackBasedSplit(const RefPtr<ParallelStagePattern>& stagePattern);
@@ -214,7 +213,8 @@ private:
         bool needShowNext, PageTransitionType hideTransitionType, PageTransitionType showTransitionType);
     void EnsureSplitSecondaryPageIfNeeded();
     bool HasRouterPushPageToPrimaryState() const;
-    bool ShouldCurrentPushPageToPrimary(const RefPtr<FrameNode>& newPageNode) const;
+    bool ShouldCurrentPushPageToPrimary(
+        const RefPtr<FrameNode>& currentTopPage, const RefPtr<FrameNode>& newPageNode) const;
     RefPtr<FrameNode> GetLastPageInStack() const;
     std::vector<RefPtr<FrameNode>> CollectRouterStackPages() const;
     std::vector<RefPtr<FrameNode>> CollectRouterStackPages(
