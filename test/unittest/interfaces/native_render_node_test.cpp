@@ -1722,4 +1722,116 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeGuardTest002, TestSize.Level1)
 
     EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
 }
+
+/**
+ * @tc.name: NativeRenderNodeBlurTest001
+ * @tc.desc: Test blur style option create and radius setter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeBlurTest001, TestSize.Level1)
+{
+    auto option = OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption();
+    ASSERT_NE(option, nullptr);
+    EXPECT_FLOAT_EQ(option->radius, 0.0f);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius(option, 12.5f), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FLOAT_EQ(option->radius, 12.5f);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius(option, -1.0f), ERROR_CODE_PARAM_INVALID);
+    EXPECT_FLOAT_EQ(option->radius, 12.5f);
+
+    OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption(option);
+}
+
+/**
+ * @tc.name: NativeRenderNodeBlurTest002
+ * @tc.desc: Test blur option set and reset on normal render node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeBlurTest002, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto option = OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption();
+    ASSERT_NE(renderNode, nullptr);
+    ASSERT_NE(option, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius(option, 8.0f), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(renderNode, option),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption(renderNode, option),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetContentBlurOption(renderNode, option), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetContentBlurOption(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption(option);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeBlurTest003
+ * @tc.desc: Test blur option parameter guards.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeBlurTest003, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto option = OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption();
+    ASSERT_NE(renderNode, nullptr);
+    ASSERT_NE(option, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius(nullptr, 1.0f), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(nullptr, option), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(renderNode, nullptr), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption(nullptr), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption(nullptr, option), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption(renderNode, nullptr), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption(nullptr), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetContentBlurOption(nullptr, option), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetContentBlurOption(renderNode, nullptr), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetContentBlurOption(nullptr), ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption(option);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeBlurTest004
+ * @tc.desc: Test blur option rejects render node from adopted frame node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeBlurTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto customNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    ASSERT_NE(customNode, nullptr);
+    ASSERT_EQ(OH_ArkUI_NativeModule_AdoptChild(rootCustomNode, customNode), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_RenderNodeHandle renderNode = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNode(customNode, &renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(renderNode, nullptr);
+
+    auto option = OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption();
+    ASSERT_NE(option, nullptr);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius(option, 6.0f), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(renderNode, option),
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption(renderNode),
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption(renderNode, option),
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption(renderNode),
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetContentBlurOption(renderNode, option),
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ResetContentBlurOption(renderNode),
+        ERROR_CODE_RENDER_IS_FROM_FRAME_NODE);
+
+    OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption(option);
+}
 } // namespace OHOS::Ace

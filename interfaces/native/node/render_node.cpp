@@ -2208,6 +2208,131 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
     return result;
 }
 
+ArkUI_RenderBlurStyleOption* OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption()
+{
+    return new ArkUI_RenderBlurStyleOption { 0.0f };
+}
+
+void OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption(ArkUI_RenderBlurStyleOption* option)
+{
+    CHECK_NULL_VOID(option);
+    delete option;
+}
+
+int32_t OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius(ArkUI_RenderBlurStyleOption* option, float radius)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Blur option is null");
+    if (radius < 0.0f) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "Blur radius must be greater than or equal to 0.");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    option->radius = radius;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption(
+    ArkUI_RenderNodeHandle node, ArkUI_RenderBlurStyleOption* option)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Blur option is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    float radius = option->radius;
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBackgroundBlurOption(
+        node->renderNodeHandle, radius);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
+}
+
+int32_t OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption(ArkUI_RenderNodeHandle node)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->resetBackgroundBlurOption(
+        node->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
+}
+
+int32_t OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption(
+    ArkUI_RenderNodeHandle node, ArkUI_RenderBlurStyleOption* option)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Blur option is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    float radius = option->radius;
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setForegroundBlurOption(
+        node->renderNodeHandle, radius);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
+}
+
+int32_t OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption(ArkUI_RenderNodeHandle node)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->resetForegroundBlurOption(
+        node->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
+}
+
+int32_t OH_ArkUI_RenderNodeUtils_SetContentBlurOption(ArkUI_RenderNodeHandle node, ArkUI_RenderBlurStyleOption* option)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Blur option is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    float radius = option->radius;
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setContentBlurOption(
+        node->renderNodeHandle, radius);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
+}
+
+int32_t OH_ArkUI_RenderNodeUtils_ResetContentBlurOption(ArkUI_RenderNodeHandle node)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->resetContentBlurOption(
+        node->renderNodeHandle);
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
+}
+
 #ifdef __cplusplus
 };
 #endif
