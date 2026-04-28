@@ -435,7 +435,7 @@ public:
 
         // insert in last new line
         if (rangeBefore.start == rangeBefore.end) {
-            return spans.back()->content.back() == u'\n';
+            return !spans.back()->content.empty() && spans.back()->content.back() == u'\n';
         }
 
         // delete to last new line
@@ -444,7 +444,8 @@ public:
                 if (rangeBefore.start > span->position) {
                     continue;
                 }
-                if ((rangeBefore.start) == span->position && span->content.back() == u'\n') {
+                if ((rangeBefore.start) == span->position && !span->content.empty()
+                    && span->content.back() == u'\n') {
                     return true;
                 }
             }
@@ -459,7 +460,8 @@ public:
         
         // insert in last new Line
         auto contentLength = spans.back()->position;
-        if (caretPosition == contentLength && spans.back()->content.back() == u'\n') {
+        if (caretPosition == contentLength && !spans.back()->content.empty()
+            && spans.back()->content.back() == u'\n') {
             return true;
         }
         return false;
