@@ -2932,6 +2932,18 @@ typedef enum {
 } ArkUI_FocusMove;
 
 /**
+ * @brief Enumerates whether accessibility default focus is enabled.
+ *
+ * @since 26
+ */
+typedef enum {
+    /** Accessibility default focus is disabled. */
+    ARKUI_ACCESSIBILITY_DEFAULT_FOCUS_DISABLED = 0,
+    /** Accessibility default focus is enabled. */
+    ARKUI_ACCESSIBILITY_DEFAULT_FOCUS_ENABLED,
+} ArkUI_AccessibilityDefaultFocus;
+
+/**
  * @brief Enumerates the edge derection.
  *
  * @since 20

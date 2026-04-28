@@ -142,6 +142,7 @@ ace_unittest("accessibility_adapter_test_ng") {
     "$ace_root/frameworks/core/accessibility/utils/accessibility_property_utils.cpp",
     "$ace_root/interfaces/native/native_interface_accessibility.cpp",
     "$ace_root/test/unittest/core/accessibility/mock_ace_container.cpp",
+    "accessibility_next_focus_attr_test.cpp",
     "accessibitlity_manager_utils_test.cpp",
     "focus_move/accessibility_focus_move_osal_test.cpp",
     "focus_move/accessibility_focus_strategy_test.cpp",
