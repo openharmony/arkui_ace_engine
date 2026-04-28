@@ -139,8 +139,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param initialValue initial value of elements.
      */
     public static create<T>(arrayLength: number, initialValue: T): WrappedArray<T> {
-        let other = new Array<T>(arrayLength.toInt());
-        other.fill(initialValue);
+        let other = Array.create<T>(arrayLength.toInt(), initialValue);
         return new WrappedArray<T>(other);
     }
 
@@ -175,12 +174,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength The length of the array to be created (optional).
      * @returns A new Array instance with the specified length
      */
-    public static $_invoke<T>(arrayLength?: int): WrappedArray<T> {
-        if (arrayLength) {
-            return new WrappedArray<T>(new Array<T>(arrayLength));
-        } else {
-            return new WrappedArray<T>(new Array<T>());
-        }
+    public static $_invoke<T>(): WrappedArray<T> {
+        return new WrappedArray<T>(new Array<T>());
     }
 
     /**

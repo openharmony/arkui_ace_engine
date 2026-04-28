@@ -2505,7 +2505,7 @@ export class ListNodeDataSource extends BasicDataSource {
       this.notifyDataReload();
       return;
     }
-    let childNum: int[] | null = new Array<int>(this.listNode[thisIndex.toInt()].getChildNodeInfo().childNum);
+    let childNum: int[] | null = Array.create<int>(this.listNode[thisIndex].getChildNodeInfo().childNum, 0);
     childNum[0] = thisIndex + 1;
     let index: int = 1;
     while (index < this.listNode[thisIndex].getChildNodeInfo().childNum) {
@@ -4241,10 +4241,9 @@ export class ListNodeDataSource extends BasicDataSource {
       if (parent.children.length === 0) {
         return [];
       } else if (parent.children.length > 0) {
-        let childrenNodeInfo: NodeInfoView[] = new Array<NodeInfoView>(parent.children.length);
-        for (let i: int = 0; i < childrenNodeInfo.length; i++) {
-          childrenNodeInfo[i] = {};
-        }
+        let childrenNodeInfo: NodeInfoView[] = new Array<NodeInfoView>(parent.children.length, () => {
+          return {} as NodeInfoView;
+        });
         for (let i: int = 0; i < parent.children.length && i < childrenNodeInfo.length; i++) {
           childrenNodeInfo[i].itemId = parent.children[i].currentNodeId;
           let nodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent.children[i]);

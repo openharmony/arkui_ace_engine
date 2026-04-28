@@ -669,18 +669,18 @@ export class FrameNode implements MaterializedBase {
         if (count <= 0) {
             return [];
         }
-        const frameNodes: Array<FrameNode> = new Array<FrameNode>(count);
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.instanceId_);
         const frameNodeCreateInfoArray = FrameNodeExtender.getFrameNodeCreateInfoArray(count);
-        const frameNodePtrs: Array<KPointer> = new Array<KPointer>(frameNodeCreateInfoArray.length);
-        for (let i = 0; i < frameNodeCreateInfoArray.length; i++) {
+        const frameNodes: Array<FrameNode> = new Array<FrameNode>(count, (i) => {
             const frameNode = new FrameNode(uiContext, undefined, 'InternalBatchFrameNode', frameNodeCreateInfoArray[i].frameNodePeer);
             frameNode.renderNode_!.peer = new Finalizable(frameNodeCreateInfoArray[i].renderNodePeer, RenderNode.getFinalizer());
             frameNode._nodeId = frameNodeCreateInfoArray[i].id;
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, frameNode);
-            frameNodes[i] = frameNode;
-            frameNodePtrs[i] = frameNodeCreateInfoArray[i].frameNodePeer;
-        }
+            return frameNode;
+        });
+        const frameNodePtrs: Array<KPointer> = new Array<KPointer>(frameNodeCreateInfoArray.length, (i) => {
+            return frameNodeCreateInfoArray[i].frameNodePeer;
+        });
         ArkUIAniModule._SetCustomCallbackWithCheckForFrameNodes(frameNodePtrs, frameNodes);
         ArkUIAniModule._Common_Restore_InstanceId();
         return frameNodes;
