@@ -624,6 +624,22 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
     return result;
 }
 
+void NGGestureRecognizer::SetGestureEventCurrentLocalLocation(GestureEvent& info, const TouchEvent& touchPoint)
+{
+    PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = touchPoint.GetOffset();
+    Offset localOffset(localPoint.GetX(), localPoint.GetY());
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = touchPoint.postEventNodeId,
+                                           globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
+}
+
 void NGGestureRecognizer::UpdateGestureReferee(const WeakPtr<GestureReferee>& gestureReferee)
 {
     referee_ = gestureReferee;

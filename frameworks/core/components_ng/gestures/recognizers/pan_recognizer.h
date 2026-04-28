@@ -180,6 +180,8 @@ private:
     bool HandlePanAccept();
     bool HandlePanExtAccept();
     void GetGestureEventHalfInfo(GestureEvent* info);
+    GestureEvent BuildGestureEventWithCurrentLocalInfo(
+        TouchEvent& touchPoint, Offset& localOffset, int32_t& postEventNodeId);
     GestureEvent GetGestureEventInfo();
     void ResetDistanceMap();
 

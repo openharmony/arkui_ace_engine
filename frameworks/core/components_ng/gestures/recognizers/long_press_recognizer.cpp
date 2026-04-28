@@ -434,6 +434,11 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalLocation(lastTouchEvent_.GetOffset())
             .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
+        TouchEvent touchPoint = {};
+        if (!touchPoints_.empty()) {
+            touchPoint = touchPoints_.begin()->second;
+        }
+        SetGestureEventCurrentLocalLocation(info, touchPoint);
         info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetForce(lastTouchEvent_.force);
