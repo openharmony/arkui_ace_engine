@@ -34,6 +34,10 @@ WebCommandEventType WebCommandWrapper::ParseEventType(const std::string& eventTy
     static const std::unordered_map<std::string, WebCommandEventType> eventTypeMap = {
         {"click", WebCommandEventType::CLICK},
         {"scroll", WebCommandEventType::SCROLL},
+        {"scrollGesture", WebCommandEventType::EVENT_TYPE_SCROLL_GESTURE},
+        {"tap", WebCommandEventType::EVENT_TYPE_TAP_GESTURE},
+        {"pinch", WebCommandEventType::EVENT_TYPE_PINCH_GESTURE},
+        {"longPress", WebCommandEventType::EVENT_TYPE_LONG_PRESS},
         {"input-date", WebCommandEventType::INPUT_DATE},
         {"input-datetime-local", WebCommandEventType::INPUT_DATETIME_LOCAL},
         {"input-month", WebCommandEventType::INPUT_MONTH},
@@ -209,6 +213,193 @@ int WebCommandWrapper::BuildClickScrollAction(
     outCommandAction = std::make_shared<NWebCommandActionImpl>(
         eventTypeStr, xpathStr, durationInt, alignStr, offsetInt);
 
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+int WebCommandWrapper::ValidateTapParameters(
+    const std::unique_ptr<JsonValue>& comJson,
+    double& outX,
+    double& outY,
+    int32_t& outDuration,
+    int32_t& outTapCount)
+{
+    auto xValue = comJson->GetValue("x");
+    if (!xValue || !xValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: tap x is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_X);
+    }
+    outX = xValue->GetDouble();
+
+    auto yValue = comJson->GetValue("y");
+    if (!yValue || !yValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: tap y is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_Y);
+    }
+    outY = yValue->GetDouble();
+
+    auto durationValue = comJson->GetValue("duration");
+    outDuration = (durationValue && durationValue->IsNumber()) ? durationValue->GetInt() : 0;
+
+    auto tapCountValue = comJson->GetValue("tapCount");
+    outTapCount = (tapCountValue && tapCountValue->IsNumber()) ? tapCountValue->GetInt() : 0;
+
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+int WebCommandWrapper::ValidateScrollGestureParameters(
+    const std::unique_ptr<JsonValue>& comJson,
+    double& outX,
+    double& outY,
+    double& outXDistance,
+    double& outYDistance,
+    int32_t& outSpeed)
+{
+    auto xValue = comJson->GetValue("x");
+    if (!xValue || !xValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: scrollGesture x is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_X);
+    }
+    outX = xValue->GetDouble();
+
+    auto yValue = comJson->GetValue("y");
+    if (!yValue || !yValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: scrollGesture y is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_Y);
+    }
+    outY = yValue->GetDouble();
+
+    auto xDistValue = comJson->GetValue("xDistance");
+    if (!xDistValue || !xDistValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: scrollGesture xDistance is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_DISTANCE);
+    }
+    outXDistance = xDistValue->GetDouble();
+
+    auto yDistValue = comJson->GetValue("yDistance");
+    if (!yDistValue || !yDistValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: scrollGesture yDistance is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_DISTANCE);
+    }
+    outYDistance = yDistValue->GetDouble();
+
+    auto speedValue = comJson->GetValue("speed");
+    outSpeed = (speedValue && speedValue->IsNumber()) ? speedValue->GetInt() : 0;
+
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+int WebCommandWrapper::ValidatePinchParameters(
+    const std::unique_ptr<JsonValue>& comJson,
+    double& outX,
+    double& outY,
+    double& outScaleFactor,
+    int32_t& outSpeed)
+{
+    auto xValue = comJson->GetValue("x");
+    if (!xValue || !xValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: pinch x is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_X);
+    }
+    outX = xValue->GetDouble();
+
+    auto yValue = comJson->GetValue("y");
+    if (!yValue || !yValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: pinch y is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_Y);
+    }
+    outY = yValue->GetDouble();
+
+    auto scaleValue = comJson->GetValue("scale");
+    if (!scaleValue || !scaleValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: pinch scale is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_SCALE);
+    }
+    outScaleFactor = scaleValue->GetDouble();
+    if (outScaleFactor <= 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: pinch scale must be greater than 0");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_SCALE);
+    }
+
+    auto speedValue = comJson->GetValue("speed");
+    outSpeed = (speedValue && speedValue->IsNumber()) ? speedValue->GetInt() : 0;
+
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+int WebCommandWrapper::ValidateLongPressParameters(
+    const std::unique_ptr<JsonValue>& comJson,
+    double& outX,
+    double& outY)
+{
+    auto xValue = comJson->GetValue("x");
+    if (!xValue || !xValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: longPress x is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_X);
+    }
+    outX = xValue->GetDouble();
+
+    auto yValue = comJson->GetValue("y");
+    if (!yValue || !yValue->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: longPress y is missing or not number type");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_Y);
+    }
+    outY = yValue->GetDouble();
+
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+int WebCommandWrapper::BuildGestureActionInfo(
+    const std::unique_ptr<JsonValue>& comJson,
+    const std::string& eventTypeStr,
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo>& outActionInfo)
+{
+    if (eventTypeStr == "tap") {
+        double x;
+        double y;
+        int32_t duration;
+        int32_t tapCount;
+        int result = ValidateTapParameters(comJson, x, y, duration, tapCount);
+        if (result != WEB_COMMAND_BUILD_SUCCESS) {
+            return result;
+        }
+        outActionInfo = NWebCommandActionInfoImpl::CreateGestureInfo(
+            eventTypeStr, x, y, 0, 0, 1.0f, duration, tapCount, 0);
+    } else if (eventTypeStr == "scrollGesture") {
+        double x;
+        double y;
+        double xDistance;
+        double yDistance;
+        int32_t speed;
+        int result = ValidateScrollGestureParameters(comJson, x, y, xDistance, yDistance, speed);
+        if (result != WEB_COMMAND_BUILD_SUCCESS) {
+            return result;
+        }
+        outActionInfo = NWebCommandActionInfoImpl::CreateGestureInfo(
+            eventTypeStr, x, y, xDistance, yDistance, 1.0f, 0, 1, speed);
+    } else if (eventTypeStr == "pinch") {
+        double x;
+        double y;
+        double scaleFactor;
+        int32_t speed;
+        int result = ValidatePinchParameters(comJson, x, y, scaleFactor, speed);
+        if (result != WEB_COMMAND_BUILD_SUCCESS) {
+            return result;
+        }
+        outActionInfo = NWebCommandActionInfoImpl::CreateGestureInfo(
+            eventTypeStr, x, y, 0, 0, scaleFactor, 0, 1, speed);
+    } else if (eventTypeStr == "longPress") {
+        double x;
+        double y;
+        int result = ValidateLongPressParameters(comJson, x, y);
+        if (result != WEB_COMMAND_BUILD_SUCCESS) {
+            return result;
+        }
+        outActionInfo = NWebCommandActionInfoImpl::CreateGestureInfo(
+            eventTypeStr, x, y, 0, 0, 1.0f, 0, 1, 0);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: unknown gesture type %{public}s", eventTypeStr.c_str());
+        return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
+    }
     return WEB_COMMAND_BUILD_SUCCESS;
 }
 

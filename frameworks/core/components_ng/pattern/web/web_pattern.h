@@ -1056,6 +1056,13 @@ public:
     int ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteCommand(const std::string& eventTypeStr, const std::string& xpathStr, int32_t durationInt,
                         const std::string& alignStr, int32_t offsetInt);
+    int HandleTapCommand(double x, double y, int32_t duration, int32_t tapCount);
+    int HandleScrollGestureCommand(double x, double y, double xDistance, double yDistance, int32_t speed);
+    int HandlePinchGestureCommand(double x, double y, double scaleFactor, int32_t speed);
+    int HandleLongPressCommand(double x, double y);
+    int ExecuteGestureCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int CheckGestureCoordinatesInWebBounds(double screenX, double screenY);
+    bool ConvertScreenToWebCoordinates(double screenX, double screenY, double& outWebX, double& outWebY);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
