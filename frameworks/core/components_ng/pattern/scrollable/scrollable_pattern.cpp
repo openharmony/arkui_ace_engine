@@ -870,6 +870,17 @@ void ScrollablePattern::SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>
     scrollable->SetNeedScrollSnapToSideCallback(std::move(needScrollSnapToSideCallback));
 }
 
+void ScrollablePattern::SetBackToTopCallback(const RefPtr<Scrollable>& scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    auto backToTopCallback = [weak = WeakClaim(this)]() -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->GetBackToTop();
+    };
+    scrollable->SetBackToTopCallback(std::move(backToTopCallback));
+}
+
 void ScrollablePattern::SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable)
 {
     CHECK_NULL_VOID(scrollable);
@@ -1021,6 +1032,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragEndCallback(scrollable);
     SetStartSnapAnimationCallback(scrollable);
     SetNeedScrollSnapToSideCallback(scrollable);
+    SetBackToTopCallback(scrollable);
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
