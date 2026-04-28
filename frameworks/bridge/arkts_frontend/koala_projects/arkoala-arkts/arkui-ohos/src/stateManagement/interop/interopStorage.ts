@@ -193,7 +193,7 @@ export class InteropStorageBase extends StorageBase {
         }
         let dynamicState: ESValue = ESValue.wrap(result);
         let originValue: T = dynamicState.invokeMethod('getUnmonitored').unwrap() as T;
-        let storageProperty = new StorageProperty<T>(key, uiUtils.makeObserved(originValue));
+        let storageProperty = new StorageProperty<T>(key, uiUtils.makeV1Observed(originValue));
 
         const setSource = ((value: T): void => {
             storageProperty.set(value);

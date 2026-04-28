@@ -79,7 +79,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     }
 
     public shouldAddRef(): boolean {
-        return (OBSERVE.renderingComponent > 0) && (this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId));
+        return OBSERVE.renderingComponent > 0;
     }
 
     override get length(): int {
@@ -92,15 +92,13 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     override set length(newLen: int) {
         const len = this.store_.length;
         if (len !== newLen) {
-            this.store_.length;
-            if (this.store_.length !== len) {
-                // the Array implementation actually changed the length!
-                this.meta_.fireChange(CONSTANT.OB_LENGTH);
-                this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+            this.store_.length = newLen;
+            // the Array implementation actually changed the length!
+            this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
-                // exec all subscribing @Watch
-                this.executeOnSubscribingWatches('length');
-            }
+            // exec all subscribing @Watch
+            this.executeOnSubscribingWatches('length');
         }
     }
 
