@@ -82,6 +82,8 @@ struct Array_ResourceColor;
 struct Ark_ResourceColor;
 typedef struct webview_WebviewControllerPeer {
     std::function<int32_t()> getWebIdFunc = nullptr;
+    std::function<bool()> getWebDebuggingAccessFunc = nullptr;
+    std::function<int32_t()> getWebDebuggingPortFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
     std::function<long()> getNativePtrFunc = nullptr;
     std::function<void()> releaseRefFunc = nullptr;
