@@ -882,6 +882,10 @@ struct SegmentButtonItem {
   @Link buttonItemsRealHeight: number[];
   public onCalculateBorderRadius?: () => void
 
+  aboutToAppear(): void {
+    this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
+  }
+
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding !== undefined) {
       return this.options.localizedTextPadding as LocalizedPadding;
@@ -2330,11 +2334,13 @@ export struct SegmentButton {
     }
 
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected ?
-        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.selectedFontSize ??
-          segmentButtonTheme.SELECTED_FONT_SIZE) :
-        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.fontSize ??
-          segmentButtonTheme.FONT_SIZE);
+      const selectedFontSize = this.options.selectedFontSize ?? 
+        (this.useAdaptiveLineHeight ? 
+          segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : 
+          segmentButtonTheme.SELECTED_FONT_SIZE);
+      const normalFontSize = this.options.fontSize ?? 
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
+      this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight =
         selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
           this.options.fontWeight ?? FontWeight.Regular;
