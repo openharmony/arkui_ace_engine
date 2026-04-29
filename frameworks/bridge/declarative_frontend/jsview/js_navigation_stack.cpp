@@ -972,6 +972,10 @@ bool JSNavigationStack::ExecutePopCallbackInStack(const JSRef<JSVal>& param)
 
 void JSNavigationStack::ExecutePopCallbackForHomeNavDestination(const JSRef<JSVal>& param)
 {
+    auto size = GetSize();
+    if (size > 0) {
+        return;
+    }
     auto homeDest = homeDestinationNode_.Upgrade();
     CHECK_NULL_VOID(homeDest);
     auto destPattern = homeDest->GetPattern<NG::NavDestinationPattern>();
