@@ -732,6 +732,9 @@ std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMater
         }
         filter = RosenEffectConverter::ConvertToFrostedGlassFilter(*(iter->second), params.dipScale);
     }
+#if defined(CROSS_PLATFORM)
+    return filter;
+#else
     auto glassFilter = std::static_pointer_cast<Rosen::RSNGFrostedGlassFilter>(filter);
     CHECK_NULL_RETURN(glassFilter, nullptr);
     auto& materialColor = params.materialColor;
@@ -739,5 +742,6 @@ std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMater
         materialColor.GetBlue() / 255.0f, materialColor.GetAlpha() / 255.0f };
     glassFilter->Setter<Rosen::FrostedGlassMaterialColorTag>(rsColor);
     return filter;
+#endif
 }
 } // namespace OHOS::Ace::NG
