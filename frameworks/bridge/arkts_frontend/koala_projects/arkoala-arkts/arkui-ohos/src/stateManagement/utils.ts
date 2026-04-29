@@ -125,7 +125,7 @@ export class UIUtils {
         return {
             path: path ?? '',
             valueCallback: callback,
-            isWildcard: observeProps
+            enableWildcard: observeProps
         };
     }
 

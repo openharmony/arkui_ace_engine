@@ -40,7 +40,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         const isSync = isSynchronous ?? false;
 
         pathLambda.forEach((info: IMonitorPathInfo) => {
-            this.values_.push(new MonitorValueInternal(info.path, info.valueCallback, this, isSync, info.isWildcard));
+            this.values_.push(new MonitorValueInternal(info.path, info.valueCallback, this, isSync, info.enableWildcard));
         });
         this.decorator = '@Monitor';
         this.readInitialMonitorValues();

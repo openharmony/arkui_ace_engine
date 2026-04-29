@@ -305,8 +305,8 @@ export interface IMonitorDecoratedVariable {
 
 export interface IMonitorPathInfo {
     path: string;
-    isWildcard?: boolean;
     valueCallback: MonitorValueCallback;
+    enableWildcard?: boolean;
 }
 
 export interface IMonitorValue<T> {
