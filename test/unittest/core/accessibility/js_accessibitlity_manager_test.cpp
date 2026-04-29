@@ -1979,7 +1979,7 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen007, TestSize.Leve
     ASSERT_NE(context, nullptr);
 
     std::map<std::string, std::string> actionArguments;
-    actionArguments["ActAccessibilityFocus"] =
+    actionArguments["accessibilityFocusScene"] =
         std::to_string(static_cast<int32_t>(Framework::AccessibilityFocusActionType::SWIPE_FOCUS));
     auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
         ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
@@ -2004,7 +2004,7 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen008, TestSize.Leve
     ASSERT_NE(context, nullptr);
 
     std::map<std::string, std::string> actionArguments;
-    actionArguments["ActAccessibilityFocus"] =
+    actionArguments["accessibilityFocusScene"] =
         std::to_string(static_cast<int32_t>(Framework::AccessibilityFocusActionType::HOVER_FOCUS));
     auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
         ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
@@ -2029,7 +2029,7 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen009, TestSize.Leve
     ASSERT_NE(context, nullptr);
 
     std::map<std::string, std::string> actionArguments;
-    actionArguments["ActAccessibilityFocus"] =
+    actionArguments["accessibilityFocusScene"] =
         std::to_string(static_cast<int32_t>(Framework::AccessibilityFocusActionType::SCROLL_FOCUS));
     auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
         ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, frameNode, elementId, context, actionArguments);
@@ -5430,7 +5430,7 @@ HWTEST_F(JsAccessibilityManagerTest, DumpExecuteActionTest005, TestSize.Level1)
 
     int64_t nodeId = frameNode->GetAccessibilityId();
     std::vector<std::string> params = {"-inspector", "--execute-action",
-        std::to_string(nodeId), "16", "ActAccessibilityFocus",
+        std::to_string(nodeId), "16", "accessibilityFocusScene",
         std::to_string(static_cast<int32_t>(Framework::AccessibilityFocusActionType::SWIPE_FOCUS))};
 
     jsAccessibilityManager->DumpExecuteActionTest(params);
