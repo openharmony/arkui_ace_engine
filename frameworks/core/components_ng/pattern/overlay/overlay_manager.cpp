@@ -4462,7 +4462,7 @@ void OverlayManager::InitSheetMask(
     CHECK_NULL_VOID(maskRenderContext);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(sheetLayoutProps);
@@ -4863,7 +4863,7 @@ void OverlayManager::UpdateSheetRender(
     CHECK_NULL_VOID(sheetRenderContext);
     auto pipeline = sheetPageNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetPageNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
     if (sheetStyle.backgroundBlurStyle.has_value()) {
@@ -5069,6 +5069,23 @@ void OverlayManager::OpenImageGenerator(BindSheetCreateParam&& param, int32_t in
     }
 }
 
+void OverlayManager::RegisterOnThemeScopeUpdate(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& sheetNode)
+{
+    auto updator = [targetNodeWk = AceType::WeakClaim(AceType::RawPtr(targetNode)),
+                       sheetNodeWk = AceType::WeakClaim(AceType::RawPtr(sheetNode))]() {
+        auto targetNode = targetNodeWk.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        auto sheetNode = sheetNodeWk.Upgrade();
+        CHECK_NULL_VOID(sheetNode);
+        auto themeScopeId = targetNode->GetThemeScopeId();
+        sheetNode->UpdateThemeScopeUpdate(themeScopeId);
+    };
+    auto themeScopeId = targetNode->GetThemeScopeId();
+    auto withThemeNode = WithThemeNode::GetWithThemeNode(themeScopeId);
+    CHECK_NULL_VOID(withThemeNode);
+    withThemeNode->PushOnThemeScopeUpdateWithId(updator, sheetNode->GetId());
+}
+
 void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& callback,
     const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -5091,6 +5108,9 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     auto sheetNode = SheetView::CreateSheetPage(
         targetNode->GetId(), targetNode->GetTag(), sheetContentNode, titleBuilder, std::move(callback), sheetStyle);
     CHECK_NULL_VOID(sheetNode);
+    if (sheetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        RegisterOnThemeScopeUpdate(targetNode, sheetNode);
+    }
     SetSheetProperty(sheetNode, sheetStyle, std::move(onAppear), std::move(onDisappear),
         std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
@@ -5144,7 +5164,10 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
         AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
     CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
     ACE_UINODE_TRACE(sheetWrapperNode);
-
+    if (sheetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        sheetWrapperNode->SetThemeScopeId(targetNode->GetThemeScopeId());
+        sheetWrapperNode->AllowUseParentTheme(false);
+    }
     if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet wrapper");
         sheetWrapperNode->MountToParent(rootNode);
@@ -5266,7 +5289,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
     CHECK_NULL_VOID(maskRenderContext);
     auto pipeline = maskNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(sheetLayoutProps);
@@ -5517,7 +5540,7 @@ void OverlayManager::ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetSty
     if (sheetStyle.sheetHeight.sheetMode.has_value()) {
         auto context = sheetNode->GetContext();
         CHECK_NULL_VOID(context);
-        auto sheetTheme = context->GetTheme<SheetTheme>();
+        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::MEDIUM) {
             sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * sheetTheme->GetMediumPercent());
@@ -5561,7 +5584,7 @@ void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle,
     if (selection.sheetMode.has_value()) {
         auto context = sheetNode->GetContext();
         CHECK_NULL_VOID(context);
-        auto sheetTheme = context->GetTheme<SheetTheme>();
+        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         if (selection.sheetMode == SheetMode::MEDIUM) {
             sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * sheetTheme->GetMediumPercent());

@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_ng/syntax/with_theme_node.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace {
@@ -477,6 +478,7 @@ public:
         std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         const RefPtr<FrameNode>& targetNode);
+    void RegisterOnThemeScopeUpdate(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& sheetNode);
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
         const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,

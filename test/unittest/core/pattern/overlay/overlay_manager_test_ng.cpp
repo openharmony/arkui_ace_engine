@@ -4401,6 +4401,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern16, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
@@ -4455,6 +4456,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern17, TestSize.Level1)
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->largePercent_ = 0.5;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
@@ -4507,6 +4509,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern18, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
@@ -4677,6 +4680,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sheetTheme));
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};

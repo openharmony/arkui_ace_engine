@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
 
 #include "core/components/drag_bar/drag_bar_theme.h"
+#include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -55,16 +56,20 @@ void SheetDragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper
 
     // paint offset
     auto paintOffset = paintWrapper->GetContentOffset();
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
-    CHECK_NULL_VOID(dragBarTheme);
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
+    CHECK_NULL_VOID(sheetTheme);
     RSPen pen;
     pen.SetAntiAlias(true);
     const float defaultOpacity = 0.2f;
     auto alpha = std::floor(UINT8_MAX * defaultOpacity);
     pen.SetAlpha(alpha * opacity);
-    pen.SetColor(ToRSColor(dragBarTheme->GetDragBarColor()));
+    pen.SetColor(ToRSColor(sheetTheme->GetDragBarColor()));
     pen.SetWidth(paintProperty->GetBarWidth().value_or(BAR_WIDTH).ConvertToPx());
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas.AttachPen(pen);

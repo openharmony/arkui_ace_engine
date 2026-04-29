@@ -83,7 +83,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SheetTheme>& theme) const
         {
             RefPtr<ThemeStyle> sheetPattern = themeConstants->GetPatternByName(THEME_PATTERN_SHEET);
@@ -130,8 +130,8 @@ public:
             ParseAdditionalStylePattern(sheetPattern, theme);
         }
 
-        void ParseAdditionalStylePattern(
-            const RefPtr<ThemeStyle>& sheetPattern, const RefPtr<SheetTheme>& theme) const
+    private:
+        void ParseAdditionalStylePattern(const RefPtr<ThemeStyle>& sheetPattern, const RefPtr<SheetTheme>& theme) const
         {
             theme->largePercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_large", 1.0f);
             theme->mediumPercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_medium", 0.6f);
@@ -420,6 +420,14 @@ public:
     }
 protected:
     SheetTheme() = default;
+    Color titleTextFontColor_;
+    Color subtitleTextFontColor_;
+    Color sheetBackgoundColor_;
+    Color dragBarColor_;
+    Color maskColor_; // No corresponding token color type, not adapted with theme
+    Color closeIconColor_;
+    Color closeIconImageColor_;
+    Color closeIconSymbolColor_;
 
 private:
     Dimension sheetRadius_;
@@ -432,14 +440,6 @@ private:
     Dimension titleTopPadding_;
     Dimension sheetTitleAreaMargin_;
     FontWeight sheetTitleFontWeight_ = FontWeight::BOLD;
-    Color titleTextFontColor_;
-    Color subtitleTextFontColor_;
-    Color sheetBackgoundColor_;
-    Color dragBarColor_;
-    Color maskColor_;
-    Color closeIconColor_;
-    Color closeIconImageColor_;
-    Color closeIconSymbolColor_;
     std::string sheetType_;
     std::string sheetBottom_;
     std::string sheetClose_;
