@@ -85,7 +85,7 @@ constexpr size_t MAX_DUMP_INFO_SIZE = 5000;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
-const std::string ACTION_ARGU_FOCUS_TYPE_STUB = "ActAccessibilityFocus";
+const std::string ACTION_ARGU_FOCUS_TYPE_STUB = "accessibilityFocusScene";
 const std::string ACTION_ARGU_FOCUS_MOVE_VALUE =
     std::to_string(static_cast<int32_t>(AccessibilityFocusActionType::SWIPE_FOCUS));
 
