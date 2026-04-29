@@ -25,6 +25,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG::ViewAnimate {
 namespace {

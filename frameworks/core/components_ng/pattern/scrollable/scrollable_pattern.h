@@ -36,6 +36,7 @@
 #endif
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace {
 class BezierVariableVelocityMotion;

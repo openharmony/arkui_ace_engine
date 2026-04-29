@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 

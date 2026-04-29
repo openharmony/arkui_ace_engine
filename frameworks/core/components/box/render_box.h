@@ -29,6 +29,7 @@
 #include "core/gestures/raw_recognizer.h"
 #include "base/window/drag_window.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/common/properties/state_attributes.h"
 
 namespace OHOS::Ace {
 

@@ -164,6 +164,7 @@
 #include "screen_session_manager_client.h"
 #include "parameters.h"
 #include "pointer_event.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 

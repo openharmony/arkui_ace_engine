@@ -19,6 +19,7 @@
 #include "interfaces/inner_api/ui_session/ui_translate_manager.h"
 #include "interfaces/inner_api/ui_session/ui_content_proxy_error_code.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
+#include "base/thread/task_executor.h"
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UiTranslateManagerImpl : public UiTranslateManager,
     public std::enable_shared_from_this<UiTranslateManagerImpl> {

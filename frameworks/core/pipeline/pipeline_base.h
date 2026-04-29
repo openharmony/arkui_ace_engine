@@ -28,7 +28,6 @@
 #include <utility>
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
-#include "interfaces/inner_api/ui_session/param_config.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
@@ -41,12 +40,10 @@
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
-#include "core/common/resource/resource_configuration.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"

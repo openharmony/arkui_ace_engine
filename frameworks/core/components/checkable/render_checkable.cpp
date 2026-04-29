@@ -20,6 +20,7 @@
 #include "base/log/event_report.h"
 #include "core/common/container.h"
 #include "core/event/ace_event_helper.h"
+#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace {
 

@@ -45,10 +45,11 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 
+
+struct ParticleOptionArrayStorage;
 namespace OHOS::Rosen {
 class DrawCmdList;
 class VisualEffect;
