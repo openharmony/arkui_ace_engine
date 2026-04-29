@@ -122,12 +122,13 @@ public:
 
     void SetExtraOffset(const std::optional<OffsetF>& offset) override;
 
-    void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
+    // Geometry transition counter management
+    void IncrementGeometryTransitionCounter() override;
+    void DecrementGeometryTransitionCounter() override;
+    void ClearGeometryTransitionCounter() override;
+    bool IsGeometryTransitionAnimating() const override;
 
-    bool HasSandBox() const override
-    {
-        return sandBoxCount_ > 0;
-    }
+    void SetSandBox(const std::optional<OffsetF>& parentPosition) override;
 
     size_t GetAnimationsCount() const override
     {
@@ -878,7 +879,7 @@ protected:
     bool hasScales_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
-    int sandBoxCount_ = 0;
+    int animatingGeometryTransitionCount_ = 0;
     uint32_t colorGamut_ = 0;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 8;
