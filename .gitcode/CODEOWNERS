@@ -3160,6 +3160,7 @@ interfaces/native/node/span_style_native_impl.cpp @arkui_rich_editor
 [ANI Interfaces]
 interfaces/ets/ani/componentSnapshot/src/componentSnapshot.cpp @ArkUI_Event
 interfaces/ets/ani/test/ @ArkUI_Event
+interfaces/ets/ani/smartgesturecontroller/BUILD.gn @ArkUI_Event
 
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkui_framework_xnode
@@ -3570,6 +3571,7 @@ test/mock/core/common/mock_container.h @arkui_framework_xnode
 test/mock/core/common/mock_data_detector_adapter.cpp @huawei_g_five
 test/mock/core/common/mock_data_detector_mgr.cpp @huawei_g_five
 test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
+test/mock/frameworks/core/common/mock_container_scope.cpp @arkui_framework_xnode
 test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp @arkui_framework_xnode
 test/mock/interfaces/native/mock_native_error_message_wrapper.cpp @arkui_framework_xnode
 test/mock/ohos_mock/ @arkui_framework_xnode
@@ -4681,6 +4683,7 @@ interfaces/ets/ani/inspector/src/inspector_util.h @ArkUI_ability_group
 interfaces/ets/ani/matrix4/src/matrix4.cpp @arkuicodepulse
 interfaces/ets/ani/mediaquery/src/mediaquery.cpp @arkuilayout1
 interfaces/ets/ani/ohosprompt/src/prompt.cpp @arkuipopupwindow_all
+interfaces/ets/ani/overlayManager/BUILD.gn @arkuipopupwindow_all
 interfaces/ets/ani/overlayManager/src/overlayManager.cpp @arkuipopupwindow_all
 interfaces/ets/ani/performanceMonitor/src/performanceMonitor.cpp @arkui_framework_xnode
 interfaces/ets/ani/pluginComponent/ @ArkUI_ability_group

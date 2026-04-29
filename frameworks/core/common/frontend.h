@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FRONTEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FRONTEND_H
 
+#include <mutex>
 #include <string>
 #include <utility>
 
