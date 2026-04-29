@@ -226,6 +226,8 @@ HWTEST_F(NativeNodeTwoPartTest, NativeFriction001, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SCROLL_FRICTION, &zeroSizeItem),
         ARKUI_ERROR_CODE_PARAM_INVALID);
 
+    frameNode->context_ = nullptr;
+    NG::ViewStackProcessor::GetInstance()->ClearStack();
     nodeAPI->disposeNode(rootNode);
 }
 
