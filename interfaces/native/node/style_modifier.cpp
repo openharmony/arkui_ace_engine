@@ -4995,14 +4995,14 @@ int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontColor(
-                node->uiNodeHandle, item->value[0].u32, nullptr);
+                node->uiNodeHandle, item->value[0].u32, nullptr, true);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setFontColor(node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontColor(
-                node->uiNodeHandle, item->value[0].u32, nullptr);
+                node->uiNodeHandle, item->value[0].u32, nullptr, true);
             break;
         case ARKUI_NODE_BUTTON:
             fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontColorPtr(
@@ -6003,7 +6003,7 @@ int32_t SetSelectedBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
             node->uiNodeHandle, item->value[0].u32, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputSelectedBackgroundColor(
-            node->uiNodeHandle, item->value[0].u32, nullptr);
+            node->uiNodeHandle, item->value[0].u32, nullptr, true);
     }
     return ERROR_CODE_NO_ERROR;
 }

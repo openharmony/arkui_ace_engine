@@ -756,14 +756,14 @@ void ResetTextInputMaxLength(ArkUINodeHandle node)
     TextFieldModelNG::ResetMaxLength(frameNode);
 }
 
-void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr, bool isCapi)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
-        if (!resRawPtr) {
+        if (!resRawPtr && isCapi) {
             ResourceParseUtils::CompleteResourceObjectFromColor(
                 resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
@@ -903,7 +903,7 @@ void ResetTextInputPlaceholderFont(ArkUINodeHandle node)
     }
 }
 
-void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr, bool isCapi)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -912,7 +912,7 @@ void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRa
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj;
-        if (!resRawPtr) {
+        if (!resRawPtr && isCapi) {
             ResourceParseUtils::CompleteResourceObjectFromColor(
                 resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
