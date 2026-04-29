@@ -45,6 +45,13 @@ enum class WebCommandEventType {
     INPUT_TIME,
     INPUT_WEEK,
     SELECT,
+    INPUT_INSERT,
+    INPUT_MODIFY,
+    INPUT_SELECT,
+    INPUT_CUT,
+    INPUT_COPY,
+    INPUT_FOCUS,
+    INPUT_SET_CURSOR,
     EVENT_TYPE_SCROLL_GESTURE,
     EVENT_TYPE_TAP_GESTURE,
     EVENT_TYPE_PINCH_GESTURE,
@@ -122,6 +129,11 @@ public:
      */
     static bool IsValidAlign(const std::string& alignStr);
 
+    static int BuildInputMethodAction(
+        const std::unique_ptr<JsonValue>& comJson,
+        const std::string& eventTypeStr,
+        std::shared_ptr<NWebCommandActionImpl>& outCommandAction);
+
     static int BuildGestureActionInfo(
         const std::unique_ptr<JsonValue>& comJson,
         const std::string& eventTypeStr,
@@ -169,6 +181,10 @@ private:
     static const char* const DURATION_KEY;
     static const char* const ALIGN_KEY;
     static const char* const OFFSET_KEY;
+    static const char* const CONTENT_KEY;
+    static const char* const START_INDEX_KEY;
+    static const char* const FINISH_INDEX_KEY;
+    static const char* const NO_NEED_KEYBOARD_KEY;
 
     static int ValidateClickParameters(
         const std::unique_ptr<JsonValue>& comJson,
@@ -180,6 +196,29 @@ private:
         std::string& outAlign,
         int32_t& outOffset,
         std::string& outXPath);
+
+    static int ValidateInputInsertParameters(
+        const std::unique_ptr<JsonValue>& comJson,
+        std::string& outContent,
+        int32_t& outIndex);
+
+    static int ValidateInputModifyParameters(
+        const std::unique_ptr<JsonValue>& comJson,
+        std::string& outContent);
+
+    static int ValidateInputSelectParameters(
+        const std::unique_ptr<JsonValue>& comJson,
+        int32_t& outStartIndex,
+        int32_t& outFinishIndex);
+    
+    static int ValidateInputFocusParameters(
+        const std::unique_ptr<JsonValue>& comJson,
+        std::string& outXPath,
+        int32_t& outNoNeedKeyboardInt);
+    
+    static int ValidateInputSetCursorParameters(
+        const std::unique_ptr<JsonValue>& comJson,
+        int32_t& outIndex);
 };
 
 } // namespace Ace

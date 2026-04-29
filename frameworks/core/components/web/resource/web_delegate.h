@@ -979,12 +979,17 @@ enum class WebCommandResult : int32_t {
     // common execution error (160-199)
     PAGE_NOT_READY = 160,
     ELEMENT_TYPE_MISMATCH = 161,
-    // input command error (200-249)
+    // input command error (200-229)
     JSON_INVALID_INPUT_XPATH = 200,
     JSON_INVALID_INPUT_VALUE = 201,
     INPUT_TYPE_INVALID = 202,
     INPUT_VALUE_FORMAT_INVALID = 203,
     INPUT_EVENT_TYPE_MISMATCH = 204,
+    // json inputmethod error (230-249)
+    JSON_INVALID_CONTENT = 230,
+    JSON_INVALID_INDEX = 231,
+    JSON_INVALID_INDEX_DURATION = 232,
+    JSON_INVALID_NO_NEED_KEYBOARD = 233,
     // select command error (250-299)
     JSON_INVALID_SELECT_XPATH = 250,
     JSON_INVALID_SELECT_OPTIONS = 251,
