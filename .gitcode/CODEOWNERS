@@ -226,10 +226,13 @@ advanced_ui_component/atomicservicetabs/ @giteewzp
 advanced_ui_component/atomicserviceweb/ @giteewzp
 advanced_ui_component/BUILD.gn @arkuitoolchain
 advanced_ui_component/chipgroup/ @arkuitoolchain
+advanced_ui_component/chipgroupv2/ @arkuitoolchain
 advanced_ui_component/chip/ @arkuitoolchain
+advanced_ui_component/chipv2/ @arkuitoolchain
 advanced_ui_component/composelistitem/ @arkuiadvancedcomponent
 advanced_ui_component/composetitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/counter/ @arkuitoolchain
+advanced_ui_component/counterv2/ @arkuitoolchain
 advanced_ui_component/dialog/ @arkuiadvancedcomponent
 advanced_ui_component/dialogv2/ @arkuiadvancedcomponent
 advanced_ui_component/downloadfilebutton/
