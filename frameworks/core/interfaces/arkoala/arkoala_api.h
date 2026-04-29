@@ -7714,6 +7714,16 @@ struct ArkUITextTimerModifier {
     void (*setTextTimerOnTimer)(ArkUINodeHandle node, void* callback);
     void (*resetTextTimerOnTimer)(ArkUINodeHandle node);
 };
+struct ArkUIContainerReaderModifier {
+    void (*create)();
+    void (*setBreakPointConfig)(ArkUINodeHandle node,
+        double* widthArr, uint32_t widthLen, double* heightArr, uint32_t heightLen);
+    void (*resetBreakPointConfig)(ArkUINodeHandle node);
+    void (*setOnSizeChange)(ArkUINodeHandle node, void* callback);
+    void (*setOnWidthBreakpointChange)(ArkUINodeHandle node, void* callback);
+    void (*setOnHeightBreakpointChange)(ArkUINodeHandle node, void* callback);
+    void (*setRenderFunction)(ArkUINodeHandle node, void* callback);
+};
 
 struct ArkUISymbolGlyphModifier {
     void (*create)(ArkUI_Uint32 symbolId);
@@ -9250,6 +9260,7 @@ struct ArkUINodeModifiers {
     const ArkUIAtomicServiceModifier* (*getAtomicServiceModifier)();
     const ArkUIMatrix4Modifier* (*getMatrix4Modifier)();
     const ArkUIDynamicLayoutModifier* (*getDynamicLayoutModifier)();
+    const ArkUIContainerReaderModifier* (*getContainerReaderModifier)();
 };
 
 // same as inner defines in property.h

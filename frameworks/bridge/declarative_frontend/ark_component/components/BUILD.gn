@@ -30,6 +30,20 @@ template("arkui_abc") {
   }
 }
 
+template("arkui_components_abc") {
+  forward_variables_from(invoker, "*")
+
+  ohos_abc(target_name) {
+    sources = [ "ark${target_name}.js" ]
+    output_name = "${target_name}"
+    install_images = [ "system" ]
+    module_install_dir = "etc/abc/arkui/components"
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+}
+arkui_components_modules = ["containerreader",]
+
 arkui_modules = [
   "dynamiclayout",
   "flowitem",
@@ -64,6 +78,12 @@ if (!ace_engine_feature_wearable) {
 }
 
 module_targets = []
+
+foreach(item, arkui_components_modules) {
+  arkui_components_abc(item) {
+  }
+  module_targets += [ ":$item" ]
+}
 
 foreach(item, arkui_modules) {
   arkui_abc(item) {

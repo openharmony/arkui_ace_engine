@@ -193,7 +193,17 @@ void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding);
 ACE_FORCE_EXPORT OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& frameSize,
     const std::unique_ptr<MeasureProperty>& calcLayoutConstraint, const SizeT<float> percentReference);
 
-WidthBreakpoint GetCommonWidthBreakpoint(double width, double density);
+ACE_FORCE_EXPORT WidthBreakpoint GetCalcWidthBreakpoint(const OHOS::Ace::WidthLayoutBreakPoint& finalBreakpoints,
+    double density, double width);
+ACE_FORCE_EXPORT WidthBreakpoint GetCalcWidthBreakpoint(const std::vector<double>& customBreakpoints,
+    double density, double width);
+ACE_FORCE_EXPORT WidthBreakpoint GetCommonWidthBreakpoint(double width, double density);
+
+ACE_FORCE_EXPORT HeightBreakpoint GetCalcHeightBreakpoint(const OHOS::Ace::HeightLayoutBreakPoint &finalBreakpoints,
+    double aspectRatio);
+ACE_FORCE_EXPORT HeightBreakpoint GetCalcHeightBreakpoint(const std::vector<double>& customBreakpoints,
+    double aspectRatio);
+ACE_FORCE_EXPORT HeightBreakpoint GetCommonHeightBreakpoint(double aspectRatio);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H

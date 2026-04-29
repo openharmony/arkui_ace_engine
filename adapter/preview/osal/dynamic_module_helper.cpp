@@ -113,6 +113,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Menu", "menu" },
         { "MenuItem", "menu" },
         { "MenuItemGroup", "menu" },
+        { "ContainerReader", "containerreader" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

@@ -284,7 +284,7 @@ public:
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
-    void Pop();
+    ACE_FORCE_EXPORT void Pop();
 
     // pop the last container
     ACE_FORCE_EXPORT void PopContainer();

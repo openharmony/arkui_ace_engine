@@ -460,6 +460,10 @@ ACE_EXPORT extern const char GRID_COL_ETS_TAG[];
 ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[];
 ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
 
+// containerReader
+ACE_EXPORT extern const char CONTAINER_READER_COMPONENT_TAG[];
+ACE_EXPORT extern const char CONTAINER_READER_ETS_TAG[];
+
 // relativeContainer
 ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[];
 ACE_FORCE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];

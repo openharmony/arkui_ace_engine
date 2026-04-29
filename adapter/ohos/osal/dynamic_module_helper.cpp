@@ -96,6 +96,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Menu", "menu" },
         { "MenuItem", "menu" },
         { "MenuItemGroup", "menu" },
+        { "ContainerReader", "containerreader" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {
