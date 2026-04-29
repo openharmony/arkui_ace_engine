@@ -671,6 +671,23 @@ ArkUI_ErrorCode OH_ArkUI_TextStyle_GetSuperscript(const OH_ArkUI_TextStyle* text
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+void ClearSpanStyle(OH_ArkUI_SpanStyle* spanStyle)
+{
+    CHECK_NULL_VOID(spanStyle);
+    if (spanStyle->paragraphStyle.leadingMarginPixelMap) {
+        delete spanStyle->paragraphStyle.leadingMarginPixelMap;
+        spanStyle->paragraphStyle.leadingMarginPixelMap = nullptr;
+    }
+    if (spanStyle->imageAttachment.pixelMap) {
+        delete spanStyle->imageAttachment.pixelMap;
+        spanStyle->imageAttachment.pixelMap = nullptr;
+    }
+    spanStyle->textShadowStyle.textShadow = {};
+    spanStyle->imageAttachment.isPixelMap = std::nullopt;
+    spanStyle->imageAttachment.isDrawingColorFilter = std::nullopt;
+    spanStyle->imageAttachment.colorFilter = {};
+}
+
 OH_ArkUI_SpanStyle* OH_ArkUI_SpanStyle_Create()
 {
     OH_ArkUI_SpanStyle* spanStyle = new OH_ArkUI_SpanStyle();
@@ -682,6 +699,7 @@ OH_ArkUI_SpanStyle* OH_ArkUI_SpanStyle_Create()
 
 void OH_ArkUI_SpanStyle_Destroy(OH_ArkUI_SpanStyle* spanStyle)
 {
+    ClearSpanStyle(spanStyle);
     delete spanStyle;
     spanStyle = nullptr;
 }
@@ -720,15 +738,6 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetLength(const OH_ArkUI_SpanStyle* spanStyle
     CHECK_NULL_RETURN(spanStyle && length, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *length = spanStyle->length;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-void ClearSpanStyle(OH_ArkUI_SpanStyle* spanStyle)
-{
-    CHECK_NULL_VOID(spanStyle);
-    spanStyle->textShadowStyle.textShadow.clear();
-    spanStyle->imageAttachment.isPixelMap = std::nullopt;
-    spanStyle->imageAttachment.isDrawingColorFilter = std::nullopt;
-    spanStyle->imageAttachment.colorFilter.clear();
 }
 
 ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetTextStyle(OH_ArkUI_SpanStyle* spanStyle, const OH_ArkUI_TextStyle* textStyle)
@@ -1379,6 +1388,7 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetLeadingMarginPixelMap(OH_ArkUI_Paragr
     CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<OHOS::Media::PixelMap> tmpPixel = pixelmap->GetInnerPixelmap();
     CHECK_NULL_RETURN(tmpPixel, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete paragraphStyle->leadingMarginPixelMap;
     paragraphStyle->leadingMarginPixelMap = new (std::nothrow) OH_PixelmapNative(tmpPixel);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1542,6 +1552,7 @@ ArkUI_ErrorCode OH_ArkUI_TextShadowStyle_SetTextShadow(OH_ArkUI_TextShadowStyle*
     const OH_ArkUI_ShadowOptions** options, uint32_t length)
 {
     CHECK_NULL_RETURN(textShadowStyle && options && length > 0, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    textShadowStyle->textShadow = {};
     for (uint32_t i = 0; i < length; i++) {
         auto temp = options[i];
         OH_ArkUI_ShadowOptions opt;
@@ -1989,6 +2000,7 @@ ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetPixelMap(
     CHECK_NULL_RETURN(imageAttachment && pixelmap, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<OHOS::Media::PixelMap> tmpPixel = pixelmap->GetInnerPixelmap();
     CHECK_NULL_RETURN(tmpPixel, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete imageAttachment->pixelMap;
     imageAttachment->pixelMap = new (std::nothrow) OH_PixelmapNative(tmpPixel);
     imageAttachment->isPixelMap = true;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -2153,6 +2165,7 @@ ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetColorFilter(
 {
     CHECK_NULL_RETURN(imageAttachment && colorFilter, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     imageAttachment->isDrawingColorFilter = false;
+    imageAttachment->colorFilter = {};
     for (uint32_t i = 0; i < size; i++) {
         auto temp = colorFilter[i];
         imageAttachment->colorFilter.emplace_back(temp);
