@@ -3524,6 +3524,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "OnTouchEvent type:%{public}d, isGenerate:%{public}d",
         static_cast<int32_t>(point.type), point.isGenerate);
     if (ConvertFromMouseAxis(point) && !point.isGenerate && compatibleManager_.NotifyNewEvent(point)) {
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->DelegateTouchEvent(point);
+        }
         if (point.type == TouchType::MOVE) {
             RequestFrame();
         }
@@ -3562,7 +3565,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         formEventMgr->HandleEtsCardTouchEvent(point, etsSerializedGesture);
     }
 
-    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty()) {
+    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty() && !point.isGenerate) {
         eventManager_->DelegateTouchEvent(point);
     }
     auto oriPoint = point;
