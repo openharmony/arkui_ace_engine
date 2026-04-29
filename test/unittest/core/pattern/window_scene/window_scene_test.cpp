@@ -1168,6 +1168,79 @@ HWTEST_F(WindowSceneTest, OnBoundsChanged, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Test OnAttachToMainTree when IsMainSessionRecent returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnAttachToMainTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create main window scene
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    
+    Rosen::RSSurfaceNodeConfig config = {
+        .SurfaceNodeName = "SurfaceNode"
+    };
+    session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
+    ASSERT_NE(session->surfaceNode_, nullptr);
+    
+    auto snapshotWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->snapshotWindow_ = AceType::RawPtr(snapshotWindowNode);
+    ASSERT_NE(windowScene->snapshotWindow_, nullptr);
+    
+    windowScene->startingWindow_ = nullptr;
+    session->SetShowRecent(true);
+    
+    /**
+     * @tc.steps: step2. Create sub window scene
+     */
+    Rosen::SessionInfo subSessionInfo = {
+        .abilityName_ = "SUB_ABILITY_NAME",
+        .bundleName_ = "SUB_BUNDLE_NAME",
+        .moduleName_ = "SUB_MODULE_NAME",
+    };
+    auto subSession = ssm_->RequestSceneSession(subSessionInfo);
+    ASSERT_NE(subSession, nullptr);
+    
+    Rosen::RSSurfaceNodeConfig subConfig = {
+        .SurfaceNodeName = "SubSurfaceNode"
+    };
+    subSession->surfaceNode_ = Rosen::RSSurfaceNode::Create(subConfig);
+    ASSERT_NE(subSession->surfaceNode_, nullptr);
+    
+    auto subWindowScene = AceType::MakeRefPtr<WindowScene>(subSession);
+    ASSERT_NE(subWindowScene, nullptr);
+    auto subFrameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), subWindowScene);
+    subWindowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(subFrameNode));
+    ASSERT_NE(subWindowScene->GetHost(), nullptr);
+    
+    windowScene->AddChild(windowScene->GetHost(), subFrameNode, "subWindow");
+    
+    /**
+     * @tc.steps: step3. Verify IsMainSessionRecent returns true
+     */
+    auto ret = subWindowScene->IsMainSessionRecent();
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: DisposeSnapshotAndBlankWindow
  * @tc.desc: DisposeSnapshotAndBlankWindow Test
  * @tc.type: FUNC
