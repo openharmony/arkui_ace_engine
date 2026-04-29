@@ -2302,6 +2302,25 @@ typedef enum {
      */
     NODE_BORDER_RADIUS_TYPE = 123,
     /**
+     * @brief Defines the accessibility next focus node ID attribute, which can be set and reset through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component ID used by accessibility for next focus navigation.\n
+     *
+     * @since 26
+     */
+    NODE_ACCESSIBILITY_NEXT_FOCUS_ID = 124,
+    /**
+     * @brief Defines the accessibility default focus attribute, which can be set and reset through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the current component is accessibility default focus.
+     * The parameter type is {@link ArkUI_AccessibilityDefaultFocus}.\n
+     *
+     * @since 26
+     */
+    NODE_ACCESSIBILITY_DEFAULT_FOCUS = 125,
+    /**
      * @brief Defines the inspector label attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

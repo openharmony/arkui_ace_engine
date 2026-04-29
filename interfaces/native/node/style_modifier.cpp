@@ -4689,6 +4689,39 @@ void ResetNextFocus(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetNextFocus(node->uiNodeHandle);
 }
 
+int32_t SetAccessibilityNextFocusId(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->string, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityNextFocusId(node->uiNodeHandle, item->string);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetAccessibilityNextFocusId(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityNextFocusId(node->uiNodeHandle);
+}
+
+int32_t SetAccessibilityDefaultFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size <= 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityDefaultFocus(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetAccessibilityDefaultFocus(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityDefaultFocus(node->uiNodeHandle);
+}
+
 int32_t SetFocusBox(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size != NUM_3) {
@@ -20173,6 +20206,8 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetDashGap,
         SetLayoutGravity,
         SetBorderRadiusType,
+        SetAccessibilityNextFocusId,
+        SetAccessibilityDefaultFocus,
         nullptr,
         nullptr,
         SetInspectorLabel,
@@ -20316,6 +20351,8 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetBorderRadiusType,
         nullptr,
         nullptr,
+        nullptr,
+        nullptr,
         GetInspectorLabel,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
@@ -20456,6 +20493,8 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetDashGap,
         ResetLayoutGravity,
         ResetBorderRadiusType,
+        ResetAccessibilityNextFocusId,
+        ResetAccessibilityDefaultFocus,
         nullptr,
         nullptr,
         ResetInspectorLabel,
