@@ -621,7 +621,7 @@ namespace {
 // needs this because siblings like ScrollablePattern's own scroll-Pan
 // sometimes appear in the arena wrapped inside a PanGestureGroup / parallel
 // group, not as direct scope members. Without the descent the callback
-// would only see the outer group and miss the actual PanRecognizer'ы.
+// would only see the outer group and miss the actual PanRecognizer's.
 bool WalkRecognizerForEach(const RefPtr<NGGestureRecognizer>& recognizer,
     const std::function<bool(const RefPtr<NGGestureRecognizer>&)>& callback)
 {
