@@ -1,0 +1,16 @@
+{
+  "float": [
+    {
+      "name": "page_text_font_size",
+      "value": "50fp"
+    },
+    {
+      "name": "picker_item_height_valid",
+      "value": "48vp"
+    },
+    {
+      "name": "picker_item_height_invalid",
+      "value": "120vp"
+    }
+  ]
+}
