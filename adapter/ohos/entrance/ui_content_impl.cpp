@@ -3924,6 +3924,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     }
 
+    // Page rotation has most of the same logic as regular rotation,
+    // but page rotation does not trigger rotation animations.
+    auto originalReason = reason;
     if (reason == OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "save PAGE_ROTATION as ROTATION");
         reason = OHOS::Rosen::WindowSizeChangeReason::ROTATION;
@@ -4081,7 +4084,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
 
     auto taskId = viewportConfigMgr_->MakeTaskId();
-    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
+    auto task = [config = modifyConfig, container, reason, originalReason, rsTransaction, rsWindow = window_,
                     instanceId = instanceId_, info, isDynamicRender = isDynamicRender_, animationOpt, avoidAreas,
                     taskId, weak = WeakPtr(viewportConfigMgr_), beforeConfig = config]() {
         container->SetWindowPos(config.Left(), config.Top());
@@ -4108,8 +4111,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
                 reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                 pipelineContext->FlushBuild();
-                LOGI("StartWindowAnimation with reason: %{public}d", reason);
-                pipelineContext->StartWindowAnimation();
+                if (originalReason != OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
+                    // Page rotation has most of the same logic as regular rotation,
+                    // but page rotation does not trigger rotation animations.
+                    LOGI("StartWindowAnimation with reason: %{public}d", reason);
+                    pipelineContext->StartWindowAnimation();
+                }
                 // SCENE_WITH_ANIMATION does not require refreshing all nodes
                 if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT &&
                     reason != OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
