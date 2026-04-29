@@ -220,12 +220,18 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
  */
 HWTEST_F(RichEditorMagnifierTest, MagnifierTest003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. get rich editor pattern.
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto frameSize = SizeF(600.f, 400.f);
     InitMagnifierParams(frameSize);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. get magnifier controller.
+     */
     RefPtr<MagnifierController> controller = richEditorPattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->OpenMagnifier();
