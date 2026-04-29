@@ -2499,56 +2499,101 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public type: TouchType
-    public id: int32
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public x: double
-    public y: double
-    public hand?: InteractionHand | undefined
-    public pressedTime?: int64 | undefined
-    public pressure?: double | undefined
-    public width?: double | undefined
-    public height?: double | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    get type(): TouchType {
+        return this.getType()
+    }
+    set type(type: TouchType) {
+        this.setType(type)
+    }
+    get id(): int32 {
+        return this.getId()
+    }
+    set id(id: int32) {
+        this.setId(id)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get hand(): InteractionHand | undefined {
+        return this.getHand()
+    }
+    set hand(hand: InteractionHand | undefined) {
+        this.setHand(hand)
+    }
+    get pressedTime(): int64 | undefined {
+        return this.getPressedTime()
+    }
+    set pressedTime(pressedTime: int64 | undefined) {
+        this.setPressedTime(pressedTime)
+    }
+    get pressure(): double | undefined {
+        return this.getPressure()
+    }
+    set pressure(pressure: double | undefined) {
+        this.setPressure(pressure)
+    }
+    get width(): double | undefined {
+        return this.getWidth()
+    }
+    set width(width: double | undefined) {
+        this.setWidth(width)
+    }
+    get height(): double | undefined {
+        return this.getHeight()
+    }
+    set height(height: double | undefined) {
+        this.setHeight(height)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TouchObjectInternal.getFinalizer())
-        this.type = this.getType()
-        this.id = this.getId()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.hand = this.getHand()
-        this.pressedTime = this.getPressedTime()
-        this.pressure = this.getPressure()
-        this.width = this.getWidth()
-        this.height = this.getHeight()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
     }
     constructor() {
         this(MaterializedBaseTag.NOP, TouchObjectInternal.construct())
-        this.type = this.getType()
-        this.id = this.getId()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.hand = this.getHand()
-        this.pressedTime = this.getPressedTime()
-        this.pressure = this.getPressure()
-        this.width = this.getWidth()
-        this.height = this.getHeight()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._TouchObject_construct()
@@ -2687,7 +2732,8 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
         const retval = ArkUIGeneratedNativeModule._TouchObject_getCurrentLocalPosition(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Coordinate2D = Coordinate2D_serializer.read(retvalDeserializer)
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as Coordinate2D)
     }
     private getType_serialize(): TouchType {
         const retval = ArkUIGeneratedNativeModule._TouchObject_getType(this.peer!.ptr)
@@ -2754,7 +2800,8 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
             buffer = InteractionHand.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult: InteractionHand | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as InteractionHand | undefined)
     }
     private setHand_serialize(hand: InteractionHand | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2777,7 +2824,8 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
             buffer = retvalDeserializer.readInt64()
         }
         const returnResult: int64 | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as int64 | undefined)
     }
     private setPressedTime_serialize(pressedTime: int64 | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2800,7 +2848,8 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setPressure_serialize(pressure: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2823,7 +2872,8 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setWidth_serialize(width: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2846,7 +2896,8 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setHeight_serialize(height: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2869,7 +2920,8 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2892,7 +2944,8 @@ export class TouchObjectInternal implements MaterializedBase,TouchObject {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult: double | undefined = buffer
-        return returnResult
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
     }
     private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
