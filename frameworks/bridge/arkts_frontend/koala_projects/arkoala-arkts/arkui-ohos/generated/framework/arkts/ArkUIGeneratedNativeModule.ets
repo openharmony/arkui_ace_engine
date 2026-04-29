@@ -5871,25 +5871,25 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PanGestureEvent_setVelocity(ptr: KPointer, velocity: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    native static _PanGestureOptionsProxy_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct
-    native static _PanGestureOptions_getFinalizer(): KPointer
+    native static _PanGestureOptionsProxy_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _PanGestureOptions_setDirection(ptr: KPointer, value: KInt): void
+    native static _PanGestureOptionsProxy_setDirection(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_setDistance(ptr: KPointer, value: KDouble): void
+    native static _PanGestureOptionsProxy_setDistance(ptr: KPointer, value: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_setFingers(ptr: KPointer, value: KInt): void
+    native static _PanGestureOptionsProxy_setFingers(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_getDirection(ptr: KPointer): KInt
+    native static _PanGestureOptionsProxy_getDirection(ptr: KPointer): KInt
     @ani.unsafe.Direct
-    native static _PanGestureOptions_getDistance(ptr: KPointer): KDouble
+    native static _PanGestureOptionsProxy_getDistance(ptr: KPointer): KDouble
     @ani.unsafe.Direct
     native static _PanRecognizer_construct(): KPointer
     @ani.unsafe.Direct
     native static _PanRecognizer_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _PanRecognizer_getPanGestureOptions(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _PanRecognizer_getPanGestureOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _PanRecognizer_getDirection(ptr: KPointer): KInt
     @ani.unsafe.Direct

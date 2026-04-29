@@ -205,7 +205,7 @@ generated_sources = [
   "implementation/offscreen_canvas_accessor.cpp",
   "implementation/offscreen_canvas_rendering_context2d_accessor.cpp",
   "implementation/pan_gesture_event_accessor.cpp",
-  "implementation/pan_gesture_options_accessor.cpp",
+  "implementation/pan_gesture_options_proxy_accessor.cpp",
   "implementation/pan_recognizer_accessor.cpp",
   "implementation/paragraph_style_accessor.cpp",
   "implementation/particle_helper_accessor.cpp",
