@@ -2673,6 +2673,33 @@ class SmartGestureShortcutModifier extends ModifierWithKey {
   }
 }
 SmartGestureShortcutModifier.identity = Symbol('smartGestureShortcut');
+class AccessibilityCustomActionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityCustomActions(node);
+    } else {
+      getUINativeModule().common.setAccessibilityCustomActions(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
+      return false;
+    }
+    if (this.value.length !== this.stageValue.length) {
+      return false;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (this.value[i].actionName !== this.stageValue[i].actionName) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+AccessibilityCustomActionsModifier.identity = Symbol('accessibilityCustomActions');
 class AccessibilityHoverTransparentModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5549,6 +5576,11 @@ class ArkComponent {
 
   smartGestureShortcut(value) {
     modifierWithKey(this._modifiersWithKeys, SmartGestureShortcutModifier.identity, SmartGestureShortcutModifier, value);
+    return this;
+  }
+
+  accessibilityCustomActions(value) {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityCustomActionsModifier.identity, AccessibilityCustomActionsModifier, value);
     return this;
   }
 

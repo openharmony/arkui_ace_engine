@@ -4134,6 +4134,35 @@ class AccessibilityActionOptionsModifier extends ModifierWithKey<object> {
   }
 }
 
+class AccessibilityCustomActionsModifier extends ModifierWithKey<Array<object>> {
+  constructor(value: Array<object>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityCustomActions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityCustomActions(node);
+    } else {
+      getUINativeModule().common.setAccessibilityCustomActions(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
+      return false;
+    }
+    if (this.value.length !== this.stageValue.length) {
+      return false;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if ((this.value[i] as Record<string, string>).actionName !==
+        (this.stageValue[i] as Record<string, string>).actionName) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
 class SmartGestureShortcutModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);
@@ -6082,6 +6111,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   accessibilityActionOptions(value: object): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityActionOptionsModifier.identity, AccessibilityActionOptionsModifier, value);
+    return this;
+  }
+
+  accessibilityCustomActions(value: Array<object>): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityCustomActionsModifier.identity, AccessibilityCustomActionsModifier, value);
     return this;
   }
 

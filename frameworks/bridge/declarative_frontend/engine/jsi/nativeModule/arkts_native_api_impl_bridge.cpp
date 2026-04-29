@@ -5490,6 +5490,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityActionOptions));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityActionOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityActionOptions));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityCustomActions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityCustomActions));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityCustomActions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityCustomActions));
 
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSmartGestureShortcut"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSmartGestureShortcut));
