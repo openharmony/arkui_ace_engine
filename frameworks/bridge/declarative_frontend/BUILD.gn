@@ -1149,6 +1149,7 @@ template("declarative_js_engine_ng") {
     if (is_arkui_x) {
       sources -= [
         "interfaces/profiler/js_profiler.cpp",
+        "jsview/js_depth_component.cpp",
         "jsview/js_location_button.cpp",
         "jsview/js_paste_button.cpp",
         "jsview/js_save_button.cpp",
