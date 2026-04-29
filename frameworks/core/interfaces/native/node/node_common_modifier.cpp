@@ -9652,6 +9652,10 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
     if (arkUITouchEvent->historySize > 0) {
         for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
             SetSingleHistoryEvent(allHistoryEvents, arkUITouchEvent, i);
+            if (arkUITouchEvent->historyEvents[i].touchPointSize > 0 &&
+                !arkUITouchEvent->historyEvents[i].touchPointes) {
+                continue;
+            }
             for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
                 allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
                 allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
