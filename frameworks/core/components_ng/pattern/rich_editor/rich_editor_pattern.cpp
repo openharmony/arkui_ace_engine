@@ -6485,6 +6485,9 @@ void RichEditorPattern::FinishTextPreview()
         RemoveEmptySpans();
         IF_TRUE(previewTextRecord_.isSpanSplit, MergeAdjacentSpans(caretPosition_));
         previewTextRecord_.Reset();
+        UndoRedoRecord styledRecord;
+        undoManager_->UpdateRecordAfterChange(caretPosition_, 0, styledRecord);
+        undoManager_->RecordPreviewInputtingEnd(styledRecord);
         return;
     }
     auto previewContent = previewTextRecord_.previewContent;
