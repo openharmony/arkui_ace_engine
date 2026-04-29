@@ -891,7 +891,7 @@ public:
     }
     bool IsFreeScrollEnabled() const;
     RefPtr<RichEditorScrollController> GetScrollController() const;
-    bool HandleHorizontalScroll();
+    bool HandleHorizontalScroll(bool needUpdateOffset);
     void RemoveOverlayModifier();
     void ScheduleDisappearDelayTask();
     bool IsMouseOverScrollBar(const MouseInfo& info);

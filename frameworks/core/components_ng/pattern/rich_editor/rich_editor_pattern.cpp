@@ -10637,7 +10637,7 @@ void RichEditorPattern::InitScrollablePattern()
         barDisplayMode_ = barState;
         isSingleLineMode_ = singleLine;
     }
-    CHECK_NULL_VOID(!HandleHorizontalScroll() && (needInit || needResetScrollBar_));
+    CHECK_NULL_VOID(!HandleHorizontalScroll(needInit) && (needInit || needResetScrollBar_));
     needResetScrollBar_ = false;
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -10817,7 +10817,7 @@ RefPtr<RichEditorScrollController> RichEditorPattern::GetScrollController() cons
     return scrollController_;
 }
 
-bool RichEditorPattern::HandleHorizontalScroll()
+bool RichEditorPattern::HandleHorizontalScroll(bool needUpdateOffset)
 {
     if (!isHorizontalScrolling_) {
         if (scrollController_->IsFreeScrollEnabled() && scrollController_->IsAttachedModifier()) {
@@ -10841,11 +10841,12 @@ bool RichEditorPattern::HandleHorizontalScroll()
     scrollController_->SetScrollBar(barState);
     UpdateScrollBarColor(GetScrollBarColor());
     auto richEditorTheme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_RETURN(richEditorTheme, false);
+    CHECK_NULL_RETURN(richEditorTheme, true);
     scrollController_->SetMinHeight(richEditorTheme->GetScrollbarMinHeight());
     if (!scrollController_->IsAttachedModifier()) {
         RemoveOverlayModifier();
     }
+    CHECK_NULL_RETURN(needUpdateOffset, true);
     if (overlayMod_) {
         UpdateScrollBarOffset();
     }
