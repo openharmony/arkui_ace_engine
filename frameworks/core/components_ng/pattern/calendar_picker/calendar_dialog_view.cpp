@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
@@ -138,8 +139,15 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     weekFrameNode->MountToParent(contentColumn);
     scrollFrameNode->MountToParent(contentColumn);
 
-    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn, settingData.entryNode.Upgrade());
+    auto entryNode = settingData.entryNode.Upgrade();
+    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn, entryNode);
     CHECK_NULL_RETURN(dialogNode, nullptr);
+    if (entryNode) {
+        auto pickerPattern = entryNode->GetPattern<CalendarPickerPattern>();
+        if (pickerPattern) {
+            pickerPattern->SetDialogNode(dialogNode);
+        }
+    }
     auto dialogLayoutProperty = dialogNode->GetLayoutProperty();
     CHECK_NULL_RETURN(dialogLayoutProperty, nullptr);
     auto calendarTextDirection = calendarLayoutProperty->GetNonAutoLayoutDirection();
@@ -147,7 +155,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     SetWeekTextDirection(dialogTextDirection, calendarTextDirection, weekFrameNode);
     dialogLayoutProperty->UpdateLayoutDirection(textDirection);
     CreateChildNode(contentColumn, dialogNode, dialogProperties);
-    if (!settingData.entryNode.Upgrade()) {
+    if (!entryNode) {
         auto contentRow =
             CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent), buttonInfos);
         contentRow->MountToParent(contentColumn);
@@ -1142,13 +1150,13 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
         } else {
             pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
         }
+    } else {
+        ApplyBlurStyleColorModeForApi26(dialogNode, styleOption);
     }
     styleOption.blurStyle = static_cast<BlurStyle>(
         dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
     if (dialogProperties.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
         contentRenderContext->UpdateBackgroundEffect(std::nullopt);
-    } else {
-        ApplyBlurStyleColorModeForApi26(dialogNode, styleOption);
     }
 
     renderContext->UpdateBackBlurStyle(styleOption);
