@@ -28,6 +28,7 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -155,6 +156,13 @@ void SetTextInputOptionsImpl(Ark_NativePointer node,
         }
     }
     auto controller = TextFieldModelStatic::GetController(frameNode, placeholder, text);
+    if (!controller) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+        pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+        controller = TextFieldModelStatic::GetController(frameNode, placeholder, text);
+    }
     if (peerPtr) {
         peerPtr->SetController(controller);
         auto styledStringCache = peerPtr->GetStyledStringCache();
