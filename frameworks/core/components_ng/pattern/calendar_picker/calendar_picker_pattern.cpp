@@ -22,6 +22,7 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1299,14 +1300,19 @@ bool CalendarPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     host->SetNeedCallChildrenUpdate(false);
-    // Host entry border is only applied in OnColorConfigurationUpdate; FrameNode::OnThemeScopeUpdate does not
-    // call it, so WithTheme scope changes left the outer border stale (often transparent Color() from wrong scope).
     OnColorConfigurationUpdate();
     if (!layoutProperty->GetNormalTextColorSetByUser().value_or(false)) {
         OnModifyDone();
     } else {
         UpdateEntryButtonColor();
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    auto dialogNode = dialogNode_.Upgrade();
+    if (dialogNode) {
+        auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+        if (dialogPattern) {
+            dialogPattern->OnThemeScopeUpdate(themeScopeId);
+        }
     }
     return true;
 }
