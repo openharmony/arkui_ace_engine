@@ -51,6 +51,7 @@
 #include "ui/base/geometry/ng/offset_t.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

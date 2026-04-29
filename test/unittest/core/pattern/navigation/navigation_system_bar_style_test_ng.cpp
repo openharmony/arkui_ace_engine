@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "mock_navigation_stack.h"
+#include "mock_navigation_route.h"
 
 #define protected public
 #define private public
@@ -28,6 +29,9 @@
 #include "test/mock/frameworks/base/system_bar/mock_system_bar_style.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

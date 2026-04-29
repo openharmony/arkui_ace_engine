@@ -30,6 +30,9 @@
 #include "core/event/mouse_event.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
 
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 

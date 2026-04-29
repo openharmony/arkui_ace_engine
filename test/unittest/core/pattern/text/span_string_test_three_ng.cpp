@@ -18,6 +18,8 @@
 
 #include "core/components_ng/pattern/text/text_pattern.h"
 
+#include "core/components_ng/pattern/stage/stage_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 

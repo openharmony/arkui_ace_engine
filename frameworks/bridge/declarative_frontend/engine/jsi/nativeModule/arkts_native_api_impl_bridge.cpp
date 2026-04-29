@@ -108,6 +108,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_web_bridge.h"
 #endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_picker_bridge.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

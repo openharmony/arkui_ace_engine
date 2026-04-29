@@ -15,6 +15,8 @@
 
 #include "gtest/gtest.h"
 
+#include "mock_navigation_route.h"
+
 #define protected public
 #define private public
 

@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::Framework {
 void JSDumpLog::JSBind(BindingTarget globalObj)

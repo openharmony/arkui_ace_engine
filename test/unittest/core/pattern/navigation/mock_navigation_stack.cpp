@@ -14,6 +14,9 @@
  */
 
 #include "mock_navigation_stack.h"
+#include "mock_navigation_route.h"
+
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 

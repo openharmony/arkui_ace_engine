@@ -62,6 +62,7 @@
 #include "frameworks/base/utils/measure_util.h"
 
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "frameworks/compatible/components/canvas/rosen_render_custom_paint.h"

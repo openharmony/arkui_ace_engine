@@ -93,6 +93,7 @@
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 

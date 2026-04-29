@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/interfaces/native/node/node_api.h"
 
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+
 using namespace testing;
 using namespace testing::ext;
 

@@ -30,6 +30,7 @@
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

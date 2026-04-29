@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
 #include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

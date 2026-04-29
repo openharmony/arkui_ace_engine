@@ -18,6 +18,7 @@
 #define protected public
 #define private public
 
+#include "mock_navigation_route.h"
 #include "mock_navigation_stack.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"

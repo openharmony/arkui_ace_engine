@@ -34,6 +34,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class NavigationManager;
 
 struct TransitionUnitInfo {
     const RefPtr<FrameNode>& transitionNode;

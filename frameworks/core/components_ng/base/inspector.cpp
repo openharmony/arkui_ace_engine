@@ -26,6 +26,7 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline/base/element_register.h"
 #include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

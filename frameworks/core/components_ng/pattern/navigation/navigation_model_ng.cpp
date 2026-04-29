@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/base/system_bar/system_bar_style.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

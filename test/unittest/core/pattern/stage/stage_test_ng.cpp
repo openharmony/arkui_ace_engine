@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #undef private
 #undef protected

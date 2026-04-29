@@ -72,6 +72,7 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
