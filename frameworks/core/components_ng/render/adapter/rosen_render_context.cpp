@@ -6147,32 +6147,25 @@ void RosenRenderContext::PaintOverlayText()
 {
     CHECK_NULL_VOID(rsNode_);
     auto& overlay = GetOrCreateOverlay();
-    if (overlay->HasOverlayText()) {
-        auto overlayText = overlay->GetOverlayTextValue();
-        auto paintRect = GetPaintRectWithTransform();
-        std::shared_ptr<Rosen::RectF> overlayRect;
-        if (overlayTextModifier_) {
-            overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
-            auto overlayOffset = overlayTextModifier_->GetOverlayOffset();
-            auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
-            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
-                std::max(paragraphSize.Width(), paintRect.Width()),
-                std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
-            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
-        } else {
-            overlayTextModifier_ = std::make_shared<OverlayTextModifier>();
-            rsNode_->AddModifier(overlayTextModifier_);
-            overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
-            auto overlayOffset = overlayTextModifier_->GetOverlayOffset();
-            auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
-            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
-                std::max(paragraphSize.Width(), paintRect.Width()),
-                std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
-            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
-        }
+    if (!overlay->HasOverlayText()) {
+        return;
     }
+    auto overlayText = overlay->GetOverlayTextValue();
+    auto paintRect = GetPaintRectWithTransform();
+
+    if (!overlayTextModifier_) {
+        overlayTextModifier_ = std::make_shared<OverlayTextModifier>();
+        rsNode_->AddModifier(overlayTextModifier_);
+    }
+    overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
+    auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
+    auto overlayOffset = overlayTextModifier_->GetOverlayOffsetWithDirection(
+        SizeF(paintRect.Width(), paintRect.Height()), paragraphSize);
+    auto overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
+        std::max(paragraphSize.Width(), paintRect.Width()),
+        std::max(paragraphSize.Height(), paintRect.Height()));
+    rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
+    UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
 }
 
 void RosenRenderContext::OnOverlayTextUpdate(const OverlayOptions& overlay)
