@@ -111,8 +111,8 @@ import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInterna
 import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMeasureInfoProxy } from "#generated";
 import { CustomSpanWrapper } from "#generated";
 import { default as text } from '@ohos.graphics.text'
-import { PanGestureOptions } from "../component/gesture"
-import { PanGestureOptionsProxy } from "../component/idlize"
+import { PanGestureOptions } from '../component/gesture'
+import { PanGestureOptionsProxy } from '../component/idlize'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -127,7 +127,7 @@ export namespace extractors {
   }
 
   export function fromInputMethodExtraConfigPtr(config: KPointer): InputMethodExtraConfig {
-    throw new Error("fromInputMethodExtraConfigPtr is not implemented in ANI")
+    throw new Error('fromInputMethodExtraConfigPtr is not implemented in ANI')
   }
 
   export function toTextParagraphPtr(paragraph: text.Paragraph): KPointer {
@@ -850,10 +850,14 @@ export namespace extractors {
   export function transform_Opt_Object_to_Ark_RecordData(value: Object | undefined): RecordData {
       return value as RecordData
   }
-  export function transform_Ark_PanGestureOptionsProxy_to_Ark_PanGestureOptions(value: PanGestureOptionsProxy): PanGestureOptions {
+  export function transform_Ark_PanGestureOptionsProxy_to_Ark_PanGestureOptions(
+    value: PanGestureOptionsProxy,
+  ): PanGestureOptions {
     return new PanGestureOptions(value)
   }
-  export function transform_Ark_PanGestureOptions_to_Ark_PanGestureOptionsProxy(value: PanGestureOptions): PanGestureOptionsProxy {
+  export function transform_Ark_PanGestureOptions_to_Ark_PanGestureOptionsProxy(
+    value: PanGestureOptions,
+  ): PanGestureOptionsProxy {
     return value.proxy;
   }
 }

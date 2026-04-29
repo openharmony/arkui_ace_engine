@@ -63,4 +63,4 @@ export * from "./component/canvas"
 export * from "./component/waterFlow"
 export * from "./component/embeddedComponent"
 export * from "./component/nodeContainer"
-export { CustomSpan } from "./component/styledString"
+export { CustomSpan } from './component/styledString'

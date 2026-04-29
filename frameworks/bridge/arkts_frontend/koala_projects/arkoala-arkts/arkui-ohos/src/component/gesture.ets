@@ -1,6 +1,6 @@
 import { nullptr } from "@koalaui/interop"
 import { Callback } from "./common"
-import { GestureOps, PanGestureOptionsProxy } from "./idlize"
+import { GestureOps, PanGestureOptionsProxy } from './idlize'
 import { PeerNode } from "../PeerNode"
 import { GlobalStateManager, MutableState } from '@koalaui/runtime'
 import { KeyEventInternal, TouchTestInfo } from "arkui/component/common"
@@ -564,7 +564,8 @@ export class PanGesture extends Gesture {
     createAndSetPanGestureAttr(): void {
         if (this.panGestureOptions !== undefined) {
             this.panGestureOptions!.getOptionState()
-            this.pointer = GestureOps.createPanGestureWithPanGestureOptions(this.panGestureOptions!.proxy.getPeer()!.ptr);
+            this.pointer = GestureOps.createPanGestureWithPanGestureOptions(
+                this.panGestureOptions!.proxy.getPeer()!.ptr);
         } else {
             this.pointer = GestureOps.createPanGesture(this.finger ?? 1, this.direction ?? PanDirection.All, this.distance ?? 5, this.isFingerCountLimited ?? false);
         }
