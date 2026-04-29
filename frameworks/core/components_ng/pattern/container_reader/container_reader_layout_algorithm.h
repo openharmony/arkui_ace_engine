@@ -30,8 +30,8 @@ class ContainerReaderLayoutAlgorithm : public BoxLayoutAlgorithm {
 
 public:
 	ContainerReaderLayoutAlgorithm() = default;
-    explicit ContainerReaderLayoutAlgorithm(const ContainerReaderRenderFunction& renderFunction)
-	    : renderFunction_(renderFunction) {}
+        explicit ContainerReaderLayoutAlgorithm(const ContainerReaderRenderFunction& renderFunction)
+	        : renderFunction_(renderFunction) {}
     ~ContainerReaderLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
