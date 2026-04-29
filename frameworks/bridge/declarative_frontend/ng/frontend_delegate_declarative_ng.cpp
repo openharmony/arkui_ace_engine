@@ -1051,6 +1051,37 @@ void FrontendDelegateDeclarativeNG::ShowActionMenu(const std::string& title, con
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
 }
 
+void FrontendDelegateDeclarativeNG::ShowActionMenu(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter with attr");
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .autoCancel = true,
+        .isMenu = true,
+        .buttons = buttons,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+        .maskRect = dialogAttr.maskRect,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial,
+    };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+    ShowActionMenuInner(dialogProperties, buttons, std::move(callback));
+}
+
 void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
