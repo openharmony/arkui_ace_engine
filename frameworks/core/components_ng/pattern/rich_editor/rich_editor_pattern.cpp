@@ -15030,4 +15030,11 @@ void RichEditorPattern::PostTaskToLayutSwap(std::function<void()>&& task)
 {
     tasks_.emplace(std::forward<std::function<void()>>(task));
 }
+
+void RichEditorPattern::ClearParagraphCache()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "paragraph cache cleared");
+    paragraphCache_.Clear();
+}
+
 } // namespace OHOS::Ace::NG
