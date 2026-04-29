@@ -1508,12 +1508,13 @@ bool ContainerPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         }
     }
 
-    if (needThemeResync) {
-        SyncSelectionIndicatorWithTheme();
+    if (needThemeResync || isUseDefaultFontColor_) {
+        if (needThemeResync) {
+            SyncSelectionIndicatorWithTheme();
+        }
         result = true;
         host->SetNeedCallChildrenUpdate(true);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
     }
     return result;
 }
