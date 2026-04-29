@@ -1659,7 +1659,8 @@ bool CalendarDialogPattern::ReportCommandResultEvent(int32_t nodeId, const std::
         value->Put("reason", reason.c_str());
     }
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "CalendarPickerDialogResult", value, 0);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "CalendarPickerDialogResult", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }
 
