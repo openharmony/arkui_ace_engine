@@ -196,6 +196,15 @@ struct PointLightProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
+struct MaterialPreProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PreBorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PreBorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PreBackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PreBackgroundColor, Color);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+};
+
 struct OuterBorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OuterBorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OuterBorderColor, BorderColorProperty);

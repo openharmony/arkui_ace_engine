@@ -663,7 +663,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderSourceFromImage, bool);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ExcludeFromRenderGroup, bool);
@@ -703,8 +702,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBackShadow, Shadow);
-
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
@@ -714,8 +711,12 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashGap, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashWidth, BorderWidthProperty);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBorderWidth, BorderWidthProperty);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBorderColor, BorderColorProperty);
+    // Material
+    ACE_DEFINE_PROPERTY_GROUP(MaterialPreParams, MaterialPreProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBackgroundColor, Color);
 
     // Outer Border
     ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
