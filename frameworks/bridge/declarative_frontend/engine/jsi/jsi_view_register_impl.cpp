@@ -113,6 +113,7 @@
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
+#include "bridge/declarative_frontend/jsview/js_with_env.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
@@ -764,6 +765,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TouchRecognizer", JSTouchRecognizer::JSBind },
     { "UnionEffectContainer", JSUnionEffectContainer::JSBind },
     { "DistortionComponent", JSDistortionComponent::JSBind },
+    { "WithEnv", JSWithEnv::JSBind },
 };
 
 void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)
@@ -840,6 +842,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSCircleShape::JSBind(globalObj);
     JSEllipseShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
+    JSWithEnv::JSBind(globalObj);
 
     RegisterBindFuncs(globalObj, isCustomEnvSupported);
     RegisterExtraViews(globalObj);
@@ -1017,6 +1020,7 @@ void JsBindFormViews(
         JSCircleShape::JSBind(globalObj);
         JSEllipseShape::JSBind(globalObj);
         JSPathShape::JSBind(globalObj);
+        JSWithEnv::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {
