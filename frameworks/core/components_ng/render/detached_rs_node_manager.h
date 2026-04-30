@@ -44,11 +44,50 @@ public:
     void PostDestructorTask(std::shared_ptr<Rosen::RSNode> rsNode);
     void FlushImplicitTransaction(std::shared_ptr<Rosen::RSUIContext> rsUIContext);
     void RemoveRSUIContext(std::shared_ptr<Rosen::RSUIContext> rsUIContext);
+    /**
+     * @brief Register an instance for pre-freeze flush.
+     * Called in UIContentImpl::Foreground() on the UI thread.
+     * Also attempts to register the externalClearCallback to NativeEngine via TryRegisterExternalClearCallback().
+     * @param instanceId The instance ID to register.
+     */
+    void RegisterPreFreezeInstance(int32_t instanceId);
+
+    /**
+     * @brief Unregister an instance from pre-freeze flush.
+     * Called in UIContentImpl::Background() on the UI thread.
+     * Removes the instanceId from registeredInstances_ so ForceFlushVsync won't be called for it.
+     * @param instanceId The instance ID to unregister.
+     */
+    void UnregisterPreFreezeInstance(int32_t instanceId);
+
+    /**
+     * @brief Static callback registered to NativeEngine::SetExternalClearCallback.
+     * Called by ArkIdleMonitor::NotifyNeedFreeze before ReportDataToRSS(true) to flush rendering commands.
+     * Takes a snapshot of registeredInstances_ to avoid holding lock during iteration.
+     * For each registered instanceId, posts a VIP-priority PostSyncTask to call ForceFlushVsync.
+     * Logs warning if any flush takes longer than 50ms.
+     */
+    static void PreFreezeFlushForAllContexts();
 
 private:
+    static void FlushInstance(uint64_t nanoTimestamp, int32_t instanceId);
+
+    /**
+     * @brief Try to register ExternalClearCallback to NativeEngine once per process.
+     * Uses bool flag + mutex instead of std::call_once because EngineHelper::GetCurrentEngine()
+     * may return nullptr on first call. Subsequent calls will retry until engine becomes available.
+     * Early returns if: externalClearRegistered_ is true, engine is null, or nativeEngine is null.
+     * Called under registeredMutex_ protection from RegisterPreFreezeInstance.
+     */
+    void TryRegisterExternalClearCallback();
+
     std::mutex mutex_;
     std::unordered_set<Rosen::RSUIContext*> rsUIContexts_;
     RefPtr<TaskRunnerAdapter> taskExecutor_ = TaskRunnerAdapterFactory::Create(false, "");
+
+    std::mutex registeredMutex_;
+    std::unordered_set<int32_t> registeredInstances_;
+    bool externalClearRegistered_ = false;
 };
 } // namespace OHOS::Ace
 
