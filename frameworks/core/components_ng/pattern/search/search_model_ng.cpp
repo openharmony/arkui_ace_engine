@@ -1112,7 +1112,7 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto textFieldTheme = pattern->GetTheme();
+    auto textFieldTheme = frameNode->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);

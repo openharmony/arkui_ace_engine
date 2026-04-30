@@ -40,11 +40,14 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/base/constants.h"
 #include "core/components/theme/icon_theme.h"
 #undef private
@@ -6161,6 +6164,46 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems007, TestSize.Level1)
      * @tc.expected: isFirstOption flag is set correctly for the first menu item.
      */
     EXPECT_FALSE(menuOptionItems[0].isFirstOption);
+}
+
+/**
+ * @tc.name: UpdateMenuColors001
+ * @tc.desc: Test UpdateMenuColors returns early when caller frame node is missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, UpdateMenuColors001, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(infoPtr, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    selectOverlayNode->selectMenu_ = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    selectOverlayNode->selectMenuInner_ =
+        FrameNode::GetOrCreateFrameNode("SelectMenuInner", ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    selectOverlayNode->moreButton_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->moreOrBackSymbol_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(selectOverlayNode->selectMenu_, nullptr);
+    ASSERT_NE(selectOverlayNode->selectMenuInner_, nullptr);
+    ASSERT_NE(selectOverlayNode->moreButton_, nullptr);
+    ASSERT_NE(selectOverlayNode->moreOrBackSymbol_, nullptr);
+
+    selectOverlayNode->UpdateMenuColors();
+
+    auto moreButtonPattern = selectOverlayNode->moreButton_->GetPattern<ButtonPattern>();
+    auto moreOrBackLayoutProperty = selectOverlayNode->moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(moreButtonPattern, nullptr);
+    ASSERT_NE(moreOrBackLayoutProperty, nullptr);
+    EXPECT_FALSE(moreButtonPattern->clickedColor_.has_value());
+    EXPECT_FALSE(moreButtonPattern->blendClickColor_.has_value());
+    EXPECT_FALSE(moreButtonPattern->blendHoverColor_.has_value());
+    EXPECT_FALSE(moreOrBackLayoutProperty->GetSymbolColorList().has_value());
 }
 
 /**

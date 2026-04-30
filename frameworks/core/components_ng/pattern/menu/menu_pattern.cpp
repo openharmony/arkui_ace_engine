@@ -2529,6 +2529,9 @@ bool MenuPattern::UpdateMenuBackBlurStyle(bool userSetBgColor)
     if (renderContext->IsUniRenderEnabled() && (!renderContext->HasBackgroundColor() || !userSetBgColor)) {
         BlurStyleOption styleOption;
         MenuView::UpdateStyleOptionColorMode(host->GetLocalColorMode(), styleOption, isColorModeFollowTarget_);
+        if (!MaterialUtils::IsMaterialDisabled()) {
+            return true;
+        }
         if (menuTheme->GetMenuBlendBgColor()) {
             styleOption.blurStyle = static_cast<BlurStyle>(menuTheme->GetMenuNormalBackgroundBlurStyle());
             renderContext->UpdateBackgroundColor(menuParams.backgroundColor.value_or(menuTheme->GetBackgroundColor()));
