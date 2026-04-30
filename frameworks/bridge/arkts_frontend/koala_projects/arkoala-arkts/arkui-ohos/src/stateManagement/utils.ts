@@ -42,8 +42,8 @@ export interface ObservedResult {
     decoratorInfo: Array<DecoratorInfo>;
 }
 
-export interface IMonitorValueInfo {
-    callback: () => Any;
+export interface MonitorValueInfo {
+    valueCallback: () => Any;
     path?: string;
     observeProps?: boolean;
 }
@@ -105,6 +105,20 @@ export class UIUtils {
         return customComponent.__getLifecycle__Internal();
     }
 
+      /**
+   * Get the custom component context.
+   *
+   * @param { T } customComponent - custom component instance
+   * @returns { CustomComponentContext } The lifecycle that the custom component belongs to.
+   * @static
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @stagemodelonly
+   * @since 26.0.0 static
+   */
+  static getCustomComponentContext<T extends IVariableOwner>(customComponent: T): CustomComponentContext {
+    return customComponent.__getCustomComponentContext__Internal();
+  }
+
     private static pathToArray(path?: string | string[]): string[] {
         if (!path) {
             return [];
@@ -132,7 +146,7 @@ export class UIUtils {
     // Loops through the callbacks array and returns array of IMonitorPathInfo.
     // The callback+options overload cannot express observeProps, so all entries
     // are created with isWildcard=false. Callers that need props-wide observation
-    // should use the IMonitorValueInfo overload and set observeProps=true.
+    // should use the MonitorValueInfo overload and set observeProps=true.
     private static generatePathLambda(callbacks: (() => Any)[], paths?: string[], isSynchronous?: boolean): IMonitorPathInfo[] {
         return callbacks.map((callback: () => Any, index: int): IMonitorPathInfo => {
             const currentPath: string = !paths || index >= paths.length
@@ -142,36 +156,41 @@ export class UIUtils {
         });
     }
 
-    private static createPathInfoArray(valueInfo: IMonitorValueInfo | Array<IMonitorValueInfo>,
+    private static createPathInfoArray(valueInfo: MonitorValueInfo | Array<MonitorValueInfo>,
         isSynchronous?: boolean): IMonitorPathInfo[] {
-        // We ignore paths passed in options if any, assume path passed only as a part of IMonitorValueInfo
+        // We ignore paths passed in options if any, assume path passed only as a part of MonitorValueInfo
         // Single value
-        if(valueInfo instanceof IMonitorValueInfo) {
-            const v = valueInfo as IMonitorValueInfo;
+        if(valueInfo instanceof MonitorValueInfo) {
+            const v = valueInfo as MonitorValueInfo;
             const path = v.path ?? `${UIUtils.DEFAULT_PATH}${UIUtils.currentIndex_++}`;
             return new Array<IMonitorPathInfo>(
-                UIUtils.createPathInfo(v.callback, path, v.observeProps ?? false)
+                UIUtils.createPathInfo(v.valueCallback, path, v.observeProps ?? false)
             );
         }
         // Array passed
-        return valueInfo.map((value: IMonitorValueInfo, _: int): IMonitorPathInfo => {
+        return valueInfo.map((value: MonitorValueInfo, _: int): IMonitorPathInfo => {
             const currentPath: string = value.path ?? `${UIUtils.DEFAULT_PATH}${UIUtils.currentIndex_++}`;
-            return UIUtils.createPathInfo(value.callback, currentPath, value.observeProps ?? false);
+            return UIUtils.createPathInfo(value.valueCallback, currentPath, value.observeProps ?? false);
         });
     }
 
     // New API to accept MonitorValueInfo. Wildcard-ness is carried explicitly
-    // on IMonitorValueInfo.observeProps — the framework no longer parses path
+    // on MonitorValueInfo.observeProps — the framework no longer parses path
     // strings for wildcard syntax, so the path may be any user-supplied string
     // (typically the dotted access chain the callback returns).
-    static addMonitor(valueInfo: IMonitorValueInfo | Array<IMonitorValueInfo>,
+    static addMonitor(valueInfo: MonitorValueInfo | Array<MonitorValueInfo>,
         monitorCallback: (m: IMonitor) => void,
-        options?: MonitorOptions): IMonitorDecoratedVariable {
+        options?: MonitorBaseOptions): IMonitorDecoratedVariable {
 
         const pathLambda = UIUtils.createPathInfoArray(valueInfo, options?.isSynchronous);
         return new MonitorFunctionDecorator(pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
     }
 
+}
+
+export interface MonitorBaseOptions {
+    isSynchronous?: boolean;
+    owner?: IVariableOwner;
 }
 
 export interface MonitorOptions {
@@ -257,3 +276,35 @@ export class MutableBinding<T> {
         return this.setter_;
     }
 }
+
+/**
+ * CustomComponentContext is a state management tool for operating the observed data.
+ *
+ * @interface
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @stagemodelonly
+ * @since 26.0.0 static
+ */
+export interface CustomComponentContext {
+/**
+ * Register active and inactive callback.
+ *
+ * @param { ActiveAndInactiveCallbackType } [active] - active function callback.
+ * @param { ActiveAndInactiveCallbackType } [inactive] - inactive function callback.
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @stagemodelonly
+ * @since 26.0.0 static
+ */
+registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType,
+  inactive?: ActiveAndInactiveCallbackType): void;
+}
+
+ /**
+ * Defines active and inactive function callback.
+ *
+ * @typedef { function }
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @stagemodelonly
+ * @since 26.0.0 static
+ */
+export type ActiveAndInactiveCallbackType = () => void;
