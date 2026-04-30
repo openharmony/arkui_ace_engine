@@ -780,6 +780,218 @@ HWTEST_F(MultiFingersRecognizerTestNg, UpdateTouchPointWithAxisEventTest002, Tes
     EXPECT_EQ(fingersRecognizer->touchPoints_[1].postEventNodeId, 123);
 }
 
+namespace {
+constexpr int32_t FINGER_COUNT_HASH_MULTIPLIER = 100;
+constexpr int32_t TEST_POINT_ID_1 = 1;
+constexpr int32_t TEST_POINT_ID_2 = 2;
+constexpr int32_t TEST_POINT_ID_3 = 3;
+constexpr int32_t TEST_ORIGINAL_ID_1 = 1;
+constexpr int32_t TEST_ORIGINAL_ID_2 = 2;
+constexpr int32_t TEST_ORIGINAL_ID_3 = 3;
+constexpr int32_t INITIAL_LOG_LIMIT = -1;
+constexpr int32_t TEST_POINTER_COUNT_LESS = 1;
+constexpr int32_t TEST_TOUCH_POINTS_SIZE_2 = 2;
+constexpr int32_t TEST_TOUCH_POINTS_SIZE_3 = 3;
+}
+
+/**
+ * @tc.name: UpdateFingerListInfo_PointersLessThanTouchPointsSize
+ * @tc.desc: Test UpdateFingerListInfo when pointers.size() < touchPoints_.size() and logLimit_ not equal
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, UpdateFingerListInfo_PointersLessThanTouchPointsSize, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    context->eventManager_ = eventManager;
+
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    clickRecognizer->lastRefereeState_ = RefereeState::READY;
+    clickRecognizer->refereeState_ = RefereeState::READY;
+    clickRecognizer->isPostEventResult_ = true;
+    eventManager->downFingerIds_.clear();
+
+    TouchEvent event1;
+    event1.id = TEST_POINT_ID_1;
+    event1.originalId = TEST_ORIGINAL_ID_1;
+    TouchPoint point1;
+    point1.id = TEST_POINT_ID_1;
+    event1.pointers.push_back(point1);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_1] = event1;
+
+    TouchEvent event2;
+    event2.id = TEST_POINT_ID_2;
+    event2.originalId = TEST_ORIGINAL_ID_2;
+    TouchPoint point2;
+    point2.id = TEST_POINT_ID_2;
+    event2.pointers.push_back(point2);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_2] = event2;
+
+    int32_t expectedHashValue = TEST_POINTER_COUNT_LESS * FINGER_COUNT_HASH_MULTIPLIER + TEST_TOUCH_POINTS_SIZE_2;
+    EXPECT_EQ(clickRecognizer->logLimit_, INITIAL_LOG_LIMIT);
+    EXPECT_NE(clickRecognizer->logLimit_, expectedHashValue);
+
+    clickRecognizer->UpdateFingerListInfo();
+
+    int32_t actualHashValue = TEST_POINTER_COUNT_LESS * FINGER_COUNT_HASH_MULTIPLIER + TEST_TOUCH_POINTS_SIZE_2;
+    EXPECT_EQ(clickRecognizer->logLimit_, actualHashValue);
+    EXPECT_EQ(clickRecognizer->fingerList_.size(), static_cast<size_t>(TEST_TOUCH_POINTS_SIZE_2));
+}
+
+/**
+ * @tc.name: UpdateFingerListInfo_PointersLessThanTouchPointsSize_LogLimitEqual
+ * @tc.desc: Test UpdateFingerListInfo when pointers.size() < touchPoints_.size() but logLimit_ already equals hash
+ * value
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    MultiFingersRecognizerTestNg, UpdateFingerListInfo_PointersLessThanTouchPointsSize_LogLimitEqual, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    context->eventManager_ = eventManager;
+
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    clickRecognizer->lastRefereeState_ = RefereeState::READY;
+    clickRecognizer->refereeState_ = RefereeState::READY;
+    clickRecognizer->isPostEventResult_ = true;
+    eventManager->downFingerIds_.clear();
+
+    TouchEvent event1;
+    event1.id = TEST_POINT_ID_1;
+    event1.originalId = TEST_ORIGINAL_ID_1;
+    TouchPoint point1;
+    point1.id = TEST_POINT_ID_1;
+    event1.pointers.push_back(point1);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_1] = event1;
+
+    TouchEvent event2;
+    event2.id = TEST_POINT_ID_2;
+    event2.originalId = TEST_ORIGINAL_ID_2;
+    TouchPoint point2;
+    point2.id = TEST_POINT_ID_2;
+    event2.pointers.push_back(point2);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_2] = event2;
+
+    int32_t preSetHashValue = TEST_POINTER_COUNT_LESS * FINGER_COUNT_HASH_MULTIPLIER + TEST_TOUCH_POINTS_SIZE_2;
+    clickRecognizer->logLimit_ = preSetHashValue;
+
+    clickRecognizer->UpdateFingerListInfo();
+
+    EXPECT_EQ(clickRecognizer->logLimit_, preSetHashValue);
+    EXPECT_EQ(clickRecognizer->fingerList_.size(), static_cast<size_t>(TEST_TOUCH_POINTS_SIZE_2));
+}
+
+/**
+ * @tc.name: UpdateFingerListInfo_PointersGreaterOrEqualTouchPointsSize
+ * @tc.desc: Test UpdateFingerListInfo when pointers.size() >= touchPoints_.size()
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, UpdateFingerListInfo_PointersGreaterOrEqualTouchPointsSize, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    context->eventManager_ = eventManager;
+
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    clickRecognizer->lastRefereeState_ = RefereeState::READY;
+    clickRecognizer->refereeState_ = RefereeState::READY;
+    clickRecognizer->isPostEventResult_ = true;
+    eventManager->downFingerIds_.clear();
+
+    TouchEvent event1;
+    event1.id = TEST_POINT_ID_1;
+    event1.originalId = TEST_ORIGINAL_ID_1;
+    TouchPoint point1;
+    point1.id = TEST_POINT_ID_1;
+    event1.pointers.push_back(point1);
+    TouchPoint point2;
+    point2.id = TEST_POINT_ID_2;
+    event1.pointers.push_back(point2);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_1] = event1;
+
+    TouchEvent event2;
+    event2.id = TEST_POINT_ID_2;
+    event2.originalId = TEST_ORIGINAL_ID_2;
+    TouchPoint point3;
+    point3.id = TEST_POINT_ID_3;
+    event2.pointers.push_back(point3);
+    TouchPoint point4;
+    point4.id = TEST_POINT_ID_1;
+    event2.pointers.push_back(point4);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_2] = event2;
+
+    clickRecognizer->UpdateFingerListInfo();
+
+    EXPECT_EQ(clickRecognizer->lastPointEvent_, nullptr);
+    EXPECT_EQ(clickRecognizer->fingerList_.size(), static_cast<size_t>(TEST_TOUCH_POINTS_SIZE_2));
+}
+
+/**
+ * @tc.name: UpdateFingerListInfo_MultipleTouchPoints_DifferentPointerCounts
+ * @tc.desc: Test UpdateFingerListInfo with multiple touch points having different pointer counts
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    MultiFingersRecognizerTestNg, UpdateFingerListInfo_MultipleTouchPoints_DifferentPointerCounts, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    context->eventManager_ = eventManager;
+
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    clickRecognizer->lastRefereeState_ = RefereeState::READY;
+    clickRecognizer->refereeState_ = RefereeState::READY;
+    clickRecognizer->isPostEventResult_ = true;
+    eventManager->downFingerIds_.clear();
+
+    TouchEvent event1;
+    event1.id = TEST_POINT_ID_1;
+    event1.originalId = TEST_ORIGINAL_ID_1;
+    TouchPoint point1;
+    point1.id = TEST_POINT_ID_1;
+    event1.pointers.push_back(point1);
+    TouchPoint point2;
+    point2.id = TEST_POINT_ID_2;
+    event1.pointers.push_back(point2);
+    event1.pointers.push_back(point2);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_1] = event1;
+
+    TouchEvent event2;
+    event2.id = TEST_POINT_ID_2;
+    event2.originalId = TEST_ORIGINAL_ID_2;
+    TouchPoint point3;
+    point3.id = TEST_POINT_ID_1;
+    event2.pointers.push_back(point3);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_2] = event2;
+
+    TouchEvent event3;
+    event3.id = TEST_POINT_ID_3;
+    event3.originalId = TEST_ORIGINAL_ID_3;
+    TouchPoint point4;
+    point4.id = TEST_POINT_ID_1;
+    event3.pointers.push_back(point4);
+    clickRecognizer->touchPoints_[TEST_POINT_ID_3] = event3;
+
+    clickRecognizer->UpdateFingerListInfo();
+
+    int32_t expectedHashValue = TEST_POINTER_COUNT_LESS * FINGER_COUNT_HASH_MULTIPLIER + TEST_TOUCH_POINTS_SIZE_3;
+    EXPECT_EQ(clickRecognizer->logLimit_, expectedHashValue);
+    EXPECT_EQ(clickRecognizer->fingerList_.size(), static_cast<size_t>(TEST_TOUCH_POINTS_SIZE_3));
+}
+
 /**
  * @tc.name: MultiFingersRecognizerConstructorTest001
  * @tc.desc: Test MultiFingersRecognizer default constructor
