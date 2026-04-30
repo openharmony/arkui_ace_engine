@@ -165,6 +165,9 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             buttonNode->MarkModifyDone();
 
             auto image = buttonNode->GetChildren().front();
@@ -280,6 +283,8 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto button = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(button);
+            auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
             bool cancelNotUpdateBGColor =
                 buttonIndex == OPTION_CANCEL_BUTTON_INDEX && !updateColorFlags[CANCEL_BUTTON_BACKGROUND_COLOR_INDEX];
             bool acceptNotUpdateBGColor =
@@ -289,6 +294,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
                                           ? Color::TRANSPARENT
                                           : calendarTheme->GetDialogButtonBackgroundColor();
                 button->GetRenderContext()->UpdateBackgroundColor(defaultBGColor);
+                buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             }
 
             auto text = button->GetChildren().front();
@@ -302,6 +308,8 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
                 buttonIndex == OPTION_ACCEPT_BUTTON_INDEX && !updateColorFlags[ACCEPT_BUTTON_FONT_COLOR_INDEX];
             if (!(cancelNotUpdateFontColor || acceptNotUpdateFontColor)) {
                 textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+                buttonLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+                buttonLayoutProperty->UpdateFontColorFlagByUser(true);
             }
             textNode->MarkModifyDone();
 

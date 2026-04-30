@@ -106,10 +106,10 @@ private:
     static void GetUserSettingLimit();
     static void SetTextDisappearProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
-    static void UpdateConfirmButtonTextLayoutProperty(
-        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
-    static void UpdateCancelButtonTextLayoutProperty(
-        const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty> &textLayoutProperty,
+        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<ButtonLayoutProperty> &buttonConfirmLayoutProperty);
+    static void UpdateCancelButtonTextLayoutProperty(const RefPtr<TextLayoutProperty> &textCancelLayoutProperty,
+        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<ButtonLayoutProperty> &buttonCancelLayoutProperty);
     static std::string GetDialogAgingButtonText(bool isNext);
     static std::string GetDialogNormalButtonText(bool isConfirm);
     static thread_local bool switchFlag_;

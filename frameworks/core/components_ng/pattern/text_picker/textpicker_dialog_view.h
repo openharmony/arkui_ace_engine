@@ -98,10 +98,10 @@ private:
         const RefPtr<PipelineContext>& pipeline);
     static void UpdateButtonBackwardLayoutProperty(const RefPtr<FrameNode>& buttonCancelNode,
         const RefPtr<PipelineContext>& pipeline);
-    static void UpdateConfirmButtonTextLayoutProperty(
-        const RefPtr<FrameNode>& textConfirmNode, const RefPtr<PickerTheme>& pickerTheme);
-    static void UpdateCancelButtonTextLayoutProperty(
-        const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateConfirmButtonTextLayoutProperty(const RefPtr<FrameNode> &textConfirmNode,
+        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<FrameNode> &buttonConfirmNode);
+    static void UpdateCancelButtonTextLayoutProperty(const RefPtr<FrameNode> &textCancelNode,
+        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<FrameNode> &buttonCancelNode);
     static void UpdateForwardButtonTextLayoutProperty(
         const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateBackwardButtonTextLayoutProperty(
