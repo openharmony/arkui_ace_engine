@@ -1666,7 +1666,7 @@ void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
     }
-    if (menuParam.targetSpace.has_value() && !menuParam.anchorPosition.has_value() && menuParam.placement.has_value()) {
+    if (menuParam.targetSpace.has_value()) {
         menuProperty->UpdateMenuTargetSpace(menuParam.targetSpace.value_or(Dimension(0)));
         menuProperty->UpdateTargetOffset(menuParam.targetOffset.value_or(OffsetF()));
         menuProperty->UpdateTargetMenuSize(menuParam.targetSize.value_or(SizeF()));
