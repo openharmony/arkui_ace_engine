@@ -22619,6 +22619,7 @@ typedef struct Ark_CustomDialogControllerOptionsExtender {
     Opt_AnimateParam openAnimation;
     Opt_AnimateParam closeAnimation;
     Opt_Boolean showInSubWindow;
+    Opt_DialogDisplayMode displayModeInSubWindow;
     Opt_ResourceColor backgroundColor;
     Opt_Union_Dimension_BorderRadiuses cornerRadius;
     Opt_Boolean isModal;

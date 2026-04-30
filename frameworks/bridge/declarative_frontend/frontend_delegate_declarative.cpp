@@ -2043,6 +2043,7 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .displayModeInSubWindow = dialogAttr.displayModeInSubWindow,
         .systemMaterial = dialogAttr.systemMaterial
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);

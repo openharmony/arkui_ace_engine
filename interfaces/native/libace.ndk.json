@@ -3272,6 +3272,10 @@
         "name": "OH_ArkUI_CustomDialog_SetSubwindowMode"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CustomDialog_SetDisplayModeInSubWindow"
+    },
+    {
         "first_introduced": "19",
         "name": "OH_ArkUI_CustomDialog_SetMask"
     },

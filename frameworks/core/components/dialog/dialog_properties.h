@@ -122,7 +122,7 @@ enum class ImmersiveMode {
     EXTEND,
 };
 
-enum class DialogDisplayMode {
+enum class DialogDisplayModeInSubWindow {
     SCREEN_BASED = 0,
     WINDOW_BASED = 1
 };
@@ -271,6 +271,7 @@ struct DialogProperties {
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
     bool isShowInSubWindow = false;
+    DialogDisplayModeInSubWindow displayModeInSubWindow = DialogDisplayModeInSubWindow::SCREEN_BASED;
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
@@ -332,7 +333,6 @@ struct DialogProperties {
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
     std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
-    DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
     RefPtr<UiMaterial> systemMaterial;
 };
 
@@ -341,6 +341,7 @@ struct PromptDialogAttr {
     std::string message;
     bool autoCancel = true;
     bool showInSubWindow = false;
+    DialogDisplayModeInSubWindow displayModeInSubWindow = DialogDisplayModeInSubWindow::SCREEN_BASED;
     bool isModal = false;
     std::optional<bool> enableHoverMode;
     bool isUserCreatedDialog = false;
@@ -386,7 +387,6 @@ struct PromptDialogAttr {
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
-    DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
     RefPtr<UiMaterial> systemMaterial;
 };
 

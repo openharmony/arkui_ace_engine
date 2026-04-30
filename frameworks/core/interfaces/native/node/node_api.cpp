@@ -2471,6 +2471,11 @@ ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSu
     return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
 }
 
+ArkUI_Int32 SetDialogDisplayModeInSubWindow(ArkUIDialogHandle handle, ArkUI_Int32 displayModeInSubWindow)
+{
+    return CustomDialog::SetDialogDisplayModeInSubWindow(handle, displayModeInSubWindow);
+}
+
 ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
     ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
 {
@@ -2532,6 +2537,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .updateCustomDialog = UpdateCustomDialog,
         .closeCustomDialog = CloseCustomDialog,
         .setSubwindowMode = SetDialogSubwindowMode,
+        .setDisplayModeInSubWindow = SetDialogDisplayModeInSubWindow,
         .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
         .setBackgroundEffect = SetBackgroundEffect
     };

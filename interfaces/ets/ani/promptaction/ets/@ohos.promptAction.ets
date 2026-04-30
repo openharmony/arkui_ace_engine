@@ -21,7 +21,7 @@ import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, Tr
 import { CustomBuilder } from 'arkui.component.builder'
 import { DialogAlignment } from 'arkui.component.alertDialog'
 import { DismissDialogAction } from 'arkui.component.actionSheet'
-import { BorderStyle, Alignment } from 'arkui.component.enums'
+import { BorderStyle, Alignment, DialogDisplayMode } from 'arkui.component.enums'
 import { Resource } from 'global.resource'
 import { LengthMetrics } from 'arkui.Graphics'
 import { default as uiMaterial } from '@ohos.arkui.uiMaterial';
@@ -187,6 +187,7 @@ export default namespace promptAction {
         alignment?: DialogAlignment;
         offset?: Offset;
         showInSubWindow?: boolean;
+        displayModeInSubWindow?: DialogDisplayMode;
         isModal?: boolean;
         autoCancel?: boolean;
         transition?: TransitionEffect;

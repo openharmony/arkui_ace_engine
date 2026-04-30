@@ -23,6 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
@@ -2586,6 +2587,16 @@ void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src)
         case ARK_EFFECT_TYPE_DEFAULT: dst = EffectType::DEFAULT; break;
         case ARK_EFFECT_TYPE_WINDOW_EFFECT: dst = EffectType::WINDOW_EFFECT; break;
         default: LOGE("Unexpected enum value in Ark_EffectType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_DialogDisplayMode& src)
+{
+    switch (src) {
+        case ARK_DIALOG_DISPLAY_MODE_SCREEN_BASED: dst = DialogDisplayModeInSubWindow::SCREEN_BASED; break;
+        case ARK_DIALOG_DISPLAY_MODE_WINDOW_BASED: dst = DialogDisplayModeInSubWindow::WINDOW_BASED; break;
+        default: LOGE("Unexpected enum value in Ark_DialogDisplayMode: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

@@ -890,6 +890,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src);
     template<> void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src);
+    template<> void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_DialogDisplayMode& src);
     template<> void AssignCast(std::optional<Dimension>& dst, const Ark_ArrowPointPosition& src);
     template<> void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);

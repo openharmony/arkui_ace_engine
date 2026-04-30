@@ -447,6 +447,17 @@ int32_t OH_ArkUI_CustomDialog_SetSubwindowMode(ArkUI_CustomDialogOptions* option
     return impl->getDialogAPI()->setSubwindowMode(options->handle, showInSubwindow);
 }
 
+int32_t OH_ArkUI_CustomDialog_SetDisplayModeInSubWindow(
+    ArkUI_CustomDialogOptions* options, OH_ArkUI_DialogDisplayModeInSubWindow displayModeInSubWindow)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !options) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setDisplayModeInSubWindow(
+        options->handle, static_cast<int32_t>(displayModeInSubWindow));
+}
+
 int32_t OH_ArkUI_CustomDialog_SetMask(
     ArkUI_CustomDialogOptions* options, uint32_t maskColor, const ArkUI_Rect* maskRect)
 {
