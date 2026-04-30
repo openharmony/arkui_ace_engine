@@ -895,6 +895,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<DistributionType>& dst, const Ark_DistributionType& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src);
+    template<> void AssignCast(std::optional<DragAnimationType>& dst, const Ark_DragAnimationType& src);
     template<> void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src);
     template<> void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& src);
     template<> void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src);
