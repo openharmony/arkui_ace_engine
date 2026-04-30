@@ -754,7 +754,8 @@ private:
     void ClearNavigationCustomTransition();
     bool IsDestinationNeedHideInPush(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavDestinationGroupNode>& destNode) const;
-    void FirePrimaryNodesLifecycle(NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason);
+    void FirePrimaryNodesLifecycle(
+        NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason, bool needTriggerActive = true);
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
