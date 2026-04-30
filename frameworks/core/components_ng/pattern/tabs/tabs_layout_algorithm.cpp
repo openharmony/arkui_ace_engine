@@ -15,15 +15,36 @@
 
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
 
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t SWIPER_INDEX = 0;
-constexpr int32_t DIVIDER_INDEX = 1;
-constexpr int32_t TAB_BAR_INDEX = 2;
-constexpr int32_t EFFECT_INDEX = 3;
+constexpr int32_t COUNT_2 = 2;
+constexpr int32_t COUNT_3 = 3;
+constexpr int32_t COUNT_4 = 4;
+
+const Dimension FLOATING_BAR_HEIGHT = Dimension(56, Ace::DimensionUnit::VP);
+const Dimension FLOATING_BAR_BOTTOM_MARGIN = Dimension(28, Ace::DimensionUnit::VP);
+const Dimension BG_MASK_OVER_BAR = Dimension(16, Ace::DimensionUnit::VP);
+
+const Dimension FLOATING_BAR_MARGIN_16 = Dimension(16, Ace::DimensionUnit::VP);
+const Dimension FLOATING_BAR_MARGIN_24 = Dimension(24, Ace::DimensionUnit::VP);
+const Dimension FLOATING_BAR_MARGIN_32 = Dimension(32, Ace::DimensionUnit::VP);
+const Dimension FLOATING_BAR_SPACING_12 = Dimension(12, Ace::DimensionUnit::VP);
+
+const Dimension BREAKPOINT_440 = Dimension(440, Ace::DimensionUnit::VP);
+const Dimension BREAKPOINT_600 = Dimension(600, Ace::DimensionUnit::VP);
+const Dimension BREAKPOINT_840 = Dimension(840, Ace::DimensionUnit::VP);
+
+const Dimension COUNT_2_MINIMUM = Dimension(168, Ace::DimensionUnit::VP);
+const Dimension COUNT_2_MAXIMUM = Dimension(184, Ace::DimensionUnit::VP);
+const Dimension COUNT_3_MINIMUM = Dimension(248, Ace::DimensionUnit::VP);
+const Dimension COUNT_3_MAXIMUM = Dimension(272, Ace::DimensionUnit::VP);
+const Dimension COUNT_4_MAXIMUM = Dimension(328, Ace::DimensionUnit::VP);
+const Dimension COUNT_5_MAXIMUM = Dimension(360, Ace::DimensionUnit::VP);
 } // namespace
 
 void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -61,21 +82,19 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float dividerStrokeWidth = 0.0f;
 
     // Measure tab bar.
-    auto tabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(TAB_BAR_INDEX);
-    SizeF tabBarSize;
-    if (tabBarWrapper) {
-        tabBarWrapper->Measure(childLayoutConstraint);
-        tabBarSize = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize();
-    }
-    
+    SizeF tabBarSize = MeasureTabBar(layoutWrapper, childLayoutConstraint);
+
     // Measure effect node.
-    auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(EFFECT_INDEX);
+    auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.effectIndex);
     if (effectWrapper) {
         MeasureEffectNode(layoutProperty, effectWrapper, idealSize);
     }
 
+    // Measure backgroundMask node.
+    MeasureBackgroundMask(layoutWrapper, idealSize, tabBarSize);
+
     // Measure divider.
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.dividerIndex);
     if (dividerWrapper) {
         dividerStrokeWidth = MeasureDivider(layoutProperty, dividerWrapper, idealSize);
     }
@@ -83,7 +102,7 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto barOverlap = layoutProperty->GetBarOverlap().value_or(false);
 
     // Measure swiper.
-    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
+    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.swiperIndex);
     if (swiperWrapper) {
         swiperWrapper->GetLayoutProperty()->UpdateLayoutDirection(layoutProperty->GetNonAutoLayoutDirection());
     }
@@ -129,10 +148,10 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto tabBarWrapper = layoutWrapper->GetChildByIndex(TAB_BAR_INDEX);
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
-    auto effectWrapper = layoutWrapper->GetChildByIndex(EFFECT_INDEX);
-    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
+    auto tabBarWrapper = layoutWrapper->GetChildByIndex(itemIndex_.tabBarIndex);
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.dividerIndex);
+    auto effectWrapper = layoutWrapper->GetChildByIndex(itemIndex_.effectIndex);
+    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.swiperIndex);
     if (!tabBarWrapper || !dividerWrapper || !swiperWrapper) {
         return;
     }
@@ -145,33 +164,94 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
         auto tabsWidth = geometryNode->GetFrameSize().Width();
         auto swiperWidth = swiperWrapper->GetGeometryNode()->GetFrameSize().Width();
-        auto& swiperOffset = offsetList[SWIPER_INDEX];
+        auto& swiperOffset = offsetList[itemIndex_.swiperIndex];
         swiperOffset = OffsetF((tabsWidth - swiperOffset.GetX() - swiperWidth), swiperOffset.GetY());
         auto dividerWidth = dividerWrapper->GetGeometryNode()->GetFrameSize().Width();
-        auto& dividerOffset = offsetList[DIVIDER_INDEX];
+        auto& dividerOffset = offsetList[itemIndex_.dividerIndex];
         dividerOffset = OffsetF((tabsWidth - dividerOffset.GetX() - dividerWidth), dividerOffset.GetY());
         if (effectWrapper) {
             auto effectWidth = effectWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
-            auto& effectOffset = offsetList[EFFECT_INDEX];
+            auto& effectOffset = offsetList[itemIndex_.effectIndex];
             effectOffset = OffsetF((tabsWidth - effectOffset.GetX() - effectWidth), effectOffset.GetY());
         }
         auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
-        auto& tabBarOffset = offsetList[TAB_BAR_INDEX];
+        auto& tabBarOffset = offsetList[itemIndex_.tabBarIndex];
         tabBarOffset = OffsetF((tabsWidth - tabBarOffset.GetX() - tabBarWidth), tabBarOffset.GetY());
     }
-    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[SWIPER_INDEX]);
+    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[itemIndex_.swiperIndex]);
     swiperWrapper->Layout();
 
-    dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[DIVIDER_INDEX]);
+    dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[itemIndex_.dividerIndex]);
     dividerWrapper->Layout();
 
     if (effectWrapper) {
-        effectWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[EFFECT_INDEX]);
+        effectWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[itemIndex_.effectIndex]);
         effectWrapper->Layout();
     }
 
-    tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[TAB_BAR_INDEX]);
+    tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[itemIndex_.tabBarIndex]);
     tabBarWrapper->Layout();
+
+    LayoutBackgroundMask(layoutWrapper);
+}
+
+void TabsLayoutAlgorithm::UpdateBarBottomMargin(LayoutWrapper* layoutWrapper, OffsetF& barOffset) const
+{
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    float barBottomMargin = FLOATING_BAR_BOTTOM_MARGIN.ConvertToPx();
+    if (layoutProperty->HasBarFloatingStyle()) {
+        auto barFloatingStyle = layoutProperty->GetBarFloatingStyleValue();
+        if (barFloatingStyle.barBottomMargin.has_value() && barFloatingStyle.barBottomMargin->IsNonNegative()) {
+            barBottomMargin = barFloatingStyle.barBottomMargin.value().ConvertToPx();
+        }
+    }
+
+    barOffset -= OffsetF(0.0f, barBottomMargin);
+
+    auto tabGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(tabGeometryNode);
+    auto tabWidth = tabGeometryNode->GetFrameSize().Width();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto tabsPattern = hostNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    float margin = 0.0f;
+    if (GreatOrEqual(tabWidth, BREAKPOINT_600.ConvertToPx())) {
+        auto tabBarWrapper = layoutWrapper->GetChildByIndex(itemIndex_.tabBarIndex);
+        CHECK_NULL_VOID(tabBarWrapper);
+        auto barGeometryNode = tabBarWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(barGeometryNode);
+        auto barWidth = barGeometryNode->GetFrameSize().Width();
+        margin = std::min(floatingBarMargin_.value_or(margin), (tabWidth - barWidth) / COUNT_2);
+        tabsPattern->SetFloatingBarMargin(margin);
+    } else {
+        tabsPattern->SetFloatingBarMargin(std::nullopt);
+    }
+}
+
+void TabsLayoutAlgorithm::LayoutBackgroundMask(LayoutWrapper* layoutWrapper)
+{
+    if (!isFloatingBar_) {
+        return;
+    }
+    auto backgroundMaskWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.bgMaskIndex);
+    CHECK_NULL_VOID(backgroundMaskWrapper);
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto paddingOffset = layoutProperty->CreatePaddingAndBorder().Offset();
+    auto axis = GetAxis(layoutWrapper);
+    auto backgroundMaskGeometryNode =
+        backgroundMaskWrapper ? backgroundMaskWrapper->GetGeometryNode() : RefPtr<GeometryNode>();
+    auto backgroundMaskFrameSize =
+        backgroundMaskGeometryNode ? backgroundMaskGeometryNode->GetMarginFrameSize() : SizeF();
+    auto offset =
+        OffsetF(0.0f, frameSize.CrossSize(axis) - backgroundMaskFrameSize.CrossSize(axis) + paddingOffset.GetY());
+    backgroundMaskGeometryNode->SetMarginFrameOffset(offset);
+    backgroundMaskWrapper->Layout();
 }
 
 std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
@@ -238,7 +318,13 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
         }
     }
     offsetList.emplace_back(swiperOffset);
+    if (itemIndex_.bgMaskIndex > 0) {
+        offsetList.emplace_back(OffsetF());
+    }
     offsetList.emplace_back(dividerOffset);
+    if (isFloatingBar_) {
+        UpdateBarBottomMargin(layoutWrapper, tabBarOffset);
+    }
     offsetList.emplace_back(tabBarOffset);
     offsetList.emplace_back(effectOffset);
     return offsetList;
@@ -398,5 +484,212 @@ SizeF TabsLayoutAlgorithm::MeasureSwiper(const RefPtr<TabsLayoutProperty>& layou
     swiperWrapper->Measure(childLayoutConstraint);
 
     return swiperWrapper->GetGeometryNode()->GetMarginFrameSize();
+}
+
+void TabsLayoutAlgorithm::MeasureBackgroundMask(
+    LayoutWrapper* layoutWrapper, const SizeF& idealSize, const SizeF& tabBarSize)
+{
+    if (!isFloatingBar_) {
+        return;
+    }
+    auto backgroundMaskWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.bgMaskIndex);
+    CHECK_NULL_VOID(backgroundMaskWrapper);
+
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto MaskNodeIdealSize = CreateIdealSize(
+        constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    auto parentWidth = idealSize.Width();
+    MaskNodeIdealSize.SetWidth(parentWidth);
+
+    float maskHeight = FLOATING_BAR_BOTTOM_MARGIN.ConvertToPx() + tabBarSize.Height() + BG_MASK_OVER_BAR.ConvertToPx();
+    if (layoutProperty->HasBarFloatingStyle()) {
+        auto barFloatingStyle = layoutProperty->GetBarFloatingStyleValue();
+        if (barFloatingStyle.maskHeight.has_value() && barFloatingStyle.maskHeight->IsNonNegative()) {
+            maskHeight = barFloatingStyle.maskHeight.value().ConvertToPx();
+        } else {
+            if (barFloatingStyle.barBottomMargin.has_value() && barFloatingStyle.barBottomMargin->IsNonNegative()) {
+                float barbottomMargin = barFloatingStyle.barBottomMargin.value().ConvertToPx();
+                maskHeight = barbottomMargin + tabBarSize.Height() + BG_MASK_OVER_BAR.ConvertToPx();
+            }
+        }
+    }
+
+    maskHeight = std::min(maskHeight, idealSize.Height());
+    MaskNodeIdealSize.SetHeight(maskHeight);
+
+    auto MaskNodeIdealSizeLayoutConstraint = layoutProperty->CreateChildConstraint();
+    MaskNodeIdealSizeLayoutConstraint.selfIdealSize = OptionalSizeF(MaskNodeIdealSize);
+    backgroundMaskWrapper->Measure(MaskNodeIdealSizeLayoutConstraint);
+}
+
+SizeF TabsLayoutAlgorithm::MeasureTabBar(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint)
+{
+    SizeF tabBarSize;
+    auto tabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.tabBarIndex);
+    CHECK_NULL_RETURN(tabBarWrapper, tabBarSize);
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, tabBarSize);
+    auto tabBarNode = tabBarWrapper->GetHostNode();
+    CHECK_NULL_RETURN(tabBarNode, tabBarSize);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarRenderContext, tabBarSize);
+
+    if (!isFloatingBar_) {
+        tabBarWrapper->Measure(childLayoutConstraint);
+        auto geometryNode = tabBarWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, tabBarSize);
+        tabBarSize = geometryNode->GetMarginFrameSize();
+        // Clear the corresponding attributes when the floating state is disabled.
+        if (lastFloatingBar_) {
+            BorderRadiusProperty radius;
+            tabBarRenderContext->UpdateBorderRadius(radius);
+            tabBarRenderContext->ResetBorderRadius();
+            tabBarRenderContext->UpdateClipEdge(false);
+        }
+        return tabBarSize;
+    }
+    if (layoutWrapper->ConstraintChanged()) {
+        auto hostNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_RETURN(hostNode, tabBarSize);
+        auto tabsPattern = hostNode->GetPattern<TabsPattern>();
+        CHECK_NULL_RETURN(tabsPattern, tabBarSize);
+        tabsPattern->ResetTabBarFollowHandPosition();
+    }
+
+    auto barLayoutProperty = tabBarWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(barLayoutProperty, tabBarSize);
+    auto constraint = barLayoutProperty->GetLayoutConstraint();
+    float barHeight = FLOATING_BAR_HEIGHT.ConvertToPx();
+    if (!constraint || !constraint->selfIdealSize.Height().has_value()) {
+        childLayoutConstraint.selfIdealSize.SetHeight(FLOATING_BAR_HEIGHT.ConvertToPx());
+    } else {
+        barHeight = constraint->selfIdealSize.Height().value();
+    }
+
+    if (layoutProperty->HasBarWidth() && layoutProperty->GetBarWidthValue().IsNonNegative()) {
+        tabBarWrapper->Measure(childLayoutConstraint);
+    } else {
+        std::optional<float> calcBarWidth = CalcFloatingBarWidth(layoutWrapper, barHeight);
+        if (calcBarWidth.has_value()) {
+            childLayoutConstraint.selfIdealSize.SetWidth(calcBarWidth.value());
+        }
+        tabBarWrapper->Measure(childLayoutConstraint);
+    }
+    auto geometryNode = tabBarWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, tabBarSize);
+    tabBarSize = geometryNode->GetMarginFrameSize();
+
+    BorderRadiusProperty radius;
+    radius.SetRadius(Dimension(tabBarSize.Height() / COUNT_2));
+    tabBarRenderContext->UpdateBorderRadius(radius);
+    tabBarRenderContext->UpdateClipEdge(true);
+
+    return tabBarSize;
+}
+
+std::optional<float> TabsLayoutAlgorithm::CalcFloatingBarWidth(LayoutWrapper* layoutWrapper, float barHeight)
+{
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, std::nullopt);
+    float tabsWidth = geometryNode->GetMarginFrameSize().Width();
+    float tabsHeight = geometryNode->GetMarginFrameSize().Height();
+
+    auto ret = ParseBarWidthAndMargin(layoutWrapper, tabsWidth, tabsHeight);
+    if (ret.has_value()) {
+        return ret;
+    }
+
+    float breakpoint600 = BREAKPOINT_600.ConvertToPx();
+    float breakpoint840 = BREAKPOINT_840.ConvertToPx();
+    // Default rule calulation.
+    if (barItemSize_ <= COUNT_2) {
+        if (LessNotEqual(tabsWidth, breakpoint600)) {
+            return COUNT_2_MINIMUM.ConvertToPx();
+        } else {
+            return COUNT_2_MAXIMUM.ConvertToPx();
+        }
+    }
+
+    if (barItemSize_ == COUNT_3) {
+        if (LessNotEqual(tabsWidth, breakpoint600)) {
+            return COUNT_3_MINIMUM.ConvertToPx();
+        } else {
+            return COUNT_3_MAXIMUM.ConvertToPx();
+        }
+    }
+
+    barHeight = std::min(barHeight, tabsHeight);
+    float sideMargin = floatingBarMargin_.value_or(0.0f);
+    if (barItemSize_ >= COUNT_4) {
+        float width = 0.0f;
+        if (LessNotEqual(tabsWidth, breakpoint600)) {
+            width = tabsWidth - COUNT_2 * sideMargin;
+        } else if (LessNotEqual(tabsWidth, breakpoint840)) {
+            width = tabsWidth - COUNT_2 * (sideMargin + FLOATING_BAR_SPACING_12.ConvertToPx() + barHeight);
+        } else {
+            width = (tabsWidth / COUNT_2 - COUNT_2 * sideMargin) * COUNT_2;
+        }
+        if (barItemSize_ == COUNT_4) {
+            return std::clamp(width, 0.0f, static_cast<float>(COUNT_4_MAXIMUM.ConvertToPx()));
+        } else {
+            return std::clamp(width, 0.0f, static_cast<float>(COUNT_5_MAXIMUM.ConvertToPx()));
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<float> TabsLayoutAlgorithm::ParseBarWidthAndMargin(
+    LayoutWrapper* layoutWrapper, float tabsWidth, float tabsHeight)
+{
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    auto barFloatingStyle = layoutProperty->GetBarFloatingStyle();
+
+    float breakpoint440 = BREAKPOINT_440.ConvertToPx();
+    float breakpoint600 = BREAKPOINT_600.ConvertToPx();
+    float breakpoint840 = BREAKPOINT_840.ConvertToPx();
+    // Margin calculate.
+    if (LessNotEqual(tabsWidth, breakpoint600)) {
+        floatingBarMargin_ = FLOATING_BAR_MARGIN_16.ConvertToPx();
+    } else if (LessNotEqual(tabsWidth, breakpoint840)) {
+        floatingBarMargin_ = FLOATING_BAR_MARGIN_24.ConvertToPx();
+    } else {
+        floatingBarMargin_ = FLOATING_BAR_MARGIN_32.ConvertToPx();
+    }
+
+    if (!barFloatingStyle.has_value()) {
+        return std::nullopt;
+    }
+    // The values actively set by the interface take priority in taking effect.
+    if (barFloatingStyle->barSideMargin.has_value() && barFloatingStyle->barSideMargin->IsNonNegative()) {
+        floatingBarMargin_ = barFloatingStyle->barSideMargin.value().ConvertToPx();
+    }
+
+    if (LessNotEqual(tabsWidth, breakpoint440) && barFloatingStyle->smallBarWidth.has_value() &&
+        barFloatingStyle->smallBarWidth->IsNonNegative()) {
+        return barFloatingStyle->smallBarWidth.value().ConvertToPx();
+    }
+
+    bool displayRatioGreaterThan08 = NearZero(tabsWidth) ? true : GreatNotEqual(tabsHeight / tabsWidth, 0.8);
+    bool isMediumWidth = (GreatOrEqual(tabsWidth, breakpoint440) && LessNotEqual(tabsWidth, breakpoint600)) ||
+                         (!displayRatioGreaterThan08 && GreatOrEqual(tabsWidth, breakpoint600) &&
+                             LessNotEqual(tabsWidth, breakpoint840));
+    if (isMediumWidth && barFloatingStyle->mediumBarWidth.has_value() &&
+        barFloatingStyle->mediumBarWidth->IsNonNegative()) {
+        return barFloatingStyle->mediumBarWidth.value().ConvertToPx();
+    }
+
+    bool isLargeWidth =
+        GreatOrEqual(tabsWidth, breakpoint840) ||
+        (displayRatioGreaterThan08 && GreatOrEqual(tabsWidth, breakpoint600) && LessNotEqual(tabsWidth, breakpoint840));
+    if (isLargeWidth && barFloatingStyle->largeBarWidth.has_value() &&
+        barFloatingStyle->largeBarWidth->IsNonNegative()) {
+        return barFloatingStyle->largeBarWidth.value().ConvertToPx();
+    }
+
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG
