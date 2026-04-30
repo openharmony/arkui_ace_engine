@@ -60,7 +60,7 @@ void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
 void JSWithEnv::SetCustomEnvProperty(const JSCallbackInfo& info)
 {
     if (info.Length() < NUM_SECOND || !info[0]->IsString()) {
-        TAG_LOGW(AceLogTag::ACE_FOREACH, "JSWithEnv::SetCustomEnvProperty invalid args");
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetCustomEnvProperty invalid args");
         return;
     }
     auto key = info[0]->ToString();
