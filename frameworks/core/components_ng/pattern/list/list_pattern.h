@@ -318,7 +318,7 @@ public:
         lastSnapTargetIndex_.reset();
     }
 
-    int32_t GetItemIndexByPosition(float xOffset, float yOffset);
+    int32_t GetItemIndexByPosition(float xOffset, float yOffset) const;
 
     void SetPredictLayoutParamV2(std::optional<ListPredictLayoutParamV2> param)
     {
@@ -352,6 +352,19 @@ public:
     }
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
+    bool NeedJudgeWithHotZone() override;
+    int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
+    bool IsInEditModeHotZone(const PointF& point) const override;
+    void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
+    SwipeSelectStateKey GetSwipeSelectStateKeyAtPosition(float offsetX, float offsetY) const override;
+    SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const override;
+    RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const override;
+    RefPtr<FrameNode> GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const override;
+    void MarkSwipeItemSelectedByStateKey(const SwipeSelectStateKey& stateKey, bool isSelected) override;
+    void BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& startKey, const SwipeSelectStateKey& endKey,
+        std::vector<SwipeSelectStateKey>& keys) const override;
+    void ApplyEditModeToVisibleItems() override;
+    void RemoveEditModeFromItems() override;
 
     void SetItemState(ItemState itemState, int32_t id)
     {
@@ -726,6 +739,7 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
+    mutable std::optional<ListItemIndex> swipeResolvedItemIndex_;
     bool isNeedDividerAnimation_ = true;
     int32_t repeatDifference_ = 0;
 

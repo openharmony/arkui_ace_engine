@@ -77,6 +77,11 @@ static bool IsItemSelected(const RefPtr<FrameNode>& gridFrameNode, int32_t index
 
 using SwipeSelectState = SelectableContainerPattern::SwipeSelectState;
 
+static SelectableContainerPattern::SwipeSelectStateKey MakeStateKey(int32_t index)
+{
+    return { index, -1 };
+}
+
 // ============================================================
 // 7.1 HandleSwipeSelectStart
 // ============================================================
@@ -94,8 +99,8 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartOnUnselectedItem001, TestSize.Le
     pattern_->HandleSwipeSelectStart(info);
 
     EXPECT_EQ(pattern_->swipeSelectState_, SwipeSelectState::SELECTING);
-    EXPECT_EQ(pattern_->swipeStartIndex_, 0);
-    EXPECT_EQ(pattern_->swipeCurrentIndex_, 0);
+    EXPECT_EQ(pattern_->swipeStartStateKey_.index, 0);
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_.index, 0);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartOnSelectedItem001, TestSize.Level0)
@@ -126,8 +131,8 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartRecordIndex001, TestSize.Level0)
     GestureEvent info = CreateGestureEvent(30.f, 150.f);
     pattern_->HandleSwipeSelectStart(info);
 
-    EXPECT_EQ(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
-    EXPECT_GE(pattern_->swipeStartIndex_, 0);
+    EXPECT_EQ(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
+    EXPECT_GE(pattern_->swipeStartStateKey_.index, 0);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartRecordOriginalState001, TestSize.Level0)
@@ -143,8 +148,8 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartRecordOriginalState001, TestSize
     pattern_->HandleSwipeSelectStart(info);
 
     EXPECT_FALSE(pattern_->swipeOriginalStates_.empty());
-    EXPECT_EQ(pattern_->swipeOriginalStates_.count(pattern_->swipeStartIndex_), 1);
-    EXPECT_FALSE(pattern_->swipeOriginalStates_[pattern_->swipeStartIndex_]);
+    EXPECT_EQ(pattern_->swipeOriginalStates_.count(pattern_->swipeStartStateKey_), 1);
+    EXPECT_FALSE(pattern_->swipeOriginalStates_[pattern_->swipeStartStateKey_]);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartNoItem001, TestSize.Level1)
@@ -160,7 +165,7 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartNoItem001, TestSize.Level1)
     pattern_->HandleSwipeSelectStart(info);
 
     EXPECT_EQ(pattern_->swipeSelectState_, SwipeSelectState::INACTIVE);
-    EXPECT_EQ(pattern_->swipeStartIndex_, -1);
+    EXPECT_EQ(pattern_->swipeStartStateKey_.index, -1);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartRecordSelectedOriginal001, TestSize.Level1)
@@ -176,7 +181,7 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartRecordSelectedOriginal001, TestS
     GestureEvent info = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectStart(info);
 
-    EXPECT_EQ(pattern_->swipeOriginalStates_[0], true);
+    EXPECT_EQ(pattern_->swipeOriginalStates_[MakeStateKey(0)], true);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectStartDisabled001, TestSize.Level1)
@@ -326,12 +331,12 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectUpdateSameIndex001, TestSize.Level1)
 
     GestureEvent startInfo = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectStart(startInfo);
-    ASSERT_EQ(pattern_->swipeCurrentIndex_, pattern_->swipeStartIndex_);
+    ASSERT_EQ(pattern_->swipeCurrentStateKey_.index, pattern_->swipeStartStateKey_.index);
 
     GestureEvent updateInfo = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectUpdate(updateInfo);
 
-    EXPECT_EQ(pattern_->swipeCurrentIndex_, pattern_->swipeStartIndex_);
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_.index, pattern_->swipeStartStateKey_.index);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectUpdateNewOriginalState001, TestSize.Level1)
@@ -346,13 +351,13 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectUpdateNewOriginalState001, TestSize.L
 
     GestureEvent startInfo = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectStart(startInfo);
-    ASSERT_EQ(pattern_->swipeOriginalStates_.count(0), 1);
+    ASSERT_EQ(pattern_->swipeOriginalStates_.count(MakeStateKey(0)), 1);
 
     GestureEvent updateInfo = CreateGestureEvent(150.f, 30.f);
     pattern_->HandleSwipeSelectUpdate(updateInfo);
 
-    EXPECT_EQ(pattern_->swipeOriginalStates_.count(1), 1);
-    EXPECT_TRUE(pattern_->swipeOriginalStates_[1]);
+    EXPECT_EQ(pattern_->swipeOriginalStates_.count(MakeStateKey(1)), 1);
+    EXPECT_TRUE(pattern_->swipeOriginalStates_[MakeStateKey(1)]);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectUpdateBackward001, TestSize.Level0)
@@ -371,8 +376,8 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectUpdateBackward001, TestSize.Level0)
     GestureEvent updateInfo = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectUpdate(updateInfo);
 
-    int32_t startIdx = pattern_->swipeStartIndex_;
-    int32_t curIdx = pattern_->swipeCurrentIndex_;
+    int32_t startIdx = pattern_->swipeStartStateKey_.index;
+    int32_t curIdx = pattern_->swipeCurrentStateKey_.index;
     int32_t rangeStart = std::min(startIdx, curIdx);
     int32_t rangeEnd = std::max(startIdx, curIdx);
     for (int32_t i = rangeStart; i <= rangeEnd; ++i) {
@@ -461,8 +466,8 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectEnd003, TestSize.Level0)
 
     pattern_->HandleSwipeSelectEnd();
 
-    EXPECT_EQ(pattern_->swipeStartIndex_, -1);
-    EXPECT_EQ(pattern_->swipeCurrentIndex_, -1);
+    EXPECT_EQ(pattern_->swipeStartStateKey_.index, -1);
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_.index, -1);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectEndKeepsSelection001, TestSize.Level0)
@@ -510,8 +515,8 @@ HWTEST_F(GridSwipeSelectTestNg, SwipeSelectCancel001, TestSize.Level0)
     EXPECT_FALSE(IsItemSelected(frameNode_, 0));
     EXPECT_FALSE(IsItemSelected(frameNode_, 1));
     EXPECT_EQ(pattern_->swipeSelectState_, SwipeSelectState::INACTIVE);
-    EXPECT_EQ(pattern_->swipeStartIndex_, -1);
-    EXPECT_EQ(pattern_->swipeCurrentIndex_, -1);
+    EXPECT_EQ(pattern_->swipeStartStateKey_.index, -1);
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_.index, -1);
 }
 
 HWTEST_F(GridSwipeSelectTestNg, SwipeSelectCancelRestoreOriginal001, TestSize.Level1)
@@ -555,13 +560,13 @@ HWTEST_F(GridSwipeSelectTestNg, UpdateSwipeSelectionRange001, TestSize.Level0)
 
     GestureEvent startInfo = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectStart(startInfo);
-    ASSERT_EQ(pattern_->swipeStartIndex_, 0);
+    ASSERT_EQ(pattern_->swipeStartStateKey_.index, 0);
 
     GestureEvent updateInfo = CreateGestureEvent(30.f, 250.f);
     pattern_->HandleSwipeSelectUpdate(updateInfo);
 
-    int32_t rangeStart = std::min(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
-    int32_t rangeEnd = std::max(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
+    int32_t rangeStart = std::min(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
+    int32_t rangeEnd = std::max(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
     for (int32_t i = rangeStart; i <= rangeEnd; ++i) {
         EXPECT_TRUE(IsItemSelected(frameNode_, i));
     }
@@ -624,8 +629,8 @@ HWTEST_F(GridSwipeSelectTestNg, UpdateSwipeSelectionSingleItem001, TestSize.Leve
 
     GestureEvent startInfo = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectStart(startInfo);
-    ASSERT_EQ(pattern_->swipeStartIndex_, 0);
-    ASSERT_EQ(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
+    ASSERT_EQ(pattern_->swipeStartStateKey_.index, 0);
+    ASSERT_EQ(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
 
     EXPECT_TRUE(IsItemSelected(frameNode_, 0));
 }
@@ -646,8 +651,8 @@ HWTEST_F(GridSwipeSelectTestNg, UpdateSwipeSelectionSelecting001, TestSize.Level
     GestureEvent updateInfo = CreateGestureEvent(30.f, 250.f);
     pattern_->HandleSwipeSelectUpdate(updateInfo);
 
-    int32_t rangeStart = std::min(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
-    int32_t rangeEnd = std::max(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
+    int32_t rangeStart = std::min(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
+    int32_t rangeEnd = std::max(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
     for (int32_t i = rangeStart; i <= rangeEnd; ++i) {
         EXPECT_TRUE(IsItemSelected(frameNode_, i)) << "SELECTING: item " << i << " should be selected";
     }
@@ -666,16 +671,16 @@ HWTEST_F(GridSwipeSelectTestNg, UpdateSwipeSelectionRecordNew001, TestSize.Level
 
     GestureEvent startInfo = CreateGestureEvent(30.f, 30.f);
     pattern_->HandleSwipeSelectStart(startInfo);
-    ASSERT_EQ(pattern_->swipeOriginalStates_.count(0), 1);
-    ASSERT_FALSE(pattern_->swipeOriginalStates_[0]);
+    ASSERT_EQ(pattern_->swipeOriginalStates_.count(MakeStateKey(0)), 1);
+    ASSERT_FALSE(pattern_->swipeOriginalStates_[MakeStateKey(0)]);
 
     GestureEvent updateInfo = CreateGestureEvent(30.f, 350.f);
     pattern_->HandleSwipeSelectUpdate(updateInfo);
 
-    EXPECT_EQ(pattern_->swipeOriginalStates_.count(3), 1);
-    EXPECT_TRUE(pattern_->swipeOriginalStates_[3]);
-    EXPECT_EQ(pattern_->swipeOriginalStates_.count(4), 1);
-    EXPECT_TRUE(pattern_->swipeOriginalStates_[4]);
+    EXPECT_EQ(pattern_->swipeOriginalStates_.count(MakeStateKey(3)), 1);
+    EXPECT_TRUE(pattern_->swipeOriginalStates_[MakeStateKey(3)]);
+    EXPECT_EQ(pattern_->swipeOriginalStates_.count(MakeStateKey(4)), 1);
+    EXPECT_TRUE(pattern_->swipeOriginalStates_[MakeStateKey(4)]);
 }
 
 // ============================================================

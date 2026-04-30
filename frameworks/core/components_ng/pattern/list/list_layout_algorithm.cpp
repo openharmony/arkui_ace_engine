@@ -756,6 +756,26 @@ bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPo
     return false;
 }
 
+bool ListLayoutAlgorithm::NeedReserveEditModeCheckBoxSpace() const
+{
+    if (!defaultMultiSelectStyleEnabled_) {
+        return false;
+    }
+    CHECK_NULL_RETURN(listLayoutProperty_, true);
+    auto lanes = listLayoutProperty_->GetLanes();
+    return !lanes.has_value() || lanes.value() == 1;
+}
+
+void ListLayoutAlgorithm::UpdateListItemEditModeCheckBoxSpace(const RefPtr<LayoutWrapper>& wrapper) const
+{
+    CHECK_NULL_VOID(wrapper);
+    auto host = wrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto listItemPattern = host->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    listItemPattern->SetNeedReserveEditModeCheckBoxSpace(NeedReserveEditModeCheckBoxSpace());
+}
+
 float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex,
     bool groupLayoutAll)
 {
@@ -770,6 +790,8 @@ float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper
             AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
         // true: layout forward, 0.0f: layout start position.
         SetListItemGroupParam(wrapper, childIndex, 0.0f, true, listLayoutProperty, groupLayoutAll);
+    } else {
+        UpdateListItemEditModeCheckBoxSpace(wrapper);
     }
     wrapper->Measure(childLayoutConstraint_);
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
@@ -1262,6 +1284,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
             MeasureLazyVGridLayout(wrapper, startPos, true);
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, startPos);
+            UpdateListItemEditModeCheckBoxSpace(wrapper);
             wrapper->Measure(childLayoutConstraint_);
         }
         float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex, isStackFromEnd_) :
@@ -1305,6 +1328,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
             MeasureLazyVGridLayout(wrapper, endPos, false);
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, endPos);
+            UpdateListItemEditModeCheckBoxSpace(wrapper);
             wrapper->Measure(childLayoutConstraint_);
         }
         float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex, isStackFromEnd_) :
@@ -2136,6 +2160,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     itemGroup->SetNeedMeasureFormLastItem(needMeasureFormLastItem);
     itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
     itemGroup->SetListLayoutProperty(layoutProperty);
+    itemGroup->SetDefaultMultiSelectStyleEnabled(defaultMultiSelectStyleEnabled_);
     itemGroup->SetNeedCheckOffset(isNeedCheckOffset_, groupItemAverageHeight_);
     itemGroup->SetFixOffset(startFixOffset_, endFixOffset_);
     itemGroup->SetNeedSyncLoad(syncLoad_);

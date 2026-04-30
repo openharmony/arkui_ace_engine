@@ -1061,6 +1061,28 @@ EditModeOptions ListModelNG::GetEditModeOptions(FrameNode* frameNode)
     return pattern->GetEditModeOptions();
 }
 
+void ListModelNG::SetEnableEditMode(bool enableEditMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableEditMode(frameNode, enableEditMode);
+}
+
+void ListModelNG::SetEnableEditMode(FrameNode* frameNode, bool enableEditMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditMode(enableEditMode);
+}
+
+bool ListModelNG::GetEnableEditMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetEnableEditMode();
+}
+
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);

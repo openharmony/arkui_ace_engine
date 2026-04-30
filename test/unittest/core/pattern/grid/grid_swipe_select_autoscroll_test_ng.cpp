@@ -275,8 +275,8 @@ HWTEST_F(GridSwipeSelectAutoScrollTestNg, AutoScrollCallbackUpdatesSelection001,
 
     pattern_->UpdateSwipeSelection();
 
-    int32_t rangeStart = std::min(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
-    int32_t rangeEnd = std::max(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
+    int32_t rangeStart = std::min(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
+    int32_t rangeEnd = std::max(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
     bool isSelected = (pattern_->swipeSelectState_ == SwipeSelectState::SELECTING);
     for (int32_t i = rangeStart; i <= rangeEnd; ++i) {
         auto child = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(i));
