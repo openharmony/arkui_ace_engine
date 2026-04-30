@@ -73,7 +73,7 @@ void RepeatVirtual2CachesTestNg::TearDown()
 
 std::unique_ptr<RepeatVirtualScroll2Caches> RepeatVirtual2CachesTestNg::CreateCachesWithMockCallback()
 {
-    auto onGetRid4Index = [](IndexType index, bool) -> std::pair<RIDType, uint32_t> {
+    auto onGetRid4Index = [](IndexType index, bool, bool) -> std::pair<RIDType, uint32_t> {
         return { TEST_RID_1, OnGetRid4IndexResult::NO_NODE };
     };
     return std::make_unique<RepeatVirtualScroll2Caches>(onGetRid4Index);

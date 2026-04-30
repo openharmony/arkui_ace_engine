@@ -116,4 +116,84 @@ bool CustomNode::FireOnCleanup()
     return false;
 }
 
+ReusableMemOptStrategy CustomNode::GetMemOptStrategy()
+{
+    return ReusableMemOptStrategy::DEFAULT;
+}
+
+void CustomNode::OnWindowHide()
+{
+}
+
+void CustomNode::OnNotifyMemoryLevel(int32_t level)
+{
+}
+
+void CustomNode::RegisterWindowStateChangedCallback()
+{
+}
+
+void CustomNode::UnregisterWindowStateChangedCallback()
+{
+}
+
+void CustomNode::RegisterMemoryLevelChangedCallback()
+{
+}
+
+void CustomNode::UnregisterMemoryLevelChangedCallback()
+{
+}
+
+bool CustomNode::CheckParentFrameNodeVisibility()
+{
+    return true;
+}
+
+void CustomNode::ScheduleCleanCacheTask()
+{
+}
+
+void CustomNode::CancelScheduledCleanCacheTask()
+{
+}
+
+void CustomNode::TryExecuteScheduledCacheTask()
+{
+}
+
+void CustomNode::CleanCache(bool syncClean, bool clearAll)
+{
+}
+
+void CustomNode::CleanCacheOnIdle(int32_t remainingTimeMs)
+{
+}
+
+void CustomNode::SetParentVisibility(bool visibility)
+{
+}
+
+bool CustomNode::GetParentVisibility()
+{
+    return true;
+}
+
+void CustomNode::StartMemOpt()
+{
+}
+
+void CustomNode::FinishMemOpt()
+{
+}
+
+void CustomNode::PostMemOptTask()
+{
+}
+
+void CustomNode::PostIdleTask()
+{
+}
+
+
 } // namespace OHOS::Ace::NG

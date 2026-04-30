@@ -36,7 +36,10 @@ enum LazyForEachIdleTaskSource {
     GET_FRAME_CHILD = 2,
     RECYCLE_ITEMS = 3,
     REMOVE_CHILD_IN_RENDER_TREE = 4,
-    SET_ACTIVE_RANGE = 5
+    SET_ACTIVE_RANGE = 5,
+    RESTORE_CACHE = 6,
+    MEMORY_OPTIMIZE = 7,
+    RELEASE_NODE = 8
 };
 
 class ACE_EXPORT LazyForEachNode : public ForEachBaseNode, public V2::DataChangeListener {
@@ -219,6 +222,26 @@ public:
     }
 
     bool hasRegisterLazyForEachToCustomNode = false;
+    LazyForEachMemOptStrategy GetMemOptStrategy();
+    void OnWindowShow() override;
+    void OnWindowHide() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    void RegisterMemoryLevelChangedCallback();
+    void UnregisterMemoryLevelChangedCallback();
+    bool CheckParentFrameNodeVisibility();
+    void ScheduleCleanCacheTask();
+    void ScheduleRestoreCacheTask();
+    void TryExecuteScheduledCacheTask();
+    void CleanCache(bool syncClean);
+    void RestoreCache();
+    void SetNeedPrebuild(bool needPrebuild);
+    bool GetNeedPrebuild();
+    void SetParentVisibility(bool visibility);
+    bool GetParentVisibility();
+    void PostMemOptTask();
+    void DisableChildrenAndCachesRecycle() override;
 
     void UpdateThemeScopeUpdate(int32_t themeScopeId) override;
 
@@ -273,6 +296,8 @@ private:
         return parent? parent->GetId() : -1;
     }
 
+    bool IsCachedCountReduced(int32_t cacheStart, int32_t cacheEnd);
+
     // The index values of the start and end of the current children nodes and the corresponding keys.
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
@@ -289,6 +314,15 @@ private:
     bool isActive_ = true;
     int32_t startIndex_ = 0;
     int32_t count_ = 0;
+
+    bool pendingCleanCache_ = false;
+    bool pendingRestoreCache_ = false;
+    bool isParentVisible_ = false;
+    bool needPreBuild_ = false;
+    int64_t cacheTaskPostTime_ = 0;
+    int64_t setActiveRangeTime_ = 0;
+    int32_t oldCacheStart_ = 0;
+    int32_t oldCacheEnd_ = 0;
 
     RefPtr<LazyForEachBuilder> builder_;
 

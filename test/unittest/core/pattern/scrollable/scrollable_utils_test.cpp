@@ -144,7 +144,8 @@ RefPtr<UINode> ScrollableUtilsTest::CreateScrollableChildUINode()
 
 RefPtr<RepeatVirtualScroll2Node> ScrollableUtilsTest::CreateRepeatNode(int32_t childCount)
 {
-    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index = [](int32_t index, bool inAnimation) {
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)> onGetRid4Index = [](int32_t index,
+        bool inAnimation, bool forceCreateNewChild) {
         return std::make_pair(0, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
@@ -152,9 +153,10 @@ RefPtr<RepeatVirtualScroll2Node> ScrollableUtilsTest::CreateRepeatNode(int32_t c
         [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
+    std::function<void()> onPurgeAll = []() {};
     std::function<void()> onUpdateDirty = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
-        0, 0, 0, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+        0, 0, 0, 0, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     node->arrLen_ = childCount;
     node->totalCount_ = childCount;
     return node;

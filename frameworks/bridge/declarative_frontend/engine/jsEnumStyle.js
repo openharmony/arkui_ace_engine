@@ -5397,6 +5397,12 @@ let LazyForEachCustomComponentFreezeMode ;
   LazyForEachCustomComponentFreezeMode.ENABLED = 2;
 })(LazyForEachCustomComponentFreezeMode  || (LazyForEachCustomComponentFreezeMode  = {}));
 
+let LazyForEachMemOptStrategy;
+(function (LazyForEachMemOptStrategy) {
+  LazyForEachMemOptStrategy.DEFAULT = 0;
+  LazyForEachMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION = 1;
+})(LazyForEachMemOptStrategy || (LazyForEachMemOptStrategy = {}));
+
 let GestureShortcut;
 (function (GestureShortcut) {
   GestureShortcut[GestureShortcut.PRIMARY = 0] = 'PRIMARY';

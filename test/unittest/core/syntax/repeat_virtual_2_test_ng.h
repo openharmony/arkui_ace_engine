@@ -92,11 +92,12 @@ public:
     /**
      * Function needed by RepeatVirtualScrollCaches constructor is special test case
      */
-    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index_;
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)> onGetRid4Index_;
     std::function<void(IndexType, IndexType)> onRecycleItems_;
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange_;
     std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
+    std::function<void()> onPurgeAll_;
     std::function<void()> onUpdateDirty_;
 };
 } // namespace OHOS::Ace::NG

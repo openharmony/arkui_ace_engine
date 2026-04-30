@@ -205,6 +205,7 @@ void CustomNodeBase::Reset()
     getThisFunc_ = nullptr;
     onRecycleFunc_ = nullptr;
     onReuseFunc_ = nullptr;
+    releaseRecyclePoolFunc_ = nullptr;
 }
 
 void CustomNodeBase::SetJSViewName(std::string&& name)
@@ -230,6 +231,31 @@ bool CustomNodeBase::GetIsV2()
 void CustomNodeBase::SetIsV2(bool isV2)
 {
     isV2_ = isV2;
+}
+
+ReusableMemOptStrategy CustomNodeBase::GetReusableMemOptStrategy()
+{
+    return reusableMemOptStrategy_;
+}
+
+void CustomNodeBase::SetReusableMemOptStrategy(int32_t reusableMemOptStrategy)
+{
+    reusableMemOptStrategy_ = static_cast<ReusableMemOptStrategy>(reusableMemOptStrategy);
+}
+
+void CustomNodeBase::SetReleaseRecyclePoolFunction(std::function<bool(int32_t, bool, bool)>&& callback)
+{
+    releaseRecyclePoolFunc_ = std::move(callback);
+}
+
+void CustomNodeBase::TryEnableParentCustomNodeMemOpt()
+{
+    CHECK_EQUAL_VOID(reusableMemOptStrategy_, ReusableMemOptStrategy::DEFAULT);
+    auto uiNode = AceType::DynamicCast<UINode>(Claim(this));
+    CHECK_NULL_VOID(uiNode);
+    auto parentCustomNode = uiNode->GetParentCustomNode();
+    CHECK_NULL_VOID(parentCustomNode);
+    parentCustomNode->StartMemOpt();
 }
 
 const ExtraInfo& CustomNodeBase::GetExtraInfo() const
