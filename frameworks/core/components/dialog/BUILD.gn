@@ -19,6 +19,7 @@ build_component("dialog") {
     "action_sheet/action_sheet_component.cpp",
     "alert_dialog_component.cpp",
     "dialog_component.cpp",
+    "dialog_properties.cpp",
     "dialog_element.cpp",
     "dialog_theme.cpp",
     "render_dialog.cpp",

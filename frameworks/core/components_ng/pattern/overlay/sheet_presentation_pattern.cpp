@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "overlay_manager.h"
+#include "core/components_ng/syntax/with_theme_node.h"
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"

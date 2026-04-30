@@ -16,6 +16,12 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/syntax/with_theme_node.h"
+#include "core/components_ng/pattern/overlay/content_cover_param.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
+
 #include <string>
 #include <utility>
 #include <vector>
