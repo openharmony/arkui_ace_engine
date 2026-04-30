@@ -118,7 +118,6 @@ struct TextDetectConfig {
                 Color colorValue;
                 ResourceParseUtils::ParseResColor(resObj, colorValue);
                 textDetectConfig.entityColor = colorValue;
-                textDetectConfig.entityDecorationColor = colorValue;
             };
             textDetectConfig.AddResource("textDetectConfig.Color", resObj, std::move(updateFunc));
         }

@@ -166,6 +166,16 @@ HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level0)
     spanModelNG.SetOnClick(onClickFunc);
 }
 
+HWTEST_F(SpanTestNg, SpanModelResetTextColor001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    spanModelNG.SetTextColor(TEXT_COLOR_VALUE);
+    spanModelNG.ResetTextColor();
+    EXPECT_FALSE(spanNode->HasTextColor());
+}
+
 /**
  * @tc.name: SpanFontWeightReset001
  * @tc.desc: Test ResetFontWeight resets fontWeight to default (no value)

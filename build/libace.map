@@ -2067,6 +2067,7 @@
       "OHOS::Ace::NG::TextPattern::OnAttachToMainTree()";
       "OHOS::Ace::NG::TextPattern::OnAttachToMainTreeMultiThreadExtension()";
       "OHOS::Ace::NG::TextPattern::OnColorConfigurationUpdate()";
+      "OHOS::Ace::NG::TextPattern::OnColorModeChange(unsigned int)";
       "OHOS::Ace::NG::TextPattern::OnDetachFromFrameNode(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::TextPattern::OnDetachFromMainTree()";
       "OHOS::Ace::NG::TextPattern::OnDirtyLayoutWrapperSwap(OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutWrapper> const&, OHOS::Ace::NG::DirtySwapConfig const&)";
@@ -3795,6 +3796,7 @@
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnAttachToFrameNode*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnAttachToMainTree*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnColorConfigurationUpdate*;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnColorModeChange*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnDetachFromFrameNode*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnDetachFromMainTree*;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnDirtyLayoutWrapperSwap*;

@@ -5875,6 +5875,17 @@ void TextPattern::OnColorConfigurationUpdate()
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
 }
 
+void TextPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
