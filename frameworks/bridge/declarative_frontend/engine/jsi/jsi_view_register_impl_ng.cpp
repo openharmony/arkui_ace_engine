@@ -47,7 +47,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
@@ -198,6 +197,7 @@
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
 #ifndef CROSS_PLATFORM
+#include "frameworks/bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_distortion_component.h"
 #endif
 
@@ -458,7 +458,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTextPicker::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSContainerPicker::JSBind(globalObj);
-    JSDepthComponent::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
 #ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);
@@ -524,6 +523,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSContextMenu::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
     JSTextMenu::JSBind(globalObj);
+    JSDepthComponent::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);
 #endif
