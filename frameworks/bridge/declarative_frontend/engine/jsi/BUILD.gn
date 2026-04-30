@@ -503,13 +503,8 @@ template("declarative_js_engine_ark") {
       ":gen_obj_src_abc_proxyclass",
       ":arkComponent_module_info",
       ":jsEnumStyle_module_info",
+      ":gen_obj_src_abc_preload"
     ]
-
-    if (is_arkui_x) {
-      deps += [ ":gen_obj_src_abc_uicontext" ]
-    } else {
-      deps += [ ":gen_obj_src_abc_preload" ]
-    }
 
     foreach(item, abc_sources) {
       deps += [ ":copy_" + item + "_abc" ]

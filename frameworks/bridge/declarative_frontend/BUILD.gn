@@ -242,13 +242,8 @@ template("declarative_js_engine") {
       "ark_theme/theme_manager:ark_theme",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
       "ark_component/components:module_group",
+      ":uicontext"
     ]
-
-    if (!is_arkui_x) {
-      deps += [ ":uicontext" ]
-    } else {
-      deps += [ ":gen_obj_src_js_uicontext" ]
-    }
 
     configs = [ "$ace_root:ace_config" ]
     if (ace_engine_feature_enable_point_light) {
@@ -780,13 +775,8 @@ template("declarative_js_engine_ng") {
       "ark_theme/theme_manager:ark_theme",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
       "ark_component/components:module_group",
+      ":uicontext"
     ]
-
-    if (!is_arkui_x) {
-      deps += [ ":uicontext" ]
-    } else {
-      deps += [ ":gen_obj_src_js_uicontext" ]
-    }
 
     configs = [ "$ace_root:ace_config" ]
 
