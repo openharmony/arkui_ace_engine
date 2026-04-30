@@ -242,7 +242,7 @@ void NavigationModelNG::Create(bool useHomeDestination)
     auto useHomeDest = navigationGroupNode->GetUseHomeDestination();
     if (!useHomeDest.has_value()) {
         useHomeDest = useHomeDestination;
-        navigationGroupNode->SetUseHomeDestinatoin(useHomeDestination);
+        navigationGroupNode->SetUseHomeDestination(useHomeDestination);
     }
     if (!useHomeDest.value() && !CreateNavBarNodeIfNeeded(navigationGroupNode)) { // navBar node
         return;

@@ -1095,7 +1095,7 @@ HWTEST_F(ObserverTestNg, GetNavigationOuterState001, TestSize.Level1)
     pattern->name_ = "test_name";
     pattern->isOnShow_ = true;
     pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
-    navigation->SetUseHomeDestinatoin(true);
+    navigation->SetUseHomeDestination(true);
     navigation->customHomeDestination_ = navDestination;
 
     auto info = UIObserverHandler::GetInstance().GetNavigationOuterState(stackNode);
@@ -1135,7 +1135,7 @@ HWTEST_F(ObserverTestNg, GetNavigationInnerState001, TestSize.Level1)
     pattern->name_ = "test_name";
     pattern->isOnShow_ = true;
     pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
-    navigation->SetUseHomeDestinatoin(true);
+    navigation->SetUseHomeDestination(true);
     navigation->customHomeDestination_ = navDestination;
 
     auto info = UIObserverHandler::GetInstance().GetNavigationInnerState(stackNode);
