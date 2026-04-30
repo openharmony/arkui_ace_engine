@@ -1245,6 +1245,18 @@ void TabContentModelNG::SetPadding(const PaddingProperty& padding)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
+    if (padding.left.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.left.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.right.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.right.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.top.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.top.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.bottom.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.bottom.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
     frameNodePattern->SetPadding(padding);
 }
 

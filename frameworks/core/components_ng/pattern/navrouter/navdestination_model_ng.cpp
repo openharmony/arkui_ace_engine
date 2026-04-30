@@ -823,6 +823,7 @@ void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool is
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(titleHeight, LpxAttribute::ALWAYS, frameNode);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
 
@@ -1904,6 +1905,7 @@ void NavDestinationModelNG::SetTitleHeight(FrameNode* frameNode, const Dimension
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(titleHeight, LpxAttribute::ALWAYS, frameNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
