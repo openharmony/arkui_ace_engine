@@ -188,11 +188,11 @@ void QRCodePattern::UpdateContentOpacity(double opacity, bool isFristLoad)
 
 void QRCodePattern::OnColorConfigurationUpdate()
 {
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!SystemProperties::ConfigChangePerform() || host->GetThemeScopeId() <= 0) {
+        return;
+    }
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto qrCodeTheme = host->GetTheme<QrcodeTheme>(true);
@@ -214,7 +214,7 @@ bool QRCodePattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || themeScopeId <= 0) {
         return false;
     }
     bool result = false;

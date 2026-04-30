@@ -1068,6 +1068,7 @@ HWTEST_F(QRCodeTestNg, QRCodeOnColorConfigurationUpdateTest001, TestSize.Level1)
     qrCodeModelNG.Create(oldValue);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
+    frameNode->SetThemeScopeId(1);
     auto pattern = frameNode->GetPattern<QRCodePattern>();
     ASSERT_NE(pattern, nullptr);
     g_isConfigChangePerform = false;
@@ -1103,6 +1104,59 @@ HWTEST_F(QRCodeTestNg, QRCodeOnColorConfigurationUpdateTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: QRCodeOnColorConfigurationUpdateTest002
+ * @tc.desc: Test OnColorConfigurationUpdate returns early when themeScopeId is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeOnColorConfigurationUpdateTest002, TestSize.Level1)
+{
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipeline = frameNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto qrCodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
+    ASSERT_NE(qrCodeTheme, nullptr);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto themeColor = qrCodeTheme->GetQrcodeColor();
+    auto themeBackgroundColor = qrCodeTheme->GetBackgroundColor();
+    auto themeFocusColor = qrCodeTheme->GetFocusedColor();
+    Color customColor = (themeColor == Color::BLACK) ? Color::BLUE : Color::BLACK;
+    Color customBackgroundColor = (themeBackgroundColor == Color::WHITE) ? Color::RED : Color::WHITE;
+    Color customFocusColor = (themeFocusColor == Color::GREEN) ? Color::BLUE : Color::GREEN;
+
+    paintProperty->UpdateColor(customColor);
+    paintProperty->UpdateBackgroundColor(customBackgroundColor);
+    paintProperty->UpdateQRCodeColorSetByUser(false);
+    paintProperty->UpdateQRBackgroundColorSetByUser(false);
+    focusHub->SetPaintColor(customFocusColor);
+
+    frameNode->SetThemeScopeId(0);
+    g_isConfigChangePerform = true;
+    pipeline->SetIsSystemColorChange(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetColorValue(), customColor);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), customBackgroundColor);
+    EXPECT_EQ(focusHub->GetPaintColor(), customFocusColor);
+
+    frameNode->SetThemeScopeId(1);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetColorValue(), themeColor);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), themeBackgroundColor);
+    EXPECT_EQ(focusHub->GetPaintColor(), themeFocusColor);
+
+    pipeline->SetIsSystemColorChange(false);
+    g_isConfigChangePerform = false;
+}
+
+/**
  * @tc.name: QRCodeCreateWithResourceObjTest001
  * @tc.desc: Test model ng  CreateWithResourceObj
  * @tc.type: FUNC
@@ -1126,14 +1180,16 @@ HWTEST_F(QRCodeTestNg, QRCodeCreateWithResourceObjTest001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->SetThemeScopeId(1);
     auto pattern = frameNode->GetPattern<QRCodePattern>();
     ASSERT_NE(pattern, nullptr);
-    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
-    pattern->OnColorModeChange(colorMode);
     auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContextWithCheck();
     ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
     auto theme = pipeline->GetTheme<QrcodeTheme>();
     Color testColor = theme->GetQrcodeColor();
     double opacity = 0.0f;
@@ -1155,6 +1211,7 @@ HWTEST_F(QRCodeTestNg, QRCodeCreateWithResourceObjTest001, TestSize.Level1)
     qrCodeModelNG.CreateWithResourceObj(jsResourceType, resObjWithId);
     pattern->OnColorModeChange(colorMode);
     EXPECT_EQ(paintProperty->GetOpacity(), opacity);
+    pipeline->SetIsSystemColorChange(false);
 }
 
 /**
@@ -1490,6 +1547,53 @@ HWTEST_F(QRCodeTestNg, QRCodeOnThemeScopeUpdateTest005, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetColorValue(), customColor);
 
     pipeline->SetIsSystemColorChange(false);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: QRCodeOnThemeScopeUpdateTest006
+ * @tc.desc: Test OnThemeScopeUpdate returns early when themeScopeId is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeOnThemeScopeUpdateTest006, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(PLATFORM_VERSION_26);
+
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto qrCodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
+    ASSERT_NE(qrCodeTheme, nullptr);
+
+    auto themeFocusColor = qrCodeTheme->GetFocusedColor();
+    auto themeBackgroundColor = qrCodeTheme->GetBackgroundColor();
+    Color customFocusColor = (themeFocusColor == Color::GREEN) ? Color::BLUE : Color::GREEN;
+    Color customBackgroundColor = (themeBackgroundColor == Color::WHITE) ? Color::RED : Color::WHITE;
+
+    paintProperty->ResetColor();
+    paintProperty->ResetBackgroundColor();
+    paintProperty->ResetQRCodeColorSetByUser();
+    renderContext->UpdateBackgroundColor(customBackgroundColor);
+    focusHub->SetPaintColor(customFocusColor);
+
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(0));
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), customBackgroundColor);
+    EXPECT_EQ(focusHub->GetPaintColor(), customFocusColor);
+
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(1));
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), themeBackgroundColor);
+    EXPECT_EQ(focusHub->GetPaintColor(), themeFocusColor);
+
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

@@ -130,8 +130,25 @@ public:
         if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             return false;
         }
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
+        auto theme = host->GetTheme<V2::PatternLockTheme>(true);
+        CHECK_NULL_RETURN(theme, false);
+        auto pops = host->GetPaintProperty<PatternLockPaintProperty>();
+        CHECK_NULL_RETURN(pops, false);
+        if (!pops->HasPathColorSetByUser() || (pops->HasPathColorSetByUser() && !pops->GetPathColorSetByUserValue())) {
+            pops->UpdatePathColor(theme->GetPathColor());
+        }
+        if (!pops->HasRegularColorSetByUser() ||
+            (pops->HasRegularColorSetByUser() && !pops->GetRegularColorSetByUserValue())) {
+            pops->UpdateRegularColor(theme->GetRegularColor());
+        }
+        if (!pops->HasActiveColorSetByUser() ||
+            (pops->HasActiveColorSetByUser() && !pops->GetActiveColorSetByUserValue())) {
+            pops->UpdateActiveColor(theme->GetActiveColor());
+        }
+        if (!pops->HasSelectedColorSetByUser() ||
+            (pops->HasSelectedColorSetByUser() && !pops->GetSelectedColorSetByUserValue())) {
+            UpdateSelectedColor(theme->GetSelectedColor());
+        }
         UpdateFocusPaintFromTheme();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;

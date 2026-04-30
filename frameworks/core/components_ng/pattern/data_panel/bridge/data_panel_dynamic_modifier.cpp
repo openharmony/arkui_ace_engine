@@ -246,6 +246,10 @@ void ResetValueColors(ArkUINodeHandle node)
     std::vector<OHOS::Ace::NG::Gradient> colors;
     ConvertThemeColor(colors);
     DataPanelModelNG::SetValueColors(frameNode, colors);
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModelNG::SetValueColorsSetByUser(frameNode, false);
+        DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::VALUE_COLORS, nullptr);
+    }
 }
 
 void SetTrackShadow(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Float32 radius,
@@ -464,6 +468,7 @@ void SetDataPanelTrackBackgroundColorNew(
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::SetTrackBackground(frameNode, Color(value));
+    DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, isSetByUser);
 
     if (SystemProperties::ConfigChangePerform()) {
         auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
@@ -474,7 +479,6 @@ void SetDataPanelTrackBackgroundColorNew(
         } else {
             DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, nullptr);
         }
-        DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, isSetByUser);
     }
 }
 

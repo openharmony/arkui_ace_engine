@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_DATA_PANEL_MODIFIER_H
 
+#include <algorithm>
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
@@ -126,10 +127,9 @@ public:
 
     void SetValueColors(const std::vector<Gradient>& valueColors)
     {
-        for (size_t i = 0; i < valueColors.size(); ++i) {
-            if (i >= MAX_COUNT) {
-                return;
-            }
+        auto updateCount = std::min(valueColors.size(), valueColors_.size());
+        updateCount = std::min(updateCount, MAX_COUNT);
+        for (size_t i = 0; i < updateCount; ++i) {
             valueColors_[i]->Set(GradientArithmetic(valueColors[i]));
         }
     };
@@ -171,10 +171,9 @@ public:
 
     void SetShadowColors(const std::vector<Gradient>& valueColors, const size_t shadowColorsLastLength)
     {
-        for (size_t i = 0; i < valueColors.size(); ++i) {
-            if (i >= MAX_COUNT) {
-                return;
-            }
+        auto updateCount = std::min(valueColors.size(), shadowColors_.size());
+        updateCount = std::min(updateCount, MAX_COUNT);
+        for (size_t i = 0; i < updateCount; ++i) {
             shadowColors_[i]->Set(GradientArithmetic(valueColors[i]));
         }
         shadowColorsLastLength_ = std::min(shadowColorsLastLength, valuesLastLength_);
