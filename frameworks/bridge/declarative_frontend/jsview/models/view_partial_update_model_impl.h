@@ -36,6 +36,14 @@ public:
         /* not used here */
         return false;
     }
+    void StartMemOpt(const WeakPtr<AceType>& node) override
+    {
+        /* not used here */
+    }
+    void RequestProgressiveRelease(const WeakPtr<AceType>& node) override
+    {
+        /* not used here */
+    }
 };
 
 } // namespace OHOS::Ace::Framework

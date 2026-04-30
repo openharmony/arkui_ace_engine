@@ -38,6 +38,9 @@ declare class NativeViewPartialUpdate {
   resetRecycleCustomNode(): void;
   sendStateInfo(stateInfo: string): void;
   setIsV2(isV2: boolean): void;
+  setReusableMemOptStrategy(reusableMemOptStrategy: number): void;
+  startMemOpt(): void;
+  requestProgressiveRelease(): void;
   allowReusableV2Descendant(): boolean;
   getInstanceId(): number;
   getMainInstanceId(): number;

@@ -46,7 +46,7 @@ public:
     }
 
     void CreateRepeatVirtualScrollNode(
-        int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& createFunc);
+        int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& createFunc);
 };
 } // namespace OHOS::Ace::NG
 

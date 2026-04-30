@@ -34,6 +34,10 @@ public:
     {
         return true;
     }
+    void SetDisableRecycle(bool disableRecycle);
+
+private:
+    bool disableRecycle_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -27,12 +27,25 @@
 class RecyclePoolV2 {
     // key: recycle element name, value: recycled element JS object
     private cachedRecycleComponents_: Map<string, Array<ViewV2>> = undefined;
- 
+
     private recycledIdRegistry_?: RecycledIdRegistry;
+    // Track pending cache reduction timers per name
+    private pendingCacheCleanTimers_: Map<string, any> = undefined;
+    // Track maximum cache size per name (for timer restart logic)
+    private maxCacheSizes_: Map<string, number> = undefined;
+    // Pending nodes for progressive release
+    private pendingProgressiveReleaseNodes_: Array<ViewV2> = undefined;
+    // Callback to request progressive release (set by parent ViewV2)
+    private requestProgressiveReleaseCallback_: () => void = undefined;
+    private defaultCacheCount: number;
 
     constructor() {
       this.cachedRecycleComponents_ = new Map<string, Array<ViewV2>>();
       this.recycledIdRegistry_ = new RecycledIdRegistry();
+      this.pendingCacheCleanTimers_ = new Map<string, any>();
+      this.maxCacheSizes_ = new Map<string, number>();
+      this.pendingProgressiveReleaseNodes_ = new Array<ViewV2>();
+      this.defaultCacheCount = 8;
     }
   
     /**
@@ -49,6 +62,18 @@ class RecyclePoolV2 {
         this.cachedRecycleComponents_.set(reuseId, new Array<ViewV2>());
       }
       this.cachedRecycleComponents_.get(reuseId)?.push(reuseComp);
+      if (reuseComp.__getReusableMemOptStrategy__Internal() === 1) {
+        const cachedComponents = this.cachedRecycleComponents_.get(reuseId);
+        if (cachedComponents && cachedComponents.length > this.defaultCacheCount) {
+          const currentSize = cachedComponents.length;
+          const maxSize = this.maxCacheSizes_.get(reuseId) || 0;
+          // Only restart timer if cache size reaches a new maximum
+          if (currentSize > maxSize) {
+            this.maxCacheSizes_.set(reuseId, currentSize);
+            this.scheduleCacheCleanTask(reuseId);
+          }
+        }
+      }
     }
 
     /**
@@ -94,6 +119,67 @@ class RecyclePoolV2 {
     }
 
     /**
+     * @function setRequestProgressiveReleaseCallback
+     * @description
+     * Sets the callback function to request progressive release from C++ side.
+     *
+     * @param {() => void} callback - The callback function.
+     */
+    public setRequestProgressiveReleaseCallback(callback: () => void): void {
+      this.requestProgressiveReleaseCallback_ = callback;
+    }
+
+    /**
+     * @function prepareCleanCacheToTargetProgressive
+     * @description
+     * Prepares to clean cache to target size by moving excess nodes to the pending progressive release list.
+     * The actual release will be done later by releaseCachedNodesProgressive.
+     *
+     * @param {string} reuseId - The reuse identifier for the cached components.
+     * @param {number} targetSize - The target cache size.
+     * @returns {number} - The number of nodes prepared for release.
+     */
+    public prepareCleanCacheToTargetProgressive(reuseId: string, targetSize: number): number {
+      const cachedComponents = this.cachedRecycleComponents_.get(reuseId);
+      if (!cachedComponents || cachedComponents.length <= targetSize) {
+        return 0;
+      }
+
+      const componentsToRemove = cachedComponents.length - targetSize;
+      for (let i = 0; i < componentsToRemove; i++) {
+        const node = cachedComponents.shift();
+        if (node) {
+          this.pendingProgressiveReleaseNodes_.push(node);
+        }
+      }
+
+      // Clear the timer tracking and max size
+      this.pendingCacheCleanTimers_.delete(reuseId);
+      this.maxCacheSizes_.delete(reuseId);
+
+      return componentsToRemove;
+    }
+
+    private scheduleCacheCleanTask(reuseId: string): void {
+      const existingTimer = this.pendingCacheCleanTimers_.get(reuseId);
+      if (existingTimer !== undefined) {
+        clearTimeout(existingTimer);
+      }
+
+      const timerId = setTimeout(() => {
+        // Prepare nodes for progressive release
+        const pendingCount = this.prepareCleanCacheToTargetProgressive(reuseId, this.defaultCacheCount);
+
+        // If there are nodes to release and callback is available, request progressive release
+        if (pendingCount > 0 && this.requestProgressiveReleaseCallback_) {
+          this.requestProgressiveReleaseCallback_();
+        }
+      }, 300000); // 5 minutes
+
+      this.pendingCacheCleanTimers_.set(reuseId, timerId);
+    }
+
+    /**
      * @function purgeAllCachedRecycleElements
      * @description
      * Clears all cached components from the recycle pool by clearing them
@@ -106,12 +192,79 @@ class RecyclePoolV2 {
      * - If the JSView object is managed by the RecyclePool, the CustomNode is reused.
      */
     public purgeAllCachedRecycleElmtIds(): void {
+      this.pendingCacheCleanTimers_.forEach((timerId) => {
+        clearTimeout(timerId);
+      });
+      this.pendingCacheCleanTimers_.clear();
+      this.maxCacheSizes_.clear();
+
       this.cachedRecycleComponents_.forEach((components_, _) => {
         components_.forEach((node) => {
           node.resetRecycleCustomNode();
         });
       });
       this.cachedRecycleComponents_.clear();
+
+      this.pendingProgressiveReleaseNodes_.forEach((node) => {
+        node.resetRecycleCustomNode();
+      });
+      this.pendingProgressiveReleaseNodes_ = new Array<ViewV2>();
+    }
+
+    /**
+     * @function preparePurgeAllCachedRecycleElmtIdsProgressive
+     * @description
+     * Prepares to release all cached components by moving them to the pending progressive release list.
+     * The actual release will be done later by releaseCachedNodesProgressive.
+     *
+     * @returns {number} - The number of nodes prepared for release.
+     */
+    public preparePurgeAllCachedRecycleElmtIdsProgressive(): number {
+      this.pendingCacheCleanTimers_.forEach((timerId) => {
+        clearTimeout(timerId);
+      });
+      this.pendingCacheCleanTimers_.clear();
+      this.maxCacheSizes_.clear();
+
+      let count = 0;
+      this.cachedRecycleComponents_.forEach((components_, _) => {
+        components_.forEach((node) => {
+          this.pendingProgressiveReleaseNodes_.push(node);
+          count++;
+        });
+      });
+      this.cachedRecycleComponents_.clear();
+      return count;
+    }
+
+    /**
+     * @function releaseCachedNodesProgressive
+     * @description
+     * Releases nodes from the pending progressive release list based on remaining time.
+     * Each release operation is timed to prevent blocking.
+     * At least one node is released per call.
+     *
+     * @param {number} remainingTimeMs - The remaining time in milliseconds.
+     * @returns {boolean} - true if all pending nodes are released, false if timeout occurred.
+     */
+    public releaseCachedNodesProgressive(remainingTimeMs: number): boolean {
+      // If no nodes to release, return true
+      if (this.pendingProgressiveReleaseNodes_.length === 0) {
+        return true;
+      }
+
+      // Record start time for releasing remaining nodes
+      const startTime = Date.now();
+      let elapsedMs: number = 0;
+      do {
+        const node = this.pendingProgressiveReleaseNodes_.shift();
+        if (node) {
+          node.resetRecycleCustomNode();
+        }
+        elapsedMs = Date.now() - startTime;
+      } while (this.pendingProgressiveReleaseNodes_.length > 0 && elapsedMs < remainingTimeMs)
+
+      return this.pendingProgressiveReleaseNodes_.length === 0;
     }
   }
 

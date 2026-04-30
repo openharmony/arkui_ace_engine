@@ -64,7 +64,7 @@ public:
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
     void FlushIdleTask(const RefPtr<LazyColumnLayoutPattern>& pattern);
     void CreateRepeatVirtualScrollNode(
-        int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& createFunc);
+        int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& createFunc);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<LazyColumnLayoutPattern> pattern_;

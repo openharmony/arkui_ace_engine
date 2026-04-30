@@ -77,7 +77,7 @@ public:
     }
 };
 
-auto g_onGetRid4Index = [](uint32_t index, bool inAnimation) -> std::pair<RIDType, uint32_t> {
+auto g_onGetRid4Index = [](uint32_t index, bool inAnimation, bool forceCreateNewChild) -> std::pair<RIDType, uint32_t> {
     return { index, index };
 };
 
@@ -89,7 +89,11 @@ auto g_onMoveFromTo = [](int32_t from, int32_t to) {};
 
 auto g_onPurge = []() {};
 
+auto g_onPurgeAll = []() {};
+
 auto g_onUpdateDirty = []() {};
+
+constexpr int32_t DEFAULT_MEM_OPT_STRATEGY = 0;
 
 /**
  * @tc.name: RepeatVirtual2GetOrCreateRepeatNodeTest001
@@ -99,9 +103,9 @@ auto g_onUpdateDirty = []() {};
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetOrCreateRepeatNodeTest001, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTotalCount(), TOTAL_COUNT_5);
@@ -115,9 +119,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetOrCreateRepeatNodeTest00
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2UpdateArrLenTest003, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->UpdateArrLen(ARR_LEN_10);
@@ -132,9 +136,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2UpdateArrLenTest003, TestSi
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetTotalCountTest004, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_10,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_10, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     auto totalCount = node->GetTotalCount();
@@ -149,9 +153,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetTotalCountTest004, TestS
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2FrameCountTest005, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     auto frameCount = node->FrameCount();
@@ -166,9 +170,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2FrameCountTest005, TestSize
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2RequestContainerReLayoutTest006, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->RequestContainerReLayout(START_INDEX_0);
@@ -183,9 +187,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2RequestContainerReLayoutTes
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2NotifyContainerLayoutChangeTest007, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->NotifyContainerLayoutChange(INDEX_0, COUNT_3, UINode::NotificationType::START_CHANGE_POSITION);
@@ -200,9 +204,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2NotifyContainerLayoutChange
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetChildrenTest008, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     (void)node->GetChildren(false);
@@ -217,9 +221,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetChildrenTest008, TestSiz
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetChildrenForInspectorTest009, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     (void)node->GetChildrenForInspector(false);
@@ -234,9 +238,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetChildrenForInspectorTest
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2DoSetActiveChildRangeTest010, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_10, TOTAL_COUNT_10,
+        NODE_ID_1, ARR_LEN_10, TOTAL_COUNT_10, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->DoSetActiveChildRange(INDEX_0, INDEX_5, INDEX_0, INDEX_0);
@@ -251,9 +255,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2DoSetActiveChildRangeTest01
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2DoSetActiveChildRangeSetBasedTest011, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     std::set<int32_t> activeItems = {0, 1, 2};
@@ -269,9 +273,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2DoSetActiveChildRangeSetBas
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2RecycleItemsTest012, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_10, TOTAL_COUNT_10,
+        NODE_ID_1, ARR_LEN_10, TOTAL_COUNT_10, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->RecycleItems(INDEX_0, INDEX_2);
@@ -286,9 +290,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2RecycleItemsTest012, TestSi
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetNodeIndexOffsetTest013, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->SetNodeIndexOffset(START_INDEX_0, COUNT_3);
@@ -303,9 +307,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetNodeIndexOffsetTest013, 
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetFrameChildByIndexTest014, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     (void)node->GetFrameChildByIndex(INDEX_0, false, false, true);
@@ -320,9 +324,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetFrameChildByIndexTest014
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetOnMoveTest015, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     auto onMoveFunc = [](int32_t from, int32_t to) {};
@@ -337,9 +341,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetOnMoveTest015, TestSize.
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetItemDragHandlerTest016, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     auto onLongPress = [](int32_t index) {};
@@ -359,9 +363,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetItemDragHandlerTest016, 
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2MoveDataTest017, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->MoveData(INDEX_0, INDEX_2);
@@ -376,9 +380,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2MoveDataTest017, TestSize.L
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2FireOnMoveTest018, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     auto onMoveFunc = [](int32_t from, int32_t to) {};
@@ -394,9 +398,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2FireOnMoveTest018, TestSize
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2InitDragManagerTest019, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     auto child = CreateNode(V2::TEXT_ETS_TAG, 1);
@@ -411,9 +415,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2InitDragManagerTest019, Tes
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2InitAllChildrenDragManagerTest020, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->InitAllChildrenDragManager(true);
@@ -428,9 +432,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2InitAllChildrenDragManagerT
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetFrameNodeTest021, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     (void)node->GetFrameNode(INDEX_0);
@@ -444,9 +448,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetFrameNodeTest021, TestSi
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetFrameNodeIndexTest022, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     auto frameNode = CreateNode(V2::TEXT_ETS_TAG, 1);
@@ -462,9 +466,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetFrameNodeIndexTest022, T
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2OnConfigurationUpdateTest023, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     ConfigurationChange config;
@@ -480,9 +484,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2OnConfigurationUpdateTest02
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2NotifyColorModeChangeTest024, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->NotifyColorModeChange(0);
@@ -497,9 +501,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2NotifyColorModeChangeTest02
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetJSViewActiveTest025, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->SetJSViewActive(true);
@@ -514,9 +518,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetJSViewActiveTest025, Tes
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2PaintDebugBoundaryTreeAllTest026, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->PaintDebugBoundaryTreeAll(true);
@@ -531,9 +535,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2PaintDebugBoundaryTreeAllTe
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2RemoveNodeTest027, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->RemoveNode(0);
@@ -548,9 +552,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2RemoveNodeTest027, TestSize
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetInvalidTest028, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->SetInvalid(0);
@@ -565,9 +569,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetInvalidTest028, TestSize
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2UpdateL1Rid4IndexTest029, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     std::map<int32_t, uint32_t> l1Rid4Index;
@@ -585,9 +589,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2UpdateL1Rid4IndexTest029, T
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetIsLoopTest030, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->SetIsLoop(true);
@@ -602,9 +606,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2SetIsLoopTest030, TestSize.
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2FireOnUpdateDirtyTest031, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->fireOnUpdateDirty();
@@ -618,9 +622,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2FireOnUpdateDirtyTest031, T
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2IsAtomicNodeTest032, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     EXPECT_FALSE(node->IsAtomicNode());
@@ -634,9 +638,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2IsAtomicNodeTest032, TestSi
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2UpdateTotalCountTest033, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     node->UpdateTotalCount(TOTAL_COUNT_10);
@@ -654,14 +658,14 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2UpdateTotalCountTest033, Te
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2DifferentNodeIdsTest034, TestSize.Level1)
 {
     auto node1 = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     auto node2 = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_2, ARR_LEN_10, TOTAL_COUNT_10,
+        NODE_ID_2, ARR_LEN_10, TOTAL_COUNT_10, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node1, nullptr);
     ASSERT_NE(node2, nullptr);
@@ -676,9 +680,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2DifferentNodeIdsTest034, Te
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2EmptyChildrenTest035, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
+        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     (void)node->GetChildren(false);
@@ -692,9 +696,9 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2EmptyChildrenTest035, TestS
 HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2EmptyChildrenTest036, TestSize.Level1)
 {
     auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_2, ARR_LEN_10, TOTAL_COUNT_10,
+        NODE_ID_2, ARR_LEN_10, TOTAL_COUNT_10, DEFAULT_MEM_OPT_STRATEGY,
         g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+        g_onMoveFromTo, g_onPurge, g_onPurgeAll, g_onUpdateDirty);
 
     ASSERT_NE(node, nullptr);
     (void)node->GetChildren(true);

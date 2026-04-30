@@ -4276,10 +4276,12 @@ HWTEST_F(ListCommonTestNg, FireFocus002, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         10,
         10,
-        [](int32_t, bool) { return std::make_pair(0, 0); },
+        0,
+        [](int32_t, bool, bool) { return std::make_pair(0, 0); },
         [](int32_t, int32_t) {},
         [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
         [](int32_t, int32_t) {},
+        []() {},
         []() {},
         []() {}
     );
@@ -4527,10 +4529,12 @@ HWTEST_F(ListCommonTestNg, LostChildFocusToSelf003, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         10,
         10,
-        [](int32_t, bool) { return std::make_pair(0, 0); },
+        0,
+        [](int32_t, bool, bool) { return std::make_pair(0, 0); },
         [](int32_t, int32_t) {},
         [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
         [](int32_t, int32_t) {},
+        []() {},
         []() {},
         []() {}
     );

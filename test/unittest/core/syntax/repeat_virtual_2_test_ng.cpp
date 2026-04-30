@@ -14,7 +14,7 @@
  */
 
 #include "repeat_virtual_2_test_ng.h"
- 
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -40,6 +40,7 @@ RefPtr<FrameNode> RepeatVirtual2TestNg::CreateNode(const std::string& tag)
 
 RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(uint32_t arrLen, uint32_t totalCount)
 {
+    constexpr int32_t DEFAULT_MEM_OPT_STRATEGY = 0;
     l1Rid4Index_ = {
         {0, 1},
         {1, 2},
@@ -48,7 +49,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(u
         {4, 5},
         {5, 6}
     };
-    onGetRid4Index_ = [&](IndexType index, bool inAnimation) -> std::pair<RIDType, uint32_t> {
+    onGetRid4Index_ = [&](IndexType index, bool inAnimation, bool forceCreateNewChild) -> std::pair<RIDType, uint32_t> {
         auto it = l1Rid4Index_.find(0);
         if (it != l1Rid4Index_.end()) {
             return {index, 2};
@@ -68,12 +69,15 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(u
     onPurge_ = []() -> void {
         return;
     };
+    onPurgeAll_ = []() -> void {
+        return;
+    };
     onUpdateDirty_ = []() -> void {
         return;
     };
     return RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        GetElmtId(), arrLen, totalCount, onGetRid4Index_, onRecycleItems_, onActiveRange_,
-        onMoveFromTo_, onPurge_, onUpdateDirty_);
+        GetElmtId(), arrLen, totalCount, DEFAULT_MEM_OPT_STRATEGY, onGetRid4Index_, onRecycleItems_, onActiveRange_,
+        onMoveFromTo_, onPurge_, onPurgeAll_, onUpdateDirty_);
 }
 
 /**
@@ -137,8 +141,8 @@ HWTEST_F(RepeatVirtual2TestNg, CreateRepeat001, TestSize.Level1)
      * @tc.expected: Object is not nullptr.
      */
     auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        nodeId, 10, 10, onGetRid4Index_, onRecycleItems_, onActiveRange_,
-        onMoveFromTo_, onPurge_, onUpdateDirty_);
+        nodeId, 10, 10, 0, onGetRid4Index_, onRecycleItems_, onActiveRange_,
+        onMoveFromTo_, onPurge_, onPurgeAll_, onUpdateDirty_);
 
     EXPECT_NE(repeatNode, nullptr);
 }
@@ -640,44 +644,44 @@ HWTEST_F(RepeatVirtual2TestNg, CallOnGetRid4Index001, TestSize.Level1)
 {
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
-        return {1, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation, bool forceCreateNewChild)->
+        std::pair<RIDType, uint32_t> { return {1, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
     auto item0 = repeatNode->caches_.CallOnGetRid4Index(0).value();
     EXPECT_EQ(item0, nullptr);
 
-    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
-        CreateListItemNode(); return {1, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
+    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index, bool inAnimation, bool forceCreateNewChild)->
+        std::pair<RIDType, uint32_t> { CreateListItemNode(); return {1, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
     auto item1 = repeatNode->caches_.CallOnGetRid4Index(0).value();
     EXPECT_EQ(item1->node_->GetId(), 10002);
 
-    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
-        CreateListItemNode(); return {0, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
+    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index, bool inAnimation, bool forceCreateNewChild)->
+        std::pair<RIDType, uint32_t> { CreateListItemNode(); return {0, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
     auto item2 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item2, std::nullopt);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
-        return {1, OnGetRid4IndexResult::UPDATED_NODE}; };
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation, bool forceCreateNewChild)->
+        std::pair<RIDType, uint32_t> { return {1, OnGetRid4IndexResult::UPDATED_NODE}; };
     auto item3 = repeatNode->caches_.CallOnGetRid4Index(0).value();
     EXPECT_EQ(item3->node_->GetId(), 10002);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
-        return {2, OnGetRid4IndexResult::UPDATED_NODE}; };
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation, bool forceCreateNewChild)->
+        std::pair<RIDType, uint32_t> { return {2, OnGetRid4IndexResult::UPDATED_NODE}; };
     auto item4 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item4, std::nullopt);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
-        return {1, OnGetRid4IndexResult::UPDATED_NODE}; };
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation, bool forceCreateNewChild)->
+        std::pair<RIDType, uint32_t> { return {1, OnGetRid4IndexResult::UPDATED_NODE}; };
     repeatNode->caches_.GetCacheItem4RID(1).value()->node_ = nullptr;
     auto item5 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item5, std::nullopt);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
-        return {0, OnGetRid4IndexResult::UPDATED_NODE}; };
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation, bool forceCreateNewChild)->
+        std::pair<RIDType, uint32_t> { return {0, OnGetRid4IndexResult::UPDATED_NODE}; };
     auto item6 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item6, std::nullopt);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
-        return {1, OnGetRid4IndexResult::NO_NODE}; };
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation, bool forceCreateNewChild)->
+        std::pair<RIDType, uint32_t> { return {1, OnGetRid4IndexResult::NO_NODE}; };
     auto item7 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item7, std::nullopt);
 }

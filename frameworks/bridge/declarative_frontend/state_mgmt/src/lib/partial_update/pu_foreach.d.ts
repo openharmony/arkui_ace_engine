@@ -70,23 +70,28 @@ declare class RepeatVirtualScrollNative {
   static setCreateByTemplate(isCreatedByTemplate: boolean): void;
 }
 
-// Repeat.virtualScroll (v2) maps to C++ RepeatVirtualScroll2Node 
+// Repeat.virtualScroll (v2) maps to C++ RepeatVirtualScroll2Node
 declare class RepeatVirtualScroll2Native {
   static create(
     arrLen: number,
     totalCount: number,
+    memOptStrategy: number,
     handlers: {
-      onGetRid4Index: (forIndex: number, isImplicitAnimationOpen: boolean) => [number, number],
+      onGetRid4Index: (forIndex: number, isImplicitAnimationOpen: boolean, forceCreateNewCache: boolean) => [number, number],
       onRecycleItems: (fromIndex: number, toIndex: number) => void,
       onActiveRange: (fromIndex: number, toIndex: number, vStart: number, vEnd: number, isLoop: boolean) => void,
       onMoveFromTo: (moveFrom: number, moveTo: number) => void,
       onPurge: () => void,
+      onPurgeAll: () => void,
       onUpdateDirty: () => void;
     }
   ): void;
 
   // purge node with given Repeat Item Id (Rid)
   static removeNode(rid: number): void;
+
+  // batch remove multiple nodes with their corresponding indexes
+  static removeNodes(rids: Array<number>, indexes: Array<number>): void;
 
   // Drop node with given Repeat Item Id (Rid) from L1 cache
   static setInvalid(repeatelmtId: number, rid: number): void;
