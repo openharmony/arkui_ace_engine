@@ -131,7 +131,11 @@ bool FocusManager::RearrangeViewStack()
         if (std::find(focusViewStack_.begin(), focusViewStack_.end(), curFocusViewWeak) != focusViewStack_.end()) {
             focusViewStack_.remove(curFocusViewWeak);
         }
-        lastFocusView_ = focusViewStack_.back();
+        if (lastFocusView_.empty()) {
+            lastFocusView_ = nullptr;
+        } else {
+            lastFocusView_ = focusViewStack_.back();
+        }
         return true;
     }
     if (focusViewStackState_ == FocusViewStackState::CLOSE) {
