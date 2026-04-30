@@ -1258,6 +1258,8 @@ void RichEditorPattern::OnAttachToFrameNode()
 {
     ACE_SCOPED_TRACE("RichEditorPattern::OnAttachToFrameNode");
     TextPattern::OnAttachToFrameNode();
+    InitSurfaceChangedCallback();
+    InitSurfacePositionChangedCallback();
     richEditorInstanceId_ = Container::CurrentIdSafely();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -1273,6 +1275,12 @@ void RichEditorPattern::OnAttachToFrameNode()
     auto contentNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_CONTENT_ETS_TAG, nodeId, patternCreator);
     frameNode->AddChild(contentNode);
     SetContentPattern(contentNode->GetPattern<RichEditorContentPattern>());
+}
+
+void RichEditorPattern::OnAttachToMainTreeMultiThreadExtension()
+{
+    InitSurfaceChangedCallback();
+    InitSurfacePositionChangedCallback();
 }
 
 void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -10101,10 +10109,10 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
 }
 
 void RichEditorPattern::HandleSurfaceChanged(
-    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type)
+    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
     if (newWidth != prevWidth || newHeight != prevHeight) {
-        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
         UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
@@ -13883,7 +13891,7 @@ SymbolSpanOptions RichEditorPattern::GetSymbolSpanOptions(const RefPtr<SpanItem>
 {
     CHECK_NULL_RETURN(spanItem, {});
     TextStyle textStyle = GetDefaultTextStyle();
-    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle, true);
+    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle, true, spanItem->symbolStyle);
     SymbolSpanOptions options;
     options.style = textStyle;
     options.offset = caretPosition_;

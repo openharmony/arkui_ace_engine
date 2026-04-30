@@ -229,9 +229,9 @@ public:
         }
         auto& symbolColorList = textStyle.GetSymbolColorList();
         for (size_t i = 0; i < symbolColorList.size(); ++i) {
-            auto updater = [i](const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
-                CHECK_NULL_VOID(fontStyle.propSymbolColorList.has_value());
-                auto& symbolColorList = fontStyle.propSymbolColorList.value();
+            auto updater = [i](const RefPtr<ResourceObject>& colorResObj, SymbolStyle& symbolStyle) {
+                CHECK_NULL_VOID(symbolStyle.propSymbolColorList.has_value());
+                auto& symbolColorList = symbolStyle.propSymbolColorList.value();
                 CHECK_NULL_VOID(i < symbolColorList.size());
                 Color colorValue;
                 ResourceParseUtils::ParseResColor(colorResObj, colorValue);

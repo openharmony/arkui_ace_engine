@@ -688,8 +688,7 @@ public:
     bool BetweenSelection(const Offset& globalOffset);
     bool InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
-        WindowSizeChangeReason type) override;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     void RequestCustomKeyboardBuilder();
@@ -728,6 +727,7 @@ public:
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTreeMultiThreadExtension() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsAtTop() const override;

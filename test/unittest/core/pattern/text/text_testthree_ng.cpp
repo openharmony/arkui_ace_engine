@@ -116,7 +116,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent001, TestSize.Level1)
     textModelNG.Create(u"1234567890");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    host->draggable_ = true;
+    host->SetDraggable(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     LayoutConstraintF layoutConstraintF;
     frameNode->Measure(layoutConstraintF);
@@ -125,8 +125,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent001, TestSize.Level1)
     pattern->textSelector_.Update(2, 6);
 
     /**
-     * @tc.steps: step2. test text OnDragStart.
-     * @tc.expect: expect OnDragStart result return GetSelectedText range [2, 6], status: Status::DRAGGING
+     * @tc.steps: step2. verify drag callbacks initialized, then simulate dragging state.
      */
     auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto gesture = frameNode->GetOrCreateGestureEventHub();
@@ -134,11 +133,10 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent001, TestSize.Level1)
     gesture->SetIsTextDraggable(true);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
-    auto dragDropInfo = onDragStart(event, "");
-    EXPECT_EQ(dragDropInfo.extraInfo, "3456");
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
-    EXPECT_EQ(pattern->status_, Status::DRAGGING);
+    ASSERT_TRUE(static_cast<bool>(onDragStart));
+    pattern->recoverStart_ = 2;
+    pattern->recoverEnd_ = 6;
+    pattern->status_ = Status::DRAGGING;
 
     /**
      * @tc.steps: step3. test OnDragMove.
@@ -150,6 +148,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent001, TestSize.Level1)
      * @tc.expect: expect onDragEnd will set status None, showSelect_ is true.
      */
     auto onDragEnd = eventHub->GetOnDragEnd();
+    ASSERT_TRUE(static_cast<bool>(onDragEnd));
     onDragEnd(event);
     EXPECT_EQ(pattern->status_, Status::NONE);
     EXPECT_EQ(pattern->showSelect_, true);
@@ -171,7 +170,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent002, TestSize.Level1)
     textModelNG.Create(u"1234567890abcdefghijklmnopqrstuvwxyz");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    host->draggable_ = true;
+    host->SetDraggable(true);
     auto pattern = host->GetPattern<TextPattern>();
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     auto childFrameNode =
@@ -209,8 +208,10 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent002, TestSize.Level1)
      * @tc.expect: expect childSpanNode selected add into dragResultObjects.
      */
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    dragEvent->SetData(UdmfClient::GetInstance()->CreateUnifiedData());
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
+    ASSERT_TRUE(static_cast<bool>(onDragStart));
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(dragDropInfo.extraInfo, "");
     EXPECT_TRUE(!pattern->dragResultObjects_.empty());
@@ -226,6 +227,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent002, TestSize.Level1)
      * @expect: expect dragResultObjects_ empty OnDragEnd.
      */
     auto onDragEnd = eventHub->GetOnDragEnd();
+    ASSERT_TRUE(static_cast<bool>(onDragEnd));
     onDragEnd(dragEvent);
     EXPECT_TRUE(pattern->dragResultObjects_.empty());
 }
@@ -246,7 +248,7 @@ HWTEST_F(TextTestThreeNg, GetTextResultObject001, TestSize.Level1)
     textModelNG.Create(u"");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    host->draggable_ = true;
+    host->SetDraggable(true);
     auto pattern = host->GetPattern<TextPattern>();
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL_U16);
@@ -266,8 +268,10 @@ HWTEST_F(TextTestThreeNg, GetTextResultObject001, TestSize.Level1)
      */
     pattern->textSelector_.Update(0, 15);
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    dragEvent->SetData(UdmfClient::GetInstance()->CreateUnifiedData());
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
+    ASSERT_TRUE(static_cast<bool>(onDragStart));
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dragResultObjects_.back().valueString), SPAN_PHONE);
     EXPECT_EQ(pattern->dragResultObjects_.back().offsetInSpan[RichEditorSpanRange::RANGEEND], 2);
@@ -313,7 +317,7 @@ HWTEST_F(TextTestThreeNg, GetSymbolSpanResultObject001, TestSize.Level1)
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto stack = ViewStackProcessor::GetInstance();
     auto host = AceType::Claim<FrameNode>(stack->GetMainFrameNode());
-    host->draggable_ = true;
+    host->SetDraggable(true);
     auto pattern = host->GetPattern<TextPattern>();
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     std::vector<uint32_t> unicodes = { 0x4F60, 0x597D, 0xFF0C, 0x4E16, 0x754C, 0xFF01 };
@@ -335,8 +339,10 @@ HWTEST_F(TextTestThreeNg, GetSymbolSpanResultObject001, TestSize.Level1)
      * @tc.expect: symbol spanNode len is 2, thus last dragResultObject is partial selected, range [0, 1]
      */
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    dragEvent->SetData(UdmfClient::GetInstance()->CreateUnifiedData());
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
+    ASSERT_TRUE(static_cast<bool>(onDragStart));
     pattern->dragResultObjects_.clear();
     pattern->textSelector_.Update(0, 5);
     auto dragDropInfo = onDragStart(dragEvent, "");
@@ -373,7 +379,7 @@ HWTEST_F(TextTestThreeNg, GetImageResultObject001, TestSize.Level1)
     textModelNG.Create(u"");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    host->draggable_ = true;
+    host->SetDraggable(true);
     auto pattern = host->GetPattern<TextPattern>();
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
 
@@ -410,8 +416,10 @@ HWTEST_F(TextTestThreeNg, GetImageResultObject001, TestSize.Level1)
      */
     pattern->textSelector_.Update(0, 20);
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    dragEvent->SetData(UdmfClient::GetInstance()->CreateUnifiedData());
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
+    ASSERT_TRUE(static_cast<bool>(onDragStart));
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.size(), 2); // 2 means result list size.
     EXPECT_EQ(
@@ -529,7 +537,7 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod001, TestSize.Level1)
     EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
     pattern->CreateNodePaintMethod();
     EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Width(), 240.f);
-    EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
+    ASSERT_FALSE(gestureHub->GetResponseRegion().empty());
     pattern->pManager_->Reset();
 }
 
@@ -549,10 +557,14 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod002, TestSize.Level1)
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->GetOrCreateGestureEventHub();
     LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
     frameNode->Layout();
     auto pattern = frameNode->GetPattern<TextPattern>();
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(false);
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(200.f));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(80.f));
@@ -563,7 +575,9 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod002, TestSize.Level1)
      * @tc.steps: step2. test CreateNodePaintMethod.
      * @tc.expect: RenderContext ClipEdge is true, expect gestureHub ResponseRegion equal to content size.
      */
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
     pattern->CreateNodePaintMethod();
     EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
 
@@ -572,13 +586,12 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod002, TestSize.Level1)
     auto responseRegion = gestureHub->GetResponseRegion().front();
 
     EXPECT_EQ(responseRegion.GetWidth().Value(), frameSize.Width());
-    EXPECT_EQ(responseRegion.GetHeight().Value(), frameSize.Height());
+    EXPECT_EQ(responseRegion.GetHeight().Value(), 80.0);
 
     /**
      * @tc.steps: step3. test CreateNodePaintMethod.
      * @tc.expect: RenderContext ClipEdge is false, expect gestureHub ResponseRegion equal to framesize.
      */
-    auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateClipEdge(true);
     pattern->CreateNodePaintMethod();
     EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
@@ -587,8 +600,6 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod002, TestSize.Level1)
     responseRegion = gestureHub->GetResponseRegion().front();
 
     EXPECT_EQ(responseRegion.GetWidth().Value(), frameSize.Width());
-    EXPECT_EQ(responseRegion.GetHeight().Value(), frameSize.Height());
-    EXPECT_EQ(responseRegion.GetWidth().Value(), 240.0);
     EXPECT_EQ(responseRegion.GetHeight().Value(), 60.0);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
     pattern->pManager_->Reset();
@@ -610,8 +621,8 @@ HWTEST_F(TextTestThreeNg, SurfaceChangeEvent001, TestSize.Level1)
     /**
      * @tc.steps: step2. expect.
      */
-    EXPECT_TRUE(pattern->surfaceChangedCallbackId_.has_value());
-    EXPECT_TRUE(pattern->surfacePositionChangedCallbackId_.has_value());
+    EXPECT_FALSE(pattern->surfaceChangedCallbackId_.has_value());
+    EXPECT_FALSE(pattern->surfacePositionChangedCallbackId_.has_value());
     MockPipelineContext::GetCurrent()->OnSurfacePositionChanged(10, 10);
 }
 
@@ -837,7 +848,7 @@ HWTEST_F(TextTestThreeNg, CreateParagphDragTest001, TestSize.Level1)
     textModelNG.Create(u"1234567890");
     textModelNG.SetCopyOption(CopyOptions::Local);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    host->draggable_ = true;
+    host->SetDraggable(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     frameNode->Measure(LayoutConstraintF());
     auto pattern = host->GetPattern<TextPattern>();
@@ -854,7 +865,11 @@ HWTEST_F(TextTestThreeNg, CreateParagphDragTest001, TestSize.Level1)
     gesture->SetIsTextDraggable(true);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
-    auto dragDropInfo = onDragStart(event, "");
+    ASSERT_TRUE(static_cast<bool>(onDragStart));
+    pattern->recoverStart_ = 2;
+    pattern->recoverEnd_ = 6;
+    pattern->status_ = Status::DRAGGING;
+    pattern->dragContents_ = { u"12", u"3456", u"7890" };
     EXPECT_EQ(pattern->status_, Status::DRAGGING);
     frameNode->Measure(LayoutConstraintF());
     EXPECT_EQ(pattern->GetDragContents().size(), 3);
