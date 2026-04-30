@@ -2804,8 +2804,8 @@ export class SegmentButton extends ViewPU {
     }
     // 获取系统语言
     try {
-      let systemLanguage = I18n.System.getSystemLanguage();
-      if (I18n.isRTL(systemLanguage) && this.options.direction != Direction.Ltr) {
+      let appPreferredLanguage = I18n.System.getAppPreferredLanguage();
+      if (I18n.isRTL(appPreferredLanguage) && this.options.direction != Direction.Ltr) {
         return true;
       }
     } catch (error) {
