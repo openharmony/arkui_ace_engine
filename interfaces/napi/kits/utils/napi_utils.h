@@ -70,9 +70,9 @@ napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeStri
 
 napi_value CreateNapiString(napi_env env, const std::string& rawStr);
 
-ResourceStruct CheckResourceStruct(napi_env env, napi_value value);
+ResourceStruct CheckResourceStruct(napi_env env, napi_value value, bool hasGetter);
 
-void CompleteResourceParam(napi_env env, napi_value value);
+void CompleteResourceParam(napi_env env, napi_value value, bool hasGetter);
 
 void CompleteResourceParamV1(napi_env env, napi_value value);
 
