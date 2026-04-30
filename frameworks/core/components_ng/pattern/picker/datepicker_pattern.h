@@ -805,6 +805,11 @@ public:
     {
         return isEnableHaptic_;
     }
+    
+    void SetIsShowInSubwindow(bool isShowInSubWindow)
+    {
+        isShowInSubWindow_ = isShowInSubWindow;
+    }
 
     void ColumnPatternInitHapticController();
     void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
@@ -902,6 +907,7 @@ private:
     double resizePickerItemHeight_ = 0.0;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool isShowInSubWindow_ = false;
     bool focusEventInitialized_ = false;
     bool haveFocus_ = false;
     bool useButtonFocusArea_ = false;

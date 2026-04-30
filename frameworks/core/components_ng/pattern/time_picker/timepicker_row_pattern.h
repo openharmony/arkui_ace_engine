@@ -683,6 +683,10 @@ public:
     {
         return isEnableCascade_;
     }
+    void SetIsShowInSubwindow(bool isShowInSubWindow)
+    {
+        isShowInSubWindow_ = isShowInSubWindow;
+    }
 
     void ColumnPatternInitHapticController();
     void ColumnPatternStopHaptic();
@@ -848,6 +852,7 @@ private:
     bool isAmPmTimeOrderUpdate_ = false;
     bool isPreLanguageUg_ = false;
     bool isShowInDialog_ = false;
+    bool isShowInSubWindow_ = false;
     bool showLunarSwitch_ = false;
     bool isUserSetDividerSpacingFont_ = false;
     bool isUserSetGradientFont_ = false;
