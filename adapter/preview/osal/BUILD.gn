@@ -86,6 +86,7 @@ ohos_source_set("preview_osal_source") {
       "layout_inspector.cpp",
       "modal_ui_extension_impl.cpp",
       "mouse_style_ohos.cpp",
+      "navigation_route_preview.cpp",
       "package_event_proxy_preview.cpp",
       "perf_interfaces.cpp",
       "pixel_map_preview.cpp",
