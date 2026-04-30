@@ -2318,7 +2318,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SymbolSpanAttribute_setFontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _SymbolSpanAttribute_setFontWeight0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolSpanAttribute_setEffectStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2327,6 +2327,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SymbolSpanAttribute_setKey(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolSpanAttribute_setId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setFontWeight1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
     native static _SymbolSpanAttribute_setDebugLine(ptr: KPointer, sourceLine: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2340,7 +2342,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _SymbolGlyphAttribute_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _SymbolGlyphAttribute_setFontWeight0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setEffectStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2355,6 +2357,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SymbolGlyphAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolGlyphAttribute_setFontWeight1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

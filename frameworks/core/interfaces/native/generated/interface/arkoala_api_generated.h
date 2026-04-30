@@ -26507,8 +26507,8 @@ typedef struct GENERATED_ArkUISymbolGlyphModifier {
                          const Opt_Array_ResourceColor* value);
     void (*setSymbolColor)(Ark_NativePointer node,
                            const Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt* value);
-    void (*setFontWeight)(Ark_NativePointer node,
-                          const Opt_Union_I32_FontWeight_String* value);
+    void (*setFontWeight0)(Ark_NativePointer node,
+                           const Opt_Union_I32_FontWeight_String* value);
     void (*setEffectStrategy)(Ark_NativePointer node,
                               const Opt_SymbolEffectStrategy* value);
     void (*setRenderingStrategy)(Ark_NativePointer node,
@@ -26523,6 +26523,9 @@ typedef struct GENERATED_ArkUISymbolGlyphModifier {
                            const Opt_Union_Array_Opt_ShaderStyle_ShaderStyle* value);
     void (*setSymbolShadow)(Ark_NativePointer node,
                             const Opt_ShadowOptions* value);
+    void (*setFontWeight1)(Ark_NativePointer node,
+                           const Opt_Union_I32_FontWeight_ResourceStr* value,
+                           const Opt_FontWeightConfigs* fontWeightConfigs);
     void (*setSymbolEffect1)(Ark_NativePointer node,
                              const Opt_SymbolEffect* symbolEffect,
                              const Opt_Boolean* isActive);
@@ -26540,8 +26543,8 @@ typedef struct GENERATED_ArkUISymbolSpanModifier {
                         const Opt_Union_F64_String_Resource* value);
     void (*setFontColor)(Ark_NativePointer node,
                          const Opt_Array_ResourceColor* value);
-    void (*setFontWeight)(Ark_NativePointer node,
-                          const Opt_Union_I32_FontWeight_String* value);
+    void (*setFontWeight0)(Ark_NativePointer node,
+                           const Opt_Union_I32_FontWeight_String* value);
     void (*setEffectStrategy)(Ark_NativePointer node,
                               const Opt_SymbolEffectStrategy* value);
     void (*setRenderingStrategy)(Ark_NativePointer node,
@@ -26550,6 +26553,9 @@ typedef struct GENERATED_ArkUISymbolSpanModifier {
                    const Opt_String* value);
     void (*setId)(Ark_NativePointer node,
                   const Opt_String* value);
+    void (*setFontWeight1)(Ark_NativePointer node,
+                           const Opt_Union_I32_FontWeight_ResourceStr* value,
+                           const Opt_FontWeightConfigs* fontWeightConfigs);
     void (*setDebugLine)(Ark_NativePointer node,
                          const Ark_String* sourceLine,
                          const Opt_String* moduleName);
