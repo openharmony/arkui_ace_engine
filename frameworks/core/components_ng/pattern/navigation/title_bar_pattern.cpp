@@ -1441,12 +1441,17 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
         needUpdateBgOptions = true;
     }
     options_ = opt;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (opt.brOptions.paddingStart.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(opt.brOptions.paddingStart.value(), LpxAttribute::ALWAYS, host);
+    }
+    if (opt.brOptions.paddingEnd.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(opt.brOptions.paddingEnd.value(), LpxAttribute::ALWAYS, host);
+    }
     if (!needUpdateBgOptions) {
         return;
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     UpdateBackgroundStyle(host);
 }
 
