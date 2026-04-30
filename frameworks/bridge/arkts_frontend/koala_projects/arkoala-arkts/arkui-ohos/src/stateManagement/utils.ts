@@ -52,7 +52,7 @@ export class UIUtils {
     static makeObserved<T extends object | null | undefined>(source: T): T {
         return uiUtils.makeObserved(source) as T;
     }
-    static getTarget<T>(source: T): T {
+    static getTarget<T extends Object>(source: T): T {
         return uiUtils.getTarget(source) as T;
     }
     static makeBinding<T>(getter: () => T): Binding<T> {
@@ -205,6 +205,10 @@ export class Binding<T> {
     public get value(): T {
         return this.getter_();
     }
+
+    get getter(): () => T {
+        return this.getter_;
+    }
 }
 
 /**
@@ -243,5 +247,13 @@ export class MutableBinding<T> {
      */
     get value(): T {
         return this.getter_();
+    }
+
+    get getter(): () => T {
+        return this.getter_;
+    }
+
+    get setter(): (newValue: T) => void {
+        return this.setter_;
     }
 }

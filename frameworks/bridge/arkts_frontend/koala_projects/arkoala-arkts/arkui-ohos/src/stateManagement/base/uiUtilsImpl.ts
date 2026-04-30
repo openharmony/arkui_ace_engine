@@ -139,7 +139,7 @@ export class UIUtilsImpl {
         if (!(value instanceof Object)) {
             return value;
         }
-        const isProxy = StateMgmtTool.isObjectLiteral(value as Object);
+        const isProxy = StateMgmtTool.isObjectLiteral(value);
         if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
         }
@@ -189,7 +189,7 @@ export class UIUtilsImpl {
         const makeObservedWrappedBase: ((value: object, allowDeep: boolean, isAPI: boolean) => object) | undefined = 
             UIUtilsImpl.makeObservedWrappedBaseMap.get(valueTypeName);
         if (makeObservedWrappedBase) {
-            return makeObservedWrappedBase!(value as object, true, true) as T;
+            return makeObservedWrappedBase!(value as Object, true, true) as T;
         }
         if (isProxy) {
             return UIUtilsImpl.makeObservedProxyNoCheck(value as Object, true, true) as T;
@@ -206,7 +206,7 @@ export class UIUtilsImpl {
             return source;
         }
         if (UIUtilsImpl.isProxied(source! as Object)) {
-            const handler = StateMgmtTool.tryGetHandler(source as Object);
+            const handler = StateMgmtTool.tryGetHandler(source);
             return (handler as InterfaceProxyHandler).target as T;
         }
         if (

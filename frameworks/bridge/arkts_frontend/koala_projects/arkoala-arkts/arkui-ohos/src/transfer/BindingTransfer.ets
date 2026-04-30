@@ -21,9 +21,8 @@ export class MutableBindingTransfer {
   static transferDynamic(input: Object): Any {
     const mutablebinding = input as MutableBinding<Any>;
     const global = ESValue.getGlobal();
-    const getter = (reflect.Value.of(mutablebinding) as ClassValue).getFieldByName('getter_').getData() as Object;
-    const setter = (reflect.Value.of(mutablebinding) as ClassValue).getFieldByName('setter_').getData() as Object;
-    return global.getProperty('createMutableBinding').invoke(ESValue.wrap(getter), ESValue.wrap(setter)).unwrap();
+    return global.getProperty('createMutableBinding').invoke(
+      ESValue.wrap(mutablebinding.getter), ESValue.wrap(mutablebinding.setter)).unwrap();
   }
 }
 
@@ -42,7 +41,6 @@ export class BindingTransfer {
   static transferDynamic(input: Object): Any {
     const binding = input as Binding<Any>;
     const global = ESValue.getGlobal();
-    const getter = (reflect.Value.of(binding) as ClassValue).getFieldByName('getter_').getData() as Object;
-    return global.getProperty('createBinding').invoke(ESValue.wrap(getter)).unwrap();
+    return global.getProperty('createBinding').invoke(ESValue.wrap(binding.getter)).unwrap();
   }
 }
