@@ -21,6 +21,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
