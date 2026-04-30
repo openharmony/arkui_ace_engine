@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {

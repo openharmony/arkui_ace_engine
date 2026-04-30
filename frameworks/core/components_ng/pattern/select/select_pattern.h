@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
 #include "interfaces/inner_api/ui_session/ui_session_json_util.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;

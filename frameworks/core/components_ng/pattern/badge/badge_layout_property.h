@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BADGE_BADGE_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BADGE_BADGE_LAYOUT_PROPERTY_H
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_enums.h"

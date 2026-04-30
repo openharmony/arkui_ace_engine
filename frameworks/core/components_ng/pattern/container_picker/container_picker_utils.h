@@ -18,7 +18,6 @@
 
 #include <optional>
 
-#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"

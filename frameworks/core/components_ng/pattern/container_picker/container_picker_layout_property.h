@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_LAYOUT_PROPERTY_H
 
-#include "base/geometry/axis.h"
 #include "base/utils/macros.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"

@@ -18,7 +18,6 @@
 
 #include <utility>
 
-#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_tip_modifier.h"

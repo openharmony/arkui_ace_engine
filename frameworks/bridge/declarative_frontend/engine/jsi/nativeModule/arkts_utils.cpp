@@ -34,6 +34,7 @@
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
+#include "frameworks/core/common/color_inverter.h"
 
 using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {

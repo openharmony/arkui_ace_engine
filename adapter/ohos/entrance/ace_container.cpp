@@ -95,6 +95,7 @@
 
 #include "accessibility_config.h"
 #include "core/components/common/properties/placement.h"
+#include "base/log/frame_report.h"
 
 namespace OHOS::Ace::Platform {
 namespace {

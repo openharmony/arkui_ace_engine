@@ -18,7 +18,6 @@
 
 #include <optional>
 
-#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components_ng/pattern/picker/picker_data.h"

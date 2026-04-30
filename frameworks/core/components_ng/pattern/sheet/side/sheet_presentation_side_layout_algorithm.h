@@ -21,7 +21,6 @@
 #include <optional>
 #include <unordered_map>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"

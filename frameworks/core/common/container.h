@@ -21,7 +21,6 @@
 #include <mutex>
 #include <unordered_map>
 
-#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 #include "interfaces/inner_api/ace/constants.h"
 #include "interfaces/inner_api/ace/navigation_controller.h"
 

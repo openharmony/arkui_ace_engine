@@ -23,6 +23,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "frameworks/core/common/ace_engine.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components/navigator/navigator_type.h"
 
 namespace OHOS::Ace::Framework {
 

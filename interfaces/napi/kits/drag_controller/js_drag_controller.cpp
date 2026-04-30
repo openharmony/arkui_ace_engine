@@ -53,6 +53,7 @@
 #include "frameworks/base/json/json_util.h"
 #include "frameworks/core/event/pointer_event.h"
 #include "drag_preview.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #endif
 
 namespace OHOS::Ace {

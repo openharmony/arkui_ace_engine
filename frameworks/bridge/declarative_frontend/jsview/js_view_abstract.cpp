@@ -99,6 +99,7 @@
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/common/color_inverter.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;

@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/list/list_properties.h"
+#include "core/common/window_size_breakpoint.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;

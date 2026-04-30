@@ -31,6 +31,7 @@
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"
 #include "base/image/pixel_map.h"
+#include "core/event/key_code.h"
 #endif
 namespace OHOS::Ace::NG {
 void SetDragData(ani_ref event, ani_ref data)

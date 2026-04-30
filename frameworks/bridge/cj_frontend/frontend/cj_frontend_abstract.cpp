@@ -24,6 +24,7 @@
 #include "core/common/font_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/navigator/navigator_type.h"
 
 using namespace OHOS::Ace::NG;
 using namespace OHOS::Ace;

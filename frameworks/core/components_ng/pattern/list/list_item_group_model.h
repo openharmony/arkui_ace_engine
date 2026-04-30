@@ -20,7 +20,6 @@
 #include <memory>
 #include <mutex>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
