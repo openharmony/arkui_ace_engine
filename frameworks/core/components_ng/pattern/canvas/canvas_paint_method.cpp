@@ -33,6 +33,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
+constexpr size_t MAX_PARAGRAPH_HISTORY_SIZE = 30;
 CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode)
     : frameNode_(frameNode)
 {
@@ -472,9 +473,10 @@ void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextS
 }
 #endif
 
-std::string CanvasPaintMethod::GetDumpInfo()
+std::deque<std::string> CanvasPaintMethod::GetDumpInfo()
 {
-    CHECK_NULL_RETURN(rsCanvas_, "Canvas is nullptr");
+    std::deque<std::string> result;
+    CHECK_NULL_RETURN(rsCanvas_, result);
     // translate
     std::string trans = "TRANS: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::TRANS_X)) + ", " +
                         std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::TRANS_Y)) + "; ";
@@ -483,8 +485,17 @@ std::string CanvasPaintMethod::GetDumpInfo()
                         std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SCALE_Y)) + "; ";
     // rotate
     std::string skew = "SKEW: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_X)) + ", " +
-                       std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_Y)) + "; ";
-    return trans.append(scale).append(skew);
+                       std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_Y)) + ";";
+    result.emplace_back(trans.append(scale).append(skew));
+
+    if (!paragraphHistory_.empty()) {
+        result.emplace_back("FillText:");
+        for (const auto& info : paragraphHistory_) {
+            result.emplace_back(info);
+        }
+        paragraphHistory_.clear();
+    }
+    return result;
 }
 
 void CanvasPaintMethod::SetHostCustomNodeName()
@@ -507,6 +518,27 @@ void CanvasPaintMethod::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
         (std::to_string(matrix.Get(RSMatrix::SCALE_X)) + "," + std::to_string(matrix.Get(RSMatrix::SCALE_Y))).c_str());
     json->Put("Skew",
         (std::to_string(matrix.Get(RSMatrix::SKEW_X)) + "," + std::to_string(matrix.Get(RSMatrix::SKEW_Y))).c_str());
+
+    if (!paragraphHistory_.empty()) {
+        std::string paragraphInfo = "[";
+        for (const auto& info : paragraphHistory_) {
+            paragraphInfo.append(info);
+        }
+        paragraphInfo.append("]");
+        json->Put("FillText", paragraphInfo.c_str());
+    }
+}
+
+void CanvasPaintMethod::AddParagraphHistory()
+{
+    if (SystemProperties::GetCanvasDebugMode() > 0) {
+        CHECK_NULL_VOID(paragraph_);
+        std::string info = ConvertTimestampToStr(GetCurrentTimestamp()) + " " + paragraph_->GetDumpInfo() + ";";
+        paragraphHistory_.emplace_back(std::move(info));
+        if (paragraphHistory_.size() > MAX_PARAGRAPH_HISTORY_SIZE) {
+            paragraphHistory_.pop_front();
+        }
+    }
 }
 
 void CanvasPaintMethod::SetCanvasRenderContext(const RefPtr<CanvasRenderContext>& canvasRenderContext)

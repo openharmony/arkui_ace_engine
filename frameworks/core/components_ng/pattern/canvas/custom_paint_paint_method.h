@@ -374,6 +374,7 @@ protected:
     virtual TextDirection GetSystemDirection() = 0;
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
     void SendStatisticEvent(StatisticEventType type);
+    virtual void AddParagraphHistory() {}
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     PaintHolder state_;
