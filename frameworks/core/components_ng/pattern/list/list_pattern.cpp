@@ -443,7 +443,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     snapTrigByScrollBar_ = false;
     ChangeCanStayOverScroll();
     CheckValidPredictItem();
-    PostAfterCurrentLayoutTask();
     return true;
 }
 
@@ -895,16 +894,6 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
         listLayoutAlgorithm->SetIsRoundingMode();
     }
-    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
-    if (paintProperty && paintProperty->HasContentClip()) {
-        auto clip = paintProperty->GetContentClipValue();
-        listLayoutAlgorithm->SetContentClipMode(clip.first);
-        if (clip.first == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
-            listLayoutAlgorithm->SetContentClipExpend(safeAreaPad_.value());
-        } else if (clip.first == ContentClipMode::CUSTOM) {
-            listLayoutAlgorithm->SetContentClipShape(clip.second);
-        }
-    }
     return listLayoutAlgorithm;
 }
 
@@ -947,6 +936,7 @@ void ListPattern::SetLayoutAlgorithmParams(
     }
     listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
+    SetLayoutAlgorithmClipContent(listLayoutAlgorithm);
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -1027,6 +1017,25 @@ void ListPattern::SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>&
     }
     if (predictSnapEndPos_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
+    }
+}
+
+void ListPattern::SetLayoutAlgorithmClipContent(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm)
+{
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    if (!paintProperty || !paintProperty->HasContentClip()) {
+        safeAreaPad_.reset();
+        return;
+    }
+    auto clip = paintProperty->GetContentClipValue();
+    listLayoutAlgorithm->SetContentClipMode(clip.first);
+    if (clip.first != ContentClipMode::SAFE_AREA) {
+        safeAreaPad_.reset();
+    }
+    if (clip.first == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
+        listLayoutAlgorithm->SetContentClipExpend(safeAreaPad_.value());
+    } else if (clip.first == ContentClipMode::CUSTOM) {
+        listLayoutAlgorithm->SetContentClipShape(clip.second);
     }
 }
 
@@ -5073,19 +5082,6 @@ void ListPattern::PostAsyncLoadTask()
     });
 }
 
-void ListPattern::PostAfterCurrentLayoutTask()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->HasContentClip() || paintProperty->GetContentClipValue().first != ContentClipMode::SAFE_AREA) {
-        safeAreaPad_.reset();
-        return;
-    }
-    host->PostBundle({}, false, LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA);
-}
-
 void ListPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
 {
     auto host = GetHost();
@@ -5106,7 +5102,8 @@ void ListPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
         CHECK_NULL_VOID(layoutProperty);
         // Mark container dirty to prevent skipMeasure or skipLayout.
         layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-        host->CreateLayoutTask(true, LayoutType::MEASURE_FOR_IGNORE);
+        host->SetLayoutDirtyMarked(true);
+        host->CreateLayoutTask(true, LayoutType::NONE);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -646,6 +646,7 @@ protected:
     }
 
     void CalculateFixOffset(const ScaleProperty& scaleProperty);
+    void PostClipContentSafeAreaBundle(LayoutWrapper* layoutWrapper);
 
     void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
 
