@@ -14,6 +14,7 @@
  */
 
 #include <cstdint>
+
 #include "native_styled_string.h"
 #include "node_extened.h"
 #include "node_model.h"
@@ -84,7 +85,7 @@ ArkUI_LayoutConstraint* OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(Ar
 
 ArkUI_IntOffset OH_ArkUI_NodeCustomEvent_GetPositionInLayout(ArkUI_NodeCustomEvent* event)
 {
-    ArkUI_IntOffset intOffset = {.x = 0, .y = 0};
+    ArkUI_IntOffset intOffset = { .x = 0, .y = 0 };
     CHECK_NULL_RETURN(event, intOffset);
     intOffset.x = event->event->data[NUM_0];
     intOffset.y = event->event->data[NUM_1];
@@ -129,16 +130,19 @@ int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(
     ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMeasureInfo* info)
 {
     if (!event || !info || !event->event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "event is null, info is null, or event->event is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     info->fontSize = event->event->numberData[0].f32;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(
-    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMetrics* metrics)
+int32_t OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMetrics* metrics)
 {
     if (!event || !metrics || !event->event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "event is null, metrics is null, or event->event is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     event->event->numberReturnData[0].f32 = metrics->width;
@@ -146,16 +150,17 @@ int32_t OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
-    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanDrawInfo* info)
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanDrawInfo* info)
 {
     if (!event || !info || !event->event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "event is null, info is null, or event->event is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    info->optionsX = event->event->numberData[0].f32; // 0: x offset
-    info->optionsLineTop = event->event->numberData[1].f32; // 1: LineTop value
+    info->optionsX = event->event->numberData[0].f32;          // 0: x offset
+    info->optionsLineTop = event->event->numberData[1].f32;    // 1: LineTop value
     info->optionsLineBottom = event->event->numberData[2].f32; // 2: LineBottom value
-    info->optionsBaseLine = event->event->numberData[3].f32; // 3: BaseLine value
+    info->optionsBaseLine = event->event->numberData[3].f32;   // 3: BaseLine value
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -177,6 +182,7 @@ void OH_ArkUI_CustomSpanMeasureInfo_Dispose(ArkUI_CustomSpanMeasureInfo* info)
 float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* info)
 {
     if (!info) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "info is null");
         return 0.0f;
     }
     return info->fontSize;
@@ -200,6 +206,7 @@ void OH_ArkUI_CustomSpanMetrics_Dispose(ArkUI_CustomSpanMetrics* metrics)
 int32_t OH_ArkUI_CustomSpanMetrics_SetWidth(ArkUI_CustomSpanMetrics* metrics, float width)
 {
     if (!metrics) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "metrics is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     metrics->width = width;
@@ -209,6 +216,7 @@ int32_t OH_ArkUI_CustomSpanMetrics_SetWidth(ArkUI_CustomSpanMetrics* metrics, fl
 int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, float height)
 {
     if (!metrics) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "metrics is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     metrics->height = height;
@@ -233,6 +241,7 @@ void OH_ArkUI_CustomSpanDrawInfo_Dispose(ArkUI_CustomSpanDrawInfo* info)
 float OH_ArkUI_CustomSpanDrawInfo_GetXOffset(ArkUI_CustomSpanDrawInfo* info)
 {
     if (!info) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "info is null");
         return 0.0f;
     }
     return info->optionsX;
@@ -241,6 +250,7 @@ float OH_ArkUI_CustomSpanDrawInfo_GetXOffset(ArkUI_CustomSpanDrawInfo* info)
 float OH_ArkUI_CustomSpanDrawInfo_GetLineTop(ArkUI_CustomSpanDrawInfo* info)
 {
     if (!info) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "info is null");
         return 0.0f;
     }
     return info->optionsLineTop;
@@ -249,6 +259,7 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineTop(ArkUI_CustomSpanDrawInfo* info)
 float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info)
 {
     if (!info) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "info is null");
         return 0.0f;
     }
     return info->optionsLineBottom;
@@ -257,6 +268,7 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info)
 float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info)
 {
     if (!info) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "info is null");
         return 0.0f;
     }
     return info->optionsBaseLine;
@@ -331,7 +343,7 @@ void* OH_ArkUI_DrawContext_GetCanvas(ArkUI_DrawContext* context)
 }
 ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context)
 {
-    ArkUI_IntSize intSize = {0, 0};
+    ArkUI_IntSize intSize = { 0, 0 };
     if (context == nullptr) {
         return intSize;
     }
@@ -516,7 +528,6 @@ uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indica
     return indicator->selectedColorValue.value;
 }
 
-
 int32_t OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(ArkUI_SwiperIndicator* indicator, int32_t maxDisplayCount)
 {
     CHECK_NULL_RETURN(indicator, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -574,7 +585,7 @@ ArkUI_SwiperDigitIndicator* OH_ArkUI_SwiperDigitIndicator_Create()
     indicator->selectedFontSize = ArkUI_OptionalFloat { 0, 14.0f };
     indicator->fontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
     indicator->selectedFontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
-    indicator->ignoreSizeValue = ArkUI_OptionalInt {0, 0};
+    indicator->ignoreSizeValue = ArkUI_OptionalInt { 0, 0 };
     return indicator;
 }
 
@@ -903,8 +914,7 @@ void OH_ArkUI_StyledString_Destroy(ArkUI_StyledString* storage)
     }
     storage->styles = std::stack<void*>();
     storage->items.clear();
-    OH_Drawing_TypographyStyle* paragraphStyle =
-        reinterpret_cast<OH_Drawing_TypographyStyle*>(storage->paragraphStyle);
+    OH_Drawing_TypographyStyle* paragraphStyle = reinterpret_cast<OH_Drawing_TypographyStyle*>(storage->paragraphStyle);
     OH_Drawing_DestroyTypographyStyle(paragraphStyle);
     delete storage;
 }
@@ -963,10 +973,8 @@ void OH_ArkUI_StyledString_AddPlaceholder(ArkUI_StyledString* storage, OH_Drawin
         reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), placeholder);
     ArkUI_SpanItem* spanItem = new ArkUI_SpanItem;
     if (placeholder) {
-        spanItem->placeholder = new OH_Drawing_PlaceholderSpan {
-            placeholder->width, placeholder->height,
-            placeholder->alignment, placeholder->baseline,
-            placeholder->baselineOffset };
+        spanItem->placeholder = new OH_Drawing_PlaceholderSpan { placeholder->width, placeholder->height,
+            placeholder->alignment, placeholder->baseline, placeholder->baselineOffset };
     } else {
         spanItem->placeholder = new OH_Drawing_PlaceholderSpan();
     }
@@ -1236,7 +1244,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_Visible
 
 ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Create()
 {
-    ArkUI_PositionEdges* edges = new ArkUI_PositionEdges{ { 0, 0.0f }, { 0, 0.0f }, { 0, 0.0f }, { 0, 0.0f } };
+    ArkUI_PositionEdges* edges = new ArkUI_PositionEdges { { 0, 0.0f }, { 0, 0.0f }, { 0, 0.0f }, { 0, 0.0f } };
     return edges;
 }
 
@@ -1461,7 +1469,7 @@ uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounte
 
 ArkUI_TextContentBaseController* OH_ArkUI_TextContentBaseController_Create()
 {
-    auto controller = new ArkUI_TextContentBaseController{};
+    auto controller = new ArkUI_TextContentBaseController {};
     return controller;
 }
 
@@ -1477,12 +1485,11 @@ void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseCont
     auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     switch (controller->textFieldType) {
         case NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE:
-            fullImpl->getNodeModifiers()->getTextInputModifier()
-                ->textInputDeleteBackward(controller->node->uiNodeHandle);
+            fullImpl->getNodeModifiers()->getTextInputModifier()->textInputDeleteBackward(
+                controller->node->uiNodeHandle);
             break;
         case NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE:
-            fullImpl->getNodeModifiers()->getTextAreaModifier()
-                ->textAreaDeleteBackward(controller->node->uiNodeHandle);
+            fullImpl->getNodeModifiers()->getTextAreaModifier()->textAreaDeleteBackward(controller->node->uiNodeHandle);
             break;
         default:
             return;
@@ -1497,34 +1504,37 @@ void OH_ArkUI_TextLayoutManager_Dispose(ArkUI_TextLayoutManager* layoutManager)
 
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineCount(ArkUI_TextLayoutManager* layoutManager, int32_t* outLineCount)
 {
-    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "layoutManager is null");
     ArkUI_NodeHandle node = layoutManager->node;
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
-        *outLineCount = fullImpl->getNodeModifiers()->getRichEditorModifier()->
-            getRichEditorLineCount(node->uiNodeHandle);
+        *outLineCount =
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorLineCount(node->uiNodeHandle);
     } else {
         *outLineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetRectsForRange(ArkUI_TextLayoutManager* layoutManager,
-    int32_t start, int32_t end, OH_Drawing_RectWidthStyle widthStyle, OH_Drawing_RectHeightStyle heightStyle,
+ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetRectsForRange(ArkUI_TextLayoutManager* layoutManager, int32_t start,
+    int32_t end, OH_Drawing_RectWidthStyle widthStyle, OH_Drawing_RectHeightStyle heightStyle,
     OH_Drawing_TextBox** outTextBoxes)
 {
-    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "layoutManager is null");
     ArkUI_NodeHandle node = layoutManager->node;
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     if (start < 0 || end < 0 || start > end) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "start is invalid (<0) or start > end");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         *outTextBoxes = reinterpret_cast<OH_Drawing_TextBox*>(
-            fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorRectsForRange(node->uiNodeHandle,
-                start, end, static_cast<ArkUI_Int32>(heightStyle), static_cast<ArkUI_Int32>(widthStyle)));
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorRectsForRange(node->uiNodeHandle, start,
+                end, static_cast<ArkUI_Int32>(heightStyle), static_cast<ArkUI_Int32>(widthStyle)));
     } else {
         *outTextBoxes = reinterpret_cast<OH_Drawing_TextBox*>(
             fullImpl->getNodeModifiers()->getTextModifier()->getRectsForRange(node->uiNodeHandle, start, end,
@@ -1536,13 +1546,15 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetRectsForRange(ArkUI_TextLayoutMana
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphPositionAtCoordinate(
     ArkUI_TextLayoutManager* layoutManager, double dx, double dy, OH_Drawing_PositionAndAffinity** outPos)
 {
-    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "layoutManager is null");
     ArkUI_NodeHandle node = layoutManager->node;
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
-        *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(fullImpl->getNodeModifiers()->
-            getRichEditorModifier()->getRichEditorGlyphPositionAtCoordinate(node->uiNodeHandle, dx, dy));
+        *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorGlyphPositionAtCoordinate(
+                node->uiNodeHandle, dx, dy));
     } else {
         *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
             fullImpl->getNodeModifiers()->getTextModifier()->getGlyphPositionAtCoordinate(node->uiNodeHandle, dx, dy));
@@ -1550,29 +1562,8 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphPositionAtCoordinate(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineMetrics(ArkUI_TextLayoutManager* layoutManager,
-    int32_t lineNumber, OH_Drawing_LineMetrics* outMetrics)
+static void AssignLineMetrics(const ArkUITextLineMetrics& lineMetrics, OH_Drawing_LineMetrics* outMetrics)
 {
-    CHECK_NULL_RETURN(layoutManager && outMetrics, ARKUI_ERROR_CODE_PARAM_INVALID);
-    ArkUI_NodeHandle node = layoutManager->node;
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    int32_t lineCount = 0;
-    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
-        lineCount = fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorLineCount(node->uiNodeHandle);
-    } else {
-        lineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
-    }
-    if (lineNumber < 0 || lineNumber >= lineCount) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    ArkUITextLineMetrics lineMetrics;
-    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
-        lineMetrics = fullImpl->getNodeModifiers()->getRichEditorModifier()->
-            getRichEditorLineMetrics(node->uiNodeHandle, lineNumber);
-    } else {
-        lineMetrics = fullImpl->getNodeModifiers()->getTextModifier()->getLineMetrics(node->uiNodeHandle, lineNumber);
-    }
     outMetrics->ascender = lineMetrics.ascender;
     outMetrics->descender = lineMetrics.descender;
     outMetrics->capHeight = lineMetrics.capHeight;
@@ -1583,7 +1574,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineMetrics(ArkUI_TextLayoutManage
     outMetrics->y = lineMetrics.y;
     outMetrics->startIndex = lineMetrics.startIndex;
     outMetrics->endIndex = lineMetrics.endIndex;
-    ArkUIFontMetrics firstCharMetrics = lineMetrics.firstCharMetrics;
+    const ArkUIFontMetrics& firstCharMetrics = lineMetrics.firstCharMetrics;
     outMetrics->firstCharMetrics.flags = firstCharMetrics.fFlags;
     outMetrics->firstCharMetrics.top = firstCharMetrics.fTop;
     outMetrics->firstCharMetrics.ascent = firstCharMetrics.fAscent;
@@ -1600,6 +1591,36 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineMetrics(ArkUI_TextLayoutManage
     outMetrics->firstCharMetrics.underlinePosition = firstCharMetrics.fUnderlinePosition;
     outMetrics->firstCharMetrics.strikeoutThickness = firstCharMetrics.fStrikeoutThickness;
     outMetrics->firstCharMetrics.strikeoutPosition = firstCharMetrics.fStrikeoutPosition;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineMetrics(ArkUI_TextLayoutManager* layoutManager,
+    int32_t lineNumber, OH_Drawing_LineMetrics* outMetrics)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "layoutManager is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(outMetrics, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outMetrics is null");
+    ArkUI_NodeHandle node = layoutManager->node;
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    int32_t lineCount = 0;
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
+        lineCount = fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorLineCount(node->uiNodeHandle);
+    } else {
+        lineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
+    }
+    if (lineNumber < 0 || lineNumber >= lineCount) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "lineNumber is out of range (lineNumber < 0 or lineNumber >= lineCount)");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUITextLineMetrics lineMetrics;
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
+        lineMetrics = fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorLineMetrics(
+            node->uiNodeHandle, lineNumber);
+    } else {
+        lineMetrics = fullImpl->getNodeModifiers()->getTextModifier()->getLineMetrics(node->uiNodeHandle, lineNumber);
+    }
+    AssignLineMetrics(lineMetrics, outMetrics);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1612,14 +1633,14 @@ OH_ArkUI_DecorationStyleOptions* OH_ArkUI_DecorationStyleOptions_Create()
     options->thicknessScale = 1.0f;
     return options;
 }
- 
+
 void OH_ArkUI_DecorationStyleOptions_Destroy(OH_ArkUI_DecorationStyleOptions* options)
 {
     CHECK_NULL_VOID(options);
     delete options;
     options = nullptr;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetTextDecorationType(
     OH_ArkUI_DecorationStyleOptions* options, ArkUI_TextDecorationType type)
 {
@@ -1627,24 +1648,23 @@ ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetTextDecorationType(
     options->type = type;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetTextDecorationType(OH_ArkUI_DecorationStyleOptions* options,
-    ArkUI_TextDecorationType* type)
+
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetTextDecorationType(
+    OH_ArkUI_DecorationStyleOptions* options, ArkUI_TextDecorationType* type)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(type, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *type = options->type;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetColor(
-    OH_ArkUI_DecorationStyleOptions* options, uint32_t color)
+
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetColor(OH_ArkUI_DecorationStyleOptions* options, uint32_t color)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     options->color = color;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetColor(OH_ArkUI_DecorationStyleOptions* options, uint32_t* color)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -1652,7 +1672,7 @@ ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetColor(OH_ArkUI_DecorationStyl
     *color = options->color;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetTextDecorationStyle(
     OH_ArkUI_DecorationStyleOptions* options, ArkUI_TextDecorationStyle style)
 {
@@ -1660,16 +1680,16 @@ ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetTextDecorationStyle(
     options->style = style;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetTextDecorationStyle(OH_ArkUI_DecorationStyleOptions* options,
-    ArkUI_TextDecorationStyle* style)
+
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetTextDecorationStyle(
+    OH_ArkUI_DecorationStyleOptions* options, ArkUI_TextDecorationStyle* style)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(style, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *style = options->style;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetThicknessScale(
     OH_ArkUI_DecorationStyleOptions* options, float thicknessScale)
 {
@@ -1677,23 +1697,23 @@ ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetThicknessScale(
     options->thicknessScale = thicknessScale;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetThicknessScale(OH_ArkUI_DecorationStyleOptions* options,
-    float* thicknessScale)
+
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetThicknessScale(
+    OH_ArkUI_DecorationStyleOptions* options, float* thicknessScale)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(thicknessScale, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *thicknessScale = options->thicknessScale;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 OH_ArkUI_TextDataDetectorConfig* OH_ArkUI_TextDataDetectorConfig_Create()
 {
     OH_ArkUI_TextDataDetectorConfig* config = new OH_ArkUI_TextDataDetectorConfig();
     config->color = 0xFF000000;
     return config;
 }
- 
+
 void OH_ArkUI_TextDataDetectorConfig_Destroy(OH_ArkUI_TextDataDetectorConfig* config)
 {
     if (!config) {
@@ -1702,19 +1722,19 @@ void OH_ArkUI_TextDataDetectorConfig_Destroy(OH_ArkUI_TextDataDetectorConfig* co
     delete config;
     config = nullptr;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetTypes(
     OH_ArkUI_TextDataDetectorConfig* config, const ArkUI_TextDataDetectorType* types, int32_t length)
 {
     CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(types, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    
+
     for (int32_t i = 0; i < length; i++) {
         config->types.push_back(types[i]);
     }
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetTypes(OH_ArkUI_TextDataDetectorConfig* config,
     ArkUI_TextDataDetectorType* buffer, int32_t bufferSize, int32_t* writeLength)
 {
@@ -1729,7 +1749,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetTypes(OH_ArkUI_TextDataDetect
     *writeLength = typeSize;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCallback(
     OH_ArkUI_TextDataDetectorConfig* config, void* userData,
     void (*callback)(const char* result, int32_t length, void* userData))
@@ -1740,15 +1760,14 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCall
     config->onDetectResultUpdateUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetColor(
-    OH_ArkUI_TextDataDetectorConfig* config, uint32_t color)
+
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetColor(OH_ArkUI_TextDataDetectorConfig* config, uint32_t color)
 {
     CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     config->color = color;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetColor(OH_ArkUI_TextDataDetectorConfig* config, uint32_t* color)
 {
     CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -1756,7 +1775,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetColor(OH_ArkUI_TextDataDetect
     *color = config->color;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetDecorationStyleOptions(
     OH_ArkUI_TextDataDetectorConfig* config, OH_ArkUI_DecorationStyleOptions* decoration)
 {
@@ -1769,7 +1788,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetDecorationStyleOptions(
     config->decoration = newDecoration;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetDecorationStyleOptions(
     OH_ArkUI_TextDataDetectorConfig* config, OH_ArkUI_DecorationStyleOptions* decoration)
 {
@@ -1778,7 +1797,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetDecorationStyleOptions(
     *decoration = config->decoration;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetEnablePreviewMenu(
     OH_ArkUI_TextDataDetectorConfig* dataDetectorConfig, bool enablePreviewMenu)
 {
@@ -1786,7 +1805,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetEnablePreviewMenu(
     dataDetectorConfig->enablePreviewMenu = enablePreviewMenu;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu(
     OH_ArkUI_TextDataDetectorConfig* config, bool* enablePreviewMenu)
 {
@@ -1805,14 +1824,14 @@ OH_ArkUI_TextEditorSelectionMenuOptions* OH_ArkUI_TextEditorSelectionMenuOptions
     options->hapticFeedbackMode = OH_ArkUI_HapticFeedbackMode::OH_ARKUI_HAPTIC_FEEDBACK_MODE_DISABLED;
     return options;
 }
- 
+
 void OH_ArkUI_TextEditorSelectionMenuOptions_Destroy(OH_ArkUI_TextEditorSelectionMenuOptions* options)
 {
     CHECK_NULL_VOID(options);
     delete options;
     options = nullptr;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetSpanType(
     OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_TextEditorSpanType textEditorSpanType)
 {
@@ -1820,7 +1839,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetSpanType(
     options->richEditorSpanType = textEditorSpanType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetSpanType(
     OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_TextEditorSpanType* textEditorSpanType)
 {
@@ -1829,61 +1848,59 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetSpanType(
     *textEditorSpanType = options->richEditorSpanType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetContentNode(OH_ArkUI_TextEditorSelectionMenuOptions* options,
-    ArkUI_NodeHandle node)
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetContentNode(
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     options->contentNode = node;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetContentNode(OH_ArkUI_TextEditorSelectionMenuOptions* options,
-    ArkUI_NodeHandle* node)
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetContentNode(
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, ArkUI_NodeHandle* node)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *node = options->contentNode;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetResponseType(
-    OH_ArkUI_TextEditorSelectionMenuOptions* options,
-    OH_ArkUI_TextEditorResponseType  responseType)
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_TextEditorResponseType responseType)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     options->responseType = responseType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetResponseType(
-    OH_ArkUI_TextEditorSelectionMenuOptions* options,
-    OH_ArkUI_TextEditorResponseType * responseType)
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_TextEditorResponseType* responseType)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(responseType, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *responseType = options->responseType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetMenuType(OH_ArkUI_TextEditorSelectionMenuOptions* options,
-    OH_ArkUI_TextMenuType  menuType)
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetMenuType(
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_TextMenuType menuType)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     options->menuType = menuType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
-ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetMenuType(OH_ArkUI_TextEditorSelectionMenuOptions* options,
-    OH_ArkUI_TextMenuType * menuType)
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetMenuType(
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_TextMenuType* menuType)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(menuType, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *menuType = options->menuType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuShowCallback(
     OH_ArkUI_TextEditorSelectionMenuOptions* options, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData))
@@ -1894,7 +1911,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuShowCallba
     options->onMenuShowUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuHideCallback(
     OH_ArkUI_TextEditorSelectionMenuOptions* options, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData))
@@ -1905,7 +1922,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuHideCallba
     options->onMenuHideUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuAppearCallback(
     OH_ArkUI_TextEditorSelectionMenuOptions* options, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData))
@@ -1916,7 +1933,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuAppearCall
     options->onMenuAppearUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuDisappearCallback(
     OH_ArkUI_TextEditorSelectionMenuOptions* options, void* userData, void (*callback)(void* userData))
 {
@@ -1926,7 +1943,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuDisappearC
     options->onMenuDisappearUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetHapticFeedbackMode(
     OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_HapticFeedbackMode mode)
 {
@@ -1934,7 +1951,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetHapticFeedbackMode(
     options->hapticFeedbackMode = mode;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
- 
+
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetHapticFeedbackMode(
     OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_HapticFeedbackMode* mode)
 {
@@ -1947,9 +1964,10 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetHapticFeedbackMode(
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(
     ArkUI_TextLayoutManager* layoutManager, double dx, double dy, OH_Drawing_PositionAndAffinity** outPos)
 {
-    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "layoutManager is null");
     ArkUI_NodeHandle node = layoutManager->node;
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
@@ -1966,9 +1984,10 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_TextLayoutManager* layoutManager,
     OH_Drawing_Range* charRange, OH_Drawing_Range** outGlyphRange, OH_Drawing_Range** outActualCharRange)
 {
-    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "layoutManager is null");
     ArkUI_NodeHandle node = layoutManager->node;
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(charRange, ARKUI_ERROR_CODE_PARAM_INVALID,
         "OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange", "Parameter charRange is null");
     int32_t start = static_cast<int32_t>(OH_Drawing_GetStartFromRange(charRange));
@@ -1989,6 +2008,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
         delete actualCharRange;
         glyphRange = nullptr;
         actualCharRange = nullptr;
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "glyphRange or actualCharRange is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *outGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
@@ -1999,9 +2019,10 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_TextLayoutManager* layoutManager,
     OH_Drawing_Range* glyphRange, OH_Drawing_Range** outCharRange, OH_Drawing_Range** outActualGlyphRange)
 {
-    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "layoutManager is null");
     ArkUI_NodeHandle node = layoutManager->node;
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(glyphRange, ARKUI_ERROR_CODE_PARAM_INVALID,
         "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange", "Parameter glyphRange is null");
     int32_t start = static_cast<int32_t>(OH_Drawing_GetStartFromRange(glyphRange));
@@ -2022,6 +2043,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
         delete actualGlyphRange;
         charRange = nullptr;
         actualGlyphRange = nullptr;
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "charRange or actualGlyphRange is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *outCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
