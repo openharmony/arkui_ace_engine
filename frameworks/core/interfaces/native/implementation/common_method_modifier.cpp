@@ -881,8 +881,9 @@ auto g_bindMenuOptionsParam = [](
         menuParam.scrollBar = scrollBarOpt.value();
     }
     auto tarGetValue = OptConvert<Dimension>(menuOptions.targetSpace);
-    Validator::ValidateNonNegative(tarGetValue);
-    menuParam.targetSpace = tarGetValue;
+    if (tarGetValue.has_value()) {
+        menuParam.targetSpace = tarGetValue.value();
+    }
     auto maxHeightOpt = OptConvert<Dimension>(menuOptions.maxHeight);
     Validator::ValidateNonNegative(maxHeightOpt);
     menuParam.maxHeight = maxHeightOpt;

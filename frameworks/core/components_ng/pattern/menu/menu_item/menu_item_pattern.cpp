@@ -727,9 +727,11 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (menuPattern->GetScrollBar().has_value()) {
         param.scrollBar = menuPattern->GetScrollBar().value();
     }
-    param.targetSpace = outterMenuLayoutProps->GetMenuTargetSpace();
-    param.targetOffset = outterMenuLayoutProps->GetTargetOffset();
-    param.targetSize = outterMenuLayoutProps->GetTargetMenuSize();
+    if (outterMenuLayoutProps->GetMenuTargetSpace().has_value()) {
+        param.targetSpace = outterMenuLayoutProps->GetMenuTargetSpace();
+        param.targetOffset = outterMenuLayoutProps->GetTargetOffset();
+        param.targetSize = outterMenuLayoutProps->GetTargetMenuSize();
+    }
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);

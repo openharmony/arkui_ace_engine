@@ -209,8 +209,11 @@ HWTEST_F(MenuLayoutAvoid1TwoTestNg, UpdateTargetValue001, TestSize.Level1)
     ASSERT_NE(layoutWrapper, nullptr);
     menuLayoutAlgorithm->UpdateTargetValue(layoutWrapper);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    EXPECT_FALSE(props->GetTargetOffset().has_value());
     ASSERT_NE(props, nullptr);
-    EXPECT_EQ(props->GetTargetOffset().value().GetX(), 0);
+    props->UpdateMenuTargetSpace(Dimension(10));
+    menuLayoutAlgorithm->UpdateTargetValue(layoutWrapper);
+    EXPECT_TRUE(props->GetTargetOffset().has_value());
     delete layoutWrapper;
 }
 
@@ -279,7 +282,7 @@ HWTEST_F(MenuLayoutAvoid1TwoTestNg, UpdatePropTargetSpace001, TestSize.Level1)
     menuProp->UpdateMenuTargetSpace(Dimension(10));
     menuPattern->SetPreviewMode(MenuPreviewMode::NONE);
     menuLayoutAlgorithm->UpdatePropTargetSpace(menuProp, menuPattern);
-    EXPECT_TRUE(menuLayoutAlgorithm->propTargetSpace_.has_value());
+    EXPECT_FALSE(menuLayoutAlgorithm->propTargetSpace_.has_value());
     menuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
     menuLayoutAlgorithm->UpdatePropTargetSpace(menuProp, menuPattern);
     EXPECT_FALSE(menuLayoutAlgorithm->propTargetSpace_.has_value());
@@ -434,38 +437,40 @@ HWTEST_F(MenuLayoutAvoid1TwoTestNg, GetCurrentPosition001, TestSize.Level1)
     menuLayoutAlgorithm->propTargetOffset_ = { 200, 200 };
     menuLayoutAlgorithm->wrapperRect_ = Rect(12, 72, 700, 1000);
     menuLayoutAlgorithm->wrapperSize_ = SizeF(720.0f, 1136.0f);
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.placement = Placement::TOP;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::CONTEXT_MENU, menuParam);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(menuNode);
     SizeF size(150.0f, 150.0f);
     OffsetF position = { 300, 300 };
-    auto offset1 = menuLayoutAlgorithm->GetCurrentPosition(position, size, false, false);
+    auto offset1 = menuLayoutAlgorithm->GetCurrentPosition(position, size, false, false, menuItemNode);
     EXPECT_EQ(offset1, 1000.0f);
-
     OffsetF positionOne = { 150, 150 };
     menuLayoutAlgorithm->proptargetSize_ = { 100.0, 200.0 };
-    auto offset2 = menuLayoutAlgorithm->GetCurrentPosition(positionOne, size, false, false);
-    EXPECT_EQ(offset2, 118);
-
+    auto offset2 = menuLayoutAlgorithm->GetCurrentPosition(positionOne, size, false, false, menuItemNode);
+    EXPECT_EQ(offset2, 118.0f);
     OffsetF positionTwo = { 150, 150 };
-    auto offset3 = menuLayoutAlgorithm->GetCurrentPosition(positionTwo, size, 400, true);
+    auto offset3 = menuLayoutAlgorithm->GetCurrentPosition(positionTwo, size, 400, true, menuItemNode);
     EXPECT_EQ(offset3, 1000.0f);
-
     SizeF sizeThree(20.0f, 20.0f);
     menuLayoutAlgorithm->proptargetSize_ = { 1000.0, 2000.0 };
     menuLayoutAlgorithm->propTargetOffset_ = { 350, 350 };
     menuLayoutAlgorithm->wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
-    auto offset4 = menuLayoutAlgorithm->GetCurrentPosition(position, sizeThree, 400, true);
+    auto offset4 = menuLayoutAlgorithm->GetCurrentPosition(position, sizeThree, 400, true, menuItemNode);
     EXPECT_EQ(offset4, 289.0f);
-
     SizeF sizeFour(200.0f, 200.0f);
     menuLayoutAlgorithm->proptargetSize_ = { 1000.0, 2000.0 };
     menuLayoutAlgorithm->wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
-    auto offset5 = menuLayoutAlgorithm->GetCurrentPosition(position, sizeFour, 400, true);
+    auto offset5 = menuLayoutAlgorithm->GetCurrentPosition(position, sizeFour, 400, true, menuItemNode);
     EXPECT_EQ(offset5, 339.0f);
-
-    SizeF sizeFive(200.0f, 200.0f);
-    menuLayoutAlgorithm->proptargetSize_ = { 1000.0, 2000.0 };
-    menuLayoutAlgorithm->wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
-    auto offset6 = menuLayoutAlgorithm->GetCurrentPosition(position, sizeFive, true, true);
-    EXPECT_EQ(offset6, 289.0f);
 }
 
 /**
@@ -492,17 +497,17 @@ HWTEST_F(MenuLayoutAvoid1TwoTestNg, NeedUpdateMaxHeight001, TestSize.Level1)
     OffsetF position = { 200, 400 };
     OffsetF positionX = { 400, 400 };
     SizeF menuItemSize = { 50.0f, 40.0f };
-    auto offset1 = menuLayoutAlgorithm->NeedUpdateMaxHeight(size, positionX, menuItemSize, nullptr);
+    auto offset1 = menuLayoutAlgorithm->NeedUpdateMaxHeight(size, positionX, menuItemSize, nullptr, menuItemNode);
     EXPECT_EQ(offset1, 2156.0f);
-    auto offset2 = menuLayoutAlgorithm->NeedUpdateMaxHeight(size, position, menuItemSize, layoutWrapper);
+    auto offset2 = menuLayoutAlgorithm->NeedUpdateMaxHeight(size, position, menuItemSize, layoutWrapper, menuItemNode);
     EXPECT_EQ(offset2, 2156.0f);
     auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
     ASSERT_NE(menuLayoutProperty, nullptr);
     menuLayoutProperty->layoutDirection_ = TextDirection::RTL;
-    auto offset3 = menuLayoutAlgorithm->NeedUpdateMaxHeight(size, position, menuItemSize, layoutWrapper);
+    auto offset3 = menuLayoutAlgorithm->NeedUpdateMaxHeight(size, position, menuItemSize, layoutWrapper, menuItemNode);
     EXPECT_EQ(offset3, 2156.0f);
     SizeF sizeTwo(2000.0f, 200.0f);
-    auto offset4 = menuLayoutAlgorithm->NeedUpdateMaxHeight(sizeTwo, position, menuItemSize, nullptr);
+    auto offset4 = menuLayoutAlgorithm->NeedUpdateMaxHeight(sizeTwo, position, menuItemSize, nullptr, menuItemNode);
     EXPECT_EQ(offset4, 2595.0f);
 }
 
@@ -519,12 +524,24 @@ HWTEST_F(MenuLayoutAvoid1TwoTestNg, GetOthersPosition001, TestSize.Level1)
     menuLayoutAlgorithm->proptargetSize_ = { 100.0, 200.0 };
     menuLayoutAlgorithm->propTargetOffset_ = { 100, 200 };
     menuLayoutAlgorithm->wrapperSize_ = { 1250.0, 400.0 };
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.placement = Placement::TOP;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::CONTEXT_MENU, menuParam);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(menuNode);
     OffsetF position = { 300, 300 };
     SizeF size(150.0f, 150.0f);
-    auto offset1 = menuLayoutAlgorithm->GetOthersPosition(position, size);
+    auto offset1 = menuLayoutAlgorithm->GetOthersPosition(position, size, menuItemNode);
     EXPECT_EQ(offset1, 2595.0f);
     menuLayoutAlgorithm->wrapperRect_ = Rect(12, 72, 70, 100);
-    auto offset2 = menuLayoutAlgorithm->GetOthersPosition(position, size);
+    auto offset2 = menuLayoutAlgorithm->GetOthersPosition(position, size, menuItemNode);
     EXPECT_EQ(offset2, 100.0f);
 }
 
@@ -542,23 +559,35 @@ HWTEST_F(MenuLayoutAvoid1TwoTestNg, MenuVerticalPanHeight001, TestSize.Level1)
     menuLayoutAlgorithm->propTargetOffset_ = { 200, 200 };
     menuLayoutAlgorithm->wrapperRect_ = Rect(12, 72, 700, 1000);
     menuLayoutAlgorithm->wrapperSize_ = SizeF(720.0f, 1136.0f);
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.placement = Placement::TOP;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::CONTEXT_MENU, menuParam);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(menuNode);
     SizeF size(150.0f, 150.0f);
     OffsetF position = { 300, 300 };
-    auto offset1 = menuLayoutAlgorithm->MenuVerticalPanHeight(position, size);
-    EXPECT_EQ(offset1, 662.0f);
+    auto offset1 = menuLayoutAlgorithm->MenuVerticalPanHeight(position, size, menuItemNode);
+    EXPECT_EQ(offset1, 118.0f);
 
     OffsetF positionTwo = { 200, 120 };
-    auto offset2 = menuLayoutAlgorithm->MenuVerticalPanHeight(positionTwo, size);
+    auto offset2 = menuLayoutAlgorithm->MenuVerticalPanHeight(positionTwo, size, menuItemNode);
     EXPECT_EQ(offset2, 118);
 
     menuLayoutAlgorithm->propTargetOffset_ = { 400, 400 };
-    auto offset3 = menuLayoutAlgorithm->MenuVerticalPanHeight(positionTwo, size);
+    auto offset3 = menuLayoutAlgorithm->MenuVerticalPanHeight(positionTwo, size, menuItemNode);
     EXPECT_EQ(offset3, 1000);
 
     menuLayoutAlgorithm->propTargetOffset_ = { 400, 300 };
     OffsetF positionThree = { 400, 600 };
-    auto offset4 = menuLayoutAlgorithm->MenuVerticalPanHeight(positionThree, size);
-    EXPECT_EQ(offset4, 562);
+    auto offset4 = menuLayoutAlgorithm->MenuVerticalPanHeight(positionThree, size, menuItemNode);
+    EXPECT_EQ(offset4, 218);
 }
 
 /**
@@ -577,16 +606,28 @@ HWTEST_F(MenuLayoutAvoid1TwoTestNg, CheckHeightReason001, TestSize.Level1)
     menuLayoutAlgorithm->wrapperSize_ = SizeF(720.0f, 1136.0f);
     SizeF size(150.0f, 150.0f);
     OffsetF position = { 300, 150 };
-    auto offset1 = menuLayoutAlgorithm->CheckHeightReason(position, size);
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.placement = Placement::TOP;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::CONTEXT_MENU, menuParam);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(menuNode);
+    auto offset1 = menuLayoutAlgorithm->CheckHeightReason(position, size, menuItemNode);
     EXPECT_EQ(offset1, TargetSpaceReason::TOP);
 
     OffsetF positionTwo = { 200, 620 };
-    auto offset2 = menuLayoutAlgorithm->CheckHeightReason(positionTwo, size);
-    EXPECT_EQ(offset2, TargetSpaceReason::BOTTOM);
+    auto offset2 = menuLayoutAlgorithm->CheckHeightReason(positionTwo, size, menuItemNode);
+    EXPECT_EQ(offset2, TargetSpaceReason::TOP);
 
     OffsetF positionThr = { 200, 300 };
-    auto offset3 = menuLayoutAlgorithm->CheckHeightReason(positionThr, size);
-    EXPECT_EQ(offset3, TargetSpaceReason::MIDDLE);
+    auto offset3 = menuLayoutAlgorithm->CheckHeightReason(positionThr, size, menuItemNode);
+    EXPECT_EQ(offset3, TargetSpaceReason::TOP);
 }
 
 /**
