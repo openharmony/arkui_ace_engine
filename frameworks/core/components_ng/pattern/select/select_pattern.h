@@ -162,6 +162,8 @@ public:
     // set props of menu background
     void SetMenuBackgroundColor(const Color& color);
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
+    void SetMenuBackgroundBlurStyleOptions(const std::optional<BlurStyleOption>& blurStyleOption);
+    void SetMenuBackgroundEffect(const std::optional<EffectOption>& effectOption);
     bool IsValidIndex(int32_t index);
     void GetSelectedValue(int32_t index, std::string& value);
     void ShowOptions(int32_t index);
@@ -215,6 +217,11 @@ public:
     RefPtr<UiMaterial> GetMenuSystemMaterial() const
     {
         return menuSystemMaterial_;
+    }
+
+    BlurStyleOption GetMenuBackgroundBlurStyle() const
+    {
+        return blurStyleOption_;
     }
 
     void SetShowInSubWindow(bool isShowInSubWindow);
@@ -454,6 +461,7 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
     std::optional<Color> menuBackgroundColor_;
+    BlurStyleOption blurStyleOption_;
     SelectDivider divider_;
     std::optional<DividerMode> dividerMode_;
 };

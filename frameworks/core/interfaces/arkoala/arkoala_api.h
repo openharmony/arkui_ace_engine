@@ -3027,6 +3027,18 @@ struct ArkUIAISessionEventStruct {
     void* onDestroyAISession;
 };
 
+struct MenuBgBlurStyleOptionArgs {
+    ArkUI_Int32 colorMode;
+    ArkUI_Int32 adaptiveColor;
+    ArkUI_Float32 scale;
+    const ArkUI_Float32* blurValues;
+    ArkUI_Int32 blurValuesSize;
+    ArkUI_Int32 policy;
+    ArkUI_Bool isValidColor;
+    ArkUI_Uint32 inactiveColor;
+    void* inactiveColorRawPtr;
+};
+
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
@@ -8064,6 +8076,13 @@ struct ArkUISelectModifier {
     void (*resetMinKeyboardAvoidDistance)(ArkUINodeHandle node);
     void (*setMenuSystemMaterial)(ArkUINodeHandle node, void* menuSystemMaterial);
     void (*resetMenuSystemMaterial)(ArkUINodeHandle node);
+    void (*setMenuBgBlurStyleWithOption)(ArkUINodeHandle node, MenuBgBlurStyleOptionArgs* optionArgs);
+    void (*resetMenuBgBlurStyleWithOption)(ArkUINodeHandle node);
+    void (*setMenuBackgroundEffect)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 saturation,
+        ArkUI_Float32 brightness, ArkUI_Uint32 color, ArkUI_Int32 adaptiveColor, const ArkUI_Float32* blurValues,
+        ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg,
+        void* colorRawPtr, void* inactiveColorRawPtr);
+    void (*resetMenuBackgroundEffect)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

@@ -2463,18 +2463,52 @@ void SelectPattern::SetMenuBackgroundColor(const Color& color)
 
 void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
 {
+    blurStyleOption_.blurStyle = blurStyle.blurStyle;
     CHECK_NULL_VOID(menuWrapper_);
     auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     auto params = wrapperPattern->GetMenuParam();
-    params.blurStyleOption = blurStyle;
+    params.blurStyleOption = blurStyleOption_;
     wrapperPattern->SetMenuParam(params);
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     ACE_UINODE_TRACE(menu);
     auto renderContext = menu->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackBlurStyle(blurStyle);
+    renderContext->UpdateBackBlurStyle(blurStyleOption_);
+}
+
+void SelectPattern::SetMenuBackgroundBlurStyleOptions(const std::optional<BlurStyleOption>& blurStyleOption)
+{
+    blurStyleOption_.colorMode = blurStyleOption->colorMode;
+    blurStyleOption_.adaptiveColor = blurStyleOption->adaptiveColor;
+    blurStyleOption_.scale = blurStyleOption->scale;
+    blurStyleOption_.blurOption = blurStyleOption->blurOption;
+    blurStyleOption_.policy = blurStyleOption->policy;
+    blurStyleOption_.inactiveColor = blurStyleOption->inactiveColor;
+    blurStyleOption_.isValidColor = blurStyleOption->isValidColor;
+    CHECK_NULL_VOID(menuWrapper_);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto params = wrapperPattern->GetMenuParam();
+    params.blurStyleOption = blurStyleOption_;
+    wrapperPattern->SetMenuParam(params);
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurStyle(blurStyleOption_);
+}
+
+void SelectPattern::SetMenuBackgroundEffect(const std::optional<EffectOption>& effectOption)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundEffect(effectOption);
 }
 
 bool SelectPattern::FindOptionIndexByValue(const std::string& value, int32_t& index)

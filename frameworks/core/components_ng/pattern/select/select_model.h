@@ -176,6 +176,8 @@ public:
     virtual void SetKeyboardAvoidMode(const std::optional<NG::MenuKeyboardAvoidMode>& mode) {};
     virtual void SetMinKeyboardAvoidDistance(const std::optional<Dimension>& distance) {};
     virtual void SetMenuSystemMaterial(const RefPtr<UiMaterial>& menuSystemMaterial) {};
+    virtual void SetMenuBackgroundBlurStyleOptions(const std::optional<BlurStyleOption>& blurStyleOption) {};
+    virtual void SetMenuBackgroundEffect(const std::optional<EffectOption>& effectOption) {};
 
 private:
     static std::unique_ptr<SelectModel> instance_;
