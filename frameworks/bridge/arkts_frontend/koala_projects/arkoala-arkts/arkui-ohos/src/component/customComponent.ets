@@ -39,6 +39,8 @@ import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { transferTypeName } from '../stateManagement/storage/persistenceV2';
 import { ArkCustomComponentRootPeer } from './staticComponents';
 import { ArkUIObjectFinalizationRegisterProxy } from '../base/ArkUIObjectFinalizationRegisterProxy';
+import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../stateManagement/utils';
+import { IVariableOwner } from '../stateManagement/decorator';
 /** @custom_components_common_method_imports */
 
 export class ReuseObject {
@@ -331,23 +333,29 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     isValidActiveCount(): boolean {
         return this.instance.__getActive__Internal() < 2;
     }
-    setActiveCount(active: boolean): void {
+    setActiveCount(active: boolean): boolean {
         let activeCount: number = this.instance.__getActive__Internal();
-        activeCount += active ? 1 : -1;
-        this.instance.__setActive__Internal(activeCount);
+        let afterCount: number = activeCount + (active ? 1 : -1);
+        this.instance.__setActive__Internal(afterCount);
         if (!this.isValidActiveCount()) {
             console.log(`activeCount_error: ${this.instance.__getActive__Internal()}`);
         }
+        return (activeCount + afterCount) === 1; // activeCount: 0, afterCount: 1 or activeCount: 1, afterCount: 0
     }
     isViewActive(): boolean {
         return this.instance.__getActive__Internal() > 0;
     }
     setActiveInternal(active: boolean, isReuse: boolean): void {
-        this.setActiveCount(active);
-        if (this.isViewActive()) {
+        const isSwitch: boolean = this.setActiveCount(active);
+        const status = this.isViewActive();
+        if (status) {
             StateUpdateLoop.consumeFreezeTasks(this.getUniqueId());
             ObserveSingleton.instance.unFreezeDelayedComputedProps();
             ObserveSingleton.instance.unFreezeDelayedMonitorPaths();
+            ObserveSingleton.instance.updateDirtyComputedAndMonitorWhenUnfreeze();
+        }
+        if (isSwitch) {
+            this.instance.__fireActiveOrInactiveFunc__Internal(status);
         }
         this.switchNodeFreeze();
         this.instance.__propagateToChild__Internal(active, isReuse);
@@ -846,4 +854,16 @@ export enum LifeCycleEvent {
     ON_RECYCLE = 2,       // Triggered when component is recycled
     ON_REUSE = 3,         // Triggered when component is reused
     ON_DISAPPEAR = 4      // Triggered when component disappears
+}
+
+export class CustomComponentContextImpl implements CustomComponentContext {
+    @JSONStringifyIgnore private customComponent: IVariableOwner;
+
+    constructor(customComponent: IVariableOwner) {
+        this.customComponent = customComponent;
+    }
+
+    registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void {
+        this.customComponent.__registerActiveAndInactiveCallback__Internal(active, inactive);
+    }
 }
