@@ -412,9 +412,9 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest007, TestSize.Level0)
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(pattern, nullptr);
     modelNg.SetColor(COLOR_DEFAULT);
-    pattern->SetColorLock(true);
+    modelNg.SetColorByUser(true);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
-    pattern->SetColorLock(false);
+    modelNg.SetColorByUser(false);
     frameNode->SetThemeScopeId(334455);
     EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);

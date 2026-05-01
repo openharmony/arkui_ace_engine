@@ -61,6 +61,11 @@ void LoadingProgressPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    RefPtr<ProgressTheme> theme = host->GetTheme<ProgressTheme>(true);
+    CHECK_NULL_VOID(theme);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && host->GetThemeScopeId()) {
+        ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, theme->GetLoadingColor());
+    }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
@@ -326,7 +331,7 @@ bool LoadingProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
     result = !paintProperty->HasColor();
 
-    if (themeScopeId && !colorLock_) {
+    if (themeScopeId && !paintProperty->GetColorSetByUser().value_or(false)) {
         paintProperty->UpdateColor(progressTheme->GetLoadingColor());
         result = true;
     }

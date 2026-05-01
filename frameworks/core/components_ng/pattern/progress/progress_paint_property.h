@@ -45,6 +45,7 @@ public:
         paintProperty->propProgressStatus_ = CloneProgressStatus();
         paintProperty->propEnableSmoothEffect_ = CloneEnableSmoothEffect();
         paintProperty->propIsSensitive_ = CloneIsSensitive();
+        paintProperty->propBorderColorSetByUser_ = CloneBorderColorSetByUser();
         return paintProperty;
     }
 
@@ -61,6 +62,7 @@ public:
         ResetProgressStatus();
         ResetEnableSmoothEffect();
         ResetIsSensitive();
+        ResetBorderColorSetByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
