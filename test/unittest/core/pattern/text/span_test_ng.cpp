@@ -2392,34 +2392,30 @@ HWTEST_F(SpanTestNg, SpanItemGetFontWeightConfigs002, TestSize.Level1)
 
 /**
  * @tc.name: SpanItemToJsonValue003
- * @tc.desc: Test SpanItem ToJsonValue contains variableFontWeight and fontWeightConfigs.
+ * @tc.desc: Verify SpanItem.ToJsonValue correctly serializes variableFontWeight and fontWeightConfigs
+ *           (enableVariableFontWeight, enableDeviceFontWeightCategory) into JSON output.
  * @tc.type: FUNC
  */
 HWTEST_F(SpanTestNg, SpanItemToJsonValue003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create SpanModelNG instance and set font properties
-     *            - variableFontWeight: 350
-     *            - enableVariableFontWeight: true
-     *            - enableDeviceFontWeightCategory: false
-     * @tc.expected: SpanModelNG is initialized with specified properties
+     * @tc.steps: step1. Create SpanNode with variableFontWeight=350,
+     *            enableVariableFontWeight=true, enableDeviceFontWeightCategory=false
+     * @tc.expected: step1. SpanNode is created and properties are set
      */
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);
     spanModelNG.SetVariableFontWeight(350);
     spanModelNG.SetEnableVariableFontWeight(true);
     spanModelNG.SetEnableDeviceFontWeightCategory(false);
-
-    /**
-     * @tc.steps: step2. Create SpanNode from ViewStackProcessor
-     * @tc.expected: SpanNode is created successfully
-     */
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
 
     /**
-     * @tc.steps: step3. Create TextFrameNode and TextPattern, then set to SpanItem
-     * @tc.expected: TextPattern is created and set successfully
+     * @tc.steps: step2. Attach TextPattern to SpanItem and call ToJsonValue
+     * @tc.expected: step2. JSON contains variableFontWeight="350",
+     *            fontWeightConfigs with enableVariableFontWeight="true",
+     *            enableDeviceFontWeightCategory="false"
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
