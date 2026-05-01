@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/pipeline_ng/environment_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace::NG {
@@ -984,6 +986,12 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
         // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
     }
+    if (!recursive && context) {
+        auto envManager = context->GetEnvironmentManager();
+        if (envManager) {
+            envManager->OnNodeAttached(Claim(this));
+        }
+    }
 }
 
 [[deprecated]] void UINode::AttachToMainTree(bool recursive)
@@ -1018,6 +1026,12 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     }
     isRemoving_ = true;
     auto context = context_;
+    if (!recursive && context) {
+        auto envManager = context->GetEnvironmentManager();
+        if (envManager) {
+            envManager->OnNodeDetached(Claim(this));
+        }
+    }
     DetachContext(false);
     if (isNodeAdapter_) {
         std::list<RefPtr<UINode>> nodes;

@@ -28,6 +28,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/back_press_handler_manager.h"
+#include "core/pipeline_ng/environment_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
@@ -1908,3 +1909,25 @@ bool WindowManager::GetPageViewportConfig(
 }
 } // namespace OHOS::Ace
 // WindowManager ===============================================================
+
+namespace OHOS::Ace::NG {
+void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
+{
+}
+
+void EnvironmentManager::OnNodeDetached(const RefPtr<UINode>& node)
+{
+}
+
+ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase)
+{
+    if (!node) {
+        return;
+    }
+    active_ = true;
+}
+
+ScopedEnvConsumer::~ScopedEnvConsumer()
+{
+}
+} // namespace OHOS::Ace::NG

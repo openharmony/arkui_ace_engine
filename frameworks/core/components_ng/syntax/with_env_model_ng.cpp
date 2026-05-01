@@ -18,6 +18,8 @@
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/with_env_node.h"
+#include "core/pipeline_ng/environment_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -30,6 +32,22 @@ WithEnvModel* WithEnvModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<EnvironmentManager> GetEnvironmentManager()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetEnvironmentManager();
+}
+
+template<typename T>
+bool SetEnvPropertyByManager(const RefPtr<WithEnvNode>& node, const std::string& key, T value)
+{
+    auto envManager = GetEnvironmentManager();
+    CHECK_NULL_RETURN(envManager, false);
+    return envManager->SetValue(node, EnvironmentPropertyKind::ENV, key, std::any(value));
+}
+} // namespace
 
 void WithEnvModelNG::Create()
 {
@@ -44,6 +62,9 @@ void WithEnvModelNG::SetEnvProperty(const std::string& key, const std::string& v
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<WithEnvNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(node);
+    if (SetEnvPropertyByManager(node, key, value)) {
+        return;
+    }
     node->SetEnvProperty(key, value);
 }
 
@@ -53,6 +74,9 @@ void WithEnvModelNG::SetEnvProperty(const std::string& key, double value)
     auto node = AceType::DynamicCast<WithEnvNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(node);
 
+    if (SetEnvPropertyByManager(node, key, value)) {
+        return;
+    }
     node->SetEnvProperty(key, value);
 }
 
@@ -61,6 +85,9 @@ void WithEnvModelNG::SetEnvProperty(const std::string& key, bool value)
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<WithEnvNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(node);
+    if (SetEnvPropertyByManager(node, key, value)) {
+        return;
+    }
     node->SetEnvProperty(key, value);
 }
 
@@ -69,6 +96,10 @@ void WithEnvModelNG::SetCustomEnvProperty(const std::string& key, std::any value
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<WithEnvNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(node);
+    auto envManager = GetEnvironmentManager();
+    if (envManager && envManager->SetValue(node, EnvironmentPropertyKind::CUSTOM, key, value)) {
+        return;
+    }
     node->SetCustomEnvProperty(key, std::move(value));
 }
 
