@@ -2289,6 +2289,7 @@ void SearchPattern::UpdateTextFieldColor()
             auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(buttonLayoutProperty);
             buttonLayoutProperty->UpdateFontColor(searchTheme->GetSearchButtonTextColor());
+            buttonLayoutProperty->UpdateFontColorFlagByUser(true);
         }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

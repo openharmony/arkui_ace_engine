@@ -660,9 +660,12 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     bool colorFlag = ParseJsColor(info[0], backgroundColor, resObj);
     if (!colorFlag) {
-        auto buttonTheme = GetTheme<ButtonTheme>(true);
-        if (buttonTheme) {
-            backgroundColor = buttonTheme->GetBgColor();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        if (pipelineContext) {
+            auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
+            if (buttonTheme) {
+                backgroundColor = buttonTheme->GetBgColor();
+            }
         }
     }
     if (SystemProperties::ConfigChangePerform()) {

@@ -5936,8 +5936,10 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
 
     if (preBackgroundColor.has_value()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
     } else {
         renderContext->ResetBackgroundColor();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, false, frameNode);
         renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
         pattern->OnBackgroundColorReset();
     }
@@ -5991,6 +5993,7 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
             return;
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
