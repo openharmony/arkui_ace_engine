@@ -14,6 +14,8 @@
  */
 
 #include "list_test_ng.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"

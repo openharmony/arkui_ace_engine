@@ -22,7 +22,6 @@
 
 #include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/pattern/grid/grid_model_ng.h"
 
 namespace OHOS::Ace::NG {
 

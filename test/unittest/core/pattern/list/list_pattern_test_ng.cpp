@@ -17,6 +17,8 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"

@@ -21,7 +21,6 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
