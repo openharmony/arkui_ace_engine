@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <chrono>
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -422,6 +424,41 @@ HWTEST_F(RichEditorTouchTestNg, HandleTouchEvent008, TestSize.Level0)
     richEditorPattern->hasUrlSpan_ = true;
     richEditorPattern->HandleTouchEvent(touchEventInfo);
     EXPECT_EQ(richEditorPattern->moveCaretState_.touchDownOffset, touchLocationInfo.localLocation_);
+}
+
+/**
+ * @tc.name: HandleTouchEvent011
+ * @tc.desc: test HandleTouchEvent cancel resets magnifier touch state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTouchTestNg, HandleTouchEvent011, TestSize.Level0)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_NE(richEditorPattern->magnifierController_, nullptr);
+
+    auto time1 = TimeStamp(std::chrono::milliseconds(10));
+    auto time2 = TimeStamp(std::chrono::milliseconds(20));
+    richEditorPattern->magnifierController_->UpdateTouchVelocity(OffsetF(10.0f, 10.0f), time1, TouchType::MOVE);
+    richEditorPattern->magnifierController_->UpdateTouchVelocity(OffsetF(50.0f, 10.0f), time2, TouchType::MOVE);
+    richEditorPattern->magnifierTouchTimeStamp_ = time2;
+    richEditorPattern->magnifierTouchType_ = TouchType::MOVE;
+
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::CANCEL;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    TouchLocationInfo changedTouchLocationInfo(0);
+    changedTouchLocationInfo.touchType_ = TouchType::CANCEL;
+    changedTouchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(changedTouchLocationInfo));
+
+    EXPECT_GE(richEditorPattern->magnifierController_->touchVelocityX_, 0.0f);
+    richEditorPattern->HandleTouchEvent(touchEventInfo);
+
+    EXPECT_EQ(richEditorPattern->magnifierController_->touchVelocityX_, 0.0f);
+    EXPECT_EQ(richEditorPattern->magnifierTouchType_, TouchType::UNKNOWN);
 }
 /**
  * @tc.name: HandleTouchEvent009

@@ -2799,6 +2799,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto touchInfo = GetAcceptedTouchLocationInfo(info);
     CHECK_NULL_VOID(touchInfo);
+    UpdateMagnifierTouchInfo(info.GetTimeStamp(), touchInfo->GetTouchType());
     DoGestureSelection(info);
     ResetOriginCaretPosition();
     auto touchType = touchInfo->GetTouchType();
@@ -2828,9 +2829,11 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     } else if (touchType == TouchType::CANCEL) {
         StopContentScroll();
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
+            magnifierController_->ResetTouchInfo();
             magnifierController_->RemoveMagnifierFrameNode();
         }
         ResetTouchAndMoveCaretState();
+        ResetMagnifierTouchInfo();
     }
 }
 
@@ -2860,8 +2863,10 @@ void TextFieldPattern::HandleTouchUp()
         isMousePressed_ = false;
     }
     if (magnifierController_) {
+        magnifierController_->ResetTouchInfo();
         magnifierController_->RemoveMagnifierFrameNode();
     }
+    ResetMagnifierTouchInfo();
     if (IsFreeScrollEnabled()) {
         freeScroller_->ScheduleScrollingDisappearDelayTask();
     } else {
@@ -2990,12 +2995,25 @@ void TextFieldPattern::SetMagnifierLocalOffsetToFloatingCaretPos()
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->GetMagnifierController()->SetLocalOffset({ floatCaretRectCenter.GetX(),
-                    floatCaretRectCenter.GetY() });
+                    floatCaretRectCenter.GetY() }, pattern->magnifierTouchTimeStamp_, pattern->magnifierTouchType_);
             });
     } else {
-        magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
+        magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() },
+            magnifierTouchTimeStamp_, magnifierTouchType_);
     }
     floatCaretState_.lastFloatingCursorY = floatCaretRectCenter.GetY();
+}
+
+void TextFieldPattern::UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType)
+{
+    magnifierTouchTimeStamp_ = time;
+    magnifierTouchType_ = touchType;
+}
+
+void TextFieldPattern::ResetMagnifierTouchInfo()
+{
+    magnifierTouchTimeStamp_ = TimeStamp();
+    magnifierTouchType_ = TouchType::UNKNOWN;
 }
 
 void TextFieldPattern::UpdateMagnifierWithFloatingCaretPos()
@@ -4965,7 +4983,9 @@ void TextFieldPattern::HandleLongPressSelectionAndReport(
     CloseSelectOverlay();
     longPressFingerNum_ = info.GetFingerList().size();
     if (magnifierController_ && HasText() && (longPressFingerNum_ == 1)) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        UpdateMagnifierTouchInfo(info.GetTimeStamp(), TouchType::DOWN);
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() },
+            magnifierTouchTimeStamp_, magnifierTouchType_);
     }
     StartGestureSelection(start, end, localOffset);
     TriggerAvoidOnCaretChange();
@@ -11662,7 +11682,8 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset)
 {
     if (magnifierController_ && HasText() && (longPressFingerNum_ == 1)) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() },
+            magnifierTouchTimeStamp_, magnifierTouchType_);
     }
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();
@@ -12328,7 +12349,9 @@ std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(
 void TextFieldPattern::DoTextSelectionTouchCancel()
 {
     CHECK_NULL_VOID(magnifierController_);
+    magnifierController_->ResetTouchInfo();
     magnifierController_->RemoveMagnifierFrameNode();
+    ResetMagnifierTouchInfo();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     StopContentScroll();
     StartTwinkling();

@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
-#include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include <chrono>
+#include <cmath>
+#include <cinttypes>
 
 #include "core/components/common/properties/color.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -28,6 +31,70 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float MAGNIFIER_SHAPE_VELOCITY_THRESHOLD = 1800.0f;
+constexpr float MAGNIFIER_SHAPE_DEAD_ZONE = 0.0f;
+constexpr float MAGNIFIER_MAX_WIDTH_SCALE = 1.20f;
+constexpr float MAGNIFIER_MIN_HEIGHT_SCALE = 0.70f;
+constexpr float MAGNIFIER_SHAPE_ATTACK_ALPHA = 0.18f;
+constexpr float MAGNIFIER_SHAPE_RELEASE_ALPHA = 0.10f;
+constexpr float MAGNIFIER_SHAPE_PROGRESS_EPSILON = 0.015f;
+
+struct MagnifierShape {
+    float width = 0.0f;
+    float height = 0.0f;
+    float progress = 0.0f;
+};
+
+const char* TouchTypeToString(TouchType touchType)
+{
+    switch (touchType) {
+        case TouchType::DOWN:
+            return "DOWN";
+        case TouchType::MOVE:
+            return "MOVE";
+        case TouchType::UP:
+            return "UP";
+        case TouchType::CANCEL:
+            return "CANCEL";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+int64_t TimeStampToMilliseconds(const TimeStamp& time)
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
+}
+
+float BuildTargetProgressFromVelocity(float velocity)
+{
+    auto absoluteVelocity = std::abs(velocity);
+    if (LessOrEqual(absoluteVelocity, MAGNIFIER_SHAPE_DEAD_ZONE)) {
+        return 0.0f;
+    }
+    auto normalizedVelocity = std::clamp((absoluteVelocity - MAGNIFIER_SHAPE_DEAD_ZONE) /
+        (MAGNIFIER_SHAPE_VELOCITY_THRESHOLD - MAGNIFIER_SHAPE_DEAD_ZONE), 0.0f, 1.0f);
+    // Use a softer ramp near low speed so medium-range velocity fluctuation is less visible.
+    return normalizedVelocity * normalizedVelocity;
+}
+
+float SmoothShapeProgress(float currentProgress, float targetProgress)
+{
+    if (NearEqual(currentProgress, targetProgress, MAGNIFIER_SHAPE_PROGRESS_EPSILON)) {
+        return currentProgress;
+    }
+    auto alpha = GreatNotEqual(targetProgress, currentProgress) ? MAGNIFIER_SHAPE_ATTACK_ALPHA
+                                                                : MAGNIFIER_SHAPE_RELEASE_ALPHA;
+    return currentProgress + alpha * (targetProgress - currentProgress);
+}
+
+MagnifierShape BuildMagnifierShapeFromProgress(float progress)
+{
+    auto width = MAGNIFIER_WIDTH.ConvertToPx() * (1.0f + (MAGNIFIER_MAX_WIDTH_SCALE - 1.0f) * progress);
+    auto height = MAGNIFIER_HEIGHT.ConvertToPx() * (1.0f - (1.0f - MAGNIFIER_MIN_HEIGHT_SCALE) * progress);
+    return { width, height, progress };
+}
+
 bool ShouldSkipMagnifierBottomConstraint(const RefPtr<PipelineContext>& pipelineContext, float patternVisibleBottom)
 {
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -44,9 +111,23 @@ bool ShouldSkipMagnifierBottomConstraint(const RefPtr<PipelineContext>& pipeline
 void MagnifierController::SetLocalOffset(
     const OffsetF& localOffset, const std::optional<OffsetF>& localOffsetWithoutTrans)
 {
+    SetLocalOffset(localOffset, TimeStamp(), TouchType::UNKNOWN, localOffsetWithoutTrans);
+}
+
+void MagnifierController::SetLocalOffset(const OffsetF& localOffset, const TimeStamp& time, TouchType touchType,
+    const std::optional<OffsetF>& localOffsetWithoutTrans)
+{
     localOffset_.SetX(localOffset.GetX());
     localOffset_.SetY(localOffset.GetY());
     localOffsetWithoutTrans_ = localOffsetWithoutTrans;
+    TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY,
+        "SetLocalOffset localOffset=(%{public}.2f, %{public}.2f) timeMs=%{public}" PRId64 " touchType=%{public}s",
+        localOffset.GetX(), localOffset.GetY(), TimeStampToMilliseconds(time), TouchTypeToString(touchType));
+    UpdateTouchVelocity(localOffsetWithoutTrans.value_or(localOffset), time, touchType);
+    auto trackedTime = velocityTracker_.GetCurrentTrackPoint().GetTimeStamp();
+    TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY,
+        "SetLocalOffset after UpdateTouchVelocity trackedTimeMs=%{public}" PRId64 " velocityX=%{public}.2f",
+        TimeStampToMilliseconds(trackedTime), touchVelocityX_);
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     PointF point(
@@ -70,6 +151,57 @@ void MagnifierController::SetLocalOffset(
     globalOffset_.SetY(point.GetY());
     magnifierNodeExist_ = true;
     UpdateShowMagnifier(true);
+}
+
+bool MagnifierController::IsDynamicShapeEnabled() const
+{
+    return Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX);
+}
+
+void MagnifierController::UpdateTouchVelocity(const OffsetF& localOffset, const TimeStamp& time, TouchType touchType)
+{
+    if (!IsDynamicShapeEnabled()) {
+        return;
+    }
+    if (touchType == TouchType::UNKNOWN) {
+        return;
+    }
+    if (touchType == TouchType::DOWN) {
+        ResetTouchVelocity();
+    }
+    TouchEvent touchEvent;
+    touchEvent.x = localOffset.GetX();
+    touchEvent.y = localOffset.GetY();
+    touchEvent.localX = localOffset.GetX();
+    touchEvent.localY = localOffset.GetY();
+    touchEvent.time = time;
+    touchEvent.type = touchType;
+    touchEvent.sourceType = SourceType::TOUCH;
+    velocityTracker_.UpdateTouchPoint(touchEvent, touchType == TouchType::UP || touchType == TouchType::CANCEL);
+    touchVelocityX_ = static_cast<float>(velocityTracker_.GetVelocity().GetVelocityX());
+}
+
+void MagnifierController::ResetTouchVelocity()
+{
+    velocityTracker_.Reset();
+    touchVelocityX_ = 0.0f;
+    shapeProgress_ = 0.0f;
+}
+
+void MagnifierController::UpdateMagnifierShapeByVelocity()
+{
+    if (!IsDynamicShapeEnabled()) {
+        return;
+    }
+    auto targetProgress = BuildTargetProgressFromVelocity(touchVelocityX_);
+    shapeProgress_ = SmoothShapeProgress(shapeProgress_, targetProgress);
+    auto shape = BuildMagnifierShapeFromProgress(shapeProgress_);
+    TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY,
+        "Magnifier shape mapped velocityX=%{public}.2f targetProgress=%{public}.4f progress=%{public}.4f "
+        "width=%{public}.2f height=%{public}.2f",
+        touchVelocityX_, targetProgress, shape.progress, shape.width, shape.height);
+    params_.width_ = shape.width;
+    params_.height_ = shape.height;
 }
 
 void MagnifierController::UpdateShowMagnifier(bool isShowMagnifier)
@@ -241,6 +373,7 @@ bool MagnifierController::UpdateMagnifierOffset()
     childContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(magnifierPaintOffset.GetX()), Dimension(magnifierPaintOffset.GetY())));
     childContext->SetContentRectToFrame(RectF(magnifierPaintOffset.GetX(), magnifierPaintOffset.GetY(), 0.0f, 0.0f));
+    UpdateMagnifierShapeByVelocity();
     params_.offsetX_ = magnifierOffset.x;
     params_.offsetY_ = magnifierOffset.y;
     params_.factor_ = MAGNIFIER_FACTOR;
@@ -375,6 +508,12 @@ void MagnifierController::RemoveMagnifierFrameNode()
     }
     removeFrameNode_ = false;
     hostViewPort_.reset();
+    ResetTouchVelocity();
+}
+
+void MagnifierController::ResetTouchInfo()
+{
+    ResetTouchVelocity();
 }
 
 void MagnifierController::CloseMagnifier()
@@ -382,6 +521,7 @@ void MagnifierController::CloseMagnifier()
     CHECK_NULL_VOID(magnifierFrameNode_);
     ViewAbstract::ReSetMagnifier(AceType::RawPtr(magnifierFrameNode_));
     ChangeMagnifierVisibility(false);
+    ResetTouchVelocity();
     magnifierFrameNode_->ForceSyncGeometryNode();
     magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

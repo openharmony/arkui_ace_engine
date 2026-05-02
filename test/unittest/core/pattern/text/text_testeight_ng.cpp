@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <chrono>
+
 #include "foundation/arkui/ace_engine/test/mock/frameworks/core/rosen/testing_canvas.h"
 #include "gmock/gmock.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -353,6 +355,33 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionEnd002, TestSize.Level1)
     TouchLocationInfo locationInfo(0);
     pattern->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_EQ(secondHandle_, pattern->textSelector_.secondHandle);
+}
+
+/**
+ * @tc.name: OnTextGestureSelectionEnd003
+ * @tc.desc: test OnTextGestureSelectionEnd resets magnifier touch velocity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnTextGestureSelectionEnd003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->textForDisplay_ = CREATE_VALUE_W;
+    pattern->SetupMagnifier();
+    ASSERT_NE(pattern->magnifierController_, nullptr);
+
+    auto time1 = TimeStamp(std::chrono::milliseconds(10));
+    auto time2 = TimeStamp(std::chrono::milliseconds(20));
+    pattern->magnifierController_->UpdateTouchVelocity(OffsetF(10.0f, 10.0f), time1, TouchType::MOVE);
+    pattern->magnifierController_->UpdateTouchVelocity(OffsetF(40.0f, 10.0f), time2, TouchType::MOVE);
+    EXPECT_GE(pattern->magnifierController_->touchVelocityX_, 0.0f);
+
+    TouchLocationInfo locationInfo(0);
+    pattern->OnTextGestureSelectionEnd(locationInfo);
+    EXPECT_EQ(pattern->magnifierController_->touchVelocityX_, 0.0f);
+    EXPECT_FALSE(pattern->magnifierController_->magnifierNodeExist_);
 }
 
 /**

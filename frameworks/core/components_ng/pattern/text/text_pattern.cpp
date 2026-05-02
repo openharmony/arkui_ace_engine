@@ -661,7 +661,8 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
     if (GetOrCreateMagnifier() && HasContent()) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        magnifierController_->SetLocalOffset(
+            { localOffset.GetX(), localOffset.GetY() }, info.GetTimeStamp(), TouchType::DOWN);
     }
     StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd(), localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -7442,7 +7443,8 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
     }
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetLocalOffset(
-            { localOffset.GetX() + deltaPaintOffset.GetX(), localOffset.GetY() + deltaPaintOffset.GetY() });
+            { localOffset.GetX() + deltaPaintOffset.GetX(), localOffset.GetY() + deltaPaintOffset.GetY() },
+            info.GetTimeStamp(), info.GetTouches().front().GetTouchType());
     }
     if (start != textSelector_.GetStart()) {
         StartVibratorByIndexChange(start, textSelector_.GetStart());
@@ -7460,6 +7462,7 @@ void TextPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInf
 {
     selectOverlay_->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), Offset(), true);
     if (magnifierController_) {
+        magnifierController_->ResetTouchInfo();
         magnifierController_->RemoveMagnifierFrameNode();
     }
     if (HasContent()) {

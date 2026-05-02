@@ -608,6 +608,8 @@ public:
     }
 
     void SetMagnifierLocalOffsetToFloatingCaretPos();
+    void UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType);
+    void ResetMagnifierTouchInfo();
 
     bool GetShowOriginCursor() const
     {
@@ -2557,6 +2559,8 @@ private:
     WeakPtr<AIWriteAdapter> aiWriteAdapter_;
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> lastCaretPos_ = std::nullopt;
