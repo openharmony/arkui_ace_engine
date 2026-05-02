@@ -23,6 +23,7 @@
 #include "ui/properties/color.h"
 #include "base/log/container_scope_wrapper.h"
 #include "base/log/log.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/common/multi_thread_build_manager.h"
@@ -1198,6 +1199,11 @@ ani_long GetPageRootNodeInStatic()
     return 0;
 }
 
+void DumpLogPrintImpl(int32_t depth, const char* content)
+{
+    DumpLog::GetInstance().Print(depth, std::string(content));
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -1287,6 +1293,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
         .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
         .isEasySplit = OHOS::Ace::NG::IsEasySplit,
+        .dumpLogPrint = OHOS::Ace::NG::DumpLogPrintImpl,
     };
     return &impl;
 }

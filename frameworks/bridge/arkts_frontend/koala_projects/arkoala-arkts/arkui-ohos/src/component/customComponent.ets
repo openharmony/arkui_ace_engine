@@ -522,6 +522,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return this.instance.__onDumpInspector__Internal();
     }
 
+    onDumpInfo(commands: string[]): void {
+        this.instance.__onDumpInfo__Internal(commands);
+    }
+
     onWillApplyTheme(theme: Theme): void {
         this.instance.onWillApplyTheme(theme);
     }

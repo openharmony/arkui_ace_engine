@@ -383,6 +383,7 @@ export class ArkUIAniModule {
     native static _GetAllUIContexts(): Array<KInt>
     native static _ResolveUIContext(): Array<KInt>
     native static _GetPageRootNode(): KPointer
+    native static _DumpLogPrint(depth: KInt, content: string): void
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
