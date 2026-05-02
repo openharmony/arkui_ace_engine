@@ -24935,9 +24935,16 @@ typedef struct GENERATED_ArkUIHyperlinkModifier {
 typedef struct GENERATED_ArkUIImageModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setImageOptions)(Ark_NativePointer node,
-                            const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
-                            const Opt_ImageAIOptions* imageAIOptions);
+    void (*setImageOptions0)(Ark_NativePointer node,
+                             const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                             const Opt_ImageAIOptions* imageAIOptions);
+    void (*setImageOptions1)(Ark_NativePointer node,
+                             const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                             const Opt_ImageAIOptions* imageAIOptions,
+                             const Opt_String* reloadKey);
+    void (*setImageOptions2)(Ark_NativePointer node,
+                             const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                             const Opt_String* reloadKey);
     void (*setAlt)(Ark_NativePointer node,
                    const Opt_Union_String_Resource_image_PixelMap_ImageAlt* value);
     void (*setMatchTextDirection)(Ark_NativePointer node,

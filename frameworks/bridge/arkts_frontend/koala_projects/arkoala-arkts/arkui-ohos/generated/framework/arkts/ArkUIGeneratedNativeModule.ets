@@ -1010,7 +1010,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Image_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _ImageInterface_setImageOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _ImageInterface_setImageOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ImageInterface_setImageOptions1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ImageInterface_setImageOptions2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ImageAttribute_setAlt(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

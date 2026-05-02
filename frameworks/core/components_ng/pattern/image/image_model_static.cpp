@@ -168,6 +168,17 @@ void ImageModelStatic::SetAltPlaceholder(FrameNode* frameNode, const std::option
     }
 }
 
+void ImageModelStatic::SetReloadKey(FrameNode* frameNode, const std::string& reloadKey)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto srcInfo = layoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
+    srcInfo.SetReloadKey(reloadKey.empty() ? std::optional<std::string>(std::nullopt)
+                                           : std::optional<std::string>(reloadKey));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
 void ImageModelStatic::SetSupportSvg2(FrameNode* frameNode, bool enable)
 {
     CHECK_NULL_VOID(frameNode);
