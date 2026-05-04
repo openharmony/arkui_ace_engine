@@ -533,6 +533,7 @@ public:
     virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
     virtual void SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions) = 0;
     virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
+    virtual void SetAccessibilityNextFocusParams(const NG::AccessibilityNextFocusParams& params) = 0;
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
     virtual void SetOnAccessibilityActionIntercept(

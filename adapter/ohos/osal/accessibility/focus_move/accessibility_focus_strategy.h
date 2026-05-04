@@ -20,6 +20,7 @@
 
 #include <string>
 #include <list>
+#include <unordered_set>
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "hilog/log.h"
@@ -116,6 +117,11 @@ public:
     {
         return false;
     }
+
+    virtual bool IsDescendantMode()
+    {
+        return false;
+    }
 };
 
 class AccessibilityFocusStrategy {
@@ -167,7 +173,8 @@ private:
         AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         const std::vector<std::shared_ptr<FocusRulesCheckNode>>& sameLevelNodes,
-        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>* visitedNextFocusNodes = nullptr);
 
     AceFocusMoveResult FindPrevReadableNodeByChildAndSelf (
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
@@ -175,16 +182,19 @@ private:
 
     AceFocusMoveResult FindNextReadableNodeToHigherLevel(
         std::shared_ptr<FocusRulesCheckNode>& parent,
-        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>* visitedNextFocusNodes = nullptr);
 
     AceFocusMoveResult FindPrevReadableNodeToHigherLevel(
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
-        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>* visitedPrevFocusNodes = nullptr);
 
     AceFocusMoveResult IsFindNextReadableNode(
         const std::shared_ptr<FocusRulesCheckNode>& current,
         const std::shared_ptr<FocusRulesCheckNode>& parent,
-        std::shared_ptr<FocusRulesCheckNode>& targetNode);
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>* visitedNextFocusNodes = nullptr);
 
     AceFocusMoveResult IsFindPrevReadableNode(
         const std::shared_ptr<FocusRulesCheckNode>& current,
@@ -207,6 +217,36 @@ private:
 
     std::string GetChildrenIdsStr(
         const std::vector<std::shared_ptr<FocusRulesCheckNode>>& children);
+
+    AceFocusMoveResult FindNextReadableNodeInner(
+        AceFocusMoveDetailCondition condition,
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>& visitedNextFocusNodes);
+
+    AceFocusMoveResult TryJumpToNextFocusTarget(
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>& visitedNextFocusNodes,
+        const char* stageTag);
+
+    AceFocusMoveResult TryFindByNextFocusForCheckSelf(
+        AceFocusMoveDetailCondition condition,
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>& visitedNextFocusNodes);
+
+    AceFocusMoveResult TryFindByPrevFocusForMain(
+        AceFocusMoveDetailCondition condition,
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>& visitedPrevFocusNodes);
+
+    AceFocusMoveResult TryJumpToPrevFocusSource(
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        std::unordered_set<int64_t>& visitedPrevFocusNodes,
+        const char* stageTag);
 };
 } // OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_STRATEGY_H

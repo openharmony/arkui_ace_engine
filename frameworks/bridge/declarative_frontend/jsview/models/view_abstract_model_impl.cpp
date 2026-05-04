@@ -1735,6 +1735,9 @@ void ViewAbstractModelImpl::SetAccessibilityGroupOptions(NG::AccessibilityGroupO
 void ViewAbstractModelImpl::SetAccessibilityNextFocusId(const std::string& nextFocusId)
 {}
 
+void ViewAbstractModelImpl::SetAccessibilityNextFocusParams(const NG::AccessibilityNextFocusParams& params)
+{}
+
 void ViewAbstractModelImpl::SetAccessibilityRole(const std::string& role, bool resetValue)
 {}
 
