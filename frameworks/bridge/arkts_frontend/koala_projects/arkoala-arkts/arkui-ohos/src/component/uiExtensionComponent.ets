@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ import { ErrorCallback } from "@ohos.base"
 import { EmbeddedType } from "./enums"
 import { ArkUIAniUiextensionModal, ArkUIAniUIExtensionOptions, ArkUIAniModule, ArkUIAniUiextensionProxyModal } from "arkui.ani"
 
-class ArkUIExtensionCallbackHelp {
+export class ArkUIExtensionCallbackHelp {
     onReceive?: ((param: Record<string, RecordData>) => void)
     onError?: ((e: BusinessError) => void)
     onTerminated?: ((parameter: TerminationInfo) => void)

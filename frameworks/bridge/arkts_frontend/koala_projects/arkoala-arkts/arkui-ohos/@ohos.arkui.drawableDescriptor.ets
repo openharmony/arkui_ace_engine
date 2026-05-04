@@ -19,7 +19,7 @@ import { AnimationStatus, ResourceStr, Resource } from '@ohos.arkui.component';
 import { SystemOps } from "#generated"
 import { ArkUIAniModule } from 'arkui.ani';
 
-class NativeDestructor {
+export class NativeDestructor {
   private ptr: long = 0
   constructor(ptr: long) {
     this.ptr = ptr

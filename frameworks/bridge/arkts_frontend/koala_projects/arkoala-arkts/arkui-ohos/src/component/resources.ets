@@ -4,7 +4,7 @@ import { ArkUIGeneratedNativeModule } from "#components";
 import { InteropNativeModule } from "@koalaui/interop";
 import { SystemOps } from "#generated";
 
-enum ResourceType {
+export enum ResourceType {
     COLOR = 10001,
     FLOAT,
     STRING,

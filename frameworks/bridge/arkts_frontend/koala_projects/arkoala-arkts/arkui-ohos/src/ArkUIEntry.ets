@@ -638,7 +638,7 @@ function makeClickEvent(x: number, y: number): ClickEvent {
     return result
 }
 
-class ApplicationConstructorParam {
+export class ApplicationConstructorParam {
     public startUrl: string;
     public startParams: string;
     public startName: string;

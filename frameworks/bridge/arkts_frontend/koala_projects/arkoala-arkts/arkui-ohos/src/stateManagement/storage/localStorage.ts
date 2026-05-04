@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@ import { InteropStorageBase } from '../interop/interopStorage';
 import { IVariableOwner, WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 
-type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
+export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
 
 /**
  * LocalStorage

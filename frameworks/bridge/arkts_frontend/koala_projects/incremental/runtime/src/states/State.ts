@@ -96,7 +96,7 @@ export interface StateManager extends StateContext {
     frozen: boolean
     reset(): void
 }
-interface DependentInfoStore {
+export interface DependentInfoStore {
     /**
     * return collection of nodes
     */
