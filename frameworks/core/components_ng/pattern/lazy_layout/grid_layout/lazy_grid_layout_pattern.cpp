@@ -15,13 +15,37 @@
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+LazyGridLayoutPattern::~LazyGridLayoutPattern() = default;
+
+RefPtr<LayoutProperty> LazyGridLayoutPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<LazyGridLayoutProperty>();
+}
+
+AdjustOffset LazyGridLayoutPattern::GetAdjustOffset() const
+{
+    CHECK_NULL_RETURN(layoutInfo_, AdjustOffset());
+    return layoutInfo_->adjustOffset_;
+}
+
+AdjustOffset LazyGridLayoutPattern::GetAndResetAdjustOffset()
+{
+    CHECK_NULL_RETURN(layoutInfo_, AdjustOffset());
+    AdjustOffset ret = layoutInfo_->adjustOffset_;
+    layoutInfo_->adjustOffset_ = AdjustOffset();
+    return ret;
+}
 
 RefPtr<LayoutAlgorithm> LazyGridLayoutPattern::CreateLayoutAlgorithm()
 {

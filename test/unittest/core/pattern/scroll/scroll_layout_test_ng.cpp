@@ -20,6 +20,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
