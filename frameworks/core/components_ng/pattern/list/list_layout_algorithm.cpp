@@ -2182,6 +2182,12 @@ void ListLayoutAlgorithm::MeasureLazyVGridLayout(const RefPtr<LayoutWrapper>& wr
         .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
         .axis = axis_,
     };
+    if (isStackFromEnd_) {
+        ref.viewPosStart = -startMainPos_;
+        ref.viewPosEnd = endMainPos_ - startMainPos_ - startMainPos_;
+        ref.referencePos = endMainPos_ - startMainPos_ - referencePos;
+        ref.referenceEdge = forward ? ReferenceEdge::END : ReferenceEdge::START;
+    }
     LayoutConstraintF constraint = childLayoutConstraint_;
     constraint.viewPosRef = ref;
     wrapper->Measure(constraint);
@@ -2219,10 +2225,17 @@ void ListLayoutAlgorithm::ApplyLazyVGridAdjustOffset(
         return;
     }
 
+    if (isStackFromEnd_) {
+        forward = !forward;
+        referencePos = endMainPos_ - startMainPos_ - referencePos;
+    }
     if (forward) {
         referencePos -= adjustOffset.start;
     } else {
         referencePos += adjustOffset.end;
+    }
+    if (isStackFromEnd_) {
+        referencePos = endMainPos_ - startMainPos_ - referencePos;
     }
 }
 
@@ -2784,6 +2797,11 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyVGrid(
                           ReferenceEdge::START : ReferenceEdge::END,
         .axis = pattern->GetAxis(),
     };
+    if (pattern->IsStackFromEnd()) {
+        ref.viewPosStart = -listMainSizeValues.startPos;
+        ref.viewPosEnd = listMainSizeValues.endPos - listMainSizeValues.startPos - listMainSizeValues.startPos;
+        ref.referencePos = index > pattern->GetEndIndex() ? ref.viewPosEnd : ref.viewPosStart;
+    }
 
     LayoutConstraintF constraint = param.layoutConstraint;
     constraint.viewPosRef = ref;

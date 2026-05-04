@@ -841,7 +841,8 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
     if (GreatNotEqualCustomPrecision(gain, 1.0f, 0.01f)) {
         if ((isReverse && gestureVelocity < 0) || (!isReverse && gestureVelocity > 0)) {
             auto node = weakHost_.Upgrade();
-            if (node) {
+            bool isBackToTop = backToTopCallback_ && backToTopCallback_();
+            if (node && isBackToTop) {
                 auto nodeIdStr = std::to_string(static_cast<uint64_t>(node->GetId()));
                 auto nodeStr = node->GetTag() + nodeIdStr;
                 TAG_LOGI(AceLogTag::ACE_SCROLLABLE,

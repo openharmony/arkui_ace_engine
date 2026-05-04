@@ -1206,6 +1206,7 @@ private:
     void SetRemainVelocityCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragEndCallback(const RefPtr<Scrollable>& scrollable);
     void SetStartSnapAnimationCallback(const RefPtr<Scrollable>& scrollable);
+    void SetBackToTopCallback(const RefPtr<Scrollable>& scrollable);
     void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
