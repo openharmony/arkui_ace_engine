@@ -5673,6 +5673,10 @@ int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event,
             if (!touchEvent) {
                 RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
+            if ((touchEvent->touchPointSize > 0 && !touchEvent->touchPointes) ||
+                (touchEvent->historySize > 0 && !touchEvent->historyEvents)) {
+                RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
             auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
             if (!fullImpl) {
                 RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
