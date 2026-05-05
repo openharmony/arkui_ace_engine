@@ -101,7 +101,7 @@ export type OnSelectedIndexChange = (selectedIndex: int) => void;
 
 export type OnSelectedIndexesChange = (selectedIndexes: int[]) => void;
 
-interface SegmentButtonV2ContentTheme {
+export interface SegmentButtonV2ContentTheme {
   itemSpace: LengthMetrics;
   itemFontSize: Dimension;
   adaptiveItemFontSize: Dimension;
@@ -126,7 +126,7 @@ interface SegmentButtonV2ContentTheme {
   itemMinFontScaleLargest: double;
 }
 
-interface SimpleSegmentButtonV2Theme extends SegmentButtonV2ContentTheme {
+export interface SimpleSegmentButtonV2Theme extends SegmentButtonV2ContentTheme {
   buttonBackgroundColor: Resource;
   buttonBorderRadius: Resource;
   buttonMinHeight: Dimension;
@@ -136,7 +136,7 @@ interface SimpleSegmentButtonV2Theme extends SegmentButtonV2ContentTheme {
   itemBorderRadius: Resource;
 }
 
-interface SegmentButtonV2ItemRect {
+export interface SegmentButtonV2ItemRect {
   size: SizeT<double>;
   position: PositionT<double>;
   globalPosition: PositionT<double>;
@@ -1172,7 +1172,7 @@ struct SimpleSegmentButtonV2 {
   }
 }
 
-interface MultiplySegmentButtonV2Theme extends SegmentButtonV2ContentTheme {
+export interface MultiplySegmentButtonV2Theme extends SegmentButtonV2ContentTheme {
   itemBackgroundColor: ResourceColor;
   itemSelectedBackgroundColor: ResourceColor;
   itemBorderRadius: Resource;
@@ -1420,7 +1420,7 @@ export class EnvironmentCallbackEntry implements EnvironmentCallback {
 }
 
 @ComponentV2
-struct SegmentButtonV2ItemContent {
+export struct SegmentButtonV2ItemContent {
   @Require @Param hasHybrid: boolean;
   @Require @Param item: SegmentButtonV2Item;
   @Require @Param selected: boolean;

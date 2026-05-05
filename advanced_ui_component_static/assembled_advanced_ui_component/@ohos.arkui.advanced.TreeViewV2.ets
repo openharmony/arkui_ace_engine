@@ -189,7 +189,7 @@ export interface BorderWidth {
   none: Resource | number;
 }
 
-interface TextSetting {
+export interface TextSetting {
   fontColor: ResourceColor;
   fontSize: Resource;
   fontWeight: FontWeight;
@@ -202,19 +202,19 @@ export interface NodeInfoView {
   isFolder?: boolean;
 }
 
-interface FloorConstraintSize {
+export interface FloorConstraintSize {
   minWidth: string;
   maxWidth: string;
 }
 
-interface TextConstraintSize {
+export interface TextConstraintSize {
   minWidth1: string;
   maxWidth1: string;
   minWidth2: string;
   maxWidth2: string;
 }
 
-interface TreeViewPadding {
+export interface TreeViewPadding {
   left: Resource;
   right: Resource;
 }
@@ -5369,7 +5369,7 @@ export class NodeItem {
   }
 }
 
-class NodeBaseInfo {
+export class NodeBaseInfo {
   public rightMargin: Resource | number = -1;
   private width: number = -1;
   private height: number = -1;
@@ -5773,7 +5773,7 @@ export class ImageNode extends NodeBaseInfo {
   }
 }
 
-class MainTitleNode extends NodeBaseInfo {
+export class MainTitleNode extends NodeBaseInfo {
   private mainTitleName: ResourceStr;
   public mainTitleSetting: TextSetting;
   private showPopUpTimeout: number;
