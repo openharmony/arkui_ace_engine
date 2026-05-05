@@ -3909,7 +3909,6 @@ bool ListPattern::IsInEditModeHotZone(const PointF& point) const
     auto itemNode = GetSelectableItemAtIndex(itemIndex.index);
     auto itemPattern = itemNode ? itemNode->GetPattern<ListItemPattern>() : nullptr;
     if (itemPattern && !itemPattern->Selectable()) {
-        printf("shj:: no item");
         return false;
     }
 
