@@ -37,6 +37,7 @@ export class FormLinkModifier extends CommonMethodModifier implements FormLinkAt
     applyFocusedAttribute(instance: FormLinkAttribute): void { }
     applyDisabledAttribute(instance: FormLinkAttribute): void { }
     applySelectedAttribute(instance: FormLinkAttribute): void { }
+    applyHoveredAttribute(instance: FormLinkAttribute): void { }
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()

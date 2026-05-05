@@ -31,6 +31,7 @@ export class ParticleModifier extends CommonMethodModifier implements ParticleAt
     applyFocusedAttribute(instance: ParticleAttribute): void { }
     applyDisabledAttribute(instance: ParticleAttribute): void { }
     applySelectedAttribute(instance: ParticleAttribute): void { }
+    applyHoveredAttribute(instance: ParticleAttribute): void { }
     _disturbanceFields_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _disturbanceFields_0_0value?: Array<DisturbanceFieldOptions> | undefined
     _emitter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

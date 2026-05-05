@@ -221,6 +221,9 @@ void ViewStackProcessor::SetVisualState(VisualState state)
         case VisualState::SELECTED:
             visualState_ = UI_STATE_SELECTED;
             break;
+        case VisualState::HOVER:
+            visualState_ = UI_STATE_HOVERED;
+            break;
         case VisualState::NORMAL:
         default:
             visualState_ = UI_STATE_NORMAL;
