@@ -18804,6 +18804,7 @@ typedef struct Ark_VisibleAreaEventOptions {
     /* kind: Interface */
     Array_F64 ratios;
     Opt_Int32 expectedUpdateInterval;
+    Opt_Boolean measureFromViewport;
 } Ark_VisibleAreaEventOptions;
 typedef struct Opt_VisibleAreaEventOptions {
     Ark_Tag tag;
@@ -24491,9 +24492,13 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_Union_Boolean_Bindable_Boolean* isShow,
                          const Opt_CustomNodeBuilder* builder,
                          const Opt_SheetOptions* options);
-    void (*setOnVisibleAreaChange)(Ark_NativePointer node,
-                                   const Opt_Array_F64* ratios,
-                                   const Opt_VisibleAreaChangeCallback* event);
+    void (*setOnVisibleAreaChange0)(Ark_NativePointer node,
+                                    const Opt_Array_F64* ratios,
+                                    const Opt_VisibleAreaChangeCallback* event);
+    void (*setOnVisibleAreaChange1)(Ark_NativePointer node,
+                                    const Opt_Array_F64* ratios,
+                                    const Opt_VisibleAreaChangeCallback* event,
+                                    const Opt_Boolean* measureFromViewport);
     void (*setOnVisibleAreaApproximateChange)(Ark_NativePointer node,
                                               const Opt_VisibleAreaEventOptions* options,
                                               const Opt_VisibleAreaChangeCallback* event);

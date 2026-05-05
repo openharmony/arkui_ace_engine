@@ -6745,9 +6745,9 @@ void SetBindSheetImpl(Ark_NativePointer node,
         std::move(cbs.onWillDisappear), std::move(cbs.onHeightDidChange), std::move(cbs.onDetentsDidChange),
         std::move(cbs.onWidthDidChange), std::move(cbs.onTypeDidChange), std::move(cbs.sheetSpringBack));
 }
-void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                const Opt_Array_F64* ratios,
-                                const Opt_VisibleAreaChangeCallback* event)
+void SetOnVisibleAreaChange0Impl(Ark_NativePointer node,
+                                 const Opt_Array_F64* ratios,
+                                 const Opt_VisibleAreaChangeCallback* event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -6787,6 +6787,52 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
+void SetOnVisibleAreaChange1Impl(Ark_NativePointer node,
+                                 const Opt_Array_F64* ratios,
+                                 const Opt_VisibleAreaChangeCallback* event,
+                                 const Opt_Boolean* measureFromViewport)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(event);
+    auto optEvent = Converter::GetOptPtr(event);
+    auto optMeasureFromViewport = Converter::OptConvertPtr<bool>(measureFromViewport);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList, optMeasureFromViewport.value_or(false));
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
+    auto rawRatioVec = Converter::OptConvertPtr<std::vector<double>>(ratios);
+    if (!rawRatioVec) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList,
+            optMeasureFromViewport.value_or(false));
+        return;
+    }
+    size_t size = rawRatioVec->size();
+    std::vector<double> ratioVec;
+    for (size_t i = 0; i < size; i++) {
+        double ratio = (*rawRatioVec)[i];
+        if (LessOrEqual(ratio, VISIBLE_RATIO_MIN)) {
+            ratio = VISIBLE_RATIO_MIN;
+        }
+
+        if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
+            ratio = VISIBLE_RATIO_MAX;
+        }
+        ratioVec.push_back(ratio);
+    }
+    ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec,
+        optMeasureFromViewport.value_or(false));
+}
 void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
                                            const Opt_VisibleAreaEventOptions* options,
                                            const Opt_VisibleAreaChangeCallback* event)
@@ -6797,6 +6843,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(event);
     auto expectedUpdateInterval =
         Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
+    auto measureFromViewPort = Converter::OptConvert<bool>(options->value.measureFromViewport).value_or(false);
     if (expectedUpdateInterval < 0) {
         expectedUpdateInterval = DEFAULT_DURATION;
     }
@@ -6804,7 +6851,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     if (!optEvent) {
         std::vector<double> ratioList;
         ViewAbstract::SetOnVisibleAreaApproximateChange(
-            frameNode, nullptr, ratioList, expectedUpdateInterval);
+            frameNode, nullptr, ratioList, expectedUpdateInterval, measureFromViewPort);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -6819,7 +6866,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     if (!rawRatioVec.has_value() || rawRatioVec->empty()) {
         std::vector<double> ratioList;
         ViewAbstract::SetOnVisibleAreaApproximateChange(
-            frameNode, std::move(onVisibleAreaChange), ratioList, expectedUpdateInterval);
+            frameNode, std::move(onVisibleAreaChange), ratioList, expectedUpdateInterval, measureFromViewPort);
         return;
     }
     std::vector<float> floatArray = rawRatioVec.value();
@@ -6837,7 +6884,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
         ratioVec.push_back(ratio);
     }
     ViewAbstract::SetOnVisibleAreaApproximateChange(
-        frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
+        frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval, measureFromViewPort);
 }
 void SetKeyboardShortcutImpl(Ark_NativePointer node,
                              const Opt_Union_String_FunctionKey* value,
@@ -7184,7 +7231,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBindContentCover0Impl,
         CommonMethodModifier::SetBindContentCover1Impl,
         CommonMethodModifier::SetBindSheetImpl,
-        CommonMethodModifier::SetOnVisibleAreaChangeImpl,
+        CommonMethodModifier::SetOnVisibleAreaChange0Impl,
+        CommonMethodModifier::SetOnVisibleAreaChange1Impl,
         CommonMethodModifier::SetOnVisibleAreaApproximateChangeImpl,
         CommonMethodModifier::SetKeyboardShortcutImpl,
         CommonMethodModifier::SetAccessibilityGroupImpl,

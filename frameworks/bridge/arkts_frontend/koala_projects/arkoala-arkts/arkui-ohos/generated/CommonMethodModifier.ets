@@ -312,6 +312,9 @@ export class CommonMethodModifier implements CommonMethod {
     public _bindSheet_0_2value?: SheetOptions | undefined
     public _onVisibleAreaChange_0_0value?: Array<double> | undefined
     public _onVisibleAreaChange_0_1value?: VisibleAreaChangeCallback | undefined
+    public _onVisibleAreaChange_1_0value?: Array<double> | undefined
+    public _onVisibleAreaChange_1_1value?: VisibleAreaChangeCallback | undefined
+    public _onVisibleAreaChange_1_2value?: boolean | undefined
     public _onVisibleAreaApproximateChange_0_0value?: VisibleAreaEventOptions | undefined
     public _onVisibleAreaApproximateChange_0_1value?: VisibleAreaChangeCallback | undefined
     public _keyboardShortcut_0_0value?: string | FunctionKey | undefined
@@ -3899,7 +3902,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[207] != 0) {
             switch (flagArray[207]) {
                 case 1: {
-                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChange0Attribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
                     flagArray[207] = 2;
                     break;
                 }
@@ -3909,7 +3912,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[207] = 0;
-                    peer.setOnVisibleAreaChangeAttribute(undefined, undefined);
+                    peer.setOnVisibleAreaChange0Attribute(undefined, undefined);
                 }
             }
         }
@@ -4059,6 +4062,23 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     flagArray[217] = 0;
                     peer.setInspectorLabelAttribute(undefined);
+                }
+            }
+        }
+        if (flagArray[218] != 0) {
+            switch (flagArray[218]) {
+                case 1: {
+                    peer.setOnVisibleAreaChange1Attribute((this._onVisibleAreaChange_1_0value as Array<double> | undefined), (this._onVisibleAreaChange_1_1value as VisibleAreaChangeCallback | undefined), (this._onVisibleAreaChange_1_2value as boolean | undefined));
+                    flagArray[218] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[218] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[218] = 0;
+                    peer.setOnVisibleAreaChange1Attribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -6713,6 +6733,18 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[218] != 0) {
+            switch (flagArray[218]) {
+                case 1:
+                case 3: {
+                    this.onVisibleAreaChange((modifier._onVisibleAreaChange_1_0value as Array<double> | undefined), (modifier._onVisibleAreaChange_1_1value as VisibleAreaChangeCallback | undefined), (modifier._onVisibleAreaChange_1_2value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -8955,6 +8987,18 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[217] = 3
+        }
+        return this
+    }
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined, measureFromViewport: boolean | undefined): this {
+        if (((this._flagArray[218]) == (0)) || ((this._onVisibleAreaChange_1_0value) !== (ratios)) || (true) || ((this._onVisibleAreaChange_1_2value) !== (measureFromViewport))) {
+            this._flagArray[218] = 1
+            this._onVisibleAreaChange_1_0value = ratios
+            this._onVisibleAreaChange_1_1value = event
+            this._onVisibleAreaChange_1_2value = measureFromViewport
+            this._state.fireChange()
+        } else {
+            this._flagArray[218] = 3
         }
         return this
     }
