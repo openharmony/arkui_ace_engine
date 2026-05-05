@@ -681,6 +681,15 @@ void JSList::SetEditModeOptions(const JSCallbackInfo& info)
     ListModel::GetInstance()->SetEditModeOptions(options);
 }
 
+void JSList::SetEnableEditMode(const JSCallbackInfo& info)
+{
+    bool enableEditMode = false;
+    if (info[0]->IsBoolean()) {
+        ParseJsBool(info[0], enableEditMode);
+    }
+    ListModel::GetInstance()->SetEnableEditMode(enableEditMode);
+}
+
 void JSList::SetScrollSnapAnimationSpeed(const JSCallbackInfo& args)
 {
     ScrollSnapAnimationSpeed speed = ScrollSnapAnimationSpeed::NORMAL;
@@ -1077,6 +1086,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);
+    JSClass<JSList>::StaticMethod("enableEditMode", &JSList::SetEnableEditMode);
     JSClass<JSList>::StaticMethod("scrollSnapAnimationSpeed", &JSList::SetScrollSnapAnimationSpeed);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

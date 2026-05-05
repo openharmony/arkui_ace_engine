@@ -31,6 +31,44 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t ITEM_COUNT = 10;
 constexpr int32_t TEST_NODE_ID = 2;
+
+std::vector<RefPtr<FrameNode>> GetFlatListItems(const RefPtr<FrameNode>& listNode)
+{
+    std::vector<RefPtr<FrameNode>> listItems;
+    CHECK_NULL_RETURN(listNode, listItems);
+    auto& children = listNode->GetChildren();
+    for (const auto& child : children) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (!childFrameNode) {
+            continue;
+        }
+        if (childFrameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+            auto groupChildren = child->GetChildren();
+            for (const auto& item : groupChildren) {
+                auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+                if (itemFrameNode && itemFrameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+                    listItems.emplace_back(itemFrameNode);
+                }
+            }
+            continue;
+        }
+        if (childFrameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+            listItems.emplace_back(childFrameNode);
+        }
+    }
+    return listItems;
+}
+
+PointF ConvertItemCenterToListLocal(const RefPtr<FrameNode>& listNode, const RefPtr<FrameNode>& itemNode)
+{
+    CHECK_NULL_RETURN(listNode, PointF());
+    CHECK_NULL_RETURN(itemNode, PointF());
+    auto listOffset = listNode->GetOffsetRelativeToWindow();
+    auto itemOffset = itemNode->GetOffsetRelativeToWindow();
+    auto itemRect = itemNode->GetGeometryNode()->GetFrameRect();
+    return PointF(itemOffset.GetX() - listOffset.GetX() + itemRect.Width() / 2.0f,
+        itemOffset.GetY() - listOffset.GetY() + itemRect.Height() / 2.0f);
+}
 } // namespace
 
 class ListGeneratedTestNg : public ListTestNg {
@@ -1657,5 +1695,95 @@ HWTEST_F(ListGeneratedTestNg, ListItemGroupModelSetFooterStyle001, TestSize.Leve
     ListItemGroupModelNG::SetFooterStyle(listNode, V2::ListItemGroupHeaderFooterStyle::FLOATING);
     EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::FLOATING);
     CreateDone();
+}
+
+/**
+ * @tc.name: ListSwipeSelectGetItemAtPosition001
+ * @tc.desc: Test swipe multi-select can still resolve item index outside edit-mode hot zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectGetItemAtPosition001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    const PointF point(WIDTH / 2.0f, ITEM_MAIN_SIZE / 2.0f);
+    EXPECT_FALSE(pattern_->IsInEditModeHotZone(point));
+    EXPECT_EQ(pattern_->GetItemAtPosition(point.GetX(), point.GetY()), 0);
+}
+
+/**
+ * @tc.name: ListSwipeSelectHotZoneSingleLane001
+ * @tc.desc: Test swipe multi-select hot zone detection for single-lane list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectHotZoneSingleLane001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    model.SetLanes(1);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    FlushUITasks();
+    const PointF hotZonePoint(WIDTH - 1.0f, ITEM_MAIN_SIZE / 2.0f);
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_TRUE(pattern_->IsInEditModeHotZone(hotZonePoint));
+
+    auto stateKey = pattern_->GetSwipeSelectStateKeyAtPosition(hotZonePoint.GetX(), hotZonePoint.GetY());
+    EXPECT_EQ(stateKey.index, 0);
+    EXPECT_EQ(stateKey.indexInGroup, -1);
+}
+
+/**
+ * @tc.name: ListSwipeSelectStateKeyForGroup001
+ * @tc.desc: Test swipe multi-select state key resolution for list items inside list item group
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectStateKeyForGroup001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, 3);
+    CreateDone();
+
+    auto listItems = GetFlatListItems(frameNode_);
+    ASSERT_GE(static_cast<int32_t>(listItems.size()), 3);
+    auto point = ConvertItemCenterToListLocal(frameNode_, listItems[0]);
+    auto stateKey = pattern_->GetSwipeSelectStateKeyAtPosition(point.GetX(), point.GetY());
+    EXPECT_EQ(stateKey.index, 0);
+    EXPECT_EQ(stateKey.indexInGroup, 0);
+
+    auto selectedNode = pattern_->GetSelectableItemAtStateKey(stateKey);
+    EXPECT_EQ(selectedNode, listItems[0]);
+}
+
+/**
+ * @tc.name: ListSwipeSelectMarkGroupItem001
+ * @tc.desc: Test swipe multi-select can mark list item inside list item group by state key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectMarkGroupItem001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, 3);
+    CreateDone();
+
+    auto listItems = GetFlatListItems(frameNode_);
+    ASSERT_GE(static_cast<int32_t>(listItems.size()), 3);
+    auto point = ConvertItemCenterToListLocal(frameNode_, listItems[0]);
+    auto stateKey = pattern_->GetSwipeSelectStateKeyAtPosition(point.GetX(), point.GetY());
+    pattern_->MarkSwipeItemSelectedByStateKey(stateKey, true);
+
+    EXPECT_TRUE(listItems[0]->GetPattern<ListItemPattern>()->IsSelected());
+    EXPECT_FALSE(listItems[1]->GetPattern<ListItemPattern>()->IsSelected());
+    EXPECT_FALSE(listItems[2]->GetPattern<ListItemPattern>()->IsSelected());
 }
 } // namespace OHOS::Ace::NG

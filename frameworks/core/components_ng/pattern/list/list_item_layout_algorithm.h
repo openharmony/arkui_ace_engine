@@ -125,8 +125,29 @@ public:
     }
     bool CheckMeasureSwipeAction(bool isStart);
 
+    void SetEditModeCheckBoxNodeIndex(int32_t index)
+    {
+        editModeCheckBoxNodeIndex_ = index;
+    }
+
+    void SetNeedReserveEditModeCheckBoxSpace(bool needReserveEditModeCheckBoxSpace)
+    {
+        needReserveEditModeCheckBoxSpace_ = needReserveEditModeCheckBoxSpace;
+    }
+
+    bool GetNeedReserveEditModeCheckBoxSpace()
+    {
+        return needReserveEditModeCheckBoxSpace_;
+    }
+
 private:
     void MeasureItemChild(LayoutWrapper* layoutWrapper);
+
+    void MeasureEditModeCheckBox(LayoutWrapper* layoutWrapper);
+
+    void UpdateEditModeSelfSize(LayoutWrapper* layoutWrapper);
+
+    void LayoutEditModeCheckBox(LayoutWrapper* layoutWrapper, const SizeF& size, const OffsetF& paddingOffset);
 
     void CheckAndUpdateCurOffset(LayoutWrapper* layoutWrapper);
 
@@ -135,6 +156,8 @@ private:
     int32_t startNodeIndex_;
     int32_t endNodeIndex_;
     int32_t childNodeIndex_;
+    int32_t editModeCheckBoxNodeIndex_ = -1;
+    bool needReserveEditModeCheckBoxSpace_ = false;
 
     int32_t indexInList_ = 0;
     int32_t indexInListItemGroup_ = -1;

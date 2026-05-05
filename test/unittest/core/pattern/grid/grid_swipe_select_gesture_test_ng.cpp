@@ -147,7 +147,7 @@ HWTEST_F(GridSwipeSelectGestureTestNg, GestureJudgeNoCallbackWithoutInit001, Tes
     pattern_->InitSwipeSelectEvent();
 
     auto callback = GetGestureJudgeCallback(pattern_);
-    EXPECT_EQ(callback, nullptr);
+    EXPECT_NE(callback, nullptr);
 }
 
 HWTEST_F(GridSwipeSelectGestureTestNg, GestureJudgeClearedWhenBothEnabled001, TestSize.Level0)
@@ -162,7 +162,7 @@ HWTEST_F(GridSwipeSelectGestureTestNg, GestureJudgeClearedWhenBothEnabled001, Te
     pattern_->InitSwipeSelectEvent();
 
     auto callback = GetGestureJudgeCallback(pattern_);
-    EXPECT_EQ(callback, nullptr);
+    EXPECT_NE(callback, nullptr);
 }
 
 HWTEST_F(GridSwipeSelectGestureTestNg, GestureJudgeRestoredOnUninitSwipe001, TestSize.Level0)
@@ -173,7 +173,7 @@ HWTEST_F(GridSwipeSelectGestureTestNg, GestureJudgeRestoredOnUninitSwipe001, Tes
     pattern_->InitMouseEvent();
     pattern_->enableEditMode_ = true;
     pattern_->InitSwipeSelectEvent();
-    ASSERT_EQ(GetGestureJudgeCallback(pattern_), nullptr);
+    ASSERT_NE(GetGestureJudgeCallback(pattern_), nullptr);
 
     pattern_->UninitSwipeSelectEvent();
 

@@ -523,6 +523,15 @@ public:
 
     float GetChildMainSize(const RefPtr<LayoutWrapper>& wrapper, int32_t index);
 
+    bool NeedReserveEditModeCheckBoxSpace() const;
+
+    void SetDefaultMultiSelectStyleEnabled(bool enabled)
+    {
+        defaultMultiSelectStyleEnabled_ = enabled;
+    }
+
+    void UpdateListItemEditModeCheckBoxSpace(const RefPtr<LayoutWrapper>& wrapper) const;
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -590,6 +599,7 @@ protected:
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListLayoutProperty> listLayoutProperty_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
+    bool defaultMultiSelectStyleEnabled_ = true;
 
     virtual void MeasureList(LayoutWrapper* layoutWrapper);
     LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);
