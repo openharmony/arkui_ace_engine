@@ -273,6 +273,7 @@ public:
         const PanDistanceMapDimension& distanceMap, double angle = DEFAULT_PAN_ANGLE);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
+    void SetPanCanCoexistWithScroll(bool value);
     void SetLongPressEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
@@ -559,6 +560,7 @@ private:
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
     bool needRecollect_ = false;
+    bool panCanCoexistWithScroll_ = false;
     bool isResponseRegion_ = false;
     bool hasTouchResponseRegionConfig_ = false;
     std::vector<DimensionRect> responseRegion_;

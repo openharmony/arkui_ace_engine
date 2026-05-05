@@ -156,6 +156,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     panRecognizer_->SetOnActionCancel(actionCancel);
     panRecognizer_->SetIsSystemGesture(true);
     panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    panRecognizer_->SetCanCoexistWithScroll(canCoexistWithScroll_);
 
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
