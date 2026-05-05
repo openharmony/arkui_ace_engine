@@ -136,6 +136,13 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 
 bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
 {
+    // Pan-gesture-escape: a finger that has been pushed out of this recognizer
+    // must not feed it further events of any kind. We filter at the very top
+    // of ProcessTouchEvent so neither MOVE updates nor DOWN/UP transitions
+    // can resurrect tracking state for an escaped finger.
+    if (IsFingerEscaped(point.id)) {
+        return true;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
@@ -242,6 +249,9 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 
 void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
 {
+    if (IsFingerEscaped(point.id)) {
+        return;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
