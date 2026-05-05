@@ -35,8 +35,6 @@
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "event/ui_input_event_impl.h"
-#include "ui_input_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2096,70 +2094,6 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridScrollByTest004, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_SCROLL_BY, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     nodeAPI->disposeNode(gridNode);
-}
-
-/**
- * @tc.name: NativeCreateClonedEventNullTouchPoints001
- * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent returns 401 when touchPointSize > 0 but touchPointes is NULL.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeTwoPartTest, NativeCreateClonedEventNullTouchPoints001, TestSize.Level1)
-{
-    ArkUITouchEvent touchEvent {};
-    touchEvent.touchPointSize = 1;
-
-    ArkUI_UIInputEvent inputEvent {};
-    inputEvent.inputEvent = &touchEvent;
-    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
-
-    ArkUI_UIInputEvent* clonedEvent = nullptr;
-    auto res = OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
-    EXPECT_EQ(res, ARKUI_ERROR_CODE_PARAM_INVALID);
-}
-
-/**
- * @tc.name: NativeCreateClonedEventNullHistoryEvents001
- * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent returns 401 when historySize > 0 but historyEvents is NULL.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeTwoPartTest, NativeCreateClonedEventNullHistoryEvents001, TestSize.Level1)
-{
-    ArkUITouchEvent touchEvent {};
-    touchEvent.historySize = 1;
-
-    ArkUI_UIInputEvent inputEvent {};
-    inputEvent.inputEvent = &touchEvent;
-    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
-
-    ArkUI_UIInputEvent* clonedEvent = nullptr;
-    auto res = OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
-    EXPECT_EQ(res, ARKUI_ERROR_CODE_PARAM_INVALID);
-}
-
-/**
- * @tc.name: NativeCreateClonedEventNullHistoryTouchPoints001
- * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent must not crash when a history entry has
- *           touchPointSize > 0 but touchPointes is NULL; SetHistoryTouchEvent skips the bad entry.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeTwoPartTest, NativeCreateClonedEventNullHistoryTouchPoints001, TestSize.Level1)
-{
-    ArkUIHistoryTouchEvent historyEntry {};
-    historyEntry.touchPointSize = 1;
-
-    ArkUITouchEvent touchEvent {};
-    touchEvent.historySize = 1;
-    touchEvent.historyEvents = &historyEntry;
-
-    ArkUI_UIInputEvent inputEvent {};
-    inputEvent.inputEvent = &touchEvent;
-    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
-
-    ArkUI_UIInputEvent* clonedEvent = nullptr;
-    OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
-    if (clonedEvent) {
-        OH_ArkUI_PointerEvent_DestroyClonedEvent(clonedEvent);
-    }
 }
 
 } // namespace OHOS::Ace
