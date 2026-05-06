@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 
+#include <array>
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
@@ -33,36 +35,26 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<GridModel> GridModel::instance_ = nullptr;
-std::mutex GridModel::mutex_;
-
 GridModel* GridModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::GridModelNG());
+    static NG::GridModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::GridModelNG());
-            } else {
-                instance_.reset(new Framework::GridModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::GridModelNG instance;
+        return &instance;
+    } else {
+        static Framework::GridModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
-const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
-const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
-    FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 const size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
 const size_t GRID_ITEM_RECT_RESULT_LENGTH = 4;
 
@@ -660,6 +652,12 @@ void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 
 void JSGrid::SetLayoutDirection(int32_t value)
 {
+    static constexpr std::array<FlexDirection, 4> LAYOUT_DIRECTION = {
+        FlexDirection::ROW,
+        FlexDirection::COLUMN,
+        FlexDirection::ROW_REVERSE,
+        FlexDirection::COLUMN_REVERSE
+    };
     if (value < 0 || value >= static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
         return;
     }

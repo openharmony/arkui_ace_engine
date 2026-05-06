@@ -44,10 +44,7 @@ public:
     bool PostUITask(int32_t contextId, std::function<void()>&& uiTask);
     bool PostUITaskAndWait(int32_t contextId, std::function<void()>&& uiTask);
 
-    static void SetIsParallelizeUI(bool isParallelizeUI)
-    {
-        isParallelizeUI_ = isParallelizeUI;
-    }
+    static void SetIsParallelizeUI(bool isParallelizeUI);
 
     static void CheckTag(const std::string& tag);
 
