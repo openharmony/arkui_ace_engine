@@ -1375,4 +1375,25 @@ namespace OHOS::Ace::NG {
         }
     }
 
+    void LazyForEachBuilder::UpdateThemeScopeUpdate(int32_t themeScopeId)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->UpdateThemeScopeUpdate(themeScopeId);
+        }
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->UpdateThemeScopeUpdate(themeScopeId);
+        }
+        for (const auto& node : nodeList_) {
+            if (node.second == nullptr) {
+                continue;
+            }
+            node.second->UpdateThemeScopeUpdate(themeScopeId);
+        }
+    }
 }
