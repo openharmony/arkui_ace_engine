@@ -38,7 +38,7 @@ export default {
   ModifierUtils, AttributeUpdater, ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier,
   SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, ModifierMap, IndicatorComponentModifier,
   LazyVGridLayoutModifier, EmbeddedComponentModifier, UIPickerComponentModifier, UnionEffectContainerModifier,
-  LazyColumnLayoutModifier
+  LazyColumnLayoutModifier, LazyVWaterFlowLayoutModifier
 };
 `;
     }

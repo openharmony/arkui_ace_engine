@@ -93,6 +93,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "TimePicker", "timepicker" },
         { "TimePickerDialog", "timepicker" },
         { "WaterFlow", "waterflow" },
+        { "LazyVWaterFlowLayout", "lazywaterflowlayout" },
         { "Menu", "menu" },
         { "MenuItem", "menu" },
         { "MenuItemGroup", "menu" },

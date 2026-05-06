@@ -108,6 +108,7 @@ declare class ModifierJS {
   LazyColumnLayoutModifier(nativePtr: KNode, classType: ModifierType): void;
   StepperModifier(nativePtr: KNode, classType: ModifierType): void;
   ContainerPickerModifier(nativePtr: KNode, classType: ModifierType): void;
+  LazyVWaterFlowLayoutModifier(nativePtr: KNode, classType: ModifierType): void;
 }
 
 declare class aceConsole {

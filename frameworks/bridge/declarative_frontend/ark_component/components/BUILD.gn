@@ -39,6 +39,7 @@ arkui_modules = [
   "alphabetindexer",
   "rating",
   "waterflow",
+  "lazywaterflowlayout",
   "rowsplit",
   "columnsplit",
   "menu",

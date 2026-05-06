@@ -40,6 +40,7 @@
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/lazy_column_layout_modifier.h"
 #include "core/interfaces/native/node/lazy_grid_layout_modifier.h"
+#include "core/interfaces/native/node/lazy_water_flow_layout_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
@@ -316,6 +317,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getMatrix4Modifier = NodeModifier::GetMatrix4Modifier,
         .getDynamicLayoutModifier = NodeModifier::GetDynamicLayoutModifier,
         .getLazyColumnLayoutModifier = NodeModifier::GetLazyColumnLayoutModifier,
+        .getLazyWaterFlowLayoutModifier = NodeModifier::GetLazyWaterFlowLayoutModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

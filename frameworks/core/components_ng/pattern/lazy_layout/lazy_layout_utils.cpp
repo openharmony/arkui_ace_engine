@@ -104,4 +104,38 @@ std::optional<ViewPosReference> LazyLayoutUtils::GetViewPosReference(
     return viewPosRefOpt;
 }
 
+bool LazyLayoutUtils::HasDirectWaterFlowAncestor(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        if (parent->GetTag() == V2::FLOW_ITEM_ETS_TAG) {
+            return false;
+        }
+        if (parent->GetTag() == V2::WATERFLOW_ETS_TAG) {
+            return true;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return false;
+}
+
+std::optional<WaterFlowAncestorInfo> LazyLayoutUtils::FindWaterFlowAncestorInfo(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
+    WaterFlowAncestorInfo info;
+    while (parent) {
+        if (parent->GetTag() == V2::FLOW_ITEM_ETS_TAG) {
+            info.throughFlowItem = true;
+        }
+        if (parent->GetTag() == V2::WATERFLOW_ETS_TAG) {
+            info.node = parent;
+            return info;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return std::nullopt;
+}
+
 } // namespace OHOS::Ace::NG

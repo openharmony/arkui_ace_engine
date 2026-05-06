@@ -27758,6 +27758,106 @@ globalThis.LazyColumnLayout.attributeModifier = function (modifier) {
 };
 }
 
+class ArkLazyVWaterFlowLayoutComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  columnsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyWaterFlowColumnsGapModifier.identity, LazyWaterFlowColumnsGapModifier, value);
+    return this;
+  }
+  rowsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyWaterFlowRowsGapModifier.identity, LazyWaterFlowRowsGapModifier, value);
+    return this;
+  }
+  columnsTemplate(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyWaterFlowColumnsTemplateModifier.identity, LazyWaterFlowColumnsTemplateModifier, value);
+    return this;
+  }
+  onVisibleIndexesChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, LazyWaterFlowOnVisibleIndexesChangeModifier.identity, LazyWaterFlowOnVisibleIndexesChangeModifier, callback);
+    return this;
+  }
+}
+class LazyWaterFlowColumnsTemplateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().lazyVWaterFlowLayout.resetColumnsTemplate(node);
+    }
+    else if (isObject(this.value)) {
+      getUINativeModule().lazyVWaterFlowLayout.setItemFillPolicy(node, this.value);
+    }
+    else if (isString(this.value)) {
+      getUINativeModule().lazyVWaterFlowLayout.setColumnsTemplate(node, this.value);
+    }
+    else {
+      getUINativeModule().lazyVWaterFlowLayout.resetColumnsTemplate(node);
+    }
+  }
+}
+LazyWaterFlowColumnsTemplateModifier.identity = Symbol('lazyVWaterFlowColumnsTemplate');
+class LazyWaterFlowColumnsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isObject(this.value)) {
+      getUINativeModule().lazyVWaterFlowLayout.resetColumnsGap(node);
+    }
+    else {
+      getUINativeModule().lazyVWaterFlowLayout.setColumnsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyWaterFlowColumnsGapModifier.identity = Symbol('lazyVWaterFlowColumnsGap');
+class LazyWaterFlowRowsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isObject(this.value)) {
+      getUINativeModule().lazyVWaterFlowLayout.resetRowsGap(node);
+    }
+    else {
+      getUINativeModule().lazyVWaterFlowLayout.setRowsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyWaterFlowRowsGapModifier.identity = Symbol('lazyVWaterFlowRowsGap');
+class LazyWaterFlowOnVisibleIndexesChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isFunction(this.value)) {
+      getUINativeModule().lazyVWaterFlowLayout.resetOnVisibleIndexesChange(node);
+    }
+    else {
+      getUINativeModule().lazyVWaterFlowLayout.setOnVisibleIndexesChange(node, this.value);
+    }
+  }
+}
+LazyWaterFlowOnVisibleIndexesChangeModifier.identity = Symbol('lazyVWaterFlowOnVisibleIndexesChange');
+// @ts-ignore
+if (globalThis.LazyVWaterFlowLayout !== undefined) {
+globalThis.LazyVWaterFlowLayout.attributeModifier = function (modifier) {
+  attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    return new ArkLazyVWaterFlowLayoutComponent(nativePtr);
+  }, (nativePtr, classType, modifierJS) => {
+    return new modifierJS.LazyVWaterFlowLayoutModifier(nativePtr, classType);
+  });
+};
+}
+
 class ArkContainerPickerComponent extends ArkComponent {
     constructor(nativePtr, classType) {
     super(nativePtr, classType);
