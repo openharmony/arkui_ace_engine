@@ -17,6 +17,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
 namespace OHOS::Ace::DragAdapter {
 namespace {

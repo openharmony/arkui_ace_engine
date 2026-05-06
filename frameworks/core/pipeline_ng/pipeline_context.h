@@ -37,7 +37,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/memory/memory_manager.h"
@@ -97,6 +96,7 @@ class FormEventManager;
 class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
+class DragDropManager;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
 

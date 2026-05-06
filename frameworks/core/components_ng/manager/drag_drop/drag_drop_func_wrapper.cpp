@@ -29,6 +29,7 @@
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

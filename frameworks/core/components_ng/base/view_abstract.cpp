@@ -18,6 +18,7 @@
 #include <functional>
 #include <unordered_map>
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/flex_property.h"
 
