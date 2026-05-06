@@ -47,7 +47,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/core/accessibility/static/accessibility_static_utils.h"
 #include "frameworks/core/components_ng/pattern/text/span_model_ng.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "frameworks/core/components_ng/property/smart_gesture_property.h"
+#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -5078,6 +5080,7 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityActionOptions(ArkUIRuntim
 ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+#ifdef SMART_GESTURE_SUPPORTED
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
@@ -5106,16 +5109,19 @@ ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInf
         config.selectable = selectableVal->BooleaValue(vm);
     }
     ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
+#endif
     return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue CommonBridge::ResetSmartGestureShortcut(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+#ifdef SMART_GESTURE_SUPPORTED
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
+#endif
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -83,7 +83,7 @@ private:
     void RefreshSelectedNodeState();
     std::vector<RefPtr<FrameNode>> BuildCenterHitPath() const;
     std::vector<RefPtr<FrameNode>> BuildSelectedAncestorPath(const RefPtr<FrameNode>& selectedNode) const;
-    std::optional<SmartGestureProposal> BuildSlideForwardProposal(
+    SmartGestureProposal BuildSlideForwardProposal(
         const std::vector<RefPtr<FrameNode>>& visiblePrimaryNodes, const RefPtr<FrameNode>& selectedNode,
         const std::vector<RefPtr<FrameNode>>& centerHitPath) const;
     void RevealSelectedNodeIfNeeded(const RefPtr<FrameNode>& node);

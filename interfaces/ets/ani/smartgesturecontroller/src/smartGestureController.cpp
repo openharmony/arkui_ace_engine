@@ -921,7 +921,7 @@ public:
             }
             return resolution;
         }
-        return CreateAcceptedResolution();
+        return CreateRejectedResolution();
     }
 
 private:

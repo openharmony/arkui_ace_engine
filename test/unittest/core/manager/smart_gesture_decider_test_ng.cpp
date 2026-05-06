@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr char TEST_NODE_TAG[] = "test";
 constexpr int32_t TEST_SCROLL_COUNT = 3;
+constexpr double TEST_SCROLL_DISTANCE = 120.0;
 
 class TestScrollablePattern : public Pattern {
     DECLARE_ACE_TYPE(TestScrollablePattern, Pattern);
@@ -62,6 +63,13 @@ ScrollingConfig CreateScrollingConfig()
 {
     ScrollingConfig config;
     config.count = TEST_SCROLL_COUNT;
+    return config;
+}
+
+ScrollingConfig CreateDistanceScrollingConfig()
+{
+    ScrollingConfig config;
+    config.distance = TEST_SCROLL_DISTANCE;
     return config;
 }
 
@@ -123,6 +131,18 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetNextVisiblePrimaryNode
     const std::vector<RefPtr<FrameNode>> visibleNodes { firstNode, secondNode };
 
     EXPECT_EQ(SmartGestureDecider::GetNextVisiblePrimaryNode(visibleNodes, nullptr), firstNode);
+}
+
+/**
+ * @tc.name: SmartGestureDeciderGetNextVisiblePrimaryNode005
+ * @tc.desc: GetNextVisiblePrimaryNode returns nullptr for an empty visible list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetNextVisiblePrimaryNode005, TestSize.Level1)
+{
+    const std::vector<RefPtr<FrameNode>> visibleNodes;
+
+    EXPECT_EQ(SmartGestureDecider::GetNextVisiblePrimaryNode(visibleNodes, nullptr), nullptr);
 }
 
 /**
@@ -296,6 +316,20 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal007, 
 }
 
 /**
+ * @tc.name: SmartGestureDeciderBuildDefaultProposal009
+ * @tc.desc: BuildDefaultProposal returns none action for slide forward when no visible or center-hit node exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal009, TestSize.Level1)
+{
+    auto proposal = SmartGestureDecider::BuildDefaultProposal(SmartGestureTrigger::SLIDE_FORWARD, {}, nullptr, {});
+
+    ASSERT_TRUE(proposal.has_value());
+    EXPECT_EQ(proposal->type, SmartGestureProposalType::NONE_ACTION);
+    EXPECT_EQ(proposal->operateIntention, SmartGestureOperateIntention::SLIDE_FORWARD);
+}
+
+/**
  * @tc.name: SmartGestureDeciderBuildCenterHitProposal001
  * @tc.desc: BuildCenterHitProposal skips invalid nodes and returns the first scrollable hit.
  * @tc.type: FUNC
@@ -308,11 +342,10 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildCenterHitProposal001
 
     auto proposal = SmartGestureDecider::BuildCenterHitProposal(centerHitPath);
 
-    ASSERT_TRUE(proposal.has_value());
-    ASSERT_TRUE(proposal->scrollingConfig.has_value());
-    EXPECT_EQ(proposal->type, SmartGestureProposalType::SCROLL);
-    EXPECT_EQ(proposal->GetTargetNode(), scrollableNode);
-    EXPECT_EQ(proposal->scrollingConfig->count.value(), TEST_SCROLL_COUNT);
+    ASSERT_TRUE(proposal.scrollingConfig.has_value());
+    EXPECT_EQ(proposal.type, SmartGestureProposalType::SCROLL);
+    EXPECT_EQ(proposal.GetTargetNode(), scrollableNode);
+    EXPECT_EQ(proposal.scrollingConfig->count.value(), TEST_SCROLL_COUNT);
 }
 
 /**
@@ -328,9 +361,28 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildCenterHitProposal002
 
     auto proposal = SmartGestureDecider::BuildCenterHitProposal(centerHitPath);
 
-    ASSERT_TRUE(proposal.has_value());
-    EXPECT_EQ(proposal->type, SmartGestureProposalType::NONE_ACTION);
-    EXPECT_EQ(proposal->operateIntention, SmartGestureOperateIntention::SLIDE_FORWARD);
+    EXPECT_EQ(proposal.type, SmartGestureProposalType::NONE_ACTION);
+    EXPECT_EQ(proposal.operateIntention, SmartGestureOperateIntention::SLIDE_FORWARD);
+}
+
+/**
+ * @tc.name: SmartGestureDeciderBuildCenterHitProposal003
+ * @tc.desc: BuildCenterHitProposal skips scrollable nodes whose default scrolling config is absent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildCenterHitProposal003, TestSize.Level1)
+{
+    const auto nodeWithoutConfig = CreateScrollableNode(true, std::nullopt);
+    const auto nodeWithDistanceConfig = CreateScrollableNode(true, CreateDistanceScrollingConfig());
+    const std::vector<RefPtr<FrameNode>> centerHitPath { nodeWithoutConfig, nodeWithDistanceConfig };
+
+    auto proposal = SmartGestureDecider::BuildCenterHitProposal(centerHitPath);
+
+    ASSERT_TRUE(proposal.scrollingConfig.has_value());
+    ASSERT_TRUE(proposal.scrollingConfig->distance.has_value());
+    EXPECT_EQ(proposal.type, SmartGestureProposalType::SCROLL);
+    EXPECT_EQ(proposal.GetTargetNode(), nodeWithDistanceConfig);
+    EXPECT_DOUBLE_EQ(proposal.scrollingConfig->distance.value(), TEST_SCROLL_DISTANCE);
 }
 
 /**

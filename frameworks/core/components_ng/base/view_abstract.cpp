@@ -52,7 +52,9 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -90,6 +92,7 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
 
+#ifdef SMART_GESTURE_SUPPORTED
 void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -101,6 +104,7 @@ void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
     CHECK_NULL_VOID(manager);
     manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
 }
+#endif
 
 std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
 {
@@ -8784,6 +8788,7 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
 
 void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (action != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
@@ -8797,16 +8802,19 @@ void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool se
     config.selectable = selectable;
     smartGestureProperty->SetSmartGestureShortcut(config);
     SyncSmartGesturePrimaryActionRegistry(frameNode);
+#endif
 }
 
 void ViewAbstract::ResetSmartGestureShortcut()
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto smartGestureProperty = frameNode->GetSmartGestureProperty();
     CHECK_NULL_VOID(smartGestureProperty);
     smartGestureProperty->ResetSmartGestureShortcut();
     SyncSmartGesturePrimaryActionRegistry(frameNode);
+#endif
 }
 
 void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)

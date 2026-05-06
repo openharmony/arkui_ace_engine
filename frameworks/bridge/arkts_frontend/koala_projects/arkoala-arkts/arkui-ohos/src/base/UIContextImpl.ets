@@ -1396,12 +1396,10 @@ export class SmartGestureControllerImpl extends SmartGestureController {
             ArkUIAniModule._Common_Restore_InstanceId();
             return;
         }
-        const monitorWrapper = monitorWrapperStack[monitorWrapperStack.length - 1];
-        smartGestureController.unregisterMonitor(monitorWrapper);
-        monitorWrapperStack.pop();
-        if (monitorWrapperStack.length === 0) {
-            this.monitorWrapperMap_.delete(monitorCallback);
+        for (let index = monitorWrapperStack.length - 1; index >= 0; index--) {
+            smartGestureController.unregisterMonitor(monitorWrapperStack[index]);
         }
+        this.monitorWrapperMap_.delete(monitorCallback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -1485,8 +1483,7 @@ export class SmartGestureControllerImpl extends SmartGestureController {
             }
             case SmartGestureAction.SCROLL_FORWARD: {
                 const node = this.fromRawNodePtr(raw.nodePtr);
-                const pageCount = raw.pageCount as int | undefined;
-                const proposal = new ScrollActionProposal(node, raw.distance ?? 0, pageCount);
+                const proposal = new ScrollActionProposal(node, raw.distance ?? 0);
                 proposal.operateIntention = operateIntention;
                 return proposal;
             }
@@ -1547,9 +1544,6 @@ export class SmartGestureControllerImpl extends SmartGestureController {
                 const scroll = selectedProposal as ScrollActionProposal;
                 rawProposal.nodePtr = this.toRawNodePtr(scroll.node);
                 rawProposal.distance = scroll.distance;
-                if (scroll.pageCount !== undefined) {
-                    rawProposal.pageCount = scroll.pageCount as int;
-                }
                 return rawProposal;
             }
             default:

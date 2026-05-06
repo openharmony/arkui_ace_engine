@@ -62,7 +62,9 @@
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "frameworks/core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #include "frameworks/core/components_ng/property/smart_gesture_property.h"
 #include "core/components/common/properties/placement.h"
 namespace OHOS::Ace::NG {
@@ -157,6 +159,7 @@ void ViewAbstractModelNG::BindMenuGesture(
     BindMenuTouch(targetNode, gestureHub);
 }
 
+#ifdef SMART_GESTURE_SUPPORTED
 void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -168,6 +171,7 @@ void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
     CHECK_NULL_VOID(manager);
     manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
 }
+#endif
 
 void ViewAbstractModelNG::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
 {
@@ -1827,20 +1831,24 @@ void ViewAbstractModelNG::ResetAccessibilityActionOptions(FrameNode* frameNode)
 
 void ViewAbstractModelNG::SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     CHECK_NULL_VOID(frameNode);
     auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
     CHECK_NULL_VOID(smartGestureProperty);
     smartGestureProperty->SetSmartGestureShortcut(config);
     SyncSmartGesturePrimaryActionRegistry(frameNode);
+#endif
 }
 
 void ViewAbstractModelNG::ResetSmartGestureShortcut(FrameNode* frameNode)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     CHECK_NULL_VOID(frameNode);
     auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
     CHECK_NULL_VOID(smartGestureProperty);
     smartGestureProperty->ResetSmartGestureShortcut();
     SyncSmartGesturePrimaryActionRegistry(frameNode);
+#endif
 }
 
 void ViewAbstractModelNG::SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions)

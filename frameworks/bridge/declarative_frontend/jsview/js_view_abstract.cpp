@@ -11935,6 +11935,7 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
 
 void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     if (info.Length() != PARAMETER_LENGTH_FIRST) {
         return;
     }
@@ -11966,6 +11967,7 @@ void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
         selectable = selectableValue->ToBoolean();
     }
     ViewAbstractModel::GetInstance()->SetSmartGestureShortcut(action, enabled, selectable);
+#endif
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)

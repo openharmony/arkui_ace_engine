@@ -374,6 +374,9 @@ bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEv
         return false;
     }
 
+    // Return value semantics: true only when smart gesture processing ends up executing
+    // a concrete action successfully; false means the gesture should be treated as unhandled,
+    // including monitor veto, invalid proposal, or a final NONE_ACTION proposal.
     auto proposal = ResolveProposal(defaultProposal.value_or(BuildNoneActionProposal(trigger)));
     if (proposal.has_value()) {
         return ExecuteProposal(proposal.value(), event);
@@ -569,7 +572,7 @@ std::vector<RefPtr<FrameNode>> SmartGestureManager::BuildSelectedAncestorPath(
     return ancestorPath;
 }
 
-std::optional<SmartGestureProposal> SmartGestureManager::BuildSlideForwardProposal(
+SmartGestureProposal SmartGestureManager::BuildSlideForwardProposal(
     const std::vector<RefPtr<FrameNode>>& visiblePrimaryNodes, const RefPtr<FrameNode>& selectedNode,
     const std::vector<RefPtr<FrameNode>>& centerHitPath) const
 {
@@ -581,7 +584,7 @@ std::optional<SmartGestureProposal> SmartGestureManager::BuildSlideForwardPropos
         }
         auto selectedAncestorPath = BuildSelectedAncestorPath(selectedNode);
         auto scrollProposal = SmartGestureDecider::BuildCenterHitProposal(selectedAncestorPath);
-        if (scrollProposal.has_value() && scrollProposal->type != SmartGestureProposalType::NONE_ACTION) {
+        if (scrollProposal.type != SmartGestureProposalType::NONE_ACTION) {
             return scrollProposal;
         }
         auto firstNode = SmartGestureDecider::GetFirstVisiblePrimaryNode(visiblePrimaryNodes);
@@ -592,12 +595,6 @@ std::optional<SmartGestureProposal> SmartGestureManager::BuildSlideForwardPropos
         return SmartGestureProposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::SLIDE_FORWARD);
     }
     auto centerHitProposal = SmartGestureDecider::BuildCenterHitProposal(centerHitPath);
-    if (!centerHitProposal.has_value()) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE,
-            "smart gesture slide-forward no visible PA and no center-hit scroll, centerHitCount=%{public}zu",
-            centerHitPath.size());
-        return SmartGestureProposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::SLIDE_FORWARD);
-    }
     return centerHitProposal;
 }
 
@@ -773,7 +770,7 @@ bool SmartGestureManager::ExecuteProposal(const SmartGestureProposal& proposal, 
     auto targetNode = proposal.GetTargetNode();
     switch (proposal.type) {
         case SmartGestureProposalType::NONE_ACTION:
-            return true;
+            return false;
         case SmartGestureProposalType::SELECT:
             UpdateSelectedNode(targetNode);
             return true;
@@ -823,14 +820,12 @@ bool SmartGestureManager::ExecuteScrollProposal(const SmartGestureProposal& prop
 
 void SmartGestureManager::ExecuteBackPressProposal()
 {
-#ifndef CROSS_PLATFORM
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     int32_t instanceId = context->GetInstanceId();
     auto uiContent = UIContent::GetUIContent(instanceId);
     CHECK_NULL_VOID(uiContent);
     uiContent->ProcessBackPressed();
-#endif
 }
 
 bool SmartGestureManager::IsPrimaryActionNodeActive(const RefPtr<FrameNode>& node) const

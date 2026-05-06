@@ -140,6 +140,14 @@ ace_unittest("smart_gesture_decider_test_ng") {
   module_name = "SmartGesture-Decider"
   type = "new"
   sources = [ "smart_gesture_decider_test_ng.cpp" ]
+  defines = [ "SMART_GESTURE_SUPPORTED" ]
+}
+
+ace_unittest("smart_gesture_manager_test_ng") {
+  module_name = "SmartGesture-Manager"
+  type = "new"
+  sources = [ "smart_gesture_manager_test_ng.cpp" ]
+  defines = [ "SMART_GESTURE_SUPPORTED" ]
 }
 
 ace_unittest("display_sync_manager_test_ng") {

@@ -654,14 +654,10 @@ export class PageSwitchActionProposal extends TargetedGestureProposal {
 
 export class ScrollActionProposal extends TargetedGestureProposal {
     public distance: number;
-    public pageCount?: int;
 
-    constructor(node: FrameNode, distance: number, pageCount?: int) {
+    constructor(node: FrameNode, distance: number) {
         super(SmartGestureAction.SCROLL_FORWARD, OperateIntention.SLIDE_FORWARD, node);
         this.distance = distance;
-        if (pageCount !== undefined) {
-            this.pageCount = pageCount;
-        }
         brandProposal(this, SmartGestureAction.SCROLL_FORWARD);
     }
 }

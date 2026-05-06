@@ -580,28 +580,30 @@ public:
 
     static bool Unregister(napi_env env, int32_t instanceId, napi_value callback)
     {
-        std::shared_ptr<SmartGestureMonitorState> stateToDetach;
+        std::vector<std::shared_ptr<SmartGestureMonitorState>> statesToDetach;
         auto iter = states_.find(instanceId);
         if (iter == states_.end() || iter->second.empty()) {
             return false;
         }
         auto& stateStack = iter->second;
-        for (auto reverseIter = stateStack.rbegin(); reverseIter != stateStack.rend(); ++reverseIter) {
-            auto state = *reverseIter;
-            if (!state || !state->MatchesCallback(env, callback)) {
-                continue;
-            }
-            stateToDetach = state;
-            stateStack.erase(std::next(reverseIter).base());
-            break;
-        }
+        auto removeIter = std::remove_if(stateStack.begin(), stateStack.end(),
+            [&statesToDetach, env, callback](const std::shared_ptr<SmartGestureMonitorState>& state) {
+                if (!state || !state->MatchesCallback(env, callback)) {
+                    return false;
+                }
+                statesToDetach.emplace_back(state);
+                return true;
+            });
+        stateStack.erase(removeIter, stateStack.end());
         if (stateStack.empty()) {
             states_.erase(iter);
         }
-        if (stateToDetach) {
-            stateToDetach->Detach();
+        for (const auto& state : statesToDetach) {
+            if (state) {
+                state->Detach();
+            }
         }
-        return stateToDetach != nullptr;
+        return !statesToDetach.empty();
     }
 
     static bool Clear(int32_t instanceId)
@@ -649,7 +651,7 @@ public:
             return resolution;
         }
 
-        return CreateAcceptedResolution();
+        return CreateRejectedResolution();
     }
 
 private:
@@ -758,6 +760,10 @@ bool GetRequiredBooleanArgument(napi_env env, napi_callback_info info, bool& val
     if (!GetSingleParam(env, info, &arg, valueType)) {
         NapiThrow(env, INVALID_PARAM_COUNT_MESSAGE, ERROR_CODE_PARAM_INVALID);
         return false;
+    }
+    if (valueType == napi_undefined || valueType == napi_null) {
+        value = false;
+        return true;
     }
     if (valueType != napi_boolean) {
         NapiThrow(env, INVALID_ENABLED_TYPE_MESSAGE, ERROR_CODE_PARAM_INVALID);

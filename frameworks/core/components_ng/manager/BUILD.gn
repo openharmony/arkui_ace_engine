@@ -57,8 +57,6 @@ build_component_ng("manager_ng") {
     "post_event/post_event_manager.cpp",
     "safe_area/safe_area_manager.cpp",
     "scroll_adjust/scroll_adjust_manager.cpp",
-    "smart_gesture/smart_gesture_decider.cpp",
-    "smart_gesture/smart_gesture_manager.cpp",
     "select_content_overlay/select_content_overlay_manager.cpp",
     "select_overlay/select_overlay_client.cpp",
     "select_overlay/select_overlay_manager.cpp",
@@ -70,4 +68,9 @@ build_component_ng("manager_ng") {
   ]
 
   gesture_debug_sources = [ "gesture_debug/gesture_debug_boundary_manager.cpp" ]
+
+  smart_gesture_sources = [
+    "smart_gesture/smart_gesture_decider.cpp",
+    "smart_gesture/smart_gesture_manager.cpp",
+  ]
 }
