@@ -124,7 +124,19 @@ void GridCustomLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     LostChildFocusToSelf(layoutWrapper, std::min(info.startIndex_, info.endIndex_) - cachedItemCnt.first,
         info.endIndex_ + cachedItemCnt.second);
-    wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cachedItemCnt.first,
+    int32_t startIndex = std::min(info.startIndex_, info.endIndex_);
+    int32_t endIndex = info.endIndex_;
+    if (info.isOnMoveDragUpdate_ && !info.isOnMoveGridChange_) {
+        if (info.fromDragIndex_ >= 0) {
+            startIndex = std::min(startIndex, info.fromDragIndex_);
+            endIndex = std::max(endIndex, info.fromDragIndex_);
+        }
+        if (info.toDragIndex_ >= 0) {
+            startIndex = std::min(startIndex, info.toDragIndex_);
+            endIndex = std::max(endIndex, info.toDragIndex_);
+        }
+    }
+    wrapper_->SetActiveChildRange(startIndex, endIndex, cachedItemCnt.first,
         cachedItemCnt.second, props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cachedItemCnt.first);
     UpdateOverlay(wrapper_);
