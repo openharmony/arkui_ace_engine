@@ -58,7 +58,7 @@ constexpr int32_t NUM_2 = 2;
 
 bool ParseFloatArray(const EcmaVM* vm, const panda::Local<panda::ArrayRef>& array, std::vector<float>& outArray)
 {
-    uint32_t length = array->Length(vm);
+    uint32_t length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t i = 0; i < length; ++i) {
         auto jsValue = panda::ArrayRef::GetValueAt(vm, array, i);
         bool isNumber = false;
@@ -2512,7 +2512,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::ArrayRef> ratioList = ratiosArg;
-    uint32_t size = ratioList->Length(vm);
+    uint32_t size = ArkTSUtils::GetArrayLength(vm, ratioList);
     std::vector<double> ratioVec(size);
     for (uint32_t i = 0; i < size; i++) {
         double radioNumber = 0.0;
@@ -2888,7 +2888,7 @@ ArkUINativeModuleValue FrameNodeBridge::CancelAnimations(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(propertiesArg->IsArray(vm), panda::BooleanRef::New(vm, false));
     panda::Local<panda::ArrayRef> propertiesArrArg = panda::Local<panda::ArrayRef>(propertiesArg);
     std::vector<AnimationPropertyType> properties;
-    auto length = propertiesArrArg->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, propertiesArrArg);
     for (uint32_t i = 0; i != length; ++i) {
         panda::Local<panda::JSValueRef> propertyArg = panda::ArrayRef::GetValueAt(vm, propertiesArrArg, i);
         AnimationPropertyType propertyType = AnimationPropertyType::ROTATION;

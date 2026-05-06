@@ -61,7 +61,7 @@ bool ParseFontVariations(EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vect
         return false;
     }
     auto array = Local<panda::ArrayRef>(jsValue);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     axisValues.reserve(length);
     fontVariations.reserve(length);
     for (uint32_t i = 0; i < length; i++) {
@@ -1674,7 +1674,7 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
     struct ArkUITextDetectConfigStruct arkUITextDetectConfig;
     std::string types;
     auto array = panda::Local<panda::ArrayRef>(typesArg);
-    for (size_t i = 0; i < array->Length(vm); i++) {
+    for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, array); i++) {
         auto value = panda::ArrayRef::GetValueAt(vm, array, i);
         auto index = value->Int32Value(vm);
         if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
