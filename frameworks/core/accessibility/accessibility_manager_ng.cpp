@@ -14,6 +14,7 @@
  */
 
 #include "core/accessibility/accessibility_manager_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_session_adapter.h"

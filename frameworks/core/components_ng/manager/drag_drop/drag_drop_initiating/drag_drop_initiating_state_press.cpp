@@ -127,7 +127,6 @@ void DragDropInitiatingStatePress::Init(int32_t currentState)
     auto dragdropEvent = gestureHub->GetDragEventActuator();
     CHECK_NULL_VOID(dragdropEvent);
     dragdropEvent->CallTimerCallback(frameNode);
-    InteractionInterface::GetInstance()->SetDraggableState(true);
     if (!params.isThumbnailCallbackTriggered && !gestureHub->GetTextDraggable()) {
         auto getPixelMapFinishCallback = [weak = AceType::WeakClaim(this)](
                                              RefPtr<PixelMap> pixelMap, bool immediately) {

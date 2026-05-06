@@ -24,7 +24,7 @@ import { WatchFunc } from './decoratorWatch';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '@component/interop';
 import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 
 export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropRefDecoratedVariable<T> {
@@ -85,11 +85,10 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
 
         // Update ObservedObjectRegistry registration
         this.updateObservedObjectRegistration(oldValue, value);
-
+        this.execWatchFuncs();
         if (this.setProxyValue) {
             this.setProxyValue!(value);
         }
-        this.execWatchFuncs();
     }
 
     update(newValue: T): void {

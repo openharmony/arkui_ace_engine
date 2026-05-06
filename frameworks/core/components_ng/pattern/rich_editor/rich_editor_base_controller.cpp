@@ -108,6 +108,13 @@ void RichEditorBaseController::StopEditing()
     richEditorPattern->StopEditing();
 }
 
+void RichEditorBaseController::ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->ScrollToVisible(start, end);
+}
+
 void RichEditorBaseController::DeleteBackward()
 {
     auto richEditorPattern = pattern_.Upgrade();

@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "compatible/components/stepper/stepper_item_component_v2.h"
 #include "core/components/focus_animation/focus_animation_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/compatible/components/stepper/stepper_item_component.h"
 #include "frameworks/core/components/stepper/stepper_theme.h"
 

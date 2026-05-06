@@ -26,6 +26,8 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -33,6 +35,17 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+const float PARENT_SIZE_WIDTH = 100.0f;
+const float PARENT_SIZE_HEIGHT = 100.0f;
+const float CHILD_SIZE_WIDTH = 20.0f;
+const float CHILD_SIZE_HEIGHT = 20.0f;
+const float CHILD_OFFSET_BELOW_VISIBLE = 150.0f;
+const float CHILD_OFFSET_NEAR_TOP = 5.0f;
+const float CHILD_OFFSET_NEAR_BOTTOM = 85.0f;
+const float INNER_PARENT_SIZE = 80.0f;
+} // namespace
 
 namespace OHOS::Ace::NG {
 
@@ -45,6 +58,33 @@ public:
 class MockAccessibilityProperty : public AccessibilityProperty {
 public:
     MOCK_METHOD(bool, GetAccessibilityInnerVisibleRect, (RectF&), (override));
+};
+
+class MockScrollPatternForA11y : public ScrollPattern {
+public:
+    bool OnScrollCallback(float offset, int32_t source) override
+    {
+        onScrollCallbackCalled_ = true;
+        scrollOffset_ = offset;
+        scrollSource_ = source;
+        return true;
+    }
+
+    bool onScrollCallbackCalled_ = false;
+    float scrollOffset_ = 0.0f;
+    int32_t scrollSource_ = -1;
+};
+
+class MockScrollablePatternNoAbility : public ScrollablePattern {
+public:
+    Axis GetAxis() const override
+    {
+        return Axis::NONE;
+    }
+    bool UpdateCurrentOffset(float delta, int32_t source) override { return false; }
+    bool IsAtTop() const override { return true; }
+    bool IsAtBottom(bool considerRepeat = false) const override { return true; }
+    void UpdateScrollBarOffset() override {}
 };
 
 void AccessibilityFrameNodeUtilsTest::SetUpTestCase()
@@ -343,5 +383,391 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, IsNodeEnabled001, TestSize.Level1)
     accessibilityProperty->SetUserDisabled(true);
     result = AccessibilityFrameNodeUtils::IsNodeEnabled(frameNode1);
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll001
+ * @tc.desc: check ProcessFocusScroll with invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll001, TestSize.Level1)
+{
+    RefPtr<PipelineContext> context = nullptr;
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(nullptr, context);
+    auto frameNode = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(frameNode, context);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll002
+ * @tc.desc: check ProcessFocusScroll branch when focus state is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll002, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    auto accessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityFocusState(false);
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll003
+ * @tc.desc: check ProcessFocusScroll branch with user scroll triggerable false
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll003, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto scrollPattern = AceType::MakeRefPtr<MockScrollPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode("scrollParentNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), scrollPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    auto parentAccessibilityProperty = parentNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(parentAccessibilityProperty, nullptr);
+    parentAccessibilityProperty->SetUserScrollTriggerable(false);
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    parentNode->AddChild(focusNode);
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    EXPECT_FALSE(scrollPattern->onScrollCallbackCalled_);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll004
+ * @tc.desc: check ProcessFocusScroll branch with SCROLL_ETS_TAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll004, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto scrollPattern = AceType::MakeRefPtr<MockScrollPatternForA11y>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), scrollPattern, true);
+    ASSERT_NE(scrollNode, nullptr);
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    scrollNode->AddChild(focusNode);
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    EXPECT_FALSE(scrollPattern->onScrollCallbackCalled_);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll006
+ * @tc.desc: check ScrollByOffsetToParent when scrollFunc is null and scrollAxis is NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll006, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto scrollablePattern = AceType::MakeRefPtr<MockScrollablePatternNoAbility>();
+    auto parentNode = FrameNode::CreateFrameNode("noAbilityParent",
+        ElementRegister::GetInstance()->MakeUniqueId(), scrollablePattern, true);
+    ASSERT_NE(parentNode, nullptr);
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    parentNode->AddChild(focusNode);
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll007
+ * @tc.desc: check ScrollByOffsetToParent when moveOffset is NearZero (child already visible)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll007, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto scrollPattern = AceType::MakeRefPtr<MockScrollPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode("scrollParentNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), scrollPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->geometryNode_->SetFrameSize(SizeF(100.0f, 100.0f));
+    parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(20.0f, 20.0f));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    parentNode->AddChild(focusNode);
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    EXPECT_FALSE(scrollPattern->onScrollCallbackCalled_);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll009
+ * @tc.desc: check ScrollByOffset with multiple parents, ScrollByOffsetToParent returns false for all
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll009, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto grandParentNode = FrameNode::CreateFrameNode("grandParent",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(grandParentNode, nullptr);
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    grandParentNode->AddChild(focusNode);
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll005
+ * @tc.desc: check ScrollByOffsetToParent triggers scroll when child is outside visible area
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll005, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto scrollPattern = AceType::MakeRefPtr<MockScrollPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode("scrollParentNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), scrollPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+    parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    parentNode->renderContext_ = mockParentRenderContext;
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, CHILD_OFFSET_BELOW_VISIBLE));
+    parentNode->AddChild(focusNode);
+    auto mockChildRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    focusNode->renderContext_ = mockChildRenderContext;
+    mockChildRenderContext->SetPaintRectWithTransform(
+        RectF(0, CHILD_OFFSET_BELOW_VISIBLE, CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    EXPECT_TRUE(scrollPattern->onScrollCallbackCalled_);
+    EXPECT_NE(scrollPattern->scrollOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll008
+ * @tc.desc: check ScrollByOffsetToParent with noNeedMargin=true does not scroll when child is at edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll008, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto scrollPattern = AceType::MakeRefPtr<MockScrollPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode("scrollParentNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), scrollPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+    parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    parentNode->renderContext_ = mockParentRenderContext;
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+
+    // Child positioned near top edge - with noNeedMargin=true, no focus margin is applied,
+    // so the child is considered visible and no scroll should be triggered
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, CHILD_OFFSET_NEAR_TOP));
+    parentNode->AddChild(focusNode);
+    auto mockChildRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    focusNode->renderContext_ = mockChildRenderContext;
+    mockChildRenderContext->SetPaintRectWithTransform(
+        RectF(0, CHILD_OFFSET_NEAR_TOP, CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    EXPECT_FALSE(scrollPattern->onScrollCallbackCalled_);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll010
+ * @tc.desc: check ScrollByOffset with nested scrollable parents, scroll succeeds on outer parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll010, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto outerScrollPattern = AceType::MakeRefPtr<MockScrollPatternForA11y>();
+    auto outerNode = FrameNode::CreateFrameNode("outerScroll",
+        ElementRegister::GetInstance()->MakeUniqueId(), outerScrollPattern, true);
+    ASSERT_NE(outerNode, nullptr);
+    outerNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+    outerNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockOuterRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    outerNode->renderContext_ = mockOuterRenderContext;
+    mockOuterRenderContext->SetPaintRectWithTransform(RectF(0, 0, PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+
+    auto innerNode = FrameNode::CreateFrameNode("innerNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(innerNode, nullptr);
+    innerNode->geometryNode_->SetFrameSize(SizeF(INNER_PARENT_SIZE, INNER_PARENT_SIZE));
+    innerNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockInnerRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    innerNode->renderContext_ = mockInnerRenderContext;
+    mockInnerRenderContext->SetPaintRectWithTransform(RectF(0, 0, INNER_PARENT_SIZE, INNER_PARENT_SIZE));
+    outerNode->AddChild(innerNode);
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, CHILD_OFFSET_BELOW_VISIBLE));
+    innerNode->AddChild(focusNode);
+    auto mockChildRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    focusNode->renderContext_ = mockChildRenderContext;
+    mockChildRenderContext->SetPaintRectWithTransform(
+        RectF(0, CHILD_OFFSET_BELOW_VISIBLE, CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    EXPECT_TRUE(outerScrollPattern->onScrollCallbackCalled_);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll011
+ * @tc.desc: check ScrollByOffsetToParent verifies scroll source is SCROLL_FROM_FOCUS_JUMP
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll011, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto scrollPattern = AceType::MakeRefPtr<MockScrollPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode("scrollParentNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), scrollPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+    parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    parentNode->renderContext_ = mockParentRenderContext;
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, CHILD_OFFSET_BELOW_VISIBLE));
+    parentNode->AddChild(focusNode);
+    auto mockChildRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    focusNode->renderContext_ = mockChildRenderContext;
+    mockChildRenderContext->SetPaintRectWithTransform(
+        RectF(0, CHILD_OFFSET_BELOW_VISIBLE, CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    EXPECT_TRUE(scrollPattern->onScrollCallbackCalled_);
+    EXPECT_EQ(scrollPattern->scrollSource_, SCROLL_FROM_FOCUS_JUMP);
+}
+
+/**
+ * @tc.name: ProcessFocusScroll012
+ * @tc.desc: check ScrollByOffsetToParent with noNeedMargin=true when child is near bottom edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, ProcessFocusScroll012, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto scrollPattern = AceType::MakeRefPtr<MockScrollPatternForA11y>();
+    auto parentNode = FrameNode::CreateFrameNode("scrollParentNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), scrollPattern, true);
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->geometryNode_->SetFrameSize(SizeF(PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+    parentNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    parentNode->renderContext_ = mockParentRenderContext;
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, PARENT_SIZE_WIDTH, PARENT_SIZE_HEIGHT));
+
+    // Child positioned near bottom edge (offset 85 + height 20 = 105, just beyond parent 100)
+    // With noNeedMargin=true, focusMargin=0, child bottom at 105 exceeds parent 100
+    auto focusNode = FrameNode::CreateFrameNode("focusNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(focusNode, nullptr);
+    focusNode->geometryNode_->SetFrameSize(SizeF(CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+    focusNode->geometryNode_->SetFrameOffset(OffsetF(0.0f, CHILD_OFFSET_NEAR_BOTTOM));
+    parentNode->AddChild(focusNode);
+    auto mockChildRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    focusNode->renderContext_ = mockChildRenderContext;
+    mockChildRenderContext->SetPaintRectWithTransform(
+        RectF(0, CHILD_OFFSET_NEAR_BOTTOM, CHILD_SIZE_WIDTH, CHILD_SIZE_HEIGHT));
+
+    auto focusAccessibilityProperty = focusNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(focusAccessibilityProperty, nullptr);
+    focusAccessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityFrameNodeUtils::ProcessFocusScroll(focusNode, context);
+    // Child bottom (85+20=105) exceeds parent height (100), scroll should be triggered
+    EXPECT_TRUE(scrollPattern->onScrollCallbackCalled_);
 }
 } // namespace OHOS::Ace::NG

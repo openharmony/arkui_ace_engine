@@ -20,6 +20,8 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "core/common/event_manager.h"
+#include "core/components_ng/gestures/gesture_referee.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
@@ -363,6 +365,12 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
                                                                   : static_cast<int32_t>(MouseAction::RELEASE);
     fingersId_.erase(event.id);
+    // Pan-gesture-escape: once every finger that caused us to request
+    // escape is gone, the request itself is stale and must be re-armed
+    // next time a multi-select Pan starts on a fresh finger.
+    if (fingersId_.empty()) {
+        escapeRequested_ = false;
+    }
     if (currentFingers_ < fingers_) {
         if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
             ResetStateVoluntarily();
@@ -475,6 +483,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
+            FilterCoexistingGestureFingers();
             if (HandlePanAccept()) {
                 return;
             }
@@ -794,6 +803,7 @@ void PanRecognizer::OnResetStatus()
     isFlushTouchEventsEnd_ = false;
     isForDrag_ = false;
     isStartTriggered_ = false;
+    escapeRequested_ = false;
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetTouchOptimizer()) {
         pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
@@ -913,7 +923,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         callbackFunction(info);
         HandleCallbackReports(info, type, PanGestureState::AFTER);
     }
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::PAN);
+#endif
     HandleReports(info, type);
 
     if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
@@ -1350,5 +1362,125 @@ std::string PanRecognizer::GetGestureInfoString() const
     gestureInfoStr.append(",AG:");
     gestureInfoStr.append(std::to_string(static_cast<int32_t>(angle_)));
     return gestureInfoStr;
+}
+
+std::unordered_set<int32_t> PanRecognizer::GetCurrentFingerIds() const
+{
+    std::unordered_set<int32_t> ids;
+    for (const auto& item : touchPoints_) {
+        ids.insert(item.first);
+    }
+    return ids;
+}
+
+void PanRecognizer::OnFingerEscaped(int32_t fingerId)
+{
+    // Drop ALL per-finger state for this finger so subsequent recognizer
+    // bookkeeping (UP handling, fingers count, gesture-accept math) stays
+    // consistent.
+    touchPoints_.erase(fingerId);
+    touchPointsDistance_.erase(fingerId);
+    fingersId_.erase(fingerId);
+    panVelocity_.Reset(fingerId);
+    activeFingers_.remove(fingerId);
+    if (currentFingers_ > 0) {
+        --currentFingers_;
+    }
+}
+
+void PanRecognizer::SetEscapeModeForPan(const std::unordered_set<int32_t>& existingFingers)
+{
+    std::unordered_set<int32_t> toCleanup;
+    for (const auto& id : existingFingers) {
+        if (touchPoints_.find(id) != touchPoints_.end() ||
+            fingersId_.find(id) != fingersId_.end()) {
+            toCleanup.insert(id);
+        }
+    }
+    SetEscapeMode(existingFingers);
+    for (const auto& id : toCleanup) {
+        OnFingerEscaped(id);
+    }
+    // Pan-gesture-escape FIX (debug_002):
+    // Per-finger cleanup above is not enough. The arena-level OnAcceptGesture
+    // skip protects this recognizer from OnRejected, but leaves aggregated
+    // state polluted by the pre-escape phase of the captured finger:
+    //   - averageDistance_ / delta_ / mainDelta_ keep accumulated motion,
+    //   - refereeState_ stays frozen at DETECTING instead of returning to READY
+    //     so a subsequent DOWN for a new finger cannot restart the gesture,
+    //   - panVelocity_ may hold partial traces of the captured finger.
+    // When the next finger arrives, UpdateTouchEventInfo adds to averageDistance_
+    // on top of a non-zero baseline, IsPanGestureAccept can then return REJECT,
+    // and Adjudicate(REJECT) -> OnRejected eventually drives refereeState_
+    // to FAIL, blocking scroll forever.
+    // Resetting aggregated math state + restoring refereeState_ to READY
+    // (while preserving the just-published escape mode / escaped-finger-ids
+    // set) puts the recognizer into a clean READY position to compete for new
+    // fingers in new GestureScopes.
+    if (touchPoints_.empty() && fingersId_.empty()) {
+        averageDistance_.Reset();
+        delta_ = Offset();
+        mainDelta_ = 0.0;
+        panVelocity_.ResetAll();
+        lastRefereeState_ = refereeState_;
+        refereeState_ = RefereeState::READY;
+    }
+}
+
+void PanRecognizer::FilterCoexistingGestureFingers()
+{
+    if (canCoexistWithScroll_ && escapeRequested_) {
+        return;
+    }
+    auto referee = referee_.Upgrade();
+    if (!referee) {
+        // Fallback: referee_ weak pointer is only populated through
+        // NGGestureRecognizer::UpdateGestureReferee, which EventManager calls
+        // only for post-event / sub-pipeline paths (see
+        // event_manager.cpp:162 "eventHandleId / EVENT_HANDLE > 0"). For
+        // regular touch events the weak pointer stays empty, so this function
+        // would silently no-op. Use the same lookup BatchAdjudicate does
+        // (gesture_recognizer.cpp:351) to reach the active referee.
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto eventMgr = pipeline->GetEventManager();
+            if (eventMgr) {
+                referee = eventMgr->GetGestureRefereeNG(Claim(this));
+            }
+        }
+    }
+    if (!referee) {
+        return;
+    }
+    auto fingers = GetCurrentFingerIds();
+    if (fingers.empty()) {
+        return;
+    }
+    int32_t affected = 0;
+    referee->ForEachRecognizer(
+        [&affected, &fingers, this](
+            const RefPtr<NGGestureRecognizer>& other) {
+            if (other == this) {
+                return true;
+            }
+            auto otherPan = AceType::DynamicCast<PanRecognizer>(other);
+            if (!otherPan) {
+                return true;
+            }
+            // For co-existing gestures filter fingers in normal ones
+            // and vice versa
+            if (otherPan->CanCoexistWithScroll() != canCoexistWithScroll_) {
+                otherPan->SetEscapeModeForPan(fingers);
+                ++affected;
+            }
+            return true;
+        });
+    if (canCoexistWithScroll_) {
+        escapeRequested_ = (affected > 0);
+    }
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "PanRecognizer: escaped %{public}d parallel Pan(s) for %{public}zu finger(s)",
+        affected, fingers.size());
+    return;
 }
 } // namespace OHOS::Ace::NG

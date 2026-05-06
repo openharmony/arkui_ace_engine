@@ -28,6 +28,10 @@
 
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
+type AnonymousEnvMonitorEntry<K extends SimpleTypeEnvKey = SimpleTypeEnvKey> = {
+  anonymousMonitorFunc: (mon: IMonitor) => void;
+  envValue: IEnvironmentValue<EnvTypeMap[K]>;
+};
 enum PrebuildPhase {
   None = 0,
   BuildPrebuildCmd = 1,
@@ -87,6 +91,13 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // inActive means updates are delayed
   protected activeCount_: number = 1;
 
+  // active count for non-freeze state, independent from activeCount_
+  // used when isCompFreezeAllowed() is false
+  protected __activeCountForNonFreeze__Internal: number = 1;
+
+  protected __needToExecuteActive__Internal: boolean = false;
+  protected __needToExecuteInactive__Internal: boolean = false;
+
   // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
   protected isDeleting_: boolean = false;
 
@@ -109,6 +120,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   protected __lifecycle__Internal: CustomComponentLifecycle | undefined;
 
+  // Instance property indicating if @Active or @Inactive decorator is used
+  // Set in constructor based on prototype flag set by decorators
+  protected __needToActiveOrInactiveLifecycle__Internal: boolean = false;
+
   protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
   protected isPrebuilding_: boolean = false;
   protected static prebuildingElmtId_: number = -1;
@@ -124,20 +139,20 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   private activeChangeListenerForInterop_: Set<(active: boolean) => void> = new Set<(active: boolean) => void>();
 
   protected __isEntryValue__Internal = false;
-  protected readonly ___reusePool?: __ReusePool;
-  protected static preRenderingPool_: __ReusePool | undefined;
+  protected readonly ___reusePool?: __ReusePool_Internal__;
+  protected static preRenderingPool_: __ReusePool_Internal__ | undefined;
   protected preRenderedChildren_?: Map<string, PUV2ViewBase>;
   public isPreRendered: boolean = false;
   public __isGlobalPoolActive : boolean = false;
   static preRenderCounter: number = 0;
 
-  static beginPreRender(pool: __ReusePool): void {
+  static beginPreRender(pool: __ReusePool_Internal__): void {
     PUV2ViewBase.preRenderingPool_ = pool;
   }
   static endPreRender(): void {
     PUV2ViewBase.preRenderingPool_ = undefined;
   }
-  static getCurrentPreRenderPool(): __ReusePool | undefined {
+  static getCurrentPreRenderPool(): __ReusePool_Internal__ | undefined {
     return PUV2ViewBase.preRenderingPool_;
   }
 
@@ -177,6 +192,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
     this.__isBlockRecycleOrReuse__ = typeof globalThis.__CheckIsInBuilderNode__ === 'function' ? globalThis.__CheckIsInBuilderNode__(parent) : false;
+    // Read the prototype flag set by @Active/@Inactive decorators
+    const hasActiveOrInactiveDecorators: string = '__hasActiveOrInactiveDecorators__Internal';
+    this.__needToActiveOrInactiveLifecycle__Internal = this[hasActiveOrInactiveDecorators] === true;
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
@@ -194,6 +212,23 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     preRenderedChild.isPreRendered = false;
     PUV2ViewBase.createRecycle(preRenderedChild, false, reuseId, () => {});
     return true;
+  }
+
+  protected __anonymousEnvMonitorFuncMap__Internal?: Map<SimpleTypeEnvKey, AnonymousEnvMonitorEntry<SimpleTypeEnvKey>>;
+
+  __setAnonymousEnvMonitorFunc__Internal<K extends SimpleTypeEnvKey>(key: K, anonymousMonitorFunc: (mon: IMonitor) => void,
+    envValue: IEnvironmentValue<EnvTypeMap[K]>): void {
+    if (!this.__anonymousEnvMonitorFuncMap__Internal) {
+      this.__anonymousEnvMonitorFuncMap__Internal = new Map<SimpleTypeEnvKey, AnonymousEnvMonitorEntry<SimpleTypeEnvKey>>();
+    }
+    this.__anonymousEnvMonitorFuncMap__Internal.set(key, {
+      anonymousMonitorFunc,
+      envValue,
+    } as AnonymousEnvMonitorEntry<SimpleTypeEnvKey>);
+  }
+
+  __getAnonymousEnvMonitorFuncBySpeficKey__Internal<K extends SimpleTypeEnvKey>(key: K): AnonymousEnvMonitorEntry<K> | undefined {
+    return this.__anonymousEnvMonitorFuncMap__Internal?.get(key) as AnonymousEnvMonitorEntry<K> | undefined;
   }
 
   public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {
@@ -225,6 +260,36 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       }
     } catch (e) {
       stateMgmtConsole.frequentApplicationError(`Lifecycle ComponentInit error, ${this.debugInfo__()}, ${e.message} ${e.stack}`);
+      throw e;
+    }
+  }
+
+  public __customComponentExecuteActive__Internal(): void {
+    let watchProp = Symbol.for('ACTIVE_INTERNAL_FUNCTION' + this.constructor.name);
+    const componentActiveFunctions = this[watchProp];
+    try {
+      if (componentActiveFunctions instanceof Array) {
+        componentActiveFunctions.forEach((componentActiveFunction) => {
+            componentActiveFunction.call(this);
+        });
+      }
+    } catch (e) {
+      stateMgmtConsole.frequentApplicationError(`Lifecycle ComponentActive error, ${this.debugInfo__()}, ${e.message}`);
+      throw e;
+    }
+  }
+
+  public __customComponentExecuteInactive__Internal(): void {
+    let watchProp = Symbol.for('INACTIVE_INTERNAL_FUNCTION' + this.constructor.name);
+    const componentInactiveFunctions = this[watchProp];
+    try {
+      if (componentInactiveFunctions instanceof Array) {
+        componentInactiveFunctions.forEach((componentInactiveFunction) => {
+            componentInactiveFunction.call(this);
+        });
+      }
+    } catch (e) {
+      stateMgmtConsole.frequentApplicationError(`Lifecycle ComponentInactive error, ${this.debugInfo__()}, ${e.message}`);
       throw e;
     }
   }
@@ -468,6 +533,30 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     }
   }
 
+  protected setActiveCountForNonFreeze(active: boolean): void {
+    // Similar to setActiveCount but for __activeCountForNonFreeze__Internal
+    // Used when isCompFreezeAllowed is false
+    if (Utils.isApiVersionEQAbove(API_VERSION_ISOLATION_FOR_5_1)) {
+      this.__activeCountForNonFreeze__Internal += active ? 1 : -1;
+    } else {
+      this.__activeCountForNonFreeze__Internal = active ? 1 : 0;
+    }
+  }
+
+  protected executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount: number): void {
+    // Execute @Active or @Inactive lifecycle callbacks based on count transition
+    // Directly check __activeCountForNonFreeze__Internal instead of isViewActive()
+    if (this.__activeCountForNonFreeze__Internal > 0) {
+      if (oldCount === 0 && this.__activeCountForNonFreeze__Internal > 0) {
+        this.__customComponentExecuteActive__Internal();
+      }
+    } else {
+      if (oldCount > 0 && this.__activeCountForNonFreeze__Internal === 0) {
+        this.__customComponentExecuteInactive__Internal();
+      }
+    }
+  }
+
   public getChildViewV2ForElmtId(elmtId: number): ViewV2 | undefined {
     const optComp = this.childrenWeakrefMap_.get(elmtId);
     return optComp?.deref() && (optComp.deref() instanceof ViewV2) ?
@@ -674,14 +763,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
    * 3. If a legacy per-instance pool exists, return it.
    * 4. Otherwise, search up the ancestor hierarchy for the nearest accepting pool.
    *
-   * @returns {__ReusePool | undefined} The `__ReusePool` instance for managing component recycling.
+   * @returns {__ReusePool | undefined} The `__ReusePool_Internal__` instance for managing component recycling.
   */
-  getReusePoolInternal(componentClass?: new (...args: PUV2ViewBase[]) => PUV2ViewBase): __ReusePool | undefined {
+  getReusePoolInternal(componentClass?: new (...args: PUV2ViewBase[]) => PUV2ViewBase): __ReusePool_Internal__ | undefined {
     const cls = componentClass ?? (this.constructor as new (...args: PUV2ViewBase[]) => PUV2ViewBase);
     let current: PUV2ViewBase | IView | undefined = this;
 
     while (current) {
-        const pool: __ReusePool | undefined = (current as PUV2ViewBase).___reusePool;
+        const pool: __ReusePool_Internal__ | undefined = (current as PUV2ViewBase).___reusePool;
         if (pool && pool.acceptsComponent(cls)) {
             return pool;
         }

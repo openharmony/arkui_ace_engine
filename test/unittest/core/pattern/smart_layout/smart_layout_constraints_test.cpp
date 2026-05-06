@@ -37,163 +37,10 @@ public:
 
 /**
  * @tc.name: SmartLayoutConstraintsTest001
- * @tc.desc: Test GetSumOfAllChildHeight with empty children
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest001, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    double sum = SmartLayoutConstraints::GetSumOfAllChildHeight(*rootNode);
-    EXPECT_EQ(sum, 0.0);
-}
-
-/**
- * @tc.name: SmartLayoutConstraintsTest002
- * @tc.desc: Test GetSumOfAllChildHeight with multiple children
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest002, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
-    rootNode->SetLayoutSize(200.0, 200.0);
-
-    std::vector<ChildLayoutInfo> childInfos;
-
-    ChildLayoutInfo info1;
-    info1.id = 1;
-    info1.width = 100.0;
-    info1.height = 50.0;
-    info1.offsetY = 0.0;
-    childInfos.push_back(info1);
-
-    ChildLayoutInfo info2;
-    info2.id = 2;
-    info2.width = 100.0;
-    info2.height = 30.0;
-    info2.offsetY = 60.0;
-    childInfos.push_back(info2);
-
-    ChildLayoutInfo info3;
-    info3.id = 3;
-    info3.width = 100.0;
-    info3.height = 40.0;
-    info3.offsetY = 100.0;
-    childInfos.push_back(info3);
-
-    rootNode->CreateChildrenFromInfos(childInfos);
-
-    double sum = SmartLayoutConstraints::GetSumOfAllChildHeight(*rootNode);
-    EXPECT_EQ(sum, 120.0);
-}
-
-/**
- * @tc.name: SmartLayoutConstraintsTest003
- * @tc.desc: Test GetSumOfAllChildWidth with empty children
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest003, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    double sum = SmartLayoutConstraints::GetSumOfAllChildWidth(*rootNode);
-    EXPECT_EQ(sum, 0.0);
-}
-
-/**
- * @tc.name: SmartLayoutConstraintsTest004
- * @tc.desc: Test GetSumOfAllChildWidth with multiple children
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest004, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    rootNode->SetLayoutType(SmartLayoutType::ROW);
-    rootNode->SetLayoutSize(400.0, 200.0);
-
-    std::vector<ChildLayoutInfo> childInfos;
-
-    ChildLayoutInfo info1;
-    info1.id = 1;
-    info1.width = 100.0;
-    info1.height = 50.0;
-    info1.offsetX = 0.0;
-    childInfos.push_back(info1);
-
-    ChildLayoutInfo info2;
-    info2.id = 2;
-    info2.width = 150.0;
-    info2.height = 50.0;
-    info2.offsetX = 110.0;
-    childInfos.push_back(info2);
-
-    ChildLayoutInfo info3;
-    info3.id = 3;
-    info3.width = 80.0;
-    info3.height = 50.0;
-    info3.offsetX = 270.0;
-    childInfos.push_back(info3);
-
-    rootNode->CreateChildrenFromInfos(childInfos);
-
-    double sum = SmartLayoutConstraints::GetSumOfAllChildWidth(*rootNode);
-    EXPECT_EQ(sum, 330.0);
-}
-
-/**
- * @tc.name: SmartLayoutConstraintsTest005
- * @tc.desc: Test GetMaxWidthOfAllChild with empty children
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest005, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    double maxWidth = SmartLayoutConstraints::GetMaxWidthOfAllChild(*rootNode);
-    EXPECT_EQ(maxWidth, 0.0);
-}
-
-/**
- * @tc.name: SmartLayoutConstraintsTest006
- * @tc.desc: Test GetMaxWidthOfAllChild with multiple children
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest006, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
-    rootNode->SetLayoutSize(200.0, 200.0);
-
-    std::vector<ChildLayoutInfo> childInfos;
-
-    ChildLayoutInfo info1;
-    info1.id = 1;
-    info1.width = 80.0;
-    info1.height = 50.0;
-    childInfos.push_back(info1);
-
-    ChildLayoutInfo info2;
-    info2.id = 2;
-    info2.width = 150.0;
-    info2.height = 30.0;
-    childInfos.push_back(info2);
-
-    ChildLayoutInfo info3;
-    info3.id = 3;
-    info3.width = 100.0;
-    info3.height = 40.0;
-    childInfos.push_back(info3);
-
-    rootNode->CreateChildrenFromInfos(childInfos);
-
-    double maxWidth = SmartLayoutConstraints::GetMaxWidthOfAllChild(*rootNode);
-    EXPECT_EQ(maxWidth, 150.0);
-}
-
-/**
- * @tc.name: SmartLayoutConstraintsTest007
  * @tc.desc: Test AddDefaultConstraints with simple setup
  * @tc.type: FUNC
  */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest007, TestSize.Level1)
+HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest001, TestSize.Level1)
 {
     auto rootNode = SmartLayoutNode::CreateRootNode();
     rootNode->SetLayoutType(SmartLayoutType::COLUMN);
@@ -230,60 +77,11 @@ HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest007, TestSize.Lev
 }
 
 /**
- * @tc.name: SmartLayoutConstraintsTest008
- * @tc.desc: Test GetMaxHeightOfAllChild with multiple children
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest008, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
-    rootNode->SetLayoutSize(200.0, 200.0);
-
-    std::vector<ChildLayoutInfo> childInfos;
-
-    ChildLayoutInfo info1;
-    info1.id = 1;
-    info1.width = 80.0;
-    info1.height = 50.0;
-    childInfos.push_back(info1);
-
-    ChildLayoutInfo info2;
-    info2.id = 2;
-    info2.width = 100.0;
-    info2.height = 80.0;
-    childInfos.push_back(info2);
-
-    ChildLayoutInfo info3;
-    info3.id = 3;
-    info3.width = 90.0;
-    info3.height = 60.0;
-    childInfos.push_back(info3);
-
-    rootNode->CreateChildrenFromInfos(childInfos);
-
-    double maxHeight = SmartLayoutConstraints::GetMaxHeightOfAllChild(*rootNode);
-    EXPECT_EQ(maxHeight, 80.0);
-}
-
-/**
- * @tc.name: SmartLayoutConstraintsTest009
- * @tc.desc: Test GetMaxHeightOfAllChild with empty children
- * @tc.type: FUNC
- */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest009, TestSize.Level1)
-{
-    auto rootNode = SmartLayoutNode::CreateRootNode();
-    double maxHeight = SmartLayoutConstraints::GetMaxHeightOfAllChild(*rootNode);
-    EXPECT_EQ(maxHeight, 0.0);
-}
-
-/**
- * @tc.name: SmartLayoutConstraintsTest010
+ * @tc.name: SmartLayoutConstraintsTest002
  * @tc.desc: Test AddColumnConstraints with multiple children
  * @tc.type: FUNC
  */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest010, TestSize.Level1)
+HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest002, TestSize.Level1)
 {
     auto rootNode = SmartLayoutNode::CreateRootNode();
     rootNode->SetLayoutType(SmartLayoutType::COLUMN);
@@ -338,11 +136,11 @@ HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest010, TestSize.Lev
 }
 
 /**
- * @tc.name: SmartLayoutConstraintsTest011
+ * @tc.name: SmartLayoutConstraintsTest003
  * @tc.desc: Test AddRowConstraints with multiple children
  * @tc.type: FUNC
  */
-HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest011, TestSize.Level1)
+HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest003, TestSize.Level1)
 {
     auto rootNode = SmartLayoutNode::CreateRootNode();
     rootNode->SetLayoutType(SmartLayoutType::ROW);
@@ -393,6 +191,120 @@ HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest011, TestSize.Lev
         EXPECT_GE(child->GetSize().height.value, 0.0);
         EXPECT_GE(child->GetPosition().offsetX.value, 0.0);
         EXPECT_GE(child->GetPosition().offsetY.value, 0.0);
+    }
+}
+
+/**
+ * @tc.name: SmartLayoutConstraintsTest004
+ * @tc.desc: Test CalculateChildStatistics with multiple children
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest004, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
+
+    std::vector<ChildLayoutInfo> childInfos;
+
+    ChildLayoutInfo info1;
+    info1.id = 1;
+    info1.width = 100.0;
+    info1.height = 50.0;
+    childInfos.push_back(info1);
+
+    ChildLayoutInfo info2;
+    info2.id = 2;
+    info2.width = 80.0;
+    info2.height = 120.0;
+    childInfos.push_back(info2);
+
+    ChildLayoutInfo info3;
+    info3.id = 3;
+    info3.width = 150.0;
+    info3.height = 30.0;
+    childInfos.push_back(info3);
+
+    rootNode->CreateChildrenFromInfos(childInfos);
+
+    ChildStatistics stats = SmartLayoutConstraints::CalculateChildStatistics(*rootNode);
+    EXPECT_EQ(stats.childCount, 3);
+    EXPECT_EQ(stats.sumOfAllChildHeight, 200.0);
+    EXPECT_EQ(stats.sumOfAllChildWidth, 330.0);
+    EXPECT_EQ(stats.maxChildWidth, 150.0);
+    EXPECT_EQ(stats.maxChildHeight, 120.0);
+}
+
+/**
+ * @tc.name: SmartLayoutConstraintsTest005
+ * @tc.desc: Test CalculateChildStatistics with empty children
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest005, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    rootNode->SetLayoutType(SmartLayoutType::COLUMN);
+
+    ChildStatistics stats = SmartLayoutConstraints::CalculateChildStatistics(*rootNode);
+    EXPECT_EQ(stats.childCount, 0);
+    EXPECT_EQ(stats.sumOfAllChildHeight, 0.0);
+    EXPECT_EQ(stats.sumOfAllChildWidth, 0.0);
+    EXPECT_EQ(stats.maxChildWidth, 0.0);
+    EXPECT_EQ(stats.maxChildHeight, 0.0);
+}
+
+/**
+ * @tc.name: SmartLayoutConstraintsTest006
+ * @tc.desc: Test AddRowConstraints with overflow children
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsTest006, TestSize.Level1)
+{
+    auto rootNode = SmartLayoutNode::CreateRootNode();
+    rootNode->SetLayoutType(SmartLayoutType::ROW);
+    rootNode->SetLayoutSize(300.0, 100.0);
+
+    std::vector<ChildLayoutInfo> childInfos;
+
+    ChildLayoutInfo info1;
+    info1.id = 1;
+    info1.width = 150.0;
+    info1.height = 50.0;
+    info1.offsetX = 0.0;
+    info1.offsetY = 0.0;
+    childInfos.push_back(info1);
+
+    ChildLayoutInfo info2;
+    info2.id = 2;
+    info2.width = 200.0;
+    info2.height = 60.0;
+    info2.offsetX = 160.0;
+    info2.offsetY = 0.0;
+    childInfos.push_back(info2);
+
+    ChildLayoutInfo info3;
+    info3.id = 3;
+    info3.width = 100.0;
+    info3.height = 40.0;
+    info3.offsetX = 370.0;
+    info3.offsetY = 0.0;
+    childInfos.push_back(info3);
+
+    rootNode->CreateChildrenFromInfos(childInfos);
+
+    SmartLayoutConstraints constraints;
+    constraints.AddRowConstraints(*rootNode);
+
+    bool result = rootNode->SolveLayout();
+    EXPECT_TRUE(result);
+
+    rootNode->SyncData();
+    auto& children = rootNode->GetChildren();
+    EXPECT_EQ(children.size(), 3);
+
+    for (auto& child : children) {
+        child->SyncData();
+        EXPECT_GE(child->GetSize().width.value, 0.0);
+        EXPECT_GE(child->GetSize().height.value, 0.0);
     }
 }
 

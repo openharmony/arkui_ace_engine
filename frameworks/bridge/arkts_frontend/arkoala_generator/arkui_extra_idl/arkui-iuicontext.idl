@@ -45,4 +45,5 @@ interface IUIContext {
     static void enableEventPassthrough((boolean or undefined) enabled, RawInputEventType eventType);
     static InputEventMonitor addLocalInputEventMonitor(i32 eventMask, InputEventListener listener);
     static void removeLocalInputEventMonitor(InputEventMonitor monitor);
+    static void setTextSelectionClearPolicy(TextSelectionClearPolicy policy);
 };

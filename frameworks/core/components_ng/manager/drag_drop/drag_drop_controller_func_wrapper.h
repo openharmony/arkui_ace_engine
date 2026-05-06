@@ -21,10 +21,18 @@
 #include "base/geometry/ng/vector.h"
 #include "core/components_ng/base/frame_node.h"
 
+namespace OHOS::Ace {
+class PipelineBase;
+class Subwindow;
+}
+
 namespace OHOS::Ace::NG {
 class FrameNode;
+class OverlayManager;
 struct GatherNodeChildInfo;
 struct ScaleDataInfo;
+struct PreparedInfoForDrag;
+struct PreparedAsyncCtxForAnimate;
 class ACE_FORCE_EXPORT DragControllerFuncWrapper {
 public:
     static OffsetF GetUpdateDragMovePosition(int32_t containerId);

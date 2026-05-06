@@ -16,6 +16,7 @@
 #include "core/components/drag_bar/drag_bar_element.h"
 
 #include "core/components/drag_bar/render_drag_bar.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 

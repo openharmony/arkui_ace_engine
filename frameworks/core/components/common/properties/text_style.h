@@ -21,6 +21,8 @@
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
 
+#include <bitset>
+
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
@@ -32,6 +34,12 @@ class SymbolEffectOptions;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
+
+struct SymbolColorInfo {
+    bool hasHdr = false;
+    bool shouldUseUIColor = false;
+    float maxHeadRoom = 1.0f;
+};
 
 struct DimensionWithActual {
     constexpr DimensionWithActual() = default;
@@ -952,6 +960,7 @@ public:
         }
         reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::COLOR_LIST));
         propRenderColors_ = renderColors;
+        symbolColorInfoDirty_ = true;
     }
 
     const std::vector<Color>& GetSymbolColorList() const
@@ -961,8 +970,11 @@ public:
 
     std::vector<Color>& GetSymbolColorListRef()
     {
+        symbolColorInfoDirty_ = true;
         return propRenderColors_;
     }
+
+    const SymbolColorInfo& GetAndUpdateSymbolColorInfo() const;
 
     void CompareCommonSubType(const std::optional<NG::SymbolEffectOptions>& options,
         const std::optional<NG::SymbolEffectOptions>& oldOptions);
@@ -1088,6 +1100,8 @@ private:
     bool needReCreateParagraph_ = false;
     int32_t textStyleUid_ = 0;
     int32_t symbolUid_ = 0;
+    mutable SymbolColorInfo symbolColorInfo_;
+    mutable bool symbolColorInfoDirty_ = true;
     std::list<std::pair<std::string, int32_t>> fontFeatures_;
     FONT_VARIATIONS_LIST fontVariations_;
     std::vector<Dimension> preferFontSizes_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,6 +88,7 @@ extern const char THEME_PATTERN_SHADOW[];
 extern const char THEME_PATTERN_CONTAINER_MODAL[];
 extern const char THEME_PATTERN_AGING_ADAPATION_DIALOG[];
 extern const char THEME_PATTERN_SCROLLABLE[];
+extern const char THEME_PATTERN_SELECTABLE[];
 extern const char THEME_PATTERN_APP[];
 extern const char THEME_PATTERN_LINEAR_INDICATOR[];
 extern const char THEME_PATTERN_CONTAINER_PICKER[];

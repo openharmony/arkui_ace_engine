@@ -24,6 +24,7 @@
 #include "core/common/event_manager.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
+#include "core/animation/scroll_motion.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
@@ -38,6 +39,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 namespace OHOS::Ace::NG {
 class ScrollableCoverTestNg : public ScrollableTestNg {
@@ -1771,6 +1774,9 @@ HWTEST_F(ScrollableCoverTestNg, CoordinateWithSheetTest001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return AceType::MakeRefPtr<SheetTheme>();
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
         return AceType::MakeRefPtr<SheetTheme>();
     });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);

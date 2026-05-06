@@ -28,6 +28,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
@@ -44,12 +45,14 @@
 #include "core/pipeline/base/element_register.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
+#include "image_source.h"
 #endif
 
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components/common/properties/placement.h"
 #endif
 namespace OHOS::Ace::NG {
 struct DragStartContext {
@@ -105,7 +108,6 @@ constexpr int32_t HALF_PIXELMAP = 2;
 constexpr int32_t PASS_THROUGH_EVENT_ID = 100000;
 constexpr int32_t DRAG_START_SUCCESS_CODE = 0;
 constexpr int32_t INVALID_DRAG_RET = -1;
-constexpr int32_t INVALID_MATERIAL_ID = -1;
 constexpr float UNIT_SCALE = 1.0f;
 } // namespace
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
@@ -418,7 +420,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
             auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / dragInfoData.dragPreviewRect.Height();
             result.SetX(-rateX * size.Width());
             result.SetY(-rateY * size.Height());
-        } else if (dragInfoData.isSceneBoardTouchDrag) {
+        } else if (dragInfoData.disableArkuiAnimation) {
             auto centerX = coordinateX + frameNodeSize_.Width() / HALF_PIXELMAP;
             auto centerY = coordinateY + frameNodeSize_.Height() / HALF_PIXELMAP;
             coordinateX = centerX - size.Width() / HALF_PIXELMAP;
@@ -1108,6 +1110,9 @@ void GestureEventHub::BuildPreparedDragInfo(DragStartContext& ctx)
         OffsetF(), OffsetF(), ctx.pixelMap, nullptr, ctx.preparedInfo.sizeChangeEffect };
     ctx.preparedInfo.isSceneBoardTouchDrag = DragDropFuncWrapper::CheckInSceneBoardWindow() &&
         ctx.info.GetInputEventType() != InputEventType::MOUSE_BUTTON;
+    auto dragAnimationType = ctx.event ? ctx.event->GetDragAnimationType() : DragAnimationType::DEFAULT;
+    ctx.preparedInfo.disableArkuiAnimation = ctx.preparedInfo.isSceneBoardTouchDrag ||
+        dragAnimationType == DragAnimationType::FOLLOW_HAND_MORPH;
     ctx.dragDropManager->ResetContextMenuDragPosition();
     ctx.preparedInfo.dragPreviewRect = RectF(0, 0, ctx.pixelMap->GetWidth(), ctx.pixelMap->GetHeight());
     ctx.preparedInfo.deviceType = ctx.info.GetSourceDevice();
@@ -1195,10 +1200,10 @@ void GestureEventHub::ResolveDragScreenPosition(const DragStartContext& ctx, flo
     CHECK_NULL_VOID(ctx.dragDropManager);
     auto dragMoveLastPoint = ctx.dragDropManager->GetDragMoveLastPointByCurrentPointer(ctx.info.GetPointerId());
     screenX = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ? dragMoveLastPoint.GetScreenX()
-        : (ctx.preparedInfo.isSceneBoardTouchDrag ? ctx.preparedInfo.displayPoint.GetX()
+        : (ctx.preparedInfo.disableArkuiAnimation ? ctx.preparedInfo.displayPoint.GetX()
                                                   : ctx.info.GetScreenLocation().GetX());
     screenY = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ? dragMoveLastPoint.GetScreenY()
-        : (ctx.preparedInfo.isSceneBoardTouchDrag ? ctx.preparedInfo.displayPoint.GetY()
+        : (ctx.preparedInfo.disableArkuiAnimation ? ctx.preparedInfo.displayPoint.GetY()
                                                   : ctx.info.GetScreenLocation().GetY());
 }
 
@@ -1208,14 +1213,22 @@ DragDataCore GestureEventHub::CreateDragData(const DragStartContext& ctx, const 
     ShadowInfoCore shadowInfo { ctx.pixelMapDuplicated, ctx.pixelMapOffset.GetX(), ctx.pixelMapOffset.GetY() };
     const int32_t pointerId =
         ctx.info.GetPassThrough() ? ctx.info.GetPointerId() % PASS_THROUGH_EVENT_ID : ctx.info.GetPointerId();
-    const int32_t materialId = ctx.frameNode
-        ? DragDropFuncWrapper::ParseUiMaterial(ctx.frameNode->GetDragPreviewOption())
-        : INVALID_MATERIAL_ID;
+    DragDropFuncWrapper::DragPreviewMaterialInfo materialInfo;
+    if (ctx.frameNode) {
+        materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(
+            ctx.frameNode->GetDragPreviewOption(), ctx.frameNode);
+    }
+    const int32_t materialId = materialInfo.materialId;
+    const bool isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    auto materialFilter = materialInfo.materialFilter;
+
     DragDataCore dragData { { shadowInfo }, {}, ctx.udKey, ctx.extraInfoLimited, extraInfoJson,
         static_cast<int32_t>(ctx.info.GetSourceDevice()), ctx.recordsSize, pointerId, screenX, screenY,
         ctx.info.GetTargetDisplayId(), windowId, true, false, ctx.dragSummaryInfo.summary,
         ctx.event->IsUseDataLoadParams(), ctx.dragSummaryInfo.detailedSummary, ctx.dragSummaryInfo.summaryFormat,
-        ctx.dragSummaryInfo.version, ctx.dragSummaryInfo.totalSize, ctx.dragSummaryInfo.tag, materialId };
+        ctx.dragSummaryInfo.version, ctx.dragSummaryInfo.totalSize, ctx.dragSummaryInfo.tag, materialId,
+        ctx.event->GetDragAnimationTypeValue(), isSetMaterialFilter, materialFilter };
+    ctx.dragDropManager->SetDragAnimationType(ctx.event->GetDragAnimationType());
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && ctx.info.GetSourceTool() == SourceTool::MOUSE &&
         ctx.info.GetSourceDevice() == SourceType::TOUCH) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
@@ -1483,7 +1496,7 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::u
     float scale, const PreparedInfoForDrag& dragInfoData)
 {
     CHECK_NULL_VOID(arkExtraInfoJson);
-    arkExtraInfoJson->Put("enable_animation", dragInfoData.isSceneBoardTouchDrag);
+    arkExtraInfoJson->Put("enable_animation", !dragInfoData.disableArkuiAnimation);
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);

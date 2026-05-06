@@ -93,6 +93,7 @@ constexpr float EFFECT_SATURATION = 1.2f;
 constexpr float BLUR_OPTION = 0.5f;
 constexpr float BRIGHTNESS = 0.8f;
 constexpr float RADIUS = 10.0f;
+constexpr int32_t THEME_SCOPE_ID = 6;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
 const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "content2", "" },
@@ -1129,6 +1130,7 @@ HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle004, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     MenuParam menuParam;
     BlurStyleOption blurStyleOption;
@@ -1151,6 +1153,43 @@ HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle004, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, effectOption.saturation);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle005
+ * @tc.desc: MenuView UpdateMenuBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle005, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(setApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+ 
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::SYSTEM;
+    effectOption.saturation = 6.0f;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    mockRenderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = mockRenderContext;
+ 
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    EXPECT_EQ(mockRenderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::SYSTEM);
+ 
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(rollbackApiVersion);
 }
 
 /**
@@ -1567,7 +1606,7 @@ HWTEST_F(MenuItemGroupTestNg, OnThemeScopeUpdate001, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
-
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
     auto ret = menuItemGroupPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId());
     EXPECT_TRUE(ret);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
@@ -1599,6 +1638,29 @@ HWTEST_F(MenuItemGroupTestNg, OnThemeScopeUpdate002, TestSize.Level1)
     ASSERT_NE(menuNode, nullptr);
 
     auto ret = menuItemGroupPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId());
+    EXPECT_FALSE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate003
+ * @tc.desc: MenuView OnThemeScopeUpdate. themeScopeId eq 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, OnThemeScopeUpdate003, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+
+    auto ret = menuItemGroupPattern->OnThemeScopeUpdate(0);
     EXPECT_FALSE(ret);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }

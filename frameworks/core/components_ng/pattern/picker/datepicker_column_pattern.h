@@ -30,11 +30,10 @@
 #include "core/components_ng/pattern/picker/datepicker_paint_method.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
-#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
-#include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
-#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+
+namespace OHOS::Ace {
+class TextLayoutProperty;
+}
 
 namespace OHOS::Ace::NG {
 

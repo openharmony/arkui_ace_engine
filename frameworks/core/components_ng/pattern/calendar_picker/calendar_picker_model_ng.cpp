@@ -59,11 +59,16 @@ void CalendarPickerModelNG::CreateCalendarPicker(const CalendarSettingData& sett
     stack->Push(pickerNode);
 
     // apply default PickerTextStyle after Push (scopeId is only valid after Push).
+    // Only set default values when properties are not already set by user via modifier.
     if (pickerNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        PickerTextStyle textStyle;
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
-        CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
+        auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (!layoutProperty->GetNormalTextColorSetByUser().value_or(false)) {
+            PickerTextStyle textStyle;
+            CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
+        }
     }
 }
 
@@ -956,7 +961,7 @@ void CalendarPickerModelNG::ParseEdgeAlignResObj(FrameNode* frameNode,
 
         DimensionOffset offsetNew = DimensionOffset(dx, dy);
         calendarPickerPattern->SetCalendarDialogOffset(offsetNew);
-        ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offsetNew);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offsetNew, frameNode);
     };
 
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();

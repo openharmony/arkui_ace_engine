@@ -76,7 +76,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void InitializeByName(OHOS::Rosen::Window *window,
         const std::string &name, napi_value storage, uint32_t focusWindowId) override;
-    void InitializeDynamic(const DynamicInitialConfig& config) override;
+    void InitializeDynamic(const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender = nullptr) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -99,6 +99,7 @@ public:
     void SetHostParams(const OHOS::AAFwk::WantParams& params) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     static int32_t GetUIContentWindowID(int32_t instanceId);
+    OHOS::Rosen::Window* GetUIContentWindow() override;
     // UI content event process
     bool ProcessBackPressed() override;
     void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
@@ -168,7 +169,8 @@ public:
     void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
 
     // ArkTS Form
-    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage,
+        sptr<IRemoteObject> connectToRender) override;
     void PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
     void RunFormPage() override;
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
@@ -485,6 +487,11 @@ public:
     void SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void SetXComponentDisplayConstraintEnabled(bool isEnable) override;
 
+    void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback) override;
+    void UnregisterTouchTimingCallback() override;
+
     // get PointerEvent ptr from ts
     const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromAxisEvent(napi_value event) override;
     const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event) override;
@@ -496,8 +503,8 @@ protected:
         OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
         OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, uint32_t focusWindowId = 0);
-    UIContentErrorCode CommonInitializeForm(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper StorageWrapper);
+    UIContentErrorCode CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        StorageWrapper StorageWrapper, sptr<IRemoteObject> connectToRender = nullptr);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void ProcessDestructCallbacks();

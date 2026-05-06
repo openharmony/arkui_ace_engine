@@ -139,7 +139,7 @@ public:
 
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
-    void MoveData(int32_t from, int32_t to) override;
+    void MoveData(int32_t from, int32_t to, bool isNeedUpdate = false) override;
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
     void InitDragManager(const RefPtr<UINode>& childNode);

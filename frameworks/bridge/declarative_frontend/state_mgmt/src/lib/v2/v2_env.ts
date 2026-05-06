@@ -80,22 +80,49 @@ class EnvV2 {
     (meta.keyToVars[prefixKey] ??= []).push(varName);
   }
 
-  public static findEnvValueFromView<K extends keyof EnvTypeMap>(key: K, view: ViewBuildNodeBase): IEnvironmentValue<EnvTypeMap[K]> | undefined {
+  public static getEnvVarNameFromView<K extends keyof EnvTypeMap>(key: K, view: ViewBuildNodeBase): Array<string> | undefined {
     const meta = view[EnvV2.ENV_DECO_META];
-    if (meta) {
-      const prefixKey: string = `${EnvV2.ENV_KEY_PREFIX}${key}`;
-      const varNames = meta.keyToVars[prefixKey];
-      if (varNames && Array.isArray(varNames) && varNames.length > 0) {
-        const varName: string = varNames[0];
-        const storeProp = ObserveV2.ENV_PREFIX + varName;
-        const existingEnvValue = view[storeProp];
-        if (existingEnvValue) {
-          stateMgmtConsole.debug(`find envValue key ${key} from view ${view.debugInfo__()}. Returning the existing one.`);
-          return existingEnvValue;
-        }
-      }
+    if (!meta) {
+      return undefined;
     }
-    return undefined;
+
+    const prefixKey: string = `${EnvV2.ENV_KEY_PREFIX}${key}`;
+    const varNames = meta.keyToVars[prefixKey];
+    if (!varNames || !Array.isArray(varNames) || varNames.length === 0) {
+      return undefined;
+    }
+    stateMgmtConsole.debug(`find @Env ${key} from view ${view.debugInfo__()}, varsName ${JSON.stringify(varNames)}`);
+    return varNames;
+  }
+
+
+  public static findEnvValueFromView<K extends keyof EnvTypeMap>(key: K, view: PUV2ViewBase): IEnvironmentValue<EnvTypeMap[K]> | undefined {
+    const varNames = EnvV2.getEnvVarNameFromView(key, view);
+    if (!varNames) {
+      stateMgmtConsole.debug(`cannot find @Env ${key} from view ${view.debugInfo__()}`);
+      return undefined;
+    }
+
+    stateMgmtConsole.debug(`find @Env ${key} from view ${view.debugInfo__()}, varsName ${JSON.stringify(varNames)}`);
+    const varName: string = varNames[0];
+    const storeProp = ObserveV2.ENV_PREFIX + varName;
+    const existingEnvValue = view[storeProp];
+    if (!existingEnvValue) {
+      return undefined;
+    }
+
+    stateMgmtConsole.debug(`find envValue key ${key} from view ${view.debugInfo__()}. Returning the existing one.`);
+    if (typeof existingEnvValue === 'object' || !EnvV2.isSimpleTypeKey(key)) {
+      return existingEnvValue;
+    }
+
+    const simpleKeyEntry = view.__getAnonymousEnvMonitorFuncBySpeficKey__Internal(key);
+    if (!simpleKeyEntry) {
+      stateMgmtConsole.warn(`simple type env ${key} should exist in view ${view.debugInfo__()}, internal error`);
+      return existingEnvValue as IEnvironmentValue<EnvTypeMap[K]>;
+    }
+
+    return simpleKeyEntry.envValue;
   }
 
 
@@ -128,6 +155,47 @@ class EnvV2 {
     return undefined;
   }
 
+  public static registerSimpleTypeMonitorFunc<K extends SimpleTypeEnvKey>(key: K, envValue: IEnvironmentValue<EnvTypeMap[K]>, view: PUV2ViewBase, varName: string): void {
+    stateMgmtConsole.debug(`registerSimpleTypeMonitorFunc: Env ${key} ${varName} ${view.debugInfo__()}.`);
+    const prop = EnvV2.getSimpleEnvProp(key);
+    const simpleValue = (envValue as any)[prop];
+    if (typeof simpleValue !== simpleEnvMetaMap[key].type) {
+      const message = `Created env value in ${view.debugInfo__()} for key ${key} has type ${typeof simpleValue} which is different from expected ${simpleEnvMetaMap[key].type}, internal error.`;
+      stateMgmtConsole.error(message);
+      throw Error(message);
+    }
+    stateMgmtConsole.debug(`registerEnv: Env ${key} is simple type, and value is ${simpleValue}`);
+    const envValueMonitorEntry = view.__getAnonymousEnvMonitorFuncBySpeficKey__Internal(key);
+    if (envValueMonitorEntry && envValueMonitorEntry.envValue === envValue) {
+      stateMgmtConsole.debug(`Env ${key} ${varName} is simple type, view ${view.debugInfo__()} already has anonymous monitor function for env`);
+      return;
+    }
+
+    if (envValueMonitorEntry && envValueMonitorEntry.envValue !== envValue) {
+      stateMgmtConsole.debug(`envValue ${key} in view ${view.debugInfo__()} has changed, may happen instance change, unregister from the old envValue`);
+      ObserveV2.getObserve().clearMonitorPath(envValueMonitorEntry.envValue, prop, envValueMonitorEntry.anonymousMonitorFunc);
+    }
+
+    const anonymousMonitorFunc = (mon: IMonitor): void => {
+      mon.dirty.forEach((path: string) => {
+        stateMgmtConsole.debug(`Env ${key} ${envValue.constructor.name}'s property ${path} varname ${varName} change from ${mon.value(path)?.before} to ${mon.value(path)?.now}`);
+        const varNames = EnvV2.getEnvVarNameFromView(key, view);
+        if (!varNames) {
+          stateMgmtConsole.debug(`anonymousMonitorFunc cannot find @Env ${key} from view ${view.debugInfo__()}`);
+          return;
+        }
+        varNames.forEach((varNameInView: string) => {
+          stateMgmtConsole.debug(`anonymousMonitorFunc fireChange cannot find @Env ${key} for ${varNameInView} in ${view.debugInfo__()}`);
+          const storeProp = ObserveV2.ENV_PREFIX + varNameInView;
+          view[storeProp] = mon.value(path)?.now;
+          ObserveV2.getObserve().fireChange(view, varNameInView);
+        });
+      });
+    };
+    view.__setAnonymousEnvMonitorFunc__Internal(key, anonymousMonitorFunc, envValue);
+    stateMgmtConsole.debug(`registerSimpleTypeMonitorFunc AddMonitorPath ${key} ${prop} ${varName} in ${view.debugInfo__()}`);
+    ObserveV2.getObserve().AddMonitorPath(envValue, prop, anonymousMonitorFunc, true, false);
+  }
 /**
  * Registers an environment value for the specified key using the given context.
  * Creates and stores the corresponding environment instance, and it will be cleaned up when the associated context is destroyed.
@@ -135,7 +203,7 @@ class EnvV2 {
  * @param newInstanceId Optional. If provided, indicates that this call occurs during a UI context switch
  *                      and the environment binding should be re-associated with the new instance.
  */
-  public static registerEnv<K extends keyof EnvTypeMap>(key: K, view: PUV2ViewBase, varName: string, newInstanceId?: number): IEnvironmentValue<EnvTypeMap[K]> {
+  public static registerEnv<K extends keyof EnvTypeMap>(key: K, view: PUV2ViewBase, varName: string, newInstanceId?: number): IEnvironmentValue<EnvTypeMap[K]> | SimpleEnvValueType {
     const instanceId = view.getMainInstanceId();
 
     stateMgmtConsole.debug(`registerEnv: Env '${key}' for view: ${view.debugInfo__()} view instanceId ${instanceId} newInstanceId: ${newInstanceId}`);
@@ -145,6 +213,11 @@ class EnvV2 {
     // step one: find EnvValue in parent recursively
     const existingEnv = EnvV2.findEnvRecursively(key, view, view.__latestInstanceId__Internal);
     if (existingEnv) {
+      if (EnvV2.isSimpleTypeKey(key)) {
+        const simpleEnv = existingEnv as IEnvironmentValue<EnvTypeMap[typeof key]>;
+        EnvV2.registerSimpleTypeMonitorFunc(key, simpleEnv, view, varName);
+        return (existingEnv as any)[EnvV2.getSimpleEnvProp(key)];
+      }
       stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} 1. find @Env(${key}) ${varName} in parent, return existing one`);
       return existingEnv;
     }
@@ -153,6 +226,11 @@ class EnvV2 {
     const envValueInGlobal = envRegister[key];
     if (envValueInGlobal) {
       stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} 2. find @Env(${key}) ${varName} in global, return existing one`);
+      if (EnvV2.isSimpleTypeKey(key)) {
+        const simpleEnv = envValueInGlobal as IEnvironmentValue<EnvTypeMap[typeof key]>;
+        EnvV2.registerSimpleTypeMonitorFunc(key, simpleEnv, view, varName);
+        return (envValueInGlobal as any)[EnvV2.getSimpleEnvProp(key)];
+      }
       return envValueInGlobal;
     }
 
@@ -168,9 +246,21 @@ class EnvV2 {
     stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} 3. cannot find @Env(${key}) ${varName} in parent/global, create new one`);
     const newEnv: IEnvironmentValue<EnvTypeMap[K]> = factory(uiContext);
     envRegister[key] = newEnv;
+    if (EnvV2.isSimpleTypeKey(key)) {
+      const simpleEnv = newEnv as IEnvironmentValue<EnvTypeMap[typeof key]>;
+      EnvV2.registerSimpleTypeMonitorFunc(key, simpleEnv, view, varName);
+      return (newEnv as any)[EnvV2.getSimpleEnvProp(key)];
+    }
     return newEnv;
   }
 
+  static isSimpleTypeKey(key: keyof EnvTypeMap): key is SimpleTypeEnvKey {
+    return key in simpleEnvMetaMap;
+  }
+
+  static getSimpleEnvProp(key: SimpleTypeEnvKey): string {
+    return simpleEnvMetaMap[key].prop;
+  }
   /**
    * Registers an environment value for the given key using the provided context.
    * Creates and stores the environment instance for later retrieval or cleanup.

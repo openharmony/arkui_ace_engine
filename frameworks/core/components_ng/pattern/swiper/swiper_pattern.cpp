@@ -29,6 +29,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "core/animation/scroll_motion.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/multi_thread.h"
@@ -163,7 +164,7 @@ void SwiperPattern::PerformScroll(const ScrollingConfig& config)
     }
     int32_t count = config.count.value();
     int32_t totalCount = TotalCount();
-    if (totalCount < 1) {
+    if (totalCount < 1 || count <= 0) {
         return;
     }
     if (IsLoop() && count > totalCount) {
@@ -172,7 +173,11 @@ void SwiperPattern::PerformScroll(const ScrollingConfig& config)
     if (config.direction == SmartGestureDirection::FORWARD) {
         ShowNextWithStep(false, count);
     } else if (config.direction == SmartGestureDirection::BACKWARD) {
-        ShowPreviousWithStep(false, count);
+        if (IsAutoLinear() && static_cast<int32_t>(itemPosition_.size()) == totalCount) {
+            ChangeIndex(0, true);
+        } else {
+            ShowPreviousWithStep(false, count);
+        }
     }
 }
 
@@ -2210,13 +2215,13 @@ void SwiperPattern::ShowNextWithStep(bool needCheckWillScroll, std::optional<int
 
     auto stepItems = IsSwipeByGroup() ? displayCount : 1;
     if (step.has_value()) {
-        if (step.value() <= 0) {
-            return;
-        }
         stepItems = step.value();
     }
     auto fromIndex = targetIndex_.value_or(currentIndex_);
     auto nextIndex = fromIndex + stepItems;
+    if (step.has_value() && !IsLoop() && fromIndex + step.value() >= childrenSize - displayCount) {
+        nextIndex = childrenSize - displayCount;
+    }
     if (fromIndex >= childrenSize - displayCount && !IsLoop()) {
         return;
     }
@@ -2280,13 +2285,13 @@ void SwiperPattern::ShowPreviousWithStep(bool needCheckWillScroll, std::optional
 
     auto stepItems = IsSwipeByGroup() ? displayCount : 1;
     if (step.has_value()) {
-        if (step.value() <= 0) {
-            return;
-        }
         stepItems = step.value();
     }
     auto fromIndex = targetIndex_.value_or(currentIndex_);
     auto prevIndex = fromIndex - stepItems;
+    if (step.has_value() && !IsLoop() && fromIndex < step.value()) {
+        prevIndex = 0;
+    }
     if (fromIndex <= 0 && !IsLoop()) {
         return;
     }

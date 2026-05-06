@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {

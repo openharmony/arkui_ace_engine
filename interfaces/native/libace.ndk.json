@@ -6424,6 +6424,10 @@
         "name": "OH_ArkUI_TextEditorStyledStringController_SetStyledPlaceholder"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_TextEditorStyledStringController_ScrollToVisible"
+    },
+    {
         "first_introduced": "24",
         "name": "OH_ArkUI_NodeEvent_GetTextEditorOnWillChangeEvent"
     },
@@ -6661,11 +6665,87 @@
         "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeBlurStyleOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBlurStyleOptionRadius"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBackgroundBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_ResetBackgroundBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetForegroundBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_ResetForegroundBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetContentBlurOption"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_ResetContentBlurOption"
+    },
+    {
  	    "first_introduced": "26.0.0",
  	    "name": "OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent"
     },
  	{
  	    "first_introduced": "26.0.0",
  	    "name": "OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineHeightStyle_SetLineHeightMultiple"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineHeightStyle_GetLineHeightMultiple"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_Create"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_Destroy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_SpanStyle_SetLineSpacingStyle"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_SpanStyle_GetLineSpacingStyle"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_SetLineSpacing"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_GetLineSpacing"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_SetOnlyBetweenLines"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LineSpacingStyle_GetOnlyBetweenLines"
     }
 ]

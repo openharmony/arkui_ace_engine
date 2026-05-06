@@ -16,6 +16,7 @@
 #include "grid_test_ng.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
@@ -296,13 +297,14 @@ HWTEST_F(GridAttrTestTwoNg, GridItemDisableEventTest001, TestSize.Level1)
     auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
     auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
     auto renderContext = gridItemFrameNode->renderContext_;
-    EXPECT_EQ(renderContext->GetOpacityValue(1.0f), 1.0f);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
     gridItemEventHub->SetEnabled(false);
     gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(renderContext->GetOpacityValue(1.0f), 0.4f);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
     gridItemEventHub->SetEnabled(true);
     gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(renderContext->GetOpacityValue(1.0f), 1.0f);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
 }
 
 /**
@@ -324,12 +326,13 @@ HWTEST_F(GridAttrTestTwoNg, GridItemDisableEventTest002, TestSize.Level1)
     auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
     auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
     auto renderContext = gridItemFrameNode->renderContext_;
-    EXPECT_EQ(renderContext->GetOpacityValue(1.0f), 1.0f);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
     gridItemEventHub->SetEnabled(false);
     gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(renderContext->GetOpacityValue(1.0f), 0.4f);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
     gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(renderContext->GetOpacityValue(1.0f), 0.4f);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
 }
 
 /**

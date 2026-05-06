@@ -29,7 +29,10 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
+
+namespace OHOS::Ace {
+class TextLayoutProperty;
+}
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -50,7 +53,7 @@ class ACE_FORCE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgor
 public:
     TextLayoutAlgorithm();
     explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
-        bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
+        const bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;

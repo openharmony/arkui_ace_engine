@@ -93,6 +93,7 @@ interface CommonAttribute {
     accessibilityText(value: string | Resource): CommonAttribute;
     accessibilityDescription(value: string | Resource): CommonAttribute;
     accessibilityLevel(value: string): CommonAttribute;
+    inspectorLabel(label: string | undefined): CommonAttribute;
     attributeModifier(modifier: AttributeModifier<CommonAttribute>): CommonAttribute;
 }
 

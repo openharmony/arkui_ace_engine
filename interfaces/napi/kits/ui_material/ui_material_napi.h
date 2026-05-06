@@ -42,7 +42,7 @@ private:
     static napi_status EnumImmersiveStyleInit(napi_env env, napi_value exports);
     static napi_status EnumImmersiveLevelInit(napi_env env, napi_value exports);
     static napi_status EnumMaterialStateInit(napi_env env, napi_value exports);
-    static napi_status ImmersiveMaterialInit(napi_env env, napi_value exports);
+    static napi_status ImmersiveMaterialInit(napi_env env, napi_value exports, napi_value baseCtr);
     static napi_value JSGetImmersiveLevel(napi_env env, napi_callback_info info);
     static napi_value JSGetMaterialInfo(napi_env env, napi_callback_info info);
     static napi_value JSGetEmpty(napi_env env, napi_callback_info info);

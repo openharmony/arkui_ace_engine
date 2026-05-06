@@ -50,13 +50,18 @@ public:
 
     void ApplyTokenTheme(const TokenTheme& theme) override
     {
-        if (auto themeColors = theme.Colors(); themeColors) {
+        auto themeColors = theme.Colors();
+        if (themeColors) {
             // update only required attributes by TokenTheme tokens
             loadingColor_ = themeColors->IconSecondary();
             ringProgressBackgroundColor_ = themeColors->CompBackgroundTertiary();
             trackBgColor_ = themeColors->CompBackgroundTertiary();
             capsuleSelectColor_ = themeColors->CompEmphasizeSecondary();
             trackSelectedColor_ = themeColors->BackgroundEmphasize();
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                borderColor_ = themeColors->CompEmphasizeSecondary();
+                capsuleInprogressBorderColor_ = themeColors->CompEmphasizeSecondary();
+            }
         }
     }
 

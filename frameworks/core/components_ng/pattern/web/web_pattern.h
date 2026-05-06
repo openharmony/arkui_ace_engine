@@ -99,6 +99,7 @@ class WebAccessibilityChildTreeCallback;
 class ViewDataCommon;
 class TransitionalNodeInfo;
 class WebDomDocument;
+enum class AccessibilityHoverEventType;
 
 namespace {
 
@@ -813,6 +814,7 @@ public:
         return isImeStatus_ == VkState::VK_SHOW;
     }
     bool OnNestedScrollV2(float& x, float& y);
+    bool OnNestedFling(float& xVelocity, float& yVelocity);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
     void EnableScrollDirectionalLock(bool enabled,
@@ -1049,8 +1051,19 @@ public:
 
     bool CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     int SendCommandToNWeb(std::unique_ptr<JsonValue> comJson);
+    int ExecuteInputCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteSelectCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteInputMethodCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteCommand(const std::string& eventTypeStr, const std::string& xpathStr, int32_t durationInt,
                         const std::string& alignStr, int32_t offsetInt);
+    int HandleTapCommand(double x, double y, int32_t duration, int32_t tapCount);
+    int HandleScrollGestureCommand(double x, double y, double xDistance, double yDistance, int32_t speed);
+    int HandlePinchGestureCommand(double x, double y, double scaleFactor, int32_t speed);
+    int HandleLongPressCommand(double x, double y);
+    int ExecuteGestureCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int CheckGestureCoordinatesInWebBounds(double screenX, double screenY);
+    bool ConvertScreenToWebCoordinates(double screenX, double screenY, double& outWebX, double& outWebY);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();

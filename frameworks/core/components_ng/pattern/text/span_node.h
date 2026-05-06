@@ -64,7 +64,7 @@ public:                                                                      \
         return defaultValue;                                                 \
     }
 
-#define DEFINE_SPAN_FONT_STYLE_ITEM(name, type, changeflag)       \
+#define DEFINE_SPAN_FONT_STYLE_ITEM(name, type, changeflag, lpxFlag) \
     DEFINE_SPAN_FONT_STYLE_ITEM_GET(name, type)                   \
 public:                                                           \
     void Update##name(const type& value)                          \
@@ -76,6 +76,7 @@ public:                                                           \
             return;                                               \
         }                                                         \
         spanItem_->fontStyle->Update##name(value);                \
+        UpdateSpanLpxFlag<type>(spanItem_, value, lpxFlag);       \
         if (changeflag == ChangeFlag::RE_CREATE) {                \
             spanItem_->MarkDirty();                               \
         } else {                                                  \
@@ -92,8 +93,9 @@ public:                                                           \
     void Reset##name()                                            \
     {                                                             \
         if (spanItem_->fontStyle) {                               \
-            return spanItem_->fontStyle->Reset##name();           \
+            spanItem_->fontStyle->Reset##name();                  \
         }                                                         \
+        ResetSpanLpxFlag<type>(spanItem_, lpxFlag);               \
     }                                                             \
     void Update##name##WithoutFlushDirty(const type& value)       \
     {                                                             \
@@ -104,9 +106,10 @@ public:                                                           \
             return;                                               \
         }                                                         \
         spanItem_->fontStyle->Update##name(value);                \
+        UpdateSpanLpxFlag<type>(spanItem_, value, lpxFlag);       \
     }
 
-#define DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(name, type, changeflag) \
+#define DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(name, type, changeflag, lpxFlag) \
     DEFINE_SPAN_FONT_STYLE_ITEM_GET(name, type)                   \
 public:                                                           \
     void Update##name(const type& value)                          \
@@ -118,6 +121,7 @@ public:                                                           \
             return;                                               \
         }                                                         \
         spanItem_->fontStyle->Update##name(value);                \
+        UpdateSpanLpxFlag<type>(spanItem_, value, lpxFlag);       \
         if (changeflag == ChangeFlag::RE_CREATE) {                \
             spanItem_->MarkDirty();                               \
         } else {                                                  \
@@ -137,6 +141,7 @@ public:                                                           \
         if (spanItem_->fontStyle) {                               \
             spanItem_->fontStyle->Reset##name();                  \
         }                                                         \
+        ResetSpanLpxFlag<type>(spanItem_, lpxFlag);               \
         if (changeflag == ChangeFlag::RE_CREATE) {                \
             spanItem_->MarkDirty();                               \
         } else {                                                  \
@@ -153,10 +158,11 @@ public:                                                           \
             return;                                               \
         }                                                         \
         spanItem_->fontStyle->Update##name(value);                \
+        UpdateSpanLpxFlag<type>(spanItem_, value, lpxFlag);       \
         spanItem_->MarkReCreateParagraph();                       \
     }
 
-#define DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(name, type, changeflag)                 \
+#define DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(name, type, changeflag, lpxFlag)          \
 public:                                                                          \
     std::optional<type> Get##name() const                                        \
     {                                                                            \
@@ -188,6 +194,7 @@ public:                                                                         
             return;                                                              \
         }                                                                        \
         spanItem_->textLineStyle->Update##name(value);                           \
+        UpdateSpanLpxFlag<type>(spanItem_, value, lpxFlag);                      \
         if (changeflag == ChangeFlag::RE_CREATE) {                               \
             spanItem_->MarkDirty();                                              \
         } else {                                                                 \
@@ -206,6 +213,7 @@ public:                                                                         
         if (spanItem_->textLineStyle) {                                          \
             spanItem_->textLineStyle->Reset##name();                             \
         }                                                                        \
+        ResetSpanLpxFlag<type>(spanItem_, lpxFlag);                              \
         if (changeflag == ChangeFlag::RE_CREATE) {                               \
             spanItem_->MarkDirty();                                              \
         } else {                                                                 \
@@ -221,6 +229,123 @@ public:                                                                         
             return;                                                              \
         }                                                                        \
         spanItem_->textLineStyle->Update##name(value);                           \
+        UpdateSpanLpxFlag<type>(spanItem_, value, lpxFlag);                      \
+    }
+
+#define DEFINE_SPAN_SYMBOL_STYLE_ITEM_GET(name, type)                           \
+public:                                                                         \
+    std::optional<type> Get##name() const                                       \
+    {                                                                           \
+        if (spanItem_->symbolStyle) {                                           \
+            return spanItem_->symbolStyle->Get##name();                         \
+        }                                                                       \
+        return std::nullopt;                                                    \
+    }                                                                           \
+    bool Has##name() const                                                      \
+    {                                                                           \
+        if (spanItem_->symbolStyle) {                                           \
+            return spanItem_->symbolStyle->Has##name();                         \
+        }                                                                       \
+        return false;                                                           \
+    }                                                                           \
+    type Get##name##Value(const type& defaultValue) const                       \
+    {                                                                           \
+        if (spanItem_->symbolStyle) {                                           \
+            return spanItem_->symbolStyle->Get##name().value_or(defaultValue);  \
+        }                                                                       \
+        return defaultValue;                                                    \
+    }
+
+#define DEFINE_SPAN_SYMBOL_STYLE_ITEM(name, type, changeflag)      \
+    DEFINE_SPAN_SYMBOL_STYLE_ITEM_GET(name, type)                  \
+public:                                                            \
+    void Update##name(const type& value)                           \
+    {                                                              \
+        if (!spanItem_->symbolStyle) {                             \
+            spanItem_->symbolStyle = std::make_unique<SymbolStyle>(); \
+        }                                                          \
+        if (spanItem_->symbolStyle->Check##name(value)) {          \
+            return;                                                \
+        }                                                          \
+        spanItem_->symbolStyle->Update##name(value);               \
+        if (changeflag == ChangeFlag::RE_CREATE) {                 \
+            spanItem_->MarkDirty();                                \
+        } else {                                                   \
+            spanItem_->MarkReLayoutParagraph();                    \
+        }                                                          \
+        RequestTextFlushDirty();                                   \
+    }                                                              \
+    void Update##name(const std::optional<type>& value)            \
+    {                                                              \
+        if (value.has_value()) {                                   \
+            Update##name(value.value());                           \
+        }                                                          \
+    }                                                              \
+    void Reset##name()                                             \
+    {                                                              \
+        if (spanItem_->symbolStyle) {                              \
+            spanItem_->symbolStyle->Reset##name();                 \
+        }                                                          \
+    }                                                              \
+    void Update##name##WithoutFlushDirty(const type& value)        \
+    {                                                              \
+        if (!spanItem_->symbolStyle) {                             \
+            spanItem_->symbolStyle = std::make_unique<SymbolStyle>(); \
+        }                                                          \
+        if (spanItem_->symbolStyle->Check##name(value)) {          \
+            return;                                                \
+        }                                                          \
+        spanItem_->symbolStyle->Update##name(value);               \
+    }
+
+#define DEFINE_SPAN_SYMBOL_STYLE_ITEM_RECREATE(name, type, changeflag) \
+    DEFINE_SPAN_SYMBOL_STYLE_ITEM_GET(name, type)                      \
+public:                                                                \
+    void Update##name(const type& value)                               \
+    {                                                                  \
+        if (!spanItem_->symbolStyle) {                                 \
+            spanItem_->symbolStyle = std::make_unique<SymbolStyle>();   \
+        }                                                              \
+        if (spanItem_->symbolStyle->Check##name(value)) {              \
+            return;                                                    \
+        }                                                              \
+        spanItem_->symbolStyle->Update##name(value);                   \
+        if (changeflag == ChangeFlag::RE_CREATE) {                     \
+            spanItem_->MarkDirty();                                    \
+        } else {                                                       \
+            spanItem_->MarkReLayoutParagraph();                        \
+        }                                                              \
+        RequestTextFlushDirty();                                       \
+        spanItem_->MarkReCreateParagraph();                            \
+    }                                                                  \
+    void Update##name(const std::optional<type>& value)                \
+    {                                                                  \
+        if (value.has_value()) {                                       \
+            Update##name(value.value());                               \
+        }                                                              \
+    }                                                                  \
+    void Reset##name()                                                 \
+    {                                                                  \
+        if (spanItem_->symbolStyle) {                                  \
+            spanItem_->symbolStyle->Reset##name();                     \
+        }                                                              \
+        if (changeflag == ChangeFlag::RE_CREATE) {                     \
+            spanItem_->MarkDirty();                                    \
+        } else {                                                       \
+            spanItem_->MarkReLayoutParagraph();                        \
+        }                                                              \
+        spanItem_->MarkReCreateParagraph();                            \
+    }                                                                  \
+    void Update##name##WithoutFlushDirty(const type& value)            \
+    {                                                                  \
+        if (!spanItem_->symbolStyle) {                                 \
+            spanItem_->symbolStyle = std::make_unique<SymbolStyle>();   \
+        }                                                              \
+        if (spanItem_->symbolStyle->Check##name(value)) {              \
+            return;                                                    \
+        }                                                              \
+        spanItem_->symbolStyle->Update##name(value);                   \
+        spanItem_->MarkReCreateParagraph();                            \
     }
 
 namespace OHOS::Ace::NG {
@@ -279,7 +404,35 @@ public:
     uint32_t unicode = 0;
     SpanItemType spanItemType = SpanItemType::NORMAL;
     std::pair<int32_t, int32_t> interval;
+
+    static constexpr uint32_t LPX_FLAG_NONE = 0;
+    static constexpr uint32_t LPX_FLAG_FontSize = 1 << 0;
+    static constexpr uint32_t LPX_FLAG_StrokeWidth = 1 << 1;
+    static constexpr uint32_t LPX_FLAG_AdaptMinFontSize = 1 << 2;
+    static constexpr uint32_t LPX_FLAG_AdaptMaxFontSize = 1 << 3;
+    static constexpr uint32_t LPX_FLAG_LetterSpacing = 1 << 4;
+    static constexpr uint32_t LPX_FLAG_LineHeight = 1 << 5;
+    static constexpr uint32_t LPX_FLAG_BaselineOffset = 1 << 6;
+    static constexpr uint32_t LPX_FLAG_TextIndent = 1 << 7;
+    static constexpr uint32_t LPX_FLAG_LineSpacing = 1 << 8;
+    static constexpr uint32_t LPX_FLAG_ParagraphSpacing = 1 << 9;
+    static constexpr uint32_t LPX_FLAG_IMAGE_MARGIN = 1 << 10;
+    static constexpr uint32_t LPX_FLAG_IMAGE_PADDING = 1 << 11;
+    static constexpr uint32_t LPX_FLAG_IMAGE_BORDER_RADIUS = 1 << 12;
+    static constexpr uint32_t LPX_FLAG_LeadingMargin = 1 << 13;
+    static constexpr uint32_t LPX_FLAG_IMAGE_SIZE = 1 << 14;
+    static constexpr uint32_t LPX_FLAG_BACKGROUND_RADIUS = 1 << 15;
+
+    uint32_t lpxFlags_ = LPX_FLAG_NONE;
+    bool HasLpxUnitStyle() const { return lpxFlags_ != LPX_FLAG_NONE; }
+    void SetLpxFlag(uint32_t flag) { lpxFlags_ |= flag; }
+    void ClearLpxFlag(uint32_t flag) { lpxFlags_ &= ~flag; }
+    void ClearAllLpxFlags() { lpxFlags_ = LPX_FLAG_NONE; }
+    void SetBackgroundStyle(const std::optional<TextBackgroundStyle>& style);
+    void ResetBackgroundStyle();
+
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
+    std::unique_ptr<SymbolStyle> symbolStyle;
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
     // for text background style
     std::optional<TextBackgroundStyle> backgroundStyle;
@@ -540,19 +693,43 @@ public:
         fontStyle->AddResource(key, resObj, std::move(updateFunc));
     }
 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, SymbolStyle&)>&& updateFunc)
+    {
+        if (!symbolStyle) {
+            symbolStyle = std::make_unique<SymbolStyle>();
+        }
+        symbolStyle->AddResource(key, resObj, std::move(updateFunc));
+    }
+
     size_t RemoveResource(const std::string& key)
     {
-        return fontStyle->RemoveResource(key);
+        auto count = fontStyle->RemoveResource(key);
+        if (symbolStyle) {
+            count += symbolStyle->RemoveResource(key);
+        }
+        return count;
     }
 
     void CopyResource(const RefPtr<SpanItem>& source)
     {
         fontStyle->CopyResource(source->fontStyle);
+        if (source->symbolStyle) {
+            if (!symbolStyle) {
+                symbolStyle = std::make_unique<SymbolStyle>();
+            }
+            symbolStyle->CopyResource(source->symbolStyle);
+        }
     }
 
     void ReloadResources()
     {
         fontStyle->ReloadResources();
+        if (symbolStyle) {
+            symbolStyle->ReloadResources();
+        }
         if (backgroundStyle.has_value()) {
             backgroundStyle->ReloadResources();
         }
@@ -659,6 +836,39 @@ private:
     int32_t groupId_ = 0;
     bool hasTextBackgroundStyle_ = false;
 };
+
+template<typename T>
+inline void UpdateSpanLpxFlag(const RefPtr<SpanItem>& spanItem, const T& value, uint32_t flag) {}
+
+template<>
+inline void UpdateSpanLpxFlag<Dimension>(const RefPtr<SpanItem>& spanItem, const Dimension& value, uint32_t flag)
+{
+    (value.Unit() == DimensionUnit::LPX) ? spanItem->SetLpxFlag(flag) : spanItem->ClearLpxFlag(flag);
+}
+
+template<>
+inline void UpdateSpanLpxFlag<LeadingMargin>(const RefPtr<SpanItem>& spanItem, const LeadingMargin& value,
+    uint32_t flag)
+{
+    auto& size = value.size;
+    bool hasLpx = (size.Width().Unit() == DimensionUnit::LPX) || (size.Height().Unit() == DimensionUnit::LPX);
+    hasLpx ? spanItem->SetLpxFlag(flag) : spanItem->ClearLpxFlag(flag);
+}
+
+template<typename T>
+inline void ResetSpanLpxFlag(const RefPtr<SpanItem>& spanItem, uint32_t flag) {}
+
+template<>
+inline void ResetSpanLpxFlag<Dimension>(const RefPtr<SpanItem>& spanItem, uint32_t flag)
+{
+    spanItem->ClearLpxFlag(flag);
+}
+
+template<>
+inline void ResetSpanLpxFlag<LeadingMargin>(const RefPtr<SpanItem>& spanItem, uint32_t flag)
+{
+    spanItem->ClearLpxFlag(flag);
+}
 
 class ACE_FORCE_EXPORT SpanNode : public UINode, public BaseSpan {
     DECLARE_ACE_TYPE(SpanNode, UINode, BaseSpan);
@@ -779,6 +989,14 @@ public:
         spanItem_->AddResource(key, resObj, std::move(updateFunc));
     }
 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, SymbolStyle&)>&& updateFunc)
+    {
+        spanItem_->AddResource(key, resObj, std::move(updateFunc));
+    }
+
     size_t RemoveResource(const std::string& key)
     {
         return spanItem_->RemoveResource(key);
@@ -795,47 +1013,54 @@ public:
     }
 
     // ChangeFlag only for rich editor
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontVariations, FONT_VARIATIONS_LIST, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(Superscript, SuperscriptStyle, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, std::vector<TextDecoration>, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(TextCase, TextCase, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(EnableDeviceFontWeightCategory, bool, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(SymbolType, SymbolType, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(LineThicknessScale, float, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextVerticalAlign, TextVerticalAlign, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextDirection, TextDirection, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OptimizeTrailingSpace, bool, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OrphanCharOptimization, bool, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(CompressLeadingPunctuation, bool, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_FontSize);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontVariations, FONT_VARIATIONS_LIST, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_StrokeWidth);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(Superscript, SuperscriptStyle, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, std::vector<TextDecoration>, ChangeFlag::RE_LAYOUT,
+        SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle, ChangeFlag::RE_LAYOUT,
+        SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(TextCase, TextCase, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_LetterSpacing);
+    DEFINE_SPAN_SYMBOL_STYLE_ITEM(SymbolColorList, std::vector<Color>, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_SYMBOL_STYLE_ITEM(SymbolRenderingStrategy, uint32_t, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_SYMBOL_STYLE_ITEM(SymbolEffectStrategy, uint32_t, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_SYMBOL_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(EnableDeviceFontWeightCategory, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_SYMBOL_STYLE_ITEM_RECREATE(SymbolType, SymbolType, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(LineThicknessScale, float, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_LineHeight);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT,
+        SpanItem::LPX_FLAG_BaselineOffset);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextVerticalAlign, TextVerticalAlign, ChangeFlag::RE_CREATE,
+        SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextDirection, TextDirection, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE,
+        SpanItem::LPX_FLAG_LeadingMargin);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT,
+        SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_LineSpacing);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OptimizeTrailingSpace, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OrphanCharOptimization, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(CompressLeadingPunctuation, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE,
+        SpanItem::LPX_FLAG_ParagraphSpacing);
 
     TextDecoration GetTextDecorationFirst() const
     {

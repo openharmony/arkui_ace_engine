@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components/popup/popup_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -695,6 +696,51 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     SetPopupBorderWidthInfo(popupObj, popupParam, INNER_BORDER_WIDTH);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, OUTER_BORDER_LINEAR_GRADIENT);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, INNER_BORDER_LINEAR_GRADIENT);
+
+    // Parse lifecycle callbacks
+    auto onWillAppearValue = popupObj->GetProperty("onWillAppear");
+    if (onWillAppearValue->IsFunction()) {
+        auto func = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(onWillAppearValue));
+        auto onWillAppearCallback = [execCtx = info.GetExecutionContext(), func = std::move(func)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup::onWillAppear");
+            func->Execute();
+        };
+        popupParam->SetOnWillAppear(std::move(onWillAppearCallback));
+    }
+
+    auto onDidAppearValue = popupObj->GetProperty("onDidAppear");
+    if (onDidAppearValue->IsFunction()) {
+        auto func = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(onDidAppearValue));
+        auto onDidAppearCallback = [execCtx = info.GetExecutionContext(), func = std::move(func)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup::onDidAppear");
+            func->Execute();
+        };
+        popupParam->SetOnDidAppear(std::move(onDidAppearCallback));
+    }
+
+    auto onWillDisappearValue = popupObj->GetProperty("onWillDisappear");
+    if (onWillDisappearValue->IsFunction()) {
+        auto func = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(onWillDisappearValue));
+        auto onWillDisappearCallback = [execCtx = info.GetExecutionContext(), func = std::move(func)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup::onWillDisappear");
+            func->Execute();
+        };
+        popupParam->SetOnWillDisappear(std::move(onWillDisappearCallback));
+    }
+
+    auto onDidDisappearValue = popupObj->GetProperty("onDidDisappear");
+    if (onDidDisappearValue->IsFunction()) {
+        auto func = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(onDidDisappearValue));
+        auto onDidDisappearCallback = [execCtx = info.GetExecutionContext(), func = std::move(func)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup::onDidDisappear");
+            func->Execute();
+        };
+        popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
+    }
     SetPopupSystemMaterial(popupObj, popupParam);
 }
 
@@ -1638,6 +1684,18 @@ void JSViewPopups::ParseMenuAnchoredColorMode(const JSRef<JSObject>& menuOptions
     }
 }
 
+void JSViewPopups::ParseMenuTargetSpace(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto targetSpaceProperty = menuOptions->GetProperty("targetSpace");
+    if (targetSpaceProperty->IsObject()) {
+        CalcDimension value;
+        if (JSViewAbstract::ParseLengthMetricsToPositiveDimension(targetSpaceProperty, value) &&
+            value.IsNonNegative() && value.Unit() != DimensionUnit::PERCENT) {
+            menuParam.targetSpace = value;
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1683,6 +1741,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
     JSViewPopups::ParseMenuMaxHeight(menuOptions, menuParam);
     JSViewPopups::ParseMenuAnchoredColorMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuTargetSpace(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseMenuLifeCycleParam(

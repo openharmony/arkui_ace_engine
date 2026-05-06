@@ -16,6 +16,7 @@
 #include "native_type.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"

@@ -76,12 +76,6 @@ bool CalcDimensionLpx(const CalcDimensionParam& param, double& result)
     }
     return false;
 }
-
-std::unordered_map<DimensionUnit, CalcDimensionFunc> calcDimensionFuncMap_ = {
-    { DimensionUnit::NONE, &CalcDimensionNone }, { DimensionUnit::PX, &CalcDimensionPx },
-    { DimensionUnit::PERCENT, &CalcDimensionPercent }, { DimensionUnit::VP, &CalcDimensionVp },
-    { DimensionUnit::FP, &CalcDimensionFp }, { DimensionUnit::LPX, &CalcDimensionLpx }
-};
 } // namespace
 
 double Dimension::ConvertToVp() const
@@ -276,12 +270,23 @@ Dimension Dimension::FromString(const std::string& str)
 bool Dimension::NormalizeToPx(
     double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const
 {
-    auto func = calcDimensionFuncMap_.find(unit_);
-    if (func != calcDimensionFuncMap_.end()) {
-        CalcDimensionParam param = { static_cast<float>(value_), static_cast<float>(vpScale),
-            static_cast<float>(fpScale), static_cast<float>(lpxScale), static_cast<float>(parentLength) };
-        return func->second(param, result);
-    }
+    CalcDimensionParam param = { value_, vpScale, fpScale, lpxScale, parentLength };
+    switch (unit_) {
+        case DimensionUnit::NONE:
+            return CalcDimensionNone(param, result);
+        case DimensionUnit::PX:
+            return CalcDimensionPx(param, result);
+        case DimensionUnit::PERCENT:
+            return CalcDimensionPercent(param, result);
+        case DimensionUnit::VP:
+            return CalcDimensionVp(param, result);
+        case DimensionUnit::FP:
+            return CalcDimensionFp(param, result);
+        case DimensionUnit::LPX:
+            return CalcDimensionLpx(param, result);
+        default:
+            break;
+    };
     return false;
 }
 } // namespace OHOS::Ace

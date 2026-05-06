@@ -177,6 +177,10 @@ struct ArkUI_RenderNodeClipOption {
     int32_t type;
 };
 
+struct ArkUI_RenderBlurStyleOption {
+    float radius;
+};
+
 #ifdef __cplusplus
 };
 #endif

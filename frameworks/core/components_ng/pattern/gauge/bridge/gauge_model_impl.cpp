@@ -16,8 +16,9 @@
 #include "core/components_ng/pattern/gauge/bridge/gauge_model_impl.h"
 
 #include "base/log/log_wrapper.h"
-#include "frameworks/core/components/progress/progress_component.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components/progress/progress_component.h"
 #include "compatible/components/chart/chart_component.h"
 
 namespace OHOS::Ace::Framework {

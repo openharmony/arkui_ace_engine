@@ -14,6 +14,7 @@
  */
 
 #include "core/components/bubble/bubble_element.h"
+#include "core/event/key_event.h"
 
 #include "core/components/bubble/render_bubble.h"
 

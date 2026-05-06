@@ -52,6 +52,11 @@ public:
             bottomTabTextOn_ = colors->FontEmphasize();
             bottomTabTextOff_ = colors->FontSecondary();
             dividerColor_ = colors->CompDivider();
+
+            activeIndicatorColor_ = colors->CompBackgroundEmphasize();
+            bottomTabIconOn_ = colors->IconEmphasize();
+            bottomTabIconOff_ = colors->IconFourth();
+            bottomTabSymbolOff_ = colors->IconTertiary();
         }
     }
 

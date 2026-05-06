@@ -24,6 +24,37 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr double HALF = 0.5;
+
+    RSCMSMatrixType ToRSCMSMatrixType(ColorSpace colorSpace)
+    {
+        switch (colorSpace) {
+            case ColorSpace::DISPLAY_P3:
+                return RSCMSMatrixType::DCIP3;
+            case ColorSpace::BT2020:
+                return RSCMSMatrixType::REC2020;
+            default:
+                return RSCMSMatrixType::SRGB;
+        }
+    }
+
+    void SetBrushColorBySpace(RSBrush& brush, const Color& color, double opacity)
+    {
+        auto matrixType = ToRSCMSMatrixType(color.GetColorSpace());
+        if (color.GetHeadRoomColor().has_value()) {
+            auto colorFloat = color.GetHeadRoomColor().value();
+            auto uiColor = RSUIColor(
+                colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
+            brush.SetUIColor(uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType));
+        } else if (color.GetColorSpace() == ColorSpace::SRGB) {
+            brush.SetColor(color.BlendOpacity(opacity).GetValue());
+        } else {
+            auto blendedColor = color.BlendOpacity(opacity);
+            brush.SetColor(
+                { blendedColor.GetRed() / 255.0, blendedColor.GetGreen() / 255.0,
+                  blendedColor.GetBlue() / 255.0, blendedColor.GetAlpha() / 255.0 },
+                RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType));
+        }
+    }
 } // namespace
 
 void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
@@ -290,26 +321,8 @@ void SvgGraphic::SetBrushColor(RSBrush& brush, bool useFillColor)
         auto opacityFillColor = imageComponentColor->BlendOpacity(curOpacity);
         opacityFillColor.SetPlaceholder(imageComponentColor->GetPlaceholder());
         brush.SetColor(ToRSColor(opacityFillColor));
-    } else if (imageComponentColor->GetColorSpace() == ColorSpace::DISPLAY_P3) {
-        if (imageComponentColor->GetHeadRoomColor().has_value()) {
-            auto colorFloat = imageComponentColor->GetHeadRoomColor().value();
-            auto uiColor =
-                RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
-            brush.SetUIColor(
-                uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
-        } else {
-            auto p3Color = imageComponentColor->BlendOpacity(curOpacity);
-            brush.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
-                                    p3Color.GetAlpha() / 255.0 },
-                RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
-        }
-    } else if (imageComponentColor->GetColorSpace() == ColorSpace::BT2020) {
-        auto colorFloat = imageComponentColor->GetHeadRoomColor().value();
-        auto uiColor =
-            RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
-        brush.SetUIColor(uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::REC2020));
     } else {
-        brush.SetColor(imageComponentColor->BlendOpacity(curOpacity).GetValue());
+        SetBrushColorBySpace(brush, *imageComponentColor, curOpacity);
     }
 }
 
@@ -364,27 +377,8 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
             auto opacityFillColor = fillColor.BlendOpacity(curOpacity);
             opacityFillColor.SetPlaceholder(fillColor.GetPlaceholder());
             fillBrush_.SetColor(ToRSColor(opacityFillColor));
-        } else if (fillColor.GetColorSpace() == ColorSpace::DISPLAY_P3) {
-            if (fillColor.GetHeadRoomColor().has_value()) {
-                auto colorFloat = fillColor.GetHeadRoomColor().value();
-                auto uiColor =
-                    RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
-                fillBrush_.SetUIColor(
-                    uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
-            } else {
-                auto p3Color = fillColor.BlendOpacity(curOpacity);
-                fillBrush_.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
-                                        p3Color.GetAlpha() / 255.0 },
-                    RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
-            }
-        } else if (fillColor.GetColorSpace() == ColorSpace::BT2020) {
-            auto colorFloat = fillColor.GetHeadRoomColor().value();
-            auto uiColor =
-                RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
-            fillBrush_.SetUIColor(
-                uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::REC2020));
         } else {
-            fillBrush_.SetColor(fillColor.BlendOpacity(curOpacity).GetValue());
+            SetBrushColorBySpace(fillBrush_, fillColor, curOpacity);
         }
     }
     return true;

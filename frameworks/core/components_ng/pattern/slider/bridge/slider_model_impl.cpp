@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/slider/bridge/slider_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components/slider/slider_component.h"
 #include "core/components/slider/slider_theme.h"
 #include "base/memory/referenced.h"

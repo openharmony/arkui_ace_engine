@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "form_constants.h"
 #include "form_info_base.h"
@@ -495,10 +496,13 @@ void FormPattern::SnapshotSurfaceNode(std::shared_ptr<Rosen::SurfaceCaptureCallb
     auto externalContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalContext);
     auto rsNode = externalContext->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
     externalContext->AddRsNodeForCapture();
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, callback);
+    if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "rsNode or rsUIContext is nullptr");
+        return;
+    }
+    auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
+    rsRenderInterface->TakeSurfaceCaptureForUI(rsNode, callback);
 }
 
 void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)

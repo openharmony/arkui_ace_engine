@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <iterator>
 
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/utils.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -363,7 +364,7 @@ void LazyGridLayoutAlgorithm::MeasureGridItemLazy(LayoutWrapper* layoutWrapper)
     }
     CheckRecycle();
     layoutInfo_->UpdatePosMap();
-    float delta = forwardLayout_ ? layoutInfo_->adjustOffset_.start : layoutInfo_->adjustOffset_.end;
+    float delta = layoutInfo_->adjustOffset_.start;
     referencePos_ += delta;
     startPos_ += delta;
     endPos_ += delta;
@@ -425,7 +426,7 @@ void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
         return;
     } else if (GreatOrEqual(endPos_, totalMainSize_) || layoutInfo_->endIndex_ >= layoutInfo_->totalItemCount_) {
         pos = totalMainSize_;
-        index = LanesCeil(layoutInfo_->totalItemCount_ - 1);
+        index = LanesCeil(totalItemCount_ - 1);
         return;
     }
     auto it = layoutInfo_->posMap_.find(layoutInfo_->endIndex_);

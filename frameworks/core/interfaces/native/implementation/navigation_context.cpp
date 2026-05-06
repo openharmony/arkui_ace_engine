@@ -1345,4 +1345,12 @@ void NavigationStack::SetRecoveryFromReplaceDestination(int32_t index, bool valu
     CHECK_NULL_VOID(info);
     info->recoveryFromReplaceDestination_ = value;
 }
+
+void NavigationStack::PushIntentNavDestination(
+    const std::string& name, const std::string& params, bool needTransition)
+{
+    if (pushDestinationInnerCallback_) {
+        pushDestinationInnerCallback_(name, params, needTransition);
+    }
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext

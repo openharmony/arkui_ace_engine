@@ -18,6 +18,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"

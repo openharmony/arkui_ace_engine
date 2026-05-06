@@ -416,6 +416,8 @@ public:
     static void SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func);
     static void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetShouldRecognizerParallelWith(
+        NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc);
     static void SetOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag);
     static void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback);
@@ -556,6 +558,7 @@ public:
     static void SetRestoreId(int32_t restoreId);
     // inspector debugLine
     static void SetDebugLine(const std::string &line);
+    static void SetInspectorLabel(const std::string& inspectorLabel);
     // transition
     static void SetTransition(const TransitionOptions &options);
     static void CleanTransition();
@@ -585,6 +588,7 @@ public:
     static void SetMotionPath(const MotionPathOption &motionPath);
     // progress mask
     static void SetProgressMask(const RefPtr<ProgressMaskProperty> &progress);
+    static void SetEdgeLightParam(const std::optional<EdgeLightParam>& param);
 
     static void Pop();
 
@@ -901,6 +905,8 @@ public:
         NG::TransitionFinishCallback&& finishCallback = nullptr);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
+    static void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable);
+    static void ResetSmartGestureShortcut();
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
@@ -957,6 +963,8 @@ public:
         FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
         FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetShouldRecognizerParallelWith(
+        FrameNode* frameNode, NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc);
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);

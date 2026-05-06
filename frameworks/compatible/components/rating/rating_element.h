@@ -18,6 +18,7 @@
 
 #include "compatible/components/rating/render_rating.h"
 #include "core/components/focus_animation/render_focus_animation.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {

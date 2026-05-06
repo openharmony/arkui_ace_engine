@@ -262,7 +262,8 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
 export enum SideBarContainerType {
     Embed = 0,
     Overlay = 1,
-    AUTO = 2
+    AUTO = 2,
+    DISPLACE = 3
 }
 export enum SideBarPosition {
     Start = 0,

@@ -14,7 +14,6 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
-
 #include <algorithm>
 #include <functional>
 #include <memory>
@@ -29,20 +28,25 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_animation_on_finish_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_feature.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
-#include "core/image/image_cache.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/image/image_cache.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -1514,6 +1518,27 @@ void JSViewContext::JSIsEasySplit(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+void JSViewContext::JSSetTextSelectionClearPolicy(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        return;
+    }
+    auto policyValue = info[0]->ToNumber<int32_t>();
+    if (policyValue <= static_cast<int32_t>(NG::TextSelectionClearPolicy::POLICY_BEGIN) ||
+        policyValue >= static_cast<int32_t>(NG::TextSelectionClearPolicy::POLICY_END)) {
+        return;
+    }
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto selectOverlayManager = pipelineContext->GetSelectOverlayManager();
+    CHECK_NULL_VOID(selectOverlayManager);
+    auto contentOverlayManager = selectOverlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    contentOverlayManager->SetTextSelectionClearPolicy(static_cast<NG::TextSelectionClearPolicy>(policyValue));
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1545,6 +1570,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod(
         "setCustomKeyboardContinueFeature",  JSViewContext::JSSetCustomKeyboardContinueFeature);
     JSClass<JSViewContext>::StaticMethod("isEasySplit", JSViewContext::JSIsEasySplit);
+    JSClass<JSViewContext>::StaticMethod("setTextSelectionClearPolicy", JSViewContext::JSSetTextSelectionClearPolicy);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

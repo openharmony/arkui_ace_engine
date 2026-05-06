@@ -14,6 +14,7 @@
  */
 
 #include "core/components/stage/stage_element.h"
+#include "core/event/key_event.h"
 
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"

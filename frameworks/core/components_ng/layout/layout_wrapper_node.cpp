@@ -16,6 +16,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 void LayoutWrapperNode::Update(

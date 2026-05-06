@@ -21,6 +21,12 @@ SRC_PATH       = "./"
 SRC_PATH_PRODUCTION = ""
 
 SRCSTS = \
+	tests/uiplugin_custom_arrays.ts \
+	tests/uipluginAddMonitorWildcards.ts \
+	tests/uipluginSyncMonitor.ts \
+	tests/uipluginMonitor.ts \
+	tests/uipluginMonitorWithWildcard.ts \
+	tests/uipluginMonitorObject.ts \
 	tests/uipluginComputed.ts \
 	tests/uipluginComputedParams.ts \
 	tests/uipluginStateSimple.ts \
@@ -45,7 +51,7 @@ SRCSTS = \
 	base/iFactoryInternal.ts \
 	base/mutableStateMeta.ts \
 	base/observeSingleton.ts \
-    base/observeWrappedArray.ts \
+	base/observeWrappedArray.ts \
 	base/observeWrappedBase.ts \
 	base/observeWrappedDate.ts \
 	base/observeWrappedMap.ts \
@@ -58,14 +64,25 @@ SRCSTS = \
 	\
 	mock/contextConstant.ts \
 	mock/extendableComponent.ts \
-	mock/factoryInternal.ts \
 	mock/ani_storage_mock.ts \
 	mock/env_mock.ts  \
 	mock/interop.ts  \
 	mock/UIContextUtil.ts  \
-	mock/interopStorageV2.ts \
+	mock/customComponent_mock.ts \
+	mock/interop_component_mock.ts \
+	mock/peerNode_mock.ts \
+	mock/aceTrace_mock.ts \
+	mock/ohos_mock.ts \
+	mock/decoratorEnv_mock.ts \
+	mock/koalaui-common.ts \
+	mock/trackedKeyedStateMeta.ts \
 	\
+	remember.ts \
+	mock/factoryInternal.ts \
 	interop/interopStorage.ts \
+	interop/interopBackingValue.ts \
+	interop/interopBinding.ts \
+	mock/interopStorageV2.ts \
 	\
 	decoratorImpl/decoratorBase.ts \
 	decoratorImpl/decoratorComputed.ts \
@@ -86,6 +103,7 @@ SRCSTS = \
 	decoratorImpl/decoratorStorageProp.ts \
 	decoratorImpl/decoratorStoragePropRef.ts \
 	decoratorImpl/decoratorWatch.ts \
+	decoratorImpl/decoratorInteropWatch.ts \
 	\
 	storage/appStorage.ts \
 	storage/appStorageV2.ts \
@@ -94,6 +112,7 @@ SRCSTS = \
 	storage/persistentStorage.ts \
 	storage/storageBase.ts \
 	storage/storageProperty.ts \
+	storage/environment.ts \
 	\
 	tools/stateMgmtDFX.ts \
 	tools/arkts/stateMgmtTool.ts \
@@ -109,7 +128,7 @@ FRAMEWORK_OBJS = $(patsubst ${SRC_PATH}/%.ets,${TARGET_PATH}/%.abc,$(FRAMEWORK_S
 FRAMEWORK_TARGET = ${TARGET_PATH}/framework.abc
 
 # Config entry function of program
-ENTRY          = main::main
+ENTRY          = main.ETSGLOBAL::main
 
 run: $(TARGET)
 	@${LAUNCHER} ${LAUNCH_FLAGS} --panda-files $(TARGET) $(TARGET) ${ENTRY}
@@ -139,9 +158,11 @@ $(FRAMEWORK_TARGET): ${FRAMEWORK_OBJS}
 	@echo "    linking $@ ..."
 	@${LINKER} --output=$@ -- ${FRAMEWORK_OBJS}
 
+build: $(TARGET)
+
 clean:
 	@rm -rf ${TARGET_PATH}
 
 all: run
 
-.PHONY: all clean run framework
+.PHONY: all clean run framework build

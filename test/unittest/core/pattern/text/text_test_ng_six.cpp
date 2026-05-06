@@ -555,7 +555,7 @@ HWTEST_F(TextTestNgSix, IsSupportMenuShare001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->IsSupportMenuShare(), false);
@@ -573,7 +573,7 @@ HWTEST_F(TextTestNgSix, CheckHandleIsVisibleWithTransform001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     OffsetF startPoint(0, 0);
@@ -612,7 +612,7 @@ HWTEST_F(TextTestNgSix, IsPointsInRegion001, TestSize.Level1)
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     std::vector<PointF> points;
@@ -641,7 +641,7 @@ HWTEST_F(TextTestNgSix, CheckHandleCanPaintInHost001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     ASSERT_NE(frameNode->GetGeometryNode(), nullptr);
 
@@ -676,7 +676,7 @@ HWTEST_F(TextTestNgSix, IsTouchAtHandle001, TestSize.Level1)
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);
@@ -725,7 +725,7 @@ HWTEST_F(TextTestNgSix, CheckSwitchToMode001, TestSize.Level1)
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->CheckSwitchToMode(HandleLevelMode::OVERLAY), true);
@@ -1040,7 +1040,7 @@ HWTEST_F(TextTestNgSix, OnHandleLevelModeChanged001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->OnAncestorNodeChanged(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
@@ -1074,7 +1074,7 @@ HWTEST_F(TextTestNgSix, OnHandleLevelModeChanged002, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->OnAncestorNodeChanged(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
@@ -1339,7 +1339,7 @@ HWTEST_F(TextTestNgSix, GetVisibleRect001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     auto parentPattern = AceType::MakeRefPtr<MockNestableScrollContainer>();
     ASSERT_NE(parentPattern, nullptr);
@@ -1380,7 +1380,7 @@ HWTEST_F(TextTestNgSix, GetLocalPointsWithTransform001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->hasTransform_ = true;
@@ -1412,7 +1412,7 @@ HWTEST_F(TextTestNgSix, GetAncestorNodeViewPort001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     auto parentPattern1 = AceType::MakeRefPtr<TextPattern>();
@@ -1437,7 +1437,7 @@ HWTEST_F(TextTestNgSix, IsAcceptResetSelectionEvent001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->IsAcceptResetSelectionEvent(SourceType::MOUSE, TouchType::DOWN), true);
@@ -1460,7 +1460,7 @@ HWTEST_F(TextTestNgSix, RevertLocalPointWithTransform001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     auto parentPattern1 = AceType::MakeRefPtr<TextPattern>();
@@ -1490,7 +1490,7 @@ HWTEST_F(TextTestNgSix, HasUnsupportedTransform001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1634,20 +1634,20 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent004, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
-    // Clear any existing spans
+    // Clear any existing spans.
     textPattern->spans_.clear();
 
-    // Create mixed spans: text + image + text
+    // Create mixed spans: text + image + text.
     auto span1 = AceType::MakeRefPtr<SpanItem>();
     span1->content = u"Text";
     span1->position = 4;
     span1->placeholderIndex = -1;
     span1->spanItemType = SpanItemType::NORMAL;
 
-    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image span
+    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image span.
     span2->content = u" ";
-    span2->position = 5;         // Image takes 1 position
-    span2->placeholderIndex = 0; // placeholderIndex != -1 indicates image/custom span
+    span2->position = 5;         // Image takes 1 position.
+    span2->placeholderIndex = 0; // placeholderIndex != -1 indicates image/custom span.
     span2->spanItemType = SpanItemType::CustomSpan;
 
     auto span3 = AceType::MakeRefPtr<SpanItem>();
@@ -1660,15 +1660,15 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent004, TestSize.Level1)
     textPattern->spans_.push_back(span2);
     textPattern->spans_.push_back(span3);
 
-    // Select including image span
+    // Select including image span.
     auto result1 = textPattern->TextHighlightSelectedContent(0, 10);
     EXPECT_EQ(result1, u"Text After");
 
-    // Select only image span
+    // Select only image span.
     auto result2 = textPattern->TextHighlightSelectedContent(4, 5);
     EXPECT_EQ(result2, u" ");
 
-    // Select from middle of first text to middle of last text (through image)
+    // Select from middle of first text to middle of last text (through image).
     auto result3 = textPattern->TextHighlightSelectedContent(2, 8);
     EXPECT_EQ(result3, u"xt Aft");
 }
@@ -2203,14 +2203,14 @@ HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex003, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     /**
-     * @tc.steps: step1. Set textForDisplay_ to "Line1\nLine2\tLine3"
-     * @tc.expected: The textForDisplay_ is set correctly
+     * @tc.steps: step1. Set textForDisplay_ to "Line1\nLine2\tLine3".
+     * @tc.expected: The textForDisplay_ is set correctly.
      */
     pattern->textForDisplay_ = u"Line1\nLine2\tLine3";
 
     /**
-     * @tc.steps: step2. Call GetSpecifiedContentIndex with "Line" and isFirst=false
-     * @tc.expected: Return vector with three elements [0, 6, 12]
+     * @tc.steps: step2. Call GetSpecifiedContentIndex with "Line" and isFirst=false.
+     * @tc.expected: Return vector with three elements [0, 6, 12].
      */
     auto result = pattern->GetSpecifiedContentIndex("Line", false);
     ASSERT_EQ(result.size(), 3);
@@ -2231,18 +2231,18 @@ HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex004, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     /**
-     * @tc.steps: step1. Set textForDisplay_ to "aaaaa"
-     * @tc.expected: The textForDisplay_ is set correctly
+     * @tc.steps: step1. Set textForDisplay_ to "aaaaa".
+     * @tc.expected: The textForDisplay_ is set correctly.
      */
     pattern->textForDisplay_ = u"你好你好鸭你好你好";
 
     /**
-     * @tc.steps: step2. Call GetSpecifiedContentIndex with "aa" and isFirst=false
-     * @tc.expected: Return vector with elements [0, 2, 4] or [0, 2] depending on algorithm
+     * @tc.steps: step2. Call GetSpecifiedContentIndex with "aa" and isFirst=false.
+     * @tc.expected: Return vector with elements [0, 2, 4] or [0, 2] depending on algorithm.
      */
     auto result = pattern->GetSpecifiedContentIndex("你好", false);
-    // 根据当前算法，会找到位置0, 2, 4
-    // 因为每次找到后pos += content.length()，不会重叠查找
+    // 根据当前算法，会找到位置0, 2, 4.
+    // 因为每次找到后pos += content.length()，不会重叠查找.
     ASSERT_EQ(result.size(), 4);
     EXPECT_EQ(result[0], 0);
     EXPECT_EQ(result[1], 2);

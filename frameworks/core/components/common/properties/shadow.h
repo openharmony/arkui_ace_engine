@@ -105,20 +105,9 @@ public:
         return color_;
     }
 
-    void SetBlurRadius(double blurRadius)
-    {
-        if (blurRadius >= 0.0) {
-            blurRadius_ = blurRadius;
-            isHardwareAcceleration_ = false;
-            return;
-        }
-        blurRadius_ = 0.0;
-    }
+    void SetBlurRadius(double blurRadius);
 
-    double GetBlurRadius() const
-    {
-        return blurRadius_;
-    }
+    double GetBlurRadius() const;
 
     void SetOffset(const Offset& offset)
     {
@@ -235,13 +224,7 @@ public:
         return isFilled_;
     }
 
-    bool IsValid() const
-    {
-        if (isHardwareAcceleration_) {
-            return elevation_ > 0.0f && elevation_ < LIGHT_HEIGHT;
-        }
-        return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
-    }
+    bool IsValid() const;
 
     void AddResource(
         const std::string& key,
@@ -279,7 +262,7 @@ private:
     float lightHeight_ = LIGHT_HEIGHT;
     float lightRadius_ = LIGHT_RADIUS;
     float elevation_ = 0.0f; // Rosen always needs a non-zero elevation.
-    double blurRadius_ = 0.0;
+    double blurRadius_ = -1.0;
     double spreadRadius_ = 0.0;
     Offset offset_;
     Color color_ = Color::BLACK;

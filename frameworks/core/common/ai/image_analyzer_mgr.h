@@ -19,7 +19,6 @@
 #include "image_analyzer_loader.h"
 
 #include "base/utils/macros.h"
-#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 

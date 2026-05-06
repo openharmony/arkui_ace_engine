@@ -25,6 +25,7 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_accessibility_property.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
@@ -159,16 +160,6 @@ public:
         isUserInitiatedBgColor_ = value;
     }
 
-    void IsModifierInitiatedColor(bool value)
-    {
-        isModifierInitiatedColor_ = value;
-    }
-
-    void IsModifierInitiatedBgColor(bool value)
-    {
-        isModifierInitiatedBgColor_ = value;
-    }
-
     bool IsEnableMatchParent() override
     {
         return true;
@@ -227,6 +218,7 @@ private:
     void ReportProgressEvent();
     void OnColorConfigurationUpdate() override;
     void ProcessColorOnColorConfigurationUpdate();
+    void OnThemeScopeUpdateGradientColor();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -255,8 +247,6 @@ private:
     bool isRightToLeft_ = false;
     bool isUserInitiatedColor_ = false;
     bool isUserInitiatedBgColor_ = false;
-    bool isModifierInitiatedColor_ = false;
-    bool isModifierInitiatedBgColor_ = false;
     double reportLastValue_ = 0.0f;
     bool hasVisibleChangeRegistered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);

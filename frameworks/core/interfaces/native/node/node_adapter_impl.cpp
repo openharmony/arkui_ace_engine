@@ -19,7 +19,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/native/error_message_macros.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 
 struct _ArkUINodeAdapter {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::NativeLazyForEachBuilder> builder;
@@ -296,8 +296,7 @@ std::vector<ArkUINodeHandle> UINodeAdapter::GetAllItems()
 namespace OHOS::Ace::NodeAdapter {
 namespace {
 
-void SetNodeAdapterErrorMessageIfNeeded(
-    ArkUI_Int32 errorCode, void* errorInfoPtr, const char* defaultMessage)
+void SetNodeAdapterErrorMessageIfNeeded(ArkUI_Int32 errorCode, const char* defaultMessage)
 {
     if (errorCode == ERROR_CODE_NO_ERROR) {
         return;
@@ -308,7 +307,7 @@ void SetNodeAdapterErrorMessageIfNeeded(
     } else if (errorCode == ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_NO_LISTENER_ERROR) {
         errorMessage = "Node adapter has no listener";
     }
-    SetErrorInfoFromErrorInfoPtr(errorCode, errorInfoPtr, errorMessage);
+    SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(errorCode, errorMessage);
 }
 
 ArkUINodeAdapterHandle Create()
@@ -335,13 +334,13 @@ void Dispose(ArkUINodeAdapterHandle handle)
     delete handle;
 }
 
-ArkUI_Int32 SetTotalNodeCount(ArkUINodeAdapterHandle handle, ArkUI_Uint32 size, void* errorInfoPtr)
+ArkUI_Int32 SetTotalNodeCount(ArkUINodeAdapterHandle handle, ArkUI_Uint32 size)
 {
     if (handle) {
         handle->builder->SetNodeTotalCount(size);
         return ERROR_CODE_NO_ERROR;
     }
-    SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node adapter handle is null");
+    SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node adapter handle is null");
     return ERROR_CODE_PARAM_INVALID;
 }
 
@@ -354,11 +353,10 @@ ArkUI_Uint32 GetTotalNodeCount(ArkUINodeAdapterHandle handle)
 }
 
 ArkUI_Int32 RegisterEventReceiver(
-    ArkUINodeAdapterHandle handle, void* userData, void (*receiver)(ArkUINodeAdapterEvent* event),
-    void* errorInfoPtr)
+    ArkUINodeAdapterHandle handle, void* userData, void (*receiver)(ArkUINodeAdapterEvent* event))
 {
     if (!handle) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node adapter handle is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node adapter handle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     handle->builder->SetUserData(userData);
@@ -375,74 +373,72 @@ void UnregisterEventReceiver(ArkUINodeAdapterHandle handle)
     handle->builder->SetReceiver(nullptr);
 }
 
-ArkUI_Int32 NotifyItemReloaded(ArkUINodeAdapterHandle handle, void* errorInfoPtr)
+ArkUI_Int32 NotifyItemReloaded(ArkUINodeAdapterHandle handle)
 {
     if (!handle) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node adapter handle is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node adapter handle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto errorCode = handle->builder->NotifyItemReloaded();
-    SetNodeAdapterErrorMessageIfNeeded(errorCode, errorInfoPtr, "Failed to reload all items");
+    SetNodeAdapterErrorMessageIfNeeded(errorCode, "Failed to reload all items");
     return errorCode;
 }
 
 ArkUI_Int32 NotifyItemChanged(
-    ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount, void* errorInfoPtr)
+    ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount)
 {
     if (!handle) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node adapter handle is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node adapter handle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto errorCode = handle->builder->NotifyItemChanged(startPosition, itemCount);
-    SetNodeAdapterErrorMessageIfNeeded(errorCode, errorInfoPtr, "Failed to reload item");
+    SetNodeAdapterErrorMessageIfNeeded(errorCode, "Failed to reload item");
     return errorCode;
 }
 
 ArkUI_Int32 NotifyItemRemoved(
-    ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount, void* errorInfoPtr)
+    ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount)
 {
     if (!handle) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node adapter handle is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node adapter handle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto errorCode = handle->builder->NotifyItemRemoved(startPosition, itemCount);
-    SetNodeAdapterErrorMessageIfNeeded(errorCode, errorInfoPtr, "Failed to remove item");
+    SetNodeAdapterErrorMessageIfNeeded(errorCode, "Failed to remove item");
     return errorCode;
 }
 
 ArkUI_Int32 NotifyItemInserted(
-    ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount, void* errorInfoPtr)
+    ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount)
 {
     if (!handle) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node adapter handle is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node adapter handle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto errorCode = handle->builder->NotifyItemInserted(startPosition, itemCount);
-    SetNodeAdapterErrorMessageIfNeeded(errorCode, errorInfoPtr, "Failed to insert item");
+    SetNodeAdapterErrorMessageIfNeeded(errorCode, "Failed to insert item");
     return errorCode;
 }
 
-ArkUI_Int32 NotifyItemMoved(
-    ArkUINodeAdapterHandle handle, ArkUI_Uint32 from, ArkUI_Uint32 to, void* errorInfoPtr)
+ArkUI_Int32 NotifyItemMoved(ArkUINodeAdapterHandle handle, ArkUI_Uint32 from, ArkUI_Uint32 to)
 {
     if (!handle) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node adapter handle is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node adapter handle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto errorCode = handle->builder->NotifyItemMoved(from, to);
-    SetNodeAdapterErrorMessageIfNeeded(errorCode, errorInfoPtr, "Failed to move item");
+    SetNodeAdapterErrorMessageIfNeeded(errorCode, "Failed to move item");
     return errorCode;
 }
 
-ArkUI_Int32 GetAllItem(
-    ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size, void* errorInfoPtr)
+ArkUI_Int32 GetAllItem(ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size)
 {
     if (!handle) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node adapter handle is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node adapter handle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto errorCode = handle->builder->GetAllItem(items, size);
-    SetNodeAdapterErrorMessageIfNeeded(errorCode, errorInfoPtr, "Failed to get all items");
+    SetNodeAdapterErrorMessageIfNeeded(errorCode, "Failed to get all items");
     return errorCode;
 }
 

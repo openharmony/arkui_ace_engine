@@ -71,6 +71,9 @@ public:
     static void SetTextSelectableMode(FrameNode* frameNode, const std::optional<TextSelectableMode>& value);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
         std::function<void()>&& buildFunc, SelectMenuParam& menuParam);
+    static void BindPreviewMenu(FrameNode* frameNode, TextSpanType& spanType, std::function<void()>&& buildFunc,
+        SelectMenuParam& menuParam);
+    static void UnBindPreviewMenu(FrameNode* frameNode);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void ResetSelectionMenuOptions(FrameNode* frameNode);

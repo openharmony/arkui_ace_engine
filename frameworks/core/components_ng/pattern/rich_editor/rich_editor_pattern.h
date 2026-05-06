@@ -177,6 +177,7 @@ struct AutoScrollParam {
     bool showScrollbar = false;
     Offset eventOffset;
     bool isFirstRun_ = true;
+    Axis axis = Axis::NONE;
 };
 enum class RecordType { DEL_FORWARD = 0, DEL_BACKWARD = 1, INSERT = 2, UNDO = 3, REDO = 4, DRAG = 5 };
 enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
@@ -428,8 +429,7 @@ public:
     void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
     int32_t OnInjectionEvent(const std::string& command) override;
     void DeleteBackwardFunction();
-    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, const std::string& value,
-        int32_t start, int32_t end);
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, int32_t start, int32_t end);
     void ReportCommandExecution(int32_t nodeId, const std::string& command);
     void ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position);
     void ReportRichEditorRequestKeyboardEvent(int32_t nodeId);
@@ -579,6 +579,8 @@ public:
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
     struct UpdateSpanStyle GetUpdateSpanStyle();
+    bool HasLpxUnitStyle() const;
+    void UpdateLpxUnitFlag();
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style);
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
@@ -686,8 +688,7 @@ public:
     bool BetweenSelection(const Offset& globalOffset);
     bool InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
-        WindowSizeChangeReason type) override;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     void RequestCustomKeyboardBuilder();
@@ -726,6 +727,7 @@ public:
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTreeMultiThreadExtension() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsAtTop() const override;
@@ -733,6 +735,11 @@ public:
     const RectF& GetTextRect() const override;
     float GetScrollOffset() const;
     RefPtr<ScrollBar> GetScrollControllerBar();
+    void StopScrolling();
+    void ClearAISpanRects();
+    void HandleScrollStart();
+    std::vector<RectF> CalculateSelectedRect(int32_t start, int32_t end);
+    void ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end);
     bool OnScrollCallback(float offset, int32_t source) override;
     void OnScrollEndCallback() override;
     bool IsScrollable() const override;
@@ -877,6 +884,17 @@ public:
 
     std::optional<float> GetLastCaretPos() const;
     void SetLastCaretPos(float lastCaretPos);
+    void SetHorizontalScrolling(bool isHorizontalScrolling);
+    bool GetHorizontalScrolling() const
+    {
+        return isHorizontalScrolling_;
+    }
+    bool IsFreeScrollEnabled() const;
+    RefPtr<RichEditorScrollController> GetScrollController() const;
+    bool HandleHorizontalScroll(bool needUpdateOffset);
+    void RemoveOverlayModifier();
+    void ScheduleDisappearDelayTask();
+    bool IsMouseOverScrollBar(const MouseInfo& info);
     bool IsShortCutBlocked() override;
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
     Color GetScrollBarColor() const;
@@ -1161,6 +1179,8 @@ private:
     void MoveCaretToContentRect(float offset, int32_t source);
     bool IsCaretInContentArea();
     bool IsTextArea() const override;
+    void UpdateRichTextRectOffsetWithPadding();
+    std::optional<PaddingProperty> GetInnerPadding();
     void ProcessInnerPadding();
 
     // ai analysis fun
@@ -1264,6 +1284,7 @@ private:
     void HandleBlurEventReset();
     void ReportComponentChangeEvent();
     void HandleTouchedFingersCount(TouchEventInfo& info);
+    void ClearParagraphCache() override;
     // hostOverlayMod_ is the overlay modifier of rich editor,
     // while overlayMod_ is the overlay modifier of rich editor content node.
     RefPtr<TextOverlayModifier> hostOverlayMod_;
@@ -1378,6 +1399,8 @@ private:
     OffsetF movingHandleOffset_;
     std::vector<TimeStamp> clickInfo_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
+    bool hasLpxUnitStyle_ = false;
+    bool hasPlaceholderLpxUnitStyle_ = false;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
     bool isTouchSelecting_ = false;
@@ -1421,7 +1444,10 @@ private:
     // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     std::unordered_set<int32_t> touchedFingers_;
+    bool isHorizontalScrolling_ = false;
+    bool needResetScrollBar_ = false;
     bool isSingleLineMode_ = false;
+    std::string lastReportSelectionText_ = "";
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

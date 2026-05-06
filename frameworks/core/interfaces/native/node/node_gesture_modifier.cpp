@@ -35,10 +35,12 @@
 #include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/gesture/gesture_model_ng_static.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "interfaces/native/node/node_model.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_drag_modifier.h"
 
@@ -399,6 +401,17 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.inputEventType = ConvertInputEventTypeToArkuiUIInputEventType(info.GetInputEventType());
 }
 
+int32_t GetGestureAttachNodeId(const Gesture* gesture)
+{
+    auto* recognizer = gesture ? reinterpret_cast<const ArkUIGestureRecognizer*>(gesture->GetUserData()) : nullptr;
+    auto* node = recognizer ? reinterpret_cast<ArkUI_Node*>(recognizer->attachNode) : nullptr;
+    if (!node || !node->uiNodeHandle) {
+        return -1;
+    }
+    auto* uiNode = reinterpret_cast<UINode*>(node->uiNodeHandle);
+    return uiNode ? uiNode->GetId() : -1;
+}
+
 int32_t GetPointerEventAction(InputEventType type, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     if (type == InputEventType::AXIS) {
@@ -609,11 +622,11 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
-void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
+void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam, const Gesture* gesture)
 {
     ArkUINodeEvent eventData;
     eventData.kind = GESTURE_ASYNC_EVENT;
-    eventData.nodeId = 0;
+    eventData.nodeId = GetGestureAttachNodeId(gesture);
     eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
     eventData.gestureAsyncEvent.subKind = eventKind;
     eventData.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
@@ -652,27 +665,27 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(gesture);
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_ACCEPT) {
-        auto onActionAccept = [extraParam](GestureEvent& info) {
-            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_START), extraParam);
+        auto onActionAccept = [extraParam, gestureRef](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_START), extraParam, gestureRef);
         };
         gestureRef->SetOnActionId(onActionAccept);
         gestureRef->SetOnActionStartId(onActionAccept);
     }
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_UPDATE) {
-        auto onActionUpdate = [extraParam](GestureEvent& info) {
-            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_UPDATE), extraParam);
+        auto onActionUpdate = [extraParam, gestureRef](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_UPDATE), extraParam, gestureRef);
         };
         gestureRef->SetOnActionUpdateId(onActionUpdate);
     }
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_END) {
-        auto onActionEnd = [extraParam](GestureEvent& info) {
-            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_END), extraParam);
+        auto onActionEnd = [extraParam, gestureRef](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_END), extraParam, gestureRef);
         };
         gestureRef->SetOnActionEndId(onActionEnd);
     }
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_CANCEL) {
-        auto onActionCancel = [extraParam](GestureEvent& info) {
-            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_CANCEL), extraParam);
+        auto onActionCancel = [extraParam, gestureRef](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_CANCEL), extraParam, gestureRef);
         };
         gestureRef->SetOnActionCancelId(onActionCancel);
     }
@@ -713,6 +726,7 @@ void registerGestureEventExt(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
 void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
 
@@ -730,6 +744,11 @@ void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 p
     }
     gesturePtr->SetGestureMask(gestureMask);
     gestureHub->AttachGesture(gesturePtr);
+    GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
+    if (clickEvent) {
+        auto commonClickEvent = clickEvent;
+        gestureHub->SetCommonClickEvent(std::move(commonClickEvent));
+    }
 }
 
 void addGestureToNodeWithRefCountDecrease(
@@ -754,6 +773,11 @@ void addGestureToNodeWithRefCountDecrease(
     }
     gesturePtr->SetGestureMask(gestureMask);
     gestureHub->AttachGesture(gesturePtr);
+    GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
+    if (clickEvent) {
+        auto commonClickEvent = clickEvent;
+        gestureHub->SetCommonClickEvent(std::move(commonClickEvent));
+    }
     // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
     gesturePtr->DecRefCount();
 }
@@ -1009,6 +1033,44 @@ ArkUI_Int32 setInnerGestureParallelTo(ArkUINodeHandle node, void* userData,
         return AceType::Claim(reinterpret_cast<NG::NGGestureRecognizer*>(result->recognizer));
     };
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(parallelInnerGestureTo));
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 setGestureParallelTo(ArkUINodeHandle node, void* userData,
+    ArkUIGestureRecognizer* (*parallelGesture)(ArkUIParallelGestureEvent* event))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (!parallelGesture) {
+        ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
+        return ERROR_CODE_NO_ERROR;
+    }
+    auto parallelGestureTo =
+        [userData, parallelGesture](const RefPtr<NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NGGestureRecognizer>>& others) -> RefPtr<NGGestureRecognizer> {
+        auto* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
+        auto count = static_cast<int32_t>(others.size());
+        ArkUIGestureRecognizer** othersArkUIGestureRecognizer = nullptr;
+        if (count > 0) {
+            othersArkUIGestureRecognizer = new ArkUIGestureRecognizer* [count];
+        }
+        for (auto index = 0; index < count; index++) {
+            othersArkUIGestureRecognizer[index] = NodeModifier::CreateGestureRecognizer(others[index]);
+        }
+        ArkUIParallelGestureEvent parallelGestureEvent;
+        parallelGestureEvent.current = currentArkUIGestureRecognizer;
+        parallelGestureEvent.responseLinkRecognizer = othersArkUIGestureRecognizer;
+        parallelGestureEvent.userData = userData;
+        parallelGestureEvent.count = count;
+        auto* result = parallelGesture(&parallelGestureEvent);
+        if (!result || !result->recognizer) {
+            delete[] othersArkUIGestureRecognizer;
+            return nullptr;
+        }
+        delete[] othersArkUIGestureRecognizer;
+        return AceType::Claim(reinterpret_cast<NG::NGGestureRecognizer*>(result->recognizer));
+    };
+    ViewAbstract::SetShouldRecognizerParallelWith(frameNode, std::move(parallelGestureTo));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1399,6 +1461,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         .setGestureInterrupterToNode = setGestureInterrupterToNode,
         .setGestureInterrupterToNodeWithUserData = setGestureInterrupterToNodeWithUserData,
         .setInnerGestureParallelTo = setInnerGestureParallelTo,
+        .setGestureParallelTo = setGestureParallelTo,
         .setGestureRecognizerEnabled = setGestureRecognizerEnabled,
         .setGestureRecognizerLimitFingerCount = setGestureRecognizerLimitFingerCount,
         .setLongPressGestureAllowableMovement = setLongPressGestureAllowableMovement,

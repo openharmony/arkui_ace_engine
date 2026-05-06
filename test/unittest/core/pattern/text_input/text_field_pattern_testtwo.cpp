@@ -1618,7 +1618,7 @@ HWTEST_F(TextFieldPatternTestTwo, IsCloseKeyboard001, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     auto pipeline = pattern->GetContext();
     ASSERT_NE(pipeline, nullptr);
-    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     EXPECT_FALSE(pattern->IsCloseKeyboard(textFieldManager));
 }
 } // namespace OHOS::Ace::NG

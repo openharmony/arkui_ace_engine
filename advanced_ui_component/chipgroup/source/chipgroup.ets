@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,8 @@ import {
   PrefixIconOptions,
   SuffixIconOptions
 } from '@ohos.arkui.advanced.Chip';
+import uiMaterial from '@ohos.arkui.uiMaterial';
+import deviceInfo from '@ohos.deviceInfo';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -208,8 +210,9 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
 
 @Component
 export struct IconGroupSuffix {
-  @Consume chipSize: ChipSize | SizeOptions;
+  @Consume chipSize: ChipSize | SizeOptions = ChipSize.NORMAL;
   @Prop items: Array<IconItemOptions | SymbolGlyphModifier | SymbolItemOptions> = [];
+  @Prop iconBackgroundSystemMaterial?: uiMaterial.Material;
   symbolEffect: SymbolEffect = new SymbolEffect();
 
   private getBackgroundSize(): number {
@@ -223,8 +226,8 @@ export struct IconGroupSuffix {
   private getIconSize(val?: Length): Length {
     if (val === undefined) {
       return this.chipSize === ChipSize.SMALL ?
-      iconGroupSuffixTheme.smallIconSize :
-      iconGroupSuffixTheme.normalIconSize;
+        iconGroupSuffixTheme.smallIconSize :
+        iconGroupSuffixTheme.normalIconSize;
     }
     let value: Length;
     if (this.chipSize === ChipSize.SMALL) {
@@ -258,7 +261,8 @@ export struct IconGroupSuffix {
       .focusable(true)
   }
 
-  build() {
+  @Builder
+  IconButtonsBuilder(material: uiMaterial.Material | undefined) {
     Row({ space: 8 }) {
       ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions) => {
         Button() {
@@ -283,6 +287,7 @@ export struct IconGroupSuffix {
         })
         .backgroundColor(iconGroupSuffixTheme.backgroundColor)
         .borderRadius(iconGroupSuffixTheme.borderRadius)
+        .systemMaterial(material)
         .accessibilityText(this.getAccessibilityText(suffixItem))
         .accessibilityDescription(this.getAccessibilityDescription(suffixItem))
         .accessibilityLevel(this.getAccessibilityLevel(suffixItem))
@@ -291,8 +296,22 @@ export struct IconGroupSuffix {
             suffixItem.action();
           }
         })
-        .borderRadius(iconGroupSuffixTheme.borderRadius)
       })
+    }
+  }
+
+  build() {
+    if (deviceInfo.sdkApiVersion >= 26) {
+      if (enableEffectComponent(this.iconBackgroundSystemMaterial)) {
+        EffectComponent() {
+          this.IconButtonsBuilder(createSubECMaterial(this.iconBackgroundSystemMaterial))
+        }
+        .systemMaterial(createECMaterial(this.iconBackgroundSystemMaterial))
+      } else {
+        this.IconButtonsBuilder(this.iconBackgroundSystemMaterial)
+      }
+    } else {
+      this.IconButtonsBuilder(undefined)
     }
   }
 
@@ -329,9 +348,11 @@ export struct ChipGroup {
   @Prop @Watch('onItemsChange') items: ChipGroupItemOptions[] = [];
   @Prop @Watch('itemStyleOnChange') itemStyle: ChipItemStyle = defaultTheme.itemStyle;
   @Provide chipSize: ChipSize | SizeOptions = defaultTheme.itemStyle.size;
+  @Provide inGroup: boolean = true;
   @Prop selectedIndexes: Array<number> = [0];
   @Prop @Watch('onMultipleChange') multiple: boolean = false;
   @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace;
+  @Prop backgroundSystemMaterial?: uiMaterial.Material = undefined;
   @BuilderParam suffix?: Callback<void>;
   public onChange: Callback<Array<number>> = noop;
   private scroller: Scroller = new Scroller();
@@ -559,65 +580,85 @@ export struct ChipGroup {
     }
   }
 
+  @Builder
+  ChipItemsBuilder(material: uiMaterial.Material | undefined) {
+    Row({ space: this.getChipGroupItemSpace() }) {
+      ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
+        if (chipItem) {
+          Chip({
+            prefixIcon: this.getPrefixIcon(chipItem),
+            prefixSymbol: chipItem?.prefixSymbol,
+            label: {
+              text: chipItem?.label?.text ?? ' ',
+              fontColor: this.getFontColor(),
+              activatedFontColor: this.getSelectedFontColor(),
+            },
+            suffixIcon: this.getSuffixIcon(chipItem),
+            suffixSymbol: chipItem?.suffixSymbol,
+            suffixSymbolOptions: chipItem.suffixSymbolOptions,
+            allowClose: chipItem.allowClose ?? false,
+            closeOptions: chipItem.closeOptions,
+            enabled: true,
+            activated: this.isSelected(index),
+            backgroundColor: this.getBackgroundColor(),
+            backgroundSystemMaterial: createSubECMaterial(this.backgroundSystemMaterial),
+            size: this.getChipSize(),
+            activatedBackgroundColor: this.getSelectedBackgroundColor(),
+            accessibilitySelectedType:
+            this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
+            accessibilityDescription: chipItem.accessibilityDescription,
+            accessibilityLevel: chipItem.accessibilityLevel,
+            onClicked: () => {
+              if (this.isSelected(index)) {
+                if (!(!this.isMultiple())) {
+                  if (this.getSelectedIndexes().length > 1) {
+                    this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
+                  }
+                }
+              } else {
+                if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
+                  this.selectedIndexes = this.getSelectedIndexes();
+                }
+                if (!this.isMultiple()) {
+                  this.selectedIndexes = [];
+                }
+                this.selectedIndexes.push(index);
+              }
+              this.getOnChange()(this.getSelectedIndexes());
+            }
+          })
+        }
+      }, () => {
+        return JSON.stringify(this.isRefresh);
+      });
+    }
+  }
+
   build() {
     Row() {
       Stack() {
         Scroll(this.scroller) {
-          Row({ space: this.getChipGroupItemSpace() }) {
-            ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
-              if (chipItem) {
-                Chip({
-                  prefixIcon: this.getPrefixIcon(chipItem),
-                  prefixSymbol: chipItem?.prefixSymbol,
-                  label: {
-                    text: chipItem?.label?.text ?? ' ',
-                    fontColor: this.getFontColor(),
-                    activatedFontColor: this.getSelectedFontColor(),
-                  },
-                  suffixIcon: this.getSuffixIcon(chipItem),
-                  suffixSymbol: chipItem?.suffixSymbol,
-                  suffixSymbolOptions: chipItem.suffixSymbolOptions,
-                  allowClose: chipItem.allowClose ?? false,
-                  closeOptions: chipItem.closeOptions,
-                  enabled: true,
-                  activated: this.isSelected(index),
-                  backgroundColor: this.getBackgroundColor(),
-                  size: this.getChipSize(),
-                  activatedBackgroundColor: this.getSelectedBackgroundColor(),
-                  accessibilitySelectedType:
-                  this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
-                  accessibilityDescription: chipItem.accessibilityDescription,
-                  accessibilityLevel: chipItem.accessibilityLevel,
-                  onClicked: () => {
-                    if (this.isSelected(index)) {
-                      if (!(!this.isMultiple())) {
-                        if (this.getSelectedIndexes().length > 1) {
-                          this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
-                        }
-                      }
-                    } else {
-                      if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
-                        this.selectedIndexes = this.getSelectedIndexes();
-                      }
-                      if (!this.isMultiple()) {
-                        this.selectedIndexes = [];
-                      }
-                      this.selectedIndexes.push(index);
-                    }
-                    this.getOnChange()(this.getSelectedIndexes());
-                  }
-                })
+          if (deviceInfo.sdkApiVersion >= 26) {
+            if (enableEffectComponent(this.backgroundSystemMaterial)) {
+              EffectComponent() {
+                Row({ space: this.getChipGroupItemSpace() }) {
+                  this.ChipItemsBuilder(createSubECMaterial(this.backgroundSystemMaterial))
+                }
               }
-            }, () => {
-              return JSON.stringify(this.isRefresh);
-            });
+              .systemMaterial(createECMaterial(this.backgroundSystemMaterial))
+            } else {
+              this.ChipItemsBuilder(this.backgroundSystemMaterial)
+            }
+
+          } else {
+            this.ChipItemsBuilder(undefined)
           }
-          .padding({
-            left: this.getChipGroupStartSpace(),
-            right: this.getChipGroupEndSpace()
-          })
-          .constraintSize({ minWidth: '100%' })
         }
+        .padding({
+          left: this.getChipGroupStartSpace(),
+          right: this.getChipGroupEndSpace()
+        })
+        .constraintSize({ minWidth: '100%' })
         .scrollable(ScrollDirection.Horizontal)
         .scrollBar(BarState.Off)
         .align(Alignment.Start)
@@ -682,5 +723,49 @@ export struct ChipGroup {
       fillColor: this.getFillColor(),
       activatedFillColor: this.getSelectedFillColor()
     };
+  }
+}
+
+function enableEffectComponent(material: uiMaterial.Material | undefined) {
+  return false;
+}
+
+function createECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
+  return undefined;
+}
+
+function createSubECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
+  return material;
+}
+
+
+@Preview
+@Component
+struct ChipGroupExample {
+  @LocalBuilder
+  suffix() {
+    IconGroupSuffix({
+      items: [{
+        icon: { src: $r('sys.media.ohos_ic_public_add') },
+        action: () => {
+          this.getUIContext().getPromptAction().showToast({
+            message: '后缀图标被点击'
+          })
+        }
+      }]
+    })
+  }
+
+  build() {
+    ChipGroup({
+      items: [
+        { label: { text: '选项A' } },
+        { label: { text: '选项B' } },
+        { label: { text: '选项C' } },
+        { label: { text: '选项D' } },
+        { label: { text: '选项E' } },
+      ],
+      suffix: () => this.suffix()
+    })
   }
 }

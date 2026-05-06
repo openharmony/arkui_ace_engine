@@ -93,6 +93,7 @@
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -387,10 +388,7 @@ void* createTimePickerNode(ArkUI_Int32 nodeId)
 {
     auto* modifier = NG::NodeModifier::GetTimepickerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
-    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createFrameNode(nodeId)));
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createTextPickerNode(ArkUI_Int32 nodeId)
@@ -405,10 +403,7 @@ void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 {
     auto modifier = NodeModifier::GetCalendarPickerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
-    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->jsCreateById(nodeId)));
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return modifier->jsCreateById(nodeId);
 }
 
 void* createContainerPickerNode(ArkUI_Int32 nodeId)
@@ -439,20 +434,14 @@ void* createWaterFlowNode(ArkUI_Int32 nodeId)
 {
     auto* modifier = NG::NodeModifier::GetWaterFlowModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
-    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createWaterFlow(nodeId)));
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return modifier->createWaterFlow(nodeId);
 }
 
 void* createFlowItemNode(ArkUI_Int32 nodeId)
 {
     auto* modifier = NG::NodeModifier::GetWaterFlowItemModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
-    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createFlowItem(nodeId)));
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return modifier->createFlowItem(nodeId);
 }
 
 void* createCircleNode(ArkUI_Int32 nodeId)
@@ -570,12 +559,7 @@ void* createRadioNode(ArkUI_Int32 nodeId)
 {
     auto arkUIRadioModifier = NG::NodeModifier::GetRadioModifier();
     CHECK_NULL_RETURN(arkUIRadioModifier, nullptr);
-    auto arkUINodeHandle = arkUIRadioModifier->createFrameNode(nodeId);
-    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
-    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return frameNode;
+    return arkUIRadioModifier->createFrameNode(nodeId);
 }
 
 void* createSelectNode(ArkUI_Int32 nodeId)

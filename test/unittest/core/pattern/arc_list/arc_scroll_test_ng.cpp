@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
+
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 
@@ -228,9 +229,6 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg005, TestSize.Level1)
     CreateScroll();
     CreateContent();
     CreateScrollDone();
-    GestureEvent info;
-    info.SetMainDelta(10.f);
-    pattern_->HandleDragUpdate(info);
     FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, 0);
     auto scrollBar = AceType::MakeRefPtr<ArcScrollBar>();
@@ -238,6 +236,7 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg005, TestSize.Level1)
     EXPECT_FALSE(scrollBar->isDriving_);
     EXPECT_EQ(scrollBar->CalcPatternOffset(ARC_LIST_ITER_SCALE), 0.92f);
 
+    GestureEvent info;
     info.SetMainDelta(10.f);
     auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
     scrollable->HandleDragUpdate(info);
@@ -528,8 +527,7 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg013, TestSize.Level1)
     EXPECT_EQ(modifer.backgroundStartAngle_->Get(), 5);
     EXPECT_EQ(modifer.backgroundSweepAngle_->Get(), 5);
     modifer.SetScrollable(true);
-    modifer.StartArcBarAnimation(HoverAnimationType::NONE,
-        OpacityAnimationType::APPEAR, true, arcBarRect, arcBarRect);
+    modifer.StartArcBarAnimation(HoverAnimationType::NONE, OpacityAnimationType::APPEAR, true, arcBarRect, arcBarRect);
     EXPECT_EQ(modifer.backgroundStrokeWidth_->Get(), 5);
 }
 

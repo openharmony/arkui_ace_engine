@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 

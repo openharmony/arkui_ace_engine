@@ -72,7 +72,7 @@ abstract class ViewPU extends PUV2ViewBase
   private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
 
   private recycleManager_: RecycleManager = undefined;
-  private myReusePool__ : __ReusePool  | undefined;
+  private myReusePool__ : __ReusePool_Internal__  | undefined;
 
   public hasBeenRecycled_: boolean = false;
 
@@ -354,6 +354,13 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
     PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
     PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
+
+    if (this.__anonymousEnvMonitorFuncMap__Internal) {
+      this.__anonymousEnvMonitorFuncMap__Internal.forEach((entry, key) => {
+        ObserveV2.getObserve().clearMonitorPath(entry.envValue, simpleEnvMetaMap[key].prop, entry.anonymousMonitorFunc);
+      });
+      this.__anonymousEnvMonitorFuncMap__Internal.clear();
+    }
     // if memory watch register the callback func, then report such information to memory watch
     // when custom node destroyed
     if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
@@ -434,11 +441,26 @@ abstract class ViewPU extends PUV2ViewBase
  */
   public setActiveInternal(active: boolean, isReuse = false): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
-    if (this.isCompFreezeAllowed()) {
+    const isCompFreezeAllowed = this.isCompFreezeAllowed();
+    if (!isCompFreezeAllowed && this.__needToActiveOrInactiveLifecycle__Internal) {
+      // Non-freeze state: use __activeCountForNonFreeze__Internal
+      // Only execute when @Active/@Inactive decorator is used for performance
+      const oldCount = this.__activeCountForNonFreeze__Internal;
+      this.setActiveCountForNonFreeze(active);
+      this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount);
+    }
+    if (isCompFreezeAllowed) {
+      const oldCount = this.activeCount_;
       this.setActiveCount(active);
       if (this.isViewActive()) {
+        if (oldCount === 0 && this.activeCount_ > 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+          this.__needToExecuteActive__Internal = true;
+        }
         this.onActiveInternal();
       } else {
+        if (oldCount > 0 && this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+          this.__needToExecuteInactive__Internal = true;
+        }
         this.onInactiveInternal();
       }
     }
@@ -463,6 +485,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.performDelayedUpdate();
     // Remove the active component from the Map for Dfx
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+    if (this.__needToExecuteActive__Internal && this.__needToActiveOrInactiveLifecycle__Internal) {
+      this.__customComponentExecuteActive__Internal();
+      this.__needToExecuteActive__Internal = false;
+    }
   }
 
 
@@ -474,6 +500,10 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: onInactiveInternal`);
     for (const stateLinkProp of this.ownObservedPropertiesStore_) {
       stateLinkProp.enableDelayedNotification();
+    }
+    if (this.__needToExecuteInactive__Internal && this.__needToActiveOrInactiveLifecycle__Internal) {
+      this.__customComponentExecuteInactive__Internal();
+      this.__needToExecuteInactive__Internal = false;
     }
     // Add the inactive Components to Map for Dfx listing
     ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
@@ -1181,17 +1211,17 @@ abstract class ViewPU extends PUV2ViewBase
       recycleUpdateFunc(element, isFirstRender, undefined, false);
     };
 
-    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const globalPool = this.__isGlobalPoolActive ? this.getReusePoolInternal(componentClass) : undefined;
     // In aliasing cases, matching reuseId strings alone can cause duplicates,
     // so we use the constructor reference to uniquely store/retrieve pool keys.
     if (globalPool && componentClass && (!name || name === componentClass.name)) {
-      __ReusePool.registerCtorName(componentClass, name);
+      __ReusePool_Internal__.registerCtorName(componentClass, name);
     }
 
     // PRE-RENDER mode: queue for later creation
     const preRenderPool = ViewPU.getCurrentPreRenderPool();
     if (preRenderPool) {
+      const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
       stateMgmtConsole.debug(`${this.debugInfo__()} [PreRender] Active..Creating pre-render instance for ${componentClass.name}`);
       ObserveV2.getObserve().queuePreRenderCreation(this, componentClass, {}, newElmtId, preRenderPool, name);
       return;
@@ -1221,7 +1251,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.observeComponentCreation(compilerAssignedUpdateFunc);
       return;
     }
-
+    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     let recycleElmtId: number;
 

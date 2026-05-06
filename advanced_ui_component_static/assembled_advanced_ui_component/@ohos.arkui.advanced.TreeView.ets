@@ -1409,9 +1409,7 @@ export struct TreeView {
           let eventInfo = new accessibility.EventInfo('requestFocusForAccessibility', bundleName as string, 'common')
           eventInfo.customId = `treeView_node_lift${currentItemNodeId}`
           try {
-            waitForCompletion(async () => {
-              await accessibility.sendAccessibilityEvent(eventInfo);
-            });
+            accessibility.sendAccessibilityEvent(eventInfo).awaitSync();
             setTimeout(() => {
               this.accessibilityNodeType = AccessibilityNodeType.TEXT;
             }, ENTER_EXIT_DURATION)
@@ -1651,9 +1649,7 @@ export struct TreeView {
       let eventInfo = new accessibility.EventInfo('requestFocusForAccessibility', bundleName as string, 'common')
       eventInfo.customId = `treeView_node${draggingCurrentNodeId}`
       try {
-        waitForCompletion(async () => {
-          await accessibility.sendAccessibilityEvent(eventInfo);
-        });
+        accessibility.sendAccessibilityEvent(eventInfo).awaitSync();
         setTimeout(() => {
           this.accessibilityNodeType = AccessibilityNodeType.TEXT;
         }, ENTER_EXIT_DURATION);
@@ -2249,7 +2245,7 @@ function delayUpdateParentChildNum(isAdd: boolean, count: int,
       updateParentChildNumHandler(parentNodeId, nodeIdNodeItemMap, isAdd, count);
     });
     clearTimeout(Double.toInt(taskId));
-  }, DELAY_TIME);
+  }, DELAY_TIME).toDouble();
 }
 
 /**
@@ -2509,7 +2505,7 @@ export class ListNodeDataSource extends BasicDataSource {
       this.notifyDataReload();
       return;
     }
-    let childNum: int[] | null = new Array<int>(this.listNode[thisIndex.toInt()].getChildNodeInfo().childNum);
+    let childNum: int[] | null = Array.create<int>(this.listNode[thisIndex].getChildNodeInfo().childNum, 0);
     childNum[0] = thisIndex + 1;
     let index: int = 1;
     while (index < this.listNode[thisIndex].getChildNodeInfo().childNum) {
@@ -2606,11 +2602,11 @@ export class ListNodeDataSource extends BasicDataSource {
       this.listNode.splice(0, this.listNode.length);
       this.listNode.push(...listNode);
       this.listNode.forEach((value, index) => {
-        this.notifyDataDelete(index);
+        this.notifyDataDelete(index.toDouble());
         this.notifyDataAdd(index as int);
       });
       clearTimeout(Double.toInt(timeId));
-    }, DELAY_TIME);
+    }, DELAY_TIME).toDouble();
   }
 
   /**
@@ -3564,7 +3560,7 @@ export class ListNodeDataSource extends BasicDataSource {
       (node: NodeItem, listNode: NodeInfo[]): boolean => {
         if (node) {
           parentNodeId = node.parentNodeId;
-          currentNodeId = node.currentNodeId;
+          currentNodeId = node.currentNodeId.toDouble();
           for (let i: int = 0; i < listNode.length; i++) {
             if (listNode[i].getNodeCurrentNodeId() === currentNodeId) {
               nodeInfo = listNode[i];
@@ -3603,7 +3599,7 @@ export class ListNodeDataSource extends BasicDataSource {
       this.listNode.forEach((value) => {
         if (value.getNodeCurrentNodeId() === rearCurrentNodeId && value.getCanShowFlagLine() === false) {
           if (value.getNodeInfoNode().children.length) {
-            insertCurrentNodeId = value.getNodeInfoNode().children[0].currentNodeId;
+            insertCurrentNodeId = value.getNodeInfoNode().children[0].currentNodeId.toDouble();
           } else {
             insertCurrentNodeId = this.INITIAL_INVALID_VALUE;
           }
@@ -3739,7 +3735,7 @@ export class ListNodeDataSource extends BasicDataSource {
       if (node.getCurrentNodeId() === rearParentNodeId) {
         node.children.forEach((value, index) => {
           if (value.getCurrentNodeId() === rearCurrentNodeId) {
-            insertChildIndex = index;
+            insertChildIndex = index.toDouble();
             return;
           }
         })
@@ -4245,10 +4241,9 @@ export class ListNodeDataSource extends BasicDataSource {
       if (parent.children.length === 0) {
         return [];
       } else if (parent.children.length > 0) {
-        let childrenNodeInfo: NodeInfoView[] = new Array<NodeInfoView>(parent.children.length);
-        for (let i: int = 0; i < childrenNodeInfo.length; i++) {
-          childrenNodeInfo[i] = {};
-        }
+        let childrenNodeInfo: NodeInfoView[] = new Array<NodeInfoView>(parent.children.length, () => {
+          return {} as NodeInfoView;
+        });
         for (let i: int = 0; i < parent.children.length && i < childrenNodeInfo.length; i++) {
           childrenNodeInfo[i].itemId = parent.children[i].currentNodeId;
           let nodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent.children[i]);

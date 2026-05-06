@@ -19,6 +19,7 @@
 
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/udmf/udmf_client.h"
@@ -30,6 +31,7 @@
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"
 #include "base/image/pixel_map.h"
+#include "core/event/key_code.h"
 #endif
 namespace OHOS::Ace::NG {
 void SetDragData(ani_ref event, ani_ref data)

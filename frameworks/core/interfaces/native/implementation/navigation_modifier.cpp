@@ -64,7 +64,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 } // namespace NavigationModifier
 
 namespace NavigationInterfaceModifier {
-void SetNavigationOptions0Impl(Ark_NativePointer node,
+void SetNavigationOptions0Impl(Ark_VMContext vmContext,
+                               Ark_NativePointer node,
                                const Opt_NavPathStack* pathInfos,
                                const Opt_NavigationModuleInfo* moduleInfo)
 {
@@ -82,7 +83,8 @@ void SetNavigationOptions0Impl(Ark_NativePointer node,
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
 }
-void SetNavigationOptions1Impl(Ark_NativePointer node,
+void SetNavigationOptions1Impl(Ark_VMContext vmContext,
+                               Ark_NativePointer node,
                                const Opt_NavPathStack* pathInfos,
                                const Opt_HomePathInfo* homeDestination,
                                const Opt_NavigationModuleInfo* moduleInfo)

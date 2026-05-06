@@ -55,6 +55,7 @@ public:
     void SetCapsuleStyle(bool value) override {};
     void SetGradientColorByUser(bool value) override {};
     void SetBorderColorSetByUser(bool value) override {};
+    void ResetBorderColor() override {};
 };
 
 } // namespace OHOS::Ace::Framework

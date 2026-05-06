@@ -35,7 +35,9 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+constexpr int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 constexpr float DEFAULT_GRADIENT_ANGLE = 180.0f;
 const std::map<std::string, Ace::SymbolGradientType> SYMBOL_SHADER_TYPE_MAP = {
@@ -633,15 +635,43 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontWeight(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsString(vm)) {
         std::string weight = secondArg->ToString(vm)->ToString(vm);
-        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontWeightStr(nativeNode, weight.c_str());
+        auto parseResult = Framework::ParseFontWeight(weight);
+        int32_t variableFontWeight;
+        FontWeight fontWeightEnum = parseResult.second;
+        if (parseResult.first) {
+            variableFontWeight = Framework::GetFontWeightNumericValue(parseResult.second);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontWeightEnum(
+            nativeNode, static_cast<int32_t>(fontWeightEnum));
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setVariableFontWeight(nativeNode, variableFontWeight);
     } else if (secondArg->IsNumber()) {
-        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontWeight(nativeNode, secondArg->Int32Value(vm));
+        int32_t weightNum = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontWeight(nativeNode, weightNum);
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setVariableFontWeight(nativeNode, weightNum);
     } else {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetFontWeight(nativeNode);
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetVariableFontWeight(nativeNode);
+    }
+    if (!thirdArg->IsNull() && !thirdArg->IsUndefined() && thirdArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setEnableVariableFontWeight(nativeNode,
+            thirdArg->ToBoolean(vm)->Value());
+    } else {
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetEnableVariableFontWeight(nativeNode);
+    }
+    if (!fourthArg->IsNull() && !fourthArg->IsUndefined() && fourthArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setEnableDeviceFontWeightCategory(nativeNode,
+            fourthArg->ToBoolean(vm)->Value());
+    } else {
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetEnableDeviceFontWeightCategory(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

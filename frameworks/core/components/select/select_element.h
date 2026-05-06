@@ -17,8 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SELECT_SELECT_ELEMENT_H
 
 #include "core/common/container.h"
-#include "core/components/text/text_component.h"
 #include "core/pipeline/base/sole_child_element.h"
+
+namespace OHOS::Ace {
+class TextComponent;
+class Component;
+class RenderNode;
+class Animator;
+template<typename T>
+class KeyframeAnimation;
+}
 
 namespace OHOS::Ace {
 

@@ -20,7 +20,10 @@
 #include <optional>
 
 #include "core/components_ng/pattern/grid/grid_item_constants.h"
+#include "core/components_ng/pattern/grid/grid_item_drag_manager.h"
+#include "core/components_ng/pattern/grid/grid_item_model.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
+#include "core/components_ng/syntax/for_each_base_node.h"
 
 namespace OHOS::Ace {
 class Color;
@@ -32,9 +35,7 @@ class GridItemEventHub;
 class GridItemLayoutAlgorithm;
 class GridItemLayoutProperty;
 class InspectorFilter;
-class InputEvent;
 class ShallowBuilder;
-class TouchEventImpl;
 
 class ACE_EXPORT GridItemPattern : public SelectableItemPattern {
     DECLARE_ACE_TYPE(GridItemPattern, SelectableItemPattern);
@@ -62,6 +63,7 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
+        SelectableItemPattern::OnDirtyLayoutWrapperSwap(dirty, config);
         return false;
     }
 
@@ -77,16 +79,12 @@ public:
         return forceRebuild_;
     }
 
-    bool Selectable() const
-    {
-        return selectable_;
-    }
-
     FocusPattern GetFocusPattern() const override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void MarkIsSelected(bool isSelected);
+    void MarkIsSelectedWithoutCheckbox(bool isSelected) override;
 
     void SetIrregularItemInfo(GridItemIndexInfo info)
     {
@@ -103,6 +101,22 @@ public:
     void ResetGridItemInfo()
     {
         irregularItemInfo_.reset();
+    }
+
+    void InitDragManager(RefPtr<ForEachBaseNode> forEach)
+    {
+        if (!dragManager_) {
+            dragManager_ = MakeRefPtr<GridItemDragManager>(GetHost(), forEach);
+            dragManager_->InitDragDropEvent();
+        }
+    }
+
+    void DeInitDragManager()
+    {
+        if (dragManager_) {
+            dragManager_->DeInitDragDropEvent();
+            dragManager_ = nullptr;
+        }
     }
 
     void UpdateGridItemStyle(GridItemStyle gridItemStyle);
@@ -151,15 +165,11 @@ private:
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;
-    bool selectable_ = true;
 
-    RefPtr<InputEvent> hoverEvent_;
-    RefPtr<TouchEventImpl> touchListener_;
-    bool isHover_ = false;
-    bool isPressed_ = false;
     bool isFocusBorderColorInitialized_ = false;
     GridItemStyle gridItemStyle_ = GridItemStyle::NONE;
     std::optional<GridItemIndexInfo> irregularItemInfo_;
+    RefPtr<GridItemDragManager> dragManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridItemPattern);
 };

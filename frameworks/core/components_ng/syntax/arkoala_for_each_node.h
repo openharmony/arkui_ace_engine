@@ -42,7 +42,7 @@ public:
 
     // used for drag move operation.
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
-    void MoveData(int32_t from, int32_t to) final;
+    void MoveData(int32_t from, int32_t to, bool isNeedUpdate = false) final;
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void SetItemDragEvent(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
         std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);

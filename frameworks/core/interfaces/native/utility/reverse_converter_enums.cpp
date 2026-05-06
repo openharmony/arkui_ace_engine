@@ -794,6 +794,7 @@ void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src)
         case Ace::SpanType::LetterSpacing: dst = ARK_STYLED_STRING_KEY_LETTER_SPACING; break;
         case Ace::SpanType::TextShadow: dst = ARK_STYLED_STRING_KEY_TEXT_SHADOW; break;
         case Ace::SpanType::LineHeight: dst = ARK_STYLED_STRING_KEY_LINE_HEIGHT; break;
+        case Ace::SpanType::LineSpacing: dst = ARK_STYLED_STRING_KEY_LINE_SPACING; break;
         case Ace::SpanType::BackgroundColor: dst = ARK_STYLED_STRING_KEY_BACKGROUND_COLOR; break;
         case Ace::SpanType::Url: dst = ARK_STYLED_STRING_KEY_URL; break;
         case Ace::SpanType::Gesture: dst = ARK_STYLED_STRING_KEY_GESTURE; break;
@@ -1173,6 +1174,18 @@ void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src)
         case MenuPolicy::HIDE: dst = ARK_MENU_POLICY_HIDE; break;
         case MenuPolicy::SHOW: dst = ARK_MENU_POLICY_SHOW; break;
         default: dst = static_cast<Ark_MenuPolicy>(-1);
+    }
+}
+
+void AssignArkValue(Ark_DragAnimationType& dst, const DragAnimationType& src)
+{
+    switch (src) {
+        case DragAnimationType::DEFAULT: dst = ARK_DRAG_ANIMATION_TYPE_DEFAULT; break;
+        case DragAnimationType::FOLLOW_HAND_MORPH: dst = ARK_DRAG_ANIMATION_TYPE_FOLLOW_HAND_MORPH; break;
+        default:
+            dst = static_cast<Ark_DragAnimationType>(-1);
+            LOGE("Unexpected enum value in DragAnimationType: %{public}d", src);
+            break;
     }
 }
 

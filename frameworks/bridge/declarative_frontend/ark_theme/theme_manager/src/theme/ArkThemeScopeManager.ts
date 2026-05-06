@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+/// <reference path='../../types/theme.d.ts' />
+
 /**
  * Used to measure theme scopes for the application components
  */
@@ -129,7 +131,7 @@ class ArkThemeScopeManager {
                 scope.addComponentToScope(elmtId, ownerComponent, componentName);
             } else {
                 // keep component to the same scope as is used by CustomComponen that defines component
-                const parentScope = ownerComponent.themeScope_;
+                const parentScope = this.resolveParentScope(ownerComponent.themeScope_, this.themeScopes);
                 if (parentScope) {
                     scope = parentScope;
                     scope.addComponentToScope(elmtId, ownerComponent, componentName);
@@ -526,7 +528,7 @@ class ArkThemeScopeManager {
         this.defaultTheme.bindToScope(0);
 
         // keep for backward compatibility
-        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0); // 0 means default Theme scope id
+        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0, !!cloneTheme?.darkColors); // 0 means default Theme scope id
         // new approach to apply theme in native side
         ArkThemeNativeHelper.setDefaultTheme(cloneTheme);
 

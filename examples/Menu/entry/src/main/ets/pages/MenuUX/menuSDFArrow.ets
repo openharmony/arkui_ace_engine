@@ -19,6 +19,11 @@ const testList1: PageClass[] = [
   new PageClass('自定义全量Case', 'pages/MenuUX/SDFArrow/totalCase', 'totalCase'),
   new PageClass('避让软键盘', 'pages/MenuUX/SDFArrow/avoidKeyboardCase', 'avoidKeyboard'),
   new PageClass('隐式动画场景', 'pages/MenuUX/SDFArrow/animationCase', 'animationCase'),
+  new PageClass('边界检测场景', 'pages/MenuUX/SDFArrow/boundaryCase', 'boundaryCase'),
+  new PageClass('响应式布局场景', 'pages/MenuUX/SDFArrow/responsiveCase', 'responsiveCase'),
+  new PageClass('多菜单场景', 'pages/MenuUX/SDFArrow/multiMenuCase', 'multiMenuCase'),
+  new PageClass('交互事件场景', 'pages/MenuUX/SDFArrow/interactionCase', 'interactionCase'),
+  new PageClass('深色/浅色模式场景', 'pages/MenuUX/SDFArrow/themeCase', 'themeCase'),
 ]
 
 @Entry

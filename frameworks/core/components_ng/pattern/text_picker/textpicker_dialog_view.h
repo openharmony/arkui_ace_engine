@@ -98,10 +98,10 @@ private:
         const RefPtr<PipelineContext>& pipeline);
     static void UpdateButtonBackwardLayoutProperty(const RefPtr<FrameNode>& buttonCancelNode,
         const RefPtr<PipelineContext>& pipeline);
-    static void UpdateConfirmButtonTextLayoutProperty(
-        const RefPtr<FrameNode>& textConfirmNode, const RefPtr<PickerTheme>& pickerTheme);
-    static void UpdateCancelButtonTextLayoutProperty(
-        const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateConfirmButtonTextLayoutProperty(const RefPtr<FrameNode> &textConfirmNode,
+        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<FrameNode> &buttonConfirmNode);
+    static void UpdateCancelButtonTextLayoutProperty(const RefPtr<FrameNode> &textCancelNode,
+        const RefPtr<PickerTheme> &pickerTheme, const RefPtr<FrameNode> &buttonCancelNode);
     static void UpdateForwardButtonTextLayoutProperty(
         const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateBackwardButtonTextLayoutProperty(
@@ -147,6 +147,7 @@ private:
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();
     static bool NeedAdaptForAging();
+    static bool IsEnableFallbackLineSpacingStyleOptimize();
     static void SetTextDisappearProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
     static void SetTextNormalProperties(const RefPtr<PickerTheme>& pickerTheme,

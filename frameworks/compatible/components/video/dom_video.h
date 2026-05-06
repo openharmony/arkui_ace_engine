@@ -18,7 +18,6 @@
 
 #include "compatible/components/video/video_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
-#include "frameworks/core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace::Framework {
 extern const char DOM_VIDEO_MUTED[];

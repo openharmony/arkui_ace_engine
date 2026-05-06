@@ -734,23 +734,23 @@ HWTEST_F(LayoutPropertyTestNgTwo, ExpandConstraintWithSafeAreaTest001, TestSize.
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), false);
     layoutProperty->SetHost(frameNodeHost);
-    layoutProperty->ExpandConstraintWithSafeArea();
+    layoutProperty->ExpandConstraintWithSafeArea(frameNodeHost);
 
     layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
     layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_SYSTEM;
     layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_ALL;
     layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
     layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
-    layoutProperty->ExpandConstraintWithSafeArea();
+    layoutProperty->ExpandConstraintWithSafeArea(frameNodeHost);
 
     frameNodeHost->SetIgnoreLayoutProcess(true);
     frameNodeHost->SetRootMeasureNode(true);
     frameNodeHost->SetEscapeDelayForIgnore(true);
-    layoutProperty->ExpandConstraintWithSafeArea();
+    layoutProperty->ExpandConstraintWithSafeArea(frameNodeHost);
 
     auto parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
     frameNodeHost->MountToParent(parent);
-    layoutProperty->ExpandConstraintWithSafeArea();
+    layoutProperty->ExpandConstraintWithSafeArea(frameNodeHost);
 
     EXPECT_EQ(frameNodeHost->GetIgnoreLayoutProcess(), true);
 }
@@ -813,7 +813,8 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest01, TestSize.Leve
         .scaleProperty = {.vpScale = 1.0, .fpScale = 1.0, .lpxScale = 1.0},
         .percentReference = { 100, 100 }
     };
-    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    auto host = layoutProperty->GetHost();
+    layoutProperty->CheckCalcLayoutConstraint(host, parentConstraint);
     /**
      * @tc.expected: layoutConstraint_ has correct maxSize, minSize and selfIdealSize.
      *               calcLayoutConstraint_ has cache for minSize, maxSize and selfIdealSize
@@ -861,7 +862,8 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest02, TestSize.Leve
         .scaleProperty = {.vpScale = 1.0, .fpScale = 1.0, .lpxScale = 1.0},
         .percentReference = { 100, 100 }
     };
-    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    auto host = layoutProperty->GetHost();
+    layoutProperty->CheckCalcLayoutConstraint(host, parentConstraint);
     /**
      * @tc.steps: step2. layoutProperty update new calcConstraint
      */
@@ -871,7 +873,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest02, TestSize.Leve
         .selfIdealSize = CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")),
     };
     layoutProperty->UpdateCalcLayoutProperty(userConstraint);
-    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    layoutProperty->CheckCalcLayoutConstraint(host, parentConstraint);
     /**
      * @tc.expected: layoutConstraint_ has correct maxSize, minSize and selfIdealSize.
      *               calcLayoutConstraint_ has cache for minSize, maxSize and selfIdealSize

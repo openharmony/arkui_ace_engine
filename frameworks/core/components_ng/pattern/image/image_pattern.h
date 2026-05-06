@@ -27,6 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_provider.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
@@ -95,6 +96,7 @@ public:
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnVisibleChange(bool isVisible) override;
+    void SetIsBackground(bool isBackground);
     void OnRecycle() override;
     void OnReuse() override;
 

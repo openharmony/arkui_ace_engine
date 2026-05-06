@@ -22,14 +22,16 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { ShaderStyle_serializer, ShaderStyle } from './textCommon'
+import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
+import { extractors, AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ShaderStyle_serializer, FontWeightConfigs_serializer, ShaderStyle, FontWeightConfigs } from './textCommon'
 import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent } from './common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { ResourceColor, Resource as arkui_component_units_Resource } from './units'
+import { ResourceColor, Resource as arkui_component_units_Resource, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr } from './units'
 import { Color as arkui_component_enums_Color, FontWeight } from './enums'
-import { AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
@@ -141,7 +143,93 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
+    setSymbolColorAttribute(value: Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof Array) {
+                if (valueTmpValue.length == 0) {
+                    thisSerializer.writeInt8((0).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const valueTmpValueElem = valueTmpValue[0]
+                    if (valueTmpValueElem instanceof ResourceColor) {
+                        thisSerializer.writeInt8((0).toByte())
+                        const valueTmpValueForIdx0 = valueTmpValue as Array<ResourceColor>
+                        thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
+                        for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
+                            const valueTmpValueForIdx0TmpElement: ResourceColor = valueTmpValueForIdx0[valueTmpValueForIdx0CounterI]
+                            if (valueTmpValueForIdx0TmpElement instanceof arkui_component_enums_Color) {
+                                thisSerializer.writeInt8((0).toByte())
+                                const valueTmpValueForIdx0TmpElementForIdx0 = valueTmpValueForIdx0TmpElement as arkui_component_enums_Color
+                                thisSerializer.writeInt32((valueTmpValueForIdx0TmpElementForIdx0.getOrdinal()) % (12))
+                            } else if (valueTmpValueForIdx0TmpElement instanceof int32) {
+                                thisSerializer.writeInt8((1).toByte())
+                                const valueTmpValueForIdx0TmpElementForIdx1 = valueTmpValueForIdx0TmpElement as int32
+                                thisSerializer.writeInt32(valueTmpValueForIdx0TmpElementForIdx1)
+                            } else if (valueTmpValueForIdx0TmpElement instanceof string) {
+                                thisSerializer.writeInt8((2).toByte())
+                                const valueTmpValueForIdx0TmpElementForIdx2 = valueTmpValueForIdx0TmpElement as string
+                                thisSerializer.writeString(valueTmpValueForIdx0TmpElementForIdx2)
+                            } else if (valueTmpValueForIdx0TmpElement instanceof arkui_component_units_Resource) {
+                                thisSerializer.writeInt8((3).toByte())
+                                const valueTmpValueForIdx0TmpElementForIdx3 = valueTmpValueForIdx0TmpElement as arkui_component_units_Resource
+                                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElementForIdx3)
+                            }
+                        }
+                    } else if (valueTmpValueElem instanceof arkui_component_units_ColorMetrics) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const valueTmpValueForIdx1 = valueTmpValue as Array<arkui_component_units_ColorMetrics>
+                        thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
+                        for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
+                            const valueTmpValueForIdx1TmpElement: arkui_component_units_ColorMetrics = valueTmpValueForIdx1[valueTmpValueForIdx1CounterI]
+                            const valueTmpValueForIdx1TmpElementTransformed: ColorMetricsExt = extractors.transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(valueTmpValueForIdx1TmpElement)
+                            ColorMetricsExt_serializer.write(thisSerializer, valueTmpValueForIdx1TmpElementTransformed)
+                        }
+                    } else if (valueTmpValueElem instanceof ResourceColor | arkui_component_units_ColorMetrics) {
+                        thisSerializer.writeInt8((2).toByte())
+                        const valueTmpValueForIdx2 = valueTmpValue as Array<ResourceColor | arkui_component_units_ColorMetrics>
+                        thisSerializer.writeInt32((valueTmpValueForIdx2.length).toInt())
+                        for (let valueTmpValueForIdx2CounterI = 0; valueTmpValueForIdx2CounterI < valueTmpValueForIdx2.length; valueTmpValueForIdx2CounterI++) {
+                            const valueTmpValueForIdx2TmpElement: ResourceColor | arkui_component_units_ColorMetrics = valueTmpValueForIdx2[valueTmpValueForIdx2CounterI]
+                            if (valueTmpValueForIdx2TmpElement instanceof ResourceColor) {
+                                thisSerializer.writeInt8((0).toByte())
+                                const valueTmpValueForIdx2TmpElementForIdx0 = valueTmpValueForIdx2TmpElement as ResourceColor
+                                if (valueTmpValueForIdx2TmpElementForIdx0 instanceof arkui_component_enums_Color) {
+                                    thisSerializer.writeInt8((0).toByte())
+                                    const valueTmpValueForIdx2TmpElementForIdx0ForIdx0 = valueTmpValueForIdx2TmpElementForIdx0 as arkui_component_enums_Color
+                                    thisSerializer.writeInt32((valueTmpValueForIdx2TmpElementForIdx0ForIdx0.getOrdinal()) % (12))
+                                } else if (valueTmpValueForIdx2TmpElementForIdx0 instanceof int32) {
+                                    thisSerializer.writeInt8((1).toByte())
+                                    const valueTmpValueForIdx2TmpElementForIdx0ForIdx1 = valueTmpValueForIdx2TmpElementForIdx0 as int32
+                                    thisSerializer.writeInt32(valueTmpValueForIdx2TmpElementForIdx0ForIdx1)
+                                } else if (valueTmpValueForIdx2TmpElementForIdx0 instanceof string) {
+                                    thisSerializer.writeInt8((2).toByte())
+                                    const valueTmpValueForIdx2TmpElementForIdx0ForIdx2 = valueTmpValueForIdx2TmpElementForIdx0 as string
+                                    thisSerializer.writeString(valueTmpValueForIdx2TmpElementForIdx0ForIdx2)
+                                } else if (valueTmpValueForIdx2TmpElementForIdx0 instanceof arkui_component_units_Resource) {
+                                    thisSerializer.writeInt8((3).toByte())
+                                    const valueTmpValueForIdx2TmpElementForIdx0ForIdx3 = valueTmpValueForIdx2TmpElementForIdx0 as arkui_component_units_Resource
+                                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2TmpElementForIdx0ForIdx3)
+                                }
+                            } else if (valueTmpValueForIdx2TmpElement instanceof arkui_component_units_ColorMetrics) {
+                                thisSerializer.writeInt8((1).toByte())
+                                const valueTmpValueForIdx2TmpElementForIdx1 = valueTmpValueForIdx2TmpElement as arkui_component_units_ColorMetrics
+                                const valueTmpValueForIdx2TmpElementForIdx1Transformed: ColorMetricsExt = extractors.transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(valueTmpValueForIdx2TmpElementForIdx1)
+                                ColorMetricsExt_serializer.write(thisSerializer, valueTmpValueForIdx2TmpElementForIdx1Transformed)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFontWeight0Attribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -162,7 +250,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontWeight0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEffectStrategyAttribute(value: SymbolEffectStrategy | undefined): void {
@@ -291,6 +379,45 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setFontWeight1Attribute(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof FontWeight) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as FontWeight
+                thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
+            } else if (valueTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0 = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
+                } else if (valueTmpValueForIdx2 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1 = valueTmpValueForIdx2 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (fontWeightConfigs !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fontWeightConfigsTmpValue = fontWeightConfigs!
+            FontWeightConfigs_serializer.write(thisSerializer, fontWeightConfigsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontWeight1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSymbolEffect1Attribute(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (symbolEffect !== undefined) {
@@ -367,6 +494,9 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     fontColor(value: Array<ResourceColor> | undefined): this {
         throw new Error('Unimplemented method fontColor')
     }
+    symbolColor(value: Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined): this {
+        throw new Error('Unimplemented method symbolColor')
+    }
     fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error('Unimplemented method fontWeight')
     }
@@ -390,6 +520,9 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     }
     symbolShadow(value: ShadowOptions | undefined): this {
         throw new Error('Unimplemented method symbolShadow')
+    }
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        throw new Error('Unimplemented method fontWeight')
     }
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
         throw new Error('Unimplemented method symbolEffect')
@@ -422,9 +555,14 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         this.getPeer()?.setFontColorAttribute(value_casted)
         return this
     }
+    public symbolColor(value: Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined): this {
+        const value_casted = value as (Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined)
+        this.getPeer()?.setSymbolColorAttribute(value_casted)
+        return this
+    }
     public fontWeight(value: int32 | FontWeight | string | undefined): this {
         const value_casted = value as (int32 | FontWeight | string | undefined)
-        this.getPeer()?.setFontWeightAttribute(value_casted)
+        this.getPeer()?.setFontWeight0Attribute(value_casted)
         return this
     }
     public effectStrategy(value: SymbolEffectStrategy | undefined): this {
@@ -460,6 +598,12 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
     public symbolShadow(value: ShadowOptions | undefined): this {
         const value_casted = value as (ShadowOptions | undefined)
         this.getPeer()?.setSymbolShadowAttribute(value_casted)
+        return this
+    }
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
+        const fontWeightConfigs_casted = fontWeightConfigs as (FontWeightConfigs | undefined)
+        this.getPeer()?.setFontWeight1Attribute(value_casted, fontWeightConfigs_casted)
         return this
     }
     public symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
@@ -639,7 +783,7 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -721,7 +865,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -745,7 +889,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         }
         const returnResult: EffectDirection | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectDirection | undefined)
     }
     private setDirection_serialize(direction: EffectDirection | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -809,7 +953,7 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -873,7 +1017,7 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
         }
         const returnResult: EffectFillStyle | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectFillStyle | undefined)
     }
     private setFillStyle_serialize(fillStyle: EffectFillStyle | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -975,7 +1119,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -999,7 +1143,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         }
         const returnResult: ReplaceEffectType | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ReplaceEffectType | undefined)
     }
     private setReplaceType_serialize(replaceType: ReplaceEffectType | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1081,7 +1225,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1105,7 +1249,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         }
         const returnResult: EffectDirection | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectDirection | undefined)
     }
     private setDirection_serialize(direction: EffectDirection | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()

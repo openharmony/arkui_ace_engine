@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
-
 #include <cstdint>
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"

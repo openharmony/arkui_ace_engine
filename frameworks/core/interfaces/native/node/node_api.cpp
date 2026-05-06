@@ -69,10 +69,11 @@
 #include "core/interfaces/native/runtime/runtime_init.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/html_utils.h"
-#include "interfaces/native/error_message_macros.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 #include "interfaces/native/native_type.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -356,42 +357,40 @@ void DumpTreeNode(ArkUINodeHandle node)
     DumpTree(node, 0);
 }
 
-ArkUI_Int32 AddChild(ArkUINodeHandle parent, ArkUINodeHandle child, void* errorInfoPtr)
+ArkUI_Int32 AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, errorInfoPtr, "Node adapter already exists");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
     if (childNode == nullptr) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (childNode->IsAdopted()) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node is adopted");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::AddChild(parent, child);
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t position, void* errorInfoPtr)
+ArkUI_Int32 InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t position)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, errorInfoPtr, "Node adapter already exists");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
     if (childNode == nullptr) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (childNode->IsAdopted()) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node is adopted");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildAt(parent, child, position);
@@ -404,21 +403,20 @@ void RemoveChild(ArkUINodeHandle parent, ArkUINodeHandle child)
 }
 
 ArkUI_Int32 InsertChildAfter(
-    ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling, void* errorInfoPtr)
+    ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, errorInfoPtr, "Node adapter already exists");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
     if (childNode == nullptr) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (childNode->IsAdopted()) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node is adopted");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildAfter(parent, child, sibling);
@@ -437,21 +435,20 @@ ArkUI_Float64 ConvertLengthMetricsUnit(ArkUI_Float64 value, ArkUI_Int32 originUn
 }
 
 ArkUI_Int32 InsertChildBefore(
-    ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling, void* errorInfoPtr)
+    ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, errorInfoPtr, "Node adapter already exists");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST, "Node adapter already exists");
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
     auto childNode = reinterpret_cast<UINode*>(child);
     if (childNode == nullptr) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (childNode->IsAdopted()) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node is adopted");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node is adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildBefore(parent, child, sibling);
@@ -2024,18 +2021,17 @@ int32_t GetContextByNode(ArkUINodeHandle node)
 }
 
 ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
-    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData), void* errorInfoPtr)
+    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
 {
     auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     if (pipeline == nullptr) {
         LOGW("Cannot find pipeline context by contextHandle ID");
-        SetErrorInfoFromErrorInfoPtr(
-            ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, errorInfoPtr, "UI context is invalid");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, "UI context is invalid");
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }
     if (!pipeline->CheckThreadSafe()) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD, errorInfoPtr, "Function is not called on the UI thread");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+            ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD, "Function is not called on the UI thread");
         return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
     }
     auto onframeCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimestamp, uint32_t frameCount) -> void {
@@ -2047,18 +2043,17 @@ ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
 }
 
 ArkUI_Int32 PostIdleCallback(ArkUI_Int32 instanceId, void* userData,
-    void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData), void* errorInfoPtr)
+    void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData))
 {
     auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     if (pipeline == nullptr) {
         LOGW("Cannot find pipeline context by contextHandle ID");
-        SetErrorInfoFromErrorInfoPtr(
-            ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, errorInfoPtr, "UI context is invalid");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, "UI context is invalid");
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }
     if (!pipeline->CheckThreadSafe()) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD, errorInfoPtr, "Function is not called on the UI thread");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(
+            ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD, "Function is not called on the UI thread");
         return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
     }
     auto onidleCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimeLeft, uint32_t frameCount) -> void {
@@ -2151,6 +2146,21 @@ ArkUI_Int32 EnableEventPassthrough(ArkUI_Int32 instanceId, ArkUI_Bool enabled, A
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+void SetErrorCodeAndMessage(ArkUI_Int32 errorCode, ArkUI_CharPtr errorMessage)
+{
+    OHOS::Ace::ErrorMessageManager::GetInstance().SetErrorCodeAndMessage(errorCode, errorMessage);
+}
+
+void SetErrorFunctionName(ArkUI_CharPtr functionName)
+{
+    OHOS::Ace::ErrorMessageManager::GetInstance().SetFunctionName(functionName);
+}
+
+const char* GetErrorMessage()
+{
+    return OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2187,6 +2197,9 @@ const ArkUIBasicAPI* GetBasicAPI()
         .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,
         .checkUIContextInvalid = CheckUIContextInvalid,
         .enableEventPassthrough = EnableEventPassthrough,
+        .setErrorCodeAndMessage = SetErrorCodeAndMessage,
+        .setErrorFunctionName = SetErrorFunctionName,
+        .getErrorMessage = GetErrorMessage,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2218,6 +2231,9 @@ const CJUIBasicAPI* GetCJUIBasicAPI()
         .isBuilderNode = IsBuilderNode,
         .convertLengthMetricsUnit = ConvertLengthMetricsUnit,
         .getContextByNode = GetContextByNode,
+        .setErrorCodeAndMessage = SetErrorCodeAndMessage,
+        .setErrorFunctionName = SetErrorFunctionName,
+        .getErrorMessage = GetErrorMessage,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;

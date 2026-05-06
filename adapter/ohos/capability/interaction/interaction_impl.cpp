@@ -15,10 +15,14 @@
 
 #include "interaction_impl.h"
 
+#include <memory>
+#include <utility>
+
+#include "base/log/log_wrapper.h"
 #include "interaction_manager.h"
 
 #include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
-#include "base/log/log_wrapper.h"
+#include "adapter/ohos/capability/interaction/stop_drag_listener_impl.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
@@ -30,6 +34,7 @@ namespace OHOS::Ace {
     DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult);
     Msdp::DeviceStatus::DragBehavior TranslateDragBehavior(OHOS::Ace::DragBehavior dragBehavior);
     OHOS::Ace::DragBehavior TranslateDragBehavior(Msdp::DeviceStatus::DragBehavior dragBehavior);
+    OHOS::Ace::DragAnimationType TranslateDragAnimationType(Msdp::DeviceStatus::DragAnimationType dragAnimationType);
 
 InteractionInterface* InteractionInterface::GetInstance()
 {
@@ -64,7 +69,8 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     std::function<void(const Msdp::DeviceStatus::DragNotifyMsg&)> callbackCore
         = [=](const Msdp::DeviceStatus::DragNotifyMsg& dragNotifyMsg) {
         OHOS::Ace::DragNotifyMsg msg { dragNotifyMsg.displayX, dragNotifyMsg.displayY, dragNotifyMsg.targetPid,
-            TranslateDragResult(dragNotifyMsg.result), TranslateDragBehavior(dragNotifyMsg.dragBehavior) };
+            TranslateDragResult(dragNotifyMsg.result), TranslateDragBehavior(dragNotifyMsg.dragBehavior),
+            TranslateDragAnimationType(dragNotifyMsg.dragAnimationType) };
         if (callback) {
             callback(msg);
         }
@@ -73,7 +79,8 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
     dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
     dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
-    dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag, dragData.materialId };
+    dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag, dragData.materialId,
+    dragData.isSetMaterialFilter, dragData.materialFilter, dragData.dragAnimationType };
     for (auto& shadowInfo: dragData.shadowInfos) {
         auto pixelSharedPtr = shadowInfo.GetPixelMapSharedPtr();
         msdpDragData.shadowInfos.push_back({ pixelSharedPtr, shadowInfo.x, shadowInfo.y });
@@ -110,11 +117,21 @@ int32_t InteractionImpl::UpdatePreviewStyleWithAnimation(const OHOS::Ace::Previe
     return InteractionManager::GetInstance()->UpdatePreviewStyleWithAnimation(msdpPreviewStyle, msdpAnimation);
 }
 
-int32_t InteractionImpl::StopDrag(DragDropRet result)
+int32_t InteractionImpl::StopDrag(DragDropRet result,
+    std::function<void()> callback)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "InteractionImpl::StopDrag called, result=%{public}d, hasCustomAnimation=%{public}d, "
+        "hasAnimationOption=%{public}d, hasCallback=%{public}d", static_cast<int32_t>(result.result),
+        result.hasCustomAnimation, !result.animationOption.empty(), callback != nullptr);
     Msdp::DeviceStatus::DragDropResult dragDropResult { TranslateDragResult(result.result), result.hasCustomAnimation,
     result.mainWindow, TranslateDragBehavior(result.dragBehavior) };
-    auto ret = InteractionManager::GetInstance()->StopDrag(dragDropResult);
+    dragDropResult.dragAnimationInfo = result.animationOption;
+    std::shared_ptr<StopDragListenerImpl> stopDragListener = nullptr;
+    if (callback) {
+        stopDragListener = std::make_shared<StopDragListenerImpl>(std::move(callback));
+    }
+    auto ret = InteractionManager::GetInstance()->StopDrag(dragDropResult, stopDragListener);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "InteractionImpl::StopDrag finished, ret=%{public}d", ret);
     NG::DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(
         ret ? NG::DragStopResult::DRAGFWK_STOP_FAIL : NG::DragStopResult::DRAG_SOTP_SUCCESS);
     NG::DragDropBehaviorReporter::GetInstance().Submit(NG::DragReporterPharse::DRAG_STOP, -1);
@@ -154,6 +171,14 @@ int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
     return InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
 }
 
+int32_t InteractionImpl::GetDragAnimationType(int32_t& dragAnimationType)
+{
+    dragAnimationType = static_cast<int32_t>(DragAnimationType::DEFAULT);
+    auto interactionManager = InteractionManager::GetInstance();
+    CHECK_NULL_RETURN(interactionManager, -1);
+    return interactionManager->GetDragAnimationType(dragAnimationType);
+}
+
 int32_t InteractionImpl::AddPrivilege(const std::string& signature, const DragEventData& dragEventData)
 {
     Msdp::DeviceStatus::DragEventData msdpDragEventData = {
@@ -190,21 +215,6 @@ int32_t InteractionImpl::UnRegisterCoordinationListener()
     auto ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer_);
     consumer_ = nullptr;
     return ret;
-}
-
-int32_t InteractionImpl::SetDraggableState(bool state)
-{
-    return InteractionManager::GetInstance()->SetDraggableState(state);
-}
-
-int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
-{
-    return InteractionManager::GetInstance()->GetAppDragSwitchState(state);
-}
-
-void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime)
-{
-    InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime);
 }
 
 int32_t InteractionImpl::EnableInternalDropAnimation(const std::string &animationInfo)
@@ -333,6 +343,19 @@ OHOS::Ace::DragBehavior TranslateDragBehavior(Msdp::DeviceStatus::DragBehavior d
             return OHOS::Ace::DragBehavior::MOVE;
         default:
             return OHOS::Ace::DragBehavior::UNKNOWN;
+    }
+}
+
+OHOS::Ace::DragAnimationType TranslateDragAnimationType(Msdp::DeviceStatus::DragAnimationType dragAnimationType)
+{
+    switch (dragAnimationType) {
+        case Msdp::DeviceStatus::DragAnimationType::DEFAULT:
+            return OHOS::Ace::DragAnimationType::DEFAULT;
+        case Msdp::DeviceStatus::DragAnimationType::FOLLOW_HAND_MORPH:
+            return OHOS::Ace::DragAnimationType::FOLLOW_HAND_MORPH;
+        default:
+            LOGW("Unknown drag animation type: %{public}d", static_cast<int32_t>(dragAnimationType));
+            return OHOS::Ace::DragAnimationType::DEFAULT;
     }
 }
 

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 
 #include <map>
+#include <unordered_set>
 
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/gestures/pan_gesture.h"
@@ -97,7 +98,7 @@ public:
     }
 
     void HandlePanGestureAccept(const GestureEvent& info, PanGestureState panGestureState, GestureCallbackType type);
-    
+
     void SetPanEndCallback(const GestureEventFunc& panEndCallback)
     {
         panEndOnDisableState_ = std::make_unique<GestureEventFunc>(panEndCallback);
@@ -117,6 +118,40 @@ public:
     {
         return angle_;
     }
+
+    // ----- Pan-Gesture-Escape API ---------------------------------------
+    // SetCanCoexistWithScroll(true) marks this PanRecognizer as a
+    // "multi-selection" Pan that should be allowed to live next to scroll.
+    // When such a recognizer crosses the pan threshold for a finger, every
+    // other PanRecognizer in the arena is asked to "escape" that finger:
+    // they release per-finger state for it and stop receiving events for
+    // it, but they remain alive in the arena and continue to compete for
+    // *new* fingers (so scroll keeps working with a second finger while
+    // multi-selection drives the first one).
+    void SetCanCoexistWithScroll(bool value)
+    {
+        canCoexistWithScroll_ = value;
+    }
+    bool CanCoexistWithScroll() const
+    {
+        return canCoexistWithScroll_;
+    }
+
+    // Returns the set of finger ids currently tracked by this recognizer.
+    std::unordered_set<int32_t> GetCurrentFingerIds() const;
+
+    // Drop one finger from this Pan's tracking state. Called by other
+    // recognizers via the escape mechanism. Public because the Referee
+    // dispatches it through the polymorphic NGGestureRecognizer hook.
+    void OnFingerEscaped(int32_t fingerId) override;
+
+    // Activated externally as well: enables escape mode on this Pan and
+    // immediately releases any of the listed fingers that we are tracking.
+    void SetEscapeModeForPan(const std::unordered_set<int32_t>& existingFingers);
+
+    // Walk the arena and ask every other PanRecognizer
+    // to release the fingers we currently track.
+    void FilterCoexistingGestureFingers();
 
 protected:
     std::string GetGestureInfoString() const override;
@@ -226,8 +261,16 @@ private:
     OnPanDistanceFunc onChangeDistance_;
     // this callback will be triggered when pan end, but the enable state is false
     std::unique_ptr<GestureEventFunc> panEndOnDisableState_;
-    int32_t lastAction_ = 0;
     double angle_ = 45.0;
+
+    // Pan-gesture-escape opt-in: when true, this recognizer will push its
+    // tracked fingers out of every other PanRecognizer in the arena once it
+    // crosses the pan threshold. Default (false) keeps legacy exclusive
+    // arena semantics.
+    bool canCoexistWithScroll_ = false;
+    // Set to true once we issued the escape request, so we do it exactly
+    // once per gesture cycle. Re-armed in OnResetStatus().
+    bool escapeRequested_ = false;
 };
 
 } // namespace OHOS::Ace::NG

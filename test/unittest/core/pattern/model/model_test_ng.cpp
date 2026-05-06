@@ -226,7 +226,6 @@ HWTEST_F(ModelTestNg, ModelViewNgTest002, TestSize.Level1)
     modelPattern->modelAdapter_->HandleCameraMove(event);
     modelPattern->modelAdapter_->DrawFrame();
     Render3D::WindowChangeInfo windowChangeInfo {};
-    modelPattern->modelAdapter_->OnDirtyLayoutWrapperSwap(windowChangeInfo);
     modelPattern->modelAdapter_->CreateTextureLayer();
     modelPattern->modelAdapter_->CreateWidgetAdapter();
     modelPattern->modelAdapter_->UnloadSceneAndBackground();
@@ -360,12 +359,7 @@ HWTEST_F(ModelTestNg, ModelViewNgTest004, TestSize.Level1)
     ASSERT_NE(layoutWrapper, nullptr);
     layoutWrapper->skipMeasureContent_ = std::make_optional(true);
     DirtySwapConfig config;
-    EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-    config.skipMeasure = true;
-    EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-    config.skipLayout = true;
-    EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-
+    
     // MarkDirtyNode
     modelPattern->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 

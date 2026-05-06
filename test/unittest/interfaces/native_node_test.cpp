@@ -14513,4 +14513,25 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordi
         ARKUI_ERROR_CODE_PARAM_INVALID);
     delete layoutManager;
 }
+
+/**
+ * @tc.name: OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate
+ * @tc.desc: Test OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle text = nodeAPI->createNode(ARKUI_NODE_TEXT);
+    auto* layoutManager = nodeAPI->getAttribute(text, NODE_TEXT_LAYOUT_MANAGER);
+    if (!layoutManager) {
+        return;
+    }
+    ArkUI_TextLayoutManager* manager = (ArkUI_TextLayoutManager*)layoutManager->object;
+    OH_Drawing_PositionAndAffinity* outPos;
+    EXPECT_EQ(OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(manager, 200, 100, &outPos),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete layoutManager;
+}
 } // namespace OHOS::Ace

@@ -12,14 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path='../../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/enums.d.ts' />
-/// <reference path='../../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/with_theme.d.ts' />
+/// <reference path='../types/common.d.ts' />
+/// <reference path='../types/theme.d.ts' />
 
 // instead reference to both common.d.ts and units.d.ts
-declare type Resource = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/global/resource').Resource;
 declare type Length = string | number | Resource;
 declare type Dimension = Resource;
-declare type ResourceColor = Color | number | string | Resource;
 declare enum ThemeColorMode {
     SYSTEM,
     LIGHT,
@@ -38,6 +36,7 @@ function getArkThemeApiTargetVersion(): number {
 declare class ViewStackProcessor {
     static GetElmtIdToAccountFor(): number;
     static visualState(state?: string): void;
+    static PushPrebuildCompCmd(): void;
 }
 declare interface ViewPuInternal {
     parent_: ViewPuInternal;
@@ -51,12 +50,13 @@ declare interface ViewPuInternal {
 declare class ViewBuildNodeBase {
     static setArkThemeScopeManager(mgr: ArkThemeScopeManager): void;
 }
+type PrebuildFunc = () => void;
 
-// own public interfaces
-declare type Theme = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').Theme;
-declare type Colors = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').Colors;
-declare type CustomColors = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').CustomColors;
-
+declare abstract class PUV2ViewBase extends ViewBuildNodeBase {
+    static isNeedBuildPrebuildCmd(): boolean;
+    static prebuildFuncQueues: Map<number, Array<PrebuildFunc>>;
+    static prebuildingElmtId_: number;
+}
 // hidden internal interfaces
 /**
  * Defines the struct of internal Theme.
@@ -89,6 +89,7 @@ declare interface ThemeInternal extends Theme {
     * @since 12
     */
     typography: Typography;
+    darkColors?: CustomColors;
 }
 
 /**
@@ -289,10 +290,6 @@ declare interface Typography {
     captionSmall: TypographyStyle;
 }
 
-declare interface CustomThemeInternal extends CustomTheme {
-    shapes?: CustomShapes;
-    typography?: CustomTypography;
-}
 declare interface CustomCornerRadius {
     none?: Length;
     level1?: Length;

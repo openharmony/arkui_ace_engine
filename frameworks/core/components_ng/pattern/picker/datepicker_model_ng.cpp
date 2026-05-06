@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <functional>
 #include <utility>

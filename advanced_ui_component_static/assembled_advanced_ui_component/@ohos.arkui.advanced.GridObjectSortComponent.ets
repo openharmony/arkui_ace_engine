@@ -354,7 +354,7 @@ export struct GridObjectSortComponent {
     }
     let systemFontScale: number | undefined =
       (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
-    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
+    return Math.min(Math.min(systemFontScale ?? DEFAULT_FONT_SIZE_SCALE, this.maxAppFontScale), MAX_FONT_SCALE);
   }
 
   private calcColNum() {
@@ -630,7 +630,7 @@ export struct GridObjectSortComponent {
   // calculated altitude
   getGridHeight(data: GridObjectSortComponentItem[], state?: string): number {
     let height: number = 0;
-    let selectLen: number = data.length;
+    let selectLen: number = data.length.toDouble();
     data.forEach(item => {
       if (item.visibility === Visibility.Hidden) {
         selectLen = selectLen - 1;

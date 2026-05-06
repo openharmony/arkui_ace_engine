@@ -61,6 +61,8 @@ public:
     void SetProgressBackgroundColor(const Color& backgroundColor) override {}
     void SetProgressColor(const Color& progressColor) override {}
     void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjRefreshOffset(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjMaxPullDownDistance(const RefPtr<ResourceObject>& resObj) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);
@@ -83,6 +85,8 @@ public:
     static bool GetPullUpToCancelRefresh(FrameNode* frameNode);
     static void SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent);
     static void SetStepOffsetChange(FrameNode* frameNode, OffsetStepChangeEvent&& changeEvent);
+    static void CreateWithResourceObjRefreshOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjMaxPullDownDistance(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 

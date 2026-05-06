@@ -26,7 +26,8 @@ function AddExportToDistFile(fileName, exportContent) {
 
 function main() {
     if (process.argv.length < 3) {
-        usageAndExit();
+        console.log('Usage: node export.js <dist-file>');
+        process.exit(1);
     }
 
     let distFileName = process.argv[2];

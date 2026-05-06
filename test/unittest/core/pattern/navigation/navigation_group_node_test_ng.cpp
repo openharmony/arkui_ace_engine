@@ -33,6 +33,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -1232,7 +1234,8 @@ HWTEST_F(NavigationGroupNodeTestNg, UpdateLastStandardIndexTest001, TestSize.Lev
     ASSERT_NE(stack, nullptr);
     stack->Add("test", navDestination);
 
-    navigation->UpdateLastStandardIndex();
+    bool hasFullScreenOverlay = false;
+    navigation->UpdateLastStandardIndex(hasFullScreenOverlay);
     EXPECT_EQ(navigation->GetLastStandardIndex(), 0);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }

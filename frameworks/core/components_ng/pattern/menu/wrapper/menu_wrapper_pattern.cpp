@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -99,9 +100,6 @@ RefPtr<FrameNode> MenuWrapperPattern::GetHoverImageCustomPreview()
 
 RefPtr<FrameNode> MenuWrapperPattern::GetPreview()
 {
-    if (GetPreviewMode() == MenuPreviewMode::NONE) {
-        return nullptr;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
@@ -1269,6 +1267,24 @@ void MenuWrapperPattern::RequestPathRender()
     flag++;
     paintProperty->UpdateRenderFlag(flag);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool MenuWrapperPattern::IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const
+{
+    if (GetPreviewMode() == MenuPreviewMode::NONE) {
+        return false;
+    }
+
+    CHECK_NULL_RETURN(frameNode, false);
+    auto tag = frameNode->GetTag();
+    auto isPreviewTag = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    CHECK_NULL_RETURN(isPreviewTag, false);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto preview = host->GetChildAtIndex(1);
+    CHECK_NULL_RETURN(preview, false);
+    return preview->GetId() == frameNode->GetId();
 }
 
 void MenuWrapperPattern::DumpInfo()

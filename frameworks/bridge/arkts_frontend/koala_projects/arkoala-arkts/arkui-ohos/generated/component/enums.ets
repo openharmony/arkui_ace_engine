@@ -62,10 +62,6 @@ export enum ImageFit {
     BOTTOM_END = 15,
     MATRIX = 16
 }
-export enum CompetitionStrategy {
-    DEFAULT = 0,
-    COMPETITION = 1
-}
 export enum BorderStyle {
     Dotted = 2,
     Dashed = 1,
@@ -622,55 +618,38 @@ export enum AnimationPropertyType {
 }
 export enum ColorSpace {
     SRGB = 0,
-    DISPLAY_P3 = 1
+    DISPLAY_P3 = 1,
+    BT2020 = 2
 }
 export enum AxisType {
     VERTICAL_AXIS = 0,
     HORIZONTAL_AXIS = 1,
     PINCH_AXIS = 2
 }
+export enum CompetitionStrategy {
+    DEFAULT = 0,
+    COMPETITION = 1
+}
 export enum AttributeModifierState {
     NORMAL = 0,
     PRESSED = 1,
     FOCUSED = 2,
-    DISABLED = 3,
-    SELECTED = 4,
-    ALL = 5
+    DISABLED = 4,
+    SELECTED = 8
 }
 export enum PresetFillType {
     BREAKPOINT_DEFAULT = 0,
     BREAKPOINT_SM1MD2LG3 = 1,
     BREAKPOINT_SM2MD3LG5 = 2
 }
-export enum RawInputEventType {
-    TOUCH = 0,
-    MOUSE = 1
-}
 export enum SystemProperties {
     BREAK_POINT = 'system.arkui.breakpoint',
     WINDOW_AVOID_AREA = 'system.window.avoidarea',
     WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px',
     WINDOW_SIZE = 'system.window.size',
-    WINDOW_SIZE_PX = 'system.window.size.px'
-}
-export enum InputEventSubTypeMask {
-    LEFT_MOUSE_DOWN = 1 << 0,
-    LEFT_MOUSE_UP = 1 << 1,
-    RIGHT_MOUSE_DOWN = 1 << 2,
-    RIGHT_MOUSE_UP = 1 << 3,
-    MIDDLE_MOUSE_DOWN = 1 << 4,
-    MIDDLE_MOUSE_UP = 1 << 5,
-    LEFT_MOUSE_DRAGGING = 1 << 6,
-    RIGHT_MOUSE_DRAGGING = 1 << 7,
-    MIDDLE_MOUSE_DRAGGING = 1 << 8,
-    TOUCH_DOWN = 1 << 9,
-    TOUCH_UP = 1 << 10,
-    KEY_DOWN = 1 << 11,
-    KEY_UP = 1 << 12
-}
-export enum InputEventInterceptAction {
-    CONTINUE = 0,
-    BLOCK = 1
+    WINDOW_SIZE_PX = 'system.window.size.px',
+    WINDOW_IS_FOCUSED = 'system.window.focused',
+    WINDOW_IS_HIGHLIGHTED = 'system.window.highlighted'
 }
 export enum GestureCollectIntervention {
     CONTINUE = 0,
@@ -678,4 +657,47 @@ export enum GestureCollectIntervention {
     DISCARD_HIGHER = 2,
     DISCARD_SELF = 3,
     DISCARD_LOWER_PRIORITY_SIBLINGS = 4
+}
+export enum RawInputEventType {
+    TOUCH = 0,
+    MOUSE = 1
+}
+export enum InputEventSubTypeMask {
+    LEFT_MOUSE_DOWN = 1,
+    LEFT_MOUSE_UP = 2,
+    RIGHT_MOUSE_DOWN = 4,
+    RIGHT_MOUSE_UP = 8,
+    MIDDLE_MOUSE_DOWN = 16,
+    MIDDLE_MOUSE_UP = 32,
+    LEFT_MOUSE_DRAGGING = 64,
+    RIGHT_MOUSE_DRAGGING = 128,
+    MIDDLE_MOUSE_DRAGGING = 256,
+    TOUCH_DOWN = 512,
+    TOUCH_UP = 1024,
+    KEY_DOWN = 2048,
+    KEY_UP = 4096
+}
+export enum InputEventInterceptAction {
+    CONTINUE = 0,
+    BLOCK = 1
+}
+export enum UIMaterialAnimationMode {
+    IMMERSIVE = 0,
+    NONE = 1
+}
+export enum GestureShortcut {
+    PRIMARY = 0
+}
+export enum SmartGestureAction {
+    NONE = 0,
+    PAGE_FORWARD = 1,
+    SCROLL_FORWARD = 2,
+    SELECT = 3,
+    CLICK = 4,
+    BACK_PRESS = 5
+}
+export enum OperateIntention {
+    TAP = 0,
+    SLIDE_FORWARD = 1,
+    BACK_PRESS = 2
 }

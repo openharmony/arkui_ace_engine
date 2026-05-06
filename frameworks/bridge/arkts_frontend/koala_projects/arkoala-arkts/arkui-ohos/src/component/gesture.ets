@@ -1,6 +1,6 @@
 import { nullptr } from "@koalaui/interop"
 import { Callback } from "./common"
-import { GestureOps } from "./idlize"
+import { GestureOps, PanGestureOptionsProxy } from './idlize'
 import { PeerNode } from "../PeerNode"
 import { GlobalStateManager, MutableState } from '@koalaui/runtime'
 import { KeyEventInternal, TouchTestInfo } from "arkui/component/common"
@@ -564,7 +564,8 @@ export class PanGesture extends Gesture {
     createAndSetPanGestureAttr(): void {
         if (this.panGestureOptions !== undefined) {
             this.panGestureOptions!.getOptionState()
-            this.pointer = GestureOps.createPanGestureWithPanGestureOptions(this.panGestureOptions!.getPeer()!.ptr);
+            this.pointer = GestureOps.createPanGestureWithPanGestureOptions(
+                this.panGestureOptions!.proxy.getPeer()!.ptr);
         } else {
             this.pointer = GestureOps.createPanGesture(this.finger ?? 1, this.direction ?? PanDirection.All, this.distance ?? 5, this.isFingerCountLimited ?? false);
         }
@@ -909,5 +910,42 @@ export namespace GestureControl {
         WEB_SCROLL_GESTURE = 9,
         TEXT_FIELD_SELECT_GESTURE = 10,
         CONTEXT_MENU_HOVER_GESTURE = 11
+    }
+}
+
+export class PanGestureOptions {
+    public proxy: PanGestureOptionsProxy
+    public optionState: MutableState<int32> | undefined
+    constructor(value?: PanGestureHandlerOptions) {
+        this.proxy = new PanGestureOptionsProxy(value)
+        const manager = GlobalStateManager.instance
+        this.optionState = manager.mutableState<int32>(0 as int32, true)
+    }
+    constructor(proxy: PanGestureOptionsProxy) {
+        this.proxy = proxy
+    }
+    public getOptionState(): number {
+        return this.optionState!.value
+    }
+    public setOptionState(): void {
+        this.optionState!.value = this.optionState!.value % 100 + 1
+    }
+    public setDirection(value: PanDirection): void {
+        this.proxy.setDirection(value)
+        this.setOptionState()
+    }
+    public setDistance(value: double): void {
+        this.proxy.setDistance(value)
+        this.setOptionState()
+    }
+    public setFingers(value: int32): void {
+        this.proxy.setFingers(value)
+        this.setOptionState()
+    }
+    public getDirection(): PanDirection {
+        return this.proxy.getDirection()
+    }
+    public getDistance(): double {
+        return this.proxy.getDistance()
     }
 }

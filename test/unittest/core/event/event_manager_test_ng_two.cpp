@@ -356,6 +356,102 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest009, TestSize.Level
 }
 
 /**
+ * @tc.name: ExecuteTouchTestDoneCallbackTest010
+ * @tc.desc: Test touch onTouchTestDone finger current local getter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest010, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    TouchEvent touchEvent;
+    TouchPoint point;
+    point.x = 10.0f;
+    point.y = 20.0f;
+    point.screenX = 30.0f;
+    point.screenY = 40.0f;
+    point.globalDisplayX = 50.0f;
+    point.globalDisplayY = 60.0f;
+    point.originalId = 1;
+    touchEvent.pointers.push_back(point);
+
+    ResponseLinkResult responseLinkRecognizers;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 0, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    bool hasCurrentLocalGetter = false;
+    Offset currentLocal;
+    Offset local;
+    auto touchTestDoneFunc = [&hasCurrentLocalGetter, &currentLocal, &local](
+                                 const std::shared_ptr<BaseGestureEvent>& event,
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) {
+        if (!event || event->GetFingerList().empty()) {
+            return;
+        }
+        const auto& fingerInfo = event->GetFingerList().front();
+        hasCurrentLocalGetter = static_cast<bool>(fingerInfo.currentLocalLocation_);
+        local = fingerInfo.localLocation_;
+        if (fingerInfo.currentLocalLocation_) {
+            currentLocal = fingerInfo.currentLocalLocation_();
+        }
+    };
+    eventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
+    eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
+    eventManager->ExecuteTouchTestDoneCallback(touchEvent, responseLinkRecognizers);
+    EXPECT_TRUE(hasCurrentLocalGetter);
+    EXPECT_DOUBLE_EQ(currentLocal.GetX(), local.GetX());
+    EXPECT_DOUBLE_EQ(currentLocal.GetY(), local.GetY());
+}
+
+/**
+ * @tc.name: ExecuteTouchTestDoneCallbackTest011
+ * @tc.desc: Test axis onTouchTestDone finger current local getter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest011, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AxisEvent axisEvent;
+    axisEvent.x = 11.0f;
+    axisEvent.y = 21.0f;
+    axisEvent.screenX = 31.0f;
+    axisEvent.screenY = 41.0f;
+    axisEvent.globalDisplayX = 51.0f;
+    axisEvent.globalDisplayY = 61.0f;
+    axisEvent.originalId = 2;
+
+    ResponseLinkResult responseLinkRecognizers;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 0, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    bool hasCurrentLocalGetter = false;
+    Offset currentLocal;
+    Offset local;
+    auto touchTestDoneFunc = [&hasCurrentLocalGetter, &currentLocal, &local](
+                                 const std::shared_ptr<BaseGestureEvent>& event,
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) {
+        if (!event || event->GetFingerList().empty()) {
+            return;
+        }
+        const auto& fingerInfo = event->GetFingerList().front();
+        hasCurrentLocalGetter = static_cast<bool>(fingerInfo.currentLocalLocation_);
+        local = fingerInfo.localLocation_;
+        if (fingerInfo.currentLocalLocation_) {
+            currentLocal = fingerInfo.currentLocalLocation_();
+        }
+    };
+    eventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
+    eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
+    eventManager->ExecuteTouchTestDoneCallback(axisEvent, responseLinkRecognizers);
+    EXPECT_TRUE(hasCurrentLocalGetter);
+    EXPECT_DOUBLE_EQ(currentLocal.GetX(), local.GetX());
+    EXPECT_DOUBLE_EQ(currentLocal.GetY(), local.GetY());
+}
+
+/**
  * @tc.name: EventManagerTestAxisEvent001
  * @tc.desc: Test TouchTest with FrameNode AxisEvent
  * @tc.type: FUNC
@@ -1553,6 +1649,257 @@ HWTEST_F(EventManagerTestNg, AddDumpTouchInfo001, TestSize.Level1)
     eventManager->SetIsUseDumpTouchInfo(true);
     eventManager->AddDumpTouchInfo(touchEvent);
     EXPECT_EQ(eventTouchInfoRecord.isUseDumpTouchInfo_, false);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo002
+ * @tc.desc: Test AddDumpTouchInfo when touchTimingCallback is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sensorTime = std::chrono::high_resolution_clock::now();
+    touchEvent.processTime = std::chrono::high_resolution_clock::now();
+
+    eventManager->UnregisterTouchTimingCallback();
+    EXPECT_EQ(eventManager->touchTimingCallback_, nullptr);
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+    EXPECT_EQ(eventManager->touchTimingCallback_, nullptr);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo003
+ * @tc.desc: Test AddDumpTouchInfo when touchTimingCallback is set but event is falsified.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo003, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    bool callbackExecuted = false;
+    uint64_t receivedSensorTime = 0;
+    uint64_t receivedReceiveTime = 0;
+    uint64_t receivedDispatchTime = 0;
+    int32_t receivedEventType = 0;
+
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackExecuted = true;
+        receivedSensorTime = sensorTime;
+        receivedReceiveTime = receiveTime;
+        receivedDispatchTime = dispatchTime;
+        receivedEventType = eventType;
+    };
+
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = true;
+    touchEvent.sensorTime = std::chrono::high_resolution_clock::now();
+    touchEvent.processTime = std::chrono::high_resolution_clock::now();
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+
+    EXPECT_FALSE(callbackExecuted);
+    EXPECT_EQ(receivedSensorTime, 0);
+    EXPECT_EQ(receivedReceiveTime, 0);
+    EXPECT_EQ(receivedDispatchTime, 0);
+    EXPECT_EQ(receivedEventType, 0);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo004
+ * @tc.desc: Test AddDumpTouchInfo when touchTimingCallback is set and event is not falsified.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo004, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    bool callbackExecuted = false;
+    uint64_t receivedSensorTime = 0;
+    uint64_t receivedReceiveTime = 0;
+    uint64_t receivedDispatchTime = 0;
+    int32_t receivedEventType = -1;
+
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackExecuted = true;
+        receivedSensorTime = sensorTime;
+        receivedReceiveTime = receiveTime;
+        receivedDispatchTime = dispatchTime;
+        receivedEventType = eventType;
+    };
+
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    auto testTime = std::chrono::high_resolution_clock::now();
+    touchEvent.sensorTime = testTime;
+    touchEvent.processTime = testTime;
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+
+    EXPECT_TRUE(callbackExecuted);
+    EXPECT_EQ(receivedSensorTime, static_cast<uint64_t>(testTime.time_since_epoch().count()));
+    EXPECT_EQ(receivedReceiveTime, static_cast<uint64_t>(testTime.time_since_epoch().count()));
+    EXPECT_GT(receivedDispatchTime, 0);
+    EXPECT_EQ(receivedEventType, static_cast<int32_t>(TouchType::DOWN));
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo005
+ * @tc.desc: Test AddDumpTouchInfo when touchTimingCallback is set and event has history points.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo005, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    
+    int callbackCount = 0;
+    std::vector<uint64_t> receivedSensorTimes;
+    std::vector<uint64_t> receivedReceiveTimes;
+    std::vector<uint64_t> receivedDispatchTimes;
+    std::vector<int32_t> receivedEventTypes;
+    
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackCount++;
+        receivedSensorTimes.push_back(sensorTime);
+        receivedReceiveTimes.push_back(receiveTime);
+        receivedDispatchTimes.push_back(dispatchTime);
+        receivedEventTypes.push_back(eventType);
+    };
+    
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+    
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    auto testTime1 = std::chrono::high_resolution_clock::now();
+    touchEvent.sensorTime = testTime1;
+    touchEvent.processTime = testTime1;
+    
+    TouchEvent historyPoint1;
+    historyPoint1.type = TouchType::MOVE;
+    historyPoint1.sourceTool = SourceTool::FINGER;
+    auto testTime2 = std::chrono::high_resolution_clock::now();
+    historyPoint1.sensorTime = testTime2;
+    historyPoint1.processTime = testTime2;
+    
+    TouchEvent historyPoint2;
+    historyPoint2.type = TouchType::UP;
+    historyPoint2.sourceTool = SourceTool::FINGER;
+    auto testTime3 = std::chrono::high_resolution_clock::now();
+    historyPoint2.sensorTime = testTime3;
+    historyPoint2.processTime = testTime3;
+    
+    touchEvent.history.push_back(historyPoint1);
+    touchEvent.history.push_back(historyPoint2);
+    
+    eventManager->AddDumpTouchInfo(touchEvent);
+    
+    EXPECT_EQ(callbackCount, 2);
+    EXPECT_EQ(receivedEventTypes.size(), 2);
+    EXPECT_EQ(receivedEventTypes[0], static_cast<int32_t>(TouchType::MOVE));
+    EXPECT_EQ(receivedEventTypes[1], static_cast<int32_t>(TouchType::UP));
+    EXPECT_EQ(receivedSensorTimes[0], static_cast<uint64_t>(testTime2.time_since_epoch().count()));
+    EXPECT_EQ(receivedSensorTimes[1], static_cast<uint64_t>(testTime3.time_since_epoch().count()));
+    EXPECT_EQ(receivedReceiveTimes[0], static_cast<uint64_t>(testTime2.time_since_epoch().count()));
+    EXPECT_EQ(receivedReceiveTimes[1], static_cast<uint64_t>(testTime3.time_since_epoch().count()));
+    EXPECT_GT(receivedDispatchTimes[0], 0);
+    EXPECT_GT(receivedDispatchTimes[1], 0);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo006
+ * @tc.desc: Test AddDumpTouchInfo when sourceTool is not FINGER (event.sourceTool == SourceTool::PEN).
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo006, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    bool callbackExecuted = false;
+    uint64_t receivedSensorTime = 0;
+    uint64_t receivedReceiveTime = 0;
+    uint64_t receivedDispatchTime = 0;
+    int32_t receivedEventType = 0;
+
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackExecuted = true;
+        receivedSensorTime = sensorTime;
+        receivedReceiveTime = receiveTime;
+        receivedDispatchTime = dispatchTime;
+        receivedEventType = eventType;
+    };
+
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sourceTool = SourceTool::PEN;
+    auto testTime = std::chrono::high_resolution_clock::now();
+    touchEvent.sensorTime = testTime;
+    touchEvent.processTime = testTime;
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+
+    EXPECT_FALSE(callbackExecuted);
+    EXPECT_EQ(receivedSensorTime, 0);
+    EXPECT_EQ(receivedReceiveTime, 0);
+    EXPECT_EQ(receivedDispatchTime, 0);
+    EXPECT_EQ(receivedEventType, 0);
+}
+
+/**
+ * @tc.name: AddDumpTouchInfo007
+ * @tc.desc: Test AddDumpTouchInfo when sourceTool is MOUSE (should not execute callback).
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddDumpTouchInfo007, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    bool callbackExecuted = false;
+
+    auto callback = [&](uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType) {
+        callbackExecuted = true;
+    };
+
+    eventManager->RegisterTouchTimingCallback(std::move(callback));
+    EXPECT_NE(eventManager->touchTimingCallback_, nullptr);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.isFalsified = false;
+    touchEvent.sourceTool = SourceTool::MOUSE;
+    auto testTime = std::chrono::high_resolution_clock::now();
+    touchEvent.sensorTime = testTime;
+    touchEvent.processTime = testTime;
+
+    eventManager->AddDumpTouchInfo(touchEvent);
+
+    EXPECT_FALSE(callbackExecuted);
 }
 
 /**

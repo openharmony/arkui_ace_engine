@@ -21,6 +21,7 @@
 
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {

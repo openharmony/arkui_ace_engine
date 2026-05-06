@@ -183,8 +183,11 @@ class ModifierUtils {
     this.timeoutId = setTimeout(frameCallback, 100) as unknown as number;
     if (hostInstanceId > -1) {
         __JSScopeUtil__.syncInstanceId(hostInstanceId);
-        getUINativeModule().frameNode.registerFrameCallback(frameCallback);
-        __JSScopeUtil__.restoreInstanceId();
+        try {
+          getUINativeModule().frameNode.registerFrameCallback(frameCallback);
+        } finally {
+          __JSScopeUtil__.restoreInstanceId();
+        }
         return;
     }
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);

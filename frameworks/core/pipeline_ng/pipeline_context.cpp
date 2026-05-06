@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/event_manager.h"
@@ -50,6 +53,7 @@
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
@@ -70,6 +74,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
@@ -79,6 +84,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/pipeline_ng/environment_manager.h"
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/base/inspector.h"
@@ -97,6 +103,8 @@
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -172,6 +180,42 @@ ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params)
     config.withWeb = (params[5] == "1");
     config.withUIExtension = (params.size() > SIMPLIFYTREE_WITH_PARAMCONFIG) && (params[6] == "1");
     return config;
+}
+
+ void AddJsonChild(std::shared_ptr<JsonValue> parentJson, std::shared_ptr<JsonValue> childJson)
+{
+    CHECK_NULL_VOID(parentJson && childJson);
+    if (!parentJson->Contains("$children")) {
+        auto array = JsonUtil::CreateArray();
+        parentJson->PutRef("$children", std::move(array));
+    }
+    auto childrenJson = parentJson->GetValue("$children");
+    childrenJson->Put(childJson);
+}
+
+RefPtr<NG::FrameNode> GetContainerModalDumpRootNode(const RefPtr<NG::FrameNode>& containerModalNode)
+{
+    RefPtr<NG::FrameNode> result = nullptr;
+    if (!containerModalNode) {
+        return nullptr;
+    }
+    auto containerModalPattern = containerModalNode->GetPattern<NG::ContainerModalPattern>();
+    if (containerModalPattern) {
+        result = containerModalPattern->GetStackNode();
+    }
+    return result;
+}
+
+RefPtr<NG::UINode> GetAtomicServiceDumpNode(const RefPtr<NG::FrameNode>& dumpBeginNode)
+{
+    CHECK_NULL_RETURN(dumpBeginNode, nullptr);
+    auto rootChildren = dumpBeginNode->GetChildren();
+    for (const auto& rootChild : rootChildren) {
+        if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+            return rootChild;
+        }
+    }
+    return nullptr;
 }
 
 class TestAICaller : public AICallerHelper {
@@ -1820,12 +1864,7 @@ void PipelineContext::SetupRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(stageNode);
     }
-    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
-        auto frontend = weakFrontend.Upgrade();
-        CHECK_NULL_RETURN(frontend, "");
-        return frontend->GetPagePathByUrl(url);
-    };
-    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
+    SetupPageStackCallbacks();
     auto frameNode = DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent());
     overlayManager_ = MakeRefPtr<OverlayManager>(frameNode);
     inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
@@ -1901,6 +1940,23 @@ void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::R
 #endif
 }
 
+void PipelineContext::SetupPageStackCallbacks()
+{
+    CHECK_NULL_VOID(stageManager_);
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
+    auto isPageInStackCallback = [weakFrontend = weakFrontend_](const RefPtr<FrameNode>& page) {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, false);
+        return frontend->IsPageInStack(page);
+    };
+    stageManager_->SetIsPageInStackCallback(std::move(isPageInStackCallback));
+}
+
 void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
@@ -1943,12 +1999,7 @@ void PipelineContext::SetupSubRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(nullptr);
     }
-    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
-        auto frontend = weakFrontend.Upgrade();
-        CHECK_NULL_RETURN(frontend, "");
-        return frontend->GetPagePathByUrl(url);
-    };
-    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
+    SetupPageStackCallbacks();
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
@@ -3476,6 +3527,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "OnTouchEvent type:%{public}d, isGenerate:%{public}d",
         static_cast<int32_t>(point.type), point.isGenerate);
     if (ConvertFromMouseAxis(point) && !point.isGenerate && compatibleManager_.NotifyNewEvent(point)) {
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->DelegateTouchEvent(point);
+        }
+        if (point.type == TouchType::MOVE) {
+            RequestFrame();
+        }
         return;
     }
 
@@ -3511,7 +3568,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         formEventMgr->HandleEtsCardTouchEvent(point, etsSerializedGesture);
     }
 
-    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty()) {
+    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty() && !point.isGenerate) {
         eventManager_->DelegateTouchEvent(point);
     }
     auto oriPoint = point;
@@ -3573,6 +3630,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+        if (eventManager_) {
+            eventManager_->ClearSmartGestureSelected();
+        }
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -4227,26 +4287,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         RefPtr<NG::FrameNode> atomicServiceNode = nullptr;
         auto rootChildren = rootNode_->GetChildren();
-        auto config = ParamConfig { true, true, true, true };
-        for (auto rootChild : rootChildren) {
-            if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-                atomicServiceNode = AceType::DynamicCast<NG::FrameNode>(rootChild);
-                break;
-            }
-        }
-        if (atomicServiceNode) {
-            auto atomicRoot = JsonUtil::CreateSharedPtrJson(true);
-            DumpSimplifyTreeJsonEntrance(atomicRoot, atomicServiceNode, config);
-            GetOverlayInspector(root, rootNode_, config);
-            if (!root->Contains("$children")) {
-                auto array = JsonUtil::CreateArray();
-                root->PutRef("$children", std::move(array));
-            }
-            auto childrenJson = root->GetValue("$children");
-            childrenJson->Put(atomicRoot);
-        } else {
-            DumpSimplifyTreeJsonEntrance(root, rootNode_, config);
-        }
+        auto config = ParamConfig{true, true, true, true};
+        DumpVisibleInspectorTree(root, config);
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
@@ -4284,8 +4326,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         DumpLog::GetInstance().Print(info);
 #endif
 #ifdef RELAXED_INTERACTION_SUPPORT
+    } else if (params[0] == "-relaxedinteractioncmd" && params.size() >= PARAM_NUM) {
+        UiSessionManager::GetInstance()->SendCommand(params[1]);
     } else if (params[0] == "-relaxedinteractionlog") {
-        DumpLog::GetInstance().Print(1, WorkflowDumper::GetInstance().Dump());
+        DumpLog::GetInstance().Print(WorkflowDumper::GetInstance().Dump());
 #endif
     }
     return true;
@@ -4742,6 +4786,9 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+        if (eventManager_) {
+            eventManager_->ClearSmartGestureSelected();
+        }
     }
 
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
@@ -5632,6 +5679,9 @@ void PipelineContext::Destroy()
     buildFinishCallbacks_.clear();
     onWindowStateChangedCallbacks_.clear();
     onWindowFocusChangedCallbacks_.clear();
+    if (eventManager_) {
+        eventManager_->ResetSmartGestureManager();
+    }
     nodesToNotifyMemoryLevel_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
@@ -6556,7 +6606,7 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
     return containerPattern->GetContainerModalTitleHeight();
 }
 
-RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
+RefPtr<FrameNode> PipelineContext::GetContainerModalNode() const
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return nullptr;
@@ -6955,15 +7005,6 @@ void PipelineContext::GetComponentOverlayInspector(
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     bool hasOverlay =
         ProcessOverlayChildrenDumpInfo(startNode, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config);
-    // check if the startNode is a atomicServiceNode
-    if (startNode != rootNode_) {
-        auto atomicServiceContainer =
-            AceType::DynamicCast<FrameNode>(overlayManager_->FindChildNodeByKey(startNode, "AtomicServiceContainerId"));
-        if (atomicServiceContainer) {
-            hasOverlay |= ProcessOverlayChildrenDumpInfo(
-                atomicServiceContainer, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config);
-        }
-    }
 
     if (isInSubWindow) {
         subRoot->PutRef("$children", std::move(subWindowOverlayArray));
@@ -6999,7 +7040,6 @@ void PipelineContext::GetOverlayInspector(
 void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode,
     std::shared_ptr<JsonValue>& root, std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const
 {
-    GetOverlayInspector(root, startNode, config);
     if (!root->Contains("$children")) {
         auto array = JsonUtil::CreateArray();
         root->PutRef("$children", std::move(array));
@@ -7018,6 +7058,10 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> s
 void PipelineContext::DumpSimplifyTreeJsonEntrance(
     std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const
 {
+    auto startNodeRect = startNode->GetTransformRectRelativeToWindow();
+    if (NearEqual(startNodeRect.Width(), 0) && NearEqual(startNodeRect.Height(), 0)) {
+        return;
+    }
     // step1: Get the topPageNode if onlyNeedVisible, avoid fetching hidden page.
     auto lastPageNode = stageManager_->GetLastPage();
     CHECK_NULL_VOID(lastPageNode);
@@ -7031,6 +7075,55 @@ void PipelineContext::DumpSimplifyTreeJsonEntrance(
         navNodes.emplace_back(lastPageNode);
     }
     DumpSimplifyTreeJsonFromTopNavNode(startNode, root, navNodes, config);
+}
+
+void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const
+{
+    auto containerModalNode = GetContainerModalNode();
+    auto containerModalDumpNode = GetContainerModalDumpRootNode(containerModalNode);
+    auto dumpBeginNode = containerModalDumpNode ? containerModalDumpNode : rootNode_;
+    auto atomicServiceDumpNode = GetAtomicServiceDumpNode(dumpBeginNode);
+    // pseudoRootJson deals with containerModal case, containerModalStack will be the actual root.
+    std::shared_ptr<JsonValue> pseudoRootJson = rootJson;
+    std::shared_ptr<JsonValue> containerModalTitleJson = nullptr;
+    if (dumpBeginNode != rootNode_) {
+        // ContainerModal case
+        containerModalTitleJson = JsonUtil::CreateSharedPtrJson();
+        // In this case, ContainerModalPattern can not be nullptr
+        auto titleRow = GetContainerModalNode()->GetPattern<NG::ContainerModalPattern>()->GetCustomTitleRow();
+        if (titleRow) {
+            DumpSimplifyTreeJsonEntrance(containerModalTitleJson, titleRow, config);
+        }
+        pseudoRootJson = JsonUtil::CreateSharedPtrJson();
+        // ContainerModal root doesn't has an actual root wrapper, so we need wrap it up
+        rootNode_->DumpSimplifyTreeBase(rootJson);
+        rootNode_->DumpSimplifyInfoWithParamConfig(rootJson, config);
+    }
+    GetOverlayInspector(pseudoRootJson, dumpBeginNode, config);
+    if (atomicServiceDumpNode) {
+        auto atomicRootJson = JsonUtil::CreateSharedPtrJson(true);
+        auto atomicMenuBarJson = JsonUtil::CreateSharedPtrJson(true);
+        auto atomicServiceRoot = AceType::DynamicCast<FrameNode>(
+            overlayManager_->FindChildNodeByKey(atomicServiceDumpNode, "AtomicServiceContainerId"));
+        if (atomicServiceRoot) {
+            // dump component-overlay only, sub-window overlay has been dumped in rootJson
+            GetComponentOverlayInspector(atomicRootJson, atomicServiceRoot, config, false);
+            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, config);
+            AddJsonChild(pseudoRootJson, atomicRootJson);
+        }
+        auto atomicServiceMenuBar = AceType::DynamicCast<FrameNode>(
+            overlayManager_->FindChildNodeByKey(atomicServiceRoot, "AtomicServiceMenubarRowId"));
+        if (atomicServiceMenuBar) {
+            DumpSimplifyTreeJsonEntrance(atomicMenuBarJson, atomicServiceMenuBar, config);
+            AddJsonChild(atomicRootJson, atomicMenuBarJson);
+        }
+    } else {
+        DumpSimplifyTreeJsonEntrance(pseudoRootJson, dumpBeginNode, config);
+    }
+    if (pseudoRootJson != rootJson) {
+        AddJsonChild(rootJson, containerModalTitleJson);
+        AddJsonChild(rootJson, pseudoRootJson);
+    }
 }
 
 void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
@@ -7052,27 +7145,7 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
                      "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
         onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
     if (onlyNeedVisible) {
-        RefPtr<NG::FrameNode> atomicServiceNode = nullptr;
-        auto rootChildren = rootNode_->GetChildren();
-        for (auto rootChild : rootChildren) {
-            if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-                atomicServiceNode = AceType::DynamicCast<NG::FrameNode>(rootChild);
-                break;
-            }
-        }
-        if (atomicServiceNode) {
-            auto atomicRoot = JsonUtil::CreateSharedPtrJson(true);
-            DumpSimplifyTreeJsonEntrance(atomicRoot, atomicServiceNode, config);
-            GetOverlayInspector(root, rootNode_, config);
-            if (!root->Contains("$children")) {
-                auto array = JsonUtil::CreateArray();
-                root->PutRef("$children", std::move(array));
-            }
-            auto childrenJson = root->GetValue("$children");
-            childrenJson->Put(atomicRoot);
-        } else {
-            DumpSimplifyTreeJsonEntrance(root, rootNode_, config);
-        }
+        DumpVisibleInspectorTree(root, config);
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
     } else {
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
@@ -7566,6 +7639,11 @@ void PipelineContext::FlushMouseEventForHover()
     eventManager_->DispatchMouseHoverAnimationNG(event, true);
 }
 
+const RefPtr<NavigationManager>& PipelineContext::GetNavigationManager() const
+{
+    return navigationMgr_;
+}
+
 void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)
 {
     if (point.sourceTool != SourceTool::FINGER || NearZero(point.force)) {
@@ -7636,6 +7714,14 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
         nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
     }
     return nodeRenderStatusMonitor_;
+}
+
+WeakPtr<AIWriteAdapter> PipelineContext::GetOrCreateAIWriteAdapter()
+{
+    if (!aiWriteAdapter_) {
+        aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    }
+    return aiWriteAdapter_;
 }
 
 void PipelineContext::RegisterArkUIObjectLifecycleCallback(Kit::ArkUIObjectLifecycleCallback&& callback)
@@ -7915,10 +8001,12 @@ bool PipelineContext::FreeMouseStyleHoldNode()
 
 void PipelineContext::InitManagers()
 {
+    navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    environmentManager_ = MakeRefPtr<EnvironmentManager>();
     recycleManager_ = std::make_unique<RecycleManager>();
 }
 
@@ -7945,6 +8033,19 @@ const RefPtr<FormGestureManager>& PipelineContext::GetFormGestureManager() const
 const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() const
 {
     return recycleManager_;
+}
+
+void PipelineContext::RegisterTouchTimingCallback(
+    const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>&&
+        callback)
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->RegisterTouchTimingCallback(std::move(callback));
+}
+void PipelineContext::UnregisterTouchTimingCallback()
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->UnregisterTouchTimingCallback();
 }
 
 void PipelineContext::ProcessCommand(const std::string& command)

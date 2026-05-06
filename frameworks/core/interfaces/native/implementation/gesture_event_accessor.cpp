@@ -304,18 +304,12 @@ Opt_EventLocationInfo GetTapLocationImpl(Ark_GestureEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, {});
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    EventLocationInfo tapLocation;
     if (info->GetGestureTypeName() == GestureTypeName::TAP_GESTURE) {
         if (!fingerList.empty()) {
-            tapLocation = {
-                fingerList.back().localLocation_,
-                fingerList.back().globalLocation_,
-                fingerList.back().screenLocation_,
-                fingerList.back().globalDisplayLocation_
-            };
+            return Converter::ArkValue<Opt_EventLocationInfo>(fingerList.back(), Converter::FC);
         }
     }
-    return Converter::ArkValue<Opt_EventLocationInfo>(tapLocation, Converter::FC);
+    return {};
 }
 void SetTapLocationImpl(Ark_GestureEvent peer,
                         const Opt_EventLocationInfo* tapLocation)

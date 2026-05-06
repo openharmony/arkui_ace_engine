@@ -25,9 +25,10 @@ import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { CommonMethod, ShadowOptions } from './component/common'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { ResourceColor, Resource as arkui_component_units_Resource } from './component/units'
+import { ResourceColor, Resource as arkui_component_units_Resource, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr } from './component/units'
 import { Color as arkui_component_enums_Color, FontWeight } from './component/enums'
-import { ShaderStyle } from './component/textCommon'
+import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
+import { ShaderStyle, FontWeightConfigs } from './component/textCommon'
 // instructive change start
 import { RuntimeType, runtimeType } from "@koalaui/interop"
 // instructive change end
@@ -62,6 +63,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     // instructive change end
     public _fontSize_0_0value?: double | string | global_resource_Resource | undefined
     public _fontColor_0_0value?: Array<ResourceColor> | undefined
+    public _symbolColor_0_0value?: Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined
     public _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     public _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
     public _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
@@ -70,6 +72,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     public _maxFontScale_0_0value?: double | global_resource_Resource | undefined
     public _shaderStyle_0_0value?: Array<ShaderStyle | undefined> | ShaderStyle | undefined
     public _symbolShadow_0_0value?: ShadowOptions | undefined
+    public _fontWeight_1_0value?: int32 | FontWeight | ResourceStr | undefined
+    public _fontWeight_1_1value?: FontWeightConfigs | undefined
     public _symbolEffect_1_0value?: SymbolEffect | undefined
     public _symbolEffect_1_1value?: boolean | undefined
     public _symbolEffect_2_0value?: SymbolEffect | undefined
@@ -138,7 +142,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         if (flagArray[2] != 0) {
             switch (flagArray[2]) {
                 case 1: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
+                    peer.setSymbolColorAttribute((this._symbolColor_0_0value as Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined));
                     flagArray[2] = 2;
                     break;
                 }
@@ -148,14 +152,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[2] = 0;
-                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
+                    peer.setSymbolColorAttribute((undefined as Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined));
                 }
             }
         }
         if (flagArray[3] != 0) {
             switch (flagArray[3]) {
                 case 1: {
-                    peer.setEffectStrategyAttribute((this._effectStrategy_0_0value as SymbolEffectStrategy | undefined));
+                    peer.setFontWeight0Attribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     flagArray[3] = 2;
                     break;
                 }
@@ -165,14 +169,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[3] = 0;
-                    peer.setEffectStrategyAttribute((undefined as SymbolEffectStrategy | undefined));
+                    peer.setFontWeight0Attribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
         if (flagArray[4] != 0) {
             switch (flagArray[4]) {
                 case 1: {
-                    peer.setRenderingStrategyAttribute((this._renderingStrategy_0_0value as SymbolRenderingStrategy | undefined));
+                    peer.setEffectStrategyAttribute((this._effectStrategy_0_0value as SymbolEffectStrategy | undefined));
                     flagArray[4] = 2;
                     break;
                 }
@@ -182,14 +186,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[4] = 0;
-                    peer.setRenderingStrategyAttribute((undefined as SymbolRenderingStrategy | undefined));
+                    peer.setEffectStrategyAttribute((undefined as SymbolEffectStrategy | undefined));
                 }
             }
         }
         if (flagArray[5] != 0) {
             switch (flagArray[5]) {
                 case 1: {
-                    peer.setSymbolEffect0Attribute((this._symbolEffect_0_0value as SymbolEffect | undefined));
+                    peer.setRenderingStrategyAttribute((this._renderingStrategy_0_0value as SymbolRenderingStrategy | undefined));
                     flagArray[5] = 2;
                     break;
                 }
@@ -199,14 +203,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[5] = 0;
-                    peer.setSymbolEffect0Attribute((undefined as SymbolEffect | undefined));
+                    peer.setRenderingStrategyAttribute((undefined as SymbolRenderingStrategy | undefined));
                 }
             }
         }
         if (flagArray[6] != 0) {
             switch (flagArray[6]) {
                 case 1: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | global_resource_Resource | undefined));
+                    peer.setSymbolEffect0Attribute((this._symbolEffect_0_0value as SymbolEffect | undefined));
                     flagArray[6] = 2;
                     break;
                 }
@@ -216,14 +220,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[6] = 0;
-                    peer.setMinFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setSymbolEffect0Attribute((undefined as SymbolEffect | undefined));
                 }
             }
         }
         if (flagArray[7] != 0) {
             switch (flagArray[7]) {
                 case 1: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | global_resource_Resource | undefined));
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | global_resource_Resource | undefined));
                     flagArray[7] = 2;
                     break;
                 }
@@ -233,14 +237,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[7] = 0;
-                    peer.setMaxFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setMinFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[8] != 0) {
             switch (flagArray[8]) {
                 case 1: {
-                    peer.setShaderStyleAttribute((this._shaderStyle_0_0value as Array<ShaderStyle | undefined> | ShaderStyle | undefined));
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | global_resource_Resource | undefined));
                     flagArray[8] = 2;
                     break;
                 }
@@ -250,14 +254,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[8] = 0;
-                    peer.setShaderStyleAttribute((undefined as Array<ShaderStyle | undefined> | ShaderStyle | undefined));
+                    peer.setMaxFontScaleAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[9] != 0) {
             switch (flagArray[9]) {
                 case 1: {
-                    peer.setSymbolShadowAttribute((this._symbolShadow_0_0value as ShadowOptions | undefined));
+                    peer.setShaderStyleAttribute((this._shaderStyle_0_0value as Array<ShaderStyle | undefined> | ShaderStyle | undefined));
                     flagArray[9] = 2;
                     break;
                 }
@@ -267,14 +271,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[9] = 0;
-                    peer.setSymbolShadowAttribute((undefined as ShadowOptions | undefined));
+                    peer.setShaderStyleAttribute((undefined as Array<ShaderStyle | undefined> | ShaderStyle | undefined));
                 }
             }
         }
         if (flagArray[10] != 0) {
             switch (flagArray[10]) {
                 case 1: {
-                    peer.setSymbolEffect1Attribute((this._symbolEffect_1_0value as SymbolEffect | undefined), (this._symbolEffect_1_1value as boolean | undefined));
+                    peer.setSymbolShadowAttribute((this._symbolShadow_0_0value as ShadowOptions | undefined));
                     flagArray[10] = 2;
                     break;
                 }
@@ -284,14 +288,14 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[10] = 0;
-                    peer.setSymbolEffect1Attribute((undefined as SymbolEffect | undefined), (undefined as boolean | undefined));
+                    peer.setSymbolShadowAttribute((undefined as ShadowOptions | undefined));
                 }
             }
         }
         if (flagArray[11] != 0) {
             switch (flagArray[11]) {
                 case 1: {
-                    peer.setSymbolEffect2Attribute((this._symbolEffect_2_0value as SymbolEffect | undefined), (this._symbolEffect_2_1value as int32 | undefined));
+                    peer.setFontWeight1Attribute((this._fontWeight_1_0value as int32 | FontWeight | ResourceStr | undefined), (this._fontWeight_1_1value as FontWeightConfigs | undefined));
                     flagArray[11] = 2;
                     break;
                 }
@@ -301,6 +305,40 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     flagArray[11] = 0;
+                    peer.setFontWeight1Attribute((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontWeightConfigs | undefined));
+                }
+            }
+        }
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1: {
+                    peer.setSymbolEffect1Attribute((this._symbolEffect_1_0value as SymbolEffect | undefined), (this._symbolEffect_1_1value as boolean | undefined));
+                    flagArray[12] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[12] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[12] = 0;
+                    peer.setSymbolEffect1Attribute((undefined as SymbolEffect | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1: {
+                    peer.setSymbolEffect2Attribute((this._symbolEffect_2_0value as SymbolEffect | undefined), (this._symbolEffect_2_1value as int32 | undefined));
+                    flagArray[13] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[13] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[13] = 0;
                     peer.setSymbolEffect2Attribute((undefined as SymbolEffect | undefined), (undefined as int32 | undefined));
                 }
             }
@@ -355,6 +393,18 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
             switch (flagArray[2]) {
                 case 1:
                 case 3: {
+                    this.symbolColor((modifier._symbolColor_0_0value as Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined));
+                    break;
+                }
+                default: {
+                    this.symbolColor((undefined as Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined));
+                }
+            }
+        }
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.fontWeight((modifier._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     break;
                 }
@@ -363,8 +413,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[3] != 0) {
-            switch (flagArray[3]) {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
                 case 1:
                 case 3: {
                     this.effectStrategy((modifier._effectStrategy_0_0value as SymbolEffectStrategy | undefined));
@@ -375,8 +425,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[4] != 0) {
-            switch (flagArray[4]) {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
                 case 1:
                 case 3: {
                     this.renderingStrategy((modifier._renderingStrategy_0_0value as SymbolRenderingStrategy | undefined));
@@ -387,8 +437,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[5] != 0) {
-            switch (flagArray[5]) {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
                 case 1:
                 case 3: {
                     this.symbolEffect((modifier._symbolEffect_0_0value as SymbolEffect | undefined));
@@ -399,8 +449,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[6] != 0) {
-            switch (flagArray[6]) {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
                 case 1:
                 case 3: {
                     this.minFontScale((modifier._minFontScale_0_0value as double | global_resource_Resource | undefined));
@@ -411,8 +461,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[7] != 0) {
-            switch (flagArray[7]) {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
                 case 1:
                 case 3: {
                     this.maxFontScale((modifier._maxFontScale_0_0value as double | global_resource_Resource | undefined));
@@ -423,8 +473,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[8] != 0) {
-            switch (flagArray[8]) {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
                 case 1:
                 case 3: {
                     this.shaderStyle((modifier._shaderStyle_0_0value as Array<ShaderStyle | undefined> | ShaderStyle | undefined));
@@ -435,8 +485,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[9] != 0) {
-            switch (flagArray[9]) {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
                 case 1:
                 case 3: {
                     this.symbolShadow((modifier._symbolShadow_0_0value as ShadowOptions | undefined));
@@ -447,8 +497,20 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[10] != 0) {
-            switch (flagArray[10]) {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1:
+                case 3: {
+                    this.fontWeight((modifier._fontWeight_1_0value as int32 | FontWeight | ResourceStr | undefined), (modifier._fontWeight_1_1value as FontWeightConfigs | undefined));
+                    break;
+                }
+                default: {
+                    this.fontWeight((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontWeightConfigs | undefined));
+                }
+            }
+        }
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
                 case 1:
                 case 3: {
                     this.symbolEffect((modifier._symbolEffect_1_0value as SymbolEffect | undefined), (modifier._symbolEffect_1_1value as boolean | undefined));
@@ -459,8 +521,8 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (flagArray[11] != 0) {
-            switch (flagArray[11]) {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
                 case 1:
                 case 3: {
                     this.symbolEffect((modifier._symbolEffect_2_0value as SymbolEffect | undefined), (modifier._symbolEffect_2_1value as int32 | undefined));
@@ -505,105 +567,126 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
         return this
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    symbolColor(value: Array<ResourceColor> | Array<arkui_component_units_ColorMetrics> | Array<ResourceColor | arkui_component_units_ColorMetrics> | undefined): this {
         if (((this._flagArray[2]) == (0)) || (true)) {
             this._flagArray[2] = 1
-            this._fontWeight_0_0value = value
+            this._symbolColor_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[2] = 3
         }
         return this
     }
-    effectStrategy(value: SymbolEffectStrategy | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._flagArray[3]) == (0)) || (true)) {
             this._flagArray[3] = 1
-            this._effectStrategy_0_0value = value
+            this._fontWeight_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[3] = 3
         }
         return this
     }
-    renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
+    effectStrategy(value: SymbolEffectStrategy | undefined): this {
         if (((this._flagArray[4]) == (0)) || (true)) {
             this._flagArray[4] = 1
-            this._renderingStrategy_0_0value = value
+            this._effectStrategy_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[4] = 3
         }
         return this
     }
-    symbolEffect(value: SymbolEffect | undefined): this {
+    renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         if (((this._flagArray[5]) == (0)) || (true)) {
             this._flagArray[5] = 1
-            this._symbolEffect_0_0value = value
+            this._renderingStrategy_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[5] = 3
         }
         return this
     }
-    minFontScale(value: double | global_resource_Resource | undefined): this {
+    symbolEffect(value: SymbolEffect | undefined): this {
         if (((this._flagArray[6]) == (0)) || (true)) {
             this._flagArray[6] = 1
-            this._minFontScale_0_0value = value
+            this._symbolEffect_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[6] = 3
         }
         return this
     }
-    maxFontScale(value: double | global_resource_Resource | undefined): this {
+    minFontScale(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[7]) == (0)) || (true)) {
             this._flagArray[7] = 1
-            this._maxFontScale_0_0value = value
+            this._minFontScale_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[7] = 3
         }
         return this
     }
-    shaderStyle(value: Array<ShaderStyle | undefined> | ShaderStyle | undefined): this {
+    maxFontScale(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[8]) == (0)) || (true)) {
             this._flagArray[8] = 1
-            this._shaderStyle_0_0value = value
+            this._maxFontScale_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[8] = 3
         }
         return this
     }
-    symbolShadow(value: ShadowOptions | undefined): this {
+    shaderStyle(value: Array<ShaderStyle | undefined> | ShaderStyle | undefined): this {
         if (((this._flagArray[9]) == (0)) || (true)) {
             this._flagArray[9] = 1
-            this._symbolShadow_0_0value = value
+            this._shaderStyle_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[9] = 3
         }
         return this
     }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
-        if (((this._flagArray[10]) == (0)) || (true) || ((this._symbolEffect_1_1value) !== (isActive))) {
+    symbolShadow(value: ShadowOptions | undefined): this {
+        if (((this._flagArray[10]) == (0)) || (true)) {
             this._flagArray[10] = 1
-            this._symbolEffect_1_0value = symbolEffect
-            this._symbolEffect_1_1value = isActive
+            this._symbolShadow_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[10] = 3
         }
         return this
     }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
-        if (((this._flagArray[11]) == (0)) || (true) || ((this._symbolEffect_2_1value) !== (triggerValue))) {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        if (((this._flagArray[11]) == (0)) || (true) || (true)) {
             this._flagArray[11] = 1
+            this._fontWeight_1_0value = value
+            this._fontWeight_1_1value = fontWeightConfigs
+            this._state.fireChange()
+        } else {
+            this._flagArray[11] = 3
+        }
+        return this
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
+        if (((this._flagArray[12]) == (0)) || (true) || ((this._symbolEffect_1_1value) !== (isActive))) {
+            this._flagArray[12] = 1
+            this._symbolEffect_1_0value = symbolEffect
+            this._symbolEffect_1_1value = isActive
+            this._state.fireChange()
+        } else {
+            this._flagArray[12] = 3
+        }
+        return this
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue: int32 | undefined): this {
+        if (((this._flagArray[13]) == (0)) || (true) || ((this._symbolEffect_2_1value) !== (triggerValue))) {
+            this._flagArray[13] = 1
             this._symbolEffect_2_0value = symbolEffect
             this._symbolEffect_2_1value = triggerValue
             this._state.fireChange()
         } else {
-            this._flagArray[11] = 3
+            this._flagArray[13] = 3
         }
         return this
     }

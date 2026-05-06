@@ -116,6 +116,7 @@ public:
     static void CreateStatic();
     static void SetSideBarContainerTypeStatic(SideBarContainerType type);
     static void ResetControlButtonStatic();
+    static void SetShowSideBarWithGesture(FrameNode* frameNode, bool showSideBarWithGesture);
 
 private:
     void MarkNeedInitRealSideBarWidth() override;

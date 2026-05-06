@@ -2932,6 +2932,18 @@ typedef enum {
 } ArkUI_FocusMove;
 
 /**
+ * @brief Enumerates whether accessibility default focus is enabled.
+ *
+ * @since 26
+ */
+typedef enum {
+    /** Accessibility default focus is disabled. */
+    ARKUI_ACCESSIBILITY_DEFAULT_FOCUS_DISABLED = 0,
+    /** Accessibility default focus is enabled. */
+    ARKUI_ACCESSIBILITY_DEFAULT_FOCUS_ENABLED,
+} ArkUI_AccessibilityDefaultFocus;
+
+/**
  * @brief Enumerates the edge derection.
  *
  * @since 20
@@ -9551,6 +9563,20 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_GetStyledString(
  */
 ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetStyledPlaceholder(
     const OH_ArkUI_TextEditorStyledStringController* controller, const ArkUI_StyledString_Descriptor* descriptor);
+
+/**
+ * @brief Scroll the text editor component to make the specified content visible.
+ *
+ * @param controller <b>TextEditor</b> styled string controller.
+ * @param start The start offset of the content to be made visible.
+ * @param end The end offset of the content to be made visible
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_ScrollToVisible(
+    const OH_ArkUI_TextEditorStyledStringController* controller, int32_t start, int32_t end);
 
 /**
  * @brief Creates a TextEditor selection menu options object.

@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/smart_gesture_property.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
@@ -70,6 +71,7 @@
 #include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/finger_info_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
@@ -90,6 +92,7 @@
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/text_field_modifier.h"
+#include "core/interfaces/native/implementation/search_modifier_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -97,10 +100,13 @@
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
+#include "dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components/common/properties/placement.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -486,6 +492,40 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (keyboardAvoidMode.has_value()) {
         popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
     }
+
+    // Parse lifecycle callbacks
+    auto arkOnWillAppear = GetOpt(src.onWillAppear);
+    if (arkOnWillAppear.has_value()) {
+        auto onWillAppearCallback = [arkCallback = CallbackHelper(*arkOnWillAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillAppear(std::move(onWillAppearCallback));
+    }
+
+    auto arkOnDidAppear = GetOpt(src.onDidAppear);
+    if (arkOnDidAppear.has_value()) {
+        auto onDidAppearCallback = [arkCallback = CallbackHelper(*arkOnDidAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidAppear(std::move(onDidAppearCallback));
+    }
+
+    auto arkOnWillDisappear = GetOpt(src.onWillDisappear);
+    if (arkOnWillDisappear.has_value()) {
+        auto onWillDisappearCallback = [arkCallback = CallbackHelper(*arkOnWillDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillDisappear(std::move(onWillDisappearCallback));
+    }
+
+    auto arkOnDidDisappear = GetOpt(src.onDidDisappear);
+    if (arkOnDidDisappear.has_value()) {
+        auto onDidDisappearCallback = [arkCallback = CallbackHelper(*arkOnDidDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
+    }
+
     auto material = OptConvert<UiMaterial*>(src.systemMaterial);
     if (material.has_value()) {
         popupParam->SetSystemMaterial(material.value()->Copy());
@@ -840,6 +880,10 @@ auto g_bindMenuOptionsParam = [](
     auto scrollBarOpt = OptConvert<DisplayMode>(menuOptions.scrollBar);
     if (scrollBarOpt.has_value()) {
         menuParam.scrollBar = scrollBarOpt.value();
+    }
+    auto tarGetValue = OptConvert<Dimension>(menuOptions.targetSpace);
+    if (tarGetValue.has_value()) {
+        menuParam.targetSpace = tarGetValue.value();
     }
     auto maxHeightOpt = OptConvert<Dimension>(menuOptions.maxHeight);
     Validator::ValidateNonNegative(maxHeightOpt);
@@ -2181,6 +2225,26 @@ NG::AccessibilityGroupOptions Convert(const Ark_AccessibilityOptions& src)
     return groupOptions;
 }
 
+template<>
+NG::SmartGestureShortcutConfig Convert(const Ark_SmartGestureShortcutOptions& src)
+{
+    NG::SmartGestureShortcutConfig config;
+    config.action = NG::SmartGestureShortcutAction::PRIMARY;
+    config.enabled = Converter::OptConvert<bool>(src.enabled).value_or(false);
+    config.selectable = Converter::OptConvert<bool>(src.selectable).value_or(false);
+    auto arkAction = Converter::OptConvert<Ark_GestureShortcut>(src.action);
+    if (arkAction.has_value()) {
+        switch (arkAction.value()) {
+            case ARK_GESTURE_SHORTCUT_PRIMARY:
+                config.action = NG::SmartGestureShortcutAction::PRIMARY;
+                break;
+            default:
+                break;
+        }
+    }
+    return config;
+}
+
 void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContext *ctx)
 {
     dst.windowX = ArkValue<Ark_Float64>(src.windowPoint.GetX());
@@ -2217,19 +2281,12 @@ void AssignCast(std::optional<GestureJudgeResult> &dst, const Ark_GestureJudgeRe
 
 void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
 {
-    dst.id = ArkValue<Ark_Int32>(src.fingerId_);
-    dst.globalX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetX()));
-    dst.globalY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetY()));
-    dst.localX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
-    dst.localY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
-    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetX()));
-    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetY()));
-    // Handle globalDisplayX/Y
-    dst.globalDisplayX =
-        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
-    dst.globalDisplayY =
-        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
-    dst.hand = ArkValue<Opt_InteractionHand>(static_cast<Ark_InteractionHand>(src.operatingHand_));
+    if (!dst) {
+        dst = PeerUtils::CreatePeer<FingerInfoPeer>();
+    }
+    CHECK_NULL_VOID(dst);
+
+    dst->SetHandler(src);
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -2614,6 +2671,8 @@ void SetMarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetMarginImpl(node, value);
+    } else if (frameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        SearchModifier::SetMarginImpl(node, value);
     } else {
         ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
     }
@@ -3237,6 +3296,7 @@ void SetOnClick0Impl(Ark_NativePointer node,
     }
     auto onClick = [callback = CallbackHelper(*optValue)](GestureEvent& info) {
         const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
+        ACE_BENCH_MARK_TRACE("OnClickEvent_end");
         callback.InvokeSync(event.ArkValue());
     };
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
@@ -3260,6 +3320,7 @@ void SetOnHoverImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
         const auto event = Converter::SyncEvent<Ark_HoverEvent>(hoverInfo);
+        ACE_BENCH_MARK_TRACE("OnHoverEvent_end isHover:%d", isHover);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     ViewAbstract::SetOnHover(frameNode, std::move(onHover));
@@ -3353,6 +3414,8 @@ void SetOnMouseImpl(Ark_NativePointer node,
     auto onMouse = [arkCallback = CallbackHelper(*optValue), node = weakNode](MouseInfo& mouseInfo) {
         PipelineContext::SetCallBackNode(node);
         const auto event = Converter::SyncEvent<Ark_MouseEvent>(mouseInfo);
+        ACE_BENCH_MARK_TRACE("OnMouseEvent_end type:%d button:%d", static_cast<int32_t>(mouseInfo.GetAction()),
+            static_cast<int32_t>(mouseInfo.GetButton()));
         arkCallback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
@@ -3385,6 +3448,9 @@ void SetOnTouchImpl(Ark_NativePointer node,
             .changedTouches = Converter::ArkValue<Array_TouchObject>(info.GetChangedTouches(), Converter::FC),
             .ptr = &info
         };
+        ACE_BENCH_MARK_TRACE("OnTouchEvent_end type:%d",
+            static_cast<int32_t>(info.GetChangedTouches().size() > 0 ?
+            info.GetChangedTouches().front().GetTouchType() : static_cast<TouchType>(0)));
         arkCallback.InvokeSync(proxy);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
@@ -3403,6 +3469,7 @@ void SetOnKeyEventImpl(Ark_NativePointer node,
         auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::SyncEvent<Ark_KeyEvent>(info);
+            ACE_BENCH_MARK_TRACE("OnKeyEvent_end type:%d", info.GetKeyType());
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(
                 event.ArkValue());
             return Converter::Convert<bool>(arkResult);
@@ -3515,6 +3582,7 @@ void SetOnAxisEventImpl(Ark_NativePointer node,
     auto onAxis = [callback = CallbackHelper(*optValue), node = weakNode](AxisInfo& info) {
         PipelineContext::SetCallBackNode(node);
         const auto arkInfo = Converter::SyncEvent<Ark_AxisEvent>(info);
+        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
         callback.InvokeSync(arkInfo.ArkValue());
     };
     ViewAbstract::SetOnAxisEvent(frameNode, std::move(onAxis));
@@ -5307,6 +5375,29 @@ void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
+void SetShouldRecognizerParallelWithImpl(Ark_NativePointer node,
+                                         const ShouldRecognizerParallelWithCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || !CallbackHelper(*value).IsValid()) {
+        ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*value), node = weakNode](
+        const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
+    ) -> RefPtr<NG::NGGestureRecognizer> {
+        PipelineContext::SetCallBackNode(node);
+
+        auto arkValCurrent = CreateArkGestureRecognizer(current);
+        auto arkValOthers = CreateArkGestureRecognizerArray(others);
+        auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
+            Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
+        return resultOpt.value_or(nullptr);
+    };
+    ViewAbstract::SetShouldRecognizerParallelWith(frameNode, std::move(shouldRecognizerParallelWithFunc));
+}
 void SetMonopolizeEventsImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)
 {
@@ -5502,6 +5593,15 @@ void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstractModelNG::SetAccessibilityActionOptions(frameNode, actions);
+}
+void SetSmartGestureShortcutImpl(Ark_NativePointer node,
+                                 const Ark_SmartGestureShortcutOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
+    ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
 }
 void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
                                const Opt_OnNeedSoftkeyboardCallback* value)
@@ -5737,6 +5837,7 @@ void SetOnClick1Impl(Ark_NativePointer node,
     }
     auto onEvent = [callback = CallbackHelper(*optEvent)](GestureEvent& info) {
         const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
+        ACE_BENCH_MARK_TRACE("OnClickEvent_end");
         callback.InvokeSync(event.ArkValue());
     };
     auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);
@@ -6864,6 +6965,15 @@ void SetDebugLineImpl(Ark_NativePointer node,
     
     ViewAbstractModelNG::SetDebugLineSta(uiNode, debugLine);
 }
+
+void SetInspectorLabelImpl(Ark_NativePointer node,
+                           const Opt_String* label)
+{
+    auto uiNode = static_cast<UINode *>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto labelOpt = Converter::OptConvertPtr<std::string>(label);
+    ViewAbstractModelStatic::SetInspectorLabelSta(uiNode, labelOpt.value_or(""));
+}
 } // CommonMethodModifier
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
 {
@@ -7023,6 +7133,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnGestureJudgeBeginImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin0Impl,
         CommonMethodModifier::SetShouldBuiltInRecognizerParallelWithImpl,
+        CommonMethodModifier::SetShouldRecognizerParallelWithImpl,
         CommonMethodModifier::SetMonopolizeEventsImpl,
         CommonMethodModifier::SetOnTouchInterceptImpl,
         CommonMethodModifier::SetOnSizeChangeImpl,
@@ -7033,6 +7144,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
+        CommonMethodModifier::SetSmartGestureShortcutImpl,
+        CommonMethodModifier::SetInspectorLabelImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

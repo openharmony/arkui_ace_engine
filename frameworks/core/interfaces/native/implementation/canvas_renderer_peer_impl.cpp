@@ -15,6 +15,7 @@
 
 
 #include <cmath>
+#include <regex>
 
 #include "canvas_renderer_peer_impl.h"
 

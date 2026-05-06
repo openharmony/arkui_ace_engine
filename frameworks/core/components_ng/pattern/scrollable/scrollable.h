@@ -22,24 +22,24 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/system_properties.h"
 #include "core/animation/animator.h"
-#include "core/animation/friction_motion.h"
-#include "core/animation/scroll_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/render/animation_utils.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
-#include "core/gestures/raw_recognizer.h"
-#include "core/gestures/timeout_recognizer.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#include "core/common/vibrator/vibrator_utils.h"
 #endif
 
+namespace OHOS::Ace {
+class ExtentPair;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
+constexpr float FRICTION_FINAL_POSITION_THRESHOLD = 60.0f;
+
 struct SlidInfo {
     double gestureVelocity {0.0};
     double velocityScale {0.0};
@@ -61,6 +61,7 @@ using MouseLeftButtonScroll = std::function<bool()>;
 using ContinuousSlidingCallback = std::function<double()>;
 using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
+using BackToTopCallback = std::function<bool()>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using IsReverseCallback = std::function<bool()>;
@@ -508,6 +509,11 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
+    void SetBackToTopCallback(BackToTopCallback&& backToTopCallback)
+    {
+        backToTopCallback_ = std::move(backToTopCallback);
+    }
+
     void StartScrollSnapAnimation(
         float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar, int32_t source = SCROLL_FROM_NONE);
 
@@ -556,6 +562,21 @@ public:
     void SetIsScrollBarDragging(bool isScrollBarDragging)
     {
         isScrollBarDragging_ = isScrollBarDragging;
+    }
+
+    void SetIsSmartGestureFling(bool isSmartGestureFling)
+    {
+        isSmartGestureFling_ = isSmartGestureFling;
+    }
+
+    bool GetIsSmartGestureFling() const
+    {
+        return isSmartGestureFling_;
+    }
+
+    bool GetIsTouchStopAnimation()
+    {
+        return isTouchStopAnimation_;
     }
 
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
@@ -706,7 +727,7 @@ private:
     void SetDelayedTask();
     void MarkNeedFlushAnimationStartTime();
     float GetFrictionVelocityByFinalPosition(
-        float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
+        float final, float position, float signum, float friction, float threshold = FRICTION_FINAL_POSITION_THRESHOLD);
     void CalcOverScrollVelocity();
     double CalcNextStep(double position, double mainDelta);
 
@@ -721,6 +742,7 @@ private:
     void StartVibrateFeedback();
 #endif
 
+    bool isSmartGestureFling_ = false;
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEndCallback_;
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
@@ -803,6 +825,7 @@ private:
     bool needScrollSnapChange_ = false;
     StartSnapAnimationCallback startSnapAnimationCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
+    BackToTopCallback backToTopCallback_;
     std::list<GestureEventFunc> panActionEndEvents_;
     GestureEventFunc actionEnd_;
 

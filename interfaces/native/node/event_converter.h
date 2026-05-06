@@ -20,7 +20,7 @@
 #include "native_node.h"
 #include "native_type.h"
 
-#include "core/event/key_event.h"
+#include "core/event/key_code.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
 struct ArkUI_NodeEvent {

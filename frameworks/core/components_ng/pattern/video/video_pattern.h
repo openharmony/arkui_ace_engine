@@ -29,8 +29,8 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/rect.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;

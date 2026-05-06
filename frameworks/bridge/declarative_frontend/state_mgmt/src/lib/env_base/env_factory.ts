@@ -28,6 +28,10 @@ interface EnvTypeMap {
   'system.window.size.px': WindowSizePxEnv;
   'system.window.avoidarea': WindowAvoidAreaVpEnv;
   'system.window.avoidarea.px': WindowAvoidAreaPxEnv;
+  'system.window.focused': WindowFocusedEnv;
+  'system.window.highlighted': WindowHighlightedEnv;
+  'system.window.density.system': SystemDensityEnv;
+  'system.window.displayid': DisplayIdEnv;
 }
 
 /**
@@ -92,4 +96,74 @@ const envFactoryMap: {
     stateMgmtConsole.debug(`create WindowAvoidAreaPxEnv.`);
     return new WindowAvoidAreaPxEnv(context);
   },
+  'system.window.focused': (context: UIContext) => {
+    const WindowFocusedEnv = requireNapi('window.windowfocusenv').WindowFocusedEnv;
+    if (typeof WindowFocusedEnv !== 'function') {
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowFocusedEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowFocusedEnv.`);
+    return new WindowFocusedEnv(context);
+  },
+  'system.window.highlighted': (context: UIContext) => {
+    const WindowHighlightedEnv = requireNapi('window.windowfocusenv').WindowHighlightedEnv;
+    if (typeof WindowHighlightedEnv !== 'function') {
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowHighlightedEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowHighlightedEnv.`);
+    return new WindowHighlightedEnv(context);
+  },
+  'system.window.density.system': (context: UIContext) => {
+    const SystemDensityEnv = requireNapi('window.systemdensityenv').SystemDensityEnv;
+    if (typeof SystemDensityEnv !== 'function') {
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'SystemDensityEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create SystemDensityEnv.`);
+    return new SystemDensityEnv(context);
+  },
+  'system.window.displayid': (context: UIContext) => {
+    const DisplayIdEnv = requireNapi('window.displayidenv').DisplayIdEnv;
+    if (typeof DisplayIdEnv !== 'function') {
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'DisplayIdEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create DisplayIdEnv.`);
+    return new DisplayIdEnv(context);
+  },
 };
+
+
+type SimpleEnvValueType = 'number' | 'boolean';
+
+interface SimpleEnvMetaItem<K extends keyof EnvTypeMap> {
+  prop: keyof EnvTypeMap[K];
+  type: SimpleEnvValueType;
+}
+
+type SimpleEnvMeta = Partial<{
+  [K in keyof EnvTypeMap]: SimpleEnvMetaItem<K>;
+}>;
+
+// add env key and property name and type here
+const simpleEnvMetaMap = {
+  'system.window.density.system': {
+    prop: 'systemDensity',
+    type: 'number',
+  },
+  'system.window.displayid': {
+    prop: 'displayId',
+    type: 'number',
+  },
+  'system.window.focused': {
+    prop: 'isFocused',
+    type: 'boolean',
+  },
+  'system.window.highlighted': {
+    prop: 'isHighlighted',
+    type: 'boolean',
+  },
+} as const satisfies SimpleEnvMeta;
+
+type SimpleTypeEnvKey = keyof typeof simpleEnvMetaMap;

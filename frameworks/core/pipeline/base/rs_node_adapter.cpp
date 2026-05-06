@@ -18,6 +18,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "render_service_client/core/ui/rs_depth_node.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -36,7 +37,21 @@ std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateCanvasNode()
         }
         return canvasNode;
     }
+    LOGW("CreateCanvasNode rsUIContext is null");
     return Rosen::RSCanvasNode::Create();
+}
+
+std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateDepthNode()
+{
+    auto rsUIContext = GetRSUIContext();
+    if (rsUIContext) {
+        auto depthNode = Rosen::RSDepthNode::Create(false, false, rsUIContext);
+        if (depthNode) {
+            depthNode->SetSkipCheckInMultiInstance(true);
+        }
+        return depthNode;
+    }
+    return Rosen::RSDepthNode::Create(false, false, nullptr);
 }
 
 std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateRootNode()
@@ -49,6 +64,7 @@ std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateRootNode()
         }
         return rootNode;
     }
+    LOGW("CreateCanvasNode rsUIContext is null");
     return Rosen::RSRootNode::Create();
 }
 
@@ -63,6 +79,7 @@ std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateSurfaceNode(
         }
         return surfaceNode;
     }
+    LOGW("CreateCanvasNode rsUIContext is null");
     return Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 
@@ -84,6 +101,7 @@ std::shared_ptr<Rosen::RSUIContext> RsNodeAdapter::GetRSUIContext()
     if (rsUIDirector) {
         return rsUIDirector->GetRSUIContext();
     }
+    LOGW("rsUIDirector rsUIContext is null");
     return nullptr;
 }
 }

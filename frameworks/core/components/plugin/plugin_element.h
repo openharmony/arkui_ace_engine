@@ -53,6 +53,9 @@ public:
 
 private:
     void RunPluginContainer();
+    void RegisterCompleteEvent();
+    void RegisterUpdateEvent();
+    void RegisterErrorEvent();
     void InitEvent(const RefPtr<PluginComponent>& component);
     void SplitString(const std::string& str, char tag, std::vector<std::string>& strList) const;
     void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);

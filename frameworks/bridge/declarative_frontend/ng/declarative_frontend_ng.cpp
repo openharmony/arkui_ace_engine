@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "core/common/recorder/node_data_cache.h"

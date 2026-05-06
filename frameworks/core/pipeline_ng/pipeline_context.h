@@ -30,8 +30,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
-#include "core/accessibility/accessibility_manager_ng.h"
-#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/color_inverter.h"
 #include "core/common/frontend.h"
 #include "core/common/thp_extra_manager.h"
@@ -43,7 +41,6 @@
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/memory/memory_manager.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -53,7 +50,6 @@
 #include "core/common/ace_translate_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
@@ -73,6 +69,7 @@ namespace OHOS::Ace::NG {
 }
 
 namespace OHOS::Ace {
+class AIWriteAdapter;
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
 } // namespace OHOS::Ace
@@ -90,7 +87,10 @@ class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
 class SafeAreaManager;
 class SelectOverlayManager;
+class NavigationManager;
+class StageManager;
 class UIExtensionManager;
+class AccessibilityManagerNG;
 class ForceSplitManager;
 class FormVisibleManager;
 class FormEventManager;
@@ -98,6 +98,7 @@ class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
 class DynamicComponentSafeManager;
+class EnvironmentManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -552,6 +553,11 @@ public:
         return frameRateManager_;
     }
 
+    const RefPtr<EnvironmentManager>& GetEnvironmentManager() const
+    {
+        return environmentManager_;
+    }
+
     void FlushBuild() override;
 
     void FlushPipelineImmediately() override;
@@ -909,7 +915,7 @@ public:
     void ResetDragging() override;
     const RefPtr<PostEventManager>& GetPostEventManager();
 
-    RefPtr<FrameNode> GetContainerModalNode();
+    RefPtr<FrameNode> GetContainerModalNode() const;
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
@@ -953,10 +959,7 @@ public:
         return memoryMgr_;
     }
 
-    const RefPtr<NavigationManager>& GetNavigationManager() const
-    {
-        return navigationMgr_;
-    }
+    const RefPtr<NavigationManager>& GetNavigationManager() const;
 
     const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
 
@@ -1252,13 +1255,7 @@ public:
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
     }
 
-    WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter()
-    {
-        if (!aiWriteAdapter_) {
-            aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
-        }
-        return aiWriteAdapter_;
-    }
+    ACE_FORCE_EXPORT WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter();
 
     int32_t RegisterRotationEndCallback(std::function<void()>&& callback)
     {
@@ -1337,6 +1334,11 @@ public:
     {
         xComponentDisplayConstraintEnabled_ = isEnable;
     }
+
+    void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback);
+    void UnregisterTouchTimingCallback();
 
     bool GetXComponentDisplayConstraintEnabled() override
     {
@@ -1429,6 +1431,8 @@ private:
 
     void DumpSimplifyTreeJsonEntrance(
         std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
+
+    void DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const;
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
@@ -1541,6 +1545,8 @@ private:
     void ResSchedReportAxisEvent(const AxisEvent& event) const;
 
     void OnShowHideForAccessibility(bool isOnShow);
+
+    void SetupPageStackCallbacks();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1698,11 +1704,12 @@ private:
 
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
-    RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    RefPtr<NavigationManager> navigationMgr_;
     RefPtr<ForceSplitManager> forceSplitMgr_;
     RefPtr<FormVisibleManager> formVisibleMgr_;
     RefPtr<FormEventManager> formEventMgr_;
     RefPtr<FormGestureManager> formGestureMgr_;
+    RefPtr<EnvironmentManager> environmentManager_;
     std::unique_ptr<RecycleManager> recycleManager_;
     ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
@@ -1733,7 +1740,7 @@ private:
     RotationEndCallbackMap rotationEndCallbackMap_ {};
     friend class ScopedLayout;
     friend class FormGestureManager;
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_;
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
     std::unordered_map<int32_t, bool> keyOcclusionNodes_;
     RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;

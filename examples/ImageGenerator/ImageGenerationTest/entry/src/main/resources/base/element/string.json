@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "ImageGeneration Test Module"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "ImageGeneration Test Entry Ability"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "ImageGenerationTest"
+    }
+  ]
+}

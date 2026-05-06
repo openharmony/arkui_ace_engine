@@ -77,6 +77,8 @@ const char JS_REPEAT_ETS_TAG[] = "Repeat";
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
 // js with theme node
 const char JS_WITH_THEME_ETS_TAG[] = "WithTheme";
+// js with env node
+const char JS_WITH_ENV_ETS_TAG[] = "WithEnv";
 // js node slot
 const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
 
@@ -138,6 +140,7 @@ const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
 const char BAR_ITEM_ETS_TAG[] = "BarItem";
 const char TITLE_BAR_ETS_TAG[] = "TitleBar";
 const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
+const char NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG[] = "NavigationFullScreenOverlay";
 const char TOOL_BAR_ETS_TAG[] = "ToolBar";
 const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
@@ -680,6 +683,9 @@ const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 
 // UIPickerComponent
 const char CONTAINER_PICKER_ETS_TAG[] = "UIPickerComponent";
+
+// DepthComponent
+const char DEPTH_COMPONENT_ETS_TAG[] = "DepthComponent";
 
 // UndefinedNode
 const char UNDEFINED_NODE_ETS_TAG[] = "";

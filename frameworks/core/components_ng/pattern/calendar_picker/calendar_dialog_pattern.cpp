@@ -86,11 +86,18 @@ void CalendarDialogPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const bool isTargetApi26Plus = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX);
-    const bool freezeTitleArrowsInThemeScope =
-        isTargetApi26Plus && host && host->GetThemeScopeId() != 0 && hasInitTitleArrowsColor_;
-    // Target API 26+: non-default theme scope (e.g. WithTheme) should keep title arrow images and tint
-    // colors stable after the first color apply; skip both updates on repeated OnModifyDone so system
-    // dark/light switches do not swap resources or override the scoped palette.
+    auto titleNode = titleNode_.Upgrade();
+    CHECK_NULL_VOID(titleNode);
+    const bool currentScopedExplicitColorMode = titleNode->GetThemeScopeId() != 0 &&
+        titleNode->GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED;
+    if (currentScopedExplicitColorMode) {
+        hasScopedExplicitColorMode_ = true;
+    }
+    const bool freezeTitleArrowsInThemeScope = isTargetApi26Plus &&
+        hasScopedExplicitColorMode_ && hasInitTitleArrowsColor_;
+    // Target API 26+: for non-default theme scope with explicit LIGHT/DARK, keep title arrow images and tint
+    // colors stable after the first color apply. For SYSTEM mode (COLOR_MODE_UNDEFINED), continue to refresh
+    // arrows on each OnModifyDone so the dialog follows runtime dark/light changes.
     // Below target API 26: freezeTitleArrowsInThemeScope is always false; always refresh both.
     if (!freezeTitleArrowsInThemeScope) {
         UpdateTitleArrowsImage();
@@ -158,6 +165,9 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             buttonNode->MarkModifyDone();
 
             auto image = buttonNode->GetChildren().front();
@@ -273,6 +283,8 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto button = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(button);
+            auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
             bool cancelNotUpdateBGColor =
                 buttonIndex == OPTION_CANCEL_BUTTON_INDEX && !updateColorFlags[CANCEL_BUTTON_BACKGROUND_COLOR_INDEX];
             bool acceptNotUpdateBGColor =
@@ -282,6 +294,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
                                           ? Color::TRANSPARENT
                                           : calendarTheme->GetDialogButtonBackgroundColor();
                 button->GetRenderContext()->UpdateBackgroundColor(defaultBGColor);
+                buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             }
 
             auto text = button->GetChildren().front();
@@ -295,6 +308,8 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
                 buttonIndex == OPTION_ACCEPT_BUTTON_INDEX && !updateColorFlags[ACCEPT_BUTTON_FONT_COLOR_INDEX];
             if (!(cancelNotUpdateFontColor || acceptNotUpdateFontColor)) {
                 textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+                buttonLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+                buttonLayoutProperty->UpdateFontColorFlagByUser(true);
             }
             textNode->MarkModifyDone();
 
@@ -1543,11 +1558,17 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
 {
     auto titleNode = titleNode_.Upgrade();
     CHECK_NULL_VOID(titleNode);
-    // Target API 26+: non-default theme scope (e.g. WithTheme) keeps the dialog title in the originally
-    // scoped palette and ignores subsequent system dark/light configuration updates here.
+    // Target API 26+: non-default theme scope with explicit LIGHT/DARK keeps the dialog title in the
+    // originally scoped palette and ignores subsequent system dark/light configuration updates here.
+    // For SYSTEM mode (COLOR_MODE_UNDEFINED), continue to refresh with runtime configuration.
     // Below target API 26: always apply configuration-driven title color refresh.
-    if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        titleNode->GetThemeScopeId() != 0) {
+    const bool isTargetApi26Plus = titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX);
+    const bool currentScopedExplicitColorMode = titleNode->GetThemeScopeId() != 0 &&
+        titleNode->GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED;
+    if (currentScopedExplicitColorMode) {
+        hasScopedExplicitColorMode_ = true;
+    }
+    if (isTargetApi26Plus && hasScopedExplicitColorMode_) {
         return;
     }
     RefPtr<CalendarTheme> theme = titleNode->GetTheme<CalendarTheme>(true);

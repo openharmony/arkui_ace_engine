@@ -37,7 +37,8 @@ enum class SmartGestureOperateIntention : uint8_t {
 };
 
 enum class SmartGestureProposalType : uint8_t {
-    CLICK = 0,
+    NONE_ACTION = 0,
+    CLICK,
     SELECT,
     SCROLL,
     BACK_PRESS,
@@ -64,19 +65,18 @@ struct ScrollingConfig {
 };
 
 struct SmartGestureProposal {
-    SmartGestureProposalType type = SmartGestureProposalType::BACK_PRESS;
+    SmartGestureProposalType type = SmartGestureProposalType::NONE_ACTION;
     SmartGestureOperateIntention operateIntention = SmartGestureOperateIntention::TAP;
     WeakPtr<FrameNode> targetNode;
     std::optional<ScrollingConfig> scrollingConfig;
 
     SmartGestureProposal() = default;
-    explicit SmartGestureProposal(
-        SmartGestureProposalType proposalType, SmartGestureOperateIntention intention =
-            SmartGestureOperateIntention::TAP)
+    explicit SmartGestureProposal(SmartGestureProposalType proposalType,
+        SmartGestureOperateIntention intention = SmartGestureOperateIntention::TAP)
         : type(proposalType), operateIntention(intention)
     {}
-    SmartGestureProposal(SmartGestureProposalType proposalType, SmartGestureOperateIntention intention,
-        const RefPtr<FrameNode>& node)
+    SmartGestureProposal(
+        SmartGestureProposalType proposalType, SmartGestureOperateIntention intention, const RefPtr<FrameNode>& node)
         : type(proposalType), operateIntention(intention), targetNode(node)
     {}
     SmartGestureProposal(SmartGestureProposalType proposalType, SmartGestureOperateIntention intention,

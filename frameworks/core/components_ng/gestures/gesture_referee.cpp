@@ -614,4 +614,57 @@ void GestureReferee::SetRecognizerDelayStatus(const RecognizerDelayStatus& recog
         RecallOnAcceptGesture();
     }
 }
+
+namespace {
+// Recursively walk a recognizer: if it's a RecognizerGroup, descend into
+// its children. Returns false to stop the whole walk. Pan-gesture-escape
+// needs this because siblings like ScrollablePattern's own scroll-Pan
+// sometimes appear in the arena wrapped inside a PanGestureGroup / parallel
+// group, not as direct scope members. Without the descent the callback
+// would only see the outer group and miss the actual PanRecognizer's.
+bool WalkRecognizerForEach(const RefPtr<NGGestureRecognizer>& recognizer,
+    const std::function<bool(const RefPtr<NGGestureRecognizer>&)>& callback)
+{
+    if (!recognizer) {
+        return true;
+    }
+    auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+    if (group) {
+        for (const auto& child : group->GetGroupRecognizer()) {
+            if (!WalkRecognizerForEach(child, callback)) {
+                return false;
+            }
+        }
+    }
+    if (!callback(recognizer)) {
+        return false;
+    }
+    return true;
+}
+} // namespace
+
+bool GestureScope::ForEachRecognizer(
+    const std::function<bool(const RefPtr<NGGestureRecognizer>&)>& callback)
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (!WalkRecognizerForEach(recognizer, callback)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void GestureReferee::ForEachRecognizer(
+    const std::function<bool(const RefPtr<NGGestureRecognizer>&)>& callback)
+{
+    for (auto& [touchId, scope] : gestureScopes_) {
+        if (!scope) {
+            continue;
+        }
+        if (!scope->ForEachRecognizer(callback)) {
+            break;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

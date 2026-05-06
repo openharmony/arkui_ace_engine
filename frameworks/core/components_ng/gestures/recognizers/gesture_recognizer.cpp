@@ -16,7 +16,6 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/event/gesture_info.h"
 #include "ui/base/referenced.h"
-#include "ui/base/utils/utils.h"
 
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
@@ -24,8 +23,9 @@
 #include "core/common/event_manager.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -136,6 +136,13 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 
 bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
 {
+    // Pan-gesture-escape: a finger that has been pushed out of this recognizer
+    // must not feed it further events of any kind. We filter at the very top
+    // of ProcessTouchEvent so neither MOVE updates nor DOWN/UP transitions
+    // can resurrect tracking state for an escaped finger.
+    if (IsFingerEscaped(point.id)) {
+        return true;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
@@ -242,6 +249,9 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 
 void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
 {
+    if (IsFingerEscaped(point.id)) {
+        return;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
@@ -754,6 +764,7 @@ void NGGestureRecognizer::HandleGestureAccept(
 
 void NGGestureRecognizer::ReportToGestureDebugManager(GestureCallbackType type, GestureListenerType listenerType)
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     auto node = GetAttachedNode().Upgrade();
     CHECK_NULL_VOID(node);
     if (SystemProperties::GetGestureDebugBoundaryEnabled()) {
@@ -764,11 +775,11 @@ void NGGestureRecognizer::ReportToGestureDebugManager(GestureCallbackType type, 
         auto& manager = eventManager->GetGestureDebugBoundaryManager();
         CHECK_NULL_VOID(manager);
         if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
-            manager->HandleGestureEnd(listenerType, node);
-        } else {
-            manager->HandleGestureAccept(listenerType, node);
+            return;
         }
+        manager->HandleGestureAccept(listenerType, node);
     }
+#endif
 }
 
 GestureActionPhase NGGestureRecognizer::GetActionPhase(

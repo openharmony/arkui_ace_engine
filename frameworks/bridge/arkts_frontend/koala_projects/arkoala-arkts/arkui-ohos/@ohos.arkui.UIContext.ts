@@ -27,7 +27,7 @@ import { UIAbilityContext, ExtensionContext } from "#external"
 import { UIObserverGestureEventOps, DetachedRootEntryManager, FocusControllerImpl, ComponentUtilsImpl,
     ComponentSnapshotImpl, DragControllerImpl, AtomicServiceBarInternal, UIInspectorImpl, ContextMenuControllerImpl,
     CursorControllerImpl, OverlayManagerImpl, PromptActionImpl, FontImpl, MeasureUtilsImpl, MagnifierImpl,
-    TextMenuControllerImpl, RouterImpl, MediaQueryImpl } from "arkui/base/UIContextImpl"
+    TextMenuControllerImpl, RouterImpl, MediaQueryImpl, SmartGestureControllerImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot, NodeIdentity } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
@@ -49,7 +49,7 @@ import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
 import { ComponentContent, ComponentContentBase } from 'arkui/ComponentContent';
 import overlayManager from '@ohos/overlayManager';
-import promptAction, { LevelOrder } from '@ohos/promptAction';
+import promptAction, { LevelOrder, LevelMode } from '@ohos/promptAction';
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 import { CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/framework';
 import { Router as RouterExt, AsyncCallback } from 'arkui/base';
@@ -68,14 +68,14 @@ import { BusinessError } from "@ohos.base"
 import { ArkUIGeneratedNativeModule } from '#components';
 import { GlobalScopeUicontextFontScale } from "#generated"
 import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
-import { RawInputEventType } from 'arkui/component/enums';
+import { RawInputEventType, SmartGestureAction, OperateIntention } from 'arkui/component/enums';
 
-export const enum GestureActionPhase {
+export enum GestureActionPhase {
     WILL_START = 0,
     WILL_END = 1
 }
 
-export const enum  GestureListenerType {
+export enum GestureListenerType {
     TAP = 0,
     LONG_PRESS = 1,
     PAN = 2,
@@ -380,6 +380,9 @@ export class DragController {
     public enableDropDisallowedBadge(enabled: boolean): void {
         throw Error('enableDropDisallowedBadge not implemented in DragController!')
     }
+    public interruptFollowHandMorphDropAnimation(): boolean {
+        throw Error('interruptFollowHandMorphDropAnimation not implemented in DragController!')
+    }
 }
 
 export interface OverlayManagerOptions {
@@ -390,6 +393,12 @@ export interface OverlayManagerOptions {
 class OverlayManagerOptionsInner implements OverlayManagerOptions {
     renderRootOverlay?: boolean = true;
     enableBackPressedEvent?: boolean = false;
+}
+
+export interface OrderOverlayOptions {
+    levelOrder?: LevelOrder;
+    levelMode?: LevelMode;
+    levelUniqueId?: int32;
 }
 
 export class ContextMenuController {
@@ -433,6 +442,10 @@ export class OverlayManager {
 
     hideAllComponentContents(): void {
         throw Error("hideAllComponentContents not implemented in OverlayManager!")
+    }
+
+    openOrderOverlay(content: ComponentContent<Object>, options?: OrderOverlayOptions): Promise<void> {
+        throw Error("openOrderOverlay not implemented in OverlayManager!")
     }
 }
 
@@ -554,7 +567,138 @@ export class CursorController {
     }
 }
 
-export const enum KeyboardAvoidMode {
+const smartGestureProposalKindStore = new WeakMap<BaseGestureHandlingProposal, SmartGestureAction>();
+
+function brandProposal(proposal: BaseGestureHandlingProposal, kind: SmartGestureAction): BaseGestureHandlingProposal {
+    smartGestureProposalKindStore.set(proposal, kind);
+    return proposal;
+}
+
+export function getProposalKind(proposal: BaseGestureHandlingProposal): SmartGestureAction | undefined {
+    return smartGestureProposalKindStore.get(proposal);
+}
+
+export function hasOwnProperty(value: object, key: string): boolean {
+    return (value as Object).hasOwnProperty(key);
+}
+
+function validateIsConsumed(isConsumed: boolean): void {
+    if (typeof isConsumed !== 'boolean') {
+        throw new TypeError('The type of isConsumed is not boolean.');
+    }
+}
+
+export abstract class BaseGestureHandlingProposal {
+    public readonly action: SmartGestureAction;
+    public operateIntention: OperateIntention;
+
+    protected constructor(action: SmartGestureAction, operateIntention: OperateIntention) {
+        this.action = action;
+        this.operateIntention = operateIntention;
+    }
+}
+
+export abstract class TargetedGestureProposal extends BaseGestureHandlingProposal {
+    public readonly node: FrameNode;
+
+    protected constructor(action: SmartGestureAction, operateIntention: OperateIntention, node: FrameNode) {
+        super(action, operateIntention);
+        this.node = node;
+    }
+}
+
+export class ClickActionProposal extends TargetedGestureProposal {
+    constructor(node: FrameNode) {
+        super(SmartGestureAction.CLICK, OperateIntention.TAP, node);
+        brandProposal(this, SmartGestureAction.CLICK);
+    }
+}
+
+export class SelectActionProposal extends TargetedGestureProposal {
+    constructor(node: FrameNode) {
+        super(SmartGestureAction.SELECT, OperateIntention.TAP, node);
+        brandProposal(this, SmartGestureAction.SELECT);
+    }
+}
+
+export class NoneActionProposal extends BaseGestureHandlingProposal {
+    constructor() {
+        super(SmartGestureAction.NONE, OperateIntention.TAP);
+        brandProposal(this, SmartGestureAction.NONE);
+    }
+}
+
+export class BackPressActionProposal extends BaseGestureHandlingProposal {
+    constructor() {
+        super(SmartGestureAction.BACK_PRESS, OperateIntention.BACK_PRESS);
+        brandProposal(this, SmartGestureAction.BACK_PRESS);
+    }
+}
+
+export class PageSwitchActionProposal extends TargetedGestureProposal {
+    public pageCount: int;
+
+    constructor(node: FrameNode, pageCount: int) {
+        super(SmartGestureAction.PAGE_FORWARD, OperateIntention.SLIDE_FORWARD, node);
+        this.pageCount = pageCount;
+        brandProposal(this, SmartGestureAction.PAGE_FORWARD);
+    }
+}
+
+export class ScrollActionProposal extends TargetedGestureProposal {
+    public distance: number;
+    public pageCount?: int;
+
+    constructor(node: FrameNode, distance: number, pageCount?: int) {
+        super(SmartGestureAction.SCROLL_FORWARD, OperateIntention.SLIDE_FORWARD, node);
+        this.distance = distance;
+        if (pageCount !== undefined) {
+            this.pageCount = pageCount;
+        }
+        brandProposal(this, SmartGestureAction.SCROLL_FORWARD);
+    }
+}
+
+export class GestureHandlingResolution {
+    public isConsumed: boolean;
+    public selectedProposal?: BaseGestureHandlingProposal;
+
+    constructor(isConsumed: boolean) {
+        validateIsConsumed(isConsumed);
+        this.isConsumed = isConsumed;
+    }
+}
+
+export declare type SmartGestureMonitorCallback =
+    (proposal: BaseGestureHandlingProposal) => GestureHandlingResolution;
+
+export class SmartGestureController {
+    public enableSmartTapAndSlideGestures(enabled: boolean): void {
+        throw Error('enableSmartTapAndSlideGestures not implemented in SmartGestureController!');
+    }
+
+    public registerMonitor(monitorCallback: SmartGestureMonitorCallback): void {
+        throw Error('registerMonitor not implemented in SmartGestureController!');
+    }
+
+    public unregisterMonitor(monitorCallback: SmartGestureMonitorCallback): void {
+        throw Error('unregisterMonitor not implemented in SmartGestureController!');
+    }
+
+    public clearMonitors(): void {
+        throw Error('clearMonitors not implemented in SmartGestureController!');
+    }
+
+    public requestSelected(id: string): void {
+        throw Error('requestSelected not implemented in SmartGestureController!');
+    }
+
+    public clearSelected(): void {
+        throw Error('clearSelected not implemented in SmartGestureController!');
+    }
+}
+
+export enum KeyboardAvoidMode {
     OFFSET = 0,
     RESIZE = 1,
     OFFSET_WITH_CARET = 2,
@@ -570,7 +714,7 @@ export class ResolvedUIContext extends UIContext {
     }
 }
 
-export const enum ResolveStrategy {
+export enum ResolveStrategy {
     CALLING_SCOPE = 0,
     LAST_FOCUS = 1,
     MAX_INSTANCE_ID = 2,
@@ -590,6 +734,7 @@ export class UIContext {
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspectorImpl | null = null;
     contextMenuController_: ContextMenuControllerImpl;
+    smartGestureController_: SmartGestureControllerImpl | null = null;
     overlayManager_: OverlayManagerImpl | null = null;
     promptAction_: PromptActionImpl | null = null;
     keyboardAvoidMode_: KeyboardAvoidMode = KeyboardAvoidMode.OFFSET;
@@ -756,6 +901,11 @@ export class UIContext {
         IUIContext.removeLocalInputEventMonitor(monitor);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+    public setTextSelectionClearPolicy(policy: TextSelectionClearPolicy): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        IUIContext.setTextSelectionClearPolicy(policy);
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
     public getMaxFontScale() : number {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let fontScale = GlobalScopeUicontextFontScale.getMaxFontScale();
@@ -863,6 +1013,13 @@ export class UIContext {
 
     public getContextMenuController(): ContextMenuController {
         return this.contextMenuController_;
+    }
+
+    public getSmartGestureController(): SmartGestureController {
+        if (!this.smartGestureController_) {
+            this.smartGestureController_ = new SmartGestureControllerImpl(this.instanceId_);
+        }
+        return this.smartGestureController_ as SmartGestureController;
     }
 
     public getComponentUtils(): ComponentUtils {
@@ -1805,7 +1962,7 @@ export class DynamicSyncScene {
     }
 }
 
-export const enum SwiperDynamicSyncSceneType {
+export enum SwiperDynamicSyncSceneType {
     GESTURE = 0,
     ANIMATION = 1,
 }
@@ -1825,7 +1982,7 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
     }
 }
 
-export const enum MarqueeDynamicSyncSceneType {
+export enum MarqueeDynamicSyncSceneType {
   ANIMATION = 1
 }
 
@@ -1844,7 +2001,12 @@ export class MarqueeDynamicSyncScene extends DynamicSyncScene {
     }
 }
 
-export const enum CustomKeyboardContinueFeature {
+export enum CustomKeyboardContinueFeature {
     ENABLED = 0,
     DISABLED = 1,
+}
+
+export enum TextSelectionClearPolicy {
+    KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0,
+    CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1,
 }

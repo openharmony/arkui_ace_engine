@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -263,10 +264,14 @@ void RichEditorOverlayModifier::PaintFloatingCaret(DrawingContext& drawingContex
 
 void RichEditorOverlayModifier::PaintScrollBar(DrawingContext& context)
 {
-    auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
-    CHECK_NULL_VOID(scrollBarOverlayModifier);
     auto pattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(!pattern || pattern->GetBarDisplayMode() != DisplayMode::OFF);
+    if (pattern->IsFreeScrollEnabled()) {
+        pattern->GetScrollController()->OnDrawScrollBar(context);
+        return;
+    }
+    auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
+    CHECK_NULL_VOID(scrollBarOverlayModifier);
     scrollBarOverlayModifier->onDraw(context);
 }
 
@@ -315,6 +320,10 @@ void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)
 {
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
+    if (richEditorPattern->IsFreeScrollEnabled()) {
+        richEditorPattern->GetScrollController()->UpdateScrollBar();
+        return;
+    }
     auto scrollBar = richEditorPattern->GetScrollControllerBar();
     if (!scrollBar || !scrollBar->NeedPaint()) {
         return;

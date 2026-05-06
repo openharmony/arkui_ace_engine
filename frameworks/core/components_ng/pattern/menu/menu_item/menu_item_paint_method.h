@@ -20,7 +20,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"

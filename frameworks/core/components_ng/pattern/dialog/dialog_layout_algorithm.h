@@ -23,8 +23,6 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/common/properties/border.h"
-#include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"

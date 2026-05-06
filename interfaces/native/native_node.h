@@ -2302,6 +2302,37 @@ typedef enum {
      */
     NODE_BORDER_RADIUS_TYPE = 123,
     /**
+     * @brief Defines the accessibility next focus node ID attribute, which can be set and reset through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component ID used by accessibility for next focus navigation.\n
+     *
+     * @since 26
+     */
+    NODE_ACCESSIBILITY_NEXT_FOCUS_ID = 124,
+    /**
+     * @brief Defines the accessibility default focus attribute, which can be set and reset through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the current component is accessibility default focus.
+     * The parameter type is {@link ArkUI_AccessibilityDefaultFocus}.\n
+     *
+     * @since 26
+     */
+    NODE_ACCESSIBILITY_DEFAULT_FOCUS = 125,
+    /**
+     * @brief Defines the inspector label attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: inspector label.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: inspector label.\n
+     * \n
+     * @since 26.0.0
+     */
+    NODE_INSPECTOR_LABEL = 126,
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -3378,17 +3409,14 @@ typedef enum {
      */
     NODE_IMAGE_SOURCE_SIZE = 4013,
     /**
-     * @brief Support the implementation of affine image transformations using floating-point numbers or matrix objects.
+     * @brief Defines the display tranformation matrix for an image.
      * This attribute can be set, reset, and obtained as required through APIs.
-     * The parameter types for setting and getting should be the same.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0...15].f32: 16 floating-point numbers.\n
-     * .object: The parameter type is {@link ArkUI_Matrix4},add since api 24.\n
-     *
+     * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0...15].f32: 16 floating-point numbers.\n
-     * .object: The parameter type is {@link ArkUI_Matrix4},add since api 24.\n
      *
      * @since 21
      */
@@ -6569,6 +6597,20 @@ typedef enum {
      * @since 26
      */
     NODE_TEXT_EDITOR_ORPHAN_CHAR_OPTIMIZATION,
+
+    /**
+     * @brief Whether to enable horizontal scrolling when text is wider than the view.
+     * The default value is false, and text will be wrapped by the view.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The horizontally scrolling state.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The horizontally scrolling state.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_EDITOR_HORIZONTAL_SCROLLING,
 
     /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,

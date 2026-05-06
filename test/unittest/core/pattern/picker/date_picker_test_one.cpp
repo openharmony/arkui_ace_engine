@@ -15,6 +15,7 @@
 
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_default.h"

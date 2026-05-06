@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/node_container/node_container_model_ng.h"
 #include "core/components_ng/pattern/node_container/node_container_node.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
+#include "core/components_ng/pattern/node_container/node_container_event_hub.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -769,12 +770,17 @@ HWTEST_F(NodeContainerPatternTestNg, FireOnWillBind_Normal, TestSize.Level1)
 {
     auto frameNode = CreateNodeContainerNode();
     ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
 
-    pattern->FireOnWillBind(TEST_CONTAINER_ID);
+    int32_t receivedId = -1;
+    auto eventHub = frameNode->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetControllerOnWillBind([&receivedId](int32_t containerId) {
+        receivedId = containerId;
+    });
 
-    SUCCEED();
+    eventHub->FireOnWillBind(TEST_CONTAINER_ID);
+
+    EXPECT_EQ(receivedId, TEST_CONTAINER_ID);
 }
 
 /**
@@ -786,11 +792,17 @@ HWTEST_F(NodeContainerPatternTestNg, FireOnWillUnbind_Normal, TestSize.Level1)
 {
     auto frameNode = CreateNodeContainerNode();
     ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
 
-    pattern->FireOnWillUnbind(TEST_CONTAINER_ID);
-    SUCCEED();
+    int32_t receivedId = -1;
+    auto eventHub = frameNode->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetControllerOnWillUnbind([&receivedId](int32_t containerId) {
+        receivedId = containerId;
+    });
+
+    eventHub->FireOnWillUnbind(TEST_CONTAINER_ID);
+
+    EXPECT_EQ(receivedId, TEST_CONTAINER_ID);
 }
 
 /**
@@ -802,27 +814,39 @@ HWTEST_F(NodeContainerPatternTestNg, FireOnBind_Normal, TestSize.Level1)
 {
     auto frameNode = CreateNodeContainerNode();
     ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
 
-    pattern->FireOnBind(TEST_CONTAINER_ID);
-    SUCCEED();
+    int32_t receivedId = -1;
+    auto eventHub = frameNode->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetControllerOnBind([&receivedId](int32_t containerId) {
+        receivedId = containerId;
+    });
+
+    eventHub->FireOnBind(TEST_CONTAINER_ID);
+
+    EXPECT_EQ(receivedId, TEST_CONTAINER_ID);
 }
 
 /**
  * @tc.name: FireOnUnbind_Normal
- * @tc.desc: Test FireOnUnbind with valid callback
+ * @tc.desc: TestOnUnbind with valid callback
  * @tc.type: FUNC
  */
 HWTEST_F(NodeContainerPatternTestNg, FireOnUnbind_Normal, TestSize.Level1)
 {
     auto frameNode = CreateNodeContainerNode();
     ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
 
-    pattern->FireOnUnbind(TEST_CONTAINER_ID);
-    SUCCEED();
+    int32_t receivedId = -1;
+    auto eventHub = frameNode->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetControllerOnUnbind([&receivedId](int32_t containerId) {
+        receivedId = containerId;
+    });
+
+    eventHub->FireOnUnbind(TEST_CONTAINER_ID);
+
+    EXPECT_EQ(receivedId, TEST_CONTAINER_ID);
 }
 
 /**

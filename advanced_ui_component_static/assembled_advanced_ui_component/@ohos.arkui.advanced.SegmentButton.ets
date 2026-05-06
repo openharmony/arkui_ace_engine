@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,7 +80,9 @@ import {
   OverlayOptions,
   CustomBuilder,
   Position,
-  PanDirection
+  PanDirection,
+  ScaleOptions,
+  LongPressGesture
 } from '@ohos.arkui.component';
 import {
   Observed,
@@ -124,6 +126,7 @@ interface SegmentButtonThemeInterface {
   CAPSULE_SELECTED_FONT_COLOR: ResourceColor,
   FONT_SIZE: DimensionNoPercentage,
   SELECTED_FONT_SIZE: DimensionNoPercentage,
+  ADAPTIVE_ITEM_FONT_SIZE: DimensionNoPercentage,
   BACKGROUND_COLOR: ResourceColor,
   TAB_SELECTED_BACKGROUND_COLOR: ResourceColor,
   CAPSULE_SELECTED_BACKGROUND_COLOR: ResourceColor,
@@ -145,6 +148,7 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   CAPSULE_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
   FONT_SIZE: $r('sys.float.segment_button_unselected_text_size'),
   SELECTED_FONT_SIZE: $r('sys.float.segment_button_checked_text_size'),
+  ADAPTIVE_ITEM_FONT_SIZE: $r('sys.float.Caption_M'),
   BACKGROUND_COLOR: $r('sys.color.segment_button_backboard_color'),
   TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.segment_button_checked_foreground_color'),
   CAPSULE_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_emphasize'),
@@ -606,11 +610,11 @@ export class SegmentButtonOptions {
       this.onButtonsUpdated();
       this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
       this.selectedBackgroundColor = options.selectedBackgroundColor ??
-      segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+        segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
     } else {
       this.showText = true;
     }
-    let themePadding: number = LengthMetrics.resource($r('sys.float.padding_level2')).value;
+    let themePadding: number = LengthMetrics.resource($r('sys.float.padding_level1')).value;
     this.componentPadding = this.multiply ? 0.0 : themePadding;
     this.backgroundSystemMaterial = options.backgroundSystemMaterial;
     if (options instanceof TabSegmentButtonOptions) {
@@ -728,6 +732,39 @@ struct SelectItem {
   @Consume selectedItemPosition: LocalizedEdges
   @Consume zoomScaleArray: number[]
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
+  @Consume openSelectedItemSystemMaterial?: boolean = false;
+  @Consume selectedItemScale?: ScaleOptions;
+
+
+  getBackgroundColor(): ResourceColor {
+    if (this.options.selectedBackgroundColor) {
+      return this.options.selectedBackgroundColor;
+    }
+    if (this.options.type === 'tab') {
+      return segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+    } else {
+      return segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+    }
+  }
+
+  getScale(): ScaleOptions | undefined {
+    if (this.openSelectedItemSystemMaterial) {
+      return this.selectedItemScale;
+    } else {
+      return {
+        x: this.zoomScaleArray[this.selectedIndexes[0]],
+        y: this.zoomScaleArray[this.selectedIndexes[0]]
+      };
+    }
+  }
+
+  getOpacity(): double {
+    if (this.openSelectedItemSystemMaterial) {
+      return 0.7;
+    } else {
+      return 1;
+    }
+  }
 
   build() {
     if (this.selectedIndexes !== undefined && this.selectedIndexes.length > 0) {
@@ -736,14 +773,10 @@ struct SelectItem {
         .direction(this.options.direction)
         .borderRadius(this.buttonBorderRadius[this.selectedIndexes[0]])
         .size(this.buttonItemsSize[this.selectedIndexes[0]])
-        .backgroundColor(this.options.selectedBackgroundColor ??
-          (this.options.type === 'tab' ? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR :
-            segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
+        .backgroundColor(this.getBackgroundColor())
         .position(this.selectedItemPosition)
-        .scale({
-          x: this.zoomScaleArray[this.selectedIndexes[0]],
-          y: this.zoomScaleArray[this.selectedIndexes[0]]
-        })
+        .scale(this.getScale())
+        .opacity(this.getOpacity())
     }
   }
 }
@@ -756,15 +789,15 @@ struct MultiSelectItemArray {
   @Consume buttonItemsSize: SizeOptions[];
   @Consume zoomScaleArray: number[];
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[];
-  @State multiColor: ResourceColor[] = 
+  @State multiColor: ResourceColor[] =
     Array.create<ResourceColor>(MAX_ITEM_COUNT, Color.Transparent as ResourceColor);
 
   onOptionsChange(a: string) {
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i.toInt()].toInt();
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
-        segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+          segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
       }
     }
   }
@@ -774,20 +807,20 @@ struct MultiSelectItemArray {
       this.multiColor[i.toInt()] = Color.Transparent;
     }
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i.toInt()].toInt();
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
-        segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+          segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
       }
     }
   }
 
   aboutToAppear() {
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i.toInt()].toInt();
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
-        segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+          segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
       }
     }
   }
@@ -813,14 +846,14 @@ struct MultiSelectItemArray {
 }
 
 export class EnvironmentCallbackEntry implements EnvironmentCallback {
-  private segmentButtonItem: SegmentButtonItem;
+  private segmentButton: SegmentButton;
 
-  constructor(segmentButtonItem: SegmentButtonItem) {
-    this.segmentButtonItem = segmentButtonItem;
+  constructor(segmentButton: SegmentButton) {
+    this.segmentButton = segmentButton;
   }
 
   onConfigurationUpdated(config: Configuration) {
-    this.segmentButtonItem.updateLanguageLineHeight();
+    this.segmentButton.updateLanguageLineHeight();
   }
 
   onMemoryLevel(level: AbilityConstant.MemoryLevel) {}
@@ -841,48 +874,16 @@ struct SegmentButtonItem {
   @State isSegmentFocusStyleCustomized: boolean = false;
   @State isTextInMarqueeCondition: boolean = false;
   @State isButtonTextFadeout?: boolean = false;
+  @Consume useAdaptiveLineHeight: boolean;
   private groupId: string = '';
   @State @Watch('onFocusIndex') hover: boolean = false;
   @Consume buttonItemsSize: SizeOptions[];
   @Consume buttonItemsPosition: LocalizedEdges[];
   @Link buttonItemsRealHeight: number[];
   public onCalculateBorderRadius?: () => void
-  @State useAdaptiveLineHeight: boolean = false;
-  private environmentCallbackID?: int;
- 	private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
-
-  updateLanguageLineHeight(): void {
-    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-    if (!resourceManager) {
-      console.error(`[SegmentButton] failed to get resourceManager`);
-      return;
-    }
-    try {
-      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
-    } catch (e) {
-      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
-    }
-  }
 
   aboutToAppear(): void {
     this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
-    if (deviceInfo.sdkApiVersion >= 26) {
-      this.updateLanguageLineHeight();
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
-      }
-    }
-  }
-
-  aboutToDisappear(): void {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
-      }
-      this.environmentCallbackID = undefined;
-    }
   }
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
@@ -994,7 +995,7 @@ struct SegmentButtonItem {
           .textAlign(TextAlign.Center)
           .padding(this.getTextPadding())
           .includeFontPadding(this.useAdaptiveLineHeight)
- 	        .fallbackLineSpacing(this.useAdaptiveLineHeight)
+          .fallbackLineSpacing(this.useAdaptiveLineHeight)
       }
     }
     .id("SegmentButtonItem")
@@ -1112,8 +1113,8 @@ struct SegmentButtonItemArrayComponent {
 
   onButtonItemsSizeChange(a: string) {
     this.buttonItemsSize.forEach((value, index) => {
-      this.buttonWidth[index.toInt()] = (value.width ?? 0.0) as number;
-      this.buttonHeight[index.toInt()] = (value.height ?? 0.0) as number;
+      this.buttonWidth[index as int] = (value.width ?? 0.0) as number;
+      this.buttonHeight[index as int] = (value.height ?? 0.0) as number;
     })
   }
 
@@ -1127,11 +1128,11 @@ struct SegmentButtonItemArrayComponent {
       if (this.selectedIndexes.length === 0 || this.selectedIndexes[0] === undefined) {
         return;
       }
-      if (this.selectedIndexes[0] < this.optionsArray.changeStartIndex!.toInt()) {
+      if (this.selectedIndexes[0] < this.optionsArray.changeStartIndex as int) {
         return;
       }
-      if (this.optionsArray.changeStartIndex!.toInt() + this.optionsArray.deleteCount!.toInt() >
-      this.selectedIndexes[0]) {
+      if (this.optionsArray.changeStartIndex as int + this.optionsArray.deleteCount as int >
+        this.selectedIndexes[0]) {
         if (this.options.type === 'tab') {
           this.selectedIndexes[0] = 0;
         } else if (this.options.type === 'capsule') {
@@ -1140,23 +1141,23 @@ struct SegmentButtonItemArrayComponent {
       } else {
         const oldIndex = this.selectedIndexes[0];
         this.selectedIndexes[0] =
-          this.selectedIndexes[0] - (this.optionsArray.deleteCount!.toInt()) + (this.optionsArray.addLength!.toInt());
+          this.selectedIndexes[0] - (this.optionsArray.deleteCount as int) + (this.optionsArray.addLength as int);
       }
     } else {
       // Multi-select
       let saveIndexes: int[] = this.selectedIndexes;
-      for (let i: int = 0; i < this.optionsArray.deleteCount!.toInt(); i++) {
-        let deleteIndex: int = saveIndexes.indexOf(this.optionsArray.changeStartIndex!.toInt(), 0);
+      for (let i: int = 0; i < this.optionsArray.deleteCount as int; i++) {
+        let deleteIndex: int = saveIndexes.indexOf(this.optionsArray.changeStartIndex as int, 0);
         let indexes: int[] = saveIndexes.map<int>(value => (this.optionsArray.changeStartIndex) &&
-          (value > this.optionsArray.changeStartIndex!.toInt()) ? value - 1 : value);
+          (value > this.optionsArray.changeStartIndex as int) ? value - 1 : value);
         if (deleteIndex !== -1) {
           indexes.splice(deleteIndex, 1);
         }
         saveIndexes = indexes;
       }
-      for (let i: int = 0; i < this.optionsArray.addLength!.toInt(); i++) {
-        let indexes: int[] = saveIndexes.map<int>(value => (this.optionsArray.changeStartIndex!.toInt()) &&
-          (value >= this.optionsArray.changeStartIndex!.toInt()) ? value + 1 : value);
+      for (let i: int = 0; i < this.optionsArray.addLength as int; i++) {
+        let indexes: int[] = saveIndexes.map<int>(value => (this.optionsArray.changeStartIndex as int) &&
+          (value >= this.optionsArray.changeStartIndex as int) ? value + 1 : value);
         saveIndexes = indexes;
       }
       this.selectedIndexes = saveIndexes;
@@ -1172,14 +1173,14 @@ struct SegmentButtonItemArrayComponent {
     if (this.focusIndex === -1) {
       return;
     }
-    if (this.focusIndex < this.optionsArray.changeStartIndex!.toInt()) {
+    if (this.focusIndex < this.optionsArray.changeStartIndex as int) {
       return;
     }
-    if (this.optionsArray.changeStartIndex!.toInt() + this.optionsArray.deleteCount!.toInt() > this.focusIndex) {
+    if (this.optionsArray.changeStartIndex as int + this.optionsArray.deleteCount as int > this.focusIndex) {
       this.focusIndex = 0;
     } else {
       this.focusIndex =
-        this.focusIndex - (this.optionsArray.deleteCount!.toInt()) + (this.optionsArray.addLength!.toInt());
+        this.focusIndex - (this.optionsArray.deleteCount as int) + (this.optionsArray.addLength as int);
     }
 
   }
@@ -1253,12 +1254,14 @@ struct SegmentButtonItemArrayComponent {
   }
 
   private calculateBorderRadius() {
-    let borderRadiusArray: LocalizedBorderRadiuses[] = Array.create<LocalizedBorderRadiuses>(MAX_ITEM_COUNT, {
+    let borderRadiusArray: LocalizedBorderRadiuses[] = new Array<LocalizedBorderRadiuses>(MAX_ITEM_COUNT, (): LocalizedBorderRadiuses => {
+      return {
         topStart: LengthMetrics.vp(0),
         topEnd: LengthMetrics.vp(0),
         bottomStart: LengthMetrics.vp(0),
         bottomEnd: LengthMetrics.vp(0)
-      })
+      }
+    })
 
     const setAllCorners = (array: LocalizedBorderRadiuses[], index: int, lengthMetrics: LengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
@@ -1554,12 +1557,14 @@ export struct SegmentButton {
   @State maxFontScale: number | Resource = DEFAULT_MAX_FONT_SCALE
   @Provide componentSize: SizeOptions = { width: 0.0, height: 0.0 } as SizeOptions
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = (() => {
-    let array = Array.create<LocalizedBorderRadiuses>(MAX_ITEM_COUNT, {
+    let array = new Array<LocalizedBorderRadiuses>(MAX_ITEM_COUNT, (): LocalizedBorderRadiuses => {
+      return {
         topStart: LengthMetrics.vp(0),
         topEnd: LengthMetrics.vp(0),
         bottomStart: LengthMetrics.vp(0),
         bottomEnd: LengthMetrics.vp(0)
-      })
+      }
+    })
     return array;
   })()
   @Provide buttonItemsSize: SizeOptions[] = (() => {
@@ -1570,12 +1575,12 @@ export struct SegmentButton {
     return arr;
   })()
   @Provide @Watch('onItemsPositionChange') buttonItemsPosition: LocalizedEdges[] = (() => {
-    let array = Array.create<LocalizedEdges>(MAX_ITEM_COUNT, {})
+    let array = new Array<LocalizedEdges>(MAX_ITEM_COUNT, (): LocalizedEdges => { return {} })
     return array;
   })()
   @Provide buttonItemsSelected: boolean[] = Array.create<boolean>(MAX_ITEM_COUNT, false);
   @Provide buttonItemProperty: ItemProperty[] = (() => {
-    let array = Array.create<ItemProperty>(MAX_ITEM_COUNT, new ItemProperty())
+    let array = new Array<ItemProperty>(MAX_ITEM_COUNT, () => { return new ItemProperty() })
     return array;
   })()
   @Provide focusIndex: int = -1;
@@ -1592,6 +1597,7 @@ export struct SegmentButton {
   })()
   private doSelectedChangeAnimate: boolean = false;
   private isCurrentPositionSelected: boolean = false;
+  private isCurrentPositionPressed: boolean = false;
   private panGestureStartPoint: Point = { x: 0.0, y: 0.0 } as Point;
   private isPanGestureMoved: boolean = false;
   @State shouldMirror: boolean = false;
@@ -1599,6 +1605,11 @@ export struct SegmentButton {
     resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED, 1) === 0;
   private isGestureInProgress: boolean = false;
   @PropRef enableStateAnimation: boolean = false;
+  @Provide openSelectedItemSystemMaterial?: boolean = false;
+  @Provide selectedItemScale?: ScaleOptions = undefined;
+  @Provide useAdaptiveLineHeight: boolean = false;
+  private environmentCallbackID?: int;
+  private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
 
   onItemsPositionChange(a: string) {
     if (this.options === undefined || this.options.buttons === undefined) {
@@ -1616,11 +1627,11 @@ export struct SegmentButton {
 
   private setItemsSelected() {
     this.buttonItemsSelected.forEach((_, index) => {
-      this.buttonItemsSelected[index.toInt()] = false;
+      this.buttonItemsSelected[index as int] = false;
     })
     if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
       this.selectedIndexes.forEach((index) => {
-        this.buttonItemsSelected[index.toInt()] = true;
+        this.buttonItemsSelected[index as int] = true;
       })
     } else {
       if (this.selectedIndexes.length !== 0) {
@@ -1696,6 +1707,36 @@ export struct SegmentButton {
     this.updateSelectedIndexes();
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
+      }
+      this.environmentCallbackID = undefined;
+    }
+  }
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
   }
 
   private isMouseWheelScroll(event: GestureEvent) {
@@ -1712,8 +1753,8 @@ export struct SegmentButton {
     }
     // 获取系统语言
     try {
-      let systemLanguage: string = I18n.System.getSystemLanguage();
-      if (I18n.isRTL(systemLanguage) && this.options.direction != Direction.Ltr) {
+      let appPreferredLanguage: string = I18n.System.getAppPreferredLanguage();
+      if (I18n.isRTL(appPreferredLanguage) && this.options.direction != Direction.Ltr) {
         return true;
       }
     } catch (error) {
@@ -1732,7 +1773,7 @@ export struct SegmentButton {
           })
         } else {
           Stack() {
-            if (this.options.buttons !== undefined && this!.options!.buttons!.length!.toDouble() > 1.0) {
+            if (this.options.buttons !== undefined && this!.options!.buttons!.length.toDouble() > 1.0) {
               PressAndHoverEffectArray({
                 options: this.options,
                 buttons: this.options.buttons!,
@@ -1770,7 +1811,6 @@ export struct SegmentButton {
         .size(this.componentSize)
         .animation({ duration: 0 })
         .borderRadius(this.getBackgroundBorderRadius())
-        .clip(true)
 
         SegmentButtonItemArrayComponent({
           pressArray: this.pressArray,
@@ -1814,7 +1854,7 @@ export struct SegmentButton {
     })
     .accessibilityLevel('no')
     .priorityGesture(
-      GestureGroup(GestureMode.Exclusive,
+      GestureGroup(GestureMode.Parallel,
         TapGesture()
           .onAction((event: GestureEvent) => {
             if (this.isGestureInProgress) {
@@ -1830,7 +1870,7 @@ export struct SegmentButton {
             let selectedInfo: number = fingerInfo!.localX ?? 0;
 
             let buttonLength: number =
-              Math.min(this!.options!.buttons!.length!.toDouble(), this!.buttonItemsSize!.length!.toDouble());
+              Math.min(this!.options!.buttons!.length.toDouble(), this!.buttonItemsSize!.length.toDouble());
 
             // 安全检查
             if (!this.buttonItemsSize || buttonLength <= 0) {
@@ -1858,8 +1898,8 @@ export struct SegmentButton {
               // 安全检查：确保 selectedIndexes 不为空
               this.doSelectedChangeAnimate =
                 (this.selectedIndexes.length > 0 &&
-                  this.selectedIndexes[0] > Math.min(this!.options!.buttons!.length!.toDouble(),
-                    this!.buttonItemsSize!.length!.toDouble())) ? false : true;
+                  this.selectedIndexes[0] > Math.min(this!.options!.buttons!.length.toDouble(),
+                    this!.buttonItemsSize!.length.toDouble())) ? false : true;
 
               let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i;
               if (this.onItemClicked) {
@@ -1922,6 +1962,70 @@ export struct SegmentButton {
               this.doSelectedChangeAnimate = false
             }
           }),
+        LongPressGesture({ repeat: false, duration: 200 })
+          .onAction((event: GestureEvent) => {
+            if (!this.isBackgroundSystemMaterialEnabled()) {
+              return
+            }
+            if (this.options === undefined || this.options.buttons === undefined) {
+              return;
+            }
+            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+              // Non drag gesture in multi-select mode
+              return;
+            }
+            let fingerInfo = event.fingerList.find(f => Boolean(f));
+            if (fingerInfo === undefined) {
+              return;
+            }
+            let selectedInfo = fingerInfo.localX
+
+            let buttonLength = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length);
+            for (let i = 0; i < buttonLength; i++) {
+              selectedInfo = selectedInfo - ((this.buttonItemsSize[i].width ?? 0) as number);
+              if (selectedInfo < 0) {
+                let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                this.isCurrentPositionPressed = realIndex === this.selectedIndexes[0] ? true : false;
+                break
+              }
+            }
+            if (this.isCurrentPositionPressed && !this.openSelectedItemSystemMaterial) {
+              this.startSelectMaterialAnimation();
+            }
+          })
+          .onActionCancel((event: GestureEvent) => {
+            if (!this.isBackgroundSystemMaterialEnabled()) {
+              return
+            }
+            if (this.options === undefined || this.options.buttons === undefined) {
+              return;
+            }
+            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+              // Non drag gesture in multi-select mode
+              return;
+            }
+
+            if (this.isCurrentPositionPressed && this.openSelectedItemSystemMaterial) {
+              this.finishSelectMaterialAnimation();
+            }
+            this.isCurrentPositionPressed = false;
+          })
+          .onActionEnd((event: GestureEvent) => {
+            if (!this.isBackgroundSystemMaterialEnabled()) {
+              return
+            }
+            if (this.options === undefined || this.options.buttons === undefined) {
+              return;
+            }
+            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+              // Non drag gesture in multi-select mode
+              return;
+            }
+            if (this.isCurrentPositionPressed && this.openSelectedItemSystemMaterial) {
+              this.finishSelectMaterialAnimation();
+            }
+            this.isCurrentPositionPressed = false;
+          }),
         PanGesture({direction: PanDirection.Horizontal})
           .onActionStart((event: GestureEvent) => {
             this.isGestureInProgress = true;
@@ -1950,6 +2054,14 @@ export struct SegmentButton {
                 break;
               }
             }
+
+            if (this.isBackgroundSystemMaterialEnabled() && this.isCurrentPositionSelected) {
+              this.getUIContext().animateTo({
+                curve: curves.interpolatingSpring(0, 1, 195, 14),
+              }, () => {
+                this.selectedItemScale = { x: 1.01, y: 0.99 }
+              })
+            }
           })
           .onActionUpdate((event: GestureEvent) => {
             if (this.options === undefined || this.options.buttons === undefined) {
@@ -1971,30 +2083,53 @@ export struct SegmentButton {
               fingerInfo!.globalY ?? 0)) {
               this.isPanGestureMoved = true;
             }
-            let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
-            for (let i = 0; i < buttonLength; i++) {
-              selectedInfo = selectedInfo - ((this.buttonItemsSize[i].width ?? 0) as number)
-              if (selectedInfo < 0.0) {
-                let realIndex: int = this.isShouldMirror() ? buttonLength - 1 - i : i;
-                this.doSelectedChangeAnimate = true;
-                this.selectedIndexes[0] = realIndex;
-                this.doSelectedChangeAnimate = false;
-                break
+            if (this.isBackgroundSystemMaterialEnabled()) {
+              const startX = this.buttonItemsPosition[0].start?.value as number;
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
+              const endX = this.buttonItemsPosition[buttonLength - 1].start?.value as number;
+
+              const offset = this.isShouldMirror() ? this.panGestureStartPoint.x - fingerInfo.globalX :
+                fingerInfo.globalX - this.panGestureStartPoint.x
+              let nowX =  offset + (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
+              nowX = Math.max(startX, nowX);
+              nowX = Math.min(endX, nowX);
+
+              this.selectedItemPosition = {
+                start: LengthMetrics.vp(nowX),
+                end: this.selectedItemPosition.end,
+                top: this.selectedItemPosition.top,
+                bottom: this.selectedItemPosition.bottom
               }
+            } else {
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
+              for (let i = 0; i < buttonLength; i++) {
+                selectedInfo = selectedInfo - ((this.buttonItemsSize[i].width ?? 0) as number)
+                if (selectedInfo < 0.0) {
+                  let realIndex: int = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                  this.doSelectedChangeAnimate = true;
+                  this.selectedIndexes[0] = realIndex;
+                  this.doSelectedChangeAnimate = false;
+                  break
+                }
+              }
+              this.zoomScaleArray.forEach((_, index) => {
+                if (index === this.selectedIndexes[0]) {
+                  this.getUIContext()?.animateTo({
+                    curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve
+                  },
+                    () => {
+                      this.zoomScaleArray[index] = 0.95;
+                    });
+                } else {
+                  this.getUIContext()?.animateTo({
+                    curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve
+                  },
+                    () => {
+                      this.zoomScaleArray[index] = 1.0;
+                    });
+                }
+              })
             }
-            this.zoomScaleArray.forEach((_, index) => {
-              if (index === this.selectedIndexes[0]) {
-                this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve },
-                  () => {
-                    this.zoomScaleArray[index] = 0.95;
-                  });
-              } else {
-                this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve },
-                  () => {
-                    this.zoomScaleArray[index] = 1.0;
-                  });
-              }
-            })
           })
           .onActionEnd((event: GestureEvent) => {
             this.isGestureInProgress = false;
@@ -2013,26 +2148,49 @@ export struct SegmentButton {
               fingerInfo!.globalY ?? 0)) {
               this.isPanGestureMoved = true;
             }
-            if (this.isMouseWheelScroll(event)) {
-              let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY
-              this.doSelectedChangeAnimate = true
 
-              // Reverse mouse wheel direction in mirrored layout
-              let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
-              let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
-
-              if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
-                this.selectedIndexes[0] -= 1;
-              } else if (shouldMoveNext && this.selectedIndexes[0] < Math.min(this.options!.buttons!.length,
-                this.buttonItemsSize!.length) - 1) {
-                this.selectedIndexes[0] += 1
+            if (this.isBackgroundSystemMaterialEnabled()) {
+              let selectedInfo = fingerInfo.localX
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
+              let realIndex: int = -1;
+              for (let i = 0; i < buttonLength; i++) {
+                selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
+                if (selectedInfo < 0) {
+                  realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                  break
+                }
               }
-              this.doSelectedChangeAnimate = false
-            }
-            this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve },
-              () => {
-                this.zoomScaleArray[this.selectedIndexes[0]] = 1.0;
+              if (realIndex === -1) {
+                realIndex = this.isShouldMirror() ? 0 : buttonLength - 1
+              }
+              this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+                this.selectedIndexes[0] = realIndex;
+                this.selectedItemPosition = this.buttonItemsPosition[realIndex];
               })
+              this.finishSelectMaterialAnimation();
+
+            } else {
+              if (this.isMouseWheelScroll(event)) {
+                let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
+                this.doSelectedChangeAnimate = true;
+
+                // Reverse mouse wheel direction in mirrored layout
+                let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
+                let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
+
+                if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
+                  this.selectedIndexes[0] -= 1;
+                } else if (shouldMoveNext && this.selectedIndexes[0] < Math.min(this.options!.buttons!.length,
+                  this.buttonItemsSize!.length) - 1) {
+                  this.selectedIndexes[0] += 1;
+                }
+                this.doSelectedChangeAnimate = false;
+              }
+              this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve },
+                () => {
+                  this.zoomScaleArray[this.selectedIndexes[0]] = 1.0;
+                });
+            }
             this.isCurrentPositionSelected = false;
           })
           .onActionCancel(() => {
@@ -2048,9 +2206,44 @@ export struct SegmentButton {
                 this.zoomScaleArray[this.selectedIndexes[0]] = 1.0;
               })
             this.isCurrentPositionSelected = false;
+            if (this.isBackgroundSystemMaterialEnabled()) {
+              this.finishSelectMaterialAnimation();
+            }
           })
       )
     )
+  }
+
+  private isBackgroundSystemMaterialEnabled(): boolean {
+    return this.options !== undefined &&
+      this.options.backgroundSystemMaterial !== undefined;
+  }
+
+  startSelectMaterialAnimation() {
+    if (!this.openSelectedItemSystemMaterial) {
+      this.getUIContext().animateTo({
+        curve: curves.interpolatingSpring(0, 1, 195, 14),
+      }, () => {
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
+        this.openSelectedItemSystemMaterial = true;
+      })
+    }
+  }
+
+  finishSelectMaterialAnimation() {
+    if (this.openSelectedItemSystemMaterial) {
+      this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
+        this.selectedItemScale = { x: 1.05, y: 1.18 };
+      })
+      this.getUIContext()
+        .animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14), delay: 300, onFinish: () => {
+          }
+        }, () => {
+          this.openSelectedItemSystemMaterial = false;
+          this.selectedItemScale = undefined;
+        })
+    }
   }
 
   private getMaxFontSize(): number {
@@ -2119,14 +2312,35 @@ export struct SegmentButton {
       })
     }
     if (curve) {
+      if (this.options.backgroundSystemMaterial) {
+        this.getUIContext().animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+        }, () => {
+          this.selectedItemScale = { x: 1.01, y: 0.99 }
+          this.openSelectedItemSystemMaterial = true;
+        })
+        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+        this.getUIContext().animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+          delay: 200
+        }, () => {
+          this.openSelectedItemSystemMaterial = false;
+        })
+      } else {
+      }
       this.getUIContext()?.animateTo({ curve: curve }, setAnimatedPropertyFunc);
     } else {
       setAnimatedPropertyFunc();
     }
 
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ??
-      segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE;
+      const selectedFontSize = this.options.selectedFontSize ?? 
+        (this.useAdaptiveLineHeight ? 
+          segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : 
+          segmentButtonTheme.SELECTED_FONT_SIZE);
+      const normalFontSize = this.options.fontSize ?? 
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
+      this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight =
         selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
           this.options.fontWeight ?? FontWeight.Regular;

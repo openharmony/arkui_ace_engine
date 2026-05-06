@@ -15,6 +15,7 @@
 
 #include "core/components_ng/syntax/repeat_node.h"
 
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -145,7 +146,7 @@ void RepeatNode::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
 }
 
 // FOREACH
-void RepeatNode::MoveData(int32_t from, int32_t to)
+void RepeatNode::MoveData(int32_t from, int32_t to, bool isNeedUpdate)
 {
     if (from == to || from < 0 || to < 0) {
         return;
@@ -172,6 +173,11 @@ void RepeatNode::MoveData(int32_t from, int32_t to)
     children.insert(toIter, child);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    if (isNeedUpdate) {
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(std::min(from, to));
+        }
+    }
 }
 
 void RepeatNode::FlushUpdateAndMarkDirty()
@@ -196,19 +202,25 @@ void RepeatNode::InitDragManager(const RefPtr<UINode>& child)
     CHECK_NULL_VOID(childNode);
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
-    auto pattern = childNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->InitDragManager(AceType::Claim(this));
+    if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+        auto pattern = childNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+        auto pattern = childNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    }
 }
 
 void RepeatNode::InitAllChildrenDragManager(bool init)
 {
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         onMoveEvent_ = nullptr;
         return;
     }
@@ -217,18 +229,30 @@ void RepeatNode::InitAllChildrenDragManager(bool init)
         if (!child || (child->GetChildren().size() != 1)) {
             continue;
         }
-        auto listItem = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
-        if (!listItem) {
+        auto item = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
+        if (!item) {
             continue;
         }
-        auto pattern = listItem->GetPattern<ListItemPattern>();
-        if (!pattern) {
-            continue;
-        }
-        if (init) {
-            pattern->InitDragManager(AceType::Claim(this));
-        } else {
-            pattern->DeInitDragManager();
+        if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+            auto pattern = item->GetPattern<ListItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
+        } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+            auto pattern = item->GetPattern<GridItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
         }
     }
 }

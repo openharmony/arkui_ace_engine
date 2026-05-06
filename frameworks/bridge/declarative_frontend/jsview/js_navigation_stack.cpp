@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/base/json/json_util.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -972,6 +973,10 @@ bool JSNavigationStack::ExecutePopCallbackInStack(const JSRef<JSVal>& param)
 
 void JSNavigationStack::ExecutePopCallbackForHomeNavDestination(const JSRef<JSVal>& param)
 {
+    auto size = GetSize();
+    if (size > 0) {
+        return;
+    }
     auto homeDest = homeDestinationNode_.Upgrade();
     CHECK_NULL_VOID(homeDest);
     auto destPattern = homeDest->GetPattern<NG::NavDestinationPattern>();
@@ -1544,11 +1549,14 @@ void JSNavigationStack::CallPushDestinationInner(const NG::NavdestinationRecover
         navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
     }
     navPathInfo->SetProperty<int32_t>("mode", infoMode);
+    JSRef<JSObject> navigationOptions = JSRef<JSObject>::New();
+    navigationOptions->SetProperty<int32_t>("launchMode", navdestinationsInfo.launchMode);
 
     auto func = JSRef<JSFunc>::Cast(pushNavDestinationFunc);
-    JSRef<JSVal> arg[1];
+    JSRef<JSVal> arg[ARGC_COUNT_TWO];
     arg[0] = navPathInfo;
-    func->Call(dataSourceObj_, 1, arg);
+    arg[1] = navigationOptions;
+    func->Call(dataSourceObj_, ARGC_COUNT_TWO, arg);
 }
 
 bool JSNavigationStack::IsFromRecovery(int32_t index)

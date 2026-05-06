@@ -82,6 +82,8 @@ ACE_EXPORT extern const char JS_REPEAT_ETS_TAG[];
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
 // js with theme node
 ACE_EXPORT extern const char JS_WITH_THEME_ETS_TAG[];
+// js with env node
+ACE_EXPORT extern const char JS_WITH_ENV_ETS_TAG[];
 // js node slot node
 ACE_EXPORT extern const char JS_NODE_SLOT_ETS_TAG[];
 // js toast node
@@ -148,6 +150,7 @@ ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
+ACE_EXPORT extern const char NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG[];
 ACE_EXPORT extern const char TOOL_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
@@ -689,6 +692,9 @@ ACE_EXPORT extern const char LAZY_V_GRID_LAYOUT_ETS_TAG[];
 
 // Picker
 ACE_EXPORT extern const char CONTAINER_PICKER_ETS_TAG[];
+
+// DepthComponent
+ACE_EXPORT extern const char DEPTH_COMPONENT_ETS_TAG[];
 
 // UndefinedNode
 ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];

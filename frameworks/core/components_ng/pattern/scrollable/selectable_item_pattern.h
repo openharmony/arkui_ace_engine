@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,8 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
+class InputEvent;
+class TouchEventImpl;
 class SelectableItemPattern : public virtual Pattern {
     DECLARE_ACE_TYPE(SelectableItemPattern, Pattern);
 
@@ -37,8 +38,52 @@ public:
         isSelected_ = selected;
     }
 
+    bool Selectable() const
+    {
+        return selectable_;
+    }
+
+    void SetSelectable(bool selectable)
+    {
+        selectable_ = selectable;
+    }
+
+    bool IsHover() const
+    {
+        return isHover_;
+    }
+
+    bool IsPressed() const
+    {
+        return isPressed_;
+    }
+
+    void SetEditModeEnabled(bool enabled);
+    void SyncCheckBoxFromItem();
+    virtual void MarkIsSelectedWithoutCheckbox(bool isSelected) {}
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        UpdateEditModeCheckBoxPosition();
+        return false;
+    }
+
+    void BeforeCreateLayoutWrapper() override;
+
 protected:
     bool isSelected_ = false;
+    bool selectable_ = true;
+    bool isHover_ = false;
+    bool isPressed_ = false;
+    RefPtr<InputEvent> hoverEvent_;
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<FrameNode> editModeCheckBoxNode_;
+
+    virtual void UpdateEditModeCheckBoxPosition();
+
+private:
+    void CreateEditModeCheckBox();
+    void RemoveEditModeCheckBox();
 };
 } // namespace OHOS::Ace::NG
 

@@ -178,6 +178,8 @@ public:
 
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged) override;
+    void ShowActionMenu(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback) override;
 
     void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
@@ -263,6 +265,8 @@ public:
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
     void AddFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder) override;
+    void OpenOrderOverlay(const RefPtr<NG::FrameNode>& node, const NG::OrderOverlayOptions& options,
+        std::function<void(int32_t)>&& callback) override;
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;

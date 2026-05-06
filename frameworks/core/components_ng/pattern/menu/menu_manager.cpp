@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_manager.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cstdint>
@@ -52,6 +53,7 @@
 #include "transaction/rs_transaction_proxy.h"
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -824,7 +826,8 @@ void MenuManager::SendToAccessibility(const WeakPtr<FrameNode> node,
     CHECK_NULL_VOID(wrapperPattern);
     auto menu = wrapperPattern->GetMenu();
     CHECK_NULL_VOID(menu);
-    auto accessibilityProperty = menu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto accessibilityProperty =
+        AceType::DynamicCast<MenuAccessibilityProperty>(menu->GetAccessibilityProperty<AccessibilityProperty>());
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(isShow);
     auto overlayManager = overlayWeak.Upgrade();

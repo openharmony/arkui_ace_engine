@@ -30,6 +30,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/force_split/force_split_utils.h"
 
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -818,6 +820,990 @@ HWTEST_F(ForceSplitManagerTestNg, IsTransitionShouldMovePageToPrimary002, TestSi
     manager->SetFullScreenPages(std::move(fullScreenPages));
     EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("fullScreen", "detail"));
     EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("home", "fullScreen"));
+}
+
+/**
+ * @tc.name: ForceSplitManagerConstructor001
+ * @tc.desc: Test ForceSplitManager constructor initializes default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ForceSplitManagerConstructor001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ForceSplitManager>();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.5f);
+    EXPECT_EQ(manager->mode_, ForceSplitMode::NOT_SPLIT);
+}
+
+/**
+ * @tc.name: ForceSplitManagerConstructor002
+ * @tc.desc: Test ForceSplitManager constructor initializes ratio to defaultSplitRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ForceSplitManagerConstructor002, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ForceSplitManager>();
+    ASSERT_NE(manager, nullptr);
+    constexpr float defaultSplitRatio = 0.5f;
+    EXPECT_FLOAT_EQ(manager->splitRatio_, defaultSplitRatio);
+}
+
+/**
+ * @tc.name: ForceSplitManagerConstructor003
+ * @tc.desc: Test ForceSplitManager constructor initializes mode to NOT_SPLIT
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ForceSplitManagerConstructor003, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ForceSplitManager>();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_EQ(manager->mode_, ForceSplitMode::NOT_SPLIT);
+}
+
+/**
+ * @tc.name: ForceSplitManagerConstructor004
+ * @tc.desc: Test ForceSplitManager constructor initializes optional values to nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ForceSplitManagerConstructor004, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ForceSplitManager>();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_FALSE(manager->wideSplitRatio_.has_value());
+    EXPECT_FALSE(manager->squareSplitRatio_.has_value());
+    EXPECT_FALSE(manager->delayedMode_.has_value());
+}
+
+/**
+ * @tc.name: SetForceSplitEnable005
+ * @tc.desc: Test SetForceSplitEnable with different mode transitions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable005, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::WIDE_SPLIT, false);
+    EXPECT_EQ(manager->mode_, ForceSplitMode::WIDE_SPLIT);
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::SQUARE_SPLIT, false);
+    EXPECT_EQ(manager->mode_, ForceSplitMode::SQUARE_SPLIT);
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::NOT_SPLIT, false);
+    EXPECT_EQ(manager->mode_, ForceSplitMode::NOT_SPLIT);
+}
+
+/**
+ * @tc.name: SetForceSplitEnable006
+ * @tc.desc: Test SetForceSplitEnable with needUpdateViewport=true stores delayedMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable006, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::WIDE_SPLIT, true);
+    EXPECT_TRUE(manager->delayedMode_.has_value());
+    EXPECT_EQ(manager->delayedMode_.value(), ForceSplitMode::WIDE_SPLIT);
+    EXPECT_TRUE(manager->surfaceChangeCallbackId_.has_value());
+
+    manager->delayedMode_ = std::nullopt;
+    manager->delayedIsForceSplitEnable_ = std::nullopt;
+    manager->surfaceChangeCallbackId_ = std::nullopt;
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::SQUARE_SPLIT, true);
+    EXPECT_TRUE(manager->delayedMode_.has_value());
+    EXPECT_EQ(manager->delayedMode_.value(), ForceSplitMode::SQUARE_SPLIT);
+}
+
+/**
+ * @tc.name: SetForceSplitEnable007
+ * @tc.desc: Test SetForceSplitEnable clears previous delayedMode when needUpdateViewport=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable007, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->delayedMode_ = ForceSplitMode::WIDE_SPLIT;
+    manager->SetForceSplitEnable(true, ForceSplitMode::SQUARE_SPLIT, false);
+    EXPECT_FALSE(manager->delayedMode_.has_value());
+    EXPECT_EQ(manager->mode_, ForceSplitMode::SQUARE_SPLIT);
+}
+
+/**
+ * @tc.name: SetForceSplitEnable008
+ * @tc.desc: Test SetForceSplitEnable with multiple rapid calls (override scenario)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable008, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::WIDE_SPLIT, true);
+    EXPECT_EQ(manager->delayedMode_.value(), ForceSplitMode::WIDE_SPLIT);
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::SQUARE_SPLIT, true);
+    EXPECT_EQ(manager->delayedMode_.value(), ForceSplitMode::SQUARE_SPLIT);
+
+    manager->SetForceSplitEnable(false, ForceSplitMode::NOT_SPLIT, true);
+    EXPECT_EQ(manager->delayedMode_.value(), ForceSplitMode::NOT_SPLIT);
+}
+
+/**
+ * @tc.name: SetForceSplitEnable009
+ * @tc.desc: Test SetForceSplitEnable sets isForceSplitSupported_ to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable009, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitSupported_ = false;
+    manager->SetForceSplitEnable(true, ForceSplitMode::WIDE_SPLIT, false);
+    EXPECT_TRUE(manager->isForceSplitSupported_);
+}
+
+/**
+ * @tc.name: SetForceSplitEnable010
+ * @tc.desc: Test SetForceSplitEnable updates ratio when mode changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable010, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetWideSplitRatio(0.6f);
+    manager->SetSquareSplitRatio(0.55f);
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::WIDE_SPLIT, false);
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.6f);
+
+    manager->SetForceSplitEnable(true, ForceSplitMode::SQUARE_SPLIT, false);
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.55f);
+}
+
+/**
+ * @tc.name: SetWideSplitRatio001
+ * @tc.desc: Test SetWideSplitRatio sets ratio correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetWideSplitRatio001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetWideSplitRatio(0.6f);
+    EXPECT_TRUE(manager->wideSplitRatio_.has_value());
+    EXPECT_FLOAT_EQ(manager->wideSplitRatio_.value(), 0.6f);
+}
+
+/**
+ * @tc.name: SetWideSplitRatio002
+ * @tc.desc: Test SetWideSplitRatio with nullopt clears ratio
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetWideSplitRatio002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetWideSplitRatio(0.6f);
+    EXPECT_TRUE(manager->wideSplitRatio_.has_value());
+
+    manager->SetWideSplitRatio(std::nullopt);
+    EXPECT_FALSE(manager->wideSplitRatio_.has_value());
+}
+
+/**
+ * @tc.name: SetWideSplitRatio003
+ * @tc.desc: Test SetWideSplitRatio with boundary value 1/3
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetWideSplitRatio003, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    manager->SetWideSplitRatio(minSplitRatio);
+    EXPECT_TRUE(manager->wideSplitRatio_.has_value());
+    EXPECT_FLOAT_EQ(manager->wideSplitRatio_.value(), minSplitRatio);
+}
+
+/**
+ * @tc.name: SetWideSplitRatio004
+ * @tc.desc: Test SetWideSplitRatio with boundary value 2/3
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetWideSplitRatio004, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
+    manager->SetWideSplitRatio(maxSplitRatio);
+    EXPECT_TRUE(manager->wideSplitRatio_.has_value());
+    EXPECT_FLOAT_EQ(manager->wideSplitRatio_.value(), maxSplitRatio);
+}
+
+/**
+ * @tc.name: SetSquareSplitRatio001
+ * @tc.desc: Test SetSquareSplitRatio sets ratio correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetSquareSplitRatio001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetSquareSplitRatio(0.55f);
+    EXPECT_TRUE(manager->squareSplitRatio_.has_value());
+    EXPECT_FLOAT_EQ(manager->squareSplitRatio_.value(), 0.55f);
+}
+
+/**
+ * @tc.name: SetSquareSplitRatio002
+ * @tc.desc: Test SetSquareSplitRatio with nullopt clears ratio
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetSquareSplitRatio002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetSquareSplitRatio(0.55f);
+    EXPECT_TRUE(manager->squareSplitRatio_.has_value());
+
+    manager->SetSquareSplitRatio(std::nullopt);
+    EXPECT_FALSE(manager->squareSplitRatio_.has_value());
+}
+
+/**
+ * @tc.name: SetSquareSplitRatio003
+ * @tc.desc: Test SetSquareSplitRatio with boundary value 1/3
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetSquareSplitRatio003, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    manager->SetSquareSplitRatio(minSplitRatio);
+    EXPECT_TRUE(manager->squareSplitRatio_.has_value());
+    EXPECT_FLOAT_EQ(manager->squareSplitRatio_.value(), minSplitRatio);
+}
+
+/**
+ * @tc.name: SetSquareSplitRatio004
+ * @tc.desc: Test SetSquareSplitRatio with boundary value 2/3
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetSquareSplitRatio004, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
+    manager->SetSquareSplitRatio(maxSplitRatio);
+    EXPECT_TRUE(manager->squareSplitRatio_.has_value());
+    EXPECT_FLOAT_EQ(manager->squareSplitRatio_.value(), maxSplitRatio);
+}
+
+/**
+ * @tc.name: GetSplitRatio001
+ * @tc.desc: Test GetSplitRatio after mode changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, GetSplitRatio001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetWideSplitRatio(0.6f);
+    manager->SetSquareSplitRatio(0.55f);
+
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+    manager->UpdateForceSplitRatio();
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.6f);
+
+    manager->mode_ = ForceSplitMode::SQUARE_SPLIT;
+    manager->UpdateForceSplitRatio();
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.55f);
+
+    manager->mode_ = ForceSplitMode::NOT_SPLIT;
+    manager->UpdateForceSplitRatio();
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), 0.5f);
+}
+
+/**
+ * @tc.name: AddForceSplitRatioListener002
+ * @tc.desc: Test AddForceSplitRatioListener with multiple listeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, AddForceSplitRatioListener002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr int32_t nodeId1 = 100;
+    constexpr int32_t nodeId2 = 200;
+    constexpr int32_t nodeId3 = 300;
+
+    std::function<void(float)> listener1 = [](float ratio) {};
+    std::function<void(float)> listener2 = [](float ratio) {};
+    std::function<void(float)> listener3 = [](float ratio) {};
+
+    manager->AddForceSplitRatioListener(nodeId1, std::move(listener1));
+    manager->AddForceSplitRatioListener(nodeId2, std::move(listener2));
+    manager->AddForceSplitRatioListener(nodeId3, std::move(listener3));
+
+    EXPECT_EQ(manager->forceSplitRatioListeners_.size(), 3);
+    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId1) != manager->forceSplitRatioListeners_.end());
+    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId2) != manager->forceSplitRatioListeners_.end());
+    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId3) != manager->forceSplitRatioListeners_.end());
+}
+
+/**
+ * @tc.name: RemoveForceSplitRatioListener003
+ * @tc.desc: Test RemoveForceSplitRatioListener removes specific listener from multiple
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, RemoveForceSplitRatioListener003, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr int32_t nodeId1 = 100;
+    constexpr int32_t nodeId2 = 200;
+    constexpr int32_t nodeId3 = 300;
+
+    std::function<void(float)> listener1 = [](float ratio) {};
+    std::function<void(float)> listener2 = [](float ratio) {};
+    std::function<void(float)> listener3 = [](float ratio) {};
+
+    manager->AddForceSplitRatioListener(nodeId1, std::move(listener1));
+    manager->AddForceSplitRatioListener(nodeId2, std::move(listener2));
+    manager->AddForceSplitRatioListener(nodeId3, std::move(listener3));
+    EXPECT_EQ(manager->forceSplitRatioListeners_.size(), 3);
+
+    manager->RemoveForceSplitRatioListener(nodeId2);
+    EXPECT_EQ(manager->forceSplitRatioListeners_.size(), 2);
+    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId2) == manager->forceSplitRatioListeners_.end());
+}
+
+/**
+ * @tc.name: UpdateForceSplitRatio005
+ * @tc.desc: Test UpdateForceSplitRatio triggers OnForceSplitRatioUpdate when ratio changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio005, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->splitRatio_ = 0.5f;
+    manager->SetWideSplitRatio(0.6f);
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+
+    manager->UpdateForceSplitRatio();
+    EXPECT_FLOAT_EQ(manager->splitRatio_, 0.6f);
+}
+
+/**
+ * @tc.name: UpdateForceSplitRatio006
+ * @tc.desc: Test UpdateForceSplitRatio does not trigger when ratio unchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio006, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->splitRatio_ = 0.6f;
+    manager->SetWideSplitRatio(0.6f);
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+
+    manager->UpdateForceSplitRatio();
+    EXPECT_FLOAT_EQ(manager->splitRatio_, 0.6f);
+}
+
+/**
+ * @tc.name: UpdateForceSplitRatio007
+ * @tc.desc: Test UpdateForceSplitRatio with ratio just above default
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio007, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float expectedRatio = 0.51f;
+    manager->SetWideSplitRatio(expectedRatio);
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+
+    manager->UpdateForceSplitRatio();
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), expectedRatio);
+}
+
+/**
+ * @tc.name: UpdateForceSplitRatio008
+ * @tc.desc: Test UpdateForceSplitRatio with ratio just below default
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio008, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float expectedRatio = 0.49f;
+    manager->SetWideSplitRatio(expectedRatio);
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+
+    manager->UpdateForceSplitRatio();
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), expectedRatio);
+}
+
+/**
+ * @tc.name: CalcCurrentSplitRatio006
+ * @tc.desc: Test CalcCurrentSplitRatio with WIDE_SPLIT and wideSplitRatio at boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio006, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
+
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+    manager->SetWideSplitRatio(minSplitRatio);
+    float ratio = manager->CalcCurrentSplitRatio();
+    EXPECT_FLOAT_EQ(ratio, minSplitRatio);
+
+    manager->SetWideSplitRatio(maxSplitRatio);
+    ratio = manager->CalcCurrentSplitRatio();
+    EXPECT_FLOAT_EQ(ratio, maxSplitRatio);
+}
+
+/**
+ * @tc.name: CalcCurrentSplitRatio007
+ * @tc.desc: Test CalcCurrentSplitRatio with SQUARE_SPLIT and squareSplitRatio at boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio007, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
+
+    manager->mode_ = ForceSplitMode::SQUARE_SPLIT;
+    manager->SetSquareSplitRatio(minSplitRatio);
+    float ratio = manager->CalcCurrentSplitRatio();
+    EXPECT_FLOAT_EQ(ratio, minSplitRatio);
+
+    manager->SetSquareSplitRatio(maxSplitRatio);
+    ratio = manager->CalcCurrentSplitRatio();
+    EXPECT_FLOAT_EQ(ratio, maxSplitRatio);
+}
+
+/**
+ * @tc.name: CalcCurrentSplitRatio008
+ * @tc.desc: Test CalcCurrentSplitRatio with invalid mode (edge case)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio008, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->mode_ = ForceSplitMode::NOT_SPLIT;
+    manager->SetWideSplitRatio(0.6f);
+    manager->SetSquareSplitRatio(0.55f);
+
+    float ratio = manager->CalcCurrentSplitRatio();
+    EXPECT_FLOAT_EQ(ratio, 0.5f);
+}
+
+/**
+ * @tc.name: CalcCurrentSplitRatio009
+ * @tc.desc: Test CalcCurrentSplitRatio returns correct ratio for all three modes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio009, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetWideSplitRatio(0.6f);
+    manager->SetSquareSplitRatio(0.55f);
+
+    manager->mode_ = ForceSplitMode::NOT_SPLIT;
+    EXPECT_FLOAT_EQ(manager->CalcCurrentSplitRatio(), 0.5f);
+
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+    EXPECT_FLOAT_EQ(manager->CalcCurrentSplitRatio(), 0.6f);
+
+    manager->mode_ = ForceSplitMode::SQUARE_SPLIT;
+    EXPECT_FLOAT_EQ(manager->CalcCurrentSplitRatio(), 0.55f);
+}
+
+/**
+ * @tc.name: ChangeForceSplitModeIfNeeded003
+ * @tc.desc: Test ChangeForceSplitModeIfNeeded with different delayedMode values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ChangeForceSplitModeIfNeeded003, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->delayedIsForceSplitEnable_ = true;
+    manager->delayedMode_ = ForceSplitMode::SQUARE_SPLIT;
+    manager->ChangeForceSplitModeIfNeeded();
+    EXPECT_FALSE(manager->delayedIsForceSplitEnable_.has_value());
+    EXPECT_FALSE(manager->delayedMode_.has_value());
+}
+
+/**
+ * @tc.name: ChangeForceSplitModeIfNeeded004
+ * @tc.desc: Test ChangeForceSplitModeIfNeeded when both delayed flags are set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ChangeForceSplitModeIfNeeded004, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->delayedIsForceSplitEnable_ = true;
+    manager->delayedMode_ = ForceSplitMode::WIDE_SPLIT;
+    manager->ChangeForceSplitModeIfNeeded();
+
+    EXPECT_FALSE(manager->delayedIsForceSplitEnable_.has_value());
+    EXPECT_FALSE(manager->delayedMode_.has_value());
+}
+
+/**
+ * @tc.name: ChangeForceSplitModeIfNeeded005
+ * @tc.desc: Test ChangeForceSplitModeIfNeeded with isForceSplitEnable_=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ChangeForceSplitModeIfNeeded005, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->delayedIsForceSplitEnable_ = false;
+    manager->delayedMode_ = ForceSplitMode::NOT_SPLIT;
+    manager->ChangeForceSplitModeIfNeeded();
+
+    EXPECT_FALSE(manager->delayedIsForceSplitEnable_.has_value());
+    EXPECT_FALSE(manager->delayedMode_.has_value());
+}
+
+/**
+ * @tc.name: OnForceSplitEnableChange001
+ * @tc.desc: Test OnForceSplitEnableChange calls UpdateIsInForceSplitMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, OnForceSplitEnableChange001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitEnable_ = true;
+    manager->isForceSplitSupported_ = true;
+    manager->OnForceSplitEnableChange();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnForceSplitEnableChange002
+ * @tc.desc: Test OnForceSplitEnableChange when force split is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, OnForceSplitEnableChange002, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitEnable_ = false;
+    manager->isForceSplitSupported_ = true;
+    manager->OnForceSplitEnableChange();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetForceSplitSupported001
+ * @tc.desc: Test SetForceSplitSupported sets isForceSplitSupported_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitSupported001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->hasSetForceSplitConfig_ = false;
+    manager->SetForceSplitSupported(true);
+    EXPECT_TRUE(manager->isForceSplitSupported_);
+    EXPECT_TRUE(manager->hasSetForceSplitConfig_);
+
+    manager->SetForceSplitSupported(false);
+    EXPECT_FALSE(manager->isForceSplitSupported_);
+}
+
+/**
+ * @tc.name: IsForceSplitSupported001
+ * @tc.desc: Test IsForceSplitSupported with different isRouter values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsForceSplitSupported001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitSupported_ = true;
+    manager->isRouter_ = true;
+
+    EXPECT_TRUE(manager->IsForceSplitSupported(true));
+    EXPECT_FALSE(manager->IsForceSplitSupported(false));
+
+    manager->isRouter_ = false;
+    EXPECT_FALSE(manager->IsForceSplitSupported(true));
+    EXPECT_TRUE(manager->IsForceSplitSupported(false));
+}
+
+/**
+ * @tc.name: IsForceSplitEnable003
+ * @tc.desc: Test IsForceSplitEnable with all conditions true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsForceSplitEnable003, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitEnable_ = true;
+    manager->isRouter_ = false;
+    manager->disableNavForceSplitInternal_ = false;
+    EXPECT_TRUE(manager->IsForceSplitEnable(false));
+}
+
+/**
+ * @tc.name: IsForceSplitEnable004
+ * @tc.desc: Test IsForceSplitEnable with disableNavForceSplitInternal_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsForceSplitEnable004, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitEnable_ = true;
+    manager->isRouter_ = false;
+    manager->disableNavForceSplitInternal_ = true;
+    EXPECT_FALSE(manager->IsForceSplitEnable(false));
+}
+
+/**
+ * @tc.name: IsForceSplitEnable005
+ * @tc.desc: Test IsForceSplitEnable with isRouter_=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsForceSplitEnable005, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitEnable_ = true;
+    manager->isRouter_ = true;
+    manager->disableNavForceSplitInternal_ = false;
+    EXPECT_TRUE(manager->IsForceSplitEnable(true));
+}
+
+/**
+ * @tc.name: SetIsRouter001
+ * @tc.desc: Test SetIsRouter sets isRouter_ correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetIsRouter001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetIsRouter(true);
+    EXPECT_TRUE(manager->isRouter_);
+
+    manager->SetIsRouter(false);
+    EXPECT_FALSE(manager->isRouter_);
+}
+
+/**
+ * @tc.name: IsRouterForceSplit001
+ * @tc.desc: Test IsRouterForceSplit returns isRouter_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsRouterForceSplit001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetIsRouter(true);
+    EXPECT_TRUE(manager->IsRouterForceSplit());
+
+    manager->SetIsRouter(false);
+    EXPECT_FALSE(manager->IsRouterForceSplit());
+}
+
+/**
+ * @tc.name: SetSplitDividerColor001
+ * @tc.desc: Test SetSplitDividerColor sets colors correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetSplitDividerColor001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    Color lightColor = Color::RED;
+    Color darkColor = Color::BLUE;
+
+    manager->SetSplitDividerColor(lightColor, darkColor);
+    auto colors = manager->GetSplitDividerColor();
+
+    EXPECT_TRUE(colors.first.has_value());
+    EXPECT_TRUE(colors.second.has_value());
+    EXPECT_EQ(colors.first.value(), lightColor);
+    EXPECT_EQ(colors.second.value(), darkColor);
+}
+
+/**
+ * @tc.name: SetSplitDividerColor002
+ * @tc.desc: Test SetSplitDividerColor with nullopt values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetSplitDividerColor002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetSplitDividerColor(std::nullopt, std::nullopt);
+    auto colors = manager->GetSplitDividerColor();
+
+    EXPECT_FALSE(colors.first.has_value());
+    EXPECT_FALSE(colors.second.has_value());
+}
+
+/**
+ * @tc.name: SetSplitDividerColor003
+ * @tc.desc: Test SetSplitDividerColor with only light color
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetSplitDividerColor003, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    Color lightColor = Color::RED;
+
+    manager->SetSplitDividerColor(lightColor, std::nullopt);
+    auto colors = manager->GetSplitDividerColor();
+
+    EXPECT_TRUE(colors.first.has_value());
+    EXPECT_FALSE(colors.second.has_value());
+    EXPECT_EQ(colors.first.value(), lightColor);
+}
+
+/**
+ * @tc.name: SetSplitDividerColor004
+ * @tc.desc: Test SetSplitDividerColor with only dark color
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetSplitDividerColor004, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    Color darkColor = Color::BLUE;
+
+    manager->SetSplitDividerColor(std::nullopt, darkColor);
+    auto colors = manager->GetSplitDividerColor();
+
+    EXPECT_FALSE(colors.first.has_value());
+    EXPECT_TRUE(colors.second.has_value());
+    EXPECT_EQ(colors.second.value(), darkColor);
+}
+
+/**
+ * @tc.name: GetSplitDividerColor001
+ * @tc.desc: Test GetSplitDividerColor returns correct pair
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, GetSplitDividerColor001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    Color lightColor = Color::RED;
+    Color darkColor = Color::BLUE;
+
+    manager->splitDividerColorLight_ = lightColor;
+    manager->splitDividerColorDark_ = darkColor;
+
+    auto colors = manager->GetSplitDividerColor();
+    EXPECT_EQ(colors.first.value(), lightColor);
+    EXPECT_EQ(colors.second.value(), darkColor);
+}
+
+/**
+ * @tc.name: NotifyForceSplitStateChange001
+ * @tc.desc: Test NotifyForceSplitStateChange calls registered listeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, NotifyForceSplitStateChange001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr int32_t nodeId = 100;
+    bool listenerCalled = false;
+    std::function<void()> listener = [&listenerCalled]() { listenerCalled = true; };
+
+    manager->AddForceSplitStateListener(nodeId, std::move(listener));
+    manager->NotifyForceSplitStateChange();
+    EXPECT_TRUE(listenerCalled);
+}
+
+/**
+ * @tc.name: NotifyForceSplitStateChange002
+ * @tc.desc: Test NotifyForceSplitStateChange with no listeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, NotifyForceSplitStateChange002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->forceSplitListeners_.clear();
+    manager->NotifyForceSplitStateChange();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: NotifyForceSplitStateChange003
+ * @tc.desc: Test NotifyForceSplitStateChange with multiple listeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, NotifyForceSplitStateChange003, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr int32_t nodeId1 = 100;
+    constexpr int32_t nodeId2 = 200;
+    int32_t callCount = 0;
+
+    std::function<void()> listener1 = [&callCount]() { callCount++; };
+    std::function<void()> listener2 = [&callCount]() { callCount++; };
+
+    manager->AddForceSplitStateListener(nodeId1, std::move(listener1));
+    manager->AddForceSplitStateListener(nodeId2, std::move(listener2));
+    manager->NotifyForceSplitStateChange();
+    EXPECT_EQ(callCount, 2);
+}
+
+/**
+ * @tc.name: AddForceSplitStateListener001
+ * @tc.desc: Test AddForceSplitStateListener adds listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, AddForceSplitStateListener001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr int32_t nodeId = 100;
+    std::function<void()> listener = []() {};
+
+    manager->AddForceSplitStateListener(nodeId, std::move(listener));
+    EXPECT_TRUE(manager->forceSplitListeners_.find(nodeId) != manager->forceSplitListeners_.end());
+}
+
+/**
+ * @tc.name: RemoveForceSplitStateListener001
+ * @tc.desc: Test RemoveForceSplitStateListener removes listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, RemoveForceSplitStateListener001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    constexpr int32_t nodeId = 100;
+    std::function<void()> listener = []() {};
+
+    manager->AddForceSplitStateListener(nodeId, std::move(listener));
+    manager->RemoveForceSplitStateListener(nodeId);
+    EXPECT_TRUE(manager->forceSplitListeners_.find(nodeId) == manager->forceSplitListeners_.end());
+}
+
+/**
+ * @tc.name: ForceSplitModeEnum001
+ * @tc.desc: Test ForceSplitMode enum values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ForceSplitModeEnum001, TestSize.Level1)
+{
+    EXPECT_EQ(static_cast<int32_t>(ForceSplitMode::NOT_SPLIT), 0);
+    EXPECT_EQ(static_cast<int32_t>(ForceSplitMode::WIDE_SPLIT), 1);
+    EXPECT_EQ(static_cast<int32_t>(ForceSplitMode::SQUARE_SPLIT), 2);
+}
+
+/**
+ * @tc.name: ForceSplitModeEnum002
+ * @tc.desc: Test ForceSplitMode enum comparison
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ForceSplitModeEnum002, TestSize.Level1)
+{
+    auto mode1 = ForceSplitMode::NOT_SPLIT;
+    auto mode2 = ForceSplitMode::WIDE_SPLIT;
+    auto mode3 = ForceSplitMode::SQUARE_SPLIT;
+
+    EXPECT_NE(mode1, mode2);
+    EXPECT_NE(mode2, mode3);
+    EXPECT_NE(mode1, mode3);
+}
+
+/**
+ * @tc.name: ForceSplitModeEnum003
+ * @tc.desc: Test ForceSplitMode enum ordering
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, ForceSplitModeEnum003, TestSize.Level1)
+{
+    EXPECT_LT(static_cast<int32_t>(ForceSplitMode::NOT_SPLIT), static_cast<int32_t>(ForceSplitMode::WIDE_SPLIT));
+    EXPECT_LT(static_cast<int32_t>(ForceSplitMode::WIDE_SPLIT), static_cast<int32_t>(ForceSplitMode::SQUARE_SPLIT));
 }
 
 } // namespace OHOS::Ace::NG

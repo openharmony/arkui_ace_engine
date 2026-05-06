@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/dynamiclayout/dynamic_layout_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 std::pair<RefPtr<DynamicLayoutNode>, bool> DynamicLayoutNode::GetOrCreateDynamicLayoutNode(

@@ -103,6 +103,7 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
         auto srcInfo = CreateSourceInfo(
             imageInfoConfig.src, imageInfoConfig.pixelMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
         srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
+        srcInfo.SetReloadKey(imageInfoConfig.reloadKey);
         ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
     }
     SetImageFillSetByUser(false);
@@ -153,6 +154,17 @@ void ImageModelNG::SetInitialSrc(FrameNode* frameNode, const std::string& src, c
 void ImageModelNG::SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
 {
     auto srcInfo = ImageSourceInfo(pixMap);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
+void ImageModelNG::SetReloadKey(FrameNode* frameNode, const std::string& reloadKey)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto srcInfo = layoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    srcInfo.SetReloadKey(reloadKey.empty() ? std::optional<std::string>(std::nullopt)
+                                           : std::optional<std::string>(reloadKey));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 

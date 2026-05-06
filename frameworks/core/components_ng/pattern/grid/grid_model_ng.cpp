@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1032,6 +1032,45 @@ EditModeOptions GridModelNG::GetEditModeOptions(FrameNode* frameNode)
     return pattern->GetEditModeOptions();
 }
 
+void GridModelNG::SetEnableEditMode(bool enableEditMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableEditMode(frameNode, enableEditMode);
+}
+
+void GridModelNG::SetEnableEditMode(FrameNode* frameNode, bool enableEditMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditMode(enableEditMode);
+}
+
+bool GridModelNG::GetEnableEditMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetEnableEditMode();
+}
+
+void GridModelNG::SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeChangeEvent(std::move(changeEvent));
+}
+
+void GridModelNG::SetEnableEditModeChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeChangeEvent(std::move(changeEvent));
+}
+
 void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1164,4 +1203,16 @@ bool GridModelNG::GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode)
     return enable;
 }
 
+void GridModelNG::CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarWidth(frameNode, resObj);
+}
+
+void GridModelNG::CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarWidth(frameNode, resObj);
+}
 } // namespace OHOS::Ace::NG

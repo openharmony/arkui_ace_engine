@@ -254,10 +254,12 @@ const GENERATED_ArkUIDragUtilsAccessor* GetDragUtilsAccessor();
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor();
 const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
+const GENERATED_ArkUIEventLocationInfoAccessor* GetEventLocationInfoAccessor();
 const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor();
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
 const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor();
 const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor();
+const GENERATED_ArkUIFingerInfoAccessor* GetFingerInfoAccessor();
 const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor();
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
 const GENERATED_ArkUIForEachOpsAccessor* GetForEachOpsAccessor();
@@ -298,6 +300,7 @@ const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor()
 const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor();
 const GENERATED_ArkUILinearGradientStyleAccessor* GetLinearGradientStyleAccessor();
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor();
+const GENERATED_ArkUILineSpacingStyleAccessor* GetLineSpacingStyleAccessor();
 const GENERATED_ArkUIListItemSwipeActionManagerAccessor* GetListItemSwipeActionManagerAccessor();
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor();
 const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAccessor();
@@ -319,7 +322,7 @@ const GENERATED_ArkUINumericTextTransitionAccessor* GetNumericTextTransitionAcce
 const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor();
 const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor();
 const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor();
-const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
+const GENERATED_ArkUIPanGestureOptionsProxyAccessor* GetPanGestureOptionsProxyAccessor();
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor();
 const GENERATED_ArkUIParticleHelperAccessor* GetParticleHelperAccessor();
@@ -393,6 +396,7 @@ const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor
 const GENERATED_ArkUIThemeOpsAccessor* GetThemeOpsAccessor();
 const GENERATED_ArkUIToggleExtenderAccessor* GetToggleExtenderAccessor();
 const GENERATED_ArkUITouchEventExtenderAccessor* GetTouchEventExtenderAccessor();
+const GENERATED_ArkUITouchObjectAccessor* GetTouchObjectAccessor();
 const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor();
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
@@ -602,10 +606,12 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDrawingRenderingContextAccessor,
         GetEnvironmentBackendAccessor,
         GetEventEmulatorAccessor,
+        GetEventLocationInfoAccessor,
         GetEventResultAccessor,
         GetEventTargetInfoAccessor,
         GetFileSelectorParamAccessor,
         GetFileSelectorResultAccessor,
+        GetFingerInfoAccessor,
         GetFocusAxisEventAccessor,
         GetFocusControllerAccessor,
         GetForEachOpsAccessor,
@@ -646,6 +652,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLinearGradientAccessor,
         GetLinearGradientStyleAccessor,
         GetLineHeightStyleAccessor,
+        GetLineSpacingStyleAccessor,
         GetListItemSwipeActionManagerAccessor,
         GetListScrollerAccessor,
         GetLongPressGestureEventAccessor,
@@ -667,7 +674,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetOffscreenCanvasAccessor,
         GetOffscreenCanvasRenderingContext2DAccessor,
         GetPanGestureEventAccessor,
-        GetPanGestureOptionsAccessor,
+        GetPanGestureOptionsProxyAccessor,
         GetPanRecognizerAccessor,
         GetParagraphStyleAccessor,
         GetParticleHelperAccessor,
@@ -741,6 +748,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetThemeOpsAccessor,
         GetToggleExtenderAccessor,
         GetTouchEventExtenderAccessor,
+        GetTouchObjectAccessor,
         GetTouchRecognizerAccessor,
         GetTransitionEffectAccessor,
         GetUICommonEventAccessor,

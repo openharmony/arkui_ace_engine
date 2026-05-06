@@ -14,9 +14,11 @@
  */
 
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"

@@ -19,6 +19,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/system_properties.h"
+#include "core/animation/curves.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -168,6 +170,20 @@ void GridPattern::OnModifyDone()
 
     if (!multiSelectable_ && isMouseEventInit_) {
         UninitMouseEvent();
+    }
+
+    if (GetEnableEditMode() && !swipeSelectPanEvent_) {
+        InitSwipeSelectEvent();
+    }
+
+    if (!GetEnableEditMode() && swipeSelectPanEvent_) {
+        UninitSwipeSelectEvent();
+    }
+
+    if (IsDefaultMultiSelectStyleEnabled()) {
+        ApplyEditModeToVisibleItems();
+    } else {
+        RemoveEditModeFromItems();
     }
 
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
@@ -307,6 +323,24 @@ bool GridPattern::IsItemSelected(float offsetX, float offsetY)
     auto itemPattern = node->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);
     return itemPattern->IsSelected();
+}
+
+int32_t GridPattern::GetItemAtPosition(float offsetX, float offsetY) const
+{
+    return GetItemIndex(static_cast<double>(offsetX), static_cast<double>(offsetY));
+}
+
+void GridPattern::MarkSwipeItemSelected(int32_t index, bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto node = host->GetChildByIndex(index);
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto itemPattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(itemPattern);
+    itemPattern->MarkIsSelected(isSelected);
 }
 
 void GridPattern::FireOnScrollStart(bool withPerfMonitor)
@@ -696,7 +730,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onJsFrameNodeScrollIndex = gridEventHub->GetJSFrameNodeOnGridScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
     FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
-    if (indexChanged) {
+    if (indexChanged && GetScrollSource() != SCROLL_FROM_NONE) {
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, info_.startIndex_, info_.endIndex_);
     }
     auto onReachStart = gridEventHub->GetOnReachStart();
@@ -764,8 +798,9 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return ret;
 }
 
-ScrollOffsetAbility GridPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility GridPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
+    (void)isAccessibility;
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
@@ -867,7 +902,12 @@ void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType 
     }
     if (smooth) {
         float position = -info_.currentHeight_ + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+        if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+            ScrollablePattern::AnimateTo(
+                -position, HALF_PAGE_SCROLL_DURATION, Curves::LINEAR, false, false, false);
+        } else {
+            ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+        }
         return;
     } else {
         if (!isConfigScrollable_) {
@@ -1990,5 +2030,34 @@ void GridPattern::PostAsyncLoadTask()
             pattern->MarkDirtyNodeSelf();
         }
     });
+}
+
+void GridPattern::ApplyEditModeToCachedItems(bool enabled)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto startIdx = info_.startIndex_;
+    auto endIdx = info_.endIndex_;
+    for (int32_t idx = startIdx - 1; idx >= 0; --idx) {
+        auto* child = host->GetFrameNodeChildByIndexWithoutBuild(idx);
+        if (!child) {
+            break;
+        }
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            itemPattern->SetEditModeEnabled(enabled);
+        }
+    }
+    int32_t total = host->TotalChildCount();
+    for (int32_t idx = endIdx + 1; idx < total; ++idx) {
+        auto* child = host->GetFrameNodeChildByIndexWithoutBuild(idx);
+        if (!child) {
+            break;
+        }
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            itemPattern->SetEditModeEnabled(enabled);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

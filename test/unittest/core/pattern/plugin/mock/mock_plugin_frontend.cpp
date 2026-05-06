@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/plugin_frontend/plugin_frontend.h"
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS::Ace {
 PluginFrontend::~PluginFrontend() = default;

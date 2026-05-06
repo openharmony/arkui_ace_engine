@@ -212,7 +212,20 @@ ArkUILineHeightStyle ConvertToOriginLineHeightStyle(const OH_ArkUI_LineHeightSty
 {
     ArkUILineHeightStyle lineHeightStyle;
     lineHeightStyle.lineHeight = style.lineHeight;
+    std::optional<double> heightMultiple;
+    if (style.lineHeightMultiple.has_value() && !LessNotEqual(style.lineHeightMultiple.value(), 0.0f)) {
+        heightMultiple = static_cast<double>(style.lineHeightMultiple.value());
+    }
+    lineHeightStyle.lineHeightMultiple = heightMultiple;
     return lineHeightStyle;
+}
+
+ArkUILineSpacingStyle ConvertToOriginLineSpacingStyle(const OH_ArkUI_LineSpacingStyle& style)
+{
+    ArkUILineSpacingStyle lineSpacingStyle;
+    lineSpacingStyle.lineSpacing = style.lineSpacing;
+    lineSpacingStyle.onlyBetweenLines = style.onlyBetweenLines;
+    return lineSpacingStyle;
 }
 
 ArkUIUrlStyle ConvertToOriginUrlStyle(const OH_ArkUI_UrlStyle& spanStyle)
@@ -293,6 +306,7 @@ ArkUISpanStyle ConvertToOriginSpanStyle(const OH_ArkUI_SpanStyle* spanStyle)
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_DECORATION, decorationStyle, DecorationStyle);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_TEXT_SHADOW, textShadowStyle, TextShadowStyle);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT, lineHeightStyle, LineHeightStyle);
+        PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LINE_SPACING, lineSpacingStyle, LineSpacingStyle);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_PARAGRAPH_STYLE, paragraphStyle, ParagraphStyle);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LETTER_SPACING, letterSpacingStyle, LetterSpacing);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_BASELINE_OFFSET, baselineOffsetStyle, BaselineOffset);
@@ -406,7 +420,18 @@ OH_ArkUI_LineHeightStyle ConvertToCLineHeightStyle(const ArkUILineHeightStyle& s
 {
     OH_ArkUI_LineHeightStyle lineHeightStyle;
     lineHeightStyle.lineHeight = style.lineHeight;
+    if (style.lineHeightMultiple.has_value()) {
+        lineHeightStyle.lineHeightMultiple = style.lineHeightMultiple.value();
+    }
     return lineHeightStyle;
+}
+
+OH_ArkUI_LineSpacingStyle ConvertToCLineSpacingStyle(const ArkUILineSpacingStyle& style)
+{
+    OH_ArkUI_LineSpacingStyle lineSpacingStyle;
+    lineSpacingStyle.lineSpacing = style.lineSpacing;
+    lineSpacingStyle.onlyBetweenLines = style.onlyBetweenLines;
+    return lineSpacingStyle;
 }
 
 OH_ArkUI_LetterSpacingStyle ConvertToCLetterSpacing(const ArkUILetterSpacingStyle& style)
@@ -484,6 +509,7 @@ OH_ArkUI_SpanStyle ConvertToCSpanStyle(const ArkUISpanStyle& spanStyle)
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_DECORATION, decorationStyle, DecorationStyle);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_TEXT_SHADOW, textShadowStyle, TextShadowStyle);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT, lineHeightStyle, LineHeightStyle);
+        PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LINE_SPACING, lineSpacingStyle, LineSpacingStyle);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_PARAGRAPH_STYLE, paragraphStyle, ParagraphStyle);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LETTER_SPACING, letterSpacingStyle, LetterSpacing);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_BASELINE_OFFSET, baselineOffsetStyle, BaselineOffset);
@@ -645,6 +671,23 @@ ArkUI_ErrorCode OH_ArkUI_TextStyle_GetSuperscript(const OH_ArkUI_TextStyle* text
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+void ClearSpanStyle(OH_ArkUI_SpanStyle* spanStyle)
+{
+    CHECK_NULL_VOID(spanStyle);
+    if (spanStyle->paragraphStyle.leadingMarginPixelMap) {
+        delete spanStyle->paragraphStyle.leadingMarginPixelMap;
+        spanStyle->paragraphStyle.leadingMarginPixelMap = nullptr;
+    }
+    if (spanStyle->imageAttachment.pixelMap) {
+        delete spanStyle->imageAttachment.pixelMap;
+        spanStyle->imageAttachment.pixelMap = nullptr;
+    }
+    spanStyle->textShadowStyle.textShadow = {};
+    spanStyle->imageAttachment.isPixelMap = std::nullopt;
+    spanStyle->imageAttachment.isDrawingColorFilter = std::nullopt;
+    spanStyle->imageAttachment.colorFilter = {};
+}
+
 OH_ArkUI_SpanStyle* OH_ArkUI_SpanStyle_Create()
 {
     OH_ArkUI_SpanStyle* spanStyle = new OH_ArkUI_SpanStyle();
@@ -656,6 +699,7 @@ OH_ArkUI_SpanStyle* OH_ArkUI_SpanStyle_Create()
 
 void OH_ArkUI_SpanStyle_Destroy(OH_ArkUI_SpanStyle* spanStyle)
 {
+    ClearSpanStyle(spanStyle);
     delete spanStyle;
     spanStyle = nullptr;
 }
@@ -694,15 +738,6 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetLength(const OH_ArkUI_SpanStyle* spanStyle
     CHECK_NULL_RETURN(spanStyle && length, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *length = spanStyle->length;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-void ClearSpanStyle(OH_ArkUI_SpanStyle* spanStyle)
-{
-    CHECK_NULL_VOID(spanStyle);
-    spanStyle->textShadowStyle.textShadow.clear();
-    spanStyle->imageAttachment.isPixelMap = std::nullopt;
-    spanStyle->imageAttachment.isDrawingColorFilter = std::nullopt;
-    spanStyle->imageAttachment.colorFilter.clear();
 }
 
 ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetTextStyle(OH_ArkUI_SpanStyle* spanStyle, const OH_ArkUI_TextStyle* textStyle)
@@ -745,8 +780,6 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetParagraphStyle(
     CHECK_NULL_RETURN(spanStyle && paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     ClearSpanStyle(spanStyle);
     OH_ArkUI_ParagraphStyle style;
-    spanStyle->start = 0;
-    spanStyle->length = 0;
     spanStyle->styledKey = OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_PARAGRAPH_STYLE;
     style.textAlign = paragraphStyle->textAlign;
     style.textIndent = paragraphStyle->textIndent;
@@ -927,6 +960,7 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetLineHeightStyle(
     ClearSpanStyle(spanStyle);
     spanStyle->styledKey = OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT;
     spanStyle->lineHeightStyle.lineHeight = lineHeightStyle->lineHeight;
+    spanStyle->lineHeightStyle.lineHeightMultiple = lineHeightStyle->lineHeightMultiple;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -937,6 +971,28 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetLineHeightStyle(
     CHECK_NULL_RETURN(spanStyle->styledKey == OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT,
         ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     lineHeightStyle->lineHeight = spanStyle->lineHeightStyle.lineHeight;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetLineSpacingStyle(
+    OH_ArkUI_SpanStyle* spanStyle, const OH_ArkUI_LineSpacingStyle* lineSpacingStyle)
+{
+    CHECK_NULL_RETURN(spanStyle && lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    ClearSpanStyle(spanStyle);
+    spanStyle->styledKey = OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_SPACING;
+    spanStyle->lineSpacingStyle.lineSpacing = lineSpacingStyle->lineSpacing;
+    spanStyle->lineSpacingStyle.onlyBetweenLines = lineSpacingStyle->onlyBetweenLines;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetLineSpacingStyle(
+    const OH_ArkUI_SpanStyle* spanStyle, OH_ArkUI_LineSpacingStyle* lineSpacingStyle)
+{
+    CHECK_NULL_RETURN(spanStyle && lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(spanStyle->styledKey == OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_SPACING,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    lineSpacingStyle->lineSpacing = spanStyle->lineSpacingStyle.lineSpacing;
+    lineSpacingStyle->onlyBetweenLines = spanStyle->lineSpacingStyle.onlyBetweenLines;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1332,6 +1388,7 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetLeadingMarginPixelMap(OH_ArkUI_Paragr
     CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<OHOS::Media::PixelMap> tmpPixel = pixelmap->GetInnerPixelmap();
     CHECK_NULL_RETURN(tmpPixel, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete paragraphStyle->leadingMarginPixelMap;
     paragraphStyle->leadingMarginPixelMap = new (std::nothrow) OH_PixelmapNative(tmpPixel);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1495,6 +1552,7 @@ ArkUI_ErrorCode OH_ArkUI_TextShadowStyle_SetTextShadow(OH_ArkUI_TextShadowStyle*
     const OH_ArkUI_ShadowOptions** options, uint32_t length)
 {
     CHECK_NULL_RETURN(textShadowStyle && options && length > 0, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    textShadowStyle->textShadow = {};
     for (uint32_t i = 0; i < length; i++) {
         auto temp = options[i];
         OH_ArkUI_ShadowOptions opt;
@@ -1716,6 +1774,69 @@ ArkUI_ErrorCode OH_ArkUI_LineHeightStyle_GetLineHeight(const OH_ArkUI_LineHeight
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_ErrorCode OH_ArkUI_LineHeightStyle_SetLineHeightMultiple(OH_ArkUI_LineHeightStyle* lineHeightStyle,
+    float lineHeightMultiple)
+{
+    CHECK_NULL_RETURN(lineHeightStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    lineHeightStyle->lineHeightMultiple = lineHeightMultiple;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_LineHeightStyle_GetLineHeightMultiple(const OH_ArkUI_LineHeightStyle* lineHeightStyle,
+    float* lineHeightMultiple)
+{
+    CHECK_NULL_RETURN(lineHeightStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(lineHeightMultiple, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *lineHeightMultiple = lineHeightStyle->lineHeightMultiple.has_value() ?
+        lineHeightStyle->lineHeightMultiple.value() : 0.0f;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+OH_ArkUI_LineSpacingStyle* OH_ArkUI_LineSpacingStyle_Create()
+{
+    return new OH_ArkUI_LineSpacingStyle;
+}
+
+void OH_ArkUI_LineSpacingStyle_Destroy(OH_ArkUI_LineSpacingStyle* lineSpacingStyle)
+{
+    delete lineSpacingStyle;
+    lineSpacingStyle = nullptr;
+}
+
+ArkUI_ErrorCode OH_ArkUI_LineSpacingStyle_SetLineSpacing(OH_ArkUI_LineSpacingStyle* lineSpacingStyle,
+    float lineSpacing)
+{
+    CHECK_NULL_RETURN(lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    lineSpacingStyle->lineSpacing = lineSpacing;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_LineSpacingStyle_GetLineSpacing(const OH_ArkUI_LineSpacingStyle* lineSpacingStyle,
+    float* lineSpacing)
+{
+    CHECK_NULL_RETURN(lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(lineSpacing, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *lineSpacing = lineSpacingStyle->lineSpacing;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_LineSpacingStyle_SetOnlyBetweenLines(
+    OH_ArkUI_LineSpacingStyle* lineSpacingStyle, bool onlyBetweenLines)
+{
+    CHECK_NULL_RETURN(lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    lineSpacingStyle->onlyBetweenLines = onlyBetweenLines;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_LineSpacingStyle_GetOnlyBetweenLines(
+    const OH_ArkUI_LineSpacingStyle* lineSpacingStyle, bool* onlyBetweenLines)
+{
+    CHECK_NULL_RETURN(lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(onlyBetweenLines, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *onlyBetweenLines = lineSpacingStyle->onlyBetweenLines;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 OH_ArkUI_BackgroundColorStyle* OH_ArkUI_BackgroundColorStyle_Create()
 {
     return new OH_ArkUI_BackgroundColorStyle;
@@ -1879,6 +2000,7 @@ ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetPixelMap(
     CHECK_NULL_RETURN(imageAttachment && pixelmap, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<OHOS::Media::PixelMap> tmpPixel = pixelmap->GetInnerPixelmap();
     CHECK_NULL_RETURN(tmpPixel, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete imageAttachment->pixelMap;
     imageAttachment->pixelMap = new (std::nothrow) OH_PixelmapNative(tmpPixel);
     imageAttachment->isPixelMap = true;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -2043,6 +2165,7 @@ ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetColorFilter(
 {
     CHECK_NULL_RETURN(imageAttachment && colorFilter, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     imageAttachment->isDrawingColorFilter = false;
+    imageAttachment->colorFilter = {};
     for (uint32_t i = 0; i < size; i++) {
         auto temp = colorFilter[i];
         imageAttachment->colorFilter.emplace_back(temp);

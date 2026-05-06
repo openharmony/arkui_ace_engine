@@ -394,6 +394,25 @@ void TextModelStatic::BindSelectionMenu(FrameNode* frameNode, TextSpanType& span
     }
 }
 
+void TextModelStatic::BindPreviewMenu(FrameNode* frameNode, TextSpanType& spanType,
+    std::function<void()>&& buildFunc, SelectMenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->BindPreviewMenu(spanType, buildFunc, menuParam);
+    }
+}
+
+void TextModelStatic::UnBindPreviewMenu(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->UnBindPreviewMenu();
+    }
+}
+
 void TextModelStatic::SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
     TextModelNG::SetHalfLeading(frameNode, valueOpt.value_or(false));

@@ -919,6 +919,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionEnableDropDisallowedBadge)
         },
         ani_native_function {
+            "_DragController_interruptFollowHandMorphDropAnimation",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionInterruptFollowHandMorphDropAnimation)
+        },
+        ani_native_function {
             "_DragSpringLoadingContext_get_state",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SpringLoadingContextGetState)

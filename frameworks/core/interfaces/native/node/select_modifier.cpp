@@ -14,10 +14,13 @@
  */
 #include "core/interfaces/native/node/select_modifier.h"
 
+#include "core/common/container.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -1159,6 +1162,123 @@ void ResetMenuSystemMaterial(ArkUINodeHandle node)
     SelectModelNG::SetMenuSystemMaterial(frameNode, nullptr);
 }
 
+void SetMenuBgBlurStyleWithOption(ArkUINodeHandle node, MenuBgBlurStyleOptionArgs* optionArgs)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "menuBackgroundBlurStyleOptions");
+    BlurStyleOption styleOption;
+    styleOption.colorMode = static_cast<OHOS::Ace::ThemeColorMode>(optionArgs->colorMode);
+    styleOption.adaptiveColor = static_cast<OHOS::Ace::AdaptiveColor>(optionArgs->adaptiveColor);
+    styleOption.scale = optionArgs->scale;
+    if (optionArgs->blurValues != nullptr && optionArgs->blurValuesSize > 0) {
+        styleOption.blurOption.grayscale.assign(
+            optionArgs->blurValues, optionArgs->blurValues + optionArgs->blurValuesSize);
+    }
+    styleOption.policy = static_cast<OHOS::Ace::BlurStyleActivePolicy>(optionArgs->policy);
+    if (optionArgs->isValidColor) {
+        styleOption.inactiveColor = Color(optionArgs->inactiveColor);
+        styleOption.isValidColor = true;
+    }
+    if (SystemProperties::ConfigChangePerform() && optionArgs->inactiveColorRawPtr) {
+        auto* colorPtr = reinterpret_cast<ResourceObject*>(optionArgs->inactiveColorRawPtr);
+        auto colorResObj = AceType::Claim(colorPtr);
+        styleOption.AddResource("menuBackgroundBlurStyleOptions.inactiveColor", colorResObj,
+            [](const RefPtr<ResourceObject>& resObj, BlurStyleOption& option) {
+                Color color;
+                if (ResourceParseUtils::ParseResColor(resObj, color)) {
+                    option.inactiveColor = color;
+                    option.isValidColor = true;
+                }
+            });
+    }
+    SelectModelNG::SetMenuBackgroundBlurStyleOptions(frameNode, styleOption);
+}
+
+void ResetMenuBgBlurStyleWithOption(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption styleOption;
+    SelectModelNG::SetMenuBackgroundBlurStyleOptions(frameNode, styleOption);
+}
+
+void CheckBackgroundEffectResObj(EffectOption& option, void* colorRawPtr, void* inactiveColorRawPtr)
+{
+    if (colorRawPtr) {
+        auto* colorPtr = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(colorPtr);
+        if (colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, EffectOption& effectOption) {
+                Color effectOptionColor;
+                ResourceParseUtils::ParseResColor(colorResObj, effectOptionColor);
+                effectOption.color = effectOptionColor;
+            };
+            option.AddResource("menuBackgroundEffect.color", colorResObj, std::move(updateFunc));
+        }
+    }
+    if (inactiveColorRawPtr) {
+        auto* inactiveColorPtr = reinterpret_cast<ResourceObject*>(inactiveColorRawPtr);
+        auto inactiveColorResObj = AceType::Claim(inactiveColorPtr);
+        if (inactiveColorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& inactiveColorObj, EffectOption& effectOption) {
+                Color effectOptionInactiveColor;
+                ResourceParseUtils::ParseResColor(inactiveColorObj, effectOptionInactiveColor);
+                effectOption.inactiveColor = effectOptionInactiveColor;
+            };
+            option.AddResource("menuBackgroundEffect.inactiveColor", inactiveColorResObj, std::move(updateFunc));
+        }
+    }
+}
+
+void SetMenuBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
+    ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
+    ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg,
+    void* colorRawPtr, void* inactiveColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "menuBackgroundEffect");
+    CalcDimension radius;
+    radius.SetValue(radiusArg);
+    Color color(colorArg);
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturationArg;
+    option.brightness = brightnessArg;
+    option.color = color;
+    option.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorArg);
+    option.blurOption = blurOption;
+    option.policy = static_cast<BlurStyleActivePolicy>(policy);
+    Color inactiveColor(inactiveColorArg);
+    option.inactiveColor = inactiveColor;
+    option.isValidColor = isValidColor;
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBackgroundEffectResObj(option, colorRawPtr, inactiveColorRawPtr);
+    }
+    SelectModelNG::SetMenuBackgroundEffect(frameNode, option);
+}
+
+void ResetMenuBackgroundEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "menuBackgroundEffect");
+    CalcDimension radius;
+    radius.SetValue(0.0f);
+    double saturation = 1.0f;
+    double brightness = 1.0f;
+    Color color = Color::TRANSPARENT;
+    color.SetValue(Color::TRANSPARENT.GetValue());
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    BlurOption blurOption;
+    EffectOption effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
+    SelectModelNG::SetMenuBackgroundEffect(frameNode, effectOption);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -1242,6 +1362,10 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetMinKeyboardAvoidDistance = ResetMinKeyboardAvoidDistance,
         .setMenuSystemMaterial = SetMenuSystemMaterial,
         .resetMenuSystemMaterial = ResetMenuSystemMaterial,
+        .setMenuBgBlurStyleWithOption = SetMenuBgBlurStyleWithOption,
+        .resetMenuBgBlurStyleWithOption = ResetMenuBgBlurStyleWithOption,
+        .setMenuBackgroundEffect = SetMenuBackgroundEffect,
+        .resetMenuBackgroundEffect = ResetMenuBackgroundEffect,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

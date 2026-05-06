@@ -33,9 +33,21 @@ public:
     void SetSymbolEffect(const uint32_t effectStrategy) override;
     void SetFontFamilies(std::vector<std::string>& familyNames) override;
     void SetSymbolType(SymbolType value) override;
+    void SetVariableFontWeight(int32_t value) override;
+    void ResetVariableFontWeight() override;
+    void SetEnableVariableFontWeight(bool value) override;
+    void ResetEnableVariableFontWeight() override;
+    void SetEnableDeviceFontWeightCategory(bool value) override;
+    void ResetEnableDeviceFontWeightCategory() override;
 
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
+    static void SetVariableFontWeight(FrameNode* frameNode, int32_t value);
+    static void ResetVariableFontWeight(FrameNode* frameNode);
+    static void SetEnableVariableFontWeight(FrameNode* frameNode, bool value);
+    static void ResetEnableVariableFontWeight(FrameNode* frameNode);
+    static void SetEnableDeviceFontWeightCategory(FrameNode* frameNode, bool value);
+    static void ResetEnableDeviceFontWeightCategory(FrameNode* frameNode);
     static void SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor);
     static void ResetFontColor(FrameNode* frameNode);
     static void SetSymbolRenderingStrategy(FrameNode* frameNode, const uint32_t renderingStrategy);

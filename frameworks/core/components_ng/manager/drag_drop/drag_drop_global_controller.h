@@ -73,16 +73,16 @@ public:
     void SetCallAnsyncDragEnd(std::function<void(DragStartRequestStatus)> callSyncDragEnd);
 
     std::function<void(DragStartRequestStatus)> GetCallAnsyncEnd();
-    // app global drag
-    void SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled);
-    bool IsAppGlobalDragEnabled() const;
-    bool IsAlreadyGetAppGlobalDrag() const;
     bool IsCurrentDrag(int32_t requestId) const;
     uint64_t GetStartDragVsyncTime() const;
     void SetStartDragVsyncTime(uint64_t startDragVsyncTime);
     void ResetPrePendingStatus();
     void SavePendingRequestIdentify(int32_t requestId);
     void NotifyPendingFailed(int32_t requestId);
+    void SavePendingFollowHandMorphDropAnimation(std::function<void()> callback);
+    bool ConsumeAndExecutePendingFollowHandMorphDropAnimation();
+    bool InterruptPendingFollowHandMorphDropAnimation();
+    bool IsWaitingFollowHandMorphDropAnimation() const;
 
 private:
     DragDropGlobalController() = default;
@@ -109,15 +109,14 @@ private:
     DragBehavior suggestedDropOperation_ = DragBehavior::UNKNOWN;
     bool disableDropAnimation_ = false;
 
-    // app global drag
-    bool isAppGlobalDragEnabled_ = false;
-    bool isAlreadyGetAppGlobalDrag_ = false;
-
     DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
     std::function<void()> asyncDragCallback_;
     bool enableDropDisallowedBadge_ = false;
     uint64_t startDragVsyncTime_ = 0;
     bool prePendingDone_ = false;
+    // Protect follow-hand morph drop animation completion/interrupt race across threads.
+    std::function<void()> pendingFollowHandMorphDropAnimationCallback_;
+    bool isWaitingFollowHandMorphDropAnimation_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -483,7 +483,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetShadowRadius(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> radius = runtimeCallInfo->GetCallArgRef(1);
-    float radiusValue = 0;
+    float radiusValue = Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0 : -1;
     if (radius->IsNumber()) {
         radiusValue = radius->ToNumber(vm)->Value();
     }
@@ -855,5 +855,50 @@ ArkUINativeModuleValue RenderNodeBridge::GetNodeType(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto nodeType = GetArkUINodeModifiers()->getRenderNodeModifier()->getNodeType(nativeNode);
     return panda::StringRef::NewFromUtf8(vm, nodeType);
+}
+
+ArkUINativeModuleValue RenderNodeBridge::SetBackgroundBlur(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto radius = GetNumber<double>(vm, runtimeCallInfo, 1, 0.0);
+    auto grayscale1 = GetNumber<int32_t>(vm, runtimeCallInfo, 2, 0);
+    auto grayscale2 = GetNumber<int32_t>(vm, runtimeCallInfo, 3, 0);
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setRenderNodeBackgroundBlur(
+        nativeNode, radius, grayscale1, grayscale2);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RenderNodeBridge::SetContentBlur(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto radius = GetNumber<double>(vm, runtimeCallInfo, 1, 0.0);
+    auto grayscale1 = GetNumber<int32_t>(vm, runtimeCallInfo, 2, 0);
+    auto grayscale2 = GetNumber<int32_t>(vm, runtimeCallInfo, 3, 0);
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setRenderNodeContentBlur(
+        nativeNode, radius, grayscale1, grayscale2);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RenderNodeBridge::SetForegroundBlur(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    auto radius = GetNumber<double>(vm, runtimeCallInfo, 1, 0.0);
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setRenderNodeForegroundBlur(nativeNode, radius);
+    return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

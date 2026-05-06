@@ -1308,6 +1308,18 @@ void BaseTextSelectOverlay::UpdateHandleColor()
     manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
 }
 
+void BaseTextSelectOverlay::UpdateMenuFromThemeChange(int32_t themeScopeId)
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    auto selectOverlayNode = manager->GetSelectOverlayNode();
+    CHECK_NULL_VOID(selectOverlayNode);
+    selectOverlayNode->SetThemeScopeId(themeScopeId);
+    selectOverlayNode->UpdateThemeScopeUpdate(themeScopeId);
+}
+
 bool BaseTextSelectOverlay::IsNeedMenuTranslate()
 {
     auto translation = GetSelectedText();
@@ -1694,5 +1706,17 @@ void BaseTextSelectOverlay::FlushAfterOverlayShowTask()
             task();
         }
     }
+}
+
+TextSelectionClearPolicy BaseTextSelectOverlay::GetClearPolicy()
+{
+    if (clearPolicy_) {
+        return clearPolicy_.value();
+    }
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, SelectOverlayCallback::GetClearPolicy());
+    auto policy = overlayManager->GetTextSelectionClearPolicy();
+    clearPolicy_ = policy ? policy.value() : SelectOverlayCallback::GetClearPolicy();
+    return clearPolicy_.value();
 }
 } // namespace OHOS::Ace::NG

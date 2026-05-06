@@ -89,6 +89,16 @@ void SheetPopupTestNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+            sheetTheme->sheetType_ = "auto";
+            sheetTheme->sheetBottom_ = "auto";
+            return sheetTheme;
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 

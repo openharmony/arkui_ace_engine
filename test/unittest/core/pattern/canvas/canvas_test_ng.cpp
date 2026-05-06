@@ -409,8 +409,10 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level0)
     /**
      * @tc.steps: step1. HasShadow() == false
      */
-    Shadow shadow1 = Shadow(5.0f, Offset(0.0, 0.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
-    Shadow shadow2 = Shadow(5.0f, Offset(10.0, 10.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
+    Shadow shadow1 =
+        Shadow(5.0f, Offset(0.0, 0.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
+    Shadow shadow2 =
+        Shadow(5.0f, Offset(10.0, 10.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
     paintMethod->state_.shadow = shadow1;
     EXPECT_FALSE(paintMethod->HasShadow());
     /**
@@ -444,7 +446,8 @@ HWTEST_F(CanvasTestNg, OnAttachToMainTreeTest, TestSize.Level0)
     /**
      * @tc.steps2: instantiation paintMethod_.
      */
-    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+    auto customNode =
+        CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
     customNode->SetJSViewName("testName");
     frameNode->SetParent(customNode);
     auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();

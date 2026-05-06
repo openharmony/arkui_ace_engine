@@ -137,6 +137,8 @@ public:
         ASSERT_TRUE(pattern);
         pattern->OnModifyDone();
     }
+
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /*
@@ -177,7 +179,7 @@ HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestValidLayoutOptionsValues, 
     Array_Int32 indexesArrayResult = indexesHolder.ArkValue();
     layoutOptions.irregularIndexes = Converter::ArkValue<Opt_Array_Int32>(indexesArrayResult);
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
-    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+    modifier_->setGridOptions(vmContext_, node_, &inputValue0, &inputValue1);
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
     EXPECT_THAT(strResult, Eq("true"));
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
@@ -188,7 +190,7 @@ HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestValidLayoutOptionsValues, 
     layoutOptions.regularSize.value0 = Converter::ArkValue<Ark_Int32>(2);
     layoutOptions.regularSize.value1 = Converter::ArkValue<Ark_Int32>(2);
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
-    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+    modifier_->setGridOptions(vmContext_, node_, &inputValue0, &inputValue1);
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
     EXPECT_THAT(strResult, Eq("true"));
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
@@ -208,7 +210,7 @@ HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestInvalidLayoutOptionsValues
     Opt_GridLayoutOptions inputValue1;
 
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
-    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+    modifier_->setGridOptions(vmContext_, node_, &inputValue0, &inputValue1);
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
     EXPECT_THAT(strResult, Eq("true"));
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
@@ -235,7 +237,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
 
     Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(peerImplPtr);
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
-    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+    modifier_->setGridOptions(vmContext_, node_, &inputValue0, &inputValue1);
 
     RefPtr<ScrollControllerBase> positionController = pattern->GetOrCreatePositionController();
     EXPECT_NE(positionController, nullptr);
@@ -269,7 +271,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Lev
 
     Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
-    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+    modifier_->setGridOptions(vmContext_, node_, &inputValue0, &inputValue1);
 
     RefPtr<ScrollControllerBase> positionController = pattern->GetOrCreatePositionController();
     EXPECT_NE(positionController, nullptr);
@@ -323,7 +325,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestGetSizeByIndex, TestSize.Level1)
     Opt_GridLayoutOptions inputValue1;
     layoutOptions.onGetIrregularSizeByIndex = optFunc;
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
-    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+    modifier_->setGridOptions(vmContext_, node_, &inputValue0, &inputValue1);
 
     auto property = frameNode->GetLayoutProperty<GridLayoutProperty>();
     auto options = property->GetLayoutOptions();
@@ -374,7 +376,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestGetRectByIndex, TestSize.Level1)
     layoutOptions.onGetRectByIndex = optFunc;
 
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
-    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+    modifier_->setGridOptions(vmContext_, node_, &inputValue0, &inputValue1);
 
     auto property = frameNode->GetLayoutProperty<GridLayoutProperty>();
     auto options = property->GetLayoutOptions();

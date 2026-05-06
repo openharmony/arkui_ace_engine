@@ -52,24 +52,7 @@ public:
 
     ~DialogThemeWrapper() override = default;
 
-    void ApplyTokenTheme(const TokenTheme& theme) override
-    {
-        if (const auto& colors = theme.Colors(); colors) {
-            backgroundColor_ = colors->CompBackgroundPrimary();
-            titleTextStyle_.SetTextColor(colors->FontPrimary());
-            subtitleTextStyle_.SetTextColor(colors->FontSecondary());
-            contentTextStyle_.SetTextColor(colors->FontPrimary());
-            buttonBackgroundColor_ = colors->CompBackgroundPrimary();
-            buttonClickedColor_ = colors->InteractiveClick();
-            commonButtonBgColor_ = colors->CompBackgroundTertiary();
-            emphasizeButtonBgColor_ = colors->Warning();
-            emphasizeButtonTextColor_ = colors->CompBackgroundPrimaryContrary();
-            buttonDefaultFontColor_ = colors->FontEmphasize();
-            buttonHighlightBgColor_ = colors->CompBackgroundEmphasize();
-            buttonHighlightFontColor_ = colors->CompBackgroundPrimaryContrary();
-            dividerColor_ = colors->CompDivider();
-        }
-    }
+    void ApplyTokenTheme(const TokenTheme& theme) override {}
 
 protected:
     DialogThemeWrapper() = default;

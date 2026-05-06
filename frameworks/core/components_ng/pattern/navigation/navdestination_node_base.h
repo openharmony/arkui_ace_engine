@@ -383,6 +383,8 @@ protected:
     OffsetF CalcTranslateForSlideTransition(const SizeF& paintRect, bool isRight, bool isEnter, bool isEnd);
 
     OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const override;
+    OffsetF GetParentGlobalOffsetWithSafeAreaInner(
+        RefPtr<FrameNode>& host, RefPtr<FrameNode>& parentNode) const override;
 
     bool isHomeDestination_ = false;
     RefPtr<UINode> contentNode_;

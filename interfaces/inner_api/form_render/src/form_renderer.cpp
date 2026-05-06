@@ -28,6 +28,7 @@ constexpr char FORM_DISABLE_UIFIRST_KEY[] = "ohos.extra.param.key.disable_uifirs
 constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
+constexpr char CONNECT_TO_RENDER[] = "ohos.connect.to.render";
 constexpr char TRANSPARENT_COLOR[] = "#00FFFFFF";
 constexpr int32_t DOUBLE = 2;
 } // namespace
@@ -67,7 +68,11 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
-    uiContent_->PreInitializeForm(nullptr, formJsInfo.formSrc, nullptr);
+    auto connectToRender = want.GetRemoteObject(CONNECT_TO_RENDER);
+    if (!connectToRender) {
+        HILOG_ERROR("FormRenderer::PreInitUIContent connectToRender is null");
+    }
+    uiContent_->PreInitializeForm(nullptr, formJsInfo.formSrc, nullptr, connectToRender);
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (!backgroundColor_.empty()) {
         uiContent_->SetFormBackgroundColor(backgroundColor_);

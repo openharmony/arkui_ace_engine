@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "compatible/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 

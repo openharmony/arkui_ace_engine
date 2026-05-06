@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <optional>
 
-#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"

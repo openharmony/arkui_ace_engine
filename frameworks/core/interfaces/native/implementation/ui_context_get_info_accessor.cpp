@@ -18,6 +18,7 @@
 
 #include "arkoala_api_generated.h"
 #include "nav_path_stack_peer_impl.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src,

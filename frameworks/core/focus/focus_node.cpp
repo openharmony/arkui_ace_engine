@@ -14,9 +14,11 @@
  */
 
 #include "core/focus/focus_node.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "core/components/flex/flex_element.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {

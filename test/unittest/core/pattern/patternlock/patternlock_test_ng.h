@@ -73,6 +73,10 @@ constexpr float DEFAULT_SIDE_LENGTH = 20.0f;
 constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
 constexpr float TOUCHPOINT_OFFSET_FLOAT = 200.0f;
+const Color TEST_THEME_SCOPE_PATH_CUSTOM_COLOR = Color(0xFF010203);
+const Color TEST_THEME_SCOPE_REGULAR_CUSTOM_COLOR = Color(0xFF040506);
+const Color TEST_THEME_SCOPE_ACTIVE_CUSTOM_COLOR = Color(0xFF070809);
+const Color TEST_THEME_SCOPE_SELECTED_CUSTOM_COLOR = Color(0xFF0A0B0C);
 inline int32_t GetPointIndex(int32_t x, int32_t y)
 {
     return (x - 1) * PATTERN_LOCK_COL_COUNT + (y - 1);

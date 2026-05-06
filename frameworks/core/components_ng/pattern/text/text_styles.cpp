@@ -38,6 +38,28 @@ namespace OHOS::Ace::NG {
         }                                                                         \
     } while (false)
 
+namespace {
+void UpdateSymbolTextStyleWithTheme(const std::unique_ptr<SymbolStyle>& symbolStyle, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme)
+{
+    UPDATE_TEXT_STYLE_WITH_THEME(symbolStyle, SymbolColorList, SymbolColorList);
+    UPDATE_TEXT_STYLE_WITH_THEME(symbolStyle, SymbolRenderingStrategy, RenderStrategy);
+    UPDATE_TEXT_STYLE_WITH_THEME(symbolStyle, SymbolEffectStrategy, EffectStrategy);
+    UPDATE_TEXT_STYLE_WITH_THEME(symbolStyle, SymbolEffectOptions, SymbolEffectOptions);
+    UPDATE_TEXT_STYLE_WITH_THEME(symbolStyle, SymbolType, SymbolType);
+    if (symbolStyle && symbolStyle->HasSymbolShadow()) {
+        textStyle.SetSymbolShadow(symbolStyle->GetSymbolShadowValue());
+    } else if (textTheme) {
+        textStyle.SetSymbolShadow(textTheme->GetTextStyle().GetSymbolShadow());
+    }
+    if (symbolStyle && symbolStyle->HasShaderStyle()) {
+        textStyle.SetShaderStyle(symbolStyle->GetShaderStyleValue());
+    } else if (textTheme) {
+        textStyle.SetShaderStyle(textTheme->GetTextStyle().GetShaderStyle());
+    }
+}
+} // namespace
+
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol)
 {
@@ -77,6 +99,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     CHECK_NULL_VOID(textTheme);
     auto& fontStyle = property->GetFontStyle();
     auto& textLineStyle = property->GetTextLineStyle();
+    auto& symbolStyle = property->GetSymbolStyle();
     // The setting of AllowScale, MinFontScale, MaxFontScale must be done before any Dimension-type properties that
     // depend on its value.
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, AllowScale, AllowScale);
@@ -107,13 +130,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableDeviceFontWeightCategory, EnableDeviceFontWeightCategory);
 
     if (isSymbol) {
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolColorList, SymbolColorList);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolRenderingStrategy, RenderStrategy);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectStrategy, EffectStrategy);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolType, SymbolType);
-        textStyle.SetSymbolShadow(property->GetSymbolShadowValue(textTheme->GetTextStyle().GetSymbolShadow()));
-        textStyle.SetShaderStyle(property->GetShaderStyleValue(textTheme->GetTextStyle().GetShaderStyle()));
+        UpdateSymbolTextStyleWithTheme(symbolStyle, textStyle, textTheme);
     }
 
     UseSelfTextLineStyleWithTheme(textLineStyle, textStyle, textTheme);
@@ -123,6 +140,7 @@ void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLin
     const RefPtr<TextTheme>& textTheme)
 {
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeightMultiply, LineHeightMultiply);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineSpacing, LineSpacing);
@@ -142,7 +160,7 @@ void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLin
 }
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
-    TextStyle& textStyle, bool isSymbol)
+    TextStyle& textStyle, bool isSymbol, const std::unique_ptr<SymbolStyle>& symbolStyle)
 {
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, AllowScale, SetAllowScale);
@@ -179,17 +197,17 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, EnableDeviceFontWeightCategory, SetEnableDeviceFontWeightCategory);
-
-        if (isSymbol) {
-            UPDATE_TEXT_STYLE(fontStyle, SymbolColorList, SetSymbolColorList);
-            UPDATE_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, SetRenderStrategy);
-            UPDATE_TEXT_STYLE(fontStyle, SymbolEffectStrategy, SetEffectStrategy);
-            UPDATE_TEXT_STYLE(fontStyle, SymbolEffectOptions, SetSymbolEffectOptions);
-            UPDATE_TEXT_STYLE(fontStyle, SymbolType, SetSymbolType);
-        }
+    }
+    if (isSymbol && symbolStyle) {
+        UPDATE_TEXT_STYLE(symbolStyle, SymbolColorList, SetSymbolColorList);
+        UPDATE_TEXT_STYLE(symbolStyle, SymbolRenderingStrategy, SetRenderStrategy);
+        UPDATE_TEXT_STYLE(symbolStyle, SymbolEffectStrategy, SetEffectStrategy);
+        UPDATE_TEXT_STYLE(symbolStyle, SymbolEffectOptions, SetSymbolEffectOptions);
+        UPDATE_TEXT_STYLE(symbolStyle, SymbolType, SetSymbolType);
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+        UPDATE_TEXT_STYLE(textLineStyle, LineHeightMultiply, SetLineHeightMultiply);
         UPDATE_TEXT_STYLE(textLineStyle, BaselineOffset, SetBaselineOffset);
         UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
         UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);

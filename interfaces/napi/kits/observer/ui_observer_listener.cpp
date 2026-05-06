@@ -271,8 +271,8 @@ static napi_value GetCurrentLocalPositionForTapLocation(napi_env env, napi_callb
     napi_create_object(env, &result);
     napi_value x = nullptr;
     napi_value y = nullptr;
-    napi_create_double(env, offset.GetX(), &x);
-    napi_create_double(env, offset.GetY(), &y);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), &x);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetY()), &y);
     napi_set_named_property(env, result, "x", x);
     napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
@@ -298,8 +298,8 @@ static napi_value GetCurrentLocalPositionForFingerInfo(napi_env env, napi_callba
     napi_create_object(env, &result);
     napi_value x = nullptr;
     napi_value y = nullptr;
-    napi_create_double(env, offset.GetX(), &x);
-    napi_create_double(env, offset.GetY(), &y);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), &x);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetY()), &y);
     napi_set_named_property(env, result, "x", x);
     napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
@@ -325,8 +325,8 @@ static napi_value GetCurrentLocalPositionForClickEvent(napi_env env, napi_callba
     napi_create_object(env, &result);
     napi_value x = nullptr;
     napi_value y = nullptr;
-    napi_create_double(env, offset.GetX(), &x);
-    napi_create_double(env, offset.GetY(), &y);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), &x);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetY()), &y);
     napi_set_named_property(env, result, "x", x);
     napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
@@ -352,8 +352,8 @@ static napi_value GetCurrentLocalPositionForGestureEvent(napi_env env, napi_call
     napi_create_object(env, &result);
     napi_value x = nullptr;
     napi_value y = nullptr;
-    napi_create_double(env, offset.GetX(), &x);
-    napi_create_double(env, offset.GetY(), &y);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), &x);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetY()), &y);
     napi_set_named_property(env, result, "x", x);
     napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
@@ -1432,7 +1432,7 @@ void UIObserverListener::AddClickEventInfoTwo(napi_value objValueClickEvent, con
         napi_set_named_property(env_, objValueClickEvent, "y", napiY);
     }
     napi_value napiGetCurrentLocalPosition = GetNamedProperty(env_, objValueClickEvent, GET_CURRENT_LOCAL_POSITION);
-    if (GetValueType(env_, napiGetCurrentLocalPosition) != napi_null &&
+    if (GetValueType(env_, napiGetCurrentLocalPosition) == napi_null &&
         SetCurrentLocalLocationForClickEvent(env_, objValueClickEvent, clickInfo)) {
         napi_value funcValue = nullptr;
         napi_create_function(

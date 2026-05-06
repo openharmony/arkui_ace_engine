@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 
 namespace OHOS::Ace::Framework {
 constexpr int32_t FUNC_ARGC_1 = 1;
@@ -36,6 +37,9 @@ public:
     static void JsFlexGrow(const JSCallbackInfo& /* info */) {};
     static void JsFlexShrink(const JSCallbackInfo& /* info */) {};
     static void JsOpacity(const JSCallbackInfo& /* info */) {};
+    static void JsOnDrawReady(const JSCallbackInfo& info);
+    static void ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
+        std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap);
 };
 
 } // namespace OHOS::Ace::Framework

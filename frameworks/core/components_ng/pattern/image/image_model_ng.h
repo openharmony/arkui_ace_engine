@@ -90,6 +90,7 @@ public:
     static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
         const std::string& moduleName, bool isUriPureNumber = false);
     static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
+    static void SetReloadKey(FrameNode* frameNode, const std::string& reloadKey);
     static void SetSmoothEdge(FrameNode* frameNode, float value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode* frameNode, bool autoResize);

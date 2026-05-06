@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
@@ -29,6 +30,7 @@
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -3885,7 +3887,7 @@ void FrontendDelegateDeclarative::CreateSnapshotFromComponent(const RefPtr<NG::U
     NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector, const NG::SnapshotParam& param)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    ViewStackModel::GetInstance()->NewScope();
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     NG::ComponentSnapshot::Create(nodeWk, std::move(callback), enableInspector, param);
 #endif
 }
@@ -3911,6 +3913,26 @@ void FrontendDelegateDeclarative::AddFrameNodeWithOrder(const RefPtr<NG::FrameNo
     overlayManager->AddFrameNodeWithOrder(node, levelOrder);
 }
 
+void FrontendDelegateDeclarative::OpenOrderOverlay(const RefPtr<NG::FrameNode>& node,
+    const NG::OrderOverlayOptions& options, std::function<void(int32_t)>&& callback)
+{
+    CHECK_NULL_VOID(node);
+    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(node)),
+        options, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenOrderOverlay calling OpenOrderOverlay.");
+        overlayManager->OpenOrderOverlay(node, options, std::move(callback));
+    };
+
+    if (options.levelMode == LevelMode::EMBEDDED) {
+        NG::DialogManager::ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowOrder", options.levelUniqueId);
+    } else {
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowOrder", nullptr);
+    }
+}
+
 void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
     auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
@@ -3918,7 +3940,9 @@ void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::Fram
         ContainerScope scope(containerId);
         overlayManager->RemoveFrameNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", nullptr);
+    CHECK_NULL_VOID(node);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(node->GetParentFrameNode());
+    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", currentOverlay);
 }
 
 void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -4023,5 +4047,15 @@ std::string FrontendDelegateDeclarative::GetPagePathByUrl(const std::string& url
     std::string path;
     pageRouterManager_->GetPageNameAndPath(url, name, path);
     return path + name;
+}
+
+bool FrontendDelegateDeclarative::IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+{
+    CHECK_NULL_RETURN(page, false);
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    return pageRouterManager_->IsPageInStack(page);
 }
 } // namespace OHOS::Ace::Framework

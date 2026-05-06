@@ -16,9 +16,22 @@
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_theme.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension DEFAULT_EDIT_MODE_CHECK_BOX_HOT_ZONE_WIDTH = 36.0_vp;
+
+float GetEditModeCheckBoxHotZoneWidthPx(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper ? layoutWrapper->GetHostNode() : nullptr;
+    auto theme = host ? host->GetTheme<SelectableTheme>(true) : nullptr;
+    auto hotZoneWidth = theme ? theme->GetEditModeCheckBoxHotZoneWidth() : DEFAULT_EDIT_MODE_CHECK_BOX_HOT_ZONE_WIDTH;
+    return std::max(0.0f, static_cast<float>(hotZoneWidth.ConvertToPx()));
+}
+} // namespace
 
 bool ListItemLayoutAlgorithm::IsRTLAndVertical(LayoutWrapper* layoutWrapper) const
 {
@@ -72,6 +85,15 @@ void ListItemLayoutAlgorithm::MeasureItemChild(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     std::list<RefPtr<LayoutWrapper>> childList;
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    if (needReserveEditModeCheckBoxSpace_) {
+        auto maxWidth = layoutConstraint.maxSize.Width();
+        if (Positive(maxWidth) && !NearEqual(maxWidth, Infinity<float>())) {
+            auto checkBoxHotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(layoutWrapper);
+            auto contentWidth = std::max(0.0f, maxWidth - checkBoxHotZoneWidth);
+            layoutConstraint.maxSize.SetWidth(contentWidth);
+            layoutConstraint.percentReference.SetWidth(contentWidth);
+        }
+    }
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
     if (child) {
         child->Measure(layoutConstraint);
@@ -81,12 +103,47 @@ void ListItemLayoutAlgorithm::MeasureItemChild(LayoutWrapper* layoutWrapper)
     CheckAndUpdateCurOffset(layoutWrapper);
 }
 
+void ListItemLayoutAlgorithm::MeasureEditModeCheckBox(LayoutWrapper* layoutWrapper)
+{
+    if (editModeCheckBoxNodeIndex_ < 0) {
+        return;
+    }
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto child = layoutWrapper->GetOrCreateChildByIndex(editModeCheckBoxNodeIndex_);
+    CHECK_NULL_VOID(child);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    child->Measure(layoutConstraint);
+}
+
+void ListItemLayoutAlgorithm::UpdateEditModeSelfSize(LayoutWrapper* layoutWrapper)
+{
+    if (editModeCheckBoxNodeIndex_ < 0 || !needReserveEditModeCheckBoxSpace_) {
+        return;
+    }
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto maxWidth = layoutConstraint->maxSize.Width();
+    auto checkBoxHotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(layoutWrapper);
+    if (NearEqual(maxWidth, Infinity<float>()) || !layoutConstraint->selfIdealSize.Width().has_value()) {
+        frameSize.SetWidth(frameSize.Width() + checkBoxHotZoneWidth);
+    }
+    geometryNode->SetFrameSize(frameSize);
+}
+
 void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     layoutWrapper->RemoveAllChildInRenderTree();
 
     // step 1: measure item child node.
+    MeasureEditModeCheckBox(layoutWrapper);
     MeasureItemChild(layoutWrapper);
+    UpdateEditModeSelfSize(layoutWrapper);
     auto mainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     if (NonPositive(mainSize)) {
         curOffset_ = 0.0f;
@@ -145,19 +202,49 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     SetSwipeActionNode(layoutWrapper, size, paddingOffset);
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
     if (child) {
-        auto translate =
+        auto translate = needReserveEditModeCheckBoxSpace_ ?
+            paddingOffset :
             Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
         OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(SetReverseValue(layoutWrapper, curOffset_), 0.0f) :
             OffsetF(0.0f, curOffset_);
-        child->GetGeometryNode()->SetMarginFrameOffset(translate + offset);
+        auto childOffset = translate + offset;
+        child->GetGeometryNode()->SetMarginFrameOffset(childOffset);
         child->Layout();
     }
+    LayoutEditModeCheckBox(layoutWrapper, size, paddingOffset);
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {
-        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
+        auto translate = needReserveEditModeCheckBoxSpace_ ?
+            paddingOffset :
+            Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
         content->SetOffset(translate);
     }
+}
+
+void ListItemLayoutAlgorithm::LayoutEditModeCheckBox(
+    LayoutWrapper* layoutWrapper, const SizeF& size, const OffsetF& paddingOffset)
+{
+    if (editModeCheckBoxNodeIndex_ < 0) {
+        return;
+    }
+    auto child = layoutWrapper->GetOrCreateChildByIndex(editModeCheckBoxNodeIndex_);
+    CHECK_NULL_VOID(child);
+    auto checkBoxGeometryNode = child->GetGeometryNode();
+    CHECK_NULL_VOID(checkBoxGeometryNode);
+    if (!needReserveEditModeCheckBoxSpace_) {
+        checkBoxGeometryNode->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
+        child->Layout();
+        return;
+    }
+    auto childSize = checkBoxGeometryNode->GetMarginFrameSize();
+    float crossOffset = 0.0f;
+    float mainOffset = 0.0f;
+    crossOffset = IsRTLAndVertical(layoutWrapper) ? 0 : (size.Width() - childSize.Width());
+    mainOffset = (size.Height() - childSize.Height()) / 2.0f;
+    auto checkBoxOffset = paddingOffset + OffsetF(crossOffset, mainOffset);
+    checkBoxGeometryNode->SetMarginFrameOffset(checkBoxOffset);
+    child->Layout();
 }
 
 void ListItemLayoutAlgorithm::SetSwipeActionNode(

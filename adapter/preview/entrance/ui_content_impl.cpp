@@ -34,6 +34,7 @@
 #include "adapter/preview/external/multimodalinput/axis_event.h"
 #include "adapter/preview/external/multimodalinput/key_event.h"
 #include "adapter/preview/external/multimodalinput/pointer_event.h"
+#include "adapter/preview/osal/navigation_route_preview.h"
 #include "adapter/preview/inspector/inspector_client.h"
 #include "base/log/log_wrapper.h"
 #include "frameworks/base/log/log.h"
@@ -410,6 +411,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     container->SetResourceConfiguration(config);
     container->SetPageProfile(pageProfile_);
     container->SetApiTargetVersion(targetVersion_);
+    auto navigationRoute = AceType::MakeRefPtr<NavigationRoutePreview>(bundleName_);
+    if (navigationRoute) {
+        auto options = context->GetOptions();
+        navigationRoute->InitRouteInfo(options.hapModuleInfo.routerArray);
+        container->SetNavigationRoute(navigationRoute);
+    }
     std::vector<std::string> paths;
     paths.push_back(assetPath_);
     std::string appResourcesPath(appResourcesPath_);
@@ -430,7 +437,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
                                  const OHOS::Ace::RefPtr<PipelineContext>& context) mutable {
         CHECK_NULL_VOID(context);
         CHECK_NULL_VOID(window);
-        auto director = OHOS::Rosen::RSUIDirector::Create();
+        auto director = window->GetRSUIDirector();
         CHECK_NULL_VOID(director);
         director->SetRSSurfaceNode(window->GetSurfaceNode());
         auto container = AceContainer::GetContainerInstance(id);
@@ -443,7 +450,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
         };
         director->SetUITaskRunner(func, id);
-        director->Init();
         context->SetRSUIDirector(director);
     };
     AceContainer::SetView(view, rsWindow_, deviceConfig_.density, deviceWidth_, deviceHeight_, callback);

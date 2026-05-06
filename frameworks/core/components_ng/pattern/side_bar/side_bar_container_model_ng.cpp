@@ -154,6 +154,7 @@ void SideBarContainerModelNG::SetSideBarWidth(const Dimension& sideBarWidth, boo
         return;
     }
     MarkNeedInitRealSideBarWidth();
+    ACE_CHECK_LPX_ATTRIBUTE(sideBarWidth, LpxAttribute::ALWAYS);
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth);
 }
 
@@ -194,6 +195,7 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(const Dimension& maxSideBarWidt
         return;
     }
     MarkNeedInitRealSideBarWidth();
+    ACE_CHECK_LPX_ATTRIBUTE(maxSideBarWidth, LpxAttribute::ALWAYS);
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth);
 }
 
@@ -716,6 +718,7 @@ void SideBarContainerModelNG::SetDividerEndMargin(const RefPtr<ResourceObject>& 
 void SideBarContainerModelNG::SetMinContentWidth(const Dimension& minContentWidth)
 {
     MarkNeedInitRealSideBarWidth();
+    ACE_CHECK_LPX_ATTRIBUTE(minContentWidth, LpxAttribute::ALWAYS);
     if (minContentWidth.IsNonNegative()) {
         ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth);
     } else {
@@ -835,6 +838,7 @@ void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const Dimens
         return;
     }
     MarkNeedInitRealSideBarWidth(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(sideBarWidth, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth, frameNode);
 }
 
@@ -1180,6 +1184,12 @@ void SideBarContainerModelNG::SetShowControlButton(FrameNode* frameNode, bool sh
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowControlButton, showControlButton, frameNode);
 }
 
+void SideBarContainerModelNG::SetShowSideBarWithGesture(FrameNode* frameNode, bool showSideBarWithGesture)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        SideBarContainerLayoutProperty, ShowSideBarWithGesture, showSideBarWithGesture, frameNode);
+}
+
 void SideBarContainerModelNG::SetAutoHide(FrameNode* frameNode, bool autoHide)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, AutoHide, autoHide, frameNode);
@@ -1194,12 +1204,14 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Dim
         return;
     }
     MarkNeedInitRealSideBarWidth(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(maxSideBarWidth, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth, frameNode);
 }
 
 void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth)
 {
     MarkNeedInitRealSideBarWidth(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(minContentWidth, LpxAttribute::ALWAYS, frameNode);
     if (minContentWidth.IsNonNegative()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
     } else {
@@ -1358,6 +1370,7 @@ void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const Re
 
 void SideBarContainerModelNG::SetDividerStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(strokeWidth, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth, frameNode);
 }
 
@@ -1368,11 +1381,13 @@ void SideBarContainerModelNG::SetDividerColor(FrameNode* frameNode, const Color&
 
 void SideBarContainerModelNG::SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(startMargin, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStartMargin, startMargin, frameNode);
 }
 
 void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(endMargin, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin, frameNode);
 }
 

@@ -453,6 +453,9 @@ declare interface RenderNodeNativeModule {
     rectBottom: number): void;
   setOvalClip(nodePtr: NodePtr, left: number, top: number, right: number, bottom: number): void;
   setPathClip(nodePtr: NodePtr, path: string): void;
+  setBackgroundBlur(nodePtr: NodePtr, radius: number, grayscale1: number, grayscale2: number): void;
+  setContentBlur(nodePtr: NodePtr, radius: number, grayscale1: number, grayscale2: number): void;
+  setForegroundBlur(nodePtr: NodePtr, radius: number): void;
 
   // No validation for return values
   appendChild(parentNodePtr: NodePtr, childNodePtr: NodePtr): any;

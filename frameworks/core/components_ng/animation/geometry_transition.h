@@ -58,6 +58,7 @@ public:
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
     void OnReSync(const WeakPtr<FrameNode>& trigger = nullptr, const AnimationOption& option = AnimationOption());
+    void OnReSyncInner(const WeakPtr<FrameNode>& trigger, const AnimationOption& option);
     bool OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode);
     bool OnFollowWithoutTransition(std::optional<bool> direction = std::nullopt);
     void WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper);

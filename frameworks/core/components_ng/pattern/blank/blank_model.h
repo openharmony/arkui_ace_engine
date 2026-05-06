@@ -18,8 +18,9 @@
 
 #include <mutex>
 
+#include "base/geometry/dimension.h"
 #include "core/common/resource/resource_object.h"
-#include "core/components_ng/event/event_hub.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT BlankModel {

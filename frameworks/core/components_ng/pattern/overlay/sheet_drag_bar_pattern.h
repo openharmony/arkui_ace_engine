@@ -18,10 +18,11 @@
 
 #include <optional>
 
-#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"

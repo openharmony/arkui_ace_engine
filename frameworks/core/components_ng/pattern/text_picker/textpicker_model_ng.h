@@ -19,11 +19,14 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/common/resource/resource_object.h"
+namespace OHOS::Ace {
+class TextTheme;
+}
+
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT TextPickerModelNG : public TextPickerModel {
 public:

@@ -21,10 +21,11 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/memory/referenced.h"
+#include "core/animation/curves.h"
 #include "core/common/back_press_handler_manager.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
-#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
@@ -36,16 +37,17 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
-#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/selectable_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -61,10 +63,98 @@ constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr int DEFAULT_HEADER_VALUE = 2;
 constexpr int DEFAULT_FOOTER_VALUE = 3;
 constexpr int DEFAULT_PREDICT_ERROR_TIMES = 50;
+constexpr Dimension DEFAULT_EDIT_MODE_CHECK_BOX_HOT_ZONE_WIDTH = 36.0_vp;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
+
+bool GetNodeRangeInParent(
+    const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& targetFrameNode, const MoveOffsetParam& param,
+    float& startPos, float& endPos)
+{
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    CHECK_NULL_RETURN(targetFrameNode, false);
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, false);
+    auto targetGeometryNode = targetFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(targetGeometryNode, false);
+    auto parentPaddingOffset = parentGeometryNode->GetPaddingOffset(true) - parentGeometryNode->GetFrameOffset();
+    auto targetFrameOffsetToWindow = targetFrameNode->GetTransformRelativeOffset();
+    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset() + parentPaddingOffset;
+    auto offsetToParentFrame = targetFrameOffsetToWindow - parentFrameOffsetToWindow;
+    auto targetFrameSize = targetGeometryNode->GetFrameSize();
+    startPos = param.isVertical ? offsetToParentFrame.GetY() : offsetToParentFrame.GetX();
+    endPos = startPos + (param.isVertical ? targetFrameSize.Height() : targetFrameSize.Width());
+    return true;
+}
+
+float GetMoveOffsetFromTargetPos(float targetPos)
+{
+    return NearZero(targetPos, 1.0f) ? 0.0f : -targetPos;
+}
+
+float GetEditModeCheckBoxHotZoneWidthPx(const RefPtr<FrameNode>& host)
+{
+    auto theme = host ? host->GetTheme<SelectableTheme>(true) : nullptr;
+    auto hotZoneWidth = theme ? theme->GetEditModeCheckBoxHotZoneWidth() : DEFAULT_EDIT_MODE_CHECK_BOX_HOT_ZONE_WIDTH;
+    return std::max(0.0f, static_cast<float>(hotZoneWidth.ConvertToPx()));
+}
+
+void SetEditModeForListItemOrGroup(const RefPtr<FrameNode>& itemNode, bool enabled)
+{
+    CHECK_NULL_VOID(itemNode);
+    auto itemPattern = itemNode->GetPattern<SelectableItemPattern>();
+    if (itemPattern) {
+        itemPattern->SetEditModeEnabled(enabled);
+        return;
+    }
+    auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(groupPattern);
+    std::list<RefPtr<FrameNode>> children;
+    itemNode->GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        auto childPattern = child->GetPattern<SelectableItemPattern>();
+        if (childPattern) {
+            childPattern->SetEditModeEnabled(enabled);
+        }
+    }
+}
+
+RefPtr<FrameNode> GetListTargetFrameNode(
+    const RefPtr<FrameNode>& listFrameNode, const RefPtr<FrameNode>& curFrameNode)
+{
+    CHECK_NULL_RETURN(listFrameNode, nullptr);
+    CHECK_NULL_RETURN(curFrameNode, nullptr);
+    auto frameNode = curFrameNode;
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
+    while (parent && parent != listFrameNode) {
+        frameNode = parent;
+        parent = frameNode->GetAncestorNodeOfFrame(false);
+    }
+    return parent == listFrameNode ? frameNode : nullptr;
+}
 } // namespace
+
+std::optional<float> GetListAccessibilityCenterLimitMoveOffset(
+    const RefPtr<FrameNode>& listFrameNode, const RefPtr<FrameNode>& curFrameNode, const MoveOffsetParam& param)
+{
+    CHECK_NULL_RETURN(listFrameNode, std::nullopt);
+    auto listPattern = listFrameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, std::nullopt);
+    if (listPattern->GetScrollSnapAlign() != ScrollSnapAlign::CENTER) {
+        return std::nullopt;
+    }
+    auto targetFrameNode = GetListTargetFrameNode(listFrameNode, curFrameNode);
+    CHECK_NULL_RETURN(targetFrameNode, std::nullopt);
+
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    if (!GetNodeRangeInParent(listFrameNode, targetFrameNode, param, startPos, endPos)) {
+        return std::nullopt;
+    }
+    float targetPos = (startPos + endPos) / 2.0f - listPattern->GetMainContentSize() / 2.0f;
+    return GetMoveOffsetFromTargetPos(targetPos);
+}
 
 // Just used for only read
 PaddingPropertyF* GetPaddingFromHost(RefPtr<FrameNode> node)
@@ -137,6 +227,17 @@ void ListPattern::OnModifyDone()
     }
     if (!multiSelectable_ && isMouseEventInit_) {
         UninitMouseEvent();
+    }
+    if (GetEnableEditMode() && !swipeSelectPanEvent_) {
+        InitSwipeSelectEvent();
+    }
+    if (!GetEnableEditMode() && swipeSelectPanEvent_) {
+        UninitSwipeSelectEvent();
+    }
+    if (IsDefaultMultiSelectStyleEnabled()) {
+        ApplyEditModeToVisibleItems();
+    } else {
+        RemoveEditModeFromItems();
     }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -382,7 +483,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     snapTrigByScrollBar_ = false;
     ChangeCanStayOverScroll();
     CheckValidPredictItem();
-    PostAfterCurrentLayoutTask();
     return true;
 }
 
@@ -440,7 +540,7 @@ ScrollAlign ListPattern::GetInitialScrollAlign() const
     return ScrollAlign::START;
 }
 
-float ListPattern::CalculateTargetPos(float startPos, float endPos)
+float ListPattern::CalculateTargetPos(float startPos, float endPos) const
 {
     float topOffset = startPos;
     float bottomOffset = endPos - contentMainSize_;
@@ -580,7 +680,7 @@ bool ListPattern::UpdateStartListItemIndex()
                            (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
         startArea = startGroupInfo.area;
         startItemIndexInGroup = startGroupInfo.indexInGroup;
-        if (startFlagChanged) {
+        if (startFlagChanged && GetScrollSource() != SCROLL_FROM_NONE) {
             VisibleContentInfo endGroupInfo = GetEndListItemIndex(startPattern);
             int32_t endItemIndexInGroup = endGroupInfo.indexInGroup;
             startWrapper->GetHostNode()->OnAccessibilityEvent(
@@ -608,7 +708,7 @@ bool ListPattern::UpdateEndListItemIndex()
                          (endInfo_.indexInGroup != endGroupInfo.indexInGroup);
         endArea = endGroupInfo.area;
         endItemIndexInGroup = endGroupInfo.indexInGroup;
-        if (endFlagChanged) {
+        if (endFlagChanged && GetScrollSource() != SCROLL_FROM_NONE) {
             VisibleContentInfo startGroupInfo = GetStartListItemIndex(endPattern);
             int32_t startItemIndexInGroup = startGroupInfo.indexInGroup;
             endWrapper->GetHostNode()->OnAccessibilityEvent(
@@ -646,7 +746,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     auto onJSFrameNodeScrollIndex = listEventHub->GetJSFrameNodeOnListScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
     FireOnScrollIndex(indexChanged, onJSFrameNodeScrollIndex);
-    if (startIndexChanged_ || endIndexChanged_) {
+    if ((startIndexChanged_ || endIndexChanged_) && GetScrollSource() != SCROLL_FROM_NONE) {
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, startIndex_, endIndex_);
     }
     OnScrollVisibleContentChange(listEventHub, indexChanged);
@@ -834,16 +934,6 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
         listLayoutAlgorithm->SetIsRoundingMode();
     }
-    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
-    if (paintProperty && paintProperty->HasContentClip()) {
-        auto clip = paintProperty->GetContentClipValue();
-        listLayoutAlgorithm->SetContentClipMode(clip.first);
-        if (clip.first == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
-            listLayoutAlgorithm->SetContentClipExpend(safeAreaPad_.value());
-        } else if (clip.first == ContentClipMode::CUSTOM) {
-            listLayoutAlgorithm->SetContentClipShape(clip.second);
-        }
-    }
     return listLayoutAlgorithm;
 }
 
@@ -884,8 +974,10 @@ void ListPattern::SetLayoutAlgorithmParams(
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
+    listLayoutAlgorithm->SetDefaultMultiSelectStyleEnabled(IsDefaultMultiSelectStyleEnabled());
     listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
+    SetLayoutAlgorithmClipContent(listLayoutAlgorithm);
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -915,7 +1007,7 @@ void ListPattern::SetChainAnimationLayoutAlgorithm(
             chainAnimation_->ResetSpaceDelta();
         }
     }
-    if (!listLayoutProperty->GetSpace().has_value() && chainAnimation_) {
+    if ((!listLayoutProperty->GetSpace().has_value() && !listLayoutProperty->GetSpaceWidth()) && chainAnimation_) {
         float chainInterval = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
         auto pipeline = GetContext();
         if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
@@ -966,6 +1058,25 @@ void ListPattern::SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>&
     }
     if (predictSnapEndPos_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
+    }
+}
+
+void ListPattern::SetLayoutAlgorithmClipContent(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm)
+{
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    if (!paintProperty || !paintProperty->HasContentClip()) {
+        safeAreaPad_.reset();
+        return;
+    }
+    auto clip = paintProperty->GetContentClipValue();
+    listLayoutAlgorithm->SetContentClipMode(clip.first);
+    if (clip.first != ContentClipMode::SAFE_AREA) {
+        safeAreaPad_.reset();
+    }
+    if (clip.first == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
+        listLayoutAlgorithm->SetContentClipExpend(safeAreaPad_.value());
+    } else if (clip.first == ContentClipMode::CUSTOM) {
+        listLayoutAlgorithm->SetContentClipShape(clip.second);
     }
 }
 
@@ -1021,6 +1132,79 @@ bool ListPattern::IsAtBottom(bool considerRepeat) const
     auto maxListItemIndex = considerRepeat ? GetMaxIndexByRepeat() : maxListItemIndex_;
     return (endIndex == maxListItemIndex && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
+}
+
+bool ListPattern::IsScrollAble(SmartGestureDirection direction) const
+{
+    if (!IsScrollable()) {
+        return false;
+    }
+    if (direction == SmartGestureDirection::FORWARD) {
+        return !IsAtBottom();
+    }
+    if (direction == SmartGestureDirection::BACKWARD) {
+        return !IsAtTop();
+    }
+    return false;
+}
+
+std::optional<ScrollingConfig> ListPattern::GetDefaultScrollingConfig(SmartGestureDirection direction) const
+{
+    if (!IsScrollAble(direction)) {
+        return std::nullopt;
+    }
+    if (itemPosition_.empty() || maxListItemIndex_ < 0) {
+        return std::nullopt;
+    }
+    auto snapAlign = GetScrollSnapAlign();
+    if (snapAlign != ScrollSnapAlign::NONE) {
+        ScrollAlign align = ScrollAlign::START;
+        int32_t anchorIndex = startIndex_;
+        switch (snapAlign) {
+            case ScrollSnapAlign::START:
+                align = ScrollAlign::START;
+                anchorIndex = GetStartIndexExcludeStartOffset();
+                break;
+            case ScrollSnapAlign::CENTER:
+                align = ScrollAlign::CENTER;
+                anchorIndex = centerIndex_;
+                break;
+            case ScrollSnapAlign::END:
+                align = ScrollAlign::END;
+                anchorIndex = GetEndIndexExcludeEndOffset();
+                break;
+            default:
+                break;
+        }
+        auto targetIndex = GetDefaultScrollTargetIndex(direction, align, anchorIndex);
+        if (targetIndex.has_value()) {
+            float targetPos = 0.0f;
+            if (CalculateScrollingDistanceToIndex(targetIndex.value(), align, targetPos) && !NearZero(targetPos)) {
+                return CreateScrollingConfig(direction, std::abs(targetPos));
+            }
+        }
+        return std::nullopt;
+    }
+    return CreateScrollingConfig(direction, GetAverageScrollingDistance());
+}
+
+void ListPattern::PerformScroll(const ScrollingConfig& config)
+{
+    if (!config.distance.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("List PerformScroll direction:%d, requestDistance:%f, id:%d, tag:%s",
+        static_cast<int32_t>(config.direction), static_cast<float>(config.distance.value()),
+        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    auto distance = config.direction == SmartGestureDirection::FORWARD ?
+        config.distance.value() : -config.distance.value();
+    if (NearZero(distance)) {
+        return;
+    }
+    SetIsOverScroll(false);
+    SmartGesturePerformScroll(currentOffset_ + distance);
 }
 
 void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const
@@ -1338,7 +1522,7 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
     return true;
 }
 
-int32_t ListPattern::GetEndIndexExcludeEndOffset()
+int32_t ListPattern::GetEndIndexExcludeEndOffset() const
 {
     auto endPos = contentMainSize_ - contentEndOffset_;
     auto iter = itemPosition_.rbegin();
@@ -1348,7 +1532,7 @@ int32_t ListPattern::GetEndIndexExcludeEndOffset()
     return iter == itemPosition_.rend() ? endIndex_ : iter->first;
 }
 
-int32_t ListPattern::GetStartIndexExcludeStartOffset()
+int32_t ListPattern::GetStartIndexExcludeStartOffset() const
 {
     auto iter = itemPosition_.begin();
     while (iter != itemPosition_.end() && LessOrEqual(iter->second.endPos, contentStartOffset_)) {
@@ -1704,8 +1888,9 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return true;
 }
 
-ScrollOffsetAbility ListPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ListPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
+    (void)isAccessibility;
     return {
         [wp = WeakClaim(this)](float moveOffset) -> bool {
             auto pattern = wp.Upgrade();
@@ -2008,7 +2193,7 @@ void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool 
     FireAndCleanScrollingListener();
 }
 
-bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos)
+bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos) const
 {
     switch (align) {
         case ScrollAlign::START:
@@ -2035,7 +2220,7 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
 }
 
 bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(
-    int32_t index, float startPos, float endPos, ScrollAlign align, float& targetPos)
+    int32_t index, float startPos, float endPos, ScrollAlign align, float& targetPos) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -2087,7 +2272,7 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(
 }
 
 bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(
-    int32_t index, int32_t indexInGroup, float startPos, ScrollAlign align, float& targetPos)
+    int32_t index, int32_t indexInGroup, float startPos, ScrollAlign align, float& targetPos) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -2206,7 +2391,11 @@ void ListPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType 
     }
     if (smooth) {
         float position = -GetTotalOffset() + distance;
-        AnimateTo(-position, -1, nullptr, true, false, false);
+        if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+            AnimateTo(-position, HALF_PAGE_SCROLL_DURATION, Curves::LINEAR, false, false, false);
+        } else {
+            AnimateTo(-position, -1, nullptr, true, false, false);
+        }
     } else {
         StopAnimate();
         UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
@@ -2220,6 +2409,76 @@ void ListPattern::ScrollBy(float offset)
     SetIsOverScroll(false);
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
     isScrollEnd_ = true;
+}
+
+std::optional<ScrollingConfig> ListPattern::CreateScrollingConfig(
+    SmartGestureDirection direction, double distance) const
+{
+    if (LessOrEqual(distance, 0.0)) {
+        return std::nullopt;
+    }
+    return ScrollingConfig { .distance = distance, .direction = direction };
+}
+
+bool ListPattern::CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const
+{
+    auto iter = itemPosition_.find(index);
+    if (iter == itemPosition_.end()) {
+        return false;
+    }
+    if (iter->second.isGroup) {
+        return GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos, iter->second.endPos,
+            align, targetPos);
+    }
+    return GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+}
+
+std::optional<int32_t> ListPattern::GetDefaultScrollTargetIndex(
+    SmartGestureDirection direction, ScrollAlign align, int32_t anchorIndex) const
+{
+    if (anchorIndex < 0 || anchorIndex > maxListItemIndex_) {
+        return std::nullopt;
+    }
+    auto iter = itemPosition_.find(anchorIndex);
+    if (iter == itemPosition_.end()) {
+        return std::nullopt;
+    }
+
+    int32_t targetIndex = anchorIndex;
+    if (direction == SmartGestureDirection::FORWARD) {
+        if (align == ScrollAlign::START) {
+            targetIndex = anchorIndex + 1;
+        } else if (align == ScrollAlign::END) {
+            auto isAligned = LessOrEqual(iter->second.endPos, contentMainSize_ - contentEndOffset_);
+            targetIndex = isAligned ? anchorIndex + 1 : anchorIndex;
+        } else {
+            auto itemCenterPos = (iter->second.startPos + iter->second.endPos) / 2.0f;
+            targetIndex = LessOrEqual(itemCenterPos, contentMainSize_ / 2.0f) ? anchorIndex + 1 : anchorIndex;
+        }
+    } else if (direction == SmartGestureDirection::BACKWARD) {
+        if (align == ScrollAlign::START) {
+            auto isAligned = GreatOrEqual(iter->second.startPos, contentStartOffset_);
+            targetIndex = isAligned ? anchorIndex - 1 : anchorIndex;
+        } else if (align == ScrollAlign::END) {
+            targetIndex = anchorIndex - 1;
+        } else {
+            auto itemCenterPos = (iter->second.startPos + iter->second.endPos) / 2.0f;
+            targetIndex = GreatOrEqual(itemCenterPos, contentMainSize_ / 2.0f) ? anchorIndex - 1 : anchorIndex;
+        }
+    } else {
+        return std::nullopt;
+    }
+
+    return std::clamp(targetIndex, 0, maxListItemIndex_);
+}
+
+double ListPattern::GetAverageScrollingDistance() const
+{
+    if (itemPosition_.empty()) {
+        return 0.0;
+    }
+    float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos;
+    return (itemsSize + spaceWidth_) / itemPosition_.size();
 }
 
 Offset ListPattern::GetCurrentOffset() const
@@ -2841,7 +3100,9 @@ void ListPattern::SetChainAnimation()
         chainAnimation_.Reset();
         return;
     }
-    auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+    auto space = listLayoutProperty->GetSpace()
+                     .value_or(listLayoutProperty->GetSpaceWidth().value_or(CHAIN_INTERVAL_DEFAULT))
+                     .ConvertToPx();
     if (Negative(space)) {
         space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
     }
@@ -2884,7 +3145,9 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
     if (chainAnimation_) {
         auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
         CHECK_NULL_VOID(listLayoutProperty);
-        auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+        auto space = listLayoutProperty->GetSpaceWidth()
+                         .value_or(listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT))
+                         .ConvertToPx();
         if (Negative(space)) {
             space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
         }
@@ -3214,7 +3477,7 @@ void ListPattern::UpdateBackPressCloseSwipeActionCallback()
     hasBackPressHandlerRegistered_ = true;
 }
 
-int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
+int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, GetStartIndex());
@@ -3545,6 +3808,245 @@ std::vector<RefPtr<FrameNode>> ListPattern::GetVisibleSelectedItems()
         children.emplace_back(itemFrameNode);
     }
     return children;
+}
+
+RefPtr<FrameNode> ListPattern::GetSelectableItemAtIndex(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    const auto resolvedItemInfo = swipeResolvedItemIndex_;
+    if (index < startIndex_ || index > endIndex_ || itemPosition_.find(index) == itemPosition_.end()) {
+        return nullptr;
+    }
+    auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
+    CHECK_NULL_RETURN(itemWrapper, nullptr);
+    auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
+    if (!itemNode) {
+        itemNode = AceType::DynamicCast<FrameNode>(itemWrapper);
+    }
+    CHECK_NULL_RETURN(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+    if (itemPattern) {
+        return itemNode;
+    }
+
+    auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, nullptr);
+    if (!resolvedItemInfo.has_value() || resolvedItemInfo->index != index || resolvedItemInfo->indexInGroup < 0) {
+        return nullptr;
+    }
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    bool showCachedItems = listProperty ? listProperty->GetShowCachedItemsValue(false) : false;
+    bool isCache = groupPattern->GetItemPosition().empty() && !showCachedItems;
+    auto groupItemWrapper = itemNode->GetChildByIndex(
+        resolvedItemInfo->indexInGroup + groupPattern->GetItemStartIndex(), isCache);
+    CHECK_NULL_RETURN(groupItemWrapper, nullptr);
+    auto groupItemNode = AceType::DynamicCast<FrameNode>(groupItemWrapper->GetHostNode());
+    if (!groupItemNode) {
+        groupItemNode = AceType::DynamicCast<FrameNode>(groupItemWrapper);
+    }
+    CHECK_NULL_RETURN(groupItemNode, nullptr);
+    return groupItemNode;
+}
+
+bool ListPattern::NeedJudgeWithHotZone()
+{
+    if (!IsDefaultMultiSelectStyleEnabled()) {
+        return false;
+    }
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, true);
+    auto lanes = listProperty->GetLanes();
+    return !lanes.has_value() || lanes.value() == 1;
+}
+
+int32_t ListPattern::GetItemAtPosition(float offsetX, float offsetY) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    swipeResolvedItemIndex_.reset();
+    auto hostOffset = host->GetTransformRelativeOffset();
+    auto mainIndex = GetItemIndexByPosition(offsetX + hostOffset.GetX(), offsetY + hostOffset.GetY());
+    auto itemIndex = GetItemIndexInGroup(offsetX, offsetY);
+    if (itemIndex.index < 0) {
+        itemIndex.index = mainIndex;
+    }
+    if (itemIndex.index < 0) {
+        return -1;
+    }
+    if (itemIndex.area != -1 && itemIndex.area != 1) {
+        return -1;
+    }
+
+    Rect itemRect = itemIndex.indexInGroup >= 0 ? GetItemRectInGroup(itemIndex.index, itemIndex.indexInGroup)
+                                                : GetItemRect(itemIndex.index);
+    if (LessOrEqual(itemRect.Width(), 0.0) || LessOrEqual(itemRect.Height(), 0.0)) {
+        return -1;
+    }
+
+    swipeResolvedItemIndex_ = itemIndex;
+    auto itemNode = GetSelectableItemAtIndex(itemIndex.index);
+    auto itemPattern = itemNode ? itemNode->GetPattern<ListItemPattern>() : nullptr;
+    if (itemPattern && !itemPattern->Selectable()) {
+        return -1;
+    }
+    return itemIndex.index;
+}
+
+bool ListPattern::IsInEditModeHotZone(const PointF& point) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    swipeResolvedItemIndex_.reset();
+    auto hostOffset = host->GetTransformRelativeOffset();
+    auto mainIndex = GetItemIndexByPosition(point.GetX() + hostOffset.GetX(), point.GetY() + hostOffset.GetY());
+    auto itemIndex = GetItemIndexInGroup(point.GetX(), point.GetY());
+    if (itemIndex.index < 0) {
+        itemIndex.index = mainIndex;
+    }
+    if (itemIndex.index < 0 || (itemIndex.area != -1 && itemIndex.area != 1)) {
+        return false;
+    }
+
+    Rect itemRect = itemIndex.indexInGroup >= 0 ? GetItemRectInGroup(itemIndex.index, itemIndex.indexInGroup)
+                                                : GetItemRect(itemIndex.index);
+    if (LessOrEqual(itemRect.Width(), 0.0) || LessOrEqual(itemRect.Height(), 0.0)) {
+        return false;
+    }
+
+    swipeResolvedItemIndex_ = itemIndex;
+    auto itemNode = GetSelectableItemAtIndex(itemIndex.index);
+    auto itemPattern = itemNode ? itemNode->GetPattern<ListItemPattern>() : nullptr;
+    if (itemPattern && !itemPattern->Selectable()) {
+        printf("shj:: no item");
+        return false;
+    }
+
+    PointF localPoint(point.GetX() - static_cast<float>(itemRect.Left()),
+        point.GetY() - static_cast<float>(itemRect.Top()));
+    auto hotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(host);
+    auto hotZoneLeft = std::max(0.0f, static_cast<float>(itemRect.Width()) - hotZoneWidth);
+    if (LessNotEqual(localPoint.GetX(), hotZoneLeft) || LessNotEqual(localPoint.GetY(), 0.0f) ||
+        GreatNotEqual(localPoint.GetY(), static_cast<float>(itemRect.Height()))) {
+        return false;
+    }
+    return true;
+}
+
+void ListPattern::MarkSwipeItemSelected(int32_t index, bool isSelected)
+{
+    auto itemNode = GetSelectableItemAtIndex(index);
+    CHECK_NULL_VOID(itemNode);
+    auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(itemPattern);
+    if (!itemPattern->Selectable()) {
+        return;
+    }
+    itemPattern->MarkIsSelected(isSelected);
+}
+
+SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectStateKeyAtPosition(
+    float offsetX, float offsetY) const
+{
+    auto index = GetItemAtPosition(offsetX, offsetY);
+    if (index < 0) {
+        return {};
+    }
+    if (swipeResolvedItemIndex_.has_value()) {
+        return { swipeResolvedItemIndex_->index, swipeResolvedItemIndex_->indexInGroup };
+    }
+    return { index, -1 };
+}
+
+SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectStateKeyAtIndex(int32_t index) const
+{
+    if (swipeResolvedItemIndex_.has_value() && swipeResolvedItemIndex_->index == index) {
+        return { swipeResolvedItemIndex_->index, swipeResolvedItemIndex_->indexInGroup };
+    }
+    return { index, -1 };
+}
+
+RefPtr<FrameNode> ListPattern::GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const
+{
+    if (!stateKey.IsValid()) {
+        return nullptr;
+    }
+    swipeResolvedItemIndex_ = { stateKey.index, stateKey.indexInGroup >= 0 ? 1 : -1, stateKey.indexInGroup };
+    return GetSelectableItemAtIndex(stateKey.index);
+}
+
+void ListPattern::MarkSwipeItemSelectedByStateKey(const SwipeSelectStateKey& stateKey, bool isSelected)
+{
+    auto itemNode = GetSelectableItemAtStateKey(stateKey);
+    CHECK_NULL_VOID(itemNode);
+    auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(itemPattern);
+    if (!itemPattern->Selectable()) {
+        return;
+    }
+    itemPattern->MarkIsSelected(isSelected);
+}
+
+void ListPattern::BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& startKey,
+    const SwipeSelectStateKey& endKey, std::vector<SwipeSelectStateKey>& keys) const
+{
+    if (!startKey.IsValid() || !endKey.IsValid()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rangeStartKey = endKey < startKey ? endKey : startKey;
+    auto rangeEndKey = startKey < endKey ? endKey : startKey;
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
+        CHECK_NULL_CONTINUE(itemWrapper);
+        auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
+        if (!itemNode) {
+            itemNode = AceType::DynamicCast<FrameNode>(itemWrapper);
+        }
+        CHECK_NULL_CONTINUE(itemNode);
+        auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+        if (itemPattern) {
+            SwipeSelectStateKey stateKey { index, -1 };
+            if (!(stateKey < rangeStartKey) && !(rangeEndKey < stateKey)) {
+                keys.emplace_back(stateKey);
+            }
+            continue;
+        }
+        auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_CONTINUE(groupPattern);
+        for (int32_t groupIndex = groupPattern->GetDisplayStartIndexInGroup();
+             groupIndex <= groupPattern->GetDisplayEndIndexInGroup(); ++groupIndex) {
+            SwipeSelectStateKey stateKey { index, groupIndex };
+            if (!(stateKey < rangeStartKey) && !(rangeEndKey < stateKey)) {
+                keys.emplace_back(stateKey);
+            }
+        }
+    }
+}
+
+void ListPattern::ApplyEditModeToVisibleItems()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        SetEditModeForListItemOrGroup(child, true);
+    }
+    ApplyEditModeToCachedItems(true);
+}
+
+void ListPattern::RemoveEditModeFromItems()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        SetEditModeForListItemOrGroup(child, false);
+    }
+    ApplyEditModeToCachedItems(false);
 }
 
 RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()
@@ -4860,19 +5362,6 @@ void ListPattern::PostAsyncLoadTask()
     });
 }
 
-void ListPattern::PostAfterCurrentLayoutTask()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->HasContentClip() || paintProperty->GetContentClipValue().first != ContentClipMode::SAFE_AREA) {
-        safeAreaPad_.reset();
-        return;
-    }
-    host->PostBundle({}, false, LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA);
-}
-
 void ListPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
 {
     auto host = GetHost();
@@ -4893,7 +5382,8 @@ void ListPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
         CHECK_NULL_VOID(layoutProperty);
         // Mark container dirty to prevent skipMeasure or skipLayout.
         layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-        host->CreateLayoutTask(true, LayoutType::MEASURE_FOR_IGNORE);
+        host->SetLayoutDirtyMarked(true);
+        host->CreateLayoutTask(true, LayoutType::NONE);
     }
 }
 } // namespace OHOS::Ace::NG

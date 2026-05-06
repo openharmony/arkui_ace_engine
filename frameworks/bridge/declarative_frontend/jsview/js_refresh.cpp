@@ -21,7 +21,6 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
-#include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -148,17 +147,28 @@ void JSRefresh::SetMaxPullDownDistance(const JSCallbackInfo& info)
     }
 
     auto args = info[0];
-    if (!args->IsNumber()) {
+    if (!args->IsNull() && args->IsObject()) {
+        double maxPullDownDistance = 0.0f;
+        RefPtr<ResourceObject> resObj;
+        bool parseResult = ParseJsDouble(args, maxPullDownDistance, resObj);
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(
+            parseResult ? std::make_optional(maxPullDownDistance) : std::nullopt);
+        RefreshModel::GetInstance()->CreateWithResourceObjMaxPullDownDistance(resObj);
+        return;
+    } else if (!args->IsNumber()) {
         RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        RefreshModel::GetInstance()->CreateWithResourceObjMaxPullDownDistance(nullptr);
         return;
     }
     float maxPullDownDistance = args->ToNumber<float>();
     if (std::isnan(maxPullDownDistance)) {
         RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        RefreshModel::GetInstance()->CreateWithResourceObjMaxPullDownDistance(nullptr);
         return;
     }
     maxPullDownDistance = std::max(maxPullDownDistance, 0.0f);
     RefreshModel::GetInstance()->SetMaxPullDownDistance(maxPullDownDistance);
+    RefreshModel::GetInstance()->CreateWithResourceObjMaxPullDownDistance(nullptr);
 }
 
 void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
@@ -172,10 +182,12 @@ void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
 void JSRefresh::JsRefreshOffset(const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
-    if (!ParseJsDimensionVpNG(jsVal, value)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsDimensionVpNG(jsVal, value, resObj)) {
         value.SetValue(0.0f);
     }
     RefreshModel::GetInstance()->SetRefreshOffset(value);
+    RefreshModel::GetInstance()->CreateWithResourceObjRefreshOffset(resObj);
 }
 
 void JSRefresh::Create(const JSCallbackInfo& info)

@@ -30,6 +30,7 @@
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/gesture_type.h"
 #include "core/gestures/long_press_recognizer.h"
+#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 

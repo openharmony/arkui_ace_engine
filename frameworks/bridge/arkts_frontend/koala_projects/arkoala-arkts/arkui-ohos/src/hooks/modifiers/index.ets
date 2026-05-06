@@ -200,6 +200,8 @@ import { ArkTextClockComponent, TextClockAttribute } from "./../../component/tex
 import { TextClockModifier } from "./../../TextClockModifier"
 import { ArkTextInputComponent, TextInputAttribute } from "./../../component/textInput"
 import { TextInputModifier } from "./../../TextInputModifier"
+import { int32 } from '@koalaui/common'
+import { Font as arkui_component_units_Font, FontSettingOptions, FontWeight, ResourceColor, CaretStyle } from '#generated'
 import { ArkTextPickerComponent, TextPickerAttribute, TextPickerOptions, ArkTextPickerPeer } from "./../../component/textPicker"
 import { TextPickerModifier } from "./../../TextPickerModifier"
 import { ArkTextTimerComponent, TextTimerAttribute } from "./../../component/textTimer"
@@ -261,6 +263,7 @@ import { ParticleModifier } from './../../ParticleModifier';
 import { ArkLazyGridLayoutAttributeComponent } from '#generated';
 import { ArkUnionEffectContainerComponent, UnionEffectContainerAttribute } from './../../component/unionEffectContainer';
 import { UnionEffectContainerModifier } from './../../UnionEffectContainerModifier';
+import { ArkDepthComponentComponent, DepthComponentAttribute } from '../../component/depthComponent'
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
@@ -626,14 +629,14 @@ export function hookUIPickerComponentAttributeModifier(component: ArkUIPickerCom
     }
     let attributeSet = (): UIPickerComponentModifier => {
         let isUIPickerComponentModifier: boolean = modifier instanceof UIPickerComponentModifier;
-        let initModifier = component.getPeer().uiPickerComponentAttributeSet ? component.getPeer().uiPickerComponentAttributeSet! : new UIPickerComponentModifier();
+        let initModifier = component.getPeer().uIPickerComponentAttributeSet ? component.getPeer().uIPickerComponentAttributeSet! : new UIPickerComponentModifier();
         if (isUIPickerComponentModifier) {
             let uiPickerComponentModifier = modifier as object as UIPickerComponentModifier;
             initModifier.mergeModifier(uiPickerComponentModifier);
-            component.getPeer().uiPickerComponentAttributeSet = initModifier;
+            component.getPeer().uIPickerComponentAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().uiPickerComponentAttributeSet = initModifier;
+            component.getPeer().uIPickerComponentAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1155,14 +1158,14 @@ export function hookQRCodeAttributeModifier(component: ArkQRCodeComponent, modif
     }
     let attributeSet = (): QRCodeModifier => {
         let isQRCodeModifier: boolean = modifier instanceof QRCodeModifier;
-        let initModifier = component.getPeer().qrCodeAttributeSet ? component.getPeer().qrCodeAttributeSet! : new QRCodeModifier();
+        let initModifier = component.getPeer().qRCodeAttributeSet ? component.getPeer().qRCodeAttributeSet! : new QRCodeModifier();
         if (isQRCodeModifier) {
             let imageModifier = modifier as object as QRCodeModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().qrCodeAttributeSet = initModifier;
+            component.getPeer().qRCodeAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().qrCodeAttributeSet = initModifier;
+            component.getPeer().qRCodeAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1947,6 +1950,37 @@ export function hookTextAttributeModifier(component: ArkTextComponent, modifier:
         return initComponent;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<TextAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookTextModifierFont(modifier: TextModifier, fontValue: arkui_component_units_Font | undefined,
+    options: FontSettingOptions | undefined, index: int32): void {
+    if (((modifier._Text_flagArray[index]) == (0)) || (true) || (true)) {
+        modifier._Text_flagArray[index] = 1
+        modifier._Text_font_0_0value = fontValue
+        modifier._Text_font_0_1value = options
+        if (modifier._Text_font_0_0value != undefined) {
+            modifier._Text_fontWeight_0_0value = modifier._Text_font_0_0value!.weight
+        }
+        modifier._state.fireChange()
+    } else {
+        modifier._Text_flagArray[index] = 3
+    }
+}
+
+export function hookTextModifierFontWeight(modifier: TextModifier,
+    weight: int32 | FontWeight | ResourceStr | undefined, options: FontSettingOptions | undefined, index: int32): void {
+    if (((modifier._Text_flagArray[index]) == (0)) || (true) || (true)) {
+        modifier._Text_flagArray[index] = 1
+        modifier._Text_fontWeight_0_0value = weight
+        modifier._Text_fontWeight_0_1value = options
+        if (modifier._Text_font_0_0value != undefined && !(modifier._Text_fontWeight_0_0value instanceof(Resource))) {
+            modifier._Text_font_0_0value!.weight =
+                modifier._Text_fontWeight_0_0value as (undefined | FontWeight | int32 | String)
+        }
+        modifier._state.fireChange()
+    } else {
+        modifier._Text_flagArray[index] = 3
+    }
 }
 
 export function hookBlankAttributeModifier(component: ArkBlankComponent,
@@ -3044,6 +3078,35 @@ export function hookTextInputAttributeModifier(component: ArkTextInputComponent,
     applyAttributeModifierBase(modifier as Object as AttributeModifier<TextInputAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
+export function hookTextInputModifierCaretColor(modifier: TextInputModifier, value: ResourceColor | undefined,
+    index: int32): void {
+    if (((modifier._TextInput_flagArray[index]) == (0)) || (true)) {
+        modifier._TextInput_flagArray[index] = 1
+        modifier._TextInput_caretColor_0_0value = value
+        if (modifier._TextInput_caretStyle_0_0value !== undefined) {
+
+            modifier._TextInput_caretStyle_0_0value!.color = modifier._TextInput_caretColor_0_0value
+        }
+        modifier._state.fireChange()
+    } else {
+        modifier._TextInput_flagArray[index] = 3
+    }
+}
+
+export function hookTextInputModifierCaretStyle(modifier: TextInputModifier, value: CaretStyle | undefined,
+    index: int32): void {
+    if (((modifier._TextInput_flagArray[index]) == (0)) || (true)) {
+        modifier._TextInput_flagArray[index] = 1
+        modifier._TextInput_caretStyle_0_0value = value
+        if (modifier._TextInput_caretStyle_0_0value !== undefined) {
+            modifier._TextInput_caretColor_0_0value = modifier._TextInput_caretStyle_0_0value!.color
+        }
+        modifier._state.fireChange()
+    } else {
+        modifier._TextInput_flagArray[index] = 3
+    }
+}
+
 export function hookTextAreaAttributeModifier(component: ArkTextAreaComponent,
     modifier: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
@@ -3254,4 +3317,11 @@ export function hookParticleAttributeModifier(component: ArkParticleComponent, m
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ParticleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookDepthComponentAttributeModifier(
+    component: ArkDepthComponentComponent,
+    modifier: AttributeModifier<DepthComponentAttribute> | AttributeModifier<CommonMethod> | undefined,
+): void {
+    throw new Error('hookDepthComponentAttributeModifier is not implemented')
 }

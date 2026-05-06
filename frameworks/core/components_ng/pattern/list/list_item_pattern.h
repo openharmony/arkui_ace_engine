@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,8 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components_ng/event/focus_type.h"
+#include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
@@ -136,11 +138,6 @@ public:
 
     void MarkIsSelected(bool isSelected);
 
-    bool Selectable() const
-    {
-        return selectable_;
-    }
-
     void SetSelectable(bool selectable)
     {
         selectable_ = selectable;
@@ -167,6 +164,16 @@ public:
     void SetIndexInListItemGroup(int32_t index)
     {
         indexInListItemGroup_ = index;
+    }
+
+    void SetNeedReserveEditModeCheckBoxSpace(bool needReserveEditModeCheckBoxSpace)
+    {
+        needReserveEditModeCheckBoxSpace_ = needReserveEditModeCheckBoxSpace;
+    }
+
+    bool GetNeedReserveEditModeCheckBoxSpace() const
+    {
+        return needReserveEditModeCheckBoxSpace_;
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
@@ -240,6 +247,8 @@ public:
 
 protected:
     void OnModifyDone() override;
+    void MarkIsSelectedWithoutCheckbox(bool isSelected) override;
+    void UpdateEditModeCheckBoxPosition() override;
     virtual Color GetBlendGgColor();
     virtual void HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode);
     virtual void HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode);
@@ -248,8 +257,6 @@ protected:
 
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;
 
-    bool isHover_ = false;
-    bool isPressed_ = false;
     std::optional<double> enableOpacity_;
 
 private:
@@ -306,19 +313,14 @@ private:
     RefPtr<Animator> springController_;
     RefPtr<SpringMotion> springMotion_;
 
-    // selectable
-    bool selectable_ = true;
-
-    // drag sort
     RefPtr<ListItemDragManager> dragManager_;
 
-    RefPtr<InputEvent> hoverEvent_;
-    RefPtr<TouchEventImpl> touchListener_;
     OnFinishFunc onFinishEvent_;
     bool isLayouted_ = false;
     bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
     bool isCardStyleInitialized_ = false;
+    bool needReserveEditModeCheckBoxSpace_ = false;
     std::optional<ListItemSwipeIndex> expandSwipeAction_;
     
     PendingSwipeFunc pendingSwipeFunc_ = nullptr;

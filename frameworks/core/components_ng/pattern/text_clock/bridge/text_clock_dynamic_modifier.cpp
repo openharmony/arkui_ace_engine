@@ -248,9 +248,9 @@ void ParseShadowRadiusUpdate(const RefPtr<ResourceObject>& radiusResObj, Shadow&
         return;
     }
     auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
-        double radius = 0.0;
+        double radius = -1.0;
         ResourceParseUtils::ParseResDouble(resObj, radius);
-        shadow.SetBlurRadius(std::max(radius, 0.0));
+        shadow.SetBlurRadius(std::max(radius, -1.0));
     };
     shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
 }

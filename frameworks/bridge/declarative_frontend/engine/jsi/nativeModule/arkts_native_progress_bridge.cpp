@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"

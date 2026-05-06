@@ -205,7 +205,8 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
         JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
         Color color;
         RefPtr<ResourceObject> resObj;
-        if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color, resObj)) {
+        auto hasJsColor = JSViewAbstract::ParseJsColor(colorObj, color, resObj);
+        if (!colorObj->IsNull() && !hasJsColor) {
             // From version 26 and above, styledString's withTheme takes effect.
             if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
                 auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
@@ -213,15 +214,18 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
                 auto theme = context->GetTheme<TextTheme>();
                 CHECK_NULL_VOID(theme);
                 color = theme->GetTextStyle().GetTextColor();
+                font.fontColor = color;
             }
+        } else if (!colorObj->IsNull() && hasJsColor) {
+            font.fontColor = color;
         }
         if (resObj) {
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
             JSViewAbstract::CompleteResourceObject(jsObj);
             resObj = JSViewAbstract::GetResourceObject(jsObj);
             font.fontColorResObj = resObj;
+            font.fontColor = color;
         }
-        font.fontColor = color;
     }
 }
 
@@ -1777,6 +1781,8 @@ void JSLineHeightSpan::JSBind(BindingTarget globalObj)
     JSClass<JSLineHeightSpan>::Declare("LineHeightStyle");
     JSClass<JSLineHeightSpan>::CustomProperty(
         "lineHeight", &JSLineHeightSpan::GetLineHeight, &JSLineHeightSpan::SetLineHeight);
+    JSClass<JSLineHeightSpan>::CustomProperty(
+        "lineHeightMultiple", &JSLineHeightSpan::GetLineHeightMultiple, &JSLineHeightSpan::SetLineHeightMultiple);
     JSClass<JSLineHeightSpan>::Bind(globalObj, JSLineHeightSpan::Constructor, JSLineHeightSpan::Destructor);
 }
 
@@ -1785,12 +1791,7 @@ void JSLineHeightSpan::Constructor(const JSCallbackInfo& args)
     auto lineHeightSpan = Referenced::MakeRefPtr<JSLineHeightSpan>();
     lineHeightSpan->IncRefCount();
 
-    RefPtr<LineHeightSpan> span;
-    if (args.Length() <= 0 || !args[0]->IsObject()) {
-        span = AceType::MakeRefPtr<LineHeightSpan>();
-    } else {
-        span = JSLineHeightSpan::ParseJSLineHeightSpan(JSRef<JSObject>::Cast(args[0]));
-    }
+    RefPtr<LineHeightSpan> span = JSLineHeightSpan::ParseJSLineHeightSpan(args);
     lineHeightSpan->lineHeightSpan_ = span;
     args.SetReturnValue(Referenced::RawPtr(lineHeightSpan));
 }
@@ -1802,12 +1803,24 @@ void JSLineHeightSpan::Destructor(JSLineHeightSpan* lineHeightSpan)
     }
 }
 
-RefPtr<LineHeightSpan> JSLineHeightSpan::ParseJSLineHeightSpan(const JSRef<JSObject>& obj)
+RefPtr<LineHeightSpan> JSLineHeightSpan::ParseJSLineHeightSpan(const JSCallbackInfo& args)
 {
-    if (obj->IsUndefined()) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
+        return AceType::MakeRefPtr<LineHeightSpan>();
+    }
+    auto obj = JSRef<JSObject>::Cast(args[0]);
+    if (args[0]->IsNull() || args[0]->IsUndefined() || obj->IsUndefined()) {
         return AceType::MakeRefPtr<LineHeightSpan>(CalcDimension(0, DimensionUnit::VP));
     }
-    return AceType::MakeRefPtr<LineHeightSpan>(ParseLengthMetrics(obj));
+    auto lineHeight = ParseLengthMetrics(obj);
+    if (args.Length() <= 1 || args[1]->IsNull() || args[1]->IsUndefined()) {
+        return AceType::MakeRefPtr<LineHeightSpan>(lineHeight);
+    }
+    double lineHeightMultiple;
+    if (!JSContainerBase::ParseJsDouble(args[1], lineHeightMultiple) || LessNotEqual(lineHeightMultiple, 0.0)) {
+        return AceType::MakeRefPtr<LineHeightSpan>(lineHeight);
+    }
+    return AceType::MakeRefPtr<LineHeightSpan>(lineHeight, lineHeightMultiple);
 }
 
 void JSLineHeightSpan::GetLineHeight(const JSCallbackInfo& info)
@@ -1819,6 +1832,18 @@ void JSLineHeightSpan::GetLineHeight(const JSCallbackInfo& info)
 
 void JSLineHeightSpan::SetLineHeight(const JSCallbackInfo& info) {}
 
+void JSLineHeightSpan::GetLineHeightMultiple(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(lineHeightSpan_);
+    if (!lineHeightSpan_->GetLineHeightMultiple().has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(lineHeightSpan_->GetLineHeightMultiple().value())));
+    info.SetReturnValue(ret);
+}
+
+void JSLineHeightSpan::SetLineHeightMultiple(const JSCallbackInfo& info) {}
+
 RefPtr<LineHeightSpan>& JSLineHeightSpan::GetLineHeightSpan()
 {
     return lineHeightSpan_;
@@ -1827,6 +1852,101 @@ RefPtr<LineHeightSpan>& JSLineHeightSpan::GetLineHeightSpan()
 void JSLineHeightSpan::SetLineHeightSpan(const RefPtr<LineHeightSpan>& lineHeightSpan)
 {
     lineHeightSpan_ = lineHeightSpan;
+}
+
+void JSLineSpacingSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSLineSpacingSpan>::Declare("LineSpacingStyle");
+    JSClass<JSLineSpacingSpan>::CustomProperty(
+        "lineSpacing", &JSLineSpacingSpan::GetLineSpacing, &JSLineSpacingSpan::SetLineSpacing);
+    JSClass<JSLineSpacingSpan>::CustomProperty(
+        "options", &JSLineSpacingSpan::GetLineSpacingOptions, &JSLineSpacingSpan::SetLineSpacingOptions);
+    JSClass<JSLineSpacingSpan>::Bind(globalObj, JSLineSpacingSpan::Constructor, JSLineSpacingSpan::Destructor);
+}
+
+void JSLineSpacingSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto lineSpacingSpan = Referenced::MakeRefPtr<JSLineSpacingSpan>();
+    lineSpacingSpan->IncRefCount();
+    RefPtr<LineSpacingSpan> span = JSLineSpacingSpan::ParseJSLineSpacingSpan(args);
+
+    lineSpacingSpan->lineSpacingSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(lineSpacingSpan));
+}
+
+void JSLineSpacingSpan::Destructor(JSLineSpacingSpan* lineSpacingSpan)
+{
+    if (lineSpacingSpan != nullptr) {
+        lineSpacingSpan->DecRefCount();
+    }
+}
+
+RefPtr<LineSpacingSpan> JSLineSpacingSpan::ParseJSLineSpacingSpan(const JSCallbackInfo& args)
+{
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
+        return AceType::MakeRefPtr<LineSpacingSpan>();
+    }
+    auto obj = JSRef<JSObject>::Cast(args[0]);
+    if (args[0]->IsNull() || args[0]->IsUndefined() || obj->IsUndefined()) {
+        return AceType::MakeRefPtr<LineSpacingSpan>(CalcDimension(0, DimensionUnit::VP));
+    }
+
+    auto lineSpacing = ParseLengthMetrics(obj);
+    lineSpacing = LessNotEqual(lineSpacing.Value(), 0.0) ? CalcDimension(0, DimensionUnit::VP) : lineSpacing;
+    std::optional<LineSpacingOptions> options;
+    if (args.Length() > 1 && args[1]->IsObject()) {
+        options = JSLineSpacingSpan::ParseJsLineSpacingOptions(JSRef<JSObject>::Cast(args[1]));
+    }
+    return AceType::MakeRefPtr<LineSpacingSpan>(lineSpacing, options);
+}
+
+LineSpacingOptions JSLineSpacingSpan::ParseJsLineSpacingOptions(const JSRef<JSObject>& obj)
+{
+    LineSpacingOptions options;
+    JSRef<JSVal> onlyBetweenLinesObj = JSRef<JSVal>::Cast(obj->GetProperty("onlyBetweenLines"));
+    if (!onlyBetweenLinesObj->IsNull() && !onlyBetweenLinesObj->IsUndefined()
+        && onlyBetweenLinesObj->IsBoolean()) {
+        options.onlyBetweenLines = onlyBetweenLinesObj->ToBoolean();
+    }
+    return options;
+}
+
+void JSLineSpacingSpan::GetLineSpacing(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(lineSpacingSpan_);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(lineSpacingSpan_->GetLineSpacing().ConvertToVp())));
+    info.SetReturnValue(ret);
+}
+
+void JSLineSpacingSpan::SetLineSpacing(const JSCallbackInfo& info) {}
+
+void JSLineSpacingSpan::GetLineSpacingOptions(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(lineSpacingSpan_);
+    if (!lineSpacingSpan_->GetLineSpacingOptions().has_value()) {
+        return;
+    }
+    auto options = lineSpacingSpan_->GetLineSpacingOptions().value();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> retObj = objectTemplate->NewInstance();
+    if (options.onlyBetweenLines.has_value()) {
+        bool onlyBetweenLines = options.onlyBetweenLines.value_or(false);
+        retObj->SetProperty<bool>("onlyBetweenLines", onlyBetweenLines);
+    }
+    info.SetReturnValue(retObj);
+}
+
+void JSLineSpacingSpan::SetLineSpacingOptions(const JSCallbackInfo& info) {}
+
+RefPtr<LineSpacingSpan>& JSLineSpacingSpan::GetLineSpacingSpan()
+{
+    return lineSpacingSpan_;
+}
+
+void JSLineSpacingSpan::SetLineSpacingSpan(const RefPtr<LineSpacingSpan>& lineSpacingSpan)
+{
+    lineSpacingSpan_ = lineSpacingSpan;
 }
 
 void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)

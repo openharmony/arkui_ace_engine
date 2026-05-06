@@ -14,6 +14,7 @@
  */
 
 #include "text_area_base.h"
+#include "core/accessibility/accessibility_manager.h"
 namespace OHOS::Ace::NG {
 class TextFieldUXTest : public TextAreaBase {};
 

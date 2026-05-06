@@ -18,6 +18,7 @@
 #include "mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/clipboard/clipboard.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
@@ -25,7 +26,9 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/back_press_handler_manager.h"
+#include "core/pipeline_ng/environment_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
@@ -49,6 +52,9 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace {
 
@@ -226,6 +232,12 @@ RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
     return pipeline_;
 }
 
+const RefPtr<NG::PageInfo> MockPipelineContext::GetLastPageInfo()
+{
+    return nullptr;
+}
+
+
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
@@ -281,7 +293,7 @@ void MockPipelineContext::SetContainerModalTitleHeight(int32_t height)
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
-PipelineContext::PipelineContext()
+PipelineContext::PipelineContext(): safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     InitManagers();
     if (navigationMgr_) {
@@ -753,6 +765,11 @@ const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
+}
+
+const RefPtr<NavigationManager>& PipelineContext::GetNavigationManager() const
+{
+    return navigationMgr_;
 }
 
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
@@ -1271,6 +1288,14 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
     return nodeRenderStatusMonitor_;
 }
 
+WeakPtr<AIWriteAdapter> PipelineContext::GetOrCreateAIWriteAdapter()
+{
+    if (!aiWriteAdapter_) {
+        aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    }
+    return aiWriteAdapter_;
+}
+
 void PipelineContext::FlushDirtyPropertyNodes()
 {
 }
@@ -1279,7 +1304,7 @@ void PipelineContext::DumpForceColor(const std::vector<std::string>& params) con
 void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
     int64_t delayMillis) {}
 
-RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
+RefPtr<FrameNode> PipelineContext::GetContainerModalNode() const
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return nullptr;
@@ -1364,6 +1389,7 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
 
 void PipelineContext::InitManagers()
 {
+    navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
@@ -1432,6 +1458,8 @@ bool PipelineBase::ReachResponseDeadline() const
 }
 
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
+
+void PipelineBase::SendUpdateVirtualNodeFocusEvent() {}
 
 void PipelineBase::OnActionEvent(const std::string& action) {}
 
@@ -1881,3 +1909,25 @@ bool WindowManager::GetPageViewportConfig(
 }
 } // namespace OHOS::Ace
 // WindowManager ===============================================================
+
+namespace OHOS::Ace::NG {
+void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
+{
+}
+
+void EnvironmentManager::OnNodeDetached(const RefPtr<UINode>& node)
+{
+}
+
+ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase)
+{
+    if (!node) {
+        return;
+    }
+    active_ = true;
+}
+
+ScopedEnvConsumer::~ScopedEnvConsumer()
+{
+}
+} // namespace OHOS::Ace::NG

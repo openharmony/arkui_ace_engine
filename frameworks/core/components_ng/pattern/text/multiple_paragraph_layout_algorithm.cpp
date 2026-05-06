@@ -30,6 +30,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -52,7 +55,7 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
     auto size = geometryNode->GetFrameSize();
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto offsetY = padding.top.value_or(0);
-    auto align = Alignment::CENTER;
+    auto align = Alignment::CENTER_LEFT;
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
@@ -62,7 +65,49 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
     }
     return offsetY;
 }
+
+void UpdateSymbolHdrHeadRoomToRenderContext(const RefPtr<FrameNode>& frameNode, TextPattern& pattern,
+    TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+        return;
+    }
+    const auto& symbolColorInfo = textStyle.GetAndUpdateSymbolColorInfo();
+    auto lastTextStyle = pattern.GetTextStyle();
+    const auto& lastSymbolColorInfo = lastTextStyle.GetAndUpdateSymbolColorInfo();
+    bool needUpdateHdrHeadRoom = symbolColorInfo.hasHdr != lastSymbolColorInfo.hasHdr;
+    if (!needUpdateHdrHeadRoom && symbolColorInfo.hasHdr) {
+        needUpdateHdrHeadRoom = !NearEqual(symbolColorInfo.maxHeadRoom, lastSymbolColorInfo.maxHeadRoom);
+    }
+    if (needUpdateHdrHeadRoom) {
+        const auto headRoom = symbolColorInfo.hasHdr ? symbolColorInfo.maxHeadRoom : 1.0f;
+#ifdef ENABLE_ROSEN_BACKEND
+        auto renderContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
+        if (renderContext) {
+            renderContext->SetHDRColorHeadRoom(headRoom);
+        }
+#endif
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("UpdateSymbolHdrHeadRoomToRenderContext[headRoom:%f]", headRoom);
+        }
+    }
+}
 } // namespace
+
+std::string MultipleParagraphLayoutAlgorithm::SpansToString()
+{
+    std::stringstream ss;
+    for (auto& list : spans_) {
+        ss << "[";
+        for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
+            ss << "[" << item->interval.first << "," << item->interval.second << ":"
+               << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
+        });
+        ss << "], ";
+    }
+    return ss.str();
+}
 
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
@@ -121,6 +166,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         }
         contentModifier->SetFontReady(false);
     }
+    UpdateSymbolHdrHeadRoomToRenderContext(frameNode, *pattern, textStyle);
     UpdateShaderStyle(textLayoutProperty, textStyle);
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
     textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));
@@ -505,7 +551,7 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::CENTER;
+    auto align = Alignment::CENTER_LEFT;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }

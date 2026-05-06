@@ -14,10 +14,14 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cinttypes>
 #include <unordered_set>
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event_hub.h"
+#include "core/components_ng/event/target_component.h"
 #if defined(OHOS_PLATFORM)
 #include <unistd.h>
 #endif
@@ -27,7 +31,10 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
+#endif
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -60,6 +67,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "base/view_data/ace_auto_fill_type.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
@@ -74,8 +82,57 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/pattern/badge/badge_accessibility_property.h"
+#include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
+#include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
+#include "core/components_ng/pattern/container_modal/container_modal_accessibility_property.h"
+#include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
+#include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
+#include "core/components_ng/pattern/picker/datepicker_column_accessibility_property.h"
+#include "core/components_ng/pattern/gauge/gauge_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
+#include "core/components_ng/pattern/indexer/indexer_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
+#include "core/components_ng/pattern/marquee/marquee_accessibility_property.h"
+#include "core/components_ng/pattern/menu/menu_accessibility_property.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_accessibility_property.h"
+#include "core/components_ng/pattern/navigation/title_bar_accessibility_property.h"
+#include "core/components_ng/pattern/progress/progress_accessibility_property.h"
+#include "core/components_ng/pattern/radio/radio_accessibility_property.h"
+#include "core/components_ng/pattern/rating/rating_accessibility_property.h"
+#include "core/components_ng/pattern/refresh/refresh_accessibility_property.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
+#include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.h"
+#include "core/components_ng/pattern/security_component/security_component_accessibility_property.h"
+#include "core/components_ng/pattern/select/select_accessibility_property.h"
+#include "core/components_ng/pattern/slider/slider_accessibility_property.h"
+#include "core/components_ng/pattern/stepper/stepper_accessibility_property.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_item_accessibility_property.h"
+#include "core/components_ng/pattern/text/text_accessibility_property.h"
+#include "core/components_ng/pattern/text_clock/text_clock_accessibility_property.h"
+#include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_accessibility_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_row_accessibility_property.h"
+#include "core/components_ng/pattern/texttimer/text_timer_accessibility_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_column_accessibility_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
+#include "core/components_ng/pattern/toast/toast_accessibility_property.h"
+#include "core/components_ng/pattern/toggle/switch_accessibility_property.h"
+#include "core/components_ng/pattern/button/toggle_button_accessibility_property.h"
+#include "core/components_ng/pattern/video/video_accessibility_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
+#include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/smart_gesture_property.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
@@ -93,6 +150,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -592,6 +650,7 @@ FrameNode::FrameNode(
         ownedTid_ = static_cast<uint64_t>(gettid());
 #endif
     }
+    uiNodeType_ = UINodeType::FRAME_NODE;
 }
 
 void FrameNode::OnDelete()
@@ -1527,14 +1586,18 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
 }
 
+// if return true, can not get property from customPropertyMap_
 bool FrameNode::IsJsCustomPropertyUpdated() const
 {
+    if (customPropertyMap_.empty()) {
+        return true;
+    }
     for (const auto& iter : customPropertyMap_) {
-        if (!iter.second.empty() && iter.second[1] == "0") {
-            return false;
+        if (iter.second.size() > 1 && iter.second[1] == "0") {
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1566,6 +1629,9 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     json->Put("isMeasureBoundary", isMeasureBoundary_);
     json->Put("hasPendingRequest", hasPendingRequest_);
     json->Put("isFirstBuilding", isFirstBuilding_);
+    if (!GetInspectorLabel().empty()) {
+        json->Put("inspectorLabel", GetInspectorLabel().c_str());
+    }
     ExtraCustomPropertyToJsonValue(json, filter);
     if (IsCNode() || !IsJsCustomPropertyUpdated()) {
         auto jsonNode = JsonUtil::Create(true);
@@ -1950,6 +2016,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
         if (safeAreaManager) {
             safeAreaManager->RemoveRestoreNode(WeakClaim(this));
         }
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
         if (SystemProperties::GetGestureDebugBoundaryEnabled()) {
             const auto& eventManager = context->GetEventManager();
             CHECK_NULL_VOID(eventManager);
@@ -1958,6 +2025,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
                 gestureDebugMgr->ClearNode(GetId());
             }
         }
+#endif
 
         if (!lpxAttributes_.empty()) {
             context->UnRegisterLpxDirtyNode(WeakClaim(this));
@@ -3300,9 +3368,8 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
     }
     auto parent = GetParent();
     while (parent) {
-        auto parentFrame = DynamicCast<FrameNode>(parent);
-        if (parentFrame) {
-            return parentFrame;
+        if (parent->GetNodeType() == UINodeType::FRAME_NODE) {
+            return ForceTransfer<FrameNode>(parent);
         }
         parent = parent->GetParent();
     }
@@ -3339,6 +3406,12 @@ void FrameNode::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefP
     if (pattern_) {
         pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType, triggerType);
     }
+}
+
+void FrameNode::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap,
+    AceAutoFillType autoFillType)
+{
+    NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType, AceAutoFillTriggerType::AUTO_REQUEST);
 }
 
 void FrameNode::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
@@ -4244,7 +4317,7 @@ bool CheckChildHitTestResult(HitTestResult childHitResult, const RefPtr<OHOS::Ac
         return ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
                 ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT &&
-                     child->GetHitTestMode() != HitTestMode::HTMBLOCK_DESCENDANTS) &&
+                    child->GetHitTestMode() != HitTestMode::HTMBLOCK_DESCENDANTS) &&
                     isExclusiveEventForChild));
     }
     return false;
@@ -4397,6 +4470,20 @@ void FrameNode::OnHoverWithHightLight(bool isHover) const
     pattern->OnHoverWithHightLight(isHover);
 }
 
+RefPtr<GestureEventHub> FrameNode::GetOrCreateGestureEventHub()
+{
+    CreateEventHubInner();
+    CHECK_NULL_RETURN(eventHub_, nullptr);
+    return eventHub_->GetOrCreateGestureEventHub();
+}
+
+RefPtr<InputEventHub> FrameNode::GetOrCreateInputEventHub()
+{
+    CreateEventHubInner();
+    CHECK_NULL_RETURN(eventHub_, nullptr);
+    return eventHub_->GetOrCreateInputEventHub();
+}
+
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
 {
     auto nodeId = GetId();
@@ -4495,12 +4582,10 @@ std::pair<float, float> FrameNode::ContextPositionConvertToPX(
     std::pair<float, float> position;
     CHECK_NULL_RETURN(context, position);
     auto scaleProperty = ScaleProperty::CreateScaleProperty();
-    position.first =
-        ConvertToPx(context->GetPositionProperty()->GetPosition()->GetX(), scaleProperty, percentReference.Width())
-            .value_or(0.0);
-    position.second =
-        ConvertToPx(context->GetPositionProperty()->GetPosition()->GetY(), scaleProperty, percentReference.Height())
-            .value_or(0.0);
+    position.first = ConvertToPxDefault(context->GetPositionProperty()->GetPosition()->GetX(),
+        scaleProperty, percentReference.Width());
+    position.second = ConvertToPxDefault(context->GetPositionProperty()->GetPosition()->GetY(),
+        scaleProperty, percentReference.Height());
     return position;
 }
 
@@ -5216,8 +5301,13 @@ bool FrameNode::MarkRemoving()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        geometryTransition->Build(WeakClaim(this), false);
-        pendingRemove = true;
+        const bool isOnShow = GetContext() ? GetContext()->GetOnShow() : true;
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "FrameNode::MarkRemoving, outNode: %{public}d, %{public}s,"
+            " isOnForeground: %{public}d", GetId(), GetTag().c_str(), isOnShow);
+        if (isOnShow) {
+            geometryTransition->Build(WeakClaim(this), false);
+            pendingRemove = true;
+        }
     }
 
     const auto children = GetChildren();
@@ -6092,6 +6182,17 @@ void FrameNode::UpdateFocusState()
     }
 }
 
+void FrameNode::UpdateSmartGestureSelectedState()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto smartGestureManager = eventManager->GetSmartGestureManager();
+    CHECK_NULL_VOID(smartGestureManager);
+    smartGestureManager->UpdateSelectedNodePaintIfNeeded(AceType::Claim(this));
+}
+
 bool FrameNode::SelfOrParentExpansive()
 {
     return SelfExpansive() || ParentExpansive();
@@ -6294,6 +6395,9 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
     // update focus state
     UpdateFocusState();
+
+    // update smart gesture selected state
+    UpdateSmartGestureSelectedState();
 
     // rebuild child render node.
     if (!isLayoutNode_) {
@@ -7112,11 +7216,27 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
         eventHub_->OnAttachContext(context);
     }
     pattern_->OnAttachContext(context);
+    if (smartGestureProperty_) {
+        auto eventManager = context->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        auto manager = eventManager->GetOrCreateSmartGestureManager();
+        if (manager) {
+            manager->SyncPrimaryActionNode(AceType::Claim(this));
+        }
+    }
 }
 
 void FrameNode::DetachContext(bool recursive)
 {
     CHECK_NULL_VOID(context_);
+    if (smartGestureProperty_) {
+        auto eventManager = context_->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        auto manager = eventManager->GetOrCreateSmartGestureManager();
+        if (manager) {
+            manager->RemovePrimaryActionNode(GetId());
+        }
+    }
     pattern_->OnDetachContext(context_);
     if (eventHub_) {
         eventHub_->OnDetachContext(context_);
@@ -7239,14 +7359,14 @@ void FrameNode::GetVisibleRectWithClip(
     }
 }
 
-CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool logFlag)
+const CacheVisibleRectResult& FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool logFlag)
 {
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
     auto scale = GetTransformScale();
     auto innerScale = scale;
-    if (renderContext_) {
-        auto matrix4 = renderContext_->GetTransformMatrixValue(Matrix4());
+    if (renderContext_->HasTransformMatrix()) {
+        auto& matrix4 = renderContext_->GetTransformMatrixValue();
         innerScale = { innerScale.x * static_cast<float>(matrix4.GetScaleX()),
             innerScale.y * static_cast<float>(matrix4.GetScaleY()) };
     }
@@ -7258,73 +7378,85 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
         return cachedVisibleRectResult_.second;
     }
 
-    CacheVisibleRectResult result;
+    const CacheVisibleRectResult* result;
     if (parentUi->cachedVisibleRectResult_.first == timestamp) {
-        auto parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
-        result = CalculateCacheVisibleRect(
+        const auto& parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
+        result = &CalculateCacheVisibleRect(
             parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     } else {
-        CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp, logFlag);
-        result = CalculateCacheVisibleRect(
+        const auto& parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp, logFlag);
+        result = &CalculateCacheVisibleRect(
             parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     }
     if (logFlag) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT,
             "OnVisibleAreaChange Node(%{public}s/%{public}d) windowOffset:%{public}s visibleRect:%{public}s "
             "innerVisibleRect:%{public}s frameRect:%{public}s innerBoundaryRect:%{public}s",
-            tag_.c_str(), nodeId_, result.windowOffset.ToString().c_str(), result.visibleRect.ToString().c_str(),
-            result.innerVisibleRect.ToString().c_str(), result.frameRect.ToString().c_str(),
-            result.innerBoundaryRect.ToString().c_str());
+            tag_.c_str(), nodeId_, result->windowOffset.ToString().c_str(), result->visibleRect.ToString().c_str(),
+            result->innerVisibleRect.ToString().c_str(), result->frameRect.ToString().c_str(),
+            result->innerBoundaryRect.ToString().c_str());
     }
-    return result;
+    return *result;
 }
 
-CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
+const CacheVisibleRectResult& FrameNode::CalculateCacheVisibleRect(const CacheVisibleRectResult& parentCacheVisibleRect,
     const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
     uint64_t timestamp)
 {
-    auto parentRenderContext = parentUi->GetRenderContext();
-    OffsetF windowOffset;
-    OffsetF innerWindowOffset;
-    auto offset = rectToParent.GetOffset();
-    auto innerOffset = rectToParent.GetOffset();
-    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
+    cachedVisibleRectResult_.first = timestamp;
+    auto& res = cachedVisibleRectResult_.second;
+
+    auto& windowOffset = res.windowOffset;
+    windowOffset = rectToParent.GetOffset();
+    auto& parentRenderContext = parentUi->GetRenderContext();
+    if (parentRenderContext) {
         auto parentScale = parentRenderContext->GetTransformScale();
-        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+        if (parentScale) {
+            auto& v = parentScale.value();
+            windowOffset.Multiply(v.x, v.y);
+        }
     }
-    windowOffset = parentCacheVisibleRect.windowOffset + offset;
+    windowOffset.Add(parentCacheVisibleRect.windowOffset);
 
-    innerOffset = OffsetF(innerOffset.GetX() * parentCacheVisibleRect.innerCumulativeScale.x,
-        innerOffset.GetY() * parentCacheVisibleRect.innerCumulativeScale.y);
-    innerWindowOffset = parentCacheVisibleRect.innerWindowOffset + innerOffset;
+    auto& rect = res.frameRect;
+    rect = {
+        windowOffset.GetX(),
+        windowOffset.GetY(),
+        rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x,
+        rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y
+    };
+    auto& visibleRect = res.visibleRect;
+    visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
 
-    RectF rect;
-    rect.SetOffset(windowOffset);
-    rect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x);
-    rect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y);
+    auto& innerWindowOffset = res.innerWindowOffset;
+    innerWindowOffset = rectToParent.GetOffset();
+    auto& parentInnerScale = parentCacheVisibleRect.innerCumulativeScale;
+    innerWindowOffset.Multiply(parentInnerScale.x, parentInnerScale.y).Add(parentCacheVisibleRect.innerWindowOffset);
 
-    RectF innerRect;
-    innerRect.SetOffset(innerWindowOffset);
-    innerRect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.innerCumulativeScale.x);
-    innerRect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.innerCumulativeScale.y);
+    auto& innerRect = res.innerFrameRect;
+    innerRect = {
+        innerWindowOffset.GetX(),
+        innerWindowOffset.GetY(),
+        rectToParent.Width() * parentCacheVisibleRect.innerCumulativeScale.x,
+        rectToParent.Height() * parentCacheVisibleRect.innerCumulativeScale.y
+    };
 
-    auto visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
-    auto innerVisibleRect = innerRect;
-    auto innerBoundaryRect = parentCacheVisibleRect.innerBoundaryRect;
+    auto& innerBoundaryRect = res.innerBoundaryRect;
     if (parentRenderContext && parentRenderContext->GetClipEdge().value_or(false)) {
-        innerBoundaryRect = parentCacheVisibleRect.innerVisibleRect.Constrain(innerBoundaryRect);
+        innerBoundaryRect = parentCacheVisibleRect.innerVisibleRect.Constrain(
+            parentCacheVisibleRect.innerBoundaryRect);
+    } else {
+        innerBoundaryRect = parentCacheVisibleRect.innerBoundaryRect;
     }
+
+    auto& innerVisibleRect = res.innerVisibleRect;
     innerVisibleRect = innerRect.Constrain(innerBoundaryRect);
 
-    VectorF cumulativeScale = { pairScale.first.x * parentCacheVisibleRect.cumulativeScale.x,
+    res.cumulativeScale = { pairScale.first.x * parentCacheVisibleRect.cumulativeScale.x,
         pairScale.first.y * parentCacheVisibleRect.cumulativeScale.y };
-    VectorF innerCumulativeScale = { pairScale.second.x * parentCacheVisibleRect.innerCumulativeScale.x,
+    res.innerCumulativeScale = { pairScale.second.x * parentCacheVisibleRect.innerCumulativeScale.x,
         pairScale.second.y * parentCacheVisibleRect.innerCumulativeScale.y };
-    cachedVisibleRectResult_ = { timestamp,
-        { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale, rect,
-            innerRect, innerBoundaryRect } };
-    return { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale,
-        rect, innerRect, innerBoundaryRect };
+    return res;
 }
 
 bool FrameNode::IsContextTransparent()
@@ -7369,8 +7501,8 @@ CacheMatrixInfo& FrameNode::GetOrRefreshMatrixFromCache(bool forceRefresh)
         getCacheNanoTime_ + MATRIX_CACHE_TIME_THRESHOLD < nanoTimestamp) {
         cacheMatrixInfo_.revertMatrix = renderContext_->GetRevertMatrix();
         cacheMatrixInfo_.paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
-        cacheMatrixInfo_.localMatrix = Matrix4::CreateTranslate(-rect.GetOffset().GetX(), -rect.GetOffset().GetY(), 0) *
-                                       cacheMatrixInfo_.revertMatrix;
+        cacheMatrixInfo_.localMatrix = Matrix4::CreateTranslate(-rect.GetOffset().GetX(),
+            -rect.GetOffset().GetY(), 0).MatrixMultiply(cacheMatrixInfo_.revertMatrix);
         isTransformNotChanged_ = true;
         getCacheNanoTime_ = nanoTimestamp;
         prePaintRect_ = rect;
@@ -8478,6 +8610,19 @@ const DragPreviewOption& FrameNode::GetDragPreviewOption()
     return dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
 }
 
+RefPtr<SmartGestureProperty> FrameNode::GetOrCreateSmartGestureProperty()
+{
+    if (!smartGestureProperty_) {
+        smartGestureProperty_ = MakeRefPtr<SmartGestureProperty>();
+    }
+    return smartGestureProperty_;
+}
+
+RefPtr<SmartGestureProperty> FrameNode::GetSmartGestureProperty() const
+{
+    return smartGestureProperty_;
+}
+
 void FrameNode::RegisterLpxAttribute(LpxAttribute attribute)
 {
     auto prevSize = lpxAttributes_.size();
@@ -8499,4 +8644,89 @@ void FrameNode::UnRegisterLpxAttribute(LpxAttribute attribute)
         context->UnRegisterLpxDirtyNode(WeakClaim(this));
     }
 }
+
+template<typename T>
+ACE_FORCE_EXPORT RefPtr<T> FrameNode::GetAccessibilityProperty() const
+{
+    return DynamicCast<T>(const_cast<FrameNode*>(this)->GetOrCreateAccessibilityProperty());
+}
+
+// Explicit template instantiation for common use cases
+template RefPtr<AccessibilityProperty> FrameNode::GetAccessibilityProperty<AccessibilityProperty>() const;
+template RefPtr<BadgeAccessibilityProperty> FrameNode::GetAccessibilityProperty<BadgeAccessibilityProperty>() const;
+template RefPtr<BubbleAccessibilityProperty> FrameNode::GetAccessibilityProperty<BubbleAccessibilityProperty>() const;
+template RefPtr<CheckBoxAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<CheckBoxAccessibilityProperty>() const;
+template RefPtr<CheckBoxGroupAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>() const;
+template RefPtr<ContainerModalAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ContainerModalAccessibilityProperty>() const;
+template RefPtr<DatePickerAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<DatePickerAccessibilityProperty>() const;
+template RefPtr<DatePickerColumnAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>() const;
+template RefPtr<DialogAccessibilityProperty> FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
+template RefPtr<GaugeAccessibilityProperty> FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
+template RefPtr<GridAccessibilityProperty> FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
+template RefPtr<GridItemAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;
+template RefPtr<IndexerAccessibilityProperty> FrameNode::GetAccessibilityProperty<IndexerAccessibilityProperty>() const;
+template RefPtr<ListAccessibilityProperty> FrameNode::GetAccessibilityProperty<ListAccessibilityProperty>() const;
+template RefPtr<ListItemAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ListItemAccessibilityProperty>() const;
+template RefPtr<ListItemGroupAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ListItemGroupAccessibilityProperty>() const;
+template RefPtr<MarqueeAccessibilityProperty> FrameNode::GetAccessibilityProperty<MarqueeAccessibilityProperty>() const;
+template RefPtr<MenuAccessibilityProperty> FrameNode::GetAccessibilityProperty<MenuAccessibilityProperty>() const;
+template RefPtr<MenuItemAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<MenuItemAccessibilityProperty>() const;
+template RefPtr<MenuItemGroupAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<MenuItemGroupAccessibilityProperty>() const;
+template RefPtr<ProgressAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ProgressAccessibilityProperty>() const;
+template RefPtr<RadioAccessibilityProperty> FrameNode::GetAccessibilityProperty<RadioAccessibilityProperty>() const;
+template RefPtr<RatingAccessibilityProperty> FrameNode::GetAccessibilityProperty<RatingAccessibilityProperty>() const;
+template RefPtr<RefreshAccessibilityProperty> FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
+template RefPtr<RichEditorAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<RichEditorAccessibilityProperty>() const;
+template RefPtr<ScrollAccessibilityProperty> FrameNode::GetAccessibilityProperty<ScrollAccessibilityProperty>() const;
+template RefPtr<ScrollBarAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ScrollBarAccessibilityProperty>() const;
+template RefPtr<SecurityComponentAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SecurityComponentAccessibilityProperty>() const;
+template RefPtr<SelectAccessibilityProperty> FrameNode::GetAccessibilityProperty<SelectAccessibilityProperty>() const;
+template RefPtr<SliderAccessibilityProperty> FrameNode::GetAccessibilityProperty<SliderAccessibilityProperty>() const;
+template RefPtr<StepperAccessibilityProperty> FrameNode::GetAccessibilityProperty<StepperAccessibilityProperty>() const;
+template RefPtr<SwiperAccessibilityProperty> FrameNode::GetAccessibilityProperty<SwiperAccessibilityProperty>() const;
+template RefPtr<SwiperIndicatorAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>() const;
+template RefPtr<SwitchAccessibilityProperty> FrameNode::GetAccessibilityProperty<SwitchAccessibilityProperty>() const;
+template RefPtr<TabBarAccessibilityProperty> FrameNode::GetAccessibilityProperty<TabBarAccessibilityProperty>() const;
+template RefPtr<TabBarItemAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TabBarItemAccessibilityProperty>() const;
+template RefPtr<TextAccessibilityProperty> FrameNode::GetAccessibilityProperty<TextAccessibilityProperty>() const;
+template RefPtr<TextClockAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextClockAccessibilityProperty>() const;
+template RefPtr<TextFieldAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextFieldAccessibilityProperty>() const;
+template RefPtr<TextPickerAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextPickerAccessibilityProperty>() const;
+template RefPtr<TextPickerRowAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextPickerRowAccessibilityProperty>() const;
+template RefPtr<TextTimerAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextTimerAccessibilityProperty>() const;
+template RefPtr<TimePickerColumnAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>() const;
+template RefPtr<TimePickerRowAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TimePickerRowAccessibilityProperty>() const;
+template RefPtr<TitleBarAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TitleBarAccessibilityProperty>() const;
+template RefPtr<ToastAccessibilityProperty> FrameNode::GetAccessibilityProperty<ToastAccessibilityProperty>() const;
+template RefPtr<ToggleButtonAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ToggleButtonAccessibilityProperty>() const;
+template RefPtr<VideoAccessibilityProperty> FrameNode::GetAccessibilityProperty<VideoAccessibilityProperty>() const;
+template RefPtr<WaterFlowAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<WaterFlowAccessibilityProperty>() const;
+template RefPtr<WebAccessibilityProperty> FrameNode::GetAccessibilityProperty<WebAccessibilityProperty>() const;
+
 } // namespace OHOS::Ace::NG

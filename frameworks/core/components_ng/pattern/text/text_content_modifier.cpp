@@ -51,6 +51,16 @@ constexpr uint32_t POINT_COUNT = 4;
 constexpr uint32_t REPORTER_PRECISION = 3;
 constexpr uint32_t NODE_TYPE = 0;
 constexpr float OBSCURED_ALPHA = 0.2f;
+
+bool HasCrossColorSpace(const std::vector<Color>& colors, const LinearVector<LinearColor>& animatableColors)
+{
+    for (size_t i = 0; i < colors.size(); ++i) {
+        if (colors[i].GetColorSpace() != animatableColors[i].ToColorWithColorSpace().GetColorSpace()) {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace
 
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
@@ -1013,10 +1023,14 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
             lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
         if (SystemProperties::GetTextTraceEnabled()) {
-            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateTextColorMeasureFlag[textColor:%s][lastTextColor:%s]["
-                                  "animatableTextColor:%s]",
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateTextColorMeasureFlag[textColor:%s][lastTextColor:%s]["
+                "animatableTextColor:%s][textColorPH:%u][lastTextColorPH:%u][animatableTextColorPH:%u]",
                 textColor_->ColorToString().c_str(), lastTextColor_.ColorToString().c_str(),
-                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
+                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str(),
+                static_cast<uint8_t>(textColor_->GetPlaceholder()),
+                static_cast<uint8_t>(lastTextColor_.GetPlaceholder()),
+                static_cast<uint8_t>(animatableTextColor_->Get().GetPlaceholder()));
         }
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
     }
@@ -1259,7 +1273,11 @@ void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool i
     }
     CHECK_NULL_VOID(animatableSymbolColor_);
     auto animatableColors = animatableSymbolColor_->Get();
-    if (colors.size() != animatableColors.size()) {
+    bool needWithoutAnimation = colors.size() != animatableColors.size();
+    if (!needWithoutAnimation) {
+        needWithoutAnimation = HasCrossColorSpace(value, animatableColors);
+    }
+    if (needWithoutAnimation) {
         AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), colors]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
@@ -1645,13 +1663,14 @@ void TextContentModifier::ContentModifierDump()
                             .append(std::to_string(static_cast<uint8_t>(animatableTextColor.GetPlaceholder()))));
     }
     dumpLog.AddDesc(
-        std::string(" onlyTextColorAnimation: ")
+        std::string("onlyTextColorAnimation: ")
             .append(std::to_string(onlyTextColorAnimation_))
             .append(" textColor_:")
             .append(textColor_.has_value() ? textColor_.value().ToString() : "NA")
             .append("|PH:")
             .append(textColor_.has_value() ? std::to_string(static_cast<uint8_t>(textColor_.value().GetPlaceholder()))
-                                           : "NA"));
+                                           : "NA")
+            .append(" ContentOffset:" + paintOffset_.ToString()));
 }
 
 void TextContentModifier::SetIsFocused(const bool isFocused)

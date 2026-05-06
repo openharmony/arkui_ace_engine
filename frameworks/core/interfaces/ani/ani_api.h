@@ -750,6 +750,7 @@ struct ArkUIAniDragControllerModifier {
     void (*aniDragActionCancelDataLoading)(const char* key);
     void (*aniDragActionNotifyDragStartReques)(int requestStatus);
     void (*aniDragActionEnableDropDisallowedBadge)(bool enabled);
+    bool (*aniDragActionInterruptFollowHandMorphDropAnimation)();
     int32_t (*aniSpringLoadingContextGetState)(ani_long ptr);
     int32_t (*aniSpringLoadingContextGetCurrentNotifySequence)(ani_long ptr);
     void (*aniSpringLoadingContextGetDragInfos)(ani_long ptr, ArkUIDragInfos& info);

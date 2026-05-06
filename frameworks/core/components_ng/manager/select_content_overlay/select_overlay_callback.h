@@ -25,6 +25,13 @@
 
 namespace OHOS::Ace::NG {
 
+enum class TextSelectionClearPolicy {
+    POLICY_BEGIN = -1,
+    KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0,
+    CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1,
+    POLICY_END = 2
+};
+
 struct TouchPointInfo {
     std::optional<PointF> point;
     int32_t id = -1;
@@ -131,6 +138,7 @@ public:
     {
         downPointInfo_.Reset();
         isIntercept_ = false;
+        clearPolicy_.reset();
     }
 
     virtual void OnHandleLevelModeChanged(HandleLevelMode mode) {}
@@ -141,6 +149,18 @@ public:
     virtual bool OnHandleBeforeMenuVisibiltyChanged(bool isVisible)
     {
         return false;
+    }
+
+    void SetTextSelectionClearPolicy(TextSelectionClearPolicy policy)
+    {
+        clearPolicy_ = policy;
+    }
+
+protected:
+    std::optional<TextSelectionClearPolicy> clearPolicy_;
+    virtual TextSelectionClearPolicy GetClearPolicy()
+    {
+        return TextSelectionClearPolicy::KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH;
     }
 
 private:

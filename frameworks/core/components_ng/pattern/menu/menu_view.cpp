@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
@@ -48,6 +49,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components/button/button_theme.h"
 #include "frameworks/base/utils/measure_util.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -206,6 +208,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
             styleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         }
+        MenuView::UpdateStyleOptionColorMode(menuNode->GetLocalColorMode(), styleOption, isColorModeFollowTarget);
         renderContext->UpdateBackBlurStyle(styleOption);
     }
 
@@ -1663,6 +1666,11 @@ void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
     }
+    if (menuParam.targetSpace.has_value()) {
+        menuProperty->UpdateMenuTargetSpace(menuParam.targetSpace.value_or(Dimension(0)));
+        menuProperty->UpdateTargetOffset(menuParam.targetOffset.value_or(OffsetF()));
+        menuProperty->UpdateTargetMenuSize(menuParam.targetSize.value_or(SizeF()));
+    }
 }
 
 void MenuView::UpdateMenuScrollBarAndMaxHeight(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
@@ -1700,6 +1708,11 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+        if (menuParam.targetSpace.has_value()) {
+            menuProperty->UpdateMenuTargetSpace(menuParam.targetSpace.value_or(Dimension(0)));
+            menuProperty->UpdateTargetOffset(menuParam.targetOffset.value_or(OffsetF()));
+            menuProperty->UpdateTargetMenuSize(menuParam.targetSize.value_or(SizeF()));
+        }
         if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
@@ -1865,15 +1878,24 @@ void MenuView::UpdateMenuBorderEffect(
 void MenuView::UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, BlurStyleOption& styleOption,
     bool isColorModeFollowTarget)
 {
-    if (!isColorModeFollowTarget) {
-        return;
-    }
-    if (colorMode == OHOS::Ace::ColorMode::LIGHT) {
-        styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
-    } else if (colorMode == OHOS::Ace::ColorMode::DARK) {
-        styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::SYSTEM;
+    if (isColorModeFollowTarget) {
+        if (colorMode == OHOS::Ace::ColorMode::LIGHT) {
+            styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+        }
+        if (colorMode == OHOS::Ace::ColorMode::DARK) {
+            styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+        }
     } else {
-        styleOption.colorMode = OHOS::Ace::ThemeColorMode::SYSTEM;
+        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipelineContext);
+        auto currentColorMode = pipelineContext->GetColorMode();
+        if (currentColorMode == OHOS::Ace::ColorMode::LIGHT) {
+            styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+        }
+        if (currentColorMode == OHOS::Ace::ColorMode::DARK) {
+            styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+        }
     }
 }
 
@@ -1931,7 +1953,7 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
         }
         if (menuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-            UpdateStyleOptionColorMode(menuNode->GetLocalColorMode(), styleOption, true);
+            UpdateStyleOptionColorMode(menuNode->GetLocalColorMode(), styleOption, menuParam.isColorModeFollowTarget);
         }
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);

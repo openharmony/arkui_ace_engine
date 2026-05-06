@@ -346,7 +346,7 @@ void ResetSpanDecoration(ArkUINodeHandle node)
     }
 }
 
-void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorRawPtr)
+void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorRawPtr, bool isCapi)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
@@ -355,7 +355,7 @@ void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorR
         auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
         CHECK_NULL_VOID(spanNode);
         RefPtr<ResourceObject> resObj;
-        if (!fontColorRawPtr) {
+        if (!fontColorRawPtr && isCapi) {
             ResourceParseUtils::CompleteResourceObjectFromColor(
                 resObj, result, ResourceParseUtils::MakeNativeNodeInfo(uiNode));
         } else {

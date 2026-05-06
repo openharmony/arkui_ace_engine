@@ -32,13 +32,15 @@
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
+namespace NG {
+struct TextMarqueeOptions;
+}
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<TextDataDetectType> TEXT_DETECT_ALL_TYPES_VECTOR = { TextDataDetectType::PHONE_NUMBER,
     TextDataDetectType::URL, TextDataDetectType::EMAIL, TextDataDetectType::ADDRESS, TextDataDetectType::DATE_TIME };
@@ -116,7 +118,6 @@ struct TextDetectConfig {
                 Color colorValue;
                 ResourceParseUtils::ParseResColor(resObj, colorValue);
                 textDetectConfig.entityColor = colorValue;
-                textDetectConfig.entityDecorationColor = colorValue;
             };
             textDetectConfig.AddResource("textDetectConfig.Color", resObj, std::move(updateFunc));
         }
@@ -234,6 +235,9 @@ public:
     virtual void SetSelectedBackgroundColor(const Color& value) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& spanType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) {};
+    virtual void BindPreviewMenu(NG::TextSpanType& spanType, std::function<void()>& buildFunc,
+        NG::SelectMenuParam& menuParam) {};
+    virtual void UnBindPreviewMenu() {};
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) {};
     virtual RefPtr<TextControllerBase> GetTextController()
     {

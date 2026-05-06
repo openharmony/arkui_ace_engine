@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cstdint>
 #include "base/geometry/dimension.h"
@@ -1114,8 +1116,11 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     if (renderContext->GetBackgroundColor().value_or(searchNormalColor_) == searchNormalColor_) {
-        renderContext->UpdateBackgroundColor(
-            searchTheme->GetSearchNormalColor().BlendColor(searchTheme->GetFocusBgColor()));
+        auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
+        CHECK_NULL_VOID(textFieldTheme);
+        renderContext->UpdateBackgroundColor(searchTheme->GetSearchNormalColor().BlendColor(
+            host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) ? textFieldTheme->GetFocusBgColor()
+                                                                                    : searchTheme->GetFocusBgColor()));
         isFocusBgColorSet_ = true;
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
@@ -2284,6 +2289,7 @@ void SearchPattern::UpdateTextFieldColor()
             auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(buttonLayoutProperty);
             buttonLayoutProperty->UpdateFontColor(searchTheme->GetSearchButtonTextColor());
+            buttonLayoutProperty->UpdateFontColorFlagByUser(true);
         }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2344,6 +2350,12 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     TextNodeOnThemeScopeUpdate(searchTheme, textFieldTheme);
     PaintSearchFocusState();
     UpdateTextFieldColor();
+
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, result);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, result);
+    textFieldPattern->UpdateSelectionMenu(themeScopeId);
 
     return result;
 }

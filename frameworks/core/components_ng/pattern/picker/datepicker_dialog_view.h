@@ -144,6 +144,7 @@ private:
         const RefPtr<FrameNode> &contentColumn, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static bool NeedAdaptForAging(bool skipOptimizeFlag = false);
+    static bool IsEnableFallbackLineSpacingStyleOptimize();
     static RefPtr<FrameNode> CreateButtonNodeForAging(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayNode,
         const RefPtr<FrameNode>& datePickerNode, const std::vector<ButtonInfo>& buttonInfos,

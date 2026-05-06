@@ -217,10 +217,20 @@ void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 
     vOverflowHandler->SetOverflowDisabledFlag(
         vOverflowHandler->IsOverflowDisabled() || hostNode->IsAncestorScrollable());
-    if (FeatureParam::IsSmartLayoutEnabled() && !vOverflowHandler->IsOverflowDisabled() &&
-        vOverflowHandler->IsOverflow()) {
+
+    // Determine if smart layout should execute this frame
+    bool shouldExecuteSmartLayout = FeatureParam::IsSmartLayoutEnabled() &&
+        !vOverflowHandler->IsOverflowDisabled() && vOverflowHandler->IsOverflow();
+    // State change detection: restore scales when transitioning from executed to not-executed
+    if (vOverflowHandler->WasSmartLayoutExecuted() && !shouldExecuteSmartLayout) {
+        vOverflowHandler->RestoreScales(layoutWrapper);
+        vOverflowHandler->SetSmartLayoutExecuted(false);
+    }
+
+    if (shouldExecuteSmartLayout) {
         SmartLayoutAlgorithm smartLayoutAlgorithm;
         smartLayoutAlgorithm.PerformSmartLayout(layoutWrapper);
+        vOverflowHandler->SetSmartLayoutExecuted(true);
     } else if (FeatureParam::IsPageOverflowEnabled()) {
         if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
             return;

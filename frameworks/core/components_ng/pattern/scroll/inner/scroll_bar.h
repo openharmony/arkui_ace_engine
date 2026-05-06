@@ -55,7 +55,7 @@ enum class BarDirection {
     PAGE_DOWN,
 };
 
-class ScrollBar : public AceType {
+class ACE_FORCE_EXPORT ScrollBar : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
 public:

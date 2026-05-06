@@ -20,6 +20,7 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/display/display_element.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components/common/properties/state_attributes.h"
 
 namespace OHOS::Ace {
 

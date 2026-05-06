@@ -17,6 +17,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/components/common/layout/constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
  
 namespace OHOS::Ace::NG {
 

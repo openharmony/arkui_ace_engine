@@ -36,6 +36,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
@@ -49,6 +50,7 @@
 #include "core/components_ng/pattern/sheet/minimize/sheet_presentation_minimize_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/accessibility_property_helper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -64,6 +66,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -102,7 +105,7 @@ void SheetPresentationPattern::OnModifyDone()
     if (renderContext) {
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        auto sheetTheme = host->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -152,7 +155,7 @@ bool SheetPresentationPattern::IsPhoneInLandScape()
     auto containerId = Container::CurrentId();
     auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
     CHECK_NULL_RETURN(foldWindow, false);
-    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, false);
     auto sheetThemeType = sheetTheme->GetSheetType();
     if (sheetThemeType == "auto" && !foldWindow->IsFoldExpand() &&
@@ -301,6 +304,31 @@ void SheetPresentationPattern::CheckBuilderChange()
     eventHub->AddInnerOnAreaChangedCallback(builderNode->GetId(), std::move(onBuilderAreaChangedFunc));
 }
 
+bool SheetPresentationPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (!sheetStyle.backgroundColor.has_value()) {
+        UpdateSheetBackgroundColor();
+    }
+    if (!sheetStyle.maskColor.has_value()) {
+        UpdateMaskBackgroundColor();
+    }
+    if (sheetStyle.sheetTitle.has_value() || sheetStyle.sheetSubtitle.has_value()) {
+        UpdateTitleTextColor();
+    }
+    if (sheetStyle.showCloseIcon.has_value() && sheetStyle.showCloseIcon) {
+        UpdateSheetCloseIcon();
+    }
+    return true;
+}
+
 void SheetPresentationPattern::AvoidAiBar()
 {
     CHECK_NULL_VOID(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
@@ -365,10 +393,11 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto targetNodeContext = targetNode->GetContext();
     CHECK_NULL_VOID(targetNodeContext);
-    auto sheetTheme = targetNodeContext->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scale_ = targetNodeContext->GetFontScale();
+    lineSpacingOptimizeFlag_ = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(targetNodeContext);
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -414,6 +443,10 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
+    auto themeScopeId = targetNode->GetThemeScopeId();
+    auto withThemeNode = WithThemeNode::GetWithThemeNode(themeScopeId);
+    CHECK_NULL_VOID(withThemeNode);
+    withThemeNode->RemoveOnThemeScopeUpdateWithId(sheetNode->GetId());
 }
 
 void SheetPresentationPattern::RegisterHoverModeChangeCallback()
@@ -460,7 +493,7 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -585,7 +618,7 @@ void SheetPresentationPattern::SetShadowStyle(bool isFocused)
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
     if (!isFocused) {
@@ -879,7 +912,7 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     if (sheetStyle.sheetHeight.sheetMode.has_value()) {
         auto pipelineContext = sheetNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, sheetHeight);
-        auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         CHECK_NULL_RETURN(sheetTheme, sheetHeight);
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::MEDIUM) {
             sheetHeight = pageHeight_ * sheetTheme->GetMediumPercent();
@@ -1297,11 +1330,13 @@ void SheetPresentationPattern::UpdateTitleColumnSize()
     auto operationColumn = GetTitleBuilderNode();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
 
+    bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(pipeline);
+    // layout constraints can be added only in non-senior-friendly and non-minority language scenarios.
     if (operationColumn && sheetStyle.sheetTitle.has_value() &&
-        NearEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale())) {
+        NearEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale()) && !needSpacingOptimize) {
         auto layoutProps = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(
@@ -1348,7 +1383,7 @@ void SheetPresentationPattern::UpdateTitleTextColor()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto firstChild = GetTitleBuilderNode();
     CHECK_NULL_VOID(firstChild);
@@ -1394,7 +1429,7 @@ void SheetPresentationPattern::UpdateTitlePadding()
     CHECK_NULL_VOID(titleLayoutProperty);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto showCloseIcon = true;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -1464,6 +1499,38 @@ void SheetPresentationPattern::UpdateSheetTitle()
     }
 }
 
+void SheetPresentationPattern::UpdateSheetTitleLineOptimize(bool newLineOptimize)
+{
+    if (newLineOptimize == lineSpacingOptimizeFlag_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyle();
+    if (sheetStyle && sheetStyle->sheetTitle.has_value()) {
+        auto titleId = GetTitleId();
+        auto titleNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(titleId));
+        CHECK_NULL_VOID(titleNode);
+        auto titlePattern = titleNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(titlePattern);
+        titlePattern->SetFallbackLineSpacingAndIncludeFontPadding(newLineOptimize);
+        titleNode->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        if (sheetStyle->sheetSubtitle.has_value()) {
+            auto subtitleId = GetSubtitleId();
+            auto subtitleNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(subtitleId));
+            CHECK_NULL_VOID(subtitleNode);
+            auto subtitlePattern = subtitleNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(subtitlePattern);
+            subtitlePattern->SetFallbackLineSpacingAndIncludeFontPadding(newLineOptimize);
+            subtitleNode->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+}
+
 Dimension SheetPresentationPattern::GetDragBarHeight(const RefPtr<FrameNode>& dragBarNode)
 {
     CHECK_NULL_RETURN(dragBarNode, 0.0_vp);
@@ -1484,7 +1551,8 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (pipeline->GetFontScale() != scale_) {
+    bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(AceType::RawPtr(pipeline));
+    if (pipeline->GetFontScale() != scale_ || needSpacingOptimize != lineSpacingOptimizeFlag_) {
         auto operationNode = GetTitleBuilderNode();
         CHECK_NULL_VOID(operationNode);
         auto titleColumnNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(0));
@@ -1493,16 +1561,18 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         CHECK_NULL_VOID(layoutProps);
         auto titleLayoutProps = titleColumnNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(titleLayoutProps);
-        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        auto sheetTheme = host->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         bool isSheetHasNoTitle = !sheetStyle.isTitleBuilder.has_value();
-        bool isFontScaledInSystemTitle = sheetStyle.isTitleBuilder.has_value() && !sheetStyle.isTitleBuilder.value() &&
-                                         GreatNotEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale());
-        if (isSheetHasNoTitle || isFontScaledInSystemTitle) {
+        // the value is true when the title is a character string and in age-friendly or minority language scenario.
+        bool isFontScaledOrOptimizeInSystemTitle =
+            sheetStyle.isTitleBuilder.has_value() && !sheetStyle.isTitleBuilder.value() &&
+            (GreatNotEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale()) || needSpacingOptimize);
+        if (isSheetHasNoTitle || isFontScaledOrOptimizeInSystemTitle) {
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
         } else if (sheetStyle.isTitleBuilder.has_value()) {
-            auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+            auto sheetTheme = host->GetTheme<SheetTheme>(true);
             CHECK_NULL_VOID(sheetTheme);
             auto operationAreaHeight = sheetTheme->GetOperationAreaHeight();
             layoutProps->UpdateUserDefinedIdealSize(
@@ -1518,7 +1588,9 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
             }
         }
         UpdateSheetTitle();
+        UpdateSheetTitleLineOptimize(needSpacingOptimize);
         scale_ = pipeline->GetFontScale();
+        lineSpacingOptimizeFlag_ = needSpacingOptimize;
         auto sheetWrapper = host->GetParent();
         CHECK_NULL_VOID(sheetWrapper);
         sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1531,7 +1603,7 @@ void SheetPresentationPattern::UpdateSheetCloseIcon()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto sheetCloseIcon = GetSheetCloseIcon();
     CHECK_NULL_VOID(sheetCloseIcon);
@@ -1567,7 +1639,7 @@ void SheetPresentationPattern::UpdateSheetBackgroundColor()
     }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1657,7 +1729,7 @@ void SheetPresentationPattern::UpdateMaskBackgroundColor()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1792,7 +1864,7 @@ void SheetPresentationPattern::InitSheetDetents()
     CHECK_NULL_VOID(geometryNode);
     auto pipelineContext = sheetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto sheetType = GetSheetTypeNoProcess();
@@ -2109,7 +2181,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType) const
         rootWidth = pipeline->GetRootWidth();
         rootHeight = pipeline->GetRootHeight();
     }
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
 #ifdef PREVIEW
     auto container = Container::Current();
@@ -3412,7 +3484,7 @@ bool SheetPresentationPattern::IsCurSheetNeedHalfFoldHover()
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, false);
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -3439,7 +3511,7 @@ bool SheetPresentationPattern::IsShowInSubWindowTwoInOne()
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, false);
     return sheetTheme->IsOuterBorderEnable();
 }
@@ -3488,7 +3560,7 @@ Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, Shadow());
     auto colorMode = pipelineContext->GetColorMode();
-    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    auto shadowTheme = host->GetTheme<ShadowTheme>(true);
     CHECK_NULL_RETURN(shadowTheme, Shadow());
     auto shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return shadow;
@@ -4205,9 +4277,7 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
     Color backgroundColor;
     bool result = ResourceParseUtils::ParseResColor(resObj, backgroundColor);
     if (!result) {
-        auto pipelineContext = sheetNode->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         backgroundColor = (sheetTheme != nullptr) ? sheetTheme->GetSheetBackgoundColor() : backgroundColor;
     }
 
@@ -4478,7 +4548,7 @@ void SheetPresentationPattern::RegisterDetentSelectionRes(const RefPtr<FrameNode
                 // Use the default detentSelection in sheetTheme for parse failed.
                 auto pipelineContext = sheetNode->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
-                auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<OHOS::Ace::NG::SheetTheme>(true);
                 CHECK_NULL_VOID(sheetTheme);
                 currSheetStyle.detentSelection->sheetMode =
                     static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode());
@@ -4512,7 +4582,7 @@ void SheetPresentationPattern::RegisterShowCloseRes(const RefPtr<FrameNode>& she
                 // Use the default showCloseIcon in sheetTheme for parse failed.
                 auto pipelineContext = sheetNode->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
-                auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<OHOS::Ace::NG::SheetTheme>(true);
                 showCloseIcon = (sheetTheme != nullptr) ? sheetTheme->GetShowCloseIcon() : showCloseIcon;
             }
 
@@ -4568,7 +4638,7 @@ void SheetPresentationPattern::RegisterHeightRes(const RefPtr<FrameNode>& sheetN
                 // Use the default sheetMode in sheetTheme for parse failed.
                 auto pipelineContext = sheetNode->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
-                auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<OHOS::Ace::NG::SheetTheme>(true);
                 CHECK_NULL_VOID(sheetTheme);
                 currSheetStyle.sheetHeight.sheetMode =
                     static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode());
@@ -4611,7 +4681,7 @@ void SheetPresentationPattern::RegisterWidthRes(const RefPtr<FrameNode>& sheetNo
                 // when sheet type is SHEET_CENTER.
                 auto pipeline = sheetNode->GetContext();
                 CHECK_NULL_VOID(pipeline);
-                auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 currSheetStyle.width = ((sheetTheme != nullptr) && pattern->GetSheetTypeNoProcess() == SHEET_CENTER)
@@ -4655,7 +4725,7 @@ void SheetPresentationPattern::UpdateSheetDetents(const RefPtr<ResourceObject>& 
             // Use the default sheetMode in sheetTheme for parse failed.
             auto pipelineContext = sheetNode->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+            auto sheetTheme = sheetNode->GetTheme<OHOS::Ace::NG::SheetTheme>(true);
             CHECK_NULL_VOID(sheetTheme);
             sheetDetent.sheetMode = static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode());
         }
@@ -4809,6 +4879,10 @@ void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(
 void SheetPresentationPattern::OnLanguageConfigurationUpdate()
 {
     sheetObject_->OnLanguageConfigurationUpdate();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        // read spacingOptimizeFlag again, check whether the lineSpacingOptimizeFlag_ changes.
+        UpdateFontScaleStatus();
+    }
 }
 
 bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const

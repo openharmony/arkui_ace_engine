@@ -17,6 +17,7 @@
 
 #include "core/components/image/image_component.h"
 #include "core/components/image/render_image.h"
+#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
 #include "core/pipeline/base/position_layout_utils.h"
 
@@ -100,8 +101,10 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     showSideBar_ = sideBar_->GetIsShow();
     if (sideBar_->GetSideBarContainerType() == SideBarContainerType::EMBED) {
         style_ = "SideBarContainerType.Embed";
-    } else {
+    } else if (sideBar_->GetSideBarContainerType() == SideBarContainerType::OVERLAY) {
         style_ = "SideBarContainerType.Overlay";
+    } else if (sideBar_->GetSideBarContainerType() == SideBarContainerType::DISPLACE) {
+        style_ = "SideBarContainerType.Displace";
     }
     buttonLeft_ = sideBar_->GetButtonLeft();
     buttonTop_ = sideBar_->GetButtonTop();

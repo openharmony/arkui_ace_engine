@@ -31,10 +31,13 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { ComponentContentBase } from 'arkui.ComponentContent'
+import { Dimension } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
 import { ListItemGroupModifier } from './../ListItemGroupModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
+import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     listItemGroupAttributeSet?: ListItemGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -77,13 +80,20 @@ export enum ListItemGroupStyle {
     NONE = 0,
     CARD = 1
 }
+export enum ListItemGroupHeaderFooterStyle {
+    NONE = 0,
+    FLOATING = 1
+}
 export interface ListItemGroupOptions {
     header?: CustomBuilder;
     headerComponent?: ComponentContentBase;
     footer?: CustomBuilder;
     footerComponent?: ComponentContentBase;
     space?: double | string;
+    spaceWidth?: Dimension;
     style?: ListItemGroupStyle;
+    headerStyle?: ListItemGroupHeaderFooterStyle;
+    footerStyle?: ListItemGroupHeaderFooterStyle;
 }
 export interface ListItemGroupAttribute extends CommonMethod {
     setListItemGroupOptions(options?: ListItemGroupOptions): this {
@@ -199,11 +209,47 @@ export class ListItemGroupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSpaceWidth = value.spaceWidth
+        if (valueHolderForSpaceWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceWidthTmpValue = valueHolderForSpaceWidth!
+            if (valueHolderForSpaceWidthTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForSpaceWidthTmpValueForIdx0 = valueHolderForSpaceWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForSpaceWidthTmpValueForIdx0)
+            } else if (valueHolderForSpaceWidthTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForSpaceWidthTmpValueForIdx1 = valueHolderForSpaceWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForSpaceWidthTmpValueForIdx1)
+            } else if (valueHolderForSpaceWidthTmpValue instanceof global_resource_Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForSpaceWidthTmpValueForIdx2 = valueHolderForSpaceWidthTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSpaceWidthTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForStyle = value.style
         if (valueHolderForStyle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStyleTmpValue = (valueHolderForStyle as ListItemGroupStyle)
             valueSerializer.writeInt32(valueHolderForStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHeaderStyle = value.headerStyle
+        if (valueHolderForHeaderStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeaderStyleTmpValue = (valueHolderForHeaderStyle as ListItemGroupHeaderFooterStyle)
+            valueSerializer.writeInt32(valueHolderForHeaderStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFooterStyle = value.footerStyle
+        if (valueHolderForFooterStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFooterStyleTmpValue = (valueHolderForFooterStyle as ListItemGroupHeaderFooterStyle)
+            valueSerializer.writeInt32(valueHolderForFooterStyleTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -275,13 +321,42 @@ export class ListItemGroupOptions_serializer {
             spaceTmpBuf = (spaceTmpBufOpt as double | string)
         }
         const spaceTmpResult: double | string | undefined = spaceTmpBuf
+        const spaceWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let spaceWidthTmpBuf: Dimension | undefined = undefined
+        if ((spaceWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const spaceWidthTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let spaceWidthTmpBufOpt: string | number | global_resource_Resource | undefined
+            if (spaceWidthTmpBufOptUnionSelector == (0).toByte()) {
+                spaceWidthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (spaceWidthTmpBufOptUnionSelector == (1).toByte()) {
+                spaceWidthTmpBufOpt = (valueDeserializer.readNumber() as number)
+            } else if (spaceWidthTmpBufOptUnionSelector == (2).toByte()) {
+                spaceWidthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for spaceWidthTmpBufOpt has to be chosen through deserialisation.')
+            }
+            spaceWidthTmpBuf = (spaceWidthTmpBufOpt as string | number | global_resource_Resource)
+        }
+        const spaceWidthTmpResult: Dimension | undefined = spaceWidthTmpBuf
         const styleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let styleTmpBuf: ListItemGroupStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             styleTmpBuf = ListItemGroupStyle.fromValue(valueDeserializer.readInt32())
         }
         const styleTmpResult: ListItemGroupStyle | undefined = styleTmpBuf
-        let value: ListItemGroupOptions = ({header: headerTmpResult, headerComponent: headerComponentTmpResult, footer: footerTmpResult, footerComponent: footerComponentTmpResult, space: spaceTmpResult, style: styleTmpResult} as ListItemGroupOptions)
+        const headerStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let headerStyleTmpBuf: ListItemGroupHeaderFooterStyle | undefined = undefined
+        if ((headerStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            headerStyleTmpBuf = ListItemGroupHeaderFooterStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const headerStyleTmpResult: ListItemGroupHeaderFooterStyle | undefined = headerStyleTmpBuf
+        const footerStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let footerStyleTmpBuf: ListItemGroupHeaderFooterStyle | undefined = undefined
+        if ((footerStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            footerStyleTmpBuf = ListItemGroupHeaderFooterStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const footerStyleTmpResult: ListItemGroupHeaderFooterStyle | undefined = footerStyleTmpBuf
+        let value: ListItemGroupOptions = ({header: headerTmpResult, headerComponent: headerComponentTmpResult, footer: footerTmpResult, footerComponent: footerComponentTmpResult, space: spaceTmpResult, spaceWidth: spaceWidthTmpResult, style: styleTmpResult, headerStyle: headerStyleTmpResult, footerStyle: footerStyleTmpResult} as ListItemGroupOptions)
         return value
     }
 }

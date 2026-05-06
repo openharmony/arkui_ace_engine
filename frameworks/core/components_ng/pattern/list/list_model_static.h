@@ -46,6 +46,7 @@ public:
         const std::optional<NestedScrollMode>& backward);
     static void SetLaneGutter(FrameNode* frameNode, const std::optional<Dimension>& laneGutter);
     static void SetListSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
+    static void SetListSpaceWidth(FrameNode* frameNode, const std::optional<Dimension>& spaceWidth);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);

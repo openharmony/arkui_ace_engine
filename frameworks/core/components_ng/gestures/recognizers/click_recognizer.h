@@ -16,17 +16,22 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_CLICK_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_CLICK_RECOGNIZER_H
 
+#include <cstddef>
 #include <functional>
 #include <limits>
+#include <utility>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/thread/cancelable_callback.h"
-#include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/gestures/click_info.h"
 #include "core/components_ng/event/event_constants.h"
+
+namespace OHOS::Ace {
+enum class AccessibilityEventType : size_t;
+}
 
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;

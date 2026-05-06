@@ -15,6 +15,7 @@
 #include "text_base.h"
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -433,6 +434,7 @@ HWTEST_F(TextPatternTestNg, HandleSingleClickEvent001, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     GestureEvent info;
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
+    ASSERT_NE(textPattern->GetSelectOverlay(), nullptr);
     textPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->selectOverlay_->originalMenuIsShow_, true);
@@ -449,6 +451,7 @@ HWTEST_F(TextPatternTestNg, HandleSingleClickEvent002, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     GestureEvent info;
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
+    ASSERT_NE(textPattern->GetSelectOverlay(), nullptr);
     textPattern->dataDetectorAdapter_->hasClickedAISpan_ = false;
     textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->selectOverlay_->originalMenuIsShow_, true);
@@ -1803,7 +1806,7 @@ HWTEST_F(TextPatternTestNg, ActSetSelection003, TestSize.Level1)
     textPattern->textSelector_.firstHandle = { 1, 2, 1, 2 };
     textPattern->textSelector_.secondHandle = { 1, 2, 1, 2 };
     textPattern->ActSetSelection(start, end);
-    EXPECT_EQ(textPattern->selectOverlay_, 1);
+    EXPECT_NE(textPattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -1825,7 +1828,7 @@ HWTEST_F(TextPatternTestNg, ActSetSelection004, TestSize.Level1)
     textPattern->textSelector_.firstHandle = { 1, 2, 1, 2 };
     textPattern->textSelector_.secondHandle = {};
     textPattern->ActSetSelection(start, end);
-    EXPECT_EQ(textPattern->selectOverlay_, 1);
+    EXPECT_NE(textPattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -2090,8 +2093,7 @@ HWTEST_F(TextPatternTestNg, HandleSurfaceChanged001, TestSize.Level1)
     int32_t newHeight = 1;
     int32_t prevWidth = 1;
     int32_t prevHeight = 1;
-    WindowSizeChangeReason type = WindowSizeChangeReason::HIDE;
-    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
 }
 
@@ -2112,8 +2114,7 @@ HWTEST_F(TextPatternTestNg, HandleSurfaceChanged002, TestSize.Level1)
     int32_t newHeight = 2;
     int32_t prevWidth = 1;
     int32_t prevHeight = 1;
-    WindowSizeChangeReason type = WindowSizeChangeReason::HIDE;
-    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
 }
 
@@ -2134,8 +2135,7 @@ HWTEST_F(TextPatternTestNg, HandleSurfaceChanged003, TestSize.Level1)
     int32_t newHeight = 1;
     int32_t prevWidth = 1;
     int32_t prevHeight = 2;
-    WindowSizeChangeReason type = WindowSizeChangeReason::HIDE;
-    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
 }
 
@@ -2156,8 +2156,7 @@ HWTEST_F(TextPatternTestNg, HandleSurfaceChanged004, TestSize.Level1)
     int32_t newHeight = 2;
     int32_t prevWidth = 1;
     int32_t prevHeight = 2;
-    WindowSizeChangeReason type = WindowSizeChangeReason::HIDE;
-    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
 }
 
@@ -2178,8 +2177,7 @@ HWTEST_F(TextPatternTestNg, HandleSurfaceChanged005, TestSize.Level1)
     int32_t newHeight = 2;
     int32_t prevWidth = 1;
     int32_t prevHeight = 2;
-    WindowSizeChangeReason type = WindowSizeChangeReason::DRAG;
-    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
 }
 
@@ -2516,7 +2514,7 @@ HWTEST_F(TextPatternTestNg, HandleMouseRightButton001, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     Offset textOffset;
     textPattern->HandleMouseRightButton(info, textOffset);
-    EXPECT_EQ(textPattern->selectOverlay_, 1);
+    EXPECT_NE(textPattern->GetSelectOverlay(), nullptr);
 }
 
 /**

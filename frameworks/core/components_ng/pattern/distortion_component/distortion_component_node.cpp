@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/distortion_component/distortion_component_node.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 

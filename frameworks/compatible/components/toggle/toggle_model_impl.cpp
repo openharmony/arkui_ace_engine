@@ -22,6 +22,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 

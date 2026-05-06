@@ -38,7 +38,7 @@ const static uint8_t FULL_TRANSPARENCY_VALUE = 0xFF;
 const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
     0x0C000000,
 };
-const static double DEFAULT_ICON_FONT_SIZE = 24;
+const static double DEFAULT_ICON_FONT_SIZE = 16;
 #ifdef SECURITY_COMPONENT_ENABLE
 static bool g_isVerified = false;
 static bool g_hasCustomPermission = false;

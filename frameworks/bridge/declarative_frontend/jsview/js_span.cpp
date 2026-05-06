@@ -351,6 +351,10 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     UnregisterSpanResource("fontColor");
     if (!ParseJsColor(info[0], textColor, resObj)) {
+        if (SystemProperties::ConfigChangePerform()) {
+            SpanModel::GetInstance()->ResetTextColor();
+            return;
+        }
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();

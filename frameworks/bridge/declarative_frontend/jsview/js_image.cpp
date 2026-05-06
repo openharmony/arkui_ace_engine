@@ -45,6 +45,7 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/image/image_event.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -117,7 +118,6 @@ ImageModel* __attribute__((optnone)) ImageModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
 JSRef<JSVal> LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -433,6 +433,18 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     config.moduleName = moduleName;
     config.isUriPureNumber = (resId == -1);
     config.isImageSpan = isImageSpan;
+    // Parse reloadKey
+    // Overload: (src, reloadKey?) — reloadKey is the 2nd argument
+    // Overload: (src, imageAIOptions?, reloadKey?) — reloadKey is the 3rd argument
+    constexpr int32_t RELOAD_KEY_ARG_INDEX_FOR_SRC_ONLY = 1;
+    constexpr int32_t RELOAD_KEY_ARG_INDEX_FOR_SRC_WITH_AI_OPTIONS = 2;
+    if (info.Length() > RELOAD_KEY_ARG_INDEX_FOR_SRC_WITH_AI_OPTIONS &&
+        info[RELOAD_KEY_ARG_INDEX_FOR_SRC_WITH_AI_OPTIONS]->IsString()) {
+        config.reloadKey = info[RELOAD_KEY_ARG_INDEX_FOR_SRC_WITH_AI_OPTIONS]->ToString();
+    } else if (info.Length() > RELOAD_KEY_ARG_INDEX_FOR_SRC_ONLY &&
+               info[RELOAD_KEY_ARG_INDEX_FOR_SRC_ONLY]->IsString()) {
+        config.reloadKey = info[RELOAD_KEY_ARG_INDEX_FOR_SRC_ONLY]->ToString();
+    }
     ImageModel::GetInstance()->Create(config);
     ParseImageAIOptions(info);
     if (SystemProperties::ConfigChangePerform()) {
@@ -997,38 +1009,9 @@ void JSImage::DestructorCallback(ImageColorFilter* obj)
     }
 }
 
-void JSImage::SetColorFilter(const JSCallbackInfo& info)
+void JSImage::SetColorFilterMatrix(const JSRef<JSVal>& jsArray)
 {
-    if (info.Length() != 1) {
-        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
-        return;
-    }
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
-        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
-        return;
-    }
-    if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
-        auto drawingColorFilter = CreateDrawingColorFilter(tmpInfo);
-        if (drawingColorFilter) {
-            ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
-            return;
-        }
-        ImageColorFilter* colorFilter;
-        if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
-            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<ImageColorFilter>();
-        } else {
-            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
-            return;
-        }
-        if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
-            ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
-            return;
-        }
-        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
-        return;
-    }
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsArray);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
         ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
@@ -1044,6 +1027,46 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         }
     }
     ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
+}
+
+void JSImage::SetColorFilter(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+
+    if (info[0]->IsArray()) {
+        SetColorFilterMatrix(info[0]);
+        return;
+    }
+
+    Color color;
+    if (info[0]->IsObject()) {
+        auto colorFilter = CreateDrawingColorFilter(info[0]);
+        if (colorFilter) {
+            ImageModel::GetInstance()->SetDrawingColorFilter(colorFilter);
+            return;
+        }
+        if (ParseJsColor(info[0], color)) {
+            auto colorFilter = DrawingColorFilter::CreateDrawingColorFilter(color, BlendMode::SRC_ATOP);
+            ImageModel::GetInstance()->SetDrawingColorFilter(colorFilter);
+            return;
+        }
+        if (!info[0]->IsUndefined() && !info[0]->IsNull()) {
+            ImageColorFilter* imageColorFilter = JSRef<JSObject>::Cast(info[0])->Unwrap<ImageColorFilter>();
+            if (imageColorFilter && imageColorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+                ImageModel::GetInstance()->SetColorFilterMatrix(imageColorFilter->GetColorFilterMatrix());
+                return;
+            }
+        }
+    }
+    if (ParseJsColor(info[0], color)) {
+        auto colorFilter = DrawingColorFilter::CreateDrawingColorFilter(color, BlendMode::SRC_ATOP);
+        ImageModel::GetInstance()->SetDrawingColorFilter(colorFilter);
+    } else {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+    }
 }
 
 void JSImage::SetSmoothEdge(const JSCallbackInfo& info)

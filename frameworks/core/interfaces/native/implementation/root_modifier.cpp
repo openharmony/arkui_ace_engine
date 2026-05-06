@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/common/plugin_manager.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RootModifier {

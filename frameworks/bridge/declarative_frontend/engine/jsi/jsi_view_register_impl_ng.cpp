@@ -97,6 +97,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_with_env.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
@@ -196,6 +197,7 @@
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
 #ifndef CROSS_PLATFORM
+#include "frameworks/bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_distortion_component.h"
 #endif
 
@@ -354,6 +356,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSImageAttachment::JSBind(globalObj);
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
+    JSLineSpacingSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
     JSTextLayout::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
@@ -431,6 +434,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSEllipseShape::JSBind(globalObj);
     JSCircleShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
+    JSWithEnv::JSBind(globalObj);
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
@@ -519,6 +523,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSContextMenu::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
     JSTextMenu::JSBind(globalObj);
+    JSDepthComponent::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);
 #endif

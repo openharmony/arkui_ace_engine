@@ -304,12 +304,26 @@ napi_status UiMaterialNapi::EnumMaterialStateInit(napi_env env, napi_value expor
     return EnumInit(env, exports, enumClassName, enumStructs);
 }
 
-napi_status UiMaterialNapi::ImmersiveMaterialInit(napi_env env, napi_value exports)
+napi_status UiMaterialNapi::ImmersiveMaterialInit(napi_env env, napi_value exports, napi_value baseCtr)
 {
     napi_property_descriptor static_prop[] = {};
     napi_value constructor = nullptr;
     napi_status status = napi_define_class(env, "ImmersiveMaterial", NAPI_AUTO_LENGTH, ImmersiveMaterialConstructor,
         nullptr, 0, static_prop, &constructor);
+    if (status != napi_ok) {
+        return status;
+    }
+    napi_value basePrototype = nullptr;
+    status = napi_get_named_property(env, baseCtr, "prototype", &basePrototype);
+    if (status != napi_ok) {
+        return status;
+    }
+    napi_value prototype = nullptr;
+    status = napi_get_named_property(env, constructor, "prototype", &prototype);
+    if (status != napi_ok) {
+        return status;
+    }
+    status = napi_set_named_property(env, prototype, "__proto__", basePrototype);
     if (status != napi_ok) {
         return status;
     }
@@ -335,12 +349,25 @@ napi_value UiMaterialNapi::Init(napi_env env, napi_value exports)
         TAG_LOGE(AceLogTag::ACE_VISUAL_EFFECT, "UIMaterial define class failed, %{public}d", status);
         return nullptr;
     }
+    napi_value basePrototype = nullptr;
+    status = napi_get_named_property(env, constructor, "prototype", &basePrototype);
+    if (status != napi_ok) {
+        TAG_LOGE(AceLogTag::ACE_VISUAL_EFFECT, "UIMaterial get prototype failed, %{public}d", status);
+        return nullptr;
+    }
+    napi_value trueNapiValue = nullptr;
+    napi_get_boolean(env, true, &trueNapiValue);
+    status = napi_set_named_property(env, basePrototype, "__MATERIAL_REFERENCE__", trueNapiValue);
+    if (status != napi_ok) {
+        TAG_LOGE(AceLogTag::ACE_VISUAL_EFFECT, "UIMaterial set __MATERIAL_REFERENCE__ property failed, %{public}d", status);
+        return nullptr;
+    }
     NAPI_CALL(env, napi_set_named_property(env, exports, "Material", constructor));
     NAPI_CALL(env, EnumMaterialTypeInit(env, exports));
     NAPI_CALL(env, EnumImmersiveStyleInit(env, exports));
     NAPI_CALL(env, EnumImmersiveLevelInit(env, exports));
     NAPI_CALL(env, EnumMaterialStateInit(env, exports));
-    NAPI_CALL(env, ImmersiveMaterialInit(env, exports));
+    NAPI_CALL(env, ImmersiveMaterialInit(env, exports, constructor));
     return exports;
 }
 

@@ -23,6 +23,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/gestures/gesture_group.h"
 #include "core/gestures/raw_recognizer.h"
+#include "core/components/common/properties/state_attributes.h"
 
 namespace OHOS::Ace {
 

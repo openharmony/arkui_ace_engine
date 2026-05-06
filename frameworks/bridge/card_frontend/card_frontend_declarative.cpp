@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"

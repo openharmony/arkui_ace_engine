@@ -20,7 +20,6 @@
 #include <functional>
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
@@ -37,6 +36,7 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class TextLayoutProperty;
+class OverlayManager;
 
 enum class DialogContentNode {
     TITLE = 0,

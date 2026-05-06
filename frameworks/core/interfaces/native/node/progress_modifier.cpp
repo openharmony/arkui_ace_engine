@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
@@ -139,7 +140,6 @@ void SetProgressColor(ArkUINodeHandle node, uint32_t color)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
-    ProgressModelNG::SetModifierInitiatedColor(frameNode, true);
     ProgressModelNG::SetColor(frameNode, Color(color));
 }
 
@@ -178,7 +178,6 @@ void SetProgressColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
-    ProgressModelNG::SetModifierInitiatedColor(frameNode, true);
     Color colorValue = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
@@ -207,27 +206,21 @@ void ResetProgressColor(ArkUINodeHandle node)
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto progresstype = progressLayoutProperty->GetType();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto progressTheme = frameNode->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(progressTheme);
-    bool isGradientColor = false;
     if (progresstype == ProgressType::RING) {
         endColor = progressTheme->GetRingProgressEndSideColor();
         beginColor = progressTheme->GetRingProgressBeginSideColor();
-        isGradientColor = true;
     } else if (progresstype == ProgressType::CAPSULE) {
-        colorVal = progressTheme->GetCapsuleParseFailedSelectColor();
+        colorVal = progressTheme->GetCapsuleSelectColor();
         endColor = colorVal;
         beginColor = colorVal;
-        isGradientColor = true;
     } else if (progresstype == ProgressType::LINEAR) {
-        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
+        colorVal = progressTheme->GetTrackSelectedColor();
         endColor = colorVal;
         beginColor = colorVal;
-        isGradientColor = true;
     } else {
-        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
+        colorVal = progressTheme->GetTrackSelectedColor();
     }
 
     OHOS::Ace::NG::Gradient gradient;
@@ -240,11 +233,10 @@ void ResetProgressColor(ArkUINodeHandle node)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
-    ProgressModelNG::SetModifierInitiatedColor(frameNode, false);
     ProgressModelNG::SetColor(frameNode, colorVal);
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::COLOR, resObj);
-    ProgressModelNG::SetGradientColorByUser(frameNode, isGradientColor);
+    ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::COLOR, nullptr);
+    ProgressModelNG::SetUserInitiatedColor(frameNode, false);
+    ProgressModelNG::SetGradientColorByUser(frameNode, false);
 }
 
 void SetLinearStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
@@ -426,11 +418,13 @@ void SetCapsuleStyleOptions(FrameNode* node)
     CHECK_NULL_VOID(selectTheme);
     auto textTheme = themeManager->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
+    auto progressTheme = node->GetTheme<ProgressTheme>(true);
+    CHECK_NULL_VOID(progressTheme);
     std::optional<std::string> textOpt = std::nullopt;
     ProgressModelNG::SetCapsuleStyle(node, false);
     ProgressModelNG::SetCapsuleStyleFontColor(node, false);
     ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
-    ProgressModelNG::SetBorderColor(node, Color(0x33006cde));
+    ProgressModelNG::SetBorderColor(node, progressTheme->GetBorderColor());
     ProgressModelNG::SetSweepingEffect(node, false);
     ProgressModelNG::SetShowText(node, false);
     ProgressModelNG::SetText(node, textOpt);
@@ -473,7 +467,6 @@ void SetProgressBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ProgressModelNG::SetModifierInitiatedBgColor(frameNode, true);
     ProgressModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
@@ -503,18 +496,23 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto progresstype = progressLayoutProperty->GetType();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<ProgressTheme>();
+    auto theme = frameNode->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        progresstype != ProgressType::CAPSULE && SystemProperties::ConfigChangePerform()) {
+        ProgressModelNG::ResetBackgroundColor(frameNode);
+        ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::BackgroundColor, nullptr);
+        return;
+    }
 
     Color backgroundColor;
     if (progresstype == ProgressType::CAPSULE) {
-        backgroundColor = theme->GetCapsuleParseFailedBgColor();
+        backgroundColor = theme->GetCapsuleBgColor();
     } else if (progresstype == ProgressType::RING) {
-        backgroundColor = theme->GetRingProgressParseFailedBgColor();
+        backgroundColor = theme->GetRingProgressBgColor();
     } else {
-        backgroundColor = theme->GetTrackParseFailedBgColor();
+        backgroundColor = theme->GetTrackBgColor();
     }
 
     if (SystemProperties::ConfigChangePerform()) {
@@ -522,7 +520,6 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
         ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::BackgroundColor, resObj);
     }
 
-    ProgressModelNG::SetModifierInitiatedBgColor(frameNode, false);
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 

@@ -61,6 +61,8 @@
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "core/common/ace_engine.h"
 
+#include "core/components_ng/pattern/stage/stage_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {

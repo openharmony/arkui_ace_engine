@@ -177,8 +177,8 @@ class FrictionModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class WaterFlowScrollBarWidthModifier extends ModifierWithKey<string | number> {
-  constructor(value: string | number) {
+class WaterFlowScrollBarWidthModifier extends ModifierWithKey<string | number | Resource> {
+  constructor(value: string | number | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('waterFlowScrollBarWidth');
@@ -497,7 +497,7 @@ class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
     return this;
   }
-  scrollBarWidth(value: string | number): this {
+  scrollBarWidth(value: string | number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarWidthModifier.identity, WaterFlowScrollBarWidthModifier, value);
     return this;
   }

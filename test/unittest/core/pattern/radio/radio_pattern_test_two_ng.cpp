@@ -987,7 +987,7 @@ HWTEST_F(RadioPatternTwoTestNg, ReportOnChangeEvent001, TestSize.Level1)
  */
 HWTEST_F(RadioPatternTwoTestNg, UpdateGroupManager001, TestSize.Level1)
 {
-    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AIWriteAdapter::MakeRefPtr<StagePattern>());
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AceType::MakeRefPtr<StagePattern>());
     ASSERT_NE(stageNode, nullptr);
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(pageNode, nullptr);

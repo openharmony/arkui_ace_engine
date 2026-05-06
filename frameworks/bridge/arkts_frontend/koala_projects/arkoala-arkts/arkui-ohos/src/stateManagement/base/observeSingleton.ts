@@ -198,6 +198,28 @@ export class ObserveSingleton implements IObserve {
         );
     }
 
+    public updateDirtyComputedAndMonitorWhenUnfreeze(): void {
+        do {
+            while (this.computedPropRefsChanged_.size > 0) {
+                const computedProps = this.computedPropRefsChanged_;
+                this.computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                this.updateDirtyComputedProps(computedProps);
+            }
+            if (this.monitorPathRefsChanged_.size > 0) {
+                const monitors = this.monitorPathRefsChanged_;
+                this.monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                let monitorsToRun: Set<MonitorFunctionDecorator> = this.notifyDirtyMonitorPaths(monitors);
+                if (monitorsToRun && monitorsToRun.size > 0) {
+                    monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => {
+                        monitor.runMonitorFunction();
+                    });
+                }
+            }
+        } while (
+            this.monitorPathRefsChanged_.size + this.computedPropRefsChanged_.size > 0
+        )
+    }
+
     private updateDirtyComputedProps(computedProps: Set<WeakRef<ITrackedDecoratorRef>>): void {
         computedProps.forEach((computedPropWeak: WeakRef<ITrackedDecoratorRef>) => {
             let computedPropRef = computedPropWeak.deref();

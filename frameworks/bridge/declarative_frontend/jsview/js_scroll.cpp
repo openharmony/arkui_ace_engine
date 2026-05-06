@@ -411,12 +411,14 @@ void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    if (!ParseJsDimensionVp(args[0], scrollBarWidth) || args[0]->IsNull() || args[0]->IsUndefined() ||
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsDimensionVpNG(args[0], scrollBarWidth, resObj) || args[0]->IsNull() || args[0]->IsUndefined() ||
         (args[0]->IsString() && args[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0) ||
         scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         scrollBarWidth = theme->GetNormalWidth();
     }
     ScrollModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
+    ScrollModel::GetInstance()->CreateWithResourceObjScrollBarWidth(resObj);
 }
 
 void JSScroll::SetScrollBarColor(const JSCallbackInfo& args)

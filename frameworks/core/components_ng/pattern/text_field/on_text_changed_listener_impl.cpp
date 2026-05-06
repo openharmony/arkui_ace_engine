@@ -311,34 +311,10 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, 
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
-void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)
+void OnTextChangedListenerImpl::UpdateImePanelStatus(
+    const KeyBoardInfo& keyboardInfo, bool isVoiceKB, bool isCandidate)
 {
-    bool isHardKeyboardConnected = InputManager::IsKeyboardConnected();
-    MiscServices::PanelType panelType = info.panelInfo.panelType;
-    bool panelVisible = info.visible;
-    MiscServices::Trigger triggerFrom = info.trigger;
-    if (!isHardKeyboardConnected && panelType == MiscServices::PanelType::SOFT_KEYBOARD && !panelVisible) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo soft keyboard is closed by user, trigger=%{public}d",
-            triggerFrom);
-        auto task = [textField = pattern_, triggerFrom] {
-            auto client = textField.Upgrade();
-            CHECK_NULL_VOID(client);
-            ContainerScope scope(client->GetInstanceId());
-            if (triggerFrom == MiscServices::Trigger::IME_APP) {
-                client->NotifyKeyboardClosedByUser();
-            }
-            client->NotifyKeyboardClosed();
-        };
-        PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
-    }
-    KeyBoardInfo keyboardInfo;
-    if (info.panelInfo.panelType == MiscServices::PanelType::SOFT_KEYBOARD) {
-        keyboardInfo.keyBoardType = KeyBoardType::SOFT_KEYBOARD;
-    } else if (info.panelInfo.panelType == MiscServices::PanelType::STATUS_BAR) {
-        keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
-    }
-    keyboardInfo.visible = info.visible;
-    auto task = [weak = pattern_, keyboardInfo, id = Container::CurrentId()] {
+    auto task = [weak = pattern_, keyboardInfo, id = Container::CurrentId(), isVoiceKB, isCandidate] {
         auto textClient = weak.Upgrade();
         CHECK_NULL_VOID(textClient);
         auto pattern = AceType::DynamicCast<Pattern>(textClient);
@@ -352,8 +328,47 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         CHECK_NULL_VOID(textFieldManager);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%{public}d", keyboardInfo.visible);
         textFieldManager->SetImeShow(keyboardInfo.visible);
+        if (isVoiceKB && isCandidate) {
+            textClient->SetInputMethodStatus(keyboardInfo.visible);
+        }
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");
+}
+
+void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)
+{
+    bool isVoiceKB = info.inputType == MiscServices::InputType::VOICEKB_INPUT;
+    bool isCandidate = info.panelInfo.panelFlag == MiscServices::PanelFlag::FLG_CANDIDATE_COLUMN;
+    if (isCandidate && !isVoiceKB) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "not notify when flag is FLG_CANDIDATE_COLUMN and type is not VOICEKB");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo type/flag:%{public}d/%{public}d",
+        static_cast<int32_t>(info.inputType), static_cast<int32_t>(info.panelInfo.panelFlag));
+    bool isHardKeyboardConnected = InputManager::IsKeyboardConnected();
+    if (!isHardKeyboardConnected && info.panelInfo.panelType == MiscServices::PanelType::SOFT_KEYBOARD &&
+        !info.visible) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo panel is closed, trigger=%{public}d", info.trigger);
+        auto task = [textField = pattern_, triggerFrom = info.trigger] {
+            auto client = textField.Upgrade();
+            CHECK_NULL_VOID(client);
+            ContainerScope scope(client->GetInstanceId());
+            if (triggerFrom == MiscServices::Trigger::IME_APP) {
+                client->NotifyKeyboardClosedByUser();
+            }
+            client->NotifyKeyboardClosed();
+        };
+        PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
+    }
+
+    KeyBoardInfo keyboardInfo;
+    if (info.panelInfo.panelType == MiscServices::PanelType::SOFT_KEYBOARD) {
+        keyboardInfo.keyBoardType = KeyBoardType::SOFT_KEYBOARD;
+    } else if (info.panelInfo.panelType == MiscServices::PanelType::STATUS_BAR) {
+        keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
+    }
+    keyboardInfo.visible = info.visible;
+    UpdateImePanelStatus(keyboardInfo, isVoiceKB, isCandidate);
 }
 
 void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(

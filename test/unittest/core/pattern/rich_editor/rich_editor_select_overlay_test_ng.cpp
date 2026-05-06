@@ -114,6 +114,9 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level0)
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get rich editor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -123,6 +126,9 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart001, TestSize.Level0)
     richEditorPattern->selectOverlay_->hasTransform_ = true;
     richEditorPattern->selectOverlay_->OnBind(manager);
     richEditorPattern->selectOverlay_->OnHandleMoveStart(info, true);
+    /**
+     * @tc.steps: step2. test flag
+     */
     EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
 }
 

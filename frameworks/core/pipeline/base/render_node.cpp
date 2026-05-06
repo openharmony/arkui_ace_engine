@@ -15,6 +15,8 @@
 
 #include "core/pipeline/base/render_node.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -225,6 +227,37 @@ void RenderNode::ClearChildren()
     children_.clear();
 }
 
+int32_t RenderNode::GetAccessibilityNodeId() const
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        return accessibilityNode->GetNodeId();
+    }
+    return 0;
+}
+
+void RenderNode::ClearAccessibilityRect()
+{
+    auto node = accessibilityNode_.Upgrade();
+    if (node) {
+        node->ClearRect();
+    }
+    for (auto& child : children_) {
+        child->ClearAccessibilityRect();
+    }
+}
+
+void RenderNode::SetAccessibilityVisible(bool visible)
+{
+    auto node = accessibilityNode_.Upgrade();
+    if (node) {
+        node->SetVisible(visible);
+    }
+    for (auto& child : children_) {
+        child->SetAccessibilityVisible(visible);
+    }
+}
+
 void RenderNode::UpdateTouchRect()
 {
     if (!isResponseRegion_) {
@@ -348,7 +381,9 @@ void RenderNode::DumpTree(int32_t depth)
     }
     const auto& children = GetChildren();
     if (DumpLog::GetInstance().GetDumpFile()) {
-        auto dirtyRect = context_.Upgrade()->GetDirtyRect();
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto dirtyRect = context->GetDirtyRect();
         std::string touchRectList = "[";
         for (auto& rect : touchRectList_) {
             touchRectList.append("{").append(rect.ToString()).append("}");

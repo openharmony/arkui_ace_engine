@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #if defined(ENABLE_ROSEN_BACKEND)
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+#include "core/components/common/properties/placement.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -414,6 +415,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     anchorPosition_ = props->GetAnchorPosition();
+    UpdatePropTargetSpace(props, menuPattern);
     dumpInfo_.globalLocation = position_;
     // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -639,26 +641,21 @@ void MenuLayoutAlgorithm::InitWrapperRect(
 
 void MenuLayoutAlgorithm::CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets)
 {
-    if (targetInUIExtention_) {
+    if (targetInUIExtension_) {
         auto rectOffset = Offset(0.0, 0.0);
         auto rectSize = Size(param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
-        if (GreatNotEqual(safeAreaInsets.top_.Length(), 0.0)) {
-            auto offsetTop = std::max(safeAreaInsets.top_.end - param_.menuWindowRect.Top(), 0.0);
-            rectOffset.SetY(offsetTop);
-            rectSize.MinusHeight(offsetTop);
+        auto topSafeAreaRect = Rect(param_.menuWindowRect.Left(), safeAreaInsets.top_.start,
+            param_.menuWindowRect.Width(), safeAreaInsets.top_.Length());
+        auto topIntersectRect = topSafeAreaRect.IntersectRect(param_.menuWindowRect);
+        if (GreatNotEqual(topIntersectRect.Height(), 0.0)) {
+            rectOffset.SetY(topIntersectRect.Height());
+            rectSize.MinusHeight(topIntersectRect.Height());
         }
-        if (GreatNotEqual(safeAreaInsets.bottom_.Length(), 0.0)) {
-            auto offsetBottom = std::max(param_.menuWindowRect.Bottom() - safeAreaInsets.bottom_.start, 0.0);
-            rectSize.MinusHeight(offsetBottom);
-        }
-        if (GreatNotEqual(safeAreaInsets.left_.Length(), 0.0)) {
-            auto offsetLeft = std::max(safeAreaInsets.left_.end - param_.menuWindowRect.Left(), 0.0);
-            rectOffset.SetX(offsetLeft);
-            rectSize.MinusWidth(offsetLeft);
-        }
-        if (GreatNotEqual(safeAreaInsets.right_.Length(), 0.0)) {
-            auto offsetRight = std::max(param_.menuWindowRect.Right() - safeAreaInsets.right_.start, 0.0);
-            rectSize.MinusWidth(offsetRight);
+        auto bottomSafeAreaRect = Rect(param_.menuWindowRect.Left(), safeAreaInsets.bottom_.start,
+            param_.menuWindowRect.Width(), safeAreaInsets.bottom_.Length());
+        auto bottomIntersectRect = bottomSafeAreaRect.IntersectRect(param_.menuWindowRect);
+        if (GreatNotEqual(bottomIntersectRect.Height(), 0.0)) {
+            rectSize.MinusHeight(bottomIntersectRect.Height());
         }
         wrapperRect_.SetRect(rectOffset, rectSize);
     } else {
@@ -1195,20 +1192,7 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     RefPtr<FrameNode> parentItem)
 {
     if (parentItem != nullptr) {
-        auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(parentPattern);
-        auto expandingMode = parentPattern->GetExpandingMode();
-        if (expandingMode == SubMenuExpandingMode::STACK) {
-            auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
-            CHECK_NULL_VOID(parentPattern);
-            auto parentMenu = parentPattern->GetMenu();
-            auto parentWidth = parentMenu->GetGeometryNode()->GetFrameSize().Width();
-            childConstraint.minSize.SetWidth(parentWidth);
-            childConstraint.maxSize.SetWidth(parentWidth);
-            childConstraint.selfIdealSize.SetWidth(parentWidth);
-            auto subMenuMaxHeight = CalcSubMenuMaxHeightConstraint(childConstraint, parentItem);
-            childConstraint.maxSize.SetHeight(std::min(subMenuMaxHeight, childConstraint.maxSize.Height()));
-        }
+        UpdateExpandSize(layoutWrapper, childConstraint, parentItem);
     }
     PrepareExtensionMenuConstraint(layoutWrapper, childConstraint);
 
@@ -2140,6 +2124,7 @@ OffsetF MenuLayoutAlgorithm::UpdateMenuPosition(LayoutWrapper* layoutWrapper, co
     auto avoidanceMode = menuProp->GetSelectAvoidanceMode().value_or(AvoidanceMode::COVER_TARGET);
     if (useLastPosition) {
         menuPosition = lastPosition_.value();
+        UpdateEmbeddedPosition(menuPosition, menuPattern, size, menuNode);
         auto lastPlacement = menuPattern->GetLastPlacement();
         if (lastPlacement.has_value()) {
             placement_ = lastPlacement.value();
@@ -2502,7 +2487,12 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
         if (layoutWrapper != nullptr) {
             PlacementRTL(layoutWrapper, placement_);
         }
-        auto childOffset = GetChildPosition(size, didNeedArrow);
+        OffsetF childOffset;
+        if (propTargetSpace_.has_value()) {
+            childOffset = GetTargetSpacePosition(size, didNeedArrow);
+        } else {
+            childOffset = GetChildPosition(size, didNeedArrow);
+        }
         x = childOffset.GetX();
         y = childOffset.GetY();
     } else {
@@ -2679,6 +2669,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     }
     UpdateMaxSpaceHeightByMenuMaxHeight(menuPattern, menuLayoutProps, maxAvailableHeight, maxSpaceHeight);
     constraint.maxSize.SetHeight(maxSpaceHeight);
+    UpdateTargetSpaceScroll(layoutWrapper, constraint);
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintSelectHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
@@ -3080,6 +3071,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         }
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
+        UpdateTargetValue(layoutWrapper);
         return;
     }
 
@@ -3092,6 +3084,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
     }
+    UpdateTargetValue(layoutWrapper);
 }
 
 OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow)
@@ -3644,7 +3637,7 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isContextMenu,
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
     CHECK_NULL_VOID(container);
-    targetInUIExtention_ = container->IsUIExtensionWindow();
+    targetInUIExtension_ = container->IsUIExtensionWindow();
     showInSubWindow_ = menuLayoutProperty->GetShowInSubWindowValue(false) || isContextMenu ||
         menuPattern->IsSelectOverlayShowInSubWindow();
     dumpInfo_.showInSubWindow = showInSubWindow_;
@@ -3656,7 +3649,7 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isContextMenu,
     // so menu showed in subwindow can not expand the current window on phone
     canExpandCurrentWindow_ = IsExpandDisplay();
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        isUIExtensionSubWindow_ = targetInUIExtention_;
+        isUIExtensionSubWindow_ = targetInUIExtension_;
         if (isUIExtensionSubWindow_) {
             // menu can show expand the UIExtension window
             canExpandCurrentWindow_ = true;
@@ -4257,43 +4250,37 @@ std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::CreateSDFTriang
     return triangleShape0;
 }
 
-std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::CreateSmoothUnionShape(
-    const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
-    const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY)
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::GetMenuSDFShape(bool didNeedArrow)
 {
     auto unionShape0 = OHOS::Rosen::RSNGShapeBase::Create(
         OHOS::Rosen::RSNGEffectType::SDF_SMOOTH_UNION_OP_SHAPE);
     auto unionShape =
         std::static_pointer_cast<OHOS::Rosen::RSNGSDFSmoothUnionOpShape>(unionShape0);
     CHECK_NULL_RETURN(unionShape, nullptr);
-
-    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeXTag>(shapeX);
-    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeYTag>(shapeY);
-    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeSpacingTag>(0.1f);
-
-    return unionShape0;
-}
-
-std::shared_ptr<OHOS::Rosen::RSNGShapeBase> MenuLayoutAlgorithm::GetMenuSDFShape(bool didNeedArrow)
-{
-    if (!didNeedArrow || !pathParams_.has_value()) {
-        return CreateSDFRRectShape();
-    }
-
     auto rrectShape = CreateSDFRRectShape();
     CHECK_NULL_RETURN(rrectShape, nullptr);
-    if (arrowPlacement_ == Placement::NONE) {
-        return rrectShape;
-    }
+
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeXTag>(rrectShape);
 
     OHOS::Rosen::Vector2f vertex0;
     OHOS::Rosen::Vector2f vertex1;
     OHOS::Rosen::Vector2f vertex2;
-    CalculateArrowVertices(vertex0, vertex1, vertex2);
-    auto triangleShape = CreateSDFTriangleShape(vertex0, vertex1, vertex2);
-    CHECK_NULL_RETURN(triangleShape, nullptr);
+    if (!didNeedArrow || !pathParams_.has_value() || arrowPlacement_ == Placement::NONE) {
+        vertex0 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childMarginFrameSize_.Width() / HALF,
+            childOffset_.GetY() + childMarginFrameSize_.Height() / HALF);
+        vertex1 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childMarginFrameSize_.Width() / HALF,
+            childOffset_.GetY() + childMarginFrameSize_.Height() / HALF);
+        vertex2 = OHOS::Rosen::Vector2f(childOffset_.GetX() + childMarginFrameSize_.Width() / HALF,
+            childOffset_.GetY() + childMarginFrameSize_.Height() / HALF);
+    } else {
+        CalculateArrowVertices(vertex0, vertex1, vertex2);
+    }
 
-    return CreateSmoothUnionShape(rrectShape, triangleShape);
+    auto triangleShape = CreateSDFTriangleShape(vertex0, vertex1, vertex2);
+    CHECK_NULL_RETURN(triangleShape, unionShape0);
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeShapeYTag>(triangleShape);
+    unionShape->Setter<OHOS::Rosen::SDFSmoothUnionOpShapeSpacingTag>(0.1f);
+    return unionShape0;
 }
 #endif
 

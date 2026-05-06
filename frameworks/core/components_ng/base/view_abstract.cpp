@@ -28,6 +28,7 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/response_region.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -42,12 +43,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/ui_material_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -63,10 +66,13 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/render/ui_material_filter_creator.h"
 #include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/smart_gesture_property.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 
@@ -81,6 +87,18 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
+
+void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto manager = eventManager->GetOrCreateSmartGestureManager();
+    CHECK_NULL_VOID(manager);
+    manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
+}
 
 std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
 {
@@ -2610,6 +2628,14 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
+void ViewAbstract::SetShouldRecognizerParallelWith(
+    NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldRecognizerParallelWithFunc(std::move(shouldRecognizerParallelWithFunc));
+}
+
 void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
     GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag)
 {
@@ -3743,9 +3769,10 @@ void ViewAbstract::ResetPosition()
     auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parentNode);
 
+    bool isStackOverflow = FeatureParam::IsPageOverflowEnabled() && parentNode->GetTag() == V2::STACK_ETS_TAG;
     // Row/Column/Flex measure and layout differently depending on whether the child nodes have position property.
     if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
-        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        parentNode->GetTag() == V2::FLEX_ETS_TAG || isStackOverflow) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         auto renderContext = frameNode->GetRenderContext();
@@ -5252,6 +5279,14 @@ void ViewAbstract::SetDebugLine(const std::string& line)
     }
 }
 
+void ViewAbstract::SetInspectorLabel(const std::string& inspectorLabel)
+{
+    auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetInspectorLabel(inspectorLabel);
+    }
+}
+
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -5902,8 +5937,10 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
 
     if (preBackgroundColor.has_value()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
     } else {
         renderContext->ResetBackgroundColor();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, false, frameNode);
         renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
         pattern->OnBackgroundColorReset();
     }
@@ -5957,6 +5994,7 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
             return;
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
@@ -7074,8 +7112,9 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     CHECK_NULL_VOID(parentNode);
     auto parentPattern = parentNode->GetPattern();
 
+    bool isStackOverflow = FeatureParam::IsPageOverflowEnabled() && parentNode->GetTag() == V2::STACK_ETS_TAG;
     if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
-        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        parentNode->GetTag() == V2::FLEX_ETS_TAG || isStackOverflow) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         auto renderContext = frameNode->GetRenderContext();
@@ -8685,6 +8724,33 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     }
 }
 
+void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (action != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
+        return;
+    }
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    SmartGestureShortcutConfig config;
+    config.action = SmartGestureShortcutAction::PRIMARY;
+    config.enabled = enabled;
+    config.selectable = selectable;
+    smartGestureProperty->SetSmartGestureShortcut(config);
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
+void ViewAbstract::ResetSmartGestureShortcut()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->ResetSmartGestureShortcut();
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
 void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching, frameNode);
@@ -9995,6 +10061,15 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
+void ViewAbstract::SetShouldRecognizerParallelWith(
+    FrameNode* frameNode, NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldRecognizerParallelWithFunc(std::move(shouldRecognizerParallelWithFunc));
+}
+
 void ViewAbstract::SetNextFocus(FrameNode* frameNode, FocusIntension key,
     std::variant<WeakPtr<AceType>, std::string> nextFocus)
 {
@@ -11125,5 +11200,21 @@ void ViewAbstract::ResetOnNeedSoftkeyboard(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetOnNeedSoftKeyboard();
+}
+
+void ViewAbstract::SetEdgeLightParam(const std::optional<EdgeLightParam>& param)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (param.has_value()) {
+        renderContext->UpdateEdgeLightParam(param.value());
+    } else {
+        renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
+    }  
 }
 } // namespace OHOS::Ace::NG

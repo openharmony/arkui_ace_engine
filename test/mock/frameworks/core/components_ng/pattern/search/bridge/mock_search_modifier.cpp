@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/search/bridge/search_custom_modifier.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
@@ -79,6 +81,12 @@ void SetDragPreviewOptions(ArkUINodeHandle node, const NG::DragPreviewOption opt
     SearchModelNG::SetDragPreviewOptions(frameNode, option);
 }
 
+void SetUserMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetUserMargin(frameNode);
+}
+
 void CreateNormalSearch(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
     std::optional<std::string>& iconSrc, const ArkUISearchCreateResourceParams* resParams)
 {
@@ -111,6 +119,7 @@ const ArkUISearchCustomModifier* GetSearchCustomModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISearchCustomModifier modifier = {
         .setKeyboardAppearanceConfig = SetKeyboardAppearanceConfig,
+        .setUserMargin = SetUserMargin,
         .setTextValue = SetTextValue,
         .setOnChangeEvent = SetOnChangeEvent,
         .createNormalSearch = CreateNormalSearch,

@@ -1847,6 +1847,11 @@ void TextFieldModelNG::SetIsShowCancelButton(FrameNode* frameNode, bool isShowCa
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton, frameNode);
 }
 
+void TextFieldModelNG::SetIsShowVoiceButton(FrameNode* frameNode, bool isShowButton)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowVoiceButton, isShowButton, frameNode);
+}
+
 void TextFieldModelNG::SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize, frameNode);

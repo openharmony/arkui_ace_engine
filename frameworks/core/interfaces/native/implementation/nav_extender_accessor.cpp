@@ -251,6 +251,23 @@ void SetSplitPlaceholderImpl(Ark_NativePointer navigation, Ark_NativePointer pla
     auto phNodeRef = FrameNodePeer::GetFrameNodeByPeer(phNodePeer);
     NavigationModelStatic::SetSplitPlaceholder(frameNode, phNodeRef);
 }
+void SetPushDestinationInnerCallbackImpl(Ark_NavPathStack peer,
+                                         const NavExtender_PushDestinationInner* callback)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback);
+    auto navigationStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(navigationStack);
+    auto peerPtr = reinterpret_cast<Ark_NativePointer>(peer);
+    auto cb = [callback = CallbackHelper(*callback), peerPtr](
+        const std::string& name, const std::string& params, bool needTransition) {
+        auto nameVal = Converter::ArkValue<Ark_String>(name, Converter::FC);
+        auto paramsVal = Converter::ArkValue<Ark_String>(params, Converter::FC);
+        auto needTransitionVal = Converter::ArkValue<Ark_Boolean>(needTransition);
+        callback.InvokeSync(peerPtr, nameVal, paramsVal, needTransitionVal);
+    };
+    navigationStack->SetPushDestinationInnerCallback(std::move(cb));
+}
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
 {
@@ -271,6 +288,7 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::SetNavDestinationRouterMapBuilderCallbackImpl,
         NavExtenderAccessor::GetRouteMapInConfigImpl,
         NavExtenderAccessor::SetSplitPlaceholderImpl,
+        NavExtenderAccessor::SetPushDestinationInnerCallbackImpl,
     };
     return &NavExtenderAccessorImpl;
 }

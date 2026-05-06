@@ -18,6 +18,7 @@
 #include <utility>
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components/touch_listener/touch_listener_component.h"
 

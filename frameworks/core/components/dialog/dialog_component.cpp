@@ -14,7 +14,9 @@
  */
 
 #include "core/components/dialog/dialog_component.h"
+#include "core/accessibility/accessibility_manager.h"
 
+#include "core/pipeline/pipeline_context.h"
 #include "base/i18n/localization.h"
 #include "core/components/dialog/action_sheet/action_sheet_component.h"
 #include "core/components/dialog/alert_dialog_component.h"
@@ -25,6 +27,7 @@
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/wrap/wrap_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
 namespace {

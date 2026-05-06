@@ -23,6 +23,10 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "interfaces/native/native_interface_xcomponent.h"
 
+namespace OHOS::Ace {
+struct KeyEvent;
+}
+
 namespace OHOS::Ace::NG {
 
 class ACE_FORCE_EXPORT XComponentUtils : public virtual AceType {

@@ -46,12 +46,14 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/base/json/json_util.h"
 #include "frameworks/core/event/pointer_event.h"
 #include "drag_preview.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #endif
 
 namespace OHOS::Ace {
@@ -914,19 +916,23 @@ std::optional<Msdp::DeviceStatus::DragData> EnvelopedDragData(std::shared_ptr<Dr
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, std::nullopt);
     auto windowId = container->GetWindowId();
+    auto pipeline = container->GetPipelineContext();
     auto arkExtraInfoJson = JsonUtil::Create(true);
     arkExtraInfoJson->Put("scale", asyncCtx->scale);
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
-    const int32_t materialId = NG::DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
-    return Msdp::DeviceStatus::DragData { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
+    auto materialInfo = NG::DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
+    Msdp::DeviceStatus::DragData dragData { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dragNumber, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag,
-        materialId };
+        materialInfo.materialId };
+    dragData.isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    dragData.materialFilter = materialInfo.materialFilter;
+    return dragData;
 }
 
 void SetDragSizeAndData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
@@ -1014,7 +1020,8 @@ int32_t StartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Msdp::
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, dragData.dragNum, dragData.pointerId,
         dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
         dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
-        dragData.summaryFormat, dragData.summaryVersion, dragData.summaryTotalSize, dragData.summaryTag };
+        dragData.summaryFormat, dragData.summaryVersion, dragData.summaryTotalSize, dragData.summaryTag,
+        dragData.materialId, dragData.dragAnimationType, dragData.isSetMaterialFilter, dragData.materialFilter };
     for (const auto& shadowInfo : dragData.shadowInfos) {
         auto pixelMap = shadowInfo.pixelMap;
         if (pixelMap) {
@@ -2182,6 +2189,24 @@ static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
     }
     return result;
 }
+
+static napi_value JSInterruptFollowHandMorphDropAnimation(napi_env env, napi_callback_info info)
+{
+    napi_value result = nullptr;
+    napi_get_boolean(env, false, &result);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, result);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, result);
+    bool interrupted = false;
+    taskExecutor->PostSyncTask(
+        [&interrupted]() {
+            interrupted = NG::DragDropGlobalController::GetInstance().InterruptPendingFollowHandMorphDropAnimation();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIInterruptFollowHandMorphDropAnimation");
+    napi_get_boolean(env, interrupted, &result);
+    return result;
+}
 #else
 
 static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
@@ -2212,6 +2237,13 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
         ERROR_CODE_INTERNAL_ERROR);
     napi_close_escapable_handle_scope(env, scope);
     return nullptr;
+}
+
+static napi_value JSInterruptFollowHandMorphDropAnimation(napi_env env, napi_callback_info info)
+{
+    napi_value result = nullptr;
+    napi_get_boolean(env, false, &result);
+    return result;
 }
 #endif
 
@@ -2260,6 +2292,7 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("executeDrag", JSExecuteDrag),
         DECLARE_NAPI_FUNCTION("getDragPreview", JSGetDragPreview),
         DECLARE_NAPI_FUNCTION("createDragAction", JSCreateDragAction),
+        DECLARE_NAPI_FUNCTION("interruptFollowHandMorphDropAnimation", JSInterruptFollowHandMorphDropAnimation),
         DECLARE_NAPI_PROPERTY("DragStatus", dragStatus),
         DECLARE_NAPI_PROPERTY("DragPreview", classDragPreview),
     };

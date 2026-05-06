@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
 

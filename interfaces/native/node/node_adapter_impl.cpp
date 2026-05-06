@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,12 +46,10 @@ int32_t OH_ArkUI_NodeAdapter_SetTotalNodeCount(ArkUI_NodeAdapterHandle handle, u
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = fullImpl->getNodeAdapterAPI()->setTotalNodeCount(
-        reinterpret_cast<ArkUINodeAdapterHandle>(handle), size, reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeAdapterHandle>(handle), size);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -74,12 +71,10 @@ int32_t OH_ArkUI_NodeAdapter_RegisterEventReceiver(
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = fullImpl->getNodeAdapterAPI()->registerEventReceiver(reinterpret_cast<ArkUINodeAdapterHandle>(handle),
-        userData, reinterpret_cast<InnerArkUINodeAdapterEvent>(receiver), reinterpret_cast<void*>(&errorInfoPtr));
+        userData, reinterpret_cast<InnerArkUINodeAdapterEvent>(receiver));
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -99,12 +94,10 @@ int32_t OH_ArkUI_NodeAdapter_ReloadAllItems(ArkUI_NodeAdapterHandle handle)
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = fullImpl->getNodeAdapterAPI()->notifyItemReloaded(
-        reinterpret_cast<ArkUINodeAdapterHandle>(handle), reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeAdapterHandle>(handle));
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -117,13 +110,10 @@ int32_t OH_ArkUI_NodeAdapter_ReloadItem(
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = fullImpl->getNodeAdapterAPI()->notifyItemChanged(
-        reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -136,13 +126,10 @@ int32_t OH_ArkUI_NodeAdapter_RemoveItem(
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = fullImpl->getNodeAdapterAPI()->notifyItemRemoved(
-        reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -155,13 +142,10 @@ int32_t OH_ArkUI_NodeAdapter_InsertItem(
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = fullImpl->getNodeAdapterAPI()->notifyItemInserted(
-        reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -173,12 +157,10 @@ int32_t OH_ArkUI_NodeAdapter_MoveItem(ArkUI_NodeAdapterHandle handle, uint32_t f
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = fullImpl->getNodeAdapterAPI()->notifyItemMoved(
-        reinterpret_cast<ArkUINodeAdapterHandle>(handle), from, to, reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeAdapterHandle>(handle), from, to);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -192,13 +174,10 @@ int32_t OH_ArkUI_NodeAdapter_GetAllItems(ArkUI_NodeAdapterHandle handle, ArkUI_N
         __FUNCTION__, "Native module not initialized");
     ArkUINodeHandle* innerNodes = nullptr;
     uint32_t totalSize = 0;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto error = fullImpl->getNodeAdapterAPI()->getAllItem(
-        reinterpret_cast<ArkUINodeAdapterHandle>(handle), &innerNodes, &totalSize,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeAdapterHandle>(handle), &innerNodes, &totalSize);
     if (error != 0) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
         return error;
     }
     *size = totalSize;

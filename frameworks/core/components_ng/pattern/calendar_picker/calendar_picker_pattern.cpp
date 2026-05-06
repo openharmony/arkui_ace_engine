@@ -22,8 +22,10 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -136,6 +138,9 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
             borderColor.SetColor(theme->GetEntryBorderColor());
             buttonNode->GetRenderContext()->UpdateBorderColor(borderColor);
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             buttonNode->MarkModifyDone();
 
             auto image = buttonNode->GetChildren().front();
@@ -1299,14 +1304,19 @@ bool CalendarPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     host->SetNeedCallChildrenUpdate(false);
-    // Host entry border is only applied in OnColorConfigurationUpdate; FrameNode::OnThemeScopeUpdate does not
-    // call it, so WithTheme scope changes left the outer border stale (often transparent Color() from wrong scope).
     OnColorConfigurationUpdate();
     if (!layoutProperty->GetNormalTextColorSetByUser().value_or(false)) {
         OnModifyDone();
     } else {
         UpdateEntryButtonColor();
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    auto dialogNode = dialogNode_.Upgrade();
+    if (dialogNode) {
+        auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+        if (dialogPattern) {
+            dialogPattern->OnThemeScopeUpdate(themeScopeId);
+        }
     }
     return true;
 }
@@ -1385,6 +1395,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     auto dayString = (json->GetUInt("day") < 10 ? "0" : "") + std::to_string(json->GetUInt("day"));
     textLayoutProperty->UpdateContent(dayString);
     dayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    SetSelectedType(selected_);
     UpdateAccessibilityText();
     FlushAddAndSubButton();
 }

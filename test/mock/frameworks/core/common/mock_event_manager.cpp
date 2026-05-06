@@ -7,8 +7,9 @@
 
 #include <algorithm>
 #include <chrono>
-
+#include "base/mousestyle/mouse_style.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace {
@@ -91,9 +92,11 @@ void EventManager::ClearRectCallbacks() {}
 
 const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoundaryManager()
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     if (!gestureDebugBoundaryManager_) {
         gestureDebugBoundaryManager_ = AceType::MakeRefPtr<NG::GestureDebugBoundaryManager>();
     }
+#endif
     return gestureDebugBoundaryManager_;
 }
 
@@ -446,4 +449,31 @@ void EventManager::ClearHitTestInfoRecord(const TouchEvent& touchPoint)
 {
     (void)touchPoint;
 }
+
+const RefPtr<NG::SmartGestureManager>& EventManager::GetOrCreateSmartGestureManager()
+{
+    return nullptr;
+}
+
+const RefPtr<NG::SmartGestureManager>& EventManager::GetSmartGestureManager() const
+{
+    return nullptr;
+}
+
+void EventManager::ClearSmartGestureSelected()
+{}
+
+void EventManager::ResetSmartGestureManager()
+{
+    return;
+}
+
+void EventManager::FlushCursorStyleRequests()
+{}
+
+MouseFormat EventManager::GetCurrentMouseStyle()
+{
+    return MouseFormat::DEFAULT;
+}
+
 } // namespace OHOS::Ace

@@ -139,6 +139,7 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_LAZY_GRID, "AceLazyGrid" },
     { AceLogTag::ACE_CONTAINER_PICKER, "AceContainerPicker" },
     { AceLogTag::ACE_COLOR_SAMPLER, "AceColorSampler" },
+    { AceLogTag::ACE_DEPTH_COMPONENT, "AceDepthComponent" },
 };
 // initial static member object
 LogLevel LogWrapper::level_ = LogLevel::DEBUG;

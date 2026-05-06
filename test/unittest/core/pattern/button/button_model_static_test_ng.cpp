@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -739,7 +740,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg018, TestSize.Level1)
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
-        AIWriteAdapter::MakeRefPtr<TextPattern>());
+        AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
     frameNode->AddChild(textNode, 0);
     /**
@@ -748,7 +749,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg018, TestSize.Level1)
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
-        AIWriteAdapter::MakeRefPtr<StagePattern>());
+        AceType::MakeRefPtr<StagePattern>());
     frameNode->AddChild(stageNode);
     /**
      * @tc.steps: step4. test ResetButtonTextFontSize.

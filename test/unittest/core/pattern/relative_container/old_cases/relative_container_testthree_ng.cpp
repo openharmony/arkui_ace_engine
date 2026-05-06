@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/relative_container/relative_container_base_test_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/common/layout/position_param.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"

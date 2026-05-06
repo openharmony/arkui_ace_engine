@@ -16,6 +16,7 @@
 #include <variant>
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_static.h"

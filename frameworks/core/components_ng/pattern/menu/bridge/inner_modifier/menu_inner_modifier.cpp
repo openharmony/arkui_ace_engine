@@ -468,6 +468,15 @@ void SetSelectOverlayExtensionMenuShow(const RefPtr<FrameNode>& node)
     menuPattern->SetSelectOverlayExtensionMenuShow();
 }
 
+void TextMenuOnThemeScopeUpdate(const RefPtr<FrameNode>& node, int32_t themeScopeId)
+{
+    node->AllowUseParentTheme(false);
+    node->SetThemeScopeId(themeScopeId);
+    auto menuPattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->TextMenuOnThemeScopeUpdate(themeScopeId);
+}
+
 RefPtr<FrameNode> GetOrCreateMenuNode(
     const std::string& nodeTag, int32_t nodeId, const std::string& patternTag, int32_t patternId, MenuType menuType)
 {
@@ -674,7 +683,8 @@ void UpdateAlignment(const RefPtr<FrameNode>& node, const OHOS::Ace::Alignment& 
 void SetAccessibilityIsShow(const RefPtr<FrameNode>& node, bool isShow)
 {
     CHECK_NULL_VOID(node);
-    auto menuAccessibilityProperty = node->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto menuAccessibilityProperty =
+        AceType::DynamicCast<MenuAccessibilityProperty>(node->GetAccessibilityProperty<AccessibilityProperty>());
     CHECK_NULL_VOID(menuAccessibilityProperty);
     menuAccessibilityProperty->SetAccessibilityIsShow(isShow);
 }
@@ -810,6 +820,7 @@ const ArkUIMenuInnerModifier* GetMenuInnerModifier()
         .menuCreateFrameNode = CreateFrameNode,
         .menuSetNeedDivider = SetNeedDivider,
         .menuOnModifyDone = OnModifyDone,
+        .textMenuOnThemeScopeUpdate = TextMenuOnThemeScopeUpdate,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

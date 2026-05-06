@@ -20,10 +20,12 @@
 #include "node_model.h"
 
 #include "base/utils/utils.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 ArkUI_TextMenuItem* OH_ArkUI_TextMenuItem_Create()
 {
     ArkUI_TextMenuItem* item = new ArkUI_TextMenuItem();
@@ -58,8 +60,9 @@ void OH_ArkUI_TextMenuItem_Dispose(ArkUI_TextMenuItem* textMenuItem)
 
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetContent(ArkUI_TextMenuItem* item, const char* content)
 {
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(content, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        content, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "content is null");
 
     if (item->isDelContent && item->content) {
         delete[] item->content;
@@ -73,6 +76,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetContent(ArkUI_TextMenuItem* item, const
         delete[] newContent;
         newContent = nullptr;
         item->isDelContent = false;
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR, __FUNCTION__, "Failed to copy content string");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
     item->content = newContent;
@@ -82,15 +87,22 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetContent(ArkUI_TextMenuItem* item, const
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetContent(
     const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(item->content, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        item->content, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item content is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        buffer, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        writeLength, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "writeLength is null");
     int32_t contentLength = static_cast<int32_t>(strlen(item->content));
     if (bufferSize < contentLength + 1) {
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size is too small");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     if (strcpy_s(buffer, bufferSize, item->content) != 0) {
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "Failed to copy content to buffer");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     *writeLength = contentLength;
@@ -99,8 +111,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetContent(
 
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetIcon(ArkUI_TextMenuItem* item, const char* icon)
 {
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(icon, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(icon, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "icon is null");
 
     if (item->isDelIcon && item->icon) {
         delete[] item->icon;
@@ -115,6 +127,7 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetIcon(ArkUI_TextMenuItem* item, const ch
         delete[] newIcon;
         newIcon = nullptr;
         item->isDelIcon = false;
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR, __FUNCTION__, "Failed to copy icon string");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
     item->icon = newIcon;
@@ -124,15 +137,22 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetIcon(ArkUI_TextMenuItem* item, const ch
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetIcon(
     const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(item->icon, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        item->icon, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item icon is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        buffer, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        writeLength, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "writeLength is null");
     int32_t iconLength = static_cast<int32_t>(strlen(item->icon));
     if (bufferSize < iconLength + 1) {
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size is too small");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     if (strcpy_s(buffer, bufferSize, item->icon) != 0) {
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "Failed to copy icon to buffer");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     *writeLength = iconLength;
@@ -141,8 +161,9 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetIcon(
 
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetLabelInfo(ArkUI_TextMenuItem* item, const char* labelInfo)
 {
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(labelInfo, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        labelInfo, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "labelInfo is null");
 
     if (item->isDelLabel && item->labelInfo) {
         delete[] item->labelInfo;
@@ -157,6 +178,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetLabelInfo(ArkUI_TextMenuItem* item, con
         delete[] newLabelInfo;
         newLabelInfo = nullptr;
         item->isDelLabel = false;
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR, __FUNCTION__, "Failed to copy labelInfo string");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
     item->labelInfo = newLabelInfo;
@@ -166,15 +189,22 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetLabelInfo(ArkUI_TextMenuItem* item, con
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetLabelInfo(
     const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize, int32_t* writeLength)
 {
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(item->labelInfo, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(buffer, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(writeLength, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        item->labelInfo, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item labelInfo is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        buffer, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "buffer is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        writeLength, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "writeLength is null");
     int32_t labelInfoLength = static_cast<int32_t>(strlen(item->labelInfo));
     if (bufferSize < labelInfoLength + 1) {
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size is too small");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     if (strcpy_s(buffer, bufferSize, item->labelInfo) != 0) {
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "Failed to copy labelInfo to buffer");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     *writeLength = labelInfoLength;
@@ -183,15 +213,15 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetLabelInfo(
 
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetId(ArkUI_TextMenuItem* item, int32_t id)
 {
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
     item->id = id;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetId(const ArkUI_TextMenuItem* item, int32_t* id)
 {
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(id, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(id, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "id is null");
     *id = item->id;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -213,7 +243,8 @@ void OH_ArkUI_TextEditMenuOptions_Dispose(ArkUI_TextEditMenuOptions* editMenuOpt
 
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetSize(ArkUI_TextMenuItemArray* itemArray, int32_t* size)
 {
-    CHECK_NULL_RETURN(itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "itemArray is null");
     *size = static_cast<int32_t>(itemArray->items.size());
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -221,11 +252,14 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetSize(ArkUI_TextMenuItemArray* item
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetItem(
     ArkUI_TextMenuItemArray* itemArray, int32_t index, ArkUI_TextMenuItem** item)
 {
-    CHECK_NULL_RETURN(itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "itemArray is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
     if (index < 0 || index >= static_cast<int32_t>(itemArray->items.size())) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "index is out of range");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+
     *item = itemArray->items.data() + index;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -233,10 +267,13 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetItem(
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Insert(
     ArkUI_TextMenuItemArray* itemArray, ArkUI_TextMenuItem* item, int32_t index)
 {
-    CHECK_NULL_RETURN(itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(item->content, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "itemArray is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(item, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        item->content, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "item content is null");
     if (index < 0 || index > static_cast<int32_t>(itemArray->items.size())) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "index is out of range");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     ArkUI_TextMenuItem insertItem;
@@ -247,6 +284,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Insert(
     insertItem.labelInfo = nullptr;
     insertItem.isDelLabel = false;
     if (OH_ArkUI_TextMenuItem_SetContent(&insertItem, item->content) != ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(
+            ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR, __FUNCTION__, "Failed to set insert item content");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_INTERNAL_ERROR;
     }
     OH_ArkUI_TextMenuItem_SetIcon(&insertItem, item->icon);
@@ -258,8 +297,10 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Insert(
 
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Erase(ArkUI_TextMenuItemArray* itemArray, int32_t index)
 {
-    CHECK_NULL_RETURN(itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "itemArray is null");
     if (index < 0 || index >= static_cast<int32_t>(itemArray->items.size())) {
+        SET_ERROR_MESSAGE(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "index is out of range");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto eraseIter = itemArray->items.begin() + index;
@@ -284,7 +325,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Erase(ArkUI_TextMenuItemArray* itemAr
 
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Clear(ArkUI_TextMenuItemArray* itemArray)
 {
-    CHECK_NULL_RETURN(itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        itemArray, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "itemArray is null");
     for (auto& eraseItem : itemArray->items) {
         if (eraseItem.isDelContent && eraseItem.content) {
             delete[] eraseItem.content;
@@ -309,7 +351,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Clear(ArkUI_TextMenuItemArray* itemAr
 ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnCreateMenuCallback(
     ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextCreateMenuCallback cb)
 {
-    CHECK_NULL_RETURN(editMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        editMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "editMenuOptions is null");
     editMenuOptions->onCreateMenu = cb;
     editMenuOptions->createUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -318,7 +361,8 @@ ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnCreateMenuCallback(
 ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnPrepareMenuCallback(
     ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextPrepareMenuCallback cb)
 {
-    CHECK_NULL_RETURN(editMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        editMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "editMenuOptions is null");
     editMenuOptions->onPrepareMenu = cb;
     editMenuOptions->prepareUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -327,7 +371,8 @@ ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnPrepareMenuCallback(
 ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnMenuItemClickCallback(
     ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextMenuItemClickCallback cb)
 {
-    CHECK_NULL_RETURN(editMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        editMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "editMenuOptions is null");
     editMenuOptions->onMenuItemClick = cb;
     editMenuOptions->clickUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -354,7 +399,8 @@ void OH_ArkUI_TextSelectionMenuOptions_Dispose(ArkUI_TextSelectionMenuOptions* s
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetSpanType(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_TextSpanType textSpanType)
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
     selectionMenuOptions->textSpanType = textSpanType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -362,8 +408,10 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetSpanType(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetSpanType(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_TextSpanType* textSpanType)
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(textSpanType, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        textSpanType, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "textSpanType is null");
     *textSpanType = selectionMenuOptions->textSpanType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -371,8 +419,9 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetSpanType(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetContentNode(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_NodeHandle node)
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     selectionMenuOptions->contentNode = node;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -380,8 +429,9 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetContentNode(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetContentNode(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_NodeHandle* node)
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     *node = selectionMenuOptions->contentNode;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -389,7 +439,8 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetContentNode(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetResponseType(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_TextResponseType responseType)
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
     selectionMenuOptions->textResponseType = responseType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -397,8 +448,10 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetResponseType(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetResponseType(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_TextResponseType* responseType)
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(responseType, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        responseType, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "responseType is null");
     *responseType = selectionMenuOptions->textResponseType;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -406,7 +459,8 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetResponseType(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, OH_ArkUI_HapticFeedbackMode hapticFeedbackMode)
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
     selectionMenuOptions->hapticFeedbackMode = hapticFeedbackMode;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -414,8 +468,10 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode(
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetHapticFeedbackMode(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, OH_ArkUI_HapticFeedbackMode* hapticFeedbackMode)
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(hapticFeedbackMode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(hapticFeedbackMode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "hapticFeedbackMode is null");
     *hapticFeedbackMode = selectionMenuOptions->hapticFeedbackMode;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -424,8 +480,8 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuShowCallback(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData))
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(callback, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
     selectionMenuOptions->onMenuShow = reinterpret_cast<void*>(callback);
     selectionMenuOptions->onMenuShowUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -435,8 +491,8 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData))
 {
-    CHECK_NULL_RETURN(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(callback, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(selectionMenuOptions, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+        "selectionMenuOptions is null");
     selectionMenuOptions->onMenuHide = reinterpret_cast<void*>(callback);
     selectionMenuOptions->onMenuHideUserData = userData;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
@@ -457,6 +513,7 @@ void OH_ArkUI_TextContentBaseController_ScrollToVisible(
             controller->node->uiNodeHandle, start, end);
     }
 }
+
 ArkUI_TextMarqueeOptions* OH_ArkUI_TextMarqueeOptions_Create()
 {
     ArkUI_TextMarqueeOptions* option = new ArkUI_TextMarqueeOptions();
@@ -576,8 +633,8 @@ ArkUI_MarqueeStartPolicy OH_ArkUI_TextMarqueeOptions_GetStartPolicy(ArkUI_TextMa
     return option->marqueeStartPolicy;
 }
 
-void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* option,
-    ArkUI_MarqueeUpdatePolicy updatePolicy)
+void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(
+    ArkUI_TextMarqueeOptions* option, ArkUI_MarqueeUpdatePolicy updatePolicy)
 {
     CHECK_NULL_VOID(option);
     option->marqueeUpdatePolicy = updatePolicy;
@@ -588,7 +645,6 @@ ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_Text
     CHECK_NULL_RETURN(option, ArkUI_MarqueeUpdatePolicy::ARKUI_MARQUEEUPDATEPOLICY_DEFAULT);
     return option->marqueeUpdatePolicy;
 }
-
 
 ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create()
 {
@@ -605,15 +661,13 @@ void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* c
     config = nullptr;
 }
 
-void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
-    ArkUI_SelectedDragPreviewStyle* config, uint32_t color)
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(ArkUI_SelectedDragPreviewStyle* config, uint32_t color)
 {
     CHECK_NULL_VOID(config);
-    config->color = {1, color};
+    config->color = { 1, color };
 }
 
-uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
-    ArkUI_SelectedDragPreviewStyle* config)
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(ArkUI_SelectedDragPreviewStyle* config)
 {
     CHECK_NULL_RETURN(config, -1);
     return config->color.value;
@@ -682,8 +736,8 @@ void OH_ArkUI_FontConfigs_Destroy(OH_ArkUI_FontConfigs* option)
     delete option;
 }
 
-void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option,
-    OH_ArkUI_FontWeightConfigs* fontWeightConfigs)
+void OH_ArkUI_FontConfigs_SetFontWeightConfigs(
+    OH_ArkUI_FontConfigs* option, OH_ArkUI_FontWeightConfigs* fontWeightConfigs)
 {
     CHECK_NULL_VOID(option);
     option->fontWeightConfigs = fontWeightConfigs;
@@ -709,10 +763,10 @@ void OH_ArkUI_TextController_Destroy(OH_ArkUI_TextController* controller)
 ArkUI_ErrorCode OH_ArkUI_TextController_SetStyledString(
     OH_ArkUI_TextController* controller, ArkUI_StyledString_Descriptor* descriptor)
 {
-    CHECK_NULL_RETURN(controller && controller->node && descriptor,
-        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->
-        getTextModifier()->setStyledString(controller->node->uiNodeHandle, descriptor);
+    CHECK_NULL_RETURN_WITH_MESSAGE(controller && controller->node && descriptor,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "controller, node, or descriptor is null");
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getTextModifier()->setStyledString(
+        controller->node->uiNodeHandle, descriptor);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 

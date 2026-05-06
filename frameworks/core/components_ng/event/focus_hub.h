@@ -21,7 +21,6 @@
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/focus_type.h"
 #include "core/event/key_event.h"
-#include "core/gestures/gesture_event.h"
 
 #include <optional>
 
@@ -480,8 +479,11 @@ public:
     bool IsSelfFocusableWholePath();
 
     bool IsFocusable();
+    bool IsChildFocusable();
     bool IsFocusableNode();
+    bool IsChildFocusableNode();
     bool IsFocusableScope();
+    bool IsChildFocusableScope();
 
     bool IsSyncRequestFocusable();
     bool IsSyncRequestFocusableNode();

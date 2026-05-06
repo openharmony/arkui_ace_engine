@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 RefPtr<CheckboxTheme> GetCheckboxGroupTheme()

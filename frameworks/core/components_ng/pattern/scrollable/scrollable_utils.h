@@ -27,6 +27,7 @@ struct MoveOffsetParam {
     float contentStartOffset = 0;
     float contentEndOffset = 0;
     bool noNeedMargin = false;
+    bool isFromAccessibility = false;
 };
 
 struct ScrollableUtils {
@@ -65,6 +66,7 @@ struct ScrollableUtils {
      * @param isVertical vertical or not
      * @param contentStartOffset content start offset from parentFrameNode
      * @param contentEndOffset content end offset from parentFrameNode
+     * @param isFromAccessibility whether the focus scroll request comes from accessibility
      */
     static float GetMoveOffset(
         const RefPtr<FrameNode>& parentFrameNode,

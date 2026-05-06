@@ -97,6 +97,30 @@ std::pair<std::optional<float>, std::optional<float>> Convert(const Ark_Computed
 }
 } // namespace OHOS::Ace::NG::Converter
 
+namespace OHOS::Ace::NG {
+namespace {
+std::optional<bool> ProcessBindableEditMode(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
+{
+    std::optional<bool> result;
+    Converter::VisitUnionPtr(value,
+        [&result](const Ark_Boolean& src) {
+            result = Converter::OptConvert<bool>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_Boolean& src) {
+            result = Converter::OptConvert<bool>(src.value);
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](bool enableEditMode) {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(enableEditMode));
+            };
+            GridModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(onEvent));
+        },
+        [] {});
+    return result;
+}
+} // namespace
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -121,7 +145,7 @@ void SetScroll(FrameNode* frameNode, const Opt_Scroller* scroller)
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
-void SetGridOptionsImpl(Ark_NativePointer node,
+void SetGridOptionsImpl(Ark_VMContext vmContext, Ark_NativePointer node,
                         const Opt_Scroller* scroller,
                         const Opt_GridLayoutOptions* layoutOptions)
 {
@@ -226,8 +250,16 @@ void SetRowsGapImpl(Ark_NativePointer node,
     }
     GridModelStatic::SetRowsGap(frameNode, convValue);
 }
-void SetScrollBarWidthImpl(Ark_NativePointer node,
-                           const Opt_Union_F64_String* value)
+void SetScrollBarWidth0Impl(Ark_NativePointer node, const Opt_Union_F64_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
+}
+void SetScrollBarWidth1Impl(Ark_NativePointer node, const Opt_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -556,6 +588,19 @@ void SetEditModeOptionsImpl(Ark_NativePointer node,
     }
     GridModelStatic::SetEditModeOptions(frameNode, options);
 }
+void SetEnableEditModeImpl(Ark_NativePointer node,
+                           const Opt_Union_Boolean_Bindable_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = ProcessBindableEditMode(frameNode, value);
+    if (!convValue) {
+        // Implement Reset value
+        GridModelNG::SetEnableEditMode(frameNode, false);
+        return;
+    }
+    GridModelNG::SetEnableEditMode(frameNode, *convValue);
+}
 void SetFocusWrapModeImpl(Ark_NativePointer node,
                           const Opt_FocusWrapMode* value)
 {
@@ -691,7 +736,8 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetRowsTemplateImpl,
         GridAttributeModifier::SetColumnsGapImpl,
         GridAttributeModifier::SetRowsGapImpl,
-        GridAttributeModifier::SetScrollBarWidthImpl,
+        GridAttributeModifier::SetScrollBarWidth0Impl,
+        GridAttributeModifier::SetScrollBarWidth1Impl,
         GridAttributeModifier::SetScrollBarColorImpl,
         GridAttributeModifier::SetScrollBarImpl,
         GridAttributeModifier::SetOnScrollBarUpdateImpl,
@@ -715,6 +761,7 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetFrictionImpl,
         GridAttributeModifier::SetAlignItemsImpl,
         GridAttributeModifier::SetEditModeOptionsImpl,
+        GridAttributeModifier::SetEnableEditModeImpl,
         GridAttributeModifier::SetFocusWrapModeImpl,
         GridAttributeModifier::SetSyncLoadImpl,
         GridAttributeModifier::SetOnScrollFrameBeginImpl,

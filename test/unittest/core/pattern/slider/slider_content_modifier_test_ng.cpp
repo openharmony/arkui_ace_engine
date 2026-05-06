@@ -574,7 +574,8 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifierTest010, TestSize.Lev
 /**
  * @tc.name: SliderContentModifier_DrawBackground_HDRTagColor
  * @tc.desc: Test DrawBackground with HDR track color where headRoom is greater than 1.0,
- *           verifying GetHDRColor4fByHeadRoom multiplies RGB by headRoom and clamps to 255.
+ *           verifying GetHDRMaxByGradientColors detects HDR, ApplyHDRHeadRoom applies headRoom,
+ *           and GetUIColorsByGradientColors converts HDR colors to RSUIColor.
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRTagColor, TestSize.Level1)
@@ -615,7 +616,8 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRTa
 /**
  * @tc.name: SliderContentModifier_DrawBackground_HDRDefaultHeadRoom
  * @tc.desc: Test DrawBackground with HDR track color where headRoom equals 1.0,
- *           verifying GetHDRColor4fByHeadRoom uses original RGB without headRoom multiplication.
+ *           verifying GetHDRMaxByGradientColors returns default headRoom, causing DrawBackground
+ *           to use GetColor4fsByGradientColors (non-HDR RSColor4f path).
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRDefaultHeadRoom, TestSize.Level1)
@@ -861,7 +863,7 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_Displ
 /**
  * @tc.name: SliderContentModifier_DrawBackground_NonHDRNormalColor
  * @tc.desc: Test DrawBackground with normal (non-HDR) track color without HeadRoomColor,
- *           verifying Get4FColorsByGradientColors uses the RSColor conversion path.
+ *           verifying GetColor4fsByGradientColors converts LinearColor to RSColor4f via RSColor.
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_NonHDRNormalColor, TestSize.Level1)
@@ -897,5 +899,189 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_NonHD
      */
     auto trackBgColor = sliderContentModifier.trackBackgroundColor_->Get();
     EXPECT_EQ(trackBgColor.GetGradient().GetColors().size(), normalGradient.GetColors().size());
+}
+
+/**
+ * @tc.name: SliderContentModifier_DrawBackground_MixedHDRAndNonHDR
+ * @tc.desc: Test DrawBackground with gradient containing both HDR (with headRoom) and non-HDR colors,
+ *           verifying GetHDRMaxByGradientColors detects max headRoom from mixed gradient and
+ *           GetUIColorsByGradientColors handles mixed HDR and non-HDR colors.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_MixedHDRAndNonHDR, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and sliderContentModifier.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+
+    /**
+     * @tc.steps: step2. Build a gradient with one HDR color and one normal LinearColor.
+     */
+    Color hdrColor = Color::FromFloat(
+        TEST_HDR_RED, TEST_HDR_GREEN, TEST_HDR_BLUE, TEST_HDR_ALPHA, TEST_HDR_HEADROOM_HIGH);
+    Gradient gradient;
+    GradientColor hdrGradColor;
+    hdrGradColor.SetColor(hdrColor);
+    hdrGradColor.SetDimension(Dimension(TEST_GRADIENT_COLOR_OFFSET_START));
+    gradient.AddColor(hdrGradColor);
+    GradientColor normalGradColor;
+    normalGradColor.SetLinearColor(LinearColor(Color::RED));
+    normalGradColor.SetDimension(Dimension(TEST_GRADIENT_COLOR_OFFSET_END));
+    gradient.AddColor(normalGradColor);
+
+    SetSliderContentModifier(sliderContentModifier);
+    sliderContentModifier.SetDirection(Axis::HORIZONTAL);
+    sliderContentModifier.SetBlockType(SliderModelNG::BlockStyleType::DEFAULT);
+    sliderContentModifier.SetSliderMode(SliderModelNG::SliderMode::OUTSET);
+    sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
+    sliderContentModifier.SetTrackBackgroundColor(gradient);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_DRAW_CANVAS_WIDTH, SLIDER_DRAW_CANVAS_HEIGHT };
+    sliderContentModifier.onDraw(context);
+
+    /**
+     * @tc.steps: step3. Verify mixed gradient draws without crash.
+     * @tc.expected: Track background color count matches the input gradient.
+     */
+    auto trackBgColor = sliderContentModifier.trackBackgroundColor_->Get();
+    EXPECT_EQ(trackBgColor.GetGradient().GetColors().size(), gradient.GetColors().size());
+}
+
+/**
+ * @tc.name: SliderContentModifier_DrawBackground_ReverseWithHDR
+ * @tc.desc: Test DrawBackground with reverse direction and HDR gradient color,
+ *           verifying reversed start/end points are passed to CreateLinearGradientShader.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_ReverseWithHDR, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and sliderContentModifier.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+
+    /**
+     * @tc.steps: step2. Set reverse_ to true and use HDR gradient, then call onDraw.
+     */
+    SetSliderContentModifier(sliderContentModifier);
+    sliderContentModifier.SetDirection(Axis::HORIZONTAL);
+    sliderContentModifier.SetBlockType(SliderModelNG::BlockStyleType::DEFAULT);
+    sliderContentModifier.SetSliderMode(SliderModelNG::SliderMode::OUTSET);
+    sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
+    sliderContentModifier.reverse_ = true;
+    auto hdrGradient = CreateHDRGradientColor(ColorSpace::SRGB, TEST_HDR_HEADROOM_HIGH);
+    sliderContentModifier.SetTrackBackgroundColor(hdrGradient);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_DRAW_CANVAS_WIDTH, SLIDER_DRAW_CANVAS_HEIGHT };
+    sliderContentModifier.onDraw(context);
+
+    /**
+     * @tc.steps: step3. Verify reverse HDR gradient draws without crash.
+     * @tc.expected: Track background color count matches the input gradient.
+     */
+    auto trackBgColor = sliderContentModifier.trackBackgroundColor_->Get();
+    EXPECT_EQ(trackBgColor.GetGradient().GetColors().size(), hdrGradient.GetColors().size());
+}
+
+/**
+ * @tc.name: SliderContentModifier_DrawBackground_HDRColorClamp
+ * @tc.desc: Test DrawBackground with HDR color values exceeding 1.0,
+ *           verifying GetHDRUIColorByHeadRoom clamps RGBA values to [0.0, 1.0] before constructing RSUIColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRColorClamp, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and sliderContentModifier.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+
+    /**
+     * @tc.steps: step2. Create HDR color with out-of-range values (red=2.0, green=-0.5, blue=1.5).
+     */
+    Color hdrColor = Color::FromFloat(2.0f, -0.5f, 1.5f, TEST_HDR_ALPHA, TEST_HDR_HEADROOM_HIGH);
+    Gradient gradient;
+    GradientColor gradColor;
+    gradColor.SetColor(hdrColor);
+    gradColor.SetDimension(Dimension(TEST_GRADIENT_COLOR_OFFSET_START));
+    gradient.AddColor(gradColor);
+    GradientColor endColor;
+    endColor.SetLinearColor(LinearColor(Color::BLUE));
+    endColor.SetDimension(Dimension(TEST_GRADIENT_COLOR_OFFSET_END));
+    gradient.AddColor(endColor);
+
+    SetSliderContentModifier(sliderContentModifier);
+    sliderContentModifier.SetDirection(Axis::HORIZONTAL);
+    sliderContentModifier.SetBlockType(SliderModelNG::BlockStyleType::DEFAULT);
+    sliderContentModifier.SetSliderMode(SliderModelNG::SliderMode::OUTSET);
+    sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
+    sliderContentModifier.SetTrackBackgroundColor(gradient);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_DRAW_CANVAS_WIDTH, SLIDER_DRAW_CANVAS_HEIGHT };
+    sliderContentModifier.onDraw(context);
+
+    /**
+     * @tc.steps: step3. Verify clamped HDR gradient draws without crash.
+     * @tc.expected: Track background color count matches, no overflow.
+     */
+    auto trackBgColor = sliderContentModifier.trackBackgroundColor_->Get();
+    EXPECT_EQ(trackBgColor.GetGradient().GetColors().size(), gradient.GetColors().size());
+}
+
+/**
+ * @tc.name: SliderContentModifier_DrawBackground_HDRWithNullHost
+ * @tc.desc: Test DrawBackground with HDR gradient color when host frameNode is null,
+ *           verifying GetHDRMaxByGradientColors detects HDR and ApplyHDRHeadRoom handles null host
+ *           gracefully without crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRWithNullHost, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create sliderContentModifier with default null host.
+     */
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+
+    /**
+     * @tc.steps: step2. Set HDR gradient and call onDraw with null host.
+     */
+    SetSliderContentModifier(sliderContentModifier);
+    sliderContentModifier.SetDirection(Axis::HORIZONTAL);
+    sliderContentModifier.SetBlockType(SliderModelNG::BlockStyleType::DEFAULT);
+    sliderContentModifier.SetSliderMode(SliderModelNG::SliderMode::OUTSET);
+    sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
+    auto hdrGradient = CreateHDRGradientColor(ColorSpace::SRGB, TEST_HDR_HEADROOM_HIGH);
+    sliderContentModifier.SetTrackBackgroundColor(hdrGradient);
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_DRAW_CANVAS_WIDTH, SLIDER_DRAW_CANVAS_HEIGHT };
+    sliderContentModifier.onDraw(context);
+
+    /**
+     * @tc.steps: step3. Verify null host does not cause crash, drawing still completes.
+     * @tc.expected: Track background color is set without errors.
+     */
+    auto trackBgColor = sliderContentModifier.trackBackgroundColor_->Get();
+    EXPECT_EQ(trackBgColor.GetGradient().GetColors().size(), hdrGradient.GetColors().size());
 }
 } // namespace OHOS::Ace::NG

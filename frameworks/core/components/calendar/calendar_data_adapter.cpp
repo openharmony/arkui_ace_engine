@@ -224,6 +224,7 @@ bool CalendarDataAdapter::GetCacheData(const CalendarDataRequest& request)
 void CalendarDataAdapter::SaveCacheData(const CalendarDataRequest& request, const std::string& result)
 {
     auto context = pipelineContext_.Upgrade();
+    CHECK_NULL_VOID(context);
     auto bkTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
 
     bkTaskExecutor.PostTask(

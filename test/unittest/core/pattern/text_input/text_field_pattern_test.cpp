@@ -1514,6 +1514,12 @@ HWTEST_F(TextFieldPatternTest, TextPattern065, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps:
+     *   step2. ConvertGlobalToLocalOffset
+     */
+
     GestureEvent info;
     pattern->selectOverlay_->hasTransform_ = false;
     pattern->ConvertGlobalToLocalOffset(info.GetGlobalLocation());
@@ -2084,10 +2090,15 @@ HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest002, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    /**
+     * @tc.steps: step3. call GetMagnifierController
+     */
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->isShowMagnifier_ = false;
+    /**
+     * @tc.steps: step4. call GetShowMagnifier
+     */
     auto result = controller->GetShowMagnifier();
     EXPECT_EQ(result, false);
 }
@@ -2187,13 +2198,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern086, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    /**
+     * @tc.steps: step2. AddTouchLocationInfo
+     */
     TouchEventInfo touchEventInfo("onTouch");
     TouchLocationInfo touchLocationInfo(0);
     touchLocationInfo.touchType_ = TouchType::MOVE;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-
+    /**
+     * @tc.steps: step3. UpdateCaretByTouchMove
+     */
     pattern->hasPreviewText_ = true;
     pattern->UpdateCaretByTouchMove(touchLocationInfo);
 }

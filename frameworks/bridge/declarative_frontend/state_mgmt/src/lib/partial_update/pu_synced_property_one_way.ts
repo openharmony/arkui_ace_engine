@@ -428,7 +428,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return getDeepCopyOfObjectRecursive(obj);
 
     function getDeepCopyOfObjectRecursive(obj: any): any {
-      if (!obj || typeof obj !== 'object') {
+      if (!obj || typeof obj !== 'object' || Reflect.get(obj, '__MATERIAL_REFERENCE__')) {
         return obj;
       }
 
@@ -439,7 +439,11 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       }
 
       let copy;
-      if (obj instanceof Set) {
+      if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
+        copy = deepCopyStaticProxy(obj, getDeepCopyOfObjectRecursive, copiedObjects);
+        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
+      } 
+      else if (obj instanceof Set) {
         copy = new Set<any>();
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
@@ -462,9 +466,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         copy = Array.isArray(obj) ? [] : {};
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
-      } else if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
-        copy = deepCopyStaticProxy(obj, getDeepCopyOfObjectRecursive, copiedObjects);
-        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
       } else {
         /**
          * As we define a variable called 'copy' with no initial value before this if/else branch,

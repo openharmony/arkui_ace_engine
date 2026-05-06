@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_INTERFACE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_INTERFACE_H
 
+#include <functional>
+
 #include "base/memory/ace_type.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/event/ace_events.h"
@@ -50,7 +52,8 @@ public:
     virtual int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle& previewStyle,
                      const PreviewAnimation& animation) = 0;
 
-    virtual int32_t StopDrag(DragDropRet result) = 0;
+    virtual int32_t StopDrag(DragDropRet result,
+        std::function<void()> callback = nullptr) = 0;
 
     virtual int32_t GetUdKey(std::string& udKey) = 0;
 
@@ -62,6 +65,12 @@ public:
 
     virtual int32_t GetDragExtraInfo(std::string& extraInfo) = 0;
 
+    virtual int32_t GetDragAnimationType(int32_t& dragAnimationType)
+    {
+        dragAnimationType = static_cast<int32_t>(DragAnimationType::DEFAULT);
+        return -1;
+    }
+
     virtual int32_t GetDragState(DragState& dragState) const = 0;
 
     virtual int32_t AddPrivilege(const std::string& signature, const DragEventData& dragEventData) = 0;
@@ -71,12 +80,6 @@ public:
     virtual int32_t RegisterCoordinationListener(std::function<void()> dragOutCallback) = 0;
 
     virtual int32_t UnRegisterCoordinationListener() = 0;
-
-    virtual int32_t SetDraggableState(bool state) = 0;
-
-    virtual int32_t GetAppDragSwitchState(bool& state) = 0;
-
-    virtual void SetDraggableStateAsync(bool state, int64_t downTime) = 0;
 
     virtual int32_t EnableInternalDropAnimation(const std::string &animationInfo) = 0;
 

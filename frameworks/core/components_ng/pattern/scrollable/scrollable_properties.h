@@ -20,7 +20,9 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/rect.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/rect.h"
 #include "base/geometry/shape.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/touch_event.h"
@@ -28,11 +30,24 @@
 #include "core/gestures/gesture_event.h"
 #include "ui/properties/scrollable_properties.h"
 
+namespace OHOS::Ace::NG {
+enum class SceneStatus : int8_t;
+class TouchEventImpl;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
 constexpr float DEFAULT_SCROLL_TO_STIFFNESS = 227.0f;
 constexpr float DEFAULT_SCROLL_TO_DAMPING = 33.0f;
 constexpr float DEFAULT_SCROLL_TO_VELOCITY = 7.0f;
+
+struct SpringCurveOption {
+    float velocity = DEFAULT_SCROLL_TO_VELOCITY;
+    float mass = DEFAULT_SCROLL_TO_MASS;
+    float stiffness = DEFAULT_SCROLL_TO_STIFFNESS;
+    float damping = DEFAULT_SCROLL_TO_DAMPING;
+};
+
 // for add item and scrollEdge(Edge.Bottom) in one layout
 constexpr int32_t LAST_ITEM = -1;
 

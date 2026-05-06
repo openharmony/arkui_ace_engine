@@ -24,6 +24,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MIDDLE_OF_COUNTS = 2;
+const char CHINESE_HOUR[] = u8"\u70b9";
 } // namespace
 int32_t TimePickerColumnAccessibilityProperty::GetCollectionItemCounts() const
 {
@@ -106,7 +107,37 @@ std::string TimePickerColumnAccessibilityProperty::GetText() const
         if (it->second < index) {
             return "";
         }
-        return timePickerRowPattern->GetOptionsValue(frameNode, index);
+        std::string text = timePickerRowPattern->GetOptionsValue(frameNode, index);
+        if (AceApplicationInfo::GetInstance().GetLanguage() == "zh" && text.compare("00") == 0) {
+            text = "0";
+        }
+        auto allChildNodes = timePickerRowPattern->GetAllChildNode();
+        std::string result;
+
+        if (allChildNodes.find("hour") != allChildNodes.end() && allChildNodes.at("hour").Upgrade() == frameNode) {
+            if (AceApplicationInfo::GetInstance().GetLanguage() != "zh") {
+                result = text + "o'clock";
+            } else {
+                result = text + std::string(CHINESE_HOUR);
+            }
+        } else if (allChildNodes.find("minute") != allChildNodes.end() &&
+            allChildNodes.at("minute").Upgrade() == frameNode) {
+            result = pattern->GetTimeUnitString(text, TimeUnitStyle::MINUTE, MeasureFormatStyle::WIDTH_WIDE);
+        } else if (allChildNodes.find("second") != allChildNodes.end() &&
+            allChildNodes.at("second").Upgrade() == frameNode) {
+            result = pattern->GetTimeUnitString(text, TimeUnitStyle::SECOND, MeasureFormatStyle::WIDTH_WIDE);
+        } else {
+            result = text;
+        }
+        if (result.empty()) {
+            return "";
+        }
+        if (result.front() == '0') {
+            result = "[n1]" + result;
+        } else {
+            result = "[n2]" + result;
+        }
+        return result;
     }
     return "";
 }

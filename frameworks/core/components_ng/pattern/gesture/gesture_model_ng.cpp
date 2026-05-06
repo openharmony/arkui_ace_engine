@@ -94,6 +94,8 @@ void GestureModelNG::Finish()
 
     GestureEventFunc clickEvent = NG::GetTapGestureEventFunc(gesture);
     if (clickEvent) {
+        auto commonClickEvent = clickEvent;
+        gestureEventHub->SetCommonClickEvent(std::move(commonClickEvent));
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(true, false);

@@ -41,6 +41,9 @@
 namespace OHOS::Ace::Framework {
 const CalcDimension EMBEDDED_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
 const CalcDimension EMBEDDED_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
+const char UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED[] = "UNDEFINED";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION[] = "ROTATION";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND[] = "FOLD_TO_EXPAND";
 
 void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
 {
@@ -58,8 +61,88 @@ void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
     JSClass<JSEmbeddedComponent>::StaticMethod("flexGrow", &JSEmbeddedComponent::JsFlexGrow);
     JSClass<JSEmbeddedComponent>::StaticMethod("flexShrink", &JSEmbeddedComponent::JsFlexShrink);
     JSClass<JSEmbeddedComponent>::StaticMethod("opacity", &JSEmbeddedComponent::JsOpacity);
+    JSClass<JSEmbeddedComponent>::StaticMethod("onDrawReady", &JSEmbeddedComponent::JsOnDrawReady);
     JSClass<JSEmbeddedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
+
+void JSEmbeddedComponent::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
+{
+    static const std::map<std::string, NG::PlaceholderType> placeholderTypeTable = {
+        { UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED, NG::PlaceholderType::UNDEFINED },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION, NG::PlaceholderType::ROTATION },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND, NG::PlaceholderType::FOLD_TO_EXPAND }
+    };
+    do {
+        JSRef<JSVal> componentContentMap = obj->GetProperty("areaChangePlaceholder");
+        if (!componentContentMap->IsObject()) {
+            break;
+        }
+        auto contentMapObj = JSRef<JSObject>::Cast(componentContentMap);
+        for (auto [strName, type] : placeholderTypeTable) {
+            JSRef<JSVal> typeContent = contentMapObj->GetProperty(strName.c_str());
+            if (!typeContent->IsObject()) {
+                continue;
+            }
+            auto componentContentObj = JSRef<JSObject>::Cast(typeContent);
+            JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
+            if (!builderNode->IsObject()) {
+                continue;
+            }
+            auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+            JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+            if (nodePtr.IsEmpty()) {
+                continue;
+            }
+            const auto* vm = nodePtr->GetEcmaVM();
+            if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
+                continue;
+            }
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            if (!frameNode) {
+                continue;
+            }
+            RefPtr<NG::FrameNode> placeholderNode = AceType::Claim(frameNode);
+            placeholderMap.insert({type, placeholderNode});
+        }
+    } while (false);
+}
+
+namespace {
+void InsertPlaceholderObj(JsiRef<JsiObject>& obj,
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
+{
+    do {
+        RefPtr<NG::FrameNode> placeholderNode = nullptr;
+        JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
+        if (!componentContent->IsObject()) {
+            break;
+        }
+        auto componentContentObj = JSRef<JSObject>::Cast(componentContent);
+        JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
+        if (!builderNode->IsObject()) {
+            break;
+        }
+        auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+        JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+        if (nodePtr.IsEmpty()) {
+            break;
+        }
+        const auto* vm = nodePtr->GetEcmaVM();
+        if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
+            break;
+        }
+        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+        if (!frameNode) {
+            break;
+        }
+        placeholderNode = AceType::Claim(frameNode);
+        placeholderMap.insert({NG::PlaceholderType::INITIAL, placeholderNode});
+    } while (false);
+}
+} // namespace
 
 void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
 {
@@ -70,11 +153,34 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
     NG::SessionType sessionType = NG::SessionType::EMBEDDED_UI_EXTENSION;
+    bool densityDpi = false;
+    bool windowModeStrategy = false;
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
     if (info.Length() > 1 && info[1]->IsNumber()) {
         sessionType = static_cast<NG::SessionType>(info[1]->ToNumber<int32_t>());
     }
-
-    UIExtensionModel::GetInstance()->Create(want, sessionType);
+    if (info.Length() > 2 && info[2]->IsObject()) { // 2: the third parameter is options
+        auto obj = JSRef<JSObject>::Cast(info[2]);
+        JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
+        if (enableDensityDPI->IsNumber()) {
+            densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
+        }
+        JSRef<JSVal> windowModeStrategyValue = obj->GetProperty("windowModeFollowStrategy");
+        if (windowModeStrategyValue->IsNumber()) {
+            windowModeStrategy = (windowModeStrategyValue->ToNumber<int32_t>()) == 0 ? true : false;
+        }
+        InsertPlaceholderObj(obj, placeholderMap);
+        ResolveAreaPlaceholderParams(obj, placeholderMap);
+    }
+    
+    NG::EmbeddedUIExtensionConfig config;
+    config.wantWrap = want;
+    config.sessionType = sessionType;
+    config.placeholderMap = placeholderMap;
+    config.densityDpi = densityDpi;
+    config.isWindowModeFollowHost = windowModeStrategy;
+    UIExtensionModel::GetInstance()->Create(config);
+    
     ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ViewAbstractModel::GetInstance()->SetWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
@@ -170,5 +276,29 @@ void JSEmbeddedComponent::JsHeight(const JSCallbackInfo& info)
     if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
         ViewAbstractModel::GetInstance()->SetHeight(value);
     }
+}
+
+void JSEmbeddedComponent::JsOnDrawReady(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onDrawReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
+        () {
+            ACE_UINODE_TRACE(node);
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("EmbeddedComponent.onDrawReady");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            auto newJSVal = JSRef<JSVal>::Make();
+            func->ExecuteJS(1, &newJSVal);
+    };
+    UIExtensionModel::GetInstance()->SetOnDrawReady(std::move(onDrawReady));
 }
 } // namespace OHOS::Ace::Framework

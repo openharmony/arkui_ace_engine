@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@ import mediaquery from '@ohos.mediaquery';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import common from '@ohos.app.ability.common';
 import deviceInfo from '@ohos.deviceInfo';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 export enum ChipSize {
   NORMAL = 'NORMAL',
@@ -130,6 +131,7 @@ interface DefaultSymbolTheme {
 interface LabelTheme {
   normalFontSize: Dimension;
   smallFontSize: Dimension;
+  adaptiveItemFontSize: Dimension;
   focusFontColor: ResourceColor;
   focusActiveFontColor: ResourceColor;
   fontColor: ResourceColor;
@@ -206,7 +208,7 @@ const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
 const HOT_SPOT_MIN_HEIGHT: number = 32;
 
-interface ChipOptions {
+export interface ChipOptions {
   prefixIcon?: PrefixIconOptions;
   prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
@@ -219,6 +221,8 @@ interface ChipOptions {
   activated?: boolean;
   backgroundColor?: ResourceColor;
   activatedBackgroundColor?: ResourceColor;
+  backgroundSystemMaterial?: uiMaterial.Material;
+  activatedBackgroundSystemMaterial?: uiMaterial.Material;
   borderRadius?: Dimension;
   size?: ChipSize | SizeOptions;
   direction?: Direction;
@@ -291,6 +295,8 @@ export function Chip(options: ChipOptions) {
     chipActivated: options.activated,
     chipNodeBackgroundColor: options.backgroundColor,
     chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+    backgroundSystemMaterial: options.backgroundSystemMaterial,
+    activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
     chipNodeRadius: options.borderRadius,
     chipDirection: options.direction,
     chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -326,6 +332,7 @@ export struct ChipComponent {
     label: {
       normalFontSize: $r('sys.float.chip_normal_font_size'),
       smallFontSize: $r('sys.float.chip_small_font_size'),
+      adaptiveItemFontSize: $r('sys.float.Caption_M'),
       focusFontColor: $r('sys.color.chip_focus_text'),
       focusActiveFontColor: $r('sys.color.chip_activated_focus_font_color'),
       fontColor: $r('sys.color.chip_font_color'),
@@ -447,27 +454,30 @@ export struct ChipComponent {
     }
   };
   @Prop chipSize?: ChipSize | SizeOptions = ChipSize.NORMAL;
-  @Prop allowClose?: boolean;
-  @Prop closeOptions?: CloseOptions;
+  @Prop allowClose?: boolean = undefined;
+  @Prop closeOptions?: CloseOptions = undefined;
   @Prop chipDirection?: Direction = Direction.Auto;
-  @Prop prefixIcon?: PrefixIconOptions;
-  @Prop prefixSymbol?: ChipSymbolGlyphOptions;
+  @Prop prefixIcon?: PrefixIconOptions = undefined;
+  @Prop prefixSymbol?: ChipSymbolGlyphOptions = undefined;
   @Require @Prop label: LabelOptions;
-  @Prop suffixIcon?: SuffixIconOptions;
-  @Prop suffixSymbol?: ChipSymbolGlyphOptions;
-  @Prop suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions;
-  @Prop chipNodeBackgroundColor?: ResourceColor;
-  @Prop chipNodeActivatedBackgroundColor?: ResourceColor;
-  @Prop chipNodeRadius?: Dimension;
+  @Prop suffixIcon?: SuffixIconOptions = undefined;
+  @Prop suffixSymbol?: ChipSymbolGlyphOptions = undefined;
+  @Prop suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions = undefined;
+  @Prop chipNodeBackgroundColor?: ResourceColor = undefined;
+  @Prop chipNodeActivatedBackgroundColor?: ResourceColor = undefined;
+  @Prop backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Prop activatedBackgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Prop chipNodeRadius?: Dimension = undefined;
   @Prop chipEnabled?: boolean = true;
-  @Prop chipActivated?: boolean;
-  @Prop chipAccessibilitySelectedType?: AccessibilitySelectedType;
-  @Prop chipAccessibilityDescription?: ResourceStr;
-  @Prop chipAccessibilityLevel?: string;
-  @Prop maxFontScale?: number | Resource;
-  @Prop minFontScale?: number | Resource;
-  @Prop chipPadding?: LocalizedPadding;
-  @Prop chipFontSize?: Dimension;
+  @Prop chipActivated?: boolean = undefined;
+  @Prop chipAccessibilitySelectedType?: AccessibilitySelectedType = undefined;
+  @Prop chipAccessibilityDescription?: ResourceStr = undefined;
+  @Prop chipAccessibilityLevel?: string = undefined;
+  @Prop maxFontScale?: number | Resource = undefined;
+  @Prop minFontScale?: number | Resource = undefined;
+  @Prop chipPadding?: LocalizedPadding = undefined;
+  @Prop chipFontSize?: Dimension = undefined;
+  @Consume inGroup: boolean = false;
   @State isChipExist: boolean = true;
   @State chipScale: ScaleOptions = { x: 1, y: 1 };
   @State chipOpacity: number = 1;
@@ -551,7 +561,7 @@ export struct ChipComponent {
     }
     try {
       return ColorMetrics.resourceColor(this.chipNodeActivatedBackgroundColor).color !==
-      ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
+        ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
     } catch (error) {
       console.error(`[Chip] failed to get ColorMetrics.resourceColor`);
       return false;
@@ -564,7 +574,7 @@ export struct ChipComponent {
     }
     try {
       return ColorMetrics.resourceColor(this.chipNodeBackgroundColor).color !==
-      ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
+        ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
     } catch (error) {
       console.error(`[Chip] failed to get resourceColor`);
       return false;
@@ -713,6 +723,7 @@ export struct ChipComponent {
     .enabled(this.isChipEnabled())
     .direction(this.chipDirection)
     .backgroundColor(this.getChipBackgroundColor())
+    .systemMaterial(this.getBackgroundSystemMaterial())
     .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
@@ -1032,14 +1043,16 @@ export struct ChipComponent {
   }
 
   private getChipResponseRegion(): Rectangle | undefined {
-    const chipHeight = this.getChipHeight();
-    if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
-      return {
-        x: 0,
-        y: (chipHeight - HOT_SPOT_MIN_HEIGHT) / 2,
-        width: '100%',
-        height: HOT_SPOT_MIN_HEIGHT
-      };
+    if (deviceInfo.sdkApiVersion >= 26) {
+      const chipHeight = this.getChipHeight();
+      if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
+        return {
+          x: 0,
+          y: (chipHeight - HOT_SPOT_MIN_HEIGHT) / 2,
+          width: '100%',
+          height: HOT_SPOT_MIN_HEIGHT
+        };
+      }
     }
     return undefined;
   }
@@ -1207,12 +1220,18 @@ export struct ChipComponent {
     return this.chipNodeInFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
   }
 
-  private getChipNodeBorderColor(): ResourceColor {
+  private getChipNodeBorderColor(): ResourceColor | undefined {
+    if (this.getBackgroundSystemMaterial()) {
+      return undefined;
+    }
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderColor : themeChipNode.borderColor;
   }
 
-  private getChipNodeBorderWidth(): Dimension {
+  private getChipNodeBorderWidth(): Dimension | undefined {
+    if (this.getBackgroundSystemMaterial()) {
+      return undefined;
+    }
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderWidth : themeChipNode.defaultBorderWidth;
   }
@@ -1232,9 +1251,9 @@ export struct ChipComponent {
       return this.chipFontSize;
     }
     if (this.isSmallChipSize()) {
-      return this.theme.label.smallFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.smallFontSize;
     }
-    return this.theme.label.normalFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.normalFontSize;
   }
 
   getChipText(): ResourceStr {
@@ -1320,6 +1339,16 @@ export struct ChipComponent {
     }
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
       this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
+  }
+
+  getBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    if (deviceInfo.sdkApiVersion < 26) {
+      return undefined;
+    }
+    if (this.isChipActivated()) {
+      return this.activatedBackgroundSystemMaterial;
+    }
+    return this.backgroundSystemMaterial;
   }
 
   getColor(color: ResourceColor | undefined, defaultColor: ResourceColor): ResourceColor {

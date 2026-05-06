@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,8 @@ public:
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetSyncLoad(bool syncLoad) override;
     void SetEditModeOptions(EditModeOptions& editModeOptions) override;
+    void SetEnableEditMode(bool enableEditMode) override;
+    void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) override;
@@ -78,6 +80,7 @@ public:
     void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
     void SetSupportLazyLoadingEmptyBranch(bool enable) override;
+    void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) override;
 
     DisplayMode GetDisplayMode() const override;
 
@@ -148,6 +151,9 @@ public:
     static bool GetSyncLoad(FrameNode* frameNode);
     static void SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions);
     static EditModeOptions GetEditModeOptions(FrameNode* frameNode);
+    static void SetEnableEditMode(FrameNode* frameNode, bool enableEditMode);
+    static bool GetEnableEditMode(FrameNode* frameNode);
+    static void SetEnableEditModeChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& changeEvent);
 
     static void SetGridItemTotalCount(FrameNode* frameNode, int totalCount);
 
@@ -173,6 +179,8 @@ public:
         std::optional<float> extraOffset = std::nullopt);
     static void SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool enable);
     static bool GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode);
+    static void CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
