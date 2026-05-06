@@ -28,12 +28,10 @@
 #include "core/animation/keyframe_animation.h"
 #include "core/animation/property_animatable.h"
 #include "core/common/draw_delegate.h"
-#include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/motion_path_option.h"
-#include "core/components/common/properties/state_attributes.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/event/axis_event.h"
@@ -52,6 +50,10 @@ class InspectorNode;
 }
 
 namespace OHOS::Ace {
+
+class AlignDeclaration;
+using AlignDeclarationPtr = AlignDeclaration*;
+enum class VisualState;
 
 ACE_FORCE_EXPORT extern const Dimension FOCUS_BOUNDARY;
 

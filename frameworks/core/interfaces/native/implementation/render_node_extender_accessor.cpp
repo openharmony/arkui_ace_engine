@@ -22,6 +22,7 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "core/interfaces/native/implementation/shape_clip_peer.h"
 #include "core/interfaces/native/implementation/shape_mask_peer.h"

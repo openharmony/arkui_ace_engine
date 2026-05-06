@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 
 #include <memory>
 

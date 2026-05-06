@@ -35,7 +35,6 @@
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
-#include "core/animation/schedule_task.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
@@ -53,7 +52,6 @@
 #include "core/event/mouse_event.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/container_window_manager.h"
@@ -65,6 +63,8 @@ enum class AvoidAreaType : uint32_t;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+class ScheduleTask;
+struct RotationEvent;
 namespace NG {
 class FrameNode;
 struct UIExtCallbackEvent;
