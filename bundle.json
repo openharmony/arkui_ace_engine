@@ -60,6 +60,7 @@
                 "accessibility",
                 "frame_aware_sched",
                 "ability_runtime",
+                "api_metrics",
                 "ipc",
                 "samgr",
                 "preferences",

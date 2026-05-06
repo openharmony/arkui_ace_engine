@@ -603,6 +603,10 @@ template("declarative_js_engine") {
       external_deps += [ "webview:libarkweb_utils" ]
     }
 
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [
@@ -1081,6 +1085,10 @@ template("declarative_js_engine_ng") {
         "jsview/js_web_controller.cpp",
       ]
       external_deps += [ "webview:libarkweb_utils" ]
+    }
+
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
