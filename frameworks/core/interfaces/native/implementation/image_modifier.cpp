@@ -131,6 +131,7 @@ void ApplyResourceColorValues(
         [frameNode, &isValid](const Ark_ResourceColor& color) {
             auto colorValue = Converter::OptConvert<Color>(color);
             if (colorValue.has_value()) {
+                isValid = true;
                 auto colorFilter =
                     DrawingColorFilter::CreateDrawingColorFilter(colorValue.value(), BlendMode::SRC_ATOP);
                 ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
