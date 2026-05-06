@@ -235,7 +235,8 @@ std::shared_ptr<NavigationController> AceContainer::GetNavigationController(cons
 }
 void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
     AbilityBase::ViewData& viewData) {}
-HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
+HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
 {
     HintToTypeWrap hintToTypeWrap;
     return hintToTypeWrap;

@@ -16,8 +16,12 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
+#include <algorithm>
+#include <cctype>
+
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -612,6 +616,7 @@ TextFieldManagerNG::~TextFieldManagerNG()
 {
     textFieldInfoMap_.clear();
     textFieldFillContentMaps_.clear();
+    textFieldMSDPAutoFillTypes_.clear();
 }
 
 bool TextFieldManagerNG::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject)
@@ -687,6 +692,65 @@ void TextFieldManagerNG::RemoveFillContentMap(int32_t id)
     if (fillContentMapIter != textFieldFillContentMaps_.end()) {
         textFieldFillContentMaps_.erase(fillContentMapIter);
     }
+}
+
+bool TextFieldManagerNG::ParseMSDPAutoFillJsonValue(const std::unique_ptr<JsonValue>& jsonObject)
+{
+    CHECK_NULL_RETURN(jsonObject, false);
+    if (!jsonObject->IsValid() || !jsonObject->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "MSDP auto fill result format is invalid");
+        return false;
+    }
+    ClearMSDPAutoFillTypes();
+    for (int32_t i = 0; i < jsonObject->GetArraySize(); ++i) {
+        auto item = jsonObject->GetArrayItem(i);
+        if (!item || !item->IsObject() || !item->Contains("id") || !item->Contains("content_type")) {
+            continue;
+        }
+        auto idJson = item->GetValue("id");
+        auto typeJson = item->GetValue("content_type");
+        if (!idJson || !idJson->IsString() || !typeJson || !typeJson->IsString()) {
+            continue;
+        }
+        auto nodeIdStr = idJson->GetString();
+        if (nodeIdStr.empty() ||
+            !std::all_of(nodeIdStr.begin(), nodeIdStr.end(), [](unsigned char ch) { return std::isdigit(ch); })) {
+            continue;
+        }
+        auto nodeId = StringUtils::StringToInt(nodeIdStr);
+        if (nodeId <= 0) {
+            continue;
+        }
+        auto msdpType = typeJson->GetString();
+        if (msdpType.empty()) {
+            RemoveMSDPAutoFillType(nodeId);
+            continue;
+        }
+        textFieldMSDPAutoFillTypes_[nodeId] = msdpType;
+    }
+    return true;
+}
+
+std::optional<std::string> TextFieldManagerNG::GetMSDPAutoFillType(int32_t id) const
+{
+    auto iter = textFieldMSDPAutoFillTypes_.find(id);
+    if (iter == textFieldMSDPAutoFillTypes_.end()) {
+        return std::nullopt;
+    }
+    return iter->second;
+}
+
+void TextFieldManagerNG::RemoveMSDPAutoFillType(int32_t id)
+{
+    auto iter = textFieldMSDPAutoFillTypes_.find(id);
+    if (iter != textFieldMSDPAutoFillTypes_.end()) {
+        textFieldMSDPAutoFillTypes_.erase(iter);
+    }
+}
+
+void TextFieldManagerNG::ClearMSDPAutoFillTypes()
+{
+    textFieldMSDPAutoFillTypes_.clear();
 }
 
 void TextFieldManagerNG::SetIsAskCeliaSupported(bool isAskCeliaSupported)

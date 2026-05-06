@@ -1098,6 +1098,7 @@ public:
     void HandleSetTextCommand(const std::unique_ptr<JsonValue>& params);
     void HandleAddTextCommand(const std::unique_ptr<JsonValue>& params);
     std::pair<std::unique_ptr<JsonValue>, std::string> ParseBaseJson(const std::string& command);
+    bool HandleMSDPAutoFillCommand(const std::unique_ptr<JsonValue>& json);
     bool HandleTextModifyCommand(int32_t nodeId, const std::unique_ptr<JsonValue>& params, const std::string& cmd);
     bool CheckAndGetSelectParams(const std::unique_ptr<JsonValue>& json, int32_t* start, int32_t* end);
     void HandleCopyOrCutCommand(const std::string& cmd, const RefPtr<FrameNode>& frameNode);
@@ -2336,6 +2337,7 @@ private:
     void HandleOnPasteCommon(const std::string& data);
     void HandleOnAutoFillSecurePaste(const std::string& data);
     void RemoveFillContentMap();
+    void RemoveMSDPAutoFillType();
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);

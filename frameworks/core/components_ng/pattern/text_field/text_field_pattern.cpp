@@ -657,7 +657,9 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
     CHECK_NULL_RETURN(json && !cmd.empty(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
-    if (cmd == "addText" || cmd == "setText" || cmd == "deleteText") {
+    if (cmd == "MSDP_AutoFill") {
+        return HandleMSDPAutoFillCommand(json);
+    } else if (cmd == "addText" || cmd == "setText" || cmd == "deleteText") {
         auto params = json->GetValue("params");
         CHECK_NULL_RETURN(params && params->IsObject(), false);
         HandleTextModifyCommand(host->GetId(), params, cmd);
@@ -698,6 +700,23 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
         return false;
     }
     return true;
+}
+
+bool TextFieldPattern::HandleMSDPAutoFillCommand(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json && json->IsObject(), false);
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "recv msdp_autofill json: %{public}s", json->ToString().c_str());
+    auto params = json->GetValue("params");
+    CHECK_NULL_RETURN(params && params->IsObject(), false);
+    auto result = params->GetValue("result");
+    CHECK_NULL_RETURN(result && result->IsArray(), false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    return textFieldManager->ParseMSDPAutoFillJsonValue(result);
 }
 
 void TextFieldPattern::HandleCopyOrCutCommand(const std::string& cmd, const RefPtr<FrameNode>& frameNode)
@@ -3731,11 +3750,21 @@ HintToTypeWrap TextFieldPattern::GetHintType()
     HintToTypeWrap hintToTypeWrap;
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, hintToTypeWrap);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, hintToTypeWrap);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, hintToTypeWrap);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, hintToTypeWrap);
+    auto msdpType = textFieldManager->GetMSDPAutoFillType(host->GetId());
+    if (msdpType.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "GetHintType msdpType: %{public}s", msdpType.value().c_str());
+    }
     auto onePlaceHolder = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
-    if (onePlaceHolder.empty()) {
+    if (onePlaceHolder.empty() && !msdpType.has_value()) {
         return hintToTypeWrap;
     }
-    return container->PlaceHolderToType(onePlaceHolder);
+    return container->PlaceHolderToType(onePlaceHolder, msdpType);
 }
 
 bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType)
@@ -12240,6 +12269,7 @@ void TextFieldPattern::OnDetachFromMainTree()
     isDetachFromMainTree_ = true;
     RemoveTextFieldInfo();
     RemoveFillContentMap();
+    RemoveMSDPAutoFillType();
 }
 
 TextFieldInfo TextFieldPattern::GenerateTextFieldInfo()
@@ -13275,6 +13305,17 @@ void TextFieldPattern::RemoveFillContentMap()
     CHECK_NULL_VOID(textFieldManager);
     auto nodeId = host->GetId();
     textFieldManager->RemoveFillContentMap(nodeId);
+}
+
+void TextFieldPattern::RemoveMSDPAutoFillType()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->RemoveMSDPAutoFillType(host->GetId());
 }
 
 bool TextFieldPattern::NeedsSendFillContent()
