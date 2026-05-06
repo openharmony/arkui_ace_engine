@@ -9699,7 +9699,7 @@ LayoutCalPolicy ViewAbstract::GetLayoutPolicy(FrameNode* frameNode, bool isWidth
 
 Color ViewAbstract::GetBackgroundColor(FrameNode* frameNode)
 {
-    Color value;
+    Color value = Color::TRANSPARENT;
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetBackgroundColorValue(value);
