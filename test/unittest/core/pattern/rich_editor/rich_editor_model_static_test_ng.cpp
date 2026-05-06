@@ -15,6 +15,7 @@
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_static.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -28,6 +29,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 class RichEditorModelStaticTestNg : public TestNG {
+private:
+    static constexpr uint32_t DEFAULT_BLACK_COLOR = 0xff000000;
 };
 
 /**
@@ -786,5 +789,1117 @@ HWTEST_F(RichEditorModelStaticTestNg, SetCustomKeyboard, TestSize.Level0)
     supportAvoidance = false;
     RichEditorModelStatic::SetCustomKeyboard(node, std::move(func), supportAvoidance);
     EXPECT_FALSE(pattern->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: CreateRichEditorStyledStringNode001
+ * @tc.desc: test CreateRichEditorStyledStringNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, CreateRichEditorStyledStringNode001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps: step2. create styled string node
+     */
+    int32_t nodeId = 100;
+    auto frameNode = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
+
+    /**
+     * @tc.steps: step3. test CreateRichEditorStyledStringNode
+     */
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    EXPECT_EQ(V2::RICH_EDITOR_ETS_TAG, frameNode->GetTag());
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+    
+    // Check if it's in styled string mode
+    EXPECT_TRUE(pattern->isSpanStringMode_);
+    
+    // Check if styled string controller is created
+    auto styledStringController = pattern->GetRichEditorStyledStringController();
+    EXPECT_TRUE(static_cast<bool>(styledStringController));
+    
+    // Check if styled string is created
+    auto styledString = pattern->styledString_;
+    EXPECT_TRUE(static_cast<bool>(styledString));
+}
+
+/**
+ * @tc.name: CreateRichEditorStyledStringNode002
+ * @tc.desc: test CreateRichEditorStyledStringNode with same node id
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, CreateRichEditorStyledStringNode002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps: step2. create styled string node with same node id twice
+     */
+    int32_t nodeId = 200;
+    auto frameNode1 = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
+    auto frameNode2 = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
+    // test that same node is returned for same node id
+    EXPECT_EQ(frameNode1, frameNode2);
+}
+
+/**
+ * @tc.name: GetCustomKeyboardNode001
+ * @tc.desc: test GetCustomKeyboardNode with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetCustomKeyboardNode001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetCustomKeyboardNode with no custom keyboard node
+     */
+    auto customKeyboardNode = RichEditorModelNG::GetCustomKeyboardNode(frameNode.GetRawPtr());
+    EXPECT_FALSE(static_cast<bool>(customKeyboardNode));
+
+    /**
+     * @tc.steps: step3. set custom keyboard node and test again
+     */
+    auto uiNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1000, AceType::MakeRefPtr<TextPattern>());
+    pattern->customKeyboardNode_ = uiNode;
+    customKeyboardNode = RichEditorModelNG::GetCustomKeyboardNode(frameNode.GetRawPtr());
+    EXPECT_TRUE(static_cast<bool>(customKeyboardNode));
+    EXPECT_EQ(customKeyboardNode, uiNode);
+    
+    /**
+     * @tc.steps: step4. test GetCustomKeyboardNode with null frame node
+     */
+    customKeyboardNode = RichEditorModelNG::GetCustomKeyboardNode(nullptr);
+    EXPECT_FALSE(static_cast<bool>(customKeyboardNode));
+}
+
+/**
+ * @tc.name: GetCustomKeyboardOption001
+ * @tc.desc: test GetCustomKeyboardOption with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetCustomKeyboardOption001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetCustomKeyboardOption with default value
+     */
+    bool option = RichEditorModelNG::GetCustomKeyboardOption(frameNode.GetRawPtr());
+    EXPECT_FALSE(option);
+
+    /**
+     * @tc.steps: step3. set keyboard avoidance and test again
+     */
+    pattern->keyboardAvoidance_ = true;
+    option = RichEditorModelNG::GetCustomKeyboardOption(frameNode.GetRawPtr());
+    EXPECT_TRUE(option);
+
+    /**
+     * @tc.steps: step4. test GetCustomKeyboardOption with null frame node
+     */
+    option = RichEditorModelNG::GetCustomKeyboardOption(nullptr);
+    // Should return false for null frame node
+    EXPECT_FALSE(option);
+}
+
+/**
+ * @tc.name: GetTextDetectEnable001
+ * @tc.desc: test GetTextDetectEnable with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetTextDetectEnable001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetTextDetectEnable with default value
+     */
+    bool textDetectEnable = RichEditorModelNG::GetTextDetectEnable(frameNode.GetRawPtr());
+    // Default value should be false
+    EXPECT_FALSE(textDetectEnable);
+
+    /**
+     * @tc.steps: step3. set text detect enable and test again
+     */
+    pattern->SetTextDetectEnable(true);
+    textDetectEnable = RichEditorModelNG::GetTextDetectEnable(frameNode.GetRawPtr());
+    EXPECT_TRUE(textDetectEnable);
+
+    /**
+     * @tc.steps: step4. test GetTextDetectEnable with null frame node
+     */
+    textDetectEnable = RichEditorModelNG::GetTextDetectEnable(nullptr);
+    // Should return false for null frame node
+    EXPECT_FALSE(textDetectEnable);
+}
+
+/**
+ * @tc.name: GetSelectedBackgroundColor001
+ * @tc.desc: test GetSelectedBackgroundColor with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetSelectedBackgroundColor001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetSelectedBackgroundColor
+     */
+    Color selectedBackgroundColor = RichEditorModelNG::GetSelectedBackgroundColor(frameNode.GetRawPtr());
+    // Should not be default black color
+    EXPECT_NE(selectedBackgroundColor.GetValue(), DEFAULT_BLACK_COLOR);
+    
+    /**
+     * @tc.steps: step3. test GetSelectedBackgroundColor with null frame node
+     */
+    selectedBackgroundColor = RichEditorModelNG::GetSelectedBackgroundColor(nullptr);
+    // Should return default black color for null frame node
+    EXPECT_EQ(selectedBackgroundColor.GetValue(), DEFAULT_BLACK_COLOR);
+}
+
+/**
+ * @tc.name: GetCaretColor001
+ * @tc.desc: test GetCaretColor with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetCaretColor001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetCaretColor
+     */
+    Color caretColor = RichEditorModelNG::GetCaretColor(frameNode.GetRawPtr());
+    EXPECT_NE(caretColor.GetValue(), DEFAULT_BLACK_COLOR);
+
+    /**
+     * @tc.steps: step3. test GetCaretColor with null frame node
+     */
+    caretColor = RichEditorModelNG::GetCaretColor(nullptr);
+    EXPECT_EQ(caretColor.GetValue(), DEFAULT_BLACK_COLOR);
+}
+
+/**
+ * @tc.name: GetLineCount001
+ * @tc.desc: test GetLineCount with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetLineCount001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetLineCount
+     */
+    size_t lineCount = RichEditorModelNG::GetLineCount(frameNode.GetRawPtr());
+    // Empty rich editor should have 0 lines
+    EXPECT_EQ(lineCount, 0);
+
+    /**
+     * @tc.steps: step3. test GetLineCount with null frame node
+     */
+    lineCount = RichEditorModelNG::GetLineCount(nullptr);
+    EXPECT_EQ(lineCount, 0);
+}
+
+/**
+ * @tc.name: GetLineMetrics001
+ * @tc.desc: test GetLineMetrics with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetLineMetrics001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetLineMetrics with invalid line number
+     */
+    TextLineMetrics lineMetrics = RichEditorModelNG::GetLineMetrics(frameNode.GetRawPtr(), 0);
+    EXPECT_EQ(lineMetrics.lineNumber, 0);
+    EXPECT_EQ(lineMetrics.height, 0);
+
+    /**
+     * @tc.steps: step3. test GetLineMetrics with null frame node
+     */
+    lineMetrics = RichEditorModelNG::GetLineMetrics(nullptr, 0);
+    EXPECT_EQ(lineMetrics.lineNumber, 0);
+    EXPECT_EQ(lineMetrics.height, 0);
+}
+
+/**
+ * @tc.name: GetRectsForRange001
+ * @tc.desc: test GetRectsForRange with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetRectsForRange001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+    auto rectHeightStyle = RectHeightStyle::TIGHT;
+    auto rectWidthStyle = RectWidthStyle::TIGHT;
+
+    /**
+     * @tc.steps: step2. test GetRectsForRange
+     */
+    auto rects = RichEditorModelNG::GetRectsForRange(frameNode.GetRawPtr(), 0, 10, rectHeightStyle, rectWidthStyle);
+    EXPECT_TRUE(rects.empty());
+
+    /**
+     * @tc.steps: step3. test GetRectsForRange with null frame node
+     */
+    rects = RichEditorModelNG::GetRectsForRange(nullptr, 0, 10, rectHeightStyle, rectWidthStyle);
+    EXPECT_TRUE(rects.empty());
+}
+
+/**
+ * @tc.name: GetGlyphPositionAtCoordinate001
+ * @tc.desc: test GetGlyphPositionAtCoordinate with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetGlyphPositionAtCoordinate001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetGlyphPositionAtCoordinate
+     */
+    PositionWithAffinity result = RichEditorModelNG::GetGlyphPositionAtCoordinate(frameNode.GetRawPtr(), 0, 0);
+    EXPECT_EQ(result.position_, 0);
+
+    /**
+     * @tc.steps: step3. test GetGlyphPositionAtCoordinate with null frame node
+     */
+    result = RichEditorModelNG::GetGlyphPositionAtCoordinate(nullptr, 0, 0);
+    EXPECT_EQ(result.position_, 0);
+    EXPECT_EQ(result.affinity_, TextAffinity::UPSTREAM);
+}
+
+/**
+ * @tc.name: GetCharacterPositionAtCoordinate001
+ * @tc.desc: test GetCharacterPositionAtCoordinate with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetCharacterPositionAtCoordinate001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetCharacterPositionAtCoordinate
+     */
+    PositionWithAffinity result = RichEditorModelNG::GetCharacterPositionAtCoordinate(frameNode.GetRawPtr(), 0, 0);
+    EXPECT_EQ(result.position_, 0);
+
+    /**
+     * @tc.steps: step3. test GetCharacterPositionAtCoordinate with null frame node
+     */
+    result = RichEditorModelNG::GetCharacterPositionAtCoordinate(nullptr, 0, 0);
+    EXPECT_EQ(result.position_, 0);
+    EXPECT_EQ(result.affinity_, TextAffinity::UPSTREAM);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRange001
+ * @tc.desc: test GetGlyphRangeForCharacterRange with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetGlyphRangeForCharacterRange001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetGlyphRangeForCharacterRange
+     * When paragraphs_ is empty, returns default TextRange{-1, -1}
+     */
+    auto result = RichEditorModelNG::GetGlyphRangeForCharacterRange(frameNode.GetRawPtr(), 0, 10);
+    EXPECT_EQ(result.first.start, -1);
+    EXPECT_EQ(result.first.end, -1);
+    EXPECT_EQ(result.second.start, -1);
+    EXPECT_EQ(result.second.end, -1);
+
+    /**
+     * @tc.steps: step3. test GetGlyphRangeForCharacterRange with null frame node
+     * Returns default constructed pair with TextRange{-1, -1}
+     */
+    result = RichEditorModelNG::GetGlyphRangeForCharacterRange(nullptr, 0, 10);
+    EXPECT_EQ(result.first.start, -1);
+    EXPECT_EQ(result.first.end, -1);
+    EXPECT_EQ(result.second.start, -1);
+    EXPECT_EQ(result.second.end, -1);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRange001
+ * @tc.desc: test GetCharacterRangeForGlyphRange with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetCharacterRangeForGlyphRange001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetCharacterRangeForGlyphRange
+     * When paragraphs_ is empty, returns default TextRange{-1, -1}
+     */
+    auto result = RichEditorModelNG::GetCharacterRangeForGlyphRange(frameNode.GetRawPtr(), 0, 10);
+    EXPECT_EQ(result.first.start, -1);
+    EXPECT_EQ(result.first.end, -1);
+    EXPECT_EQ(result.second.start, -1);
+    EXPECT_EQ(result.second.end, -1);
+
+    /**
+     * @tc.steps: step3. test GetCharacterRangeForGlyphRange with null frame node
+     * Returns default constructed pair with TextRange{-1, -1}
+     */
+    result = RichEditorModelNG::GetCharacterRangeForGlyphRange(nullptr, 0, 10);
+    EXPECT_EQ(result.first.start, -1);
+    EXPECT_EQ(result.first.end, -1);
+    EXPECT_EQ(result.second.start, -1);
+    EXPECT_EQ(result.second.end, -1);
+}
+
+/**
+ * @tc.name: GetTypingStyle001
+ * @tc.desc: test GetTypingStyle with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetTypingStyle001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetTypingStyle
+     */
+    auto typingStyle = RichEditorModelNG::GetTypingStyle(frameNode.GetRawPtr());
+    // Default should be nullopt
+    EXPECT_FALSE(typingStyle.has_value());
+
+    /**
+     * @tc.steps: step3. test GetTypingStyle with null frame node
+     */
+    typingStyle = RichEditorModelNG::GetTypingStyle(nullptr);
+    // Should return nullopt
+    EXPECT_FALSE(typingStyle.has_value());
+}
+
+/**
+ * @tc.name: GetRequestKeyboardOnFocus001
+ * @tc.desc: test GetRequestKeyboardOnFocus with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetRequestKeyboardOnFocus001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetRequestKeyboardOnFocus
+     */
+    bool requestKeyboard = RichEditorModelNG::GetRequestKeyboardOnFocus(frameNode.GetRawPtr());
+    // Default should be true
+    EXPECT_TRUE(requestKeyboard);
+
+    /**
+     * @tc.steps: step3. test GetRequestKeyboardOnFocus with null frame node
+     */
+    requestKeyboard = RichEditorModelNG::GetRequestKeyboardOnFocus(nullptr);
+    // Should return true for null frame node
+    EXPECT_TRUE(requestKeyboard);
+}
+
+/**
+ * @tc.name: IsSupportPreviewText001
+ * @tc.desc: test IsSupportPreviewText with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsSupportPreviewText001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsSupportPreviewText
+     */
+    bool supportPreview = RichEditorModelNG::IsSupportPreviewText(frameNode.GetRawPtr());
+    // Default should be true
+    EXPECT_TRUE(supportPreview);
+
+    /**
+     * @tc.steps: step3. test IsSupportPreviewText with null frame node
+     */
+    supportPreview = RichEditorModelNG::IsSupportPreviewText(nullptr);
+    // Should return false for null frame node
+    EXPECT_FALSE(supportPreview);
+}
+
+/**
+ * @tc.name: IsIncludeFontPadding001
+ * @tc.desc: test IsIncludeFontPadding with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsIncludeFontPadding001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsIncludeFontPadding
+     */
+    bool isIncludeFontPadding = RichEditorModelNG::IsIncludeFontPadding(frameNode.GetRawPtr());
+    EXPECT_FALSE(isIncludeFontPadding);
+
+    /**
+     * @tc.steps: step3. test IsIncludeFontPadding with null frame node
+     */
+    isIncludeFontPadding = RichEditorModelNG::IsIncludeFontPadding(nullptr);
+    EXPECT_FALSE(isIncludeFontPadding);
+}
+
+/**
+ * @tc.name: IsCompressLeadingPunctuation001
+ * @tc.desc: test IsCompressLeadingPunctuation with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsCompressLeadingPunctuation001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsCompressLeadingPunctuation
+     */
+    bool isCompressLeadingPunctuation = RichEditorModelNG::IsCompressLeadingPunctuation(frameNode.GetRawPtr());
+    EXPECT_FALSE(isCompressLeadingPunctuation);
+
+    /**
+     * @tc.steps: step3. test IsCompressLeadingPunctuation with null frame node
+     */
+    isCompressLeadingPunctuation = RichEditorModelNG::IsCompressLeadingPunctuation(nullptr);
+    EXPECT_FALSE(isCompressLeadingPunctuation);
+}
+
+/**
+ * @tc.name: GetEnterKeyType001
+ * @tc.desc: test GetEnterKeyType with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetEnterKeyType001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetEnterKeyType
+     */
+    TextInputAction enterKeyType = RichEditorModelNG::GetEnterKeyType(frameNode.GetRawPtr());
+    EXPECT_EQ(enterKeyType, TextInputAction::NEW_LINE);
+
+    /**
+     * @tc.steps: step3. test GetEnterKeyType with null frame node
+     */
+    enterKeyType = RichEditorModelNG::GetEnterKeyType(nullptr);
+    EXPECT_EQ(enterKeyType, TextInputAction::UNSPECIFIED);
+}
+
+/**
+ * @tc.name: IsFallbackLineSpacing001
+ * @tc.desc: test IsFallbackLineSpacing with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsFallbackLineSpacing001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsFallbackLineSpacing
+     */
+    bool isFallbackLineSpacing = RichEditorModelNG::IsFallbackLineSpacing(frameNode.GetRawPtr());
+    EXPECT_FALSE(isFallbackLineSpacing);
+
+    /**
+     * @tc.steps: step3. test IsFallbackLineSpacing with null frame node
+     */
+    isFallbackLineSpacing = RichEditorModelNG::IsFallbackLineSpacing(nullptr);
+    EXPECT_FALSE(isFallbackLineSpacing);
+}
+
+/**
+ * @tc.name: IsStopBackPress001
+ * @tc.desc: test IsStopBackPress with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsStopBackPress001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsStopBackPress
+     */
+    bool isStopBackPress = RichEditorModelNG::IsStopBackPress(frameNode.GetRawPtr());
+    EXPECT_TRUE(isStopBackPress);
+
+    /**
+     * @tc.steps: step3. test IsStopBackPress with null frame node
+     */
+    isStopBackPress = RichEditorModelNG::IsStopBackPress(nullptr);
+    EXPECT_TRUE(isStopBackPress);
+}
+
+/**
+ * @tc.name: GetKeyboardAppearance001
+ * @tc.desc: test GetKeyboardAppearance with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetKeyboardAppearance001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetKeyboardAppearance
+     */
+    KeyboardAppearance keyboardAppearance = RichEditorModelNG::GetKeyboardAppearance(frameNode.GetRawPtr());
+    EXPECT_EQ(keyboardAppearance, KeyboardAppearance::NONE_IMMERSIVE);
+
+    /**
+     * @tc.steps: step3. test GetKeyboardAppearance with null frame node
+     */
+    keyboardAppearance = RichEditorModelNG::GetKeyboardAppearance(nullptr);
+    EXPECT_EQ(keyboardAppearance, KeyboardAppearance::NONE_IMMERSIVE);
+}
+
+/**
+ * @tc.name: GetEnableHapticFeedback001
+ * @tc.desc: test GetEnableHapticFeedback with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetEnableHapticFeedback001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetEnableHapticFeedback
+     */
+    bool enableHapticFeedback = RichEditorModelNG::GetEnableHapticFeedback(frameNode.GetRawPtr());
+    EXPECT_TRUE(enableHapticFeedback);
+
+    /**
+     * @tc.steps: step3. test GetEnableHapticFeedback with null frame node
+     */
+    enableHapticFeedback = RichEditorModelNG::GetEnableHapticFeedback(nullptr);
+    EXPECT_FALSE(enableHapticFeedback);
+}
+
+/**
+ * @tc.name: IsSupportStyledUndo001
+ * @tc.desc: test IsSupportStyledUndo with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsSupportStyledUndo001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsSupportStyledUndo
+     */
+    bool isSupportStyledUndo = RichEditorModelNG::IsSupportStyledUndo(frameNode.GetRawPtr());
+    EXPECT_FALSE(isSupportStyledUndo);
+
+    /**
+     * @tc.steps: step3. test IsSupportStyledUndo with null frame node
+     */
+    isSupportStyledUndo = RichEditorModelNG::IsSupportStyledUndo(nullptr);
+    EXPECT_FALSE(isSupportStyledUndo);
+}
+
+/**
+ * @tc.name: GetScrollBarColor001
+ * @tc.desc: test GetScrollBarColor with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetScrollBarColor001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetScrollBarColor
+     */
+    Color scrollBarColor = RichEditorModelNG::GetScrollBarColor(frameNode.GetRawPtr());
+    EXPECT_EQ(scrollBarColor.GetValue(), Color().GetValue());
+
+    /**
+     * @tc.steps: step3. test GetScrollBarColor with null frame node
+     */
+    scrollBarColor = RichEditorModelNG::GetScrollBarColor(nullptr);
+    EXPECT_EQ(scrollBarColor.GetValue(), Color().GetValue());
+}
+
+/**
+ * @tc.name: GetCaretOffset001
+ * @tc.desc: test GetCaretOffset with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetCaretOffset001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetCaretOffset
+     */
+    int32_t caretOffset = RichEditorModelNG::GetCaretOffset(frameNode.GetRawPtr());
+    EXPECT_EQ(caretOffset, 0);
+
+    /**
+     * @tc.steps: step3. test GetCaretOffset with null frame node
+     */
+    caretOffset = RichEditorModelNG::GetCaretOffset(nullptr);
+    EXPECT_EQ(caretOffset, -1);
+}
+
+/**
+ * @tc.name: IsEditing001
+ * @tc.desc: test IsEditing with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsEditing001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsEditing
+     */
+    bool isEditing = RichEditorModelNG::IsEditing(frameNode.GetRawPtr());
+    EXPECT_FALSE(isEditing);
+
+    /**
+     * @tc.steps: step3. test IsEditing with null frame node
+     */
+    isEditing = RichEditorModelNG::IsEditing(nullptr);
+    EXPECT_FALSE(isEditing);
+}
+
+/**
+ * @tc.name: GetCaretRect001
+ * @tc.desc: test GetCaretRect with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetCaretRect001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetCaretRect
+     */
+    RectF caretRect = RichEditorModelNG::GetCaretRect(frameNode.GetRawPtr());
+    EXPECT_EQ(caretRect.GetX(), -1.0f);
+    EXPECT_EQ(caretRect.GetY(), -1.0f);
+    EXPECT_EQ(caretRect.Width(), -1.0f);
+    EXPECT_EQ(caretRect.Height(), -1.0f);
+
+    /**
+     * @tc.steps: step3. test GetCaretRect with null frame node
+     */
+    caretRect = RichEditorModelNG::GetCaretRect(nullptr);
+    EXPECT_EQ(caretRect.GetX(), -1.0f);
+    EXPECT_EQ(caretRect.GetY(), -1.0f);
+    EXPECT_EQ(caretRect.Width(), -1.0f);
+    EXPECT_EQ(caretRect.Height(), -1.0f);
+}
+
+/**
+ * @tc.name: GetPreviewTextInfo001
+ * @tc.desc: test GetPreviewTextInfo with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetPreviewTextInfo001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetPreviewTextInfo
+     */
+    PreviewTextInfo previewTextInfo = RichEditorModelNG::GetPreviewTextInfo(frameNode.GetRawPtr());
+    EXPECT_FALSE(previewTextInfo.value.has_value());
+    EXPECT_FALSE(previewTextInfo.offset.has_value());
+
+    /**
+     * @tc.steps: step3. test GetPreviewTextInfo with null frame node
+     */
+    previewTextInfo = RichEditorModelNG::GetPreviewTextInfo(nullptr);
+    EXPECT_FALSE(previewTextInfo.value.has_value());
+    EXPECT_FALSE(previewTextInfo.offset.has_value());
+}
+
+/**
+ * @tc.name: GetSelectDetectConfig001
+ * @tc.desc: test GetSelectDetectConfig with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetSelectDetectConfig001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetSelectDetectConfig
+     */
+    auto selectDetectConfig = RichEditorModelNG::GetSelectDetectConfig(frameNode.GetRawPtr());
+    EXPECT_TRUE(selectDetectConfig.empty());
+}
+
+
+/**
+ * @tc.name: GetSelectionRangeInfo001
+ * @tc.desc: test GetSelectionRangeInfo with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetSelectionRangeInfo001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetSelectionRangeInfo
+     */
+    SelectionRangeInfo selectionRangeInfo = RichEditorModelNG::GetSelectionRangeInfo(frameNode.GetRawPtr());
+    EXPECT_EQ(selectionRangeInfo.start_, 0);
+    EXPECT_EQ(selectionRangeInfo.end_, 0);
+
+    /**
+     * @tc.steps: step3. test GetSelectionRangeInfo with null frame node
+     */
+    selectionRangeInfo = RichEditorModelNG::GetSelectionRangeInfo(nullptr);
+    EXPECT_EQ(selectionRangeInfo.start_, 0);
+    EXPECT_EQ(selectionRangeInfo.end_, 0);
+}
+
+/**
+ * @tc.name: GetStyledString001
+ * @tc.desc: test GetStyledString with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetStyledString001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetStyledString
+     */
+    SpanStringBase* styledString = RichEditorModelNG::GetStyledString(frameNode.GetRawPtr());
+    EXPECT_TRUE(styledString != nullptr);
+    delete styledString;
+
+    /**
+     * @tc.steps: step3. test GetStyledString with null frame node
+     */
+    styledString = RichEditorModelNG::GetStyledString(nullptr);
+    EXPECT_TRUE(styledString != nullptr);
+    delete styledString;
+}
+
+/**
+ * @tc.name: GetMaxLength001
+ * @tc.desc: test GetMaxLength with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetMaxLength001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetMaxLength
+     */
+    int32_t maxLength = RichEditorModelNG::GetMaxLength(frameNode.GetRawPtr());
+    EXPECT_EQ(maxLength, INT_MAX);
+
+    /**
+     * @tc.steps: step3. test GetMaxLength with null frame node
+     */
+    maxLength = RichEditorModelNG::GetMaxLength(nullptr);
+    EXPECT_EQ(maxLength, INT_MAX);
+}
+
+/**
+ * @tc.name: GetMaxLines001
+ * @tc.desc: test GetMaxLines with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, GetMaxLines001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test GetMaxLines
+     */
+    int32_t maxLines = RichEditorModelNG::GetMaxLines(frameNode.GetRawPtr());
+    EXPECT_EQ(maxLines, INT32_MAX);
+
+    /**
+     * @tc.steps: step3. test GetMaxLines with null frame node
+     */
+    maxLines = RichEditorModelNG::GetMaxLines(nullptr);
+    EXPECT_EQ(maxLines, INT32_MAX);
+}
+
+/**
+ * @tc.name: IsOrphanCharOptimization001
+ * @tc.desc: test IsOrphanCharOptimization with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsOrphanCharOptimization001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsOrphanCharOptimization
+     */
+    bool isOrphanCharOptimization = RichEditorModelNG::IsOrphanCharOptimization(frameNode.GetRawPtr());
+    EXPECT_FALSE(isOrphanCharOptimization);
+
+    /**
+     * @tc.steps: step3. test IsOrphanCharOptimization with null frame node
+     */
+    isOrphanCharOptimization = RichEditorModelNG::IsOrphanCharOptimization(nullptr);
+    EXPECT_FALSE(isOrphanCharOptimization);
+}
+
+/**
+ * @tc.name: IsEnableAutoSpacing001
+ * @tc.desc: test IsEnableAutoSpacing with valid frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModelStaticTestNg, IsEnableAutoSpacing001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(0);
+    EXPECT_TRUE(static_cast<bool>(frameNode));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    EXPECT_TRUE(static_cast<bool>(pattern));
+
+    /**
+     * @tc.steps: step2. test IsEnableAutoSpacing
+     */
+    bool isEnableAutoSpacing = RichEditorModelNG::IsEnableAutoSpacing(frameNode.GetRawPtr());
+    EXPECT_FALSE(isEnableAutoSpacing);
+
+    /**
+     * @tc.steps: step3. test IsEnableAutoSpacing with null frame node
+     */
+    isEnableAutoSpacing = RichEditorModelNG::IsEnableAutoSpacing(nullptr);
+    EXPECT_FALSE(isEnableAutoSpacing);
 }
 }
