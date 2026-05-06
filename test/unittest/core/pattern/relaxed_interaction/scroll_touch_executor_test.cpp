@@ -239,4 +239,150 @@ HWTEST_F(ScrollTouchExecuteIsSingleStepTest, IsSingleStep_ReturnsTrueForDifferen
     EXPECT_TRUE(executor2.IsSingleStep());
 }
 
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_DirectionUp_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::UP;
+    ScrollTouchExecutor executor(context, tmpCmd);
+
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::FAILED);
+}
+
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_DirectionLeft_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::LEFT;
+    ScrollTouchExecutor executor(context, tmpCmd);
+
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::FAILED);
+}
+
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_DirectionForward_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::FORWARD;
+    ScrollTouchExecutor executor(context, tmpCmd);
+
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::FAILED);
+}
+
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_DirectionDown_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::DOWN;
+    ScrollTouchExecutor executor(context, tmpCmd);
+
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::FAILED);
+}
+
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_DirectionRight_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::RIGHT;
+    ScrollTouchExecutor executor(context, tmpCmd);
+
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::FAILED);
+}
+
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_FindScrollPatternNullContext_ReturnsFailed, TestSize.Level1)
+{
+    WeakPtr<PipelineContext> nullContext;
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 100.0;
+    tmpCmd.actionInfo.coordinates.y1 = 100.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::FORWARD;
+    ScrollTouchExecutor executor(nullContext, tmpCmd);
+
+    auto result = executor.FindScrollPattern(100.0f, 100.0f);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_ExecuteTargetMode_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::BACKWARD;
+    ScrollTouchExecutor executor(context, tmpCmd);
+
+    auto result = executor.ExecuteTargetMode();
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_ExecuteTargetModeForwards_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::FORWARD;
+    ScrollTouchExecutor executor(context, tmpCmd);
+
+    auto result = executor.ExecuteTargetMode();
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(ScrollTouchExecuteStepTest, ExecuteStep_CommandCoordinatesStoredCorrectly, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 500.0;
+    tmpCmd.actionInfo.coordinates.x1 = 200.0;
+    tmpCmd.actionInfo.coordinates.y1 = 300.0;
+    tmpCmd.actionInfo.direction = RelaxedScrollDirection::UP;
+    ScrollTouchExecutor executor(context, tmpCmd);
+
+    EXPECT_FLOAT_EQ(executor.cmd_.actionInfo.coordinates.x1, 200.0f);
+    EXPECT_FLOAT_EQ(executor.cmd_.actionInfo.coordinates.y1, 300.0f);
+    EXPECT_FLOAT_EQ(executor.cmd_.actionInfo.distance, 500.0f);
+    EXPECT_EQ(executor.cmd_.actionInfo.direction, RelaxedScrollDirection::UP);
+}
+
 } // namespace OHOS::Ace::NG

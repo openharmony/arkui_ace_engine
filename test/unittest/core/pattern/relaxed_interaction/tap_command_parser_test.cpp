@@ -155,4 +155,104 @@ HWTEST_F(TapCommandParserParseTest, Parse_NullContext_ReturnsOneExecutor, TestSi
     EXPECT_EQ(executors[0]->GetType(), "smart_gesture");
 }
 
+HWTEST_F(TapCommandParserParseTest, Parse_NullRootNode_ReturnsOneExecutor, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    TapCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_TAP_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto rootBackup = mockPipelineContext_->rootNode_;
+    mockPipelineContext_->rootNode_.Reset();
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 1);
+    ASSERT_NE(executors[0], nullptr);
+    EXPECT_EQ(executors[0]->GetType(), "smart_gesture");
+
+    mockPipelineContext_->rootNode_ = rootBackup;
+}
+
+HWTEST_F(TapCommandParserParseTest, Parse_EmptyRootRect_ReturnsOneExecutor, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    TapCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_TAP_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto rootNode = mockPipelineContext_->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+    auto geometryNode = rootNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto originalSize = geometryNode->GetFrameSize();
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 1);
+    ASSERT_NE(executors[0], nullptr);
+    EXPECT_EQ(executors[0]->GetType(), "smart_gesture");
+
+    geometryNode->SetFrameSize(originalSize);
+}
+
+HWTEST_F(TapCommandParserParseTest, Parse_ZeroWidthRootRect_ReturnsOneExecutor, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    TapCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_TAP_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto rootNode = mockPipelineContext_->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+    auto geometryNode = rootNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto originalSize = geometryNode->GetFrameSize();
+    geometryNode->SetFrameSize(SizeF(0.0f, ROOT_HEIGHT));
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 1);
+    ASSERT_NE(executors[0], nullptr);
+    EXPECT_EQ(executors[0]->GetType(), "smart_gesture");
+
+    geometryNode->SetFrameSize(originalSize);
+}
+
+HWTEST_F(TapCommandParserParseTest, Parse_ZeroHeightRootRect_ReturnsOneExecutor, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    TapCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_TAP_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto rootNode = mockPipelineContext_->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+    auto geometryNode = rootNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto originalSize = geometryNode->GetFrameSize();
+    geometryNode->SetFrameSize(SizeF(ROOT_WIDTH, 0.0f));
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 1);
+    ASSERT_NE(executors[0], nullptr);
+    EXPECT_EQ(executors[0]->GetType(), "smart_gesture");
+
+    geometryNode->SetFrameSize(originalSize);
+}
+
+HWTEST_F(TapCommandParserParseTest, Parse_MultipleCalls_Success, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    TapCommandParser parser(context);
+    auto json1 = JsonUtil::ParseJsonString(VALID_TAP_JSON);
+    auto json2 = JsonUtil::ParseJsonString(EMPTY_JSON);
+
+    auto executors1 = parser.Parse(json1);
+    auto executors2 = parser.Parse(json2);
+
+    EXPECT_EQ(executors1.size(), 2);
+    EXPECT_EQ(executors2.size(), 2);
+    EXPECT_EQ(executors1[0]->GetType(), "smart_gesture");
+    EXPECT_EQ(executors2[0]->GetType(), "smart_gesture");
+}
+
 } // namespace OHOS::Ace::NG
