@@ -9143,6 +9143,7 @@ struct ArkUINodeModifiers {
     ArkUI_Int32 version;
     const ArkUICommonModifier* (*getCommonModifier)();
     const ArkUICheckboxGroupModifier* (*getCheckboxGroupModifier)();
+    const ArkUIContainerReaderModifier* (*getContainerReaderModifier)();
     const ArkUICounterModifier* (*getCounterModifier)();
     const ArkUIRowModifier* (*getRowModifier)();
     const ArkUIRowSplitModifier* (*getRowSplitModifier)();
@@ -9260,7 +9261,6 @@ struct ArkUINodeModifiers {
     const ArkUIAtomicServiceModifier* (*getAtomicServiceModifier)();
     const ArkUIMatrix4Modifier* (*getMatrix4Modifier)();
     const ArkUIDynamicLayoutModifier* (*getDynamicLayoutModifier)();
-    const ArkUIContainerReaderModifier* (*getContainerReaderModifier)();
 };
 
 // same as inner defines in property.h

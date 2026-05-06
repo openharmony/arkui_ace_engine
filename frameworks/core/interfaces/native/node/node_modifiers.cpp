@@ -158,6 +158,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .version = ARKUI_NODE_MODIFIERS_API_VERSION,
         .getCommonModifier = NodeModifier::GetCommonModifier,
         .getCheckboxGroupModifier = NodeModifier::GetCheckboxGroupModifier,
+        .getContainerReaderModifier = NodeModifier::GetContainerReaderModifier,
         .getCounterModifier = NodeModifier::GetCounterModifier,
         .getRowModifier = NodeModifier::GetRowModifier,
         .getRowSplitModifier = NodeModifier::GetRowSplitModifier,
@@ -315,7 +316,6 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getAtomicServiceModifier = NodeModifier::GetAtomicServiceModifier,
         .getMatrix4Modifier = NodeModifier::GetMatrix4Modifier,
         .getDynamicLayoutModifier = NodeModifier::GetDynamicLayoutModifier,
-        .getContainerReaderModifier = NodeModifier::GetContainerReaderModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;
