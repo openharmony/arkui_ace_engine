@@ -650,6 +650,16 @@ void TextFieldModelStatic::SetTextDecorationStyle(FrameNode* frameNode,
     }
 }
 
+void TextFieldModelStatic::SetLineThicknessScale(FrameNode* frameNode, const std::optional<float>& valueOpt)
+{
+    if (valueOpt) {
+        auto lineThicknessScale = valueOpt.value() < 0 ? DEFAULT_LINE_THICKNESS_SCALE : valueOpt.value();
+        TextFieldModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineThicknessScale, frameNode);
+    }
+}
+
 void TextFieldModelStatic::SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
 {
     if (valueOpt) {
