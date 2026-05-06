@@ -235,7 +235,8 @@ RefPtr<Paragraph> RichEditorLayoutAlgorithm::GetOrCreateParagraph(const std::lis
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 {
     RefPtr<SpanItem> lastSpan = allSpans_.empty() ? nullptr : allSpans_.back();
-    bool afterNewLine = !allSpans_.empty() && lastSpan && lastSpan->content.back() == u'\n';
+    bool afterNewLine = !allSpans_.empty() && lastSpan
+        && !lastSpan->content.empty() && lastSpan->content.back() == u'\n';
     bool emptyAndNoPlaceholder = allSpans_.empty() && !needShowPlaceholder_;
     bool needNewLineSpan = afterNewLine || emptyAndNoPlaceholder;
     IF_TRUE(isSingleLineMode_, needNewLineSpan = emptyAndNoPlaceholder);

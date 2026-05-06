@@ -2583,7 +2583,8 @@ void RichEditorPattern::UpdateCaretStyleByTypingStyle(bool isReset)
 {
     bool empty = spans_.empty();
     bool hasPreviewContent = !previewTextRecord_.previewContent.empty();
-    bool lastNewLine = !empty && styleManager_->HasTypingParagraphStyle() && spans_.back()->content.back() == u'\n';
+    bool lastNewLine = !empty && styleManager_->HasTypingParagraphStyle()
+        && !spans_.back()->content.empty() && spans_.back()->content.back() == u'\n';
     CHECK_NULL_VOID(empty || hasPreviewContent || lastNewLine || isReset);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3375,7 +3376,8 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
     auto paraStart = firstSpan->position - static_cast<int32_t>(firstSpan->content.length());
 
     for (auto it = spanNodes.begin(); it != spanNodes.end(); ++it) {
-        if (it == std::prev(spanNodes.end()) || (*it)->GetSpanItem()->content.back() == u'\n') {
+        if (it == std::prev(spanNodes.end()) || (!(*it)->GetSpanItem()->content.empty()
+            && (*it)->GetSpanItem()->content.back() == u'\n')) {
             ParagraphInfo info;
             auto lm = (*it)->GetLeadingMarginValue({});
             std::optional<double> spacingOpt;
@@ -3449,7 +3451,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
         if (spanNode) {
             auto&& info = spanNode->GetSpanItem();
             spanEnd = info->position;
-            isEnd = info->content.back() == u'\n';
+            isEnd = !info->content.empty() && info->content.back() == u'\n';
         } else {
             ++spanEnd;
             isEnd = false;
@@ -3475,7 +3477,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
             res.emplace_back(spanNode);
             auto&& info = spanNode->GetSpanItem();
             spanEnd = info->position;
-            isEnd = info->content.back() == u'\n';
+            isEnd = !info->content.empty() && info->content.back() == u'\n';
         } else {
             ++spanEnd;
             isEnd = false;
@@ -3861,7 +3863,7 @@ bool RichEditorPattern::HandleUserGestureEvent(
             paragraphOffset.SetY(selectedRects[0].GetOffset().GetY());
             isParagraphHead = false;
         }
-        if (!isParagraphHead && item->content.back() == '\n') {
+        if (!isParagraphHead && !item->content.empty() && item->content.back() == '\n') {
             isParagraphHead = true;
         }
         for (auto&& rect : selectedRects) {
