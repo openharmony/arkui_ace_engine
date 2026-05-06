@@ -43,7 +43,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         } else {
             this.sourceProvide_!.registerWatchToSource(this);
         }
-        const initValue = this.sourceProvide_!.get()
+        const initValue = this.sourceProvide_!.get();
         this.registerToObservedObject(initValue);
     }
 
