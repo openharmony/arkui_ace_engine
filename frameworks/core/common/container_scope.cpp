@@ -102,6 +102,16 @@ thread_local int32_t currentLocalId_(DEFAULT_ID);
 thread_local int32_t currentId_(DEFAULT_ID);
 std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
 std::atomic<int32_t> recentForegroundId_(DEFAULT_ID);
+std::atomic<ContainerScope::CheckRunOnUIThreadFunc> checkThreadFunc_ = nullptr;
+
+bool CheckRunOnUIThread(int32_t currentId, bool defaultRes)
+{
+    auto checkFunc = checkThreadFunc_.load(std::memory_order_acquire);
+    if (checkFunc == nullptr) {
+        return defaultRes;
+    }
+    return checkFunc(currentId, defaultRes);
+}
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
 bool trackingEnabled_ = false;
@@ -307,6 +317,11 @@ int32_t ContainerScope::CurrentId()
     return currentId_;
 }
 
+void ContainerScope::RegisterThreadCheckFunc(CheckRunOnUIThreadFunc checkFunc)
+{
+    checkThreadFunc_.store(checkFunc, std::memory_order_release);
+}
+
 void ContainerScope::UpdateLocalCurrent(int32_t id)
 {
     currentLocalId_ = id;
@@ -345,7 +360,7 @@ int32_t ContainerScope::RecentForegroundId()
     return recentForegroundId_.load(std::memory_order_relaxed);
 }
 
-int32_t ContainerScope::SafelyId()
+int32_t ContainerScope::SafelyId(bool checkThread)
 {
     uint32_t containerCount = ContainerCount();
     if (containerCount == 0) {
@@ -355,17 +370,22 @@ int32_t ContainerScope::SafelyId()
         return SingletonId();
     }
     int32_t currentId = RecentActiveId();
-    if (currentId >= 0) {
-        return currentId;
+    if (currentId < 0) {
+        currentId = RecentForegroundId();
     }
-    currentId = RecentForegroundId();
     if (currentId >= 0) {
-        return currentId;
+        if (checkThread && currentLocalId_ != DEFAULT_ID &&
+            !CheckRunOnUIThread(currentId, true) &&
+            CheckRunOnUIThread(currentLocalId_, true)) {
+            return currentLocalId_;
+        } else {
+            return currentId;
+        }
     }
     return DefaultId();
 }
 
-std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
+std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason(bool checkThread)
 {
     int32_t currentId = CurrentId();
     if (currentId >= 0) {
@@ -379,12 +399,19 @@ std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
         return { SingletonId(), InstanceIdGenReason::SINGLETON };
     }
     currentId = ContainerScope::RecentActiveId();
-    if (currentId >= 0) {
-        return { currentId, InstanceIdGenReason::ACTIVE };
+    InstanceIdGenReason reason = InstanceIdGenReason::ACTIVE;
+    if (currentId < 0) {
+        currentId = RecentForegroundId();
+        reason = InstanceIdGenReason::FOREGROUND;
     }
-    currentId = ContainerScope::RecentForegroundId();
     if (currentId >= 0) {
-        return { currentId, InstanceIdGenReason::FOREGROUND };
+        if (checkThread && currentLocalId_ != DEFAULT_ID &&
+            !CheckRunOnUIThread(currentId, true) &&
+            CheckRunOnUIThread(currentLocalId_, true)) {
+            return { currentLocalId_, InstanceIdGenReason::LOCAL };
+        } else {
+            return { currentId, reason };
+        }
     }
     return { ContainerScope::DefaultId(), InstanceIdGenReason::DEFAULT };
 }
@@ -402,6 +429,8 @@ const std::string ContainerScope::ReasonToDescription(InstanceIdGenReason reason
             return "No specific instance was specified, return the only remaining instance";
         case InstanceIdGenReason::FOREGROUND:
             return "No specific instance was specified, return the foreground instance";
+        case InstanceIdGenReason::LOCAL:
+            return "No specific instance was specified, return the local thread instance";
         case InstanceIdGenReason::UNDEFINED:
             return "No valid instance exists";
         default:
