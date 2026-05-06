@@ -113,6 +113,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Menu", "menu" },
         { "MenuItem", "menu" },
         { "MenuItemGroup", "menu" },
+        { "LazyColumnLayout", "lazycolumnlayout" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

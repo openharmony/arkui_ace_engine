@@ -232,6 +232,7 @@ enum AceLogTag : uint8_t {
     ACE_IMAGE_GENERATION = 99,     // C03963
     ACE_COLOR_SAMPLER = 100,       // C03964
     ACE_DEPTH_COMPONENT = 101,     // C03965
+    ACE_LAZY_COLUMN = 102,         // C03966
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };

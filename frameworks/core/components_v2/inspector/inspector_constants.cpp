@@ -695,4 +695,7 @@ const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
 
 // Custom
 const char CUSTOM_ETS_TAG[] = "Custom";
+
+// LazyColumnLayout
+const char LAZY_COLUMN_LAYOUT_ETS_TAG[] = "LazyColumnLayout";
 } // namespace OHOS::Ace::V2

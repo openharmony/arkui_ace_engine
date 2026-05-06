@@ -1400,6 +1400,7 @@ enum ArkUINodeType {
     ARKUI_UNDEFINED,
     ARKUI_PICKER,
     ARKUI_RICH_EDITOR,
+    ARKUI_LAZY_COLUMN_LAYOUT,
 };
 
 enum ArkUIEventCategory {
@@ -1651,6 +1652,8 @@ enum ArkUIEventSubKind {
     ON_RICH_EDITOR_ON_COPY,
     ON_RICH_EDITOR_ON_WILL_CHANGE,
     ON_RICH_EDITOR_ON_DID_CHANGE,
+
+    ON_LAZY_COLUMN_LAYOUT_SCROLL_INDEX = ARKUI_MAX_EVENT_NUM * ARKUI_LAZY_COLUMN_LAYOUT,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -4716,6 +4719,16 @@ struct ArkUILazyGridLayoutModifier {
     void (*resetRowsGap)(ArkUINodeHandle node);
     void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
+};
+
+struct ArkUILazyColumnLayoutModifier {
+    void (*create)();
+    void (*setSpace)(ArkUINodeHandle node, const struct ArkUIResourceLength* space);
+    void (*resetSpace)(ArkUINodeHandle node);
+    void (*setAlignItems)(ArkUINodeHandle node, ArkUI_Int32 align);
+    void (*resetAlignItems)(ArkUINodeHandle node);
+    void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIEmbeddedComponentModifier {
@@ -9271,6 +9284,7 @@ struct ArkUINodeModifiers {
     const ArkUIAtomicServiceModifier* (*getAtomicServiceModifier)();
     const ArkUIMatrix4Modifier* (*getMatrix4Modifier)();
     const ArkUIDynamicLayoutModifier* (*getDynamicLayoutModifier)();
+    const ArkUILazyColumnLayoutModifier* (*getLazyColumnLayoutModifier)();
 };
 
 // same as inner defines in property.h

@@ -27685,6 +27685,79 @@ globalThis.LazyVGridLayout.attributeModifier = function (modifier) {
 };
 }
 
+class ArkLazyColumnLayoutComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  space(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnLayoutSpaceModifier.identity, LazyColumnLayoutSpaceModifier, value);
+    return this;
+  }
+  alignItems(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnLayoutAlignItemsModifier.identity, LazyColumnLayoutAlignItemsModifier, value);
+    return this;
+  }
+  onVisibleIndexesChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnLayoutOnVisibleIndexesChangeModifier.identity, LazyColumnLayoutOnVisibleIndexesChangeModifier, callback);
+    return this;
+  }
+}
+class LazyColumnLayoutSpaceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().lazyColumnLayout.resetSpace(node);
+    }
+    else {
+      getUINativeModule().lazyColumnLayout.setSpace(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyColumnLayoutSpaceModifier.identity = Symbol('lazyColumnLayoutSpace');
+class LazyColumnLayoutAlignItemsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isNumber(this.value)) {
+      getUINativeModule().lazyColumnLayout.resetAlignItems(node);
+    }
+    else {
+      getUINativeModule().lazyColumnLayout.setAlignItems(node, this.value);
+    }
+  }
+}
+LazyColumnLayoutAlignItemsModifier.identity = Symbol('lazyColumnLayoutAlignItems');
+class LazyColumnLayoutOnVisibleIndexesChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isFunction(this.value)) {
+      getUINativeModule().lazyColumnLayout.resetOnVisibleIndexesChange(node);
+    }
+    else {
+      getUINativeModule().lazyColumnLayout.setOnVisibleIndexesChange(node, this.value);
+    }
+  }
+}
+LazyColumnLayoutOnVisibleIndexesChangeModifier.identity = Symbol('lazyColumnLayoutOnVisibleIndexesChange');
+// @ts-ignore
+if (globalThis.LazyColumnLayout !== undefined) {
+globalThis.LazyColumnLayout.attributeModifier = function (modifier) {
+  attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    return new ArkLazyColumnLayoutComponent(nativePtr);
+  }, (nativePtr, classType, modifierJS) => {
+    return new modifierJS.LazyColumnLayoutModifier(nativePtr, classType);
+  });
+};
+}
+
 class ArkContainerPickerComponent extends ArkComponent {
     constructor(nativePtr, classType) {
     super(nativePtr, classType);

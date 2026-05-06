@@ -203,6 +203,7 @@ build_component_ng("pattern_ng") {
     "image_animator/image_animator_model_static.cpp",
     "image_animator/image_animator_pattern.cpp",
     "image_animator/image_animator_pattern_multi_thread.cpp",
+    "lazy_layout/lazy_layout_utils.cpp",
     "lazy_layout/grid_layout/lazy_grid_layout_algorithm.cpp",
     "lazy_layout/grid_layout/lazy_grid_layout_info.cpp",
     "lazy_layout/grid_layout/lazy_grid_layout_model.cpp",

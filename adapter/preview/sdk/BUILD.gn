@@ -166,6 +166,7 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:alphabetindexer",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:symbolglyph",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:richeditor",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:lazycolumnlayout",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgauge",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkdatapanel",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextclock",
@@ -212,6 +213,7 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkalphabetindexer.abc",
       "${out_path}/arkui/ace_engine/arksymbolglyph.abc",
       "${out_path}/arkui/ace_engine/arkricheditor.abc",
+      "${out_path}/arkui/ace_engine/arklazycolumnlayout.abc",
     ]
     if (!ace_engine_feature_wearable) { 
       sources += [
