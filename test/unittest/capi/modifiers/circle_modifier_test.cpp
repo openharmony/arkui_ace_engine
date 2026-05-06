@@ -18,6 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
+#include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 using namespace testing;
@@ -30,6 +31,10 @@ namespace  {
 
     const auto ATTRIBUTE_HEIGHT_NAME = "height";
     const auto ATTRIBUTE_HEIGHT_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_STROKE_NAME = "stroke";
+    const auto ATTRIBUTE_FILL_NAME = "fill";
+    const auto ATTRIBUTE_FOREGROUND_COLOR_NAME = "foregroundColor";
+    const auto ATTRIBUTE_COLOR_DEFAULT_VALUE = "#FF000000";
 } // namespace
 
 class CircleModifierTest : public ModifierTestBase<GENERATED_ArkUICircleModifier,
@@ -49,6 +54,104 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestDefaultValues, TestSize.Level1)
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
     EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
+}
+
+/*
+ * @tc.name: setStrokeTestResourceColorAndColorMetrics
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CircleModifierTest, setStrokeTestResourceColorAndColorMetrics, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setStroke, nullptr);
+    const auto RES_NAME = NamedResourceId { "circle.stroke.test", ResourceType::COLOR };
+    AddResource(RES_NAME, Color::RED);
+
+    const auto initialValue = GetAttrValue<std::string>(node_, ATTRIBUTE_STROKE_NAME);
+    EXPECT_THAT(initialValue, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE));
+
+    const std::vector<std::pair<Ark_ResourceColor, std::string>> resourcePlan = {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+        { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), Color::RED.ToString() },
+    };
+
+    for (const auto& [resourceColor, expected] : resourcePlan) {
+        auto inputValue =
+            Converter::ArkUnion<Opt_Union_ResourceColor_ColorMetricsExt, Ark_ResourceColor>(resourceColor);
+        modifier_->setStroke(node_, &inputValue);
+        const auto actualValue = GetAttrValue<std::string>(node_, ATTRIBUTE_STROKE_NAME);
+        EXPECT_THAT(actualValue, Eq(expected));
+    }
+
+    Ark_ColorMetricsExt colorMetrics = {
+        .red = 0x11,
+        .green = 0x22,
+        .blue = 0x33,
+        .alpha = 0xAA,
+        .colorSpace = ARK_COLOR_SPACE_SRGB,
+        .resourceId = 0,
+        .redValue = 0.0,
+        .greenValue = 0.0,
+        .blueValue = 0.0,
+        .headRoom = 1.0,
+        .isHDR = false,
+    };
+    auto metricsValue = Converter::ArkUnion<Opt_Union_ResourceColor_ColorMetricsExt, Ark_ColorMetricsExt>(colorMetrics);
+    modifier_->setStroke(node_, &metricsValue);
+    const auto metricsResult = GetAttrValue<std::string>(node_, ATTRIBUTE_STROKE_NAME);
+    EXPECT_THAT(metricsResult, Eq("#AA112233"));
+
+    auto resetValue = Converter::ArkValue<Opt_Union_ResourceColor_ColorMetricsExt>(Ark_Empty());
+    modifier_->setStroke(node_, &resetValue);
+    const auto resetResult = GetAttrValue<std::string>(node_, ATTRIBUTE_STROKE_NAME);
+    EXPECT_THAT(resetResult, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE));
+}
+
+/*
+ * @tc.name: setFillTestColorMetricsAndResetSemantics
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CircleModifierTest, setFillTestColorMetricsAndResetSemantics, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFill, nullptr);
+    ASSERT_NE(commonModifier_->setForegroundColor, nullptr);
+
+    auto foregroundValue = Converter::ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x445566));
+    commonModifier_->setForegroundColor(node_, &foregroundValue);
+    auto foregroundResult = GetAttrValue<std::string>(node_, ATTRIBUTE_FOREGROUND_COLOR_NAME);
+    EXPECT_THAT(foregroundResult, Eq("#FF445566"));
+
+    Ark_ColorMetricsExt colorMetrics = {
+        .red = 0x66,
+        .green = 0x77,
+        .blue = 0x88,
+        .alpha = 0xCC,
+        .colorSpace = ARK_COLOR_SPACE_SRGB,
+        .resourceId = 0,
+        .redValue = 0.0,
+        .greenValue = 0.0,
+        .blueValue = 0.0,
+        .headRoom = 1.0,
+        .isHDR = false,
+    };
+    auto fillValue = Converter::ArkUnion<Opt_Union_ResourceColor_ColorMetricsExt, Ark_ColorMetricsExt>(colorMetrics);
+    modifier_->setFill(node_, &fillValue);
+
+    auto fillResult = GetAttrValue<std::string>(node_, ATTRIBUTE_FILL_NAME);
+    EXPECT_THAT(fillResult, Eq("#CC667788"));
+    foregroundResult = GetAttrValue<std::string>(node_, ATTRIBUTE_FOREGROUND_COLOR_NAME);
+    EXPECT_THAT(foregroundResult, Eq("#CC667788"));
+
+    auto resetValue = Converter::ArkValue<Opt_Union_ResourceColor_ColorMetricsExt>(Ark_Empty());
+    modifier_->setFill(node_, &resetValue);
+
+    fillResult = GetAttrValue<std::string>(node_, ATTRIBUTE_FILL_NAME);
+    EXPECT_THAT(fillResult, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE));
+    foregroundResult = GetAttrValue<std::string>(node_, ATTRIBUTE_FOREGROUND_COLOR_NAME);
+    EXPECT_FALSE(foregroundResult.has_value());
 }
 
 /*

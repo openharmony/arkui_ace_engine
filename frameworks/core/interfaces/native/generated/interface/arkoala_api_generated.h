@@ -24004,6 +24004,10 @@ typedef struct GENERATED_ArkUICircleModifier {
                                    Ark_Int32 flags);
     void (*setCircleOptions)(Ark_NativePointer node,
                              const Opt_CircleOptions* options);
+    void (*setStroke)(Ark_NativePointer node,
+                      const Opt_Union_ResourceColor_ColorMetricsExt* value);
+    void (*setFill)(Ark_NativePointer node,
+                    const Opt_Union_ResourceColor_ColorMetricsExt* value);
 } GENERATED_ArkUICircleModifier;
 
 typedef struct GENERATED_ArkUIColumnModifier {
@@ -32564,4 +32568,3 @@ struct OH_AnyAPI {
 /* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
-

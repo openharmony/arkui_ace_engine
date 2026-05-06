@@ -179,6 +179,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CircleInterface_setCircleOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _CircleAttribute_setStroke(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _CircleAttribute_setFill(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _Column_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _ColumnInterface_setColumnOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
