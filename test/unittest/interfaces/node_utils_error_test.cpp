@@ -32,12 +32,12 @@ public:
 };
 
 /**
- * @tc.name: NodeUtilsErrorTest_NodeUtils_GetLayoutSize_NullNode_001
+ * @tc.name: NodeUtilsErrorTest_NodeUtils_GetLayoutSize_NullNode
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutSize with null node parameter.
  *           Verifies SET_ERROR_MESSAGE triggers and returns ERROR_CODE_PARAM_INVALID.
  * @tc.type: FUNC
  */
-HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutSize_NullNode_001, TestSize.Level1)
+HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutSize_NullNode, TestSize.Level1)
 {
     ArkUI_IntSize size;
     int32_t result = OH_ArkUI_NodeUtils_GetLayoutSize(nullptr, &size);
@@ -45,12 +45,12 @@ HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutSize_NullNode_001, TestSize.Leve
 }
 
 /**
- * @tc.name: NodeUtilsErrorTest_NodeUtils_GetLayoutPosition_NullNode_001
+ * @tc.name: NodeUtilsErrorTest_NodeUtils_GetLayoutPosition_NullNode
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPosition with null node parameter.
  *           Verifies SET_ERROR_MESSAGE triggers and returns ERROR_CODE_PARAM_INVALID.
  * @tc.type: FUNC
  */
-HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPosition_NullNode_001, TestSize.Level1)
+HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPosition_NullNode, TestSize.Level1)
 {
     ArkUI_IntOffset localOffset;
     int32_t result = OH_ArkUI_NodeUtils_GetLayoutPosition(nullptr, &localOffset);
@@ -58,12 +58,12 @@ HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPosition_NullNode_001, TestSize.
 }
 
 /**
- * @tc.name: NodeUtilsErrorTest_NodeUtils_GetLayoutPositionInWindow_NullNode_001
+ * @tc.name: NodeUtilsErrorTest_NodeUtils_GetLayoutPositionInWindow_NullNode
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPositionInWindow with null node parameter.
  *           Verifies SET_ERROR_MESSAGE triggers and returns ERROR_CODE_PARAM_INVALID.
  * @tc.type: FUNC
  */
-HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPositionInWindow_NullNode_001, TestSize.Level1)
+HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPositionInWindow_NullNode, TestSize.Level1)
 {
     ArkUI_IntOffset globalOffset;
     int32_t result = OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(nullptr, &globalOffset);
@@ -71,12 +71,12 @@ HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPositionInWindow_NullNode_001, T
 }
 
 /**
- * @tc.name: NodeUtilsErrorTest_NodeUtils_GetLayoutPositionInScreen_NullNode_001
+ * @tc.name: NodeUtilsErrorTest_NodeUtils_GetLayoutPositionInScreen_NullNode
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPositionInScreen with null node parameter.
  *           Verifies SET_ERROR_MESSAGE triggers and returns ERROR_CODE_PARAM_INVALID.
  * @tc.type: FUNC
  */
-HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPositionInScreen_NullNode_001, TestSize.Level1)
+HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPositionInScreen_NullNode, TestSize.Level1)
 {
     ArkUI_IntOffset screenOffset;
     int32_t result = OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(nullptr, &screenOffset);
@@ -84,12 +84,12 @@ HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetLayoutPositionInScreen_NullNode_001, T
 }
 
 /**
- * @tc.name: NodeUtilsErrorTest_NodeUtils_GetPositionWithTranslateInWindow_NullNode_001
+ * @tc.name: NodeUtilsErrorTest_NodeUtils_GetPositionWithTranslateInWindow_NullNode
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow with null node parameter.
  *           Verifies SET_ERROR_MESSAGE triggers and returns ERROR_CODE_PARAM_INVALID.
  * @tc.type: FUNC
  */
-HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetPositionWithTranslateInWindow_NullNode_001, TestSize.Level1)
+HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetPositionWithTranslateInWindow_NullNode, TestSize.Level1)
 {
     ArkUI_IntOffset translateOffset;
     int32_t result = OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(nullptr, &translateOffset);
@@ -97,12 +97,12 @@ HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetPositionWithTranslateInWindow_NullNode
 }
 
 /**
- * @tc.name: NodeUtilsErrorTest_NodeUtils_GetPositionWithTranslateInScreen_NullNode_001
+ * @tc.name: NodeUtilsErrorTest_NodeUtils_GetPositionWithTranslateInScreen_NullNode
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen with null node parameter.
  *           Verifies SET_ERROR_MESSAGE triggers and returns ERROR_CODE_PARAM_INVALID.
  * @tc.type: FUNC
  */
-HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetPositionWithTranslateInScreen_NullNode_001, TestSize.Level1)
+HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetPositionWithTranslateInScreen_NullNode, TestSize.Level1)
 {
     ArkUI_IntOffset translateOffset;
     int32_t result = OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(nullptr, &translateOffset);

@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/styled_string_impl.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -526,7 +527,11 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor)
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "UnmarshallStyledStringDescriptor");
-    CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (!(buffer && descriptor && bufferSize > 0)) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID,
+            "buffer, descriptor, or bufferSize is invalid");
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
     MutableSpanString* spanString = new MutableSpanString(u"");
     spanString->DecodeTlvExt(vec, spanString, nullptr);
@@ -538,13 +543,23 @@ ArkUI_Int32 MarshallStyledStringDescriptor(
     uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor, size_t* resultSize)
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "MarshallStyledStringDescriptor");
-    CHECK_NULL_RETURN(buffer && resultSize && descriptor, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(descriptor->spanString, ArkUI_ErrorCode::ARKUI_ERROR_CODE_INVALID_STYLED_STRING);
+    if (!(buffer && resultSize && descriptor)) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID,
+            "buffer, resultSize, or descriptor is null");
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!descriptor->spanString) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ArkUI_ErrorCode::ARKUI_ERROR_CODE_INVALID_STYLED_STRING,
+            "descriptor spanString is null");
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_INVALID_STYLED_STRING;
+    }
     auto spanStringRawPtr = reinterpret_cast<SpanString*>(descriptor->spanString);
     std::vector<uint8_t> tlvData;
     spanStringRawPtr->EncodeTlv(tlvData);
     *resultSize = tlvData.size();
     if (bufferSize < *resultSize) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID,
+            "bufferSize is smaller than the required size");
         return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto data = tlvData.data();
