@@ -1515,11 +1515,9 @@ HWTEST_F(SelectTestNg, SetSpinnerColorByUser001, TestSize.Level1)
      */
     props->UpdateArrowModifierSetByUser(false);
     selectPattern->SetSpinnerColorByUser(theme, props);
-    const auto& fontStyle = spinnerLayoutProperty->GetFontStyle();
-    ASSERT_NE(fontStyle, nullptr);
-    ASSERT_TRUE(fontStyle->GetSymbolColorList().has_value());
-    ASSERT_FALSE(fontStyle->GetSymbolColorList()->empty());
-    EXPECT_EQ(fontStyle->GetSymbolColorList()->front(), Color::RED);
+    ASSERT_TRUE(spinnerLayoutProperty->GetSymbolColorList().has_value());
+    ASSERT_FALSE(spinnerLayoutProperty->GetSymbolColorList()->empty());
+    EXPECT_EQ(spinnerLayoutProperty->GetSymbolColorList()->front(), Color::RED);
 
     /**
      * @tc.steps: step4. ArrowModifierSetByUser = true, call SetSpinnerColorByUser.
@@ -1527,11 +1525,9 @@ HWTEST_F(SelectTestNg, SetSpinnerColorByUser001, TestSize.Level1)
      */
     props->UpdateArrowModifierSetByUser(true);
     selectPattern->SetSpinnerColorByUser(theme, props);
-    const auto& fontStyle1 = spinnerLayoutProperty->GetFontStyle();
-    ASSERT_NE(fontStyle1, nullptr);
-    ASSERT_TRUE(fontStyle1->GetSymbolColorList().has_value());
-    ASSERT_FALSE(fontStyle1->GetSymbolColorList()->empty());
-    EXPECT_EQ(fontStyle1->GetSymbolColorList()->front(), theme->GetSpinnerSymbolColor());
+    ASSERT_TRUE(spinnerLayoutProperty->GetSymbolColorList().has_value());
+    ASSERT_FALSE(spinnerLayoutProperty->GetSymbolColorList()->empty());
+    EXPECT_EQ(spinnerLayoutProperty->GetSymbolColorList()->front(), theme->GetSpinnerSymbolColor());
 }
 
 /**
@@ -1577,11 +1573,9 @@ HWTEST_F(SelectTestNg, SetSpinnerColorByUser002, TestSize.Level1)
      * @tc.expected: Function returns safely and symbol color remains unchanged.
      */
     pattern->SetSpinnerColorByUser(theme, nullptr);
-    const auto& fontStyle = spinnerLayoutProperty->GetFontStyle();
-    ASSERT_NE(fontStyle, nullptr);
-    ASSERT_TRUE(fontStyle->GetSymbolColorList().has_value());
-    ASSERT_FALSE(fontStyle->GetSymbolColorList()->empty());
-    EXPECT_EQ(fontStyle->GetSymbolColorList()->front(), Color::RED);
+    ASSERT_TRUE(spinnerLayoutProperty->GetSymbolColorList().has_value());
+    ASSERT_FALSE(spinnerLayoutProperty->GetSymbolColorList()->empty());
+    EXPECT_EQ(spinnerLayoutProperty->GetSymbolColorList()->front(), Color::RED);
 }
 
 /**

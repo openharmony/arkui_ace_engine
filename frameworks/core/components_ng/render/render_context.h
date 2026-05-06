@@ -45,10 +45,11 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 
+
+struct ParticleOptionArrayStorage;
 namespace OHOS::Rosen {
 class DrawCmdList;
 class VisualEffect;
@@ -171,14 +172,14 @@ public:
 
     virtual void SetExtraOffset(const std::optional<OffsetF>& offset) {};
 
+    virtual void IncrementGeometryTransitionCounter() {}
+    virtual void DecrementGeometryTransitionCounter() {}
+    virtual void ClearGeometryTransitionCounter() {}
+    virtual bool IsGeometryTransitionAnimating() const { return false; }
+
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
-    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
-
-    virtual bool HasSandBox() const
-    {
-        return false;
-    }
+    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {}
 
     virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
 
@@ -663,7 +664,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderSourceFromImage, bool);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ExcludeFromRenderGroup, bool);
@@ -703,8 +703,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBackShadow, Shadow);
-
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
@@ -714,8 +712,12 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashGap, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashWidth, BorderWidthProperty);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBorderWidth, BorderWidthProperty);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBorderColor, BorderColorProperty);
+    // Material
+    ACE_DEFINE_PROPERTY_GROUP(MaterialPreParams, MaterialPreProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBackgroundColor, Color);
 
     // Outer Border
     ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);

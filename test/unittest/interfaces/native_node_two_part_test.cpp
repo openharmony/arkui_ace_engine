@@ -35,6 +35,8 @@
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "event/ui_input_event_impl.h"
+#include "ui_input_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -226,6 +228,8 @@ HWTEST_F(NativeNodeTwoPartTest, NativeFriction001, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SCROLL_FRICTION, &zeroSizeItem),
         ARKUI_ERROR_CODE_PARAM_INVALID);
 
+    frameNode->context_ = nullptr;
+    NG::ViewStackProcessor::GetInstance()->ClearStack();
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -1366,6 +1370,103 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeCanLoopTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeDisplayedItemCountTest
+ * @tc.desc: Test Picker displayed item count.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeDisplayedItemCountTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_NumberValue value[] = { {.i32 = 8} };
+    ArkUI_AttributeItem item = {
+        value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    auto ret = nodeAPI->setAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 9);
+
+    ArkUI_NumberValue abnormalValue[] = { {.i32 = 100} };
+    ArkUI_AttributeItem abnormalItem = {
+        abnormalValue, sizeof(abnormalValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT, &abnormalItem),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 7);
+
+    ArkUI_NumberValue minBoundaryValue[] = { {.i32 = 2} };
+    ArkUI_AttributeItem minBoundaryItem = {
+        minBoundaryValue, sizeof(minBoundaryValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT, &minBoundaryItem),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 3);
+
+    ArkUI_NumberValue maxBoundaryValue[] = { {.i32 = 9} };
+    ArkUI_AttributeItem maxBoundaryItem = {
+        maxBoundaryValue, sizeof(maxBoundaryValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT, &maxBoundaryItem),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 9);
+
+    EXPECT_EQ(
+        nodeAPI->resetAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 7);
+    nodeAPI->disposeNode(picker);
+}
+
+/**
+ * @tc.name: NativeNodeItemHeightTest
+ * @tc.desc: Test Picker item height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeItemHeightTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_NumberValue value[] = { {.f32 = 50.0f} };
+    ArkUI_AttributeItem item = {
+        value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    auto ret = nodeAPI->setAttribute(picker, NODE_PICKER_ITEM_HEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 50.0f);
+
+    ArkUI_NumberValue abnormalValue[] = { {.f32 = 10.0f} };
+    ArkUI_AttributeItem abnormalItem = {
+        abnormalValue, sizeof(abnormalValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_ITEM_HEIGHT, &abnormalItem), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 40.0f);
+
+    ArkUI_NumberValue minBoundaryValue[] = { {.f32 = 40.0f} };
+    ArkUI_AttributeItem minBoundaryItem = {
+        minBoundaryValue, sizeof(minBoundaryValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_ITEM_HEIGHT, &minBoundaryItem), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 40.0f);
+
+    ArkUI_NumberValue maxBoundaryValue[] = { {.f32 = 64.0f} };
+    ArkUI_AttributeItem maxBoundaryItem = {
+        maxBoundaryValue, sizeof(maxBoundaryValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_ITEM_HEIGHT, &maxBoundaryItem), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 64.0f);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(picker, NODE_PICKER_ITEM_HEIGHT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 40.0f);
+    nodeAPI->disposeNode(picker);
+}
+
+/**
  * @tc.name: NativeNodeSelectionIndicatorTest
  * @tc.desc: Test Picker selection indicator.
  * @tc.type: FUNC
@@ -2092,6 +2193,70 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridScrollByTest004, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_SCROLL_BY, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeCreateClonedEventNullTouchPoints001
+ * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent returns 401 when touchPointSize > 0 but touchPointes is NULL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeCreateClonedEventNullTouchPoints001, TestSize.Level1)
+{
+    ArkUITouchEvent touchEvent {};
+    touchEvent.touchPointSize = 1;
+
+    ArkUI_UIInputEvent inputEvent {};
+    inputEvent.inputEvent = &touchEvent;
+    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+
+    ArkUI_UIInputEvent* clonedEvent = nullptr;
+    auto res = OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
+    EXPECT_EQ(res, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeCreateClonedEventNullHistoryEvents001
+ * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent returns 401 when historySize > 0 but historyEvents is NULL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeCreateClonedEventNullHistoryEvents001, TestSize.Level1)
+{
+    ArkUITouchEvent touchEvent {};
+    touchEvent.historySize = 1;
+
+    ArkUI_UIInputEvent inputEvent {};
+    inputEvent.inputEvent = &touchEvent;
+    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+
+    ArkUI_UIInputEvent* clonedEvent = nullptr;
+    auto res = OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
+    EXPECT_EQ(res, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeCreateClonedEventNullHistoryTouchPoints001
+ * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent must not crash when a history entry has
+ *           touchPointSize > 0 but touchPointes is NULL; SetHistoryTouchEvent skips the bad entry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeCreateClonedEventNullHistoryTouchPoints001, TestSize.Level1)
+{
+    ArkUIHistoryTouchEvent historyEntry {};
+    historyEntry.touchPointSize = 1;
+
+    ArkUITouchEvent touchEvent {};
+    touchEvent.historySize = 1;
+    touchEvent.historyEvents = &historyEntry;
+
+    ArkUI_UIInputEvent inputEvent {};
+    inputEvent.inputEvent = &touchEvent;
+    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+
+    ArkUI_UIInputEvent* clonedEvent = nullptr;
+    OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
+    if (clonedEvent) {
+        OH_ArkUI_PointerEvent_DestroyClonedEvent(clonedEvent);
+    }
 }
 
 } // namespace OHOS::Ace

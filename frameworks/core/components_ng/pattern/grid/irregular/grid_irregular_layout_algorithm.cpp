@@ -186,10 +186,13 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 }
 
 namespace {
-inline void PrepareJumpOnReset(GridLayoutInfo& info)
+inline void PrepareJumpOnReset(GridLayoutInfo& info, float* postJumpOffset)
 {
-    info.jumpIndex_ = std::min(info.startIndex_, info.childrenCount_ - 1);
-    info.scrollAlign_ = ScrollAlign::START;
+    if (info.jumpIndex_ == EMPTY_JUMP_INDEX) {
+        *postJumpOffset = info.currentOffset_;
+        info.jumpIndex_ = std::min(info.startIndex_, info.childrenCount_ - 1);
+        info.scrollAlign_ = ScrollAlign::START;
+    }
 }
 inline void ResetMaps(GridLayoutInfo& info)
 {
@@ -212,8 +215,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
     if (info_.IsResetted() ||
         (info_.gridMatrix_.empty() && info_.startIndex_ == 0 && !NearZero(info_.currentOffset_))) {
         // reset layout info_ and perform jump to current startIndex
-        postJumpOffset_ = info_.currentOffset_;
-        PrepareJumpOnReset(info_);
+        PrepareJumpOnReset(info_, &postJumpOffset_);
         ResetMaps(info_);
         ResetLayoutRange(info_);
         ResetFocusedIndex(wrapper_);
@@ -229,8 +231,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
             info_.ClearMatrixToEnd(updateIdx, it->first);
         }
         if (updateIdx <= info_.endIndex_) {
-            postJumpOffset_ = info_.currentOffset_;
-            PrepareJumpOnReset(info_);
+            PrepareJumpOnReset(info_, &postJumpOffset_);
             ResetLayoutRange(info_);
             ResetFocusedIndex(wrapper_);
         }
@@ -244,9 +245,8 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         auto mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
         overscrollOffsetBeforeJump_ =
             -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
-        postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
-        PrepareJumpOnReset(info_);
+        PrepareJumpOnReset(info_, &postJumpOffset_);
         ResetLayoutRange(info_);
         ResetFocusedIndex(wrapper_);
         return;
@@ -254,9 +254,8 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
 
     if (wrapper_->ConstraintChanged()) {
         // need to remeasure all items in current view
-        postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
-        PrepareJumpOnReset(info_);
+        PrepareJumpOnReset(info_, &postJumpOffset_);
     }
 }
 
@@ -372,7 +371,11 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
         MeasureOnOffset(mainSize);
     }
     if (!NearZero(postJumpOffset_)) {
-        info_.currentOffset_ = postJumpOffset_;
+        if (Positive(info_.currentOffset_)) {
+            info_.currentOffset_ = postJumpOffset_;
+        } else {
+            info_.currentOffset_ += postJumpOffset_;
+        }
         enableSkip_ = false;
         MeasureOnOffset(mainSize);
         return;

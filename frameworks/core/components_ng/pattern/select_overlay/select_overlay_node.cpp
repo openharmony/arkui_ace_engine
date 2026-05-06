@@ -62,6 +62,7 @@
 #include "frameworks/base/utils/measure_util.h"
 
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "frameworks/compatible/components/canvas/rosen_render_custom_paint.h"
@@ -1835,18 +1836,10 @@ RefPtr<FrameNode> GetRightClickMenuWrapper(std::vector<OptionParam>& params,
     if (innerMenuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         auto menu = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
         CHECK_NULL_RETURN(menu, menuWrapper);
-        menu->AllowUseParentTheme(false);
-        menu->SetThemeScopeId(themeScopeId);
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        if (menuPattern) {
-            menuPattern->TextMenuOnThemeScopeUpdate(themeScopeId);
-        }
-        innerMenuNode->AllowUseParentTheme(false);
-        innerMenuNode->SetThemeScopeId(themeScopeId);
-        auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
-        if (innerMenuPattern) {
-            innerMenuPattern->TextMenuOnThemeScopeUpdate(themeScopeId);
-        }
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_RETURN(menuModifier, menuWrapper);
+        menuModifier->textMenuOnThemeScopeUpdate(menu, themeScopeId);
+        menuModifier->textMenuOnThemeScopeUpdate(innerMenuNode, themeScopeId);
     }
     return menuWrapper;
 }

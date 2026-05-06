@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "core/components_ng/pattern/linear_split/linear_split_paint_method.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "base/mousestyle/mouse_style.h"
 
 namespace OHOS::Ace::NG {
 const char COLUMN_SPLIT_ETS_TAG[] = "ColumnSplit";

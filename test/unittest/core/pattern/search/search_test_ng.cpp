@@ -961,11 +961,9 @@ HWTEST_F(SearchTestNg, SetSearchIconSymbolGlyphModofier001, TestSize.Level1)
     auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(symbolLayoutProperty, nullptr);
 
-    const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-    EXPECT_EQ(symbolStyle->GetFontSize(), Dimension(16, DimensionUnit::FP));
+    EXPECT_EQ(symbolLayoutProperty->GetFontSize(), Dimension(16, DimensionUnit::FP));
     std::vector<Color> color = { searchTheme->GetSymbolIconColor() };
-    EXPECT_EQ(symbolStyle->GetSymbolColorList(), color);
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorList(), color);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 
@@ -1121,11 +1119,9 @@ HWTEST_F(SearchTestNg, SetCancelIconSymbolGlyphModofier001, TestSize.Level1)
     auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(symbolLayoutProperty, nullptr);
 
-    const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-    EXPECT_EQ(symbolStyle->GetFontSize(), Dimension(16, DimensionUnit::FP));
+    EXPECT_EQ(symbolLayoutProperty->GetFontSize(), Dimension(16, DimensionUnit::FP));
     std::vector<Color> color = { searchTheme->GetSymbolIconColor() };
-    EXPECT_EQ(symbolStyle->GetSymbolColorList(), color);
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorList(), color);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 

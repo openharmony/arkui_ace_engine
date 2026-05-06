@@ -210,6 +210,7 @@ private:
     PickerDate reportedPickerDate_;
     WeakPtr<FrameNode> titleNode_;
     bool hasInitTitleArrowsColor_ = false;
+    bool hasScopedExplicitColorMode_ = false;
 };
 } // namespace OHOS::Ace::NG
 

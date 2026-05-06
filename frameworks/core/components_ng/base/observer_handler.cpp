@@ -500,6 +500,13 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(c
         if (destNode->GetNavDestinationType() == NavDestinationType::RELATED) {
             break;
         }
+        auto parentNav = AceType::DynamicCast<NavigationGroupNode>(parent);
+        CHECK_NULL_CONTINUE(parentNav);
+        const auto& useHome = parentNav->GetUseHomeDestination();
+        const auto& homeDest = parentNav->GetHomeDestinationNode();
+        if (useHome.has_value() && useHome.value() && current == homeDest) {
+            break;
+        }
     }
     CHECK_NULL_RETURN(current, nullptr);
     return GetNavDestinationInfo(current);
@@ -528,6 +535,13 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(c
         CHECK_NULL_CONTINUE(destNode);
         // related NavDestination in forceSplit mode.
         if (destNode->GetNavDestinationType() == NavDestinationType::RELATED) {
+            break;
+        }
+        auto parentNav = AceType::DynamicCast<NavigationGroupNode>(parent);
+        CHECK_NULL_CONTINUE(parentNav);
+        const auto& useHome = parentNav->GetUseHomeDestination();
+        const auto& homeDest = parentNav->GetHomeDestinationNode();
+        if (useHome.has_value() && useHome.value() && current == homeDest) {
             break;
         }
     }

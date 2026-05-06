@@ -82,6 +82,8 @@ ACE_EXPORT extern const char JS_REPEAT_ETS_TAG[];
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
 // js with theme node
 ACE_EXPORT extern const char JS_WITH_THEME_ETS_TAG[];
+// js with env node
+ACE_EXPORT extern const char JS_WITH_ENV_ETS_TAG[];
 // js node slot node
 ACE_EXPORT extern const char JS_NODE_SLOT_ETS_TAG[];
 // js toast node
@@ -702,5 +704,8 @@ ACE_EXPORT extern const char UNION_EFFECT_CONTAINER_ETS_TAG[];
 
 // Custom
 ACE_EXPORT extern const char CUSTOM_ETS_TAG[];
+
+// LazyColumnLayout
+ACE_EXPORT extern const char LAZY_COLUMN_LAYOUT_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

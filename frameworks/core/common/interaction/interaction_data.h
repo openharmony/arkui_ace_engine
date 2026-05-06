@@ -34,6 +34,10 @@ class PixelMap;
 
 }
 
+namespace OHOS::Rosen {
+class Filter;
+}
+
 namespace OHOS::Ace {
 
 class PixelMap;
@@ -98,6 +102,8 @@ struct DragDataCore {
     std::string summaryTag;
     int32_t materialId { -1 };
     int32_t dragAnimationType { static_cast<int32_t>(DragAnimationType::DEFAULT) };
+    bool isSetMaterialFilter { false };
+    std::shared_ptr<Rosen::Filter> materialFilter { nullptr };
 };
 
 struct DragBundleInfo {

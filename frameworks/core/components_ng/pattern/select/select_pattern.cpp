@@ -1823,11 +1823,9 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
     if (arrowApply_ && spinner_->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
-        const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
-        CHECK_NULL_VOID(symbolStyle);
-        auto fontSize = symbolStyle->GetFontSize();
+        auto fontSize = symbolLayoutProperty->GetFontSize();
         json->PutExtAttr("symbolFontSize", (fontSize.has_value() ? fontSize.value().ToString() : "").c_str(), filter);
-        const std::optional<std::vector<Color>>& colorListOptional = symbolStyle->GetSymbolColorList();
+        const std::optional<std::vector<Color>>& colorListOptional = symbolLayoutProperty->GetSymbolColorList();
         if (colorListOptional.has_value()) {
             std::string colorString = StringUtils::SymbolColorListToString(colorListOptional.value());
             json->PutExtAttr("symbolColorList", colorString.c_str(), filter);
@@ -2465,18 +2463,52 @@ void SelectPattern::SetMenuBackgroundColor(const Color& color)
 
 void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
 {
+    blurStyleOption_.blurStyle = blurStyle.blurStyle;
     CHECK_NULL_VOID(menuWrapper_);
     auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     auto params = wrapperPattern->GetMenuParam();
-    params.blurStyleOption = blurStyle;
+    params.blurStyleOption = blurStyleOption_;
     wrapperPattern->SetMenuParam(params);
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     ACE_UINODE_TRACE(menu);
     auto renderContext = menu->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackBlurStyle(blurStyle);
+    renderContext->UpdateBackBlurStyle(blurStyleOption_);
+}
+
+void SelectPattern::SetMenuBackgroundBlurStyleOptions(const std::optional<BlurStyleOption>& blurStyleOption)
+{
+    blurStyleOption_.colorMode = blurStyleOption->colorMode;
+    blurStyleOption_.adaptiveColor = blurStyleOption->adaptiveColor;
+    blurStyleOption_.scale = blurStyleOption->scale;
+    blurStyleOption_.blurOption = blurStyleOption->blurOption;
+    blurStyleOption_.policy = blurStyleOption->policy;
+    blurStyleOption_.inactiveColor = blurStyleOption->inactiveColor;
+    blurStyleOption_.isValidColor = blurStyleOption->isValidColor;
+    CHECK_NULL_VOID(menuWrapper_);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto params = wrapperPattern->GetMenuParam();
+    params.blurStyleOption = blurStyleOption_;
+    wrapperPattern->SetMenuParam(params);
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurStyle(blurStyleOption_);
+}
+
+void SelectPattern::SetMenuBackgroundEffect(const std::optional<EffectOption>& effectOption)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundEffect(effectOption);
 }
 
 bool SelectPattern::FindOptionIndexByValue(const std::string& value, int32_t& index)

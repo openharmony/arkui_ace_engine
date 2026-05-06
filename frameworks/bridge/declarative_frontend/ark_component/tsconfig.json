@@ -3,7 +3,8 @@
         "types/*.d.ts"
     ],
     "files": [
-        "src/ArkLog.ts"
+        "src/ArkLog.ts",
+        "src/ArkComponent.ts"
     ],
     "compilerOptions": {
         "module": "none",
@@ -15,7 +16,7 @@
         "noEmitOnError": false,
         "experimentalDecorators": true,
         "lib": [
-            "ES2016"
+            "ES2019"
         ]
     }
 }

@@ -18,6 +18,7 @@
 #include <functional>
 #include <unordered_map>
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/flex_property.h"
 
@@ -43,6 +44,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/ui_material_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -5936,8 +5938,10 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
 
     if (preBackgroundColor.has_value()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
     } else {
         renderContext->ResetBackgroundColor();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, false, frameNode);
         renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
         pattern->OnBackgroundColorReset();
     }
@@ -5991,6 +5995,7 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
             return;
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);

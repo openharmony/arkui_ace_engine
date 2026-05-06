@@ -987,7 +987,7 @@ ArkUINativeModuleValue TextInputBridge::SetSelectedBackgroundColor(ArkUIRuntimeC
             color = color.ChangeOpacity(DEFAULT_OPACITY);
         }
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputSelectedBackgroundColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject), false);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1127,7 +1127,7 @@ ArkUINativeModuleValue TextInputBridge::SetFontColor(ArkUIRuntimeCallInfo *runti
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputFontColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject), false);
     }
     return panda::JSValueRef::Undefined(vm);
 }

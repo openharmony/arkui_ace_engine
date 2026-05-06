@@ -64,6 +64,7 @@ ace_unittest("relaxed_interaction_manager_test_ng") {
     "strict_click_executor_test.cpp",
     "strict_content_switch_executor_test.cpp",
     "workflow_dumper_test.cpp",
+    "backpress_command_parser_test.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {

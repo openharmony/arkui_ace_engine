@@ -74,6 +74,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
@@ -84,6 +85,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/pipeline_ng/environment_manager.h"
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/base/inspector.h"
@@ -102,6 +104,8 @@
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -3524,6 +3528,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "OnTouchEvent type:%{public}d, isGenerate:%{public}d",
         static_cast<int32_t>(point.type), point.isGenerate);
     if (ConvertFromMouseAxis(point) && !point.isGenerate && compatibleManager_.NotifyNewEvent(point)) {
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->DelegateTouchEvent(point);
+        }
+        if (point.type == TouchType::MOVE) {
+            RequestFrame();
+        }
         return;
     }
 
@@ -3559,7 +3569,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         formEventMgr->HandleEtsCardTouchEvent(point, etsSerializedGesture);
     }
 
-    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty()) {
+    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty() && !point.isGenerate) {
         eventManager_->DelegateTouchEvent(point);
     }
     auto oriPoint = point;
@@ -4915,7 +4925,7 @@ void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<F
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.mouseAction = event.action;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    if (event.action != MouseAction::MOVE || event.passThrough) {
+    if (event.action != MouseAction::MOVE || isMousePassThrough_ || event.passThrough) {
         eventManager_->MouseTest(scaleEvent, node, touchRestrict);
         eventManager_->DispatchMouseEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -7630,6 +7640,11 @@ void PipelineContext::FlushMouseEventForHover()
     eventManager_->DispatchMouseHoverAnimationNG(event, true);
 }
 
+const RefPtr<NavigationManager>& PipelineContext::GetNavigationManager() const
+{
+    return navigationMgr_;
+}
+
 void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)
 {
     if (point.sourceTool != SourceTool::FINGER || NearZero(point.force)) {
@@ -7987,10 +8002,12 @@ bool PipelineContext::FreeMouseStyleHoldNode()
 
 void PipelineContext::InitManagers()
 {
+    navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    environmentManager_ = MakeRefPtr<EnvironmentManager>();
     recycleManager_ = std::make_unique<RecycleManager>();
 }
 

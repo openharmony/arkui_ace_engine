@@ -97,21 +97,16 @@ extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
-extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkCommon_abc_start[];
 extern const char _binary_arkDynamicComponent_abc_start[];
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 extern const char _binary_jsPreload_abc_start[];
 extern const char _binary_jsPreload_abc_end[];
-#endif
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
-extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkCommon_abc_end[];
 extern const char _binary_arkDynamicComponent_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
-extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkCommon_abc_end;
 extern const char* _binary_arkDynamicComponent_abc_end;
 #endif
@@ -266,13 +261,8 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
 {
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
-    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
-#else
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsPreload_abc_start));
     int32_t codeLength = _binary_jsPreload_abc_end - _binary_jsPreload_abc_start;
-#endif
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
@@ -845,6 +835,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
+        { "LazyColumnLayout", "arkui.components.arklazycolumnlayout" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");

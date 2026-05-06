@@ -386,7 +386,7 @@ public:
     void InitSurfaceChangedCallback();
     void InitSurfacePositionChangedCallback();
     virtual void HandleSurfaceChanged(
-        int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type);
+        int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     virtual void HandleSurfacePositionChanged(int32_t posX, int32_t posY) {};
     bool HasSurfaceChangedCallback()
     {
@@ -771,9 +771,13 @@ public:
     void SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans);
     void SetExternalSpanItemMultiThread(const std::list<RefPtr<SpanItem>>& spans);
 
-    void SetExternalParagraphStyle(std::optional<ParagraphStyle> paragraphStyle)
+    void SetExternalParagraphStyle(const std::optional<ParagraphStyle>& paragraphStyle)
     {
-        externalParagraphStyle_ = paragraphStyle;
+        if (paragraphStyle.has_value()) {
+            externalParagraphStyle_ = std::make_unique<ParagraphStyle>(paragraphStyle.value());
+            return;
+        }
+        externalParagraphStyle_.reset();
     }
 
     TextStyle GetTextStyle()
@@ -788,9 +792,12 @@ public:
         return textStyle_.has_value() ? textStyle_->CheckIsFontSizeOrColorChanged() : false;
     }
 
-    std::optional<ParagraphStyle> GetExternalParagraphStyle()
+    std::optional<ParagraphStyle> GetExternalParagraphStyle() const
     {
-        return externalParagraphStyle_;
+        if (!externalParagraphStyle_) {
+            return std::nullopt;
+        }
+        return *externalParagraphStyle_;
     }
 
     size_t GetLineCount() const override;
@@ -807,17 +814,23 @@ public:
 
     void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
     {
-        selectOverlay_->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
+        auto selectOverlay = GetSelectOverlay();
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
     }
 
     void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
     {
-        selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+        auto selectOverlay = GetSelectOverlay();
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
     }
 
     void OnPrepareMenuCallbackUpdate(const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
     {
-        selectOverlay_->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
+        auto selectOverlay = GetSelectOverlay();
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
     }
     
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
@@ -825,11 +838,6 @@ public:
     void UpdateParentGlobalOffset()
     {
         parentGlobalOffset_ = GetParentGlobalOffset();
-    }
-
-    void SetPrintInfo(const std::string& area, const OffsetF& paintOffset)
-    {
-        paintInfo_ = area + paintOffset.ToString();
     }
 
     void DumpRecord(const std::string& record, bool stateChange = false)
@@ -919,6 +927,7 @@ public:
 
     void ResetCustomFontColor();
     void OnColorConfigurationUpdate() override;
+    void OnColorModeChange(uint32_t colorMode) override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
@@ -1036,6 +1045,7 @@ public:
 
     bool GetFallbackLineSpacingStyleOptimizeFlag();
     bool SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
+    virtual void ClearParagraphCache() {};
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1066,7 +1076,10 @@ protected:
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void RecoverCopyOption();
+    void InitCopyOptionAndOverlay();
+    void InitDefaultTextDraggable();
     void InitCopyOption(const RefPtr<GestureEventHub>& gestureEventHub, const RefPtr<EventHub>& eventHub);
+    void ClearTextDefaultDrag(const RefPtr<GestureEventHub>& gestureEventHub, const RefPtr<EventHub>& eventHub);
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
@@ -1126,6 +1139,7 @@ protected:
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;
     void OnDetachFromMainTreeMultiThread();
+    virtual void OnAttachToMainTreeMultiThreadExtension();
 
     void CreateMultipleClickRecognizer()
     {
@@ -1160,11 +1174,51 @@ protected:
     void HandleSpanStringTouchEvent(TouchEventInfo& info);
     void ShowAIEntityPreviewMenuTimer();
     void PreviewDragNodeHideAnimation();
-    bool enabled_ = true;
+    RefPtr<MutableSpanString> styledString_;
+    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
+    RefPtr<FrameNode> dragNode_;
+    RefPtr<LongPressEvent> longPressEvent_;
+    // Deprecated: Use the selectOverlay_ instead.
+    RefPtr<SelectOverlayProxy> selectOverlayProxy_;
+    RefPtr<Clipboard> clipboard_;
+    RefPtr<TextContentModifier> contentMod_;
+    RefPtr<TextOverlayModifier> overlayMod_;
+    std::vector<int32_t> symbolFontColorResObjIndexArr;
+    std::u16string textForDisplay_;
+    std::string frameRecord_ = "";
+    std::optional<TextStyle> textStyle_;
+    std::list<RefPtr<SpanItem>> spans_;
+    mutable std::list<RefPtr<UINode>> childNodes_;
+    std::vector<RectF> dragBoxes_;
+    std::map<std::pair<TextSpanType, TextResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+    friend class TextContentModifier;
+    struct SubComponentInfoEx {
+        std::optional<AISpan> aiSpan;
+        WeakPtr<SpanItem> span;
+    };
+    // properties for AI
+    RefPtr<DataDetectorAdapter> dataDetectorAdapter_;
+    RefPtr<DataDetectorAdapter> selectDetectorAdapter_;
+    OffsetF parentGlobalOffset_;
+    std::vector<SubComponentInfoEx> subComponentInfos_;
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;
+    WeakPtr<PipelineContext> pipeline_;
+
     Status status_ = Status::NONE;
-    bool contChange_ = false;
+    CopyOptions copyOption_ = CopyOptions::None;
+    SourceType sourceType_ = SourceType::NONE;
+    MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
+    std::optional<TextResponseType> textResponseType_;
+    std::optional<TextSpanType> selectedType_;
+    TextSelectionOptions textSelectionOptions_ = {0, 0, MenuPolicy::DEFAULT};
     int32_t recoverStart_ = 0;
     int32_t recoverEnd_ = 0;
+    int32_t placeholderCount_ = 0;
+    float baselineOffset_ = 0.0f;
+
+    bool enabled_ = true;
+    bool contChange_ = false;
     bool aiSpanHoverEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool spanMouseEventInitialized_ = false;
@@ -1175,62 +1229,18 @@ protected:
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
-    RefPtr<MutableSpanString> styledString_;
     bool keyEventInitialized_ = false;
     bool isShowAIMenuOption_ = false;
     bool isAskCeliaEnabled_ = false;
     bool isShowAskCeliaInRightClick_ = false;
-    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
-
-    RefPtr<FrameNode> dragNode_;
-    RefPtr<LongPressEvent> longPressEvent_;
-    // Deprecated: Use the selectOverlay_ instead.
-    RefPtr<SelectOverlayProxy> selectOverlayProxy_;
-    RefPtr<Clipboard> clipboard_;
-    RefPtr<TextContentModifier> contentMod_;
-    RefPtr<TextOverlayModifier> overlayMod_;
-    CopyOptions copyOption_ = CopyOptions::None;
-    std::vector<int32_t> symbolFontColorResObjIndexArr;
-
-    std::u16string textForDisplay_;
-    std::string paintInfo_ = "NA";
-    std::string frameRecord_ = "NA";
-    std::optional<TextStyle> textStyle_;
-    std::list<RefPtr<SpanItem>> spans_;
-    mutable std::list<RefPtr<UINode>> childNodes_;
-    float baselineOffset_ = 0.0f;
-    int32_t placeholderCount_ = 0;
-    SelectMenuInfo selectMenuInfo_;
-    std::vector<RectF> dragBoxes_;
-    std::map<std::pair<TextSpanType, TextResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
-    std::optional<TextSpanType> selectedType_;
-    SourceType sourceType_ = SourceType::NONE;
-    std::function<void(bool)> isFocusActiveUpdateEvent_;
-
-    friend class TextContentModifier;
-    // properties for AI
     bool textDetectEnable_ = false;
-    RefPtr<DataDetectorAdapter> dataDetectorAdapter_;
-    RefPtr<DataDetectorAdapter> selectDetectorAdapter_;
-    bool selectDetectEnabledIsUserSet_ = false; // Process the logic following interface dataDetectorConfig
+    bool selectDetectEnabledIsUserSet_ = false;
     bool selectDetectEnabled_ = true;
+    bool hasUrlSpan_ = false;
 
-    OffsetF parentGlobalOffset_;
-    std::optional<TextResponseType> textResponseType_;
-
-    struct SubComponentInfoEx {
-        std::optional<AISpan> aiSpan;
-        WeakPtr<SpanItem> span;
-    };
-    std::vector<SubComponentInfoEx> subComponentInfos_;
-    TextSelectionOptions textSelectionOptions_ = {0, 0, MenuPolicy::DEFAULT};
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
-    MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;
     bool ShowShadow(const PointF& textOffset, const Color& color);
     virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
-    bool hasUrlSpan_ = false;
-    WeakPtr<PipelineContext> pipeline_;
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     bool IsSupportAskCelia();
 
@@ -1271,10 +1281,12 @@ private:
     void HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
+    void ResetMouseReleaseState(const MouseInfo& info);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void InitSpanItemEvent(bool& isSpanHasClick, bool& isSpanHasLongPress);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
+    bool ShouldUseDefaultTextDrag() const;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void ProcessBoundRectByTextMarquee(RectF& rect);
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
@@ -1325,8 +1337,8 @@ private:
     void RegisterVisibleAreaChangeCallback();
     void HandleFormVisibleChange(bool visible);
     void RemoveFormVisibleChangeCallback(int32_t id);
-    void GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
-        NG::TextLineStyle& textLineStyle, const std::optional<TextStyle>& textStyle);
+    void GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::TextLineStyle& textLineStyle,
+        NG::SymbolStyle& symbolStyle, const std::optional<TextStyle>& textStyle);
     RefPtr<TaskExecutor> GetTaskExecutorItem();
     void AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanString);
     void AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& pasteData);
@@ -1345,6 +1357,47 @@ private:
     std::u16string GetContentWithPlaceholderSpaceFillter() const;
     std::u16string TextHighlightSelectedContent(int32_t start, int32_t end) const;
 
+    RefPtr<ParagraphManager> pManager_;
+    RefPtr<TextEffect> textEffect_;
+    RefPtr<PreviewMenuController> previewController_;
+    RefPtr<TextController> textController_;
+    RefPtr<TextSelectOverlay> selectOverlay_;
+
+    std::vector<int32_t> placeholderIndex_;
+    std::vector<RectF> rectsForPlaceholders_;
+    std::vector<WeakPtr<FrameNode>> imageNodeList_;
+    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
+    std::optional<int32_t> surfaceChangedCallbackId_;
+    std::optional<int32_t> surfacePositionChangedCallbackId_;
+    std::optional<void*> externalParagraph_;
+    std::unique_ptr<ParagraphStyle> externalParagraphStyle_;
+    WeakPtr<ScrollablePattern> scrollableParent_;
+    std::optional<std::function<void()>> afterLayoutCallback_;
+    GestureEventFunc onClick_;
+    ExternalDrawCallback externalDrawCallback_;
+    std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;
+    std::string textDetectTypes_ = "";
+
+    Offset leftMousePressedOffset_;
+    OffsetF imageOffset_;
+    Offset lastLeftMouseMoveLocation_;
+    // Used to record original caret position for "shift + up/down"
+    // Less than 0 is invalid, initialized as invalid in constructor
+    OffsetF originCaretPosition_;
+    OffsetF gestureSelectTextPaintOffset_;
+
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
+    SourceTool lastDragTool_ = SourceTool::UNKNOWN;
+    int32_t clickedSpanPosition_ = -1;
+    int32_t dragRecordSize_ = -1;
+    TextSpanType oldSelectedType_ = TextSpanType::NONE;
+    // params for ai/url entity dragging
+    // left mouse click(lastLeftMouseClickStyle_ = true) ==> dragging(isTryEntityDragging_ = true)
+    MouseFormat lastLeftMouseClickStyle_ = MouseFormat::DEFAULT;
+    int32_t highlightAppearAnimationId_ = 0;
+    int32_t highlightDisappearAnimationId_ = 0;
+
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
     bool leftMousePressed_ = false;
@@ -1353,68 +1406,24 @@ private:
     bool isDoubleClick_ = false;
     bool isSensitive_ = false;
     bool hasSpanStringLongPressEvent_ = false;
-    int32_t clickedSpanPosition_ = -1;
-    Offset leftMousePressedOffset_;
     bool isEnableHapticFeedback_ = true;
     bool mouseUpAndDownPointChange_ = false;
-
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
     bool spanStringTouchInitialized_ = false;
     bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
-
-    RefPtr<ParagraphManager> pManager_;
-    RefPtr<TextEffect> textEffect_;
-    std::vector<int32_t> placeholderIndex_;
-    std::vector<RectF> rectsForPlaceholders_;
-    OffsetF imageOffset_;
-
-    OffsetF contentOffset_;
-    GestureEventFunc onClick_;
-    double distanceThreshold_ = std::numeric_limits<double>::infinity();
-    RefPtr<DragWindow> dragWindow_;
-    RefPtr<DragDropProxy> dragDropProxy_;
-    RefPtr<PreviewMenuController> previewController_;
-    std::optional<int32_t> surfaceChangedCallbackId_;
-    SourceTool lastDragTool_ = SourceTool::UNKNOWN;
-    std::optional<int32_t> surfacePositionChangedCallbackId_;
-    int32_t dragRecordSize_ = -1;
-    RefPtr<TextController> textController_;
-    TextSpanType oldSelectedType_ = TextSpanType::NONE;
     bool isShowMenu_ = true;
-    RefPtr<TextSelectOverlay> selectOverlay_;
-    std::vector<WeakPtr<FrameNode>> imageNodeList_;
     bool isDetachFromMainTree_ = false;
-    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
-    std::optional<void*> externalParagraph_;
-    std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
-    WeakPtr<ScrollablePattern> scrollableParent_;
-    ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
-    std::optional<std::function<void()>> afterLayoutCallback_;
-    Offset lastLeftMouseMoveLocation_;
     bool isAutoScrollByMouse_ = false;
     bool shiftFlag_ = false;
-    std::string textDetectTypes_ = "";
-    // Used to record original caret position for "shift + up/down"
-    // Less than 0 is invalid, initialized as invalid in constructor
-    OffsetF originCaretPosition_;
     bool hasRegisterFormVisibleCallback_ = false;
-    // params for ai/url entity dragging
-    // left mouse click(lastLeftMouseClickStyle_ = true) ==> dragging(isTryEntityDragging_ = true)
-    MouseFormat lastLeftMouseClickStyle_ = MouseFormat::DEFAULT;
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
-    OffsetF gestureSelectTextPaintOffset_;
-    ExternalDrawCallback externalDrawCallback_;
     bool isMeasured_ = false;
 
-    std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
-    std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;
-
-    int32_t highlightAppearAnimationId_ = 0;
-    int32_t highlightDisappearAnimationId_ = 0;
+    ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 
     friend class OneStepDragController;
     std::unique_ptr<OneStepDragController> oneStepDragController_;

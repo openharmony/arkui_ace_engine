@@ -1255,10 +1255,11 @@ HWTEST_F(TextTestNg, GetSpanItemAttributeUseForHtml, TestSize.Level1)
     textStyle->SetLineHeight(Dimension(2.2));
     NG::FontStyle fontStyle;
     NG::TextLineStyle textLineStyle;
+    NG::SymbolStyle symbolStyle;
     /**
      * @tc.steps: step3. Excute function for GetSpanItemAttributeUseForHtml.
      */
-    pattern->GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, textStyle);
+    pattern->GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, symbolStyle, textStyle);
     EXPECT_EQ(fontStyle.GetFontSize(), Dimension(NG::TEXT_DEFAULT_FONT_SIZE));
     EXPECT_EQ(fontStyle.GetFontWeight(), FontWeight::MEDIUM);
     EXPECT_EQ(textLineStyle.GetLineHeight(), Dimension(2.2));

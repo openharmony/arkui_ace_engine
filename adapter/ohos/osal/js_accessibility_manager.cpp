@@ -38,6 +38,7 @@
 #include "frameworks/core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -85,7 +86,7 @@ constexpr size_t MAX_DUMP_INFO_SIZE = 5000;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
-const std::string ACTION_ARGU_FOCUS_TYPE_STUB = "ActAccessibilityFocus";
+const std::string ACTION_ARGU_FOCUS_TYPE_STUB = "accessibilityFocusScene";
 const std::string ACTION_ARGU_FOCUS_MOVE_VALUE =
     std::to_string(static_cast<int32_t>(AccessibilityFocusActionType::SWIPE_FOCUS));
 
@@ -148,6 +149,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
     { ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK,
         [](const AccessibilityActionParam& param) {
             return param.accessibilityProperty->ActActionExecSubComponent(static_cast<int32_t>(param.spanId));
+        } },
+    { ActionType::ACCESSIBILITY_ACTION_CUSTOM,
+        [](const AccessibilityActionParam& param) {
+            return param.accessibilityProperty->ActActionCustom(param.customActionName);
         } },
 };
 
@@ -1522,6 +1527,17 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         }
     }
     nodeInfo.SetExtraElement(extraElementInfo);
+
+    // Set custom action list for accessibility
+    auto customActions = accessibilityProperty->GetAccessibilityCustomActions();
+    if (!customActions.empty()) {
+        std::vector<std::string> customActionNames;
+        customActionNames.reserve(customActions.size());
+        for (const auto& customAction : customActions) {
+            customActionNames.push_back(customAction.actionName);
+        }
+        nodeInfo.SetCustomActionList(customActionNames);
+    }
 
     int32_t row = accessibilityProperty->GetCollectionItemInfo().row;
     int32_t column = accessibilityProperty->GetCollectionItemInfo().column;
@@ -4149,6 +4165,12 @@ void JsAccessibilityManager::ProcessParameters(
             paramsMap = { { ACTION_ARGU_SPAN_ID, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
         }
     }
+
+    if (op == ActionType::ACCESSIBILITY_ACTION_CUSTOM) {
+        if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER) {
+            paramsMap = { { ACTION_ARGU_CUSTOM_ACTION, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
+        }
+    }
 }
 
 bool TransferExecuteAction(int64_t elementId, const RefPtr<NG::FrameNode>& node,
@@ -4378,6 +4400,27 @@ void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>
         );
     }
     DumpLog::GetInstance().Print(std::string("Result: inject action done"));
+}
+
+void JsAccessibilityManager::DumpCustomActionTest(const std::vector<std::string>& params)
+{
+    int64_t nodeId = 0;
+    std::string actionName;
+    bool listActions = false;
+
+    if (!AccessibilityHidumper::DumpProcessCustomActionParameters(params, nodeId, actionName, listActions)) {
+        return;
+    }
+
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<NG::PipelineContext> ngPipeline;
+
+    RefPtr<NG::FrameNode> frameNode;
+    ngPipeline = FindPipelineByElementId(nodeId, frameNode);
+    CHECK_NULL_VOID(ngPipeline);
+    CHECK_NULL_VOID(frameNode);
+    AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
 }
 
 void JsAccessibilityManager::DumpEmbedSearchTest(const std::vector<std::string>& params)
@@ -4693,6 +4736,9 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
             }
         } else if (*arg == "--event-test") {
             return CheckAndGetEventTestArgument(arg, params, argument);
+        } else if (*arg == "--custom-action-test") {
+            argument.mode = DumpMode::CUSTOM_ACTION_TEST;
+            break;
         } else if (*arg == "-v") {
             argument.verbose = true;
 #ifdef WEB_SUPPORTED
@@ -4789,6 +4835,9 @@ void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& par
             ChooseWebDumpEvent(argument, windowId);
             break;
 #endif
+        case DumpMode::CUSTOM_ACTION_TEST:
+            DumpCustomActionTest(params);
+            break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
             break;
@@ -7129,6 +7178,12 @@ bool JsAccessibilityManager::ActAccessibilityAction(Accessibility::ActionType ac
     }
     if (action == ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK) {
         param.spanId = getArgumentByKey(actionArguments, ACTION_ARGU_SPAN_ID);
+    }
+    if (action == ActionType::ACCESSIBILITY_ACTION_CUSTOM) {
+        auto iter = actionArguments.find(ACTION_ARGU_CUSTOM_ACTION);
+        if (iter != actionArguments.end()) {
+            param.customActionName = iter->second;
+        }
     }
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {

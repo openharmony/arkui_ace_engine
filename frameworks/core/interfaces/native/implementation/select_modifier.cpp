@@ -630,6 +630,22 @@ void SetMenuSystemMaterialImpl(Ark_NativePointer node,
     auto ptrOpt = Converter::OptConvertPtr<UiMaterial*>(value).value_or(nullptr);
     SelectModelNG::SetMenuSystemMaterial(frameNode, ptrOpt ? ptrOpt->Copy() : nullptr);
 }
+void SetMenuBackgroundBlurStyleOptionsImpl(Ark_NativePointer node,
+                                           const Opt_BackgroundBlurStyleOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<BlurStyleOption>(*value);
+    SelectModelNG::SetMenuBackgroundBlurStyleOptions(frameNode, convValue);
+}
+void SetMenuBackgroundEffectImpl(Ark_NativePointer node,
+                                 const Opt_BackgroundEffectOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<EffectOption>(*value);
+    SelectModelNG::SetMenuBackgroundEffect(frameNode, convValue);
+}
 void SetMenuAlignImpl(Ark_NativePointer node,
                       const Opt_MenuAlignType* alignType,
                       const Opt_Offset* offset)
@@ -683,6 +699,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::SetKeyboardAvoidModeImpl,
         SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
         SelectAttributeModifier::SetMenuSystemMaterialImpl,
+        SelectAttributeModifier::SetMenuBackgroundBlurStyleOptionsImpl,
+        SelectAttributeModifier::SetMenuBackgroundEffectImpl,
         SelectAttributeModifier::SetMenuAlignImpl,
     };
     return &ArkUISelectModifierImpl;

@@ -25,6 +25,9 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 

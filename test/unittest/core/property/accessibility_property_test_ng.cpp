@@ -1406,4 +1406,108 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest046, TestSize.Lev
 
     eventHub->SetGestureEventHub(gestureEventHubBak);
 }
+
+/**
+ * @tc.name: ActActionCustom001
+ * @tc.desc: Test ActActionCustom with no custom actions set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, ActActionCustom001, TestSize.Level1)
+{
+    AccessibilityProperty props;
+    EXPECT_FALSE(props.ActActionCustom("action1"));
+}
+
+/**
+ * @tc.name: ActActionCustom002
+ * @tc.desc: Test ActActionCustom with empty custom actions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, ActActionCustom002, TestSize.Level1)
+{
+    AccessibilityProperty props;
+    props.SetAccessibilityCustomActions({});
+    EXPECT_FALSE(props.ActActionCustom("action1"));
+}
+
+/**
+ * @tc.name: ActActionCustom003
+ * @tc.desc: Test ActActionCustom with action name not found.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, ActActionCustom003, TestSize.Level1)
+{
+    AccessibilityProperty props;
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"existingAction", []() {}});
+    props.SetAccessibilityCustomActions(actions);
+    EXPECT_FALSE(props.ActActionCustom("nonExistentAction"));
+}
+
+/**
+ * @tc.name: ActActionCustom004
+ * @tc.desc: Test ActActionCustom with null callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, ActActionCustom004, TestSize.Level1)
+{
+    AccessibilityProperty props;
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"nullCallbackAction", nullptr});
+    props.SetAccessibilityCustomActions(actions);
+    EXPECT_FALSE(props.ActActionCustom("nullCallbackAction"));
+}
+
+/**
+ * @tc.name: ActActionCustom005
+ * @tc.desc: Test ActActionCustom with valid callback executed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, ActActionCustom005, TestSize.Level1)
+{
+    AccessibilityProperty props;
+    bool callbackExecuted = false;
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"testAction", [&callbackExecuted]() { callbackExecuted = true; }});
+    props.SetAccessibilityCustomActions(actions);
+    EXPECT_TRUE(props.ActActionCustom("testAction"));
+    EXPECT_TRUE(callbackExecuted);
+}
+
+/**
+ * @tc.name: ActActionCustom006
+ * @tc.desc: Test ActActionCustom with multiple custom actions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, ActActionCustom006, TestSize.Level1)
+{
+    AccessibilityProperty props;
+    bool action1Executed = false;
+    bool action2Executed = false;
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"action1", [&action1Executed]() { action1Executed = true; }});
+    actions.push_back({"action2", [&action2Executed]() { action2Executed = true; }});
+    props.SetAccessibilityCustomActions(actions);
+
+    EXPECT_TRUE(props.ActActionCustom("action2"));
+    EXPECT_FALSE(action1Executed);
+    EXPECT_TRUE(action2Executed);
+}
+
+/**
+ * @tc.name: ActActionCustom007
+ * @tc.desc: Test ActActionCustom after ResetAccessibilityCustomActions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, ActActionCustom007, TestSize.Level1)
+{
+    AccessibilityProperty props;
+    std::vector<AccessibilityCustomAction> actions;
+    actions.push_back({"action1", []() {}});
+    props.SetAccessibilityCustomActions(actions);
+    EXPECT_TRUE(props.ActActionCustom("action1"));
+
+    props.ResetAccessibilityCustomActions();
+    EXPECT_FALSE(props.ActActionCustom("action1"));
+}
 } // namespace OHOS::Ace::NG

@@ -537,78 +537,6 @@ HWTEST_F(WebCommandActionTest, IsInputEventType_AllTypes_0100, TestSize.Level1)
     EXPECT_FALSE(IsInputEventType(WebCommandEventType::UNKNOWN));
 }
 
-// ===== WebPattern::OnInjectionEvent supplementary tests (input/select paths) =====
-
-/**
- * @tc.name: OnInjectionEvent_InputDate_ManagerNull_0100
- * @tc.desc: Test OnInjectionEvent with input-date when command action manager is null.
- * @tc.type: FUNC
- */
-HWTEST_F(WebCommandActionTest, OnInjectionEvent_InputDate_ManagerNull_0100, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    const std::string command = R"({
-        "event_type": "input-date",
-        "xpath": "/html/body/input",
-        "value": "2025-01-01"
-    })";
-    int result = g_commandWebPattern->OnInjectionEvent(command);
-    EXPECT_EQ(result, static_cast<int>(WebCommandResult::FAILED));
-#endif
-}
-
-/**
- * @tc.name: OnInjectionEvent_InputTime_MissingValue_0100
- * @tc.desc: Test OnInjectionEvent with input-time missing value.
- * @tc.type: FUNC
- */
-HWTEST_F(WebCommandActionTest, OnInjectionEvent_InputTime_MissingValue_0100, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    const std::string command = R"({
-        "event_type": "input-time",
-        "xpath": "/html/body/input"
-    })";
-    int result = g_commandWebPattern->OnInjectionEvent(command);
-    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INPUT_VALUE));
-#endif
-}
-
-/**
- * @tc.name: OnInjectionEvent_Select_ManagerNull_0100
- * @tc.desc: Test OnInjectionEvent with select when command action manager is null.
- * @tc.type: FUNC
- */
-HWTEST_F(WebCommandActionTest, OnInjectionEvent_Select_ManagerNull_0100, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    const std::string command = R"({
-        "event_type": "select",
-        "xpath": "/html/body/select",
-        "value": ["option1", "option2"]
-    })";
-    int result = g_commandWebPattern->OnInjectionEvent(command);
-    EXPECT_EQ(result, static_cast<int>(WebCommandResult::FAILED));
-#endif
-}
-
-/**
- * @tc.name: OnInjectionEvent_Select_EmptyOptions_0100
- * @tc.desc: Test OnInjectionEvent with select command having no values or indexes.
- * @tc.type: FUNC
- */
-HWTEST_F(WebCommandActionTest, OnInjectionEvent_Select_EmptyOptions_0100, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    const std::string command = R"({
-        "event_type": "select",
-        "xpath": "/html/body/select"
-    })";
-    int result = g_commandWebPattern->OnInjectionEvent(command);
-    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_SELECT_OPTIONS));
-#endif
-}
-
 // ===== Gesture Command Tests =====
 
 /**
@@ -1001,4 +929,787 @@ HWTEST_F(WebCommandActionTest, IsGestureCommandType_GestureTypes_0100, TestSize.
     EXPECT_FALSE(WebCommandWrapper::IsGestureCommandType(WebCommandEventType::CLICK));
     EXPECT_FALSE(WebCommandWrapper::IsGestureCommandType(WebCommandEventType::SCROLL));
 }
+
+// ===== ParseEventType - Input Method Types =====
+
+/**
+ * @tc.name: ParseEventType_InputMethodTypes_0100
+ * @tc.desc: Test ParseEventType with all input method event type strings.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ParseEventType_InputMethodTypes_0100, TestSize.Level1)
+{
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputInsert"), WebCommandEventType::INPUT_INSERT);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputModify"), WebCommandEventType::INPUT_MODIFY);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputSelect"), WebCommandEventType::INPUT_SELECT);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputCut"), WebCommandEventType::INPUT_CUT);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputCopy"), WebCommandEventType::INPUT_COPY);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputFocus"), WebCommandEventType::INPUT_FOCUS);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputSetCursor"), WebCommandEventType::INPUT_SET_CURSOR);
+}
+
+/**
+ * @tc.name: ParseEventType_InputMethodCaseSensitive_0100
+ * @tc.desc: Test ParseEventType with incorrect case for input method types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ParseEventType_InputMethodCaseSensitive_0100, TestSize.Level1)
+{
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("InputInsert"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("INPUTINSERT"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputinsert"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("InputModify"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("InputSelect"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("InputCut"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("InputCopy"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("InputFocus"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("InputSetCursor"), WebCommandEventType::UNKNOWN);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("inputsetcursor"), WebCommandEventType::UNKNOWN);
+}
+
+// ===== BuildInputMethodAction - InputInsert Tests =====
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_Success_0100
+ * @tc.desc: Test BuildInputMethodAction with valid inputInsert JSON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": "hello world",
+        "index": 5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+    EXPECT_EQ(outCommandAction->GetEventType(), "inputInsert");
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_MissingContent_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON missing content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_MissingContent_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "index": 5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_InvalidContentType_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON where content is not a string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_InvalidContentType_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": 123,
+        "index": 5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_ContentBoolean_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON where content is boolean.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_ContentBoolean_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": true,
+        "index": 5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_MissingIndex_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON missing index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_MissingIndex_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": "hello"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_InvalidIndexString_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON where index is a string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_InvalidIndexString_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": "five"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_IndexBoolean_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON where index is boolean.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_IndexBoolean_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": true
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_NegativeIndex_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON where index is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_NegativeIndex_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": -1
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputInsert_IndexZero_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON where index is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_IndexZero_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": "test",
+        "index": 0
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+#endif
+}
+
+// ===== BuildInputMethodAction - InputModify Tests =====
+
+/**
+ * @tc.name: BuildInputMethodAction_InputModify_Success_0100
+ * @tc.desc: Test BuildInputMethodAction with valid inputModify JSON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputModify_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputModify",
+        "content": "modified text"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputModify", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+    EXPECT_EQ(outCommandAction->GetEventType(), "inputModify");
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputModify_MissingContent_0100
+ * @tc.desc: Test BuildInputMethodAction with inputModify JSON missing content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputModify_MissingContent_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputModify"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputModify", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputModify_InvalidContentType_0100
+ * @tc.desc: Test BuildInputMethodAction with inputModify JSON where content is a number.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputModify_InvalidContentType_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputModify",
+        "content": 42
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputModify", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputModify_ContentNull_0100
+ * @tc.desc: Test BuildInputMethodAction with inputModify JSON where content is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputModify_ContentNull_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputModify",
+        "content": null
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputModify", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputModify_ContentArray_0100
+ * @tc.desc: Test BuildInputMethodAction with inputModify JSON where content is an array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputModify_ContentArray_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputModify",
+        "content": ["a", "b"]
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputModify", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputModify_ContentObject_0100
+ * @tc.desc: Test BuildInputMethodAction with inputModify JSON where content is an object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputModify_ContentObject_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputModify",
+        "content": {"key": "value"}
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputModify", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+// ===== BuildInputMethodAction - InputSelect Tests =====
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_Success_0100
+ * @tc.desc: Test BuildInputMethodAction with valid inputSelect JSON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": 10
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+    EXPECT_EQ(outCommandAction->GetEventType(), "inputSelect");
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_MissingStartIndex_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSelect JSON missing start_index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_MissingStartIndex_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect",
+        "finish_index": 10
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_MissingFinishIndex_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSelect JSON missing finish_index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_MissingFinishIndex_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect",
+        "start_index": 0
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_StartGreaterOrEqualFinish_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSelect where start_index >= finish_index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_StartGreaterOrEqualFinish_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr1 = R"({
+        "event_type": "inputSelect",
+        "start_index": 10,
+        "finish_index": 5
+    })";
+    auto comJson1 = JsonUtil::ParseJsonString(jsonStr1);
+    ASSERT_NE(comJson1, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson1, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX_DURATION));
+
+    const std::string jsonStr2 = R"({
+        "event_type": "inputSelect",
+        "start_index": 10,
+        "finish_index": 10
+    })";
+    auto comJson2 = JsonUtil::ParseJsonString(jsonStr2);
+    ASSERT_NE(comJson2, nullptr);
+    result = WebCommandWrapper::BuildInputMethodAction(comJson2, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX_DURATION));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_NegativeStartIndex_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSelect where start_index is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_NegativeStartIndex_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect",
+        "start_index": -1,
+        "finish_index": 10
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_NegativeFinishIndex_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSelect where finish_index is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_NegativeFinishIndex_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": -5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_InvalidStartIndexType_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSelect where start_index is a string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_InvalidStartIndexType_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect",
+        "start_index": "zero",
+        "finish_index": 10
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_BothIndexesMissing_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSelect JSON missing both indexes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_BothIndexesMissing_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+// ===== BuildInputMethodAction - InputFocus Tests =====
+
+/**
+ * @tc.name: BuildInputMethodAction_InputFocus_Success_0100
+ * @tc.desc: Test BuildInputMethodAction with valid inputFocus JSON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputFocus_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input",
+        "no_need_keyboard": 1
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputFocus", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+    EXPECT_EQ(outCommandAction->GetEventType(), "inputFocus");
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputFocus_MissingNoNeedKeyboard_0100
+ * @tc.desc: Test BuildInputMethodAction with inputFocus JSON missing no_need_keyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputFocus_MissingNoNeedKeyboard_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputFocus", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputFocus_MissingXPath_0100
+ * @tc.desc: Test BuildInputMethodAction with inputFocus JSON missing XPath.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputFocus_MissingXPath_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputFocus",
+        "no_need_keyboard": 1
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputFocus", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_XPATH));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputFocus_InvalidNoNeedKeyboard_0100
+ * @tc.desc: Test BuildInputMethodAction with inputFocus JSON where no_need_keyboard is invalid (2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputFocus_InvalidNoNeedKeyboard_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input",
+        "no_need_keyboard": 2
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputFocus", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_NO_NEED_KEYBOARD));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputFocus_NoNeedKeyboardNegative_0100
+ * @tc.desc: Test BuildInputMethodAction with inputFocus JSON where no_need_keyboard is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputFocus_NoNeedKeyboardNegative_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input",
+        "no_need_keyboard": -1
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputFocus", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_NO_NEED_KEYBOARD));
+#endif
+}
+
+// ===== BuildInputMethodAction - InputSetCursor Tests =====
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSetCursor_Success_0100
+ * @tc.desc: Test BuildInputMethodAction with valid inputSetCursor JSON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSetCursor_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSetCursor",
+        "index": 15
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSetCursor", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+    EXPECT_EQ(outCommandAction->GetEventType(), "inputSetCursor");
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSetCursor_MissingIndex_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSetCursor JSON missing index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSetCursor_MissingIndex_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSetCursor"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSetCursor", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSetCursor_NegativeIndex_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSetCursor JSON where index is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSetCursor_NegativeIndex_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSetCursor",
+        "index": -3
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSetCursor", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSetCursor_InvalidIndexType_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSetCursor JSON where index is a string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSetCursor_InvalidIndexType_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSetCursor",
+        "index": "fifteen"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSetCursor", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+// ===== BuildInputMethodAction - InputCut/InputCopy (fallback path) =====
+
+/**
+ * @tc.name: BuildInputMethodAction_InputCut_Success_0100
+ * @tc.desc: Test BuildInputMethodAction with inputCut JSON (falls through to default).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputCut_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputCut",
+        "XPath": "/html/body/input"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputCut", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+    EXPECT_EQ(outCommandAction->GetEventType(), "inputCut");
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputCopy_Success_0100
+ * @tc.desc: Test BuildInputMethodAction with inputCopy JSON (falls through to default).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputCopy_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputCopy",
+        "XPath": "/html/body/input"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputCopy", outCommandAction);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outCommandAction, nullptr);
+    EXPECT_EQ(outCommandAction->GetEventType(), "inputCopy");
+#endif
+}
+
+// ===== WebCommandResult enum value verification =====
+
+/**
+ * @tc.name: WebCommandResult_InputMethodErrorCodes_0100
+ * @tc.desc: Verify the WebCommandResult error codes for input method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, WebCommandResult_InputMethodErrorCodes_0100, TestSize.Level1)
+{
+    EXPECT_EQ(static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT), 230);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::JSON_INVALID_INDEX), 231);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::JSON_INVALID_INDEX_DURATION), 232);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::JSON_INVALID_NO_NEED_KEYBOARD), 233);
+}
+
 } // namespace OHOS::Ace::NG

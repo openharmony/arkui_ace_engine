@@ -67,6 +67,7 @@
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -9804,6 +9805,14 @@ int WebPattern::SendCommandToNWeb(std::unique_ptr<JsonValue> comJson)
         case WebCommandEventType::CLICK:
         case WebCommandEventType::SCROLL:
             return ExecuteClickScrollCommand(comJson, eventTypeStr);
+        case WebCommandEventType::INPUT_INSERT:
+        case WebCommandEventType::INPUT_MODIFY:
+        case WebCommandEventType::INPUT_SELECT:
+        case WebCommandEventType::INPUT_CUT:
+        case WebCommandEventType::INPUT_COPY:
+        case WebCommandEventType::INPUT_FOCUS:
+        case WebCommandEventType::INPUT_SET_CURSOR:
+            return ExecuteInputMethodCommand(comJson, eventTypeStr);
         case WebCommandEventType::EVENT_TYPE_TAP_GESTURE:
         case WebCommandEventType::EVENT_TYPE_SCROLL_GESTURE:
         case WebCommandEventType::EVENT_TYPE_PINCH_GESTURE:
@@ -10099,6 +10108,33 @@ int WebPattern::ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJ
     }
     return result;
 }
+
+int WebPattern::ExecuteInputMethodCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr)
+{
+    std::shared_ptr<NWebCommandActionImpl> commandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, eventTypeStr, commandAction);
+    if (result != WEB_COMMAND_BUILD_SUCCESS) {
+        return result;
+    }
+    if (!delegate_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteInputMethodCommand: delegate_ is nullptr");
+        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR,
+            std::to_string(static_cast<int32_t>(WebCommandResult::DELEGATE_NULL)));
+        return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+    }
+    result = delegate_->SendCommandActionToNWeb(std::move(commandAction));
+    if (result == static_cast<int>(WebCommandResult::ELEMENT_NOT_FOUND)) {
+        auto xpathValue = comJson->GetValue("XPath");
+        std::string xpathStr = xpathValue ? xpathValue->GetString() : "";
+        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_TARGET_NODE_NOT_FOUND,
+            std::to_string(static_cast<int32_t>(WebCommandResult::ELEMENT_NOT_FOUND)), xpathStr.c_str());
+    } else if (result > RET_SUCCESS) {
+        NWeb::EventReport::ReportMSDPError(
+            INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR, std::to_string(result));
+    }
+    return result;
+}
+
 
 void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {

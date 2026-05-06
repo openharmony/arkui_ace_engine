@@ -41,6 +41,9 @@ private:
 
     std::pair<int32_t, int32_t> GetCrossStartAndSpan(const GridLayoutOptions& options, int32_t itemIndex);
 
+    std::pair<int32_t, int32_t> GetCrossStartAndSpanDuringDrag(
+        const GridLayoutOptions& options, int32_t itemIndex, int32_t lookupIndex);
+
     std::pair<int32_t, int32_t> GetCrossStartAndSpanWithUserFunction(
         int32_t itemIndex, const GridLayoutOptions& options, int32_t firstIrregularIndex);
 

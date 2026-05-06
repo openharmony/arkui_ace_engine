@@ -1429,20 +1429,6 @@ HWTEST_F(RichEditorMenuTestNg, HandleExtendAction001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HandleExtendAction002
- * @tc.desc: test HandleExtendAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorMenuTestNg, HandleExtendAction002, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->HandleExtendAction(2);
-    EXPECT_TRUE(richEditorPattern->selectMenuInfo_.showCopyAll);
-}
-
-/**
  * @tc.name: SetPreviewMenuParam002
  * @tc.desc: test SetPreviewMenuParam
  * @tc.type: FUNC

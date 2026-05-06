@@ -263,6 +263,7 @@ import { ParticleModifier } from './../../ParticleModifier';
 import { ArkLazyGridLayoutAttributeComponent } from '#generated';
 import { ArkUnionEffectContainerComponent, UnionEffectContainerAttribute } from './../../component/unionEffectContainer';
 import { UnionEffectContainerModifier } from './../../UnionEffectContainerModifier';
+import { ArkDepthComponentComponent, DepthComponentAttribute } from '../../component/depthComponent'
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
@@ -3316,4 +3317,11 @@ export function hookParticleAttributeModifier(component: ArkParticleComponent, m
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ParticleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookDepthComponentAttributeModifier(
+    component: ArkDepthComponentComponent,
+    modifier: AttributeModifier<DepthComponentAttribute> | AttributeModifier<CommonMethod> | undefined,
+): void {
+    throw new Error('hookDepthComponentAttributeModifier is not implemented')
 }

@@ -62,7 +62,6 @@ private:
     static void ProcessCapsuleBorderColor(const JSRef<JSObject>& paramObject);
     static void ProcessFontSizeOption(const JSRef<JSObject>& textObject);
     static void ProcessCapsuleContent(const JSRef<JSObject>& paramObject);
-    static void ProcessColor(Color& colorVal);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -41,6 +41,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -97,6 +99,15 @@ void SheetOthersTestNg::SetUpTestCase()
     sheetTheme_ = AceType::MakeRefPtr<SheetTheme>();
     textTheme_ = AceType::MakeRefPtr<TextTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme_;
+        } else if (type == TextTheme::TypeId()) {
+            return textTheme_;
+        } else {
+            return nullptr;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
             return sheetTheme_;
         } else if (type == TextTheme::TypeId()) {

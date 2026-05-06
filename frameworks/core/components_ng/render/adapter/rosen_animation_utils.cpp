@@ -24,6 +24,7 @@
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace {
 
@@ -162,10 +163,11 @@ CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus()
     return CloseImplicitCancelAnimationReturnStatus(nullptr);
 }
 
-CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(
+    const RefPtr<PipelineBase>& context, bool nodeExceptionSensitive)
 {
     auto rsUIContext = GetRSUIContext(context);
-    auto status = Rosen::RSNode::CloseImplicitCancelAnimationReturnStatus(rsUIContext);
+    auto status = Rosen::RSNode::CloseImplicitCancelAnimationReturnStatus(rsUIContext, nodeExceptionSensitive);
     return static_cast<CancelAnimationStatus>(status);
 }
 

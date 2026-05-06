@@ -45,6 +45,7 @@ public:
     static void SetAlt(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetAltError(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetReloadKey(FrameNode* frameNode, const std::string& reloadKey);
     static void SetSupportSvg2(FrameNode* frameNode, bool enable);
     static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
     static void SetAntialiased(FrameNode* frameNode, const std::optional<bool>& antialiased);

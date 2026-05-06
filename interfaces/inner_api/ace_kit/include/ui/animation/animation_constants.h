@@ -120,6 +120,7 @@ enum class CancelAnimationStatus : int32_t {
     INCORRECT_PARAM_TYPE,
     EMPTY_PENDING_SYNC_LIST,
     TASK_EXECUTION_FAILURE,
+    NODE_EXCEPTION,
 };
 } // namespace OHOS::Ace
 

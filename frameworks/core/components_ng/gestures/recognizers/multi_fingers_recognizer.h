@@ -169,6 +169,8 @@ protected:
     bool isLimitFingerCount_ = false;
     int32_t lastAction_ = 0;
     std::optional<std::map<int32_t, TouchEvent>> backupTouchPointsForSucceedBlock_;
+    // Used only for log throttling.
+    int32_t logLimit_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

@@ -159,6 +159,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         stateMgmtConsole.debug(`${this.debugInfo__()}: @ComponentV2 freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
 
         this.__customComponentExecuteInit__Internal();
+        this.__isCustomEnvConstructionFinalized__Internal = true;
     }
 
     public debugInfo__(): string {

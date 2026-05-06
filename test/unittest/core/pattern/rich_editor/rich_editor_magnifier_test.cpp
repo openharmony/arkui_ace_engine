@@ -220,12 +220,18 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
  */
 HWTEST_F(RichEditorMagnifierTest, MagnifierTest003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. get rich editor pattern.
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto frameSize = SizeF(600.f, 400.f);
     InitMagnifierParams(frameSize);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. get magnifier controller.
+     */
     RefPtr<MagnifierController> controller = richEditorPattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->OpenMagnifier();
@@ -251,7 +257,7 @@ void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& ric
     EXPECT_FALSE(controller->GetShowMagnifier());
 
     controller->SetLocalOffset(localOffset);
-    richEditorPattern->HandleSurfaceChanged(1, 1, 1, 1, WindowSizeChangeReason::DRAG);
+    richEditorPattern->HandleSurfaceChanged(1, 1, 1, 1);
     EXPECT_FALSE(controller->GetShowMagnifier());
 
     controller->SetLocalOffset(localOffset);
@@ -327,7 +333,8 @@ HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged001, TestSize.Level2)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->magnifierController_.Reset();
-    richEditorPattern->HandleSurfaceChanged(1, 1, 2, 2, WindowSizeChangeReason::DRAG);
+    richEditorPattern->UpdateOriginIsMenuShow(true);
+    richEditorPattern->HandleSurfaceChanged(1, 1, 2, 2);
     EXPECT_FALSE(richEditorPattern->originIsMenuShow_);
 }
 
@@ -342,9 +349,13 @@ HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged002, TestSize.Level2)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    richEditorPattern->UpdateOriginIsMenuShow(true);
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
-    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0, WindowSizeChangeReason::DRAG);
+    richEditorPattern->magnifierController_->magnifierNodeExist_ = true;
+    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0);
 
+    EXPECT_TRUE(richEditorPattern->originIsMenuShow_);
+    EXPECT_FALSE(richEditorPattern->magnifierController_->GetMagnifierNodeExist());
     EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
 }
 

@@ -55,11 +55,47 @@ constexpr int32_t DELTA_INDEX_3 = 3;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
 } // namespace
 
+void ContainerPickerPattern::SyncPickerParamsFromLayout()
+{
+    constexpr float DEFAULT_DISPLAY_COUNT =
+        static_cast<float>(ContainerPickerUtils::DEFAULT_DISPLAYED_ITEM_COUNT);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto props = host->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    if (props->HasDisplayedItemCount()) {
+        displayCount_ = ContainerPickerUtils::NormalizeDisplayedItemCount(props->GetDisplayedItemCount().value());
+    } else {
+        displayCount_ = ContainerPickerUtils::DEFAULT_DISPLAYED_ITEM_COUNT;
+    }
+    Dimension itemDim = PICKER_ITEM_HEIGHT;
+    if (props->HasItemHeight()) {
+        itemDim = ContainerPickerUtils::ClampPickerItemHeight(props->GetItemHeight().value());
+    } else {
+        itemDim = ContainerPickerUtils::ClampPickerItemHeight(PICKER_ITEM_HEIGHT);
+    }
+    pickerItemHeight_ = static_cast<float>(itemDim.ConvertToPx());
+    const float totalHeight = static_cast<float>(displayCount_) * pickerItemHeight_;
+    pickerHeightBeforeRotate_ = totalHeight;
+    const float defaultPickerHeight = static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
+    const float defaultItemHeight = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
+    const float fixedHeightScale =
+        NearZero(defaultItemHeight) ? 1.0f : defaultPickerHeight / (DEFAULT_DISPLAY_COUNT * defaultItemHeight);
+    // Default host height tracks totalHeight with fixed wheel scaling to avoid clipping when displayCount changes.
+    pickerDefaultHeight_ = totalHeight * fixedHeightScale;
+    const float baseItemPx = static_cast<float>(Dimension(40, DimensionUnit::VP).ConvertToPx());
+    const float scale = NearZero(baseItemPx) ? 1.0f : pickerItemHeight_ / baseItemPx;
+    firstAdjacentItemHeight_ = static_cast<float>(FIRST_ADJACENT_ITEM_HEIGHT.ConvertToPx()) * scale;
+    secondAdjacentItemHeight_ = static_cast<float>(SECOND_ADJACENT_ITEM_HEIGHT.ConvertToPx()) * scale;
+    thirdAdjacentItemHeight_ = static_cast<float>(THIRD_ADJACENT_ITEM_HEIGHT.ConvertToPx()) * scale;
+}
+
 RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     ACE_UINODE_TRACE(host);
+    SyncPickerParamsFromLayout();
     auto layoutAlgorithm = MakeRefPtr<ContainerPickerLayoutAlgorithm>();
     CHECK_NULL_RETURN(layoutAlgorithm, nullptr);
     totalItemCount_ = GetRealTotalItemCount();
@@ -76,6 +112,7 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetPickerHeight(pickerDefaultHeight_);
     layoutAlgorithm->SetItemHeight(pickerItemHeight_);
     layoutAlgorithm->SetPickerHeightBeforeRotate(pickerHeightBeforeRotate_);
+    layoutAlgorithm->SetDisplayedItemCount(displayCount_);
     layoutAlgorithm->SetIsLoop(isLoop_);
     return layoutAlgorithm;
 }
@@ -259,6 +296,7 @@ void ContainerPickerPattern::OnModifyDone()
     InitMouseAndPressEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    SyncPickerParamsFromLayout();
     containerPickerId_ = host->GetId();
     totalItemCount_ = GetRealTotalItemCount();
     isLoop_ = IsLoop();
@@ -1699,7 +1737,7 @@ void ContainerPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto frameRect = geometryNode->GetFrameRect();
 
     float paintRectWidth = frameRect.Width() - FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx();
-    float paintRectHeight = PICKER_ITEM_HEIGHT.ConvertToPx() - FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx();
+    float paintRectHeight = pickerItemHeight_ - FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx();
     float offsetX = FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx() / 2;
     float offsetY = frameRect.Height() / 2 - paintRectHeight / 2;
     paintRect.SetRect(RectF(offsetX, offsetY, paintRectWidth, paintRectHeight));

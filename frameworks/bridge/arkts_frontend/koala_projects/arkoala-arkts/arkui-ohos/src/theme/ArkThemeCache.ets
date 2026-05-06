@@ -132,20 +132,16 @@ export class ArkThemeCache {
             return false;
         }
 
-        // take array of keys of color tokens used by both custom themes
-        let keys1 = Object.keys(theme1.colors!);
-        let keys2 = Object.keys(theme2.colors!);
-
-        if (keys1.length !== keys2.length) {
-            // return false if the length of the keys arrays are different
+        const theme1Colors = makeRecordfromObj(theme1!.colors!);
+        const theme2Colors = makeRecordfromObj(theme2!.colors!);
+        if (theme1Colors.size !== theme2Colors.size) {
+            // return false if the size of the color records are different
             return false;
         }
 
-        const theme1Colors = makeRecordfromObj(theme1!.colors!);
-        const theme2Colors = makeRecordfromObj(theme2!.colors!);
         // go by color tokens attributes keys one by one
-        for (let key of keys1) {
-            if (!keys2.includes(key)) {
+        for (let key of theme1Colors.keySet()) {
+            if (!theme2Colors.has(key)) {
                 return false;
             }
             let value1 = theme1Colors[key];

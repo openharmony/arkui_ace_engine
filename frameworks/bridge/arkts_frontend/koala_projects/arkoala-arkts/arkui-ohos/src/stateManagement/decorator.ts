@@ -22,6 +22,7 @@ import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 import { IncrementalNode } from '@koalaui/runtime';
 import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
+import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
 export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
 
 export interface IDecoratorBaseRegistry {
@@ -39,6 +40,8 @@ export interface IVariableOwner {
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
+    __getCustomComponentContext__Internal(): CustomComponentContext;
+    __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
 }
 
 export interface IDecoratedVariable {
@@ -305,8 +308,8 @@ export interface IMonitorDecoratedVariable {
 
 export interface IMonitorPathInfo {
     path: string;
-    isWildcard?: boolean;
     valueCallback: MonitorValueCallback;
+    enableWildcard?: boolean;
 }
 
 export interface IMonitorValue<T> {

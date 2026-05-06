@@ -30,6 +30,7 @@
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -3939,7 +3940,9 @@ void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::Fram
         ContainerScope scope(containerId);
         overlayManager->RemoveFrameNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", nullptr);
+    CHECK_NULL_VOID(node);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(node->GetParentFrameNode());
+    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", currentOverlay);
 }
 
 void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)

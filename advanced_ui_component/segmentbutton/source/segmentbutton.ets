@@ -1508,14 +1508,14 @@ export struct SegmentButton {
     }
     // 获取系统语言
     try {
-      let systemLanguage: string = I18n.System.getSystemLanguage();
-      if (I18n.isRTL(systemLanguage) && this.options.direction != Direction.Ltr) {
-        return true
+      let appPreferredLanguage: string = I18n.System.getAppPreferredLanguage();
+      if (I18n.isRTL(appPreferredLanguage) && this.options.direction != Direction.Ltr) {
+        return true;
       }
     } catch (error) {
       console.error(`Ace SegmentButton getSystemLanguage, error: ${error.toString()}`);
     }
-    return false
+    return false;
   }
 
   private isSegmentFocusStyleCustomized(): boolean {
@@ -2044,11 +2044,13 @@ export struct SegmentButton {
       setAnimatedPropertyFunc();
     }
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected ?
-        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.selectedFontSize ??
-          segmentButtonTheme.SELECTED_FONT_SIZE) :
-        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.fontSize ??
-          segmentButtonTheme.FONT_SIZE)
+      const selectedFontSize = this.options.selectedFontSize ?? 
+        (this.useAdaptiveLineHeight ? 
+          segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : 
+          segmentButtonTheme.SELECTED_FONT_SIZE);
+      const normalFontSize = this.options.fontSize ?? 
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
+      this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
         this.options.fontWeight ?? initFontWeight(FontWeight.Regular)
       this.buttonItemProperty[index].isSelected = selected

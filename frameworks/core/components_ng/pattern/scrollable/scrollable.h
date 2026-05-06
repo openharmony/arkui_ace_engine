@@ -61,6 +61,7 @@ using MouseLeftButtonScroll = std::function<bool()>;
 using ContinuousSlidingCallback = std::function<double()>;
 using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
+using BackToTopCallback = std::function<bool()>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using IsReverseCallback = std::function<bool()>;
@@ -508,6 +509,11 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
+    void SetBackToTopCallback(BackToTopCallback&& backToTopCallback)
+    {
+        backToTopCallback_ = std::move(backToTopCallback);
+    }
+
     void StartScrollSnapAnimation(
         float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar, int32_t source = SCROLL_FROM_NONE);
 
@@ -819,6 +825,7 @@ private:
     bool needScrollSnapChange_ = false;
     StartSnapAnimationCallback startSnapAnimationCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
+    BackToTopCallback backToTopCallback_;
     std::list<GestureEventFunc> panActionEndEvents_;
     GestureEventFunc actionEnd_;
 

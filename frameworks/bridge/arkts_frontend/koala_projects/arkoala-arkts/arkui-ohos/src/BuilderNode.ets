@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -283,6 +283,10 @@ export class BuilderNode<T = undefined> {
     }
     public postInputEvent(event: InputEventType): boolean {
         let ret = this._JSBuilderNode.postInputEvent(event);
+        return ret;
+    }
+    public postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+        let ret = this._JSBuilderNode.postInputEventWithStrategy(event, competitionStrategy);
         return ret;
     }
     public dispose(): void {

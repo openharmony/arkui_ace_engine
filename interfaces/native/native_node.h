@@ -2302,6 +2302,25 @@ typedef enum {
      */
     NODE_BORDER_RADIUS_TYPE = 123,
     /**
+     * @brief Defines the accessibility next focus node ID attribute, which can be set and reset through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component ID used by accessibility for next focus navigation.\n
+     *
+     * @since 26
+     */
+    NODE_ACCESSIBILITY_NEXT_FOCUS_ID = 124,
+    /**
+     * @brief Defines the accessibility default focus attribute, which can be set and reset through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the current component is accessibility default focus.
+     * The parameter type is {@link ArkUI_AccessibilityDefaultFocus}.\n
+     *
+     * @since 26
+     */
+    NODE_ACCESSIBILITY_DEFAULT_FOCUS = 125,
+    /**
      * @brief Defines the inspector label attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -8867,6 +8886,34 @@ typedef enum {
      * @since 23
      */
     NODE_PICKER_SELECTION_INDICATOR = 1018003,
+
+    /**
+     * @brief Sets the total number of visible items.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: number of visible items. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of visible items. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_PICKER_DISPLAYED_ITEM_COUNT = 1018004,
+
+    /**
+     * @brief Sets the height of each item.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the height of each item, in vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the height of each item, in vp. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_PICKER_ITEM_HEIGHT = 1018005,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12

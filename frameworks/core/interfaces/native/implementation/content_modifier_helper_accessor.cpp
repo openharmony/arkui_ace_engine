@@ -397,8 +397,31 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
         arkConfig->selected_ = config.selected_;
         arkConfig->index_ = config.index_;
         arkConfig->node_ = node;
-        auto boxNode =  CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+
+        RefPtr<FrameNode> boxNode = nullptr;
+        auto selectPattern = frameNode->GetPattern<SelectPattern>();
+        if (selectPattern) {
+            auto options = selectPattern->GetBuilderOptions();
+            if (options.size() == config.index_) {
+                boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+                selectPattern->AddBuilderOptionNode(boxNode);
+            } else if (config.index_ >= 0 && config.index_ < options.size()) {
+                boxNode = options[config.index_];
+            }
+        } else {
+            boxNode = GeneratedApiImpl::GetContentNode(node);
+            if (boxNode == nullptr) {
+                boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+                GeneratedApiImpl::SetContentNode(node, boxNode);
+            }
+        }
+
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
+
             boxNode->AddChild(uiNode);
             boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }, node, arkConfig);

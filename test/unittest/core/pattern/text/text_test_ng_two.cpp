@@ -1175,7 +1175,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestCheckAndAdjustHandle001, TestSize.L
  
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     RectF paintRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
@@ -1218,7 +1218,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestCheckAndAdjustHandle002, TestSize.L
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(frameNode->geometryNode_, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     RectF paintRect;
@@ -1245,7 +1245,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestCheckHandleVisible001, TestSize.Lev
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(frameNode->geometryNode_, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     RectF paintRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
@@ -1261,7 +1261,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestCheckHandleVisible002, TestSize.Lev
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     RectF paintRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
@@ -1293,7 +1293,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestOnResetTextSelection001, TestSize.L
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
     ASSERT_NE(frameNode, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     auto textPattern = textSelectOverlay->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
@@ -1322,7 +1322,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestOnHandleMove001, TestSize.Level1)
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(frameNode->geometryNode_, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     RectF handleRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
@@ -1335,6 +1335,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestOnHandleMove001, TestSize.Level1)
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);
     manager->selectOverlayNode_ = overlayNode;
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnBind(manager);
 
     ASSERT_EQ(pattern->textSelector_.GetStart(), TEXT_ERROR);
@@ -1360,7 +1361,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestUpdateSelectorOnHandleMove001, Test
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
     ASSERT_NE(frameNode, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     OffsetF handleOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
@@ -1408,7 +1409,7 @@ HWTEST_F(TextTestNgTwo, TextSelectOverlayTestGetSelectArea001, TestSize.Level1)
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(frameNode->geometryNode_, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     bool hasTransform = textSelectOverlay->hasTransform_;

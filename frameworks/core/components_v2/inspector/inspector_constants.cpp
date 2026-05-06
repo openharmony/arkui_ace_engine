@@ -77,6 +77,8 @@ const char JS_REPEAT_ETS_TAG[] = "Repeat";
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
 // js with theme node
 const char JS_WITH_THEME_ETS_TAG[] = "WithTheme";
+// js with env node
+const char JS_WITH_ENV_ETS_TAG[] = "WithEnv";
 // js node slot
 const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
 
@@ -693,4 +695,7 @@ const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
 
 // Custom
 const char CUSTOM_ETS_TAG[] = "Custom";
+
+// LazyColumnLayout
+const char LAZY_COLUMN_LAYOUT_ETS_TAG[] = "LazyColumnLayout";
 } // namespace OHOS::Ace::V2

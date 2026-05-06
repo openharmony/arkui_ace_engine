@@ -165,6 +165,8 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("keyboardAvoidMode", &JSSelect::SetKeyboardAvoidMode);
     JSClass<JSSelect>::StaticMethod("minKeyboardAvoidDistance", &JSSelect::SetMinKeyboardAvoidDistance);
     JSClass<JSSelect>::StaticMethod("menuSystemMaterial", &JSSelect::SetMenuSystemMaterial);
+    JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyleOptions", &JSSelect::SetMenuBackgroundBlurStyleOptions);
+    JSClass<JSSelect>::StaticMethod("menuBackgroundEffect", &JSSelect::SetMenuBackgroundEffect);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -1253,5 +1255,32 @@ void JSSelect::SetMenuSystemMaterial(const JSCallbackInfo& info)
     }
     const auto* menuSystemMaterial = CreateUiMaterialFromNapiValue(info[0]);
     SelectModel::GetInstance()->SetMenuSystemMaterial(menuSystemMaterial->Copy());
+}
+
+void JSSelect::SetMenuBackgroundBlurStyleOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    BlurStyleOption styleOption;
+    if (info[0]->IsObject()) {
+        auto jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSViewAbstract::ParseBlurStyleOption(jsObj, styleOption);
+    }
+    SelectModel::GetInstance()->SetMenuBackgroundBlurStyleOptions(styleOption);
+}
+
+void JSSelect::SetMenuBackgroundEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    EffectOption option;
+    if (info[0]->IsObject()) {
+        auto jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSViewAbstract::ParseEffectOption(jsObj, option);
+    }
+    SelectModel::GetInstance()->SetMenuBackgroundEffect(option);
 }
 } // namespace OHOS::Ace::Framework

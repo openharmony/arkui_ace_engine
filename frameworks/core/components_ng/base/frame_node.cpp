@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cinttypes>
@@ -150,6 +151,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -5300,8 +5302,13 @@ bool FrameNode::MarkRemoving()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        geometryTransition->Build(WeakClaim(this), false);
-        pendingRemove = true;
+        const bool isOnShow = GetContext() ? GetContext()->GetOnShow() : true;
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "FrameNode::MarkRemoving, outNode: %{public}d, %{public}s,"
+            " isOnForeground: %{public}d", GetId(), GetTag().c_str(), isOnShow);
+        if (isOnShow) {
+            geometryTransition->Build(WeakClaim(this), false);
+            pendingRemove = true;
+        }
     }
 
     const auto children = GetChildren();

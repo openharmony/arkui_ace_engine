@@ -37,11 +37,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/memory/memory_manager.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -51,7 +49,6 @@
 #include "core/common/ace_translate_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
@@ -89,6 +86,8 @@ class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
 class SafeAreaManager;
 class SelectOverlayManager;
+class NavigationManager;
+class StageManager;
 class UIExtensionManager;
 class AccessibilityManagerNG;
 class ForceSplitManager;
@@ -97,7 +96,9 @@ class FormEventManager;
 class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
+class DragDropManager;
 class DynamicComponentSafeManager;
+class EnvironmentManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -552,6 +553,11 @@ public:
         return frameRateManager_;
     }
 
+    const RefPtr<EnvironmentManager>& GetEnvironmentManager() const
+    {
+        return environmentManager_;
+    }
+
     void FlushBuild() override;
 
     void FlushPipelineImmediately() override;
@@ -953,10 +959,7 @@ public:
         return memoryMgr_;
     }
 
-    const RefPtr<NavigationManager>& GetNavigationManager() const
-    {
-        return navigationMgr_;
-    }
+    const RefPtr<NavigationManager>& GetNavigationManager() const;
 
     const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
 
@@ -1701,11 +1704,12 @@ private:
 
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
-    RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    RefPtr<NavigationManager> navigationMgr_;
     RefPtr<ForceSplitManager> forceSplitMgr_;
     RefPtr<FormVisibleManager> formVisibleMgr_;
     RefPtr<FormEventManager> formEventMgr_;
     RefPtr<FormGestureManager> formGestureMgr_;
+    RefPtr<EnvironmentManager> environmentManager_;
     std::unique_ptr<RecycleManager> recycleManager_;
     ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);

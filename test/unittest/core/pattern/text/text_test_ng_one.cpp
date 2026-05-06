@@ -101,7 +101,7 @@ HWTEST_F(TextTestNgOne, TextSelectOverlayTestGetSelectAreaFromHandle001, TestSiz
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(frameNode->geometryNode_, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     RectF rect;
@@ -139,7 +139,7 @@ HWTEST_F(TextTestNgOne, TextSelectOverlayTestOnUpdateMenuInfo001, TestSize.Level
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     SelectMenuInfo menuInfo;
@@ -688,6 +688,7 @@ HWTEST_F(TextTestNgOne, TextPattern015, TestSize.Level1)
      * @tc.steps: step2. test pattern OnHandleAreaChanged
      */
     RectF handleRect = CONTENT_RECT;
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
     pattern->OnHandleAreaChanged();
     EXPECT_EQ(pattern->selectOverlay_->SelectOverlayIsOn(), false);
@@ -713,7 +714,8 @@ HWTEST_F(TextTestNgOne, TextPattern016, TestSize.Level1)
     int32_t newHeight = 1;
     int32_t prevWidth = 0;
     int32_t prevHeight = 0;
-    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, WindowSizeChangeReason::DRAG);
+    pattern->GetSelectOverlay();
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 
     /**
@@ -723,7 +725,7 @@ HWTEST_F(TextTestNgOne, TextPattern016, TestSize.Level1)
     newHeight = 1;
     prevWidth = 1;
     prevHeight = 1;
-    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 }
 
@@ -764,6 +766,7 @@ HWTEST_F(TextTestNgOne, TextPattern017, TestSize.Level1)
     /**
      * @tc.steps: step3. test pattern UpdateSelectOverlayOrCreate
      */
+    pattern->GetSelectOverlay();
     pattern->UpdateSelectOverlayOrCreate(selectInfo, true);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 
@@ -804,6 +807,7 @@ HWTEST_F(TextTestNgOne, TextPattern019, TestSize.Level1)
     /**
      * @tc.steps: step2. show selectoverlay.
      */
+    pattern->GetSelectOverlay();
     pattern->ShowSelectOverlay();
     EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
 

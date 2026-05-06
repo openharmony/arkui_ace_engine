@@ -135,6 +135,7 @@ HWTEST_F(CalendarPickerResourceTest, CalendarPickerParseEdgeAlignResObj001, Test
     /**
      * @tc.steps: step1. Create CalendarPicker.
      */
+    g_isConfigChangePerform = false;
     CalendarSettingData settingData;
     CalendarPickerModelNG calendarPickerModel;
     calendarPickerModel.Create(settingData);

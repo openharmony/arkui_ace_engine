@@ -74,6 +74,8 @@ public:
     static void SetKeyboardAvoidMode(const JSCallbackInfo& info);
     static void SetMinKeyboardAvoidDistance(const JSCallbackInfo& info);
     static void SetMenuSystemMaterial(const JSCallbackInfo& info);
+    static void SetMenuBackgroundBlurStyleOptions(const JSCallbackInfo& info);
+    static void SetMenuBackgroundEffect(const JSCallbackInfo& info);
 
     static void ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type);
     static void ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type);

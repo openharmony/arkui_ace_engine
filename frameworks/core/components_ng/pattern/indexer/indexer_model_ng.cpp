@@ -124,6 +124,9 @@ void IndexerModelNG::SetSelectedFont(std::optional<Dimension>& fontSize, std::op
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (fontSize.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(fontSize.value(), LpxAttribute::LPX_FONT_SIZE);
+    }
     auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle selectTextStyle = indexerTheme->GetSelectTextStyle();
@@ -140,6 +143,9 @@ void IndexerModelNG::SetPopupFont(std::optional<Dimension>& fontSize, std::optio
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (fontSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize.value(), LpxAttribute::LPX_FONT_SIZE, frameNode);
+    }
     auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle popupTextStyle = indexerTheme->GetPopupTextStyle();
@@ -156,6 +162,9 @@ void IndexerModelNG::SetFont(std::optional<Dimension>& fontSize, std::optional<F
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (fontSize.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(fontSize.value(), LpxAttribute::LPX_FONT_SIZE);
+    }
     auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle defaultTextStyle = indexerTheme->GetDefaultTextStyle();
@@ -204,6 +213,7 @@ void IndexerModelNG::SetSelected(int32_t selected)
 void IndexerModelNG::SetPopupPositionX(const std::optional<Dimension>& popupPositionXOpt)
 {
     if (popupPositionXOpt.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(popupPositionXOpt.value(), LpxAttribute::ALWAYS);
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionXOpt.value());
     } else {
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionX, PROPERTY_UPDATE_NORMAL);
@@ -213,6 +223,7 @@ void IndexerModelNG::SetPopupPositionX(const std::optional<Dimension>& popupPosi
 void IndexerModelNG::SetPopupPositionY(const std::optional<Dimension>& popupPositionYOpt)
 {
     if (popupPositionYOpt.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(popupPositionYOpt.value(), LpxAttribute::ALWAYS);
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionYOpt.value());
     } else {
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionY, PROPERTY_UPDATE_NORMAL);
@@ -273,6 +284,7 @@ void IndexerModelNG::RemovePopupUnselectedColor(FrameNode* frameNode)
 void IndexerModelNG::SetFontSize(const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {
+        ACE_CHECK_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE);
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontSize, fontSize);
     } else {
         ACE_RESET_LAYOUT_PROPERTY(IndexerLayoutProperty, FontSize);
@@ -726,6 +738,7 @@ void IndexerModelNG::RemovePopupTitleBackground(FrameNode* frameNode)
 void IndexerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontSize, fontSize, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontSize, frameNode);
@@ -741,6 +754,9 @@ void IndexerModelNG::SetSelectedFont(FrameNode* frameNode, std::optional<Dimensi
     std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
     std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
+    if (fontSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize.value(), LpxAttribute::LPX_FONT_SIZE, frameNode);
+    }
     auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle selectTextStyle = indexerTheme->GetSelectTextStyle();
@@ -756,6 +772,9 @@ void IndexerModelNG::SetPopupFont(FrameNode* frameNode, std::optional<Dimension>
     std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
     std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
+    if (fontSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize.value(), LpxAttribute::LPX_FONT_SIZE, frameNode);
+    }
     auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle popupTextStyle = indexerTheme->GetPopupTextStyle();
@@ -771,6 +790,9 @@ void IndexerModelNG::SetFont(FrameNode* frameNode, std::optional<Dimension>& fon
     std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
     std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
+    if (fontSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize.value(), LpxAttribute::LPX_FONT_SIZE, frameNode);
+    }
     auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle defaultTextStyle = indexerTheme->GetDefaultTextStyle();
@@ -947,6 +969,7 @@ void IndexerModelNG::SetItemSize(FrameNode* frameNode, const Dimension& itemSize
 void IndexerModelNG::SetPopupPositionX(FrameNode* frameNode, const std::optional<Dimension>& popupPositionXOpt)
 {
     if (popupPositionXOpt.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(popupPositionXOpt.value(), LpxAttribute::ALWAYS, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionXOpt.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
@@ -957,6 +980,7 @@ void IndexerModelNG::SetPopupPositionX(FrameNode* frameNode, const std::optional
 void IndexerModelNG::SetPopupPositionY(FrameNode* frameNode, const std::optional<Dimension>& popupPositionYOpt)
 {
     if (popupPositionYOpt.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(popupPositionYOpt.value(), LpxAttribute::ALWAYS, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionYOpt.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(

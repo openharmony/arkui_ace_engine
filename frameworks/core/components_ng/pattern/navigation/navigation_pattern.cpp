@@ -48,6 +48,8 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "base/log/ace_checker.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -2359,7 +2361,8 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
 
     if (isOnShow) {
         if (needHideOrShowPrimaryNodes) {
-            navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW, visibilityReason);
+            navigationPattern->FirePrimaryNodesLifecycle(
+                NavDestinationLifecycle::ON_SHOW, visibilityReason, false);
         }
         navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
             NavDestinationLifecycle::ON_SHOW, false, visibilityReason);
@@ -2418,7 +2421,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
         NavDestinationLifecycle::ON_HIDE, false, visibilityReason);
     if (needHideOrShowPrimaryNodes) {
-        navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, visibilityReason);
+        navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, visibilityReason, false);
     }
 }
 
@@ -7296,7 +7299,7 @@ bool NavigationPattern::IsDestinationNeedHideInPush(
 }
 
 void NavigationPattern::FirePrimaryNodesLifecycle(
-    NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason)
+    NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason, bool needTriggerActive)
 {
     if (lifecycle != NavDestinationLifecycle::ON_SHOW && lifecycle != NavDestinationLifecycle::ON_HIDE) {
         return;
@@ -7320,7 +7323,7 @@ void NavigationPattern::FirePrimaryNodesLifecycle(
                 NotifyDestinationLifecycle(node, NavDestinationLifecycle::ON_SHOW);
                 pattern->SetIsOnShow(true);
             }
-            if (idx == primaryNodes.size() - 1 && !pattern->IsActive()) {
+            if (needTriggerActive && idx == primaryNodes.size() - 1 && !pattern->IsActive()) {
                 NotifyDestinationLifecycle(node,
                     NavDestinationLifecycle::ON_ACTIVE, NavDestinationActiveReason::TRANSITION);
                 pattern->SetIsActive(true);
@@ -7335,7 +7338,7 @@ void NavigationPattern::FirePrimaryNodesLifecycle(
         CHECK_NULL_CONTINUE(node);
         auto pattern = node->GetPattern<NavDestinationPattern>();
         CHECK_NULL_CONTINUE(pattern);
-        if (idx == 0 && pattern->IsActive()) {
+        if (needTriggerActive && idx == 0 && pattern->IsActive()) {
             NotifyDestinationLifecycle(node,
                 NavDestinationLifecycle::ON_INACTIVE, NavDestinationActiveReason::TRANSITION);
             pattern->SetIsActive(false);

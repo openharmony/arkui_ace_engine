@@ -365,6 +365,7 @@ void SwiperModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParameter
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
+    AddDotIndicatorLpx(swiperNode, swiperParameters);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
@@ -412,6 +413,7 @@ void SwiperModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& swiper
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
+    AddDigitIndicatorLpx(swiperNode, swiperDigitalParameters);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperDigitalParameters(swiperDigitalParameters);
@@ -430,6 +432,7 @@ void SwiperModelNG::SetMainSwiperSizeHeight() {}
 
 void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(prevMargin, LpxAttribute::ALWAYS);
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin);
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank);
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -441,6 +444,7 @@ void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin, bool ignoreBl
 
 void SwiperModelNG::SetNextMargin(const Dimension& nextMargin, bool ignoreBlank)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(nextMargin, LpxAttribute::ALWAYS);
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank);
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -507,6 +511,7 @@ void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParame
             SwiperLayoutProperty, IsShowBackground, swiperArrowParameters.isShowBackground.value());
     }
     if (swiperArrowParameters.backgroundSize.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(swiperArrowParameters.backgroundSize.value(), LpxAttribute::ALWAYS);
         ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize, swiperArrowParameters.backgroundSize.value());
     }
     if (swiperArrowParameters.backgroundColor.has_value()) {
@@ -514,6 +519,7 @@ void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParame
             SwiperLayoutProperty, BackgroundColor, swiperArrowParameters.backgroundColor.value());
     }
     if (swiperArrowParameters.arrowSize.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(swiperArrowParameters.arrowSize.value(), LpxAttribute::ALWAYS);
         ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, swiperArrowParameters.arrowSize.value());
     }
     if (swiperArrowParameters.arrowColor.has_value()) {
@@ -672,6 +678,7 @@ void SwiperModelNG::SetDigitalCrownSensitivity(int32_t sensitivity)
 
 void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(nextMargin, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank, frameNode);
     CHECK_NULL_VOID(frameNode);
@@ -682,6 +689,7 @@ void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMar
 
 void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlank)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(prevMargin, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank, frameNode);
     CHECK_NULL_VOID(frameNode);
@@ -803,6 +811,7 @@ void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParamet
             SwiperLayoutProperty, IsShowBackground, swiperArrowParameters.isShowBackground.value(), frameNode);
     }
     if (swiperArrowParameters.backgroundSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(swiperArrowParameters.backgroundSize.value(), LpxAttribute::ALWAYS, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, BackgroundSize, swiperArrowParameters.backgroundSize.value(), frameNode);
     }
@@ -811,6 +820,7 @@ void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParamet
             SwiperLayoutProperty, BackgroundColor, swiperArrowParameters.backgroundColor.value(), frameNode);
     }
     if (swiperArrowParameters.arrowSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(swiperArrowParameters.arrowSize.value(), LpxAttribute::ALWAYS, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, ArrowSize, swiperArrowParameters.arrowSize.value(), frameNode);
     }
@@ -857,6 +867,7 @@ void SwiperModelNG::SetIndicatorIsBoolean(FrameNode* frameNode, bool isBoolean)
 void SwiperModelNG::SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDigitalParameters& swiperDigitalParameters)
 {
     CHECK_NULL_VOID(frameNode);
+    AddDigitIndicatorLpx(frameNode, swiperDigitalParameters);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperDigitalParameters(swiperDigitalParameters);
@@ -1937,5 +1948,72 @@ void SwiperModelNG::CallSwiperShowNext(FrameNode* frameNode)
     auto controller = pattern->GetSwiperController();
     CHECK_NULL_VOID(controller);
     controller->ShowNext();
+}
+
+void SwiperModelNG::AddDigitIndicatorLpx(FrameNode* frameNode, const SwiperDigitalParameters& params)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (params.dimLeft.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimLeft.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimBottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimBottom.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimTop.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimTop.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimRight.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimRight.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimStart.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimStart.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimEnd.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimEnd.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.fontSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.fontSize.value(), LpxAttribute::LPX_FONT_SIZE, frameNode);
+    }
+    if (params.selectedFontSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.selectedFontSize.value(), LpxAttribute::LPX_FONT_SIZE, frameNode);
+    }
+}
+
+void SwiperModelNG::AddDotIndicatorLpx(FrameNode* frameNode, const SwiperParameters& params)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (params.itemWidth.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.itemWidth.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.itemHeight.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.itemHeight.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.selectedItemWidth.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.selectedItemWidth.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.selectedItemHeight.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.selectedItemHeight.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimSpace.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimSpace.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimLeft.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimLeft.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimTop.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimTop.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimRight.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimRight.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimBottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimBottom.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimStart.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimStart.value(), LpxAttribute::ALWAYS, frameNode);
+    }
+    if (params.dimEnd.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(params.dimEnd.value(), LpxAttribute::ALWAYS, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

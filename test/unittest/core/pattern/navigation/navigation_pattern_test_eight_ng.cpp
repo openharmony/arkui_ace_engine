@@ -48,6 +48,8 @@
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -1947,5 +1949,121 @@ HWTEST_F(NavigationPatternTestEightNg, UpdateColorModeForNodesTest001, TestSize.
         AceType::DynamicCast<UINode>(destination))));
     context.pattern->UpdateColorModeForNodes(std::nullopt);
     SUCCEED();
+}
+
+/**
+ * @tc.name: FirePrimaryNodesLifecycleShowNeedTriggerActive001
+ * @tc.desc: Branch: needTriggerActive && idx == last && !IsActive => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, FirePrimaryNodesLifecycleShowNeedTriggerActive001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto primaryDest = CreateNavDestinationNode("Primary", 1);
+    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
+    context.pattern->primaryNodes_ = { WeakPtr<NavDestinationGroupNode>(primaryDest) };
+    context.navNode->lastStandardIndex_ = 2;
+
+    auto primaryPattern = primaryDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(primaryPattern, nullptr);
+    primaryPattern->SetIsOnShow(false);
+    primaryPattern->SetIsActive(false);
+
+    context.pattern->FirePrimaryNodesLifecycle(
+        NavDestinationLifecycle::ON_SHOW, NavDestVisibilityChangeReason::TRANSITION, true);
+
+    EXPECT_TRUE(primaryPattern->GetIsOnShow());
+    EXPECT_TRUE(primaryPattern->IsActive());
+}
+
+/**
+ * @tc.name: FirePrimaryNodesLifecycleShowNeedTriggerActive002
+ * @tc.desc: Branch: needTriggerActive && idx == last && !IsActive => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, FirePrimaryNodesLifecycleShowNeedTriggerActive002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto primaryDest = CreateNavDestinationNode("Primary", 1);
+    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
+    context.pattern->primaryNodes_ = { WeakPtr<NavDestinationGroupNode>(primaryDest) };
+    context.navNode->lastStandardIndex_ = 2;
+
+    auto primaryPattern = primaryDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(primaryPattern, nullptr);
+    primaryPattern->SetIsOnShow(false);
+    primaryPattern->SetIsActive(false);
+
+    context.pattern->FirePrimaryNodesLifecycle(
+        NavDestinationLifecycle::ON_SHOW, NavDestVisibilityChangeReason::TRANSITION, false);
+
+    EXPECT_TRUE(primaryPattern->GetIsOnShow());
+    EXPECT_FALSE(primaryPattern->IsActive());
+}
+
+/**
+ * @tc.name: FirePrimaryNodesLifecycleHideNeedTriggerActive001
+ * @tc.desc: Branch: needTriggerActive && idx == 0 && IsActive => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, FirePrimaryNodesLifecycleHideNeedTriggerActive001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto primaryDest = CreateNavDestinationNode("Primary", 1);
+    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
+    context.pattern->primaryNodes_ = { WeakPtr<NavDestinationGroupNode>(primaryDest) };
+    context.navNode->lastStandardIndex_ = 2;
+
+    auto primaryPattern = primaryDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(primaryPattern, nullptr);
+    primaryPattern->SetIsOnShow(true);
+    primaryPattern->SetIsActive(true);
+
+    context.pattern->FirePrimaryNodesLifecycle(
+        NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION, true);
+
+    EXPECT_FALSE(primaryPattern->GetIsOnShow());
+    EXPECT_FALSE(primaryPattern->IsActive());
+}
+
+/**
+ * @tc.name: FirePrimaryNodesLifecycleHideNeedTriggerActive002
+ * @tc.desc: Branch: needTriggerActive && idx == 0 && IsActive => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, FirePrimaryNodesLifecycleHideNeedTriggerActive002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto primaryDest = CreateNavDestinationNode("Primary", 1);
+    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
+    context.pattern->primaryNodes_ = { WeakPtr<NavDestinationGroupNode>(primaryDest) };
+    context.navNode->lastStandardIndex_ = 2;
+
+    auto primaryPattern = primaryDest->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(primaryPattern, nullptr);
+    primaryPattern->SetIsOnShow(true);
+    primaryPattern->SetIsActive(true);
+
+    context.pattern->FirePrimaryNodesLifecycle(
+        NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION, false);
+
+    EXPECT_FALSE(primaryPattern->GetIsOnShow());
+    EXPECT_TRUE(primaryPattern->IsActive());
 }
 } // namespace OHOS::Ace::NG

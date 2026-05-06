@@ -73,6 +73,7 @@
 #include "interfaces/native/native_type.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

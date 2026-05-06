@@ -1510,6 +1510,37 @@ void AccessibilityProperty::ResetAccessibilityActionOptions()
     accessibilityActionOptions_.reset();
 }
 
+void AccessibilityProperty::SetAccessibilityCustomActions(
+    const std::vector<AccessibilityCustomAction>& accessibilityCustomActions)
+{
+    accessibilityCustomActions_ = accessibilityCustomActions;
+}
+
+std::vector<AccessibilityCustomAction> AccessibilityProperty::GetAccessibilityCustomActions()
+{
+    return accessibilityCustomActions_.value_or(std::vector<AccessibilityCustomAction> {});
+}
+
+void AccessibilityProperty::ResetAccessibilityCustomActions()
+{
+    accessibilityCustomActions_.reset();
+}
+
+bool AccessibilityProperty::ActActionCustom(const std::string& actionName)
+{
+    auto customActions = GetAccessibilityCustomActions();
+    for (auto& customAction : customActions) {
+        if (customAction.actionName == actionName) {
+            if (customAction.customActionCallback) {
+                customAction.customActionCallback();
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+}
+
 void AccessibilityProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("scrollable", IsScrollable(), filter, FIXED_ATTR_SCROLLABLE);

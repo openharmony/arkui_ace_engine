@@ -226,10 +226,13 @@ advanced_ui_component/atomicservicetabs/ @giteewzp
 advanced_ui_component/atomicserviceweb/ @giteewzp
 advanced_ui_component/BUILD.gn @arkuitoolchain
 advanced_ui_component/chipgroup/ @arkuitoolchain
+advanced_ui_component/chipgroupv2/ @arkuitoolchain
 advanced_ui_component/chip/ @arkuitoolchain
+advanced_ui_component/chipv2/ @arkuitoolchain
 advanced_ui_component/composelistitem/ @arkuiadvancedcomponent
 advanced_ui_component/composetitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/counter/ @arkuitoolchain
+advanced_ui_component/counterv2/ @arkuitoolchain
 advanced_ui_component/dialog/ @arkuiadvancedcomponent
 advanced_ui_component/dialogv2/ @arkuiadvancedcomponent
 advanced_ui_component/downloadfilebutton/
@@ -579,6 +582,7 @@ frameworks/bridge/declarative_frontend/ark_component/package.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkflowitem.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkfolderstack.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arklazywaterflow.js @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_component/components/arklazycolumnlayout.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
@@ -635,6 +639,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui0
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyGridLayout.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyWaterFlowLayout.ts @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyColumnLayout.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLine.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLinearIndicator.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @arkuiscroll
@@ -729,6 +734,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @
 frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_grid_layout_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_water_flow_layout_modifier.ts @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_column_layout_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier.ts @arkuiscroll
@@ -2512,6 +2518,7 @@ frameworks/core/components_ng/pattern/image/ @arkui001
 frameworks/core/components_ng/pattern/indexer/ @arkui_navigation
 frameworks/core/components_ng/pattern/lazy_layout/ @arkuiscroll
 frameworks/core/components_ng/pattern/lazy_waterflow/ @arkuiscroll
+frameworks/core/components_ng/pattern/lazy_column_layout/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_indicator/ @arkui_navigation
 frameworks/core/components_ng/pattern/linear_layout/ @arkuilayout1
 frameworks/core/components_ng/pattern/linear_split/ @arkuilayout1
@@ -2895,6 +2902,8 @@ frameworks/core/interfaces/native/node/lazy_grid_layout_modifier.cpp @arkuiscrol
 frameworks/core/interfaces/native/node/lazy_grid_layout_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/lazy_water_flow_layout_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/lazy_water_flow_layout_modifier.h @arkuiscroll
+frameworks/core/interfaces/native/node/lazy_column_layout_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/node/lazy_column_layout_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/line_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/line_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/linear_indicator_modifier.cpp @arkui_navigation
@@ -4507,8 +4516,8 @@ frameworks/core/interfaces/native/implementation/offscreen_canvas_rendering_cont
 frameworks/core/interfaces/native/implementation/offscreen_canvas_rendering_context2d_peer_impl.h @arkuilayout1
 frameworks/core/interfaces/native/implementation/pan_gesture_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/pan_gesture_event_peer.h @ArkUI_Event
-frameworks/core/interfaces/native/implementation/pan_gesture_options_accessor.cpp @ArkUI_Event
-frameworks/core/interfaces/native/implementation/pan_gesture_options_peer.h @ArkUI_Event
+frameworks/core/interfaces/native/implementation/pan_gesture_options_proxy_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/pan_gesture_options_proxy_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/pan_recognizer_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/pan_recognizer_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/particle_helper_accessor.cpp @arkuicodepulse

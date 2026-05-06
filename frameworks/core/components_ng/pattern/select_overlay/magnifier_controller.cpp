@@ -106,6 +106,12 @@ bool MagnifierController::UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pi
     RectF visibleRect;
     RectF frameRect;
     node->GetVisibleRect(visibleRect, frameRect);
+    // if component extends beyond its parent, visibleRect is invalid, use frameRect instead.
+    if (visibleRect.Height() <= 0.0f && frameRect.Height() > 0.0f) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "visibleRect=%{public}s, frameRect=%{public}s",
+            visibleRect.ToString().c_str(), frameRect.ToString().c_str());
+        visibleRect = frameRect;
+    }
     auto patternFrameTop = windowGlobalRect.Top() + visibleRect.GetY() * windowScale;
     auto patternBottom = visibleRect.Height() * windowScale + patternFrameTop;
     patternVisibleBottom = visibleRect.Bottom();

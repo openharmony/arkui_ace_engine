@@ -40,6 +40,7 @@ struct ViewPosReference {
     float referencePos;
     ReferenceEdge referenceEdge;
     Axis axis;
+    std::optional<int64_t> deadline;
 
     bool operator==(const ViewPosReference &other) const;
 };

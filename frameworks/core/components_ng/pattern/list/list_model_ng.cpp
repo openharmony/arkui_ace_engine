@@ -22,6 +22,7 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
@@ -1059,6 +1060,28 @@ EditModeOptions ListModelNG::GetEditModeOptions(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, options);
     return pattern->GetEditModeOptions();
+}
+
+void ListModelNG::SetEnableEditMode(bool enableEditMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableEditMode(frameNode, enableEditMode);
+}
+
+void ListModelNG::SetEnableEditMode(FrameNode* frameNode, bool enableEditMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditMode(enableEditMode);
+}
+
+bool ListModelNG::GetEnableEditMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetEnableEditMode();
 }
 
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)

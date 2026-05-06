@@ -17,6 +17,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include "core/event/ace_event_helper.h"
+#include "core/components/common/properties/alignment.h"
 namespace OHOS::Ace {
 namespace {
 

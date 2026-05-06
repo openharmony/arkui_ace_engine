@@ -560,7 +560,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
-    UpdateConfirmButtonTextLayoutProperty(textConfirmNode, pickerTheme);
+    UpdateConfirmButtonTextLayoutProperty(textConfirmNode, pickerTheme, buttonConfirmNode);
     auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
     textPattern->SetConfirmNode(buttonConfirmNode);
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
@@ -600,17 +600,22 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     return buttonConfirmNode;
 }
 
-void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(
-    const RefPtr<FrameNode>& textConfirmNode, const RefPtr<PickerTheme>& pickerTheme)
+void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(const RefPtr<FrameNode> &textConfirmNode,
+    const RefPtr<PickerTheme> &pickerTheme, const RefPtr<FrameNode> &buttonConfirmNode)
 {
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto buttonLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
     if (useButtonFocusArea_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+        buttonLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        buttonLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
+    buttonLayoutProperty->UpdateFontColorFlagByUser(true);
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -624,17 +629,22 @@ void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(
     }
 }
 
-void TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(
-    const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme)
+void TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(const RefPtr<FrameNode> &textCancelNode,
+    const RefPtr<PickerTheme> &pickerTheme, const RefPtr<FrameNode> &buttonCancelNode)
 {
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textCancelLayoutProperty);
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonCancelLayoutProperty);
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
     if (useButtonFocusArea_) {
         textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+        buttonCancelLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        buttonCancelLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
+    buttonCancelLayoutProperty->UpdateFontColorFlagByUser(true);
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -866,7 +876,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    UpdateCancelButtonTextLayoutProperty(textCancelNode, pickerTheme);
+    UpdateCancelButtonTextLayoutProperty(textCancelNode, pickerTheme, buttonCancelNode);
     auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
     textPattern->SetCancelNode(buttonCancelNode);
     textCancelNode->MountToParent(buttonCancelNode);

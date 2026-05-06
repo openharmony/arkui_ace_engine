@@ -22,4 +22,11 @@ std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMater
 {
     return nullptr;
 }
+
+std::shared_ptr<OHOS::Rosen::Filter> UiMaterialFilterCreator::CreateRosenFilter(
+    const ImmersiveMaterialConfig& params)
+{
+    return nullptr;
+}
+
 } // namespace OHOS::Ace::NG

@@ -102,6 +102,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_theme_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
+#include "core/components_ng/pattern/sheet/sheet_theme_wrapper.h"
 #include "core/components_ng/pattern/slider/slider_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/badge/badge_theme_wrapper.h"
@@ -248,6 +249,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { IndexerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::IndexerThemeWrapper::WrapperBuilder> },
         { TabTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TabThemeWrapper::WrapperBuilder> },
         { SwiperIndicatorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwiperThemeWrapper::WrapperBuilder> },
+        { NG::SheetTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SheetThemeWrapper::WrapperBuilder> },
         { NG::MenuTheme::TypeId(), &ThemeWrapperBuildFunc<NG::MenuThemeWrapper::WrapperBuilder> }
     };
 

@@ -67,6 +67,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/token_theme/token_theme.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -81,6 +83,192 @@ namespace {
 const InspectorFilter filter;
 constexpr Dimension TEST_SETTING_RADIUS = Dimension(10.0, DimensionUnit::VP);
 constexpr int32_t TEST_NON_DEFAULT_THEME_SCOPE_ID = 9;
+constexpr int32_t TEST_TOKEN_THEME_ID = 1;
+constexpr int32_t TITLE_ROW_CHILD_COUNT = 5;
+constexpr int32_t TITLE_TEXT_CHILD_INDEX = 2;
+constexpr int32_t OPTIONS_BUTTON_COUNT = 2;
+
+struct ModifyDoneTestTree {
+    RefPtr<FrameNode> dialogNode;
+    RefPtr<CalendarDialogPattern> pattern;
+    RefPtr<FrameNode> titleNode;
+    RefPtr<ImageLayoutProperty> lastYearArrowImageLayout;
+};
+
+RefPtr<FrameNode> CreateMountedCalendarDialogHost(int32_t dialogApiVersion, RefPtr<CalendarDialogPattern>& patternOut)
+{
+    patternOut = nullptr;
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CalendarDialogPattern>());
+    if (!dialogNode) {
+        return nullptr;
+    }
+    dialogNode->apiVersion_ = dialogApiVersion;
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    if (!wrapperNode) {
+        return nullptr;
+    }
+    dialogNode->MountToParent(wrapperNode);
+    patternOut = dialogNode->GetPattern<CalendarDialogPattern>();
+    if (!patternOut) {
+        return nullptr;
+    }
+    return dialogNode;
+}
+
+bool AttachCalendarPickerEntry(const RefPtr<CalendarDialogPattern>& pattern)
+{
+    auto entryNode = FrameNode::CreateFrameNode(
+        V2::CALENDAR_PICKER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CalendarPickerPattern>());
+    if (!entryNode) {
+        return false;
+    }
+    pattern->SetEntryNode(entryNode);
+    return true;
+}
+
+RefPtr<FrameNode> BuildTitleRowWithArrowButtons(
+    const RefPtr<FrameNode>& dialogNode, const RefPtr<CalendarDialogPattern>& pattern)
+{
+    auto titleNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    if (!titleNode || !dialogNode || !pattern) {
+        return nullptr;
+    }
+    pattern->SetTitleNode(titleNode);
+    dialogNode->AddChild(titleNode);
+
+    for (int32_t titleChildIndex = 0; titleChildIndex < TITLE_ROW_CHILD_COUNT; titleChildIndex++) {
+        if (titleChildIndex == TITLE_TEXT_CHILD_INDEX) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            if (!textNode) {
+                return nullptr;
+            }
+            titleNode->AddChild(textNode);
+            continue;
+        }
+        auto buttonNode = FrameNode::CreateFrameNode(
+            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        auto imageNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        if (!buttonNode || !imageNode) {
+            return nullptr;
+        }
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetFillColor(Color::BLACK);
+        auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+        if (!imageLayoutProperty) {
+            return nullptr;
+        }
+        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        buttonNode->AddChild(imageNode);
+        titleNode->AddChild(buttonNode);
+    }
+    return titleNode;
+}
+
+bool AppendDividerSwiperAndOptions(const RefPtr<FrameNode>& dialogNode)
+{
+    if (!dialogNode) {
+        return false;
+    }
+    auto dividerNode = FrameNode::CreateFrameNode(
+        V2::DIVIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SWIPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SwiperPattern>());
+    auto calendarNode = FrameNode::CreateFrameNode(
+        V2::CALENDAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CalendarPattern>());
+    auto optionsNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    if (!dividerNode || !scrollNode || !calendarNode || !optionsNode) {
+        return false;
+    }
+    scrollNode->AddChild(calendarNode);
+    dialogNode->AddChild(dividerNode);
+    dialogNode->AddChild(scrollNode);
+    for (int32_t buttonIndex = 0; buttonIndex < OPTIONS_BUTTON_COUNT; buttonIndex++) {
+        auto buttonNode = FrameNode::CreateFrameNode(
+            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        if (!buttonNode || !textNode) {
+            return false;
+        }
+        buttonNode->AddChild(textNode);
+        optionsNode->AddChild(buttonNode);
+    }
+    dialogNode->AddChild(optionsNode);
+    return true;
+}
+
+RefPtr<ImageLayoutProperty> GetTitleFirstArrowImageLayout(const RefPtr<FrameNode>& titleNode)
+{
+    if (!titleNode) {
+        return nullptr;
+    }
+    auto lastYearButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(0));
+    if (!lastYearButton) {
+        return nullptr;
+    }
+    auto lastYearImage = AceType::DynamicCast<FrameNode>(lastYearButton->GetChildAtIndex(0));
+    if (!lastYearImage) {
+        return nullptr;
+    }
+    return lastYearImage->GetLayoutProperty<ImageLayoutProperty>();
+}
+
+ModifyDoneTestTree BuildModifyDoneTestTree(
+    PipelineContext* pipeline, int32_t dialogApiVersion, bool attachPipelineContext = true)
+{
+    ModifyDoneTestTree out;
+    if (!pipeline) {
+        return out;
+    }
+    out.dialogNode = CreateMountedCalendarDialogHost(dialogApiVersion, out.pattern);
+    if (!out.dialogNode || !out.pattern) {
+        return {};
+    }
+    if (!AttachCalendarPickerEntry(out.pattern)) {
+        return {};
+    }
+    out.titleNode = BuildTitleRowWithArrowButtons(out.dialogNode, out.pattern);
+    if (!out.titleNode) {
+        return {};
+    }
+    if (!AppendDividerSwiperAndOptions(out.dialogNode)) {
+        return {};
+    }
+    if (attachPipelineContext) {
+        out.dialogNode->AttachContext(pipeline, true);
+    }
+    out.lastYearArrowImageLayout = GetTitleFirstArrowImageLayout(out.titleNode);
+    if (!out.lastYearArrowImageLayout) {
+        return {};
+    }
+    return out;
+}
+
+void ApplyTitleScopedTokenTheme(const RefPtr<FrameNode>& titleNode, ColorMode tokenColorMode)
+{
+    if (!titleNode) {
+        return;
+    }
+    titleNode->SetThemeScopeId(TEST_NON_DEFAULT_THEME_SCOPE_ID);
+    auto scopedTheme = AceType::MakeRefPtr<TokenTheme>(TEST_TOKEN_THEME_ID);
+    if (!scopedTheme) {
+        return;
+    }
+    scopedTheme->SetColorMode(tokenColorMode);
+    TokenThemeStorage::GetInstance()->CacheSet(scopedTheme);
+    TokenThemeStorage::GetInstance()->StoreThemeScope(TEST_NON_DEFAULT_THEME_SCOPE_ID, TEST_TOKEN_THEME_ID);
+}
 } // namespace
 class CalendarDialogPatternTestNg : public testing::Test {
 public:
@@ -1948,6 +2136,11 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_OnColorConfig_Themed
     ASSERT_NE(textTitle, nullptr);
     dialogPattern->SetTitleNode(textTitle);
     textTitle->SetThemeScopeId(TEST_NON_DEFAULT_THEME_SCOPE_ID);
+    auto scopedTheme = AceType::MakeRefPtr<TokenTheme>(TEST_TOKEN_THEME_ID);
+    ASSERT_NE(scopedTheme, nullptr);
+    scopedTheme->SetColorMode(ColorMode::DARK);
+    TokenThemeStorage::GetInstance()->CacheSet(scopedTheme);
+    TokenThemeStorage::GetInstance()->StoreThemeScope(TEST_NON_DEFAULT_THEME_SCOPE_ID, TEST_TOKEN_THEME_ID);
 
     auto textLayoutProperty = textTitle->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
@@ -1958,6 +2151,56 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_OnColorConfig_Themed
     dialogPattern->OnColorConfigurationUpdate();
 
     EXPECT_EQ(textLayoutProperty->GetTextColor().value_or(Color::TRANSPARENT), lockedTitleColor);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarDialogPattern_OnColorConfig_ThemedScopeSystemModeApi26_001
+ * @tc.desc: API 26+ with scoped SYSTEM mode still refreshes title color on configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_OnColorConfig_ThemedScopeSystemModeApi26_001,
+    TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto calendarDialogNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CalendarDialogPattern>());
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto textTitle = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textTitle, nullptr);
+    dialogPattern->SetTitleNode(textTitle);
+    textTitle->SetThemeScopeId(TEST_NON_DEFAULT_THEME_SCOPE_ID);
+    auto scopedTheme = AceType::MakeRefPtr<TokenTheme>(TEST_TOKEN_THEME_ID);
+    ASSERT_NE(scopedTheme, nullptr);
+    scopedTheme->SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    TokenThemeStorage::GetInstance()->CacheSet(scopedTheme);
+    TokenThemeStorage::GetInstance()->StoreThemeScope(TEST_NON_DEFAULT_THEME_SCOPE_ID, TEST_TOKEN_THEME_ID);
+
+    auto textLayoutProperty = textTitle->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto calTheme = textTitle->GetTheme<CalendarTheme>(true);
+    ASSERT_NE(calTheme, nullptr);
+    const Color expectedTitleColor = calTheme->GetCalendarTitleFontColor();
+    textLayoutProperty->UpdateTextColor(Color::FromRGB(0x1A, 0x2B, 0x3C));
+
+    g_isConfigChangePerform = false;
+    dialogPattern->OnColorConfigurationUpdate();
+
+    EXPECT_FALSE(dialogPattern->hasScopedExplicitColorMode_);
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value_or(Color::TRANSPARENT), expectedTitleColor);
 
     container->SetApiTargetVersion(backupContainerApi);
     pipeline->SetApiTargetVersion(backupPipelineApi);
@@ -2006,4 +2249,97 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_OnColorConfig_Defaul
     container->SetApiTargetVersion(backupContainerApi);
     pipeline->SetApiTargetVersion(backupPipelineApi);
 }
+
+/**
+ * @tc.name: CalendarDialogPattern_ModifyDone_ArrowThemeApi25_001
+ * @tc.desc: Below API 26, OnModifyDone refreshes title arrow fill from theme (no freeze), even if
+ *            scoped explicit color and init flags were previously set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_ModifyDone_ArrowThemeApi25_001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+
+    auto tree = BuildModifyDoneTestTree(
+        AceType::RawPtr(pipeline), static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    ASSERT_NE(tree.dialogNode, nullptr);
+    ASSERT_NE(tree.pattern, nullptr);
+    ASSERT_NE(tree.lastYearArrowImageLayout, nullptr);
+    ApplyTitleScopedTokenTheme(tree.titleNode, ColorMode::DARK);
+
+    auto imageLayoutProperty = tree.lastYearArrowImageLayout;
+    auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_TRUE(imageInfo.has_value());
+    const Color customArrowColor = Color::FromRGB(0x11, 0x22, 0x33);
+    imageInfo->SetFillColor(customArrowColor);
+    imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+
+    tree.pattern->hasInitTitleArrowsColor_ = true;
+    tree.pattern->hasScopedExplicitColorMode_ = true;
+    tree.pattern->OnModifyDone();
+
+    auto updatedInfo = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_TRUE(updatedInfo.has_value());
+    auto calendarTheme = tree.dialogNode->GetTheme<CalendarTheme>(true);
+    ASSERT_NE(calendarTheme, nullptr);
+    EXPECT_EQ(updatedInfo->GetFillColor(), calendarTheme->GetEntryArrowColor());
+    EXPECT_NE(updatedInfo->GetFillColor(), customArrowColor);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarDialogPattern_ModifyDone_ArrowSystemApi26_001
+ * @tc.desc: API 26+ with scoped SYSTEM color mode still refreshes title arrows on OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_ModifyDone_ArrowSystemApi26_001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto tree = BuildModifyDoneTestTree(AceType::RawPtr(pipeline),
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX), false);
+    ASSERT_NE(tree.dialogNode, nullptr);
+    ASSERT_NE(tree.pattern, nullptr);
+    ASSERT_NE(tree.titleNode, nullptr);
+    ASSERT_NE(tree.lastYearArrowImageLayout, nullptr);
+    ApplyTitleScopedTokenTheme(tree.titleNode, ColorMode::COLOR_MODE_UNDEFINED);
+
+    auto imageLayoutProperty = tree.lastYearArrowImageLayout;
+    auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_TRUE(imageInfo.has_value());
+    const Color customArrowColor = Color::FromRGB(0x44, 0x55, 0x66);
+    imageInfo->SetFillColor(customArrowColor);
+    imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+
+    auto expectedTheme = tree.titleNode->GetTheme<CalendarTheme>(true);
+    ASSERT_NE(expectedTheme, nullptr);
+    tree.pattern->hasInitTitleArrowsColor_ = true;
+    tree.pattern->hasScopedExplicitColorMode_ = false;
+    tree.pattern->OnModifyDone();
+
+    auto updatedInfo = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_TRUE(updatedInfo.has_value());
+    EXPECT_EQ(updatedInfo->GetFillColor(), expectedTheme->GetEntryArrowColor());
+    EXPECT_FALSE(tree.pattern->hasScopedExplicitColorMode_);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
 } // namespace OHOS::Ace::NG

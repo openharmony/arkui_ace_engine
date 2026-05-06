@@ -30,6 +30,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS {
 namespace Media {

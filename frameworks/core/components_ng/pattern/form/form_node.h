@@ -22,6 +22,7 @@
 
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 

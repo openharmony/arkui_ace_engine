@@ -15,11 +15,15 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_picker_bridge.h"
 
+#include <cmath>
+#include <limits>
+
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 namespace OHOS::Ace::NG {
@@ -324,6 +328,89 @@ ArkUINativeModuleValue ContainerPickerBridge::ResetContainerPickerSelectionIndic
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerDisplayedItemCount(
+    ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> countArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto containerPickerModifier = nodeModifiers->getContainerPickerModifier();
+    CHECK_NULL_RETURN(containerPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    if (countArg->IsNumber()) {
+        double countValue = countArg->ToNumber(vm)->Value();
+        if (!std::isfinite(countValue) || countValue < static_cast<double>(std::numeric_limits<int32_t>::min()) ||
+            countValue > static_cast<double>(std::numeric_limits<int32_t>::max())) {
+            containerPickerModifier->resetContainerPickerDisplayedItemCount(nativeNode);
+        } else {
+            const int32_t rawCount = static_cast<int32_t>(countValue);
+            const int32_t normalizedCount = ContainerPickerUtils::NormalizeDisplayedItemCount(rawCount);
+            containerPickerModifier->setContainerPickerDisplayedItemCount(nativeNode, normalizedCount);
+        }
+    } else {
+        containerPickerModifier->resetContainerPickerDisplayedItemCount(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ContainerPickerBridge::ResetContainerPickerDisplayedItemCount(
+    ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto containerPickerModifier = nodeModifiers->getContainerPickerModifier();
+    CHECK_NULL_RETURN(containerPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    containerPickerModifier->resetContainerPickerDisplayedItemCount(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerItemHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> itemHeightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto containerPickerModifier = nodeModifiers->getContainerPickerModifier();
+    CHECK_NULL_RETURN(containerPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    CalcDimension itemHeight;
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, itemHeightArg, itemHeight) ||
+        ArkTSUtils::ParseJsDimensionVp(vm, itemHeightArg, itemHeight)) {
+        containerPickerModifier->setContainerPickerItemHeight(
+            nativeNode, static_cast<ArkUI_Float32>(itemHeight.ConvertToVp()));
+    } else {
+        containerPickerModifier->resetContainerPickerItemHeight(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ContainerPickerBridge::ResetContainerPickerItemHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto containerPickerModifier = nodeModifiers->getContainerPickerModifier();
+    CHECK_NULL_RETURN(containerPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    containerPickerModifier->resetContainerPickerItemHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -338,7 +425,7 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerOnChange(ArkUIRu
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
-        GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerOnChange(nativeNode);
+        GetArkUINodeModifiers()->getContainerPickerModifier()->resetContainerPickerOnChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);

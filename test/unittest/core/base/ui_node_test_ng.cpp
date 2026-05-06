@@ -44,6 +44,8 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/unittest/core/base/ui_node_test_ng.h"
 
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+
 using namespace testing;
 using namespace testing::ext;
 

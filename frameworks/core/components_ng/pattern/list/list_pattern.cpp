@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/selectable_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
@@ -62,6 +63,7 @@ constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr int DEFAULT_HEADER_VALUE = 2;
 constexpr int DEFAULT_FOOTER_VALUE = 3;
 constexpr int DEFAULT_PREDICT_ERROR_TIMES = 50;
+constexpr Dimension DEFAULT_EDIT_MODE_CHECK_BOX_HOT_ZONE_WIDTH = 36.0_vp;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
@@ -89,6 +91,33 @@ bool GetNodeRangeInParent(
 float GetMoveOffsetFromTargetPos(float targetPos)
 {
     return NearZero(targetPos, 1.0f) ? 0.0f : -targetPos;
+}
+
+float GetEditModeCheckBoxHotZoneWidthPx(const RefPtr<FrameNode>& host)
+{
+    auto theme = host ? host->GetTheme<SelectableTheme>(true) : nullptr;
+    auto hotZoneWidth = theme ? theme->GetEditModeCheckBoxHotZoneWidth() : DEFAULT_EDIT_MODE_CHECK_BOX_HOT_ZONE_WIDTH;
+    return std::max(0.0f, static_cast<float>(hotZoneWidth.ConvertToPx()));
+}
+
+void SetEditModeForListItemOrGroup(const RefPtr<FrameNode>& itemNode, bool enabled)
+{
+    CHECK_NULL_VOID(itemNode);
+    auto itemPattern = itemNode->GetPattern<SelectableItemPattern>();
+    if (itemPattern) {
+        itemPattern->SetEditModeEnabled(enabled);
+        return;
+    }
+    auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(groupPattern);
+    std::list<RefPtr<FrameNode>> children;
+    itemNode->GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        auto childPattern = child->GetPattern<SelectableItemPattern>();
+        if (childPattern) {
+            childPattern->SetEditModeEnabled(enabled);
+        }
+    }
 }
 
 RefPtr<FrameNode> GetListTargetFrameNode(
@@ -198,6 +227,17 @@ void ListPattern::OnModifyDone()
     }
     if (!multiSelectable_ && isMouseEventInit_) {
         UninitMouseEvent();
+    }
+    if (GetEnableEditMode() && !swipeSelectPanEvent_) {
+        InitSwipeSelectEvent();
+    }
+    if (!GetEnableEditMode() && swipeSelectPanEvent_) {
+        UninitSwipeSelectEvent();
+    }
+    if (IsDefaultMultiSelectStyleEnabled()) {
+        ApplyEditModeToVisibleItems();
+    } else {
+        RemoveEditModeFromItems();
     }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -443,7 +483,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     snapTrigByScrollBar_ = false;
     ChangeCanStayOverScroll();
     CheckValidPredictItem();
-    PostAfterCurrentLayoutTask();
     return true;
 }
 
@@ -895,16 +934,6 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
         listLayoutAlgorithm->SetIsRoundingMode();
     }
-    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
-    if (paintProperty && paintProperty->HasContentClip()) {
-        auto clip = paintProperty->GetContentClipValue();
-        listLayoutAlgorithm->SetContentClipMode(clip.first);
-        if (clip.first == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
-            listLayoutAlgorithm->SetContentClipExpend(safeAreaPad_.value());
-        } else if (clip.first == ContentClipMode::CUSTOM) {
-            listLayoutAlgorithm->SetContentClipShape(clip.second);
-        }
-    }
     return listLayoutAlgorithm;
 }
 
@@ -945,8 +974,10 @@ void ListPattern::SetLayoutAlgorithmParams(
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
+    listLayoutAlgorithm->SetDefaultMultiSelectStyleEnabled(IsDefaultMultiSelectStyleEnabled());
     listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
+    SetLayoutAlgorithmClipContent(listLayoutAlgorithm);
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -1027,6 +1058,25 @@ void ListPattern::SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>&
     }
     if (predictSnapEndPos_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
+    }
+}
+
+void ListPattern::SetLayoutAlgorithmClipContent(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm)
+{
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    if (!paintProperty || !paintProperty->HasContentClip()) {
+        safeAreaPad_.reset();
+        return;
+    }
+    auto clip = paintProperty->GetContentClipValue();
+    listLayoutAlgorithm->SetContentClipMode(clip.first);
+    if (clip.first != ContentClipMode::SAFE_AREA) {
+        safeAreaPad_.reset();
+    }
+    if (clip.first == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
+        listLayoutAlgorithm->SetContentClipExpend(safeAreaPad_.value());
+    } else if (clip.first == ContentClipMode::CUSTOM) {
+        listLayoutAlgorithm->SetContentClipShape(clip.second);
     }
 }
 
@@ -3427,7 +3477,7 @@ void ListPattern::UpdateBackPressCloseSwipeActionCallback()
     hasBackPressHandlerRegistered_ = true;
 }
 
-int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
+int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, GetStartIndex());
@@ -3758,6 +3808,245 @@ std::vector<RefPtr<FrameNode>> ListPattern::GetVisibleSelectedItems()
         children.emplace_back(itemFrameNode);
     }
     return children;
+}
+
+RefPtr<FrameNode> ListPattern::GetSelectableItemAtIndex(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    const auto resolvedItemInfo = swipeResolvedItemIndex_;
+    if (index < startIndex_ || index > endIndex_ || itemPosition_.find(index) == itemPosition_.end()) {
+        return nullptr;
+    }
+    auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
+    CHECK_NULL_RETURN(itemWrapper, nullptr);
+    auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
+    if (!itemNode) {
+        itemNode = AceType::DynamicCast<FrameNode>(itemWrapper);
+    }
+    CHECK_NULL_RETURN(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+    if (itemPattern) {
+        return itemNode;
+    }
+
+    auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(groupPattern, nullptr);
+    if (!resolvedItemInfo.has_value() || resolvedItemInfo->index != index || resolvedItemInfo->indexInGroup < 0) {
+        return nullptr;
+    }
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    bool showCachedItems = listProperty ? listProperty->GetShowCachedItemsValue(false) : false;
+    bool isCache = groupPattern->GetItemPosition().empty() && !showCachedItems;
+    auto groupItemWrapper = itemNode->GetChildByIndex(
+        resolvedItemInfo->indexInGroup + groupPattern->GetItemStartIndex(), isCache);
+    CHECK_NULL_RETURN(groupItemWrapper, nullptr);
+    auto groupItemNode = AceType::DynamicCast<FrameNode>(groupItemWrapper->GetHostNode());
+    if (!groupItemNode) {
+        groupItemNode = AceType::DynamicCast<FrameNode>(groupItemWrapper);
+    }
+    CHECK_NULL_RETURN(groupItemNode, nullptr);
+    return groupItemNode;
+}
+
+bool ListPattern::NeedJudgeWithHotZone()
+{
+    if (!IsDefaultMultiSelectStyleEnabled()) {
+        return false;
+    }
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, true);
+    auto lanes = listProperty->GetLanes();
+    return !lanes.has_value() || lanes.value() == 1;
+}
+
+int32_t ListPattern::GetItemAtPosition(float offsetX, float offsetY) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    swipeResolvedItemIndex_.reset();
+    auto hostOffset = host->GetTransformRelativeOffset();
+    auto mainIndex = GetItemIndexByPosition(offsetX + hostOffset.GetX(), offsetY + hostOffset.GetY());
+    auto itemIndex = GetItemIndexInGroup(offsetX, offsetY);
+    if (itemIndex.index < 0) {
+        itemIndex.index = mainIndex;
+    }
+    if (itemIndex.index < 0) {
+        return -1;
+    }
+    if (itemIndex.area != -1 && itemIndex.area != 1) {
+        return -1;
+    }
+
+    Rect itemRect = itemIndex.indexInGroup >= 0 ? GetItemRectInGroup(itemIndex.index, itemIndex.indexInGroup)
+                                                : GetItemRect(itemIndex.index);
+    if (LessOrEqual(itemRect.Width(), 0.0) || LessOrEqual(itemRect.Height(), 0.0)) {
+        return -1;
+    }
+
+    swipeResolvedItemIndex_ = itemIndex;
+    auto itemNode = GetSelectableItemAtIndex(itemIndex.index);
+    auto itemPattern = itemNode ? itemNode->GetPattern<ListItemPattern>() : nullptr;
+    if (itemPattern && !itemPattern->Selectable()) {
+        return -1;
+    }
+    return itemIndex.index;
+}
+
+bool ListPattern::IsInEditModeHotZone(const PointF& point) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    swipeResolvedItemIndex_.reset();
+    auto hostOffset = host->GetTransformRelativeOffset();
+    auto mainIndex = GetItemIndexByPosition(point.GetX() + hostOffset.GetX(), point.GetY() + hostOffset.GetY());
+    auto itemIndex = GetItemIndexInGroup(point.GetX(), point.GetY());
+    if (itemIndex.index < 0) {
+        itemIndex.index = mainIndex;
+    }
+    if (itemIndex.index < 0 || (itemIndex.area != -1 && itemIndex.area != 1)) {
+        return false;
+    }
+
+    Rect itemRect = itemIndex.indexInGroup >= 0 ? GetItemRectInGroup(itemIndex.index, itemIndex.indexInGroup)
+                                                : GetItemRect(itemIndex.index);
+    if (LessOrEqual(itemRect.Width(), 0.0) || LessOrEqual(itemRect.Height(), 0.0)) {
+        return false;
+    }
+
+    swipeResolvedItemIndex_ = itemIndex;
+    auto itemNode = GetSelectableItemAtIndex(itemIndex.index);
+    auto itemPattern = itemNode ? itemNode->GetPattern<ListItemPattern>() : nullptr;
+    if (itemPattern && !itemPattern->Selectable()) {
+        printf("shj:: no item");
+        return false;
+    }
+
+    PointF localPoint(point.GetX() - static_cast<float>(itemRect.Left()),
+        point.GetY() - static_cast<float>(itemRect.Top()));
+    auto hotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(host);
+    auto hotZoneLeft = std::max(0.0f, static_cast<float>(itemRect.Width()) - hotZoneWidth);
+    if (LessNotEqual(localPoint.GetX(), hotZoneLeft) || LessNotEqual(localPoint.GetY(), 0.0f) ||
+        GreatNotEqual(localPoint.GetY(), static_cast<float>(itemRect.Height()))) {
+        return false;
+    }
+    return true;
+}
+
+void ListPattern::MarkSwipeItemSelected(int32_t index, bool isSelected)
+{
+    auto itemNode = GetSelectableItemAtIndex(index);
+    CHECK_NULL_VOID(itemNode);
+    auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(itemPattern);
+    if (!itemPattern->Selectable()) {
+        return;
+    }
+    itemPattern->MarkIsSelected(isSelected);
+}
+
+SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectStateKeyAtPosition(
+    float offsetX, float offsetY) const
+{
+    auto index = GetItemAtPosition(offsetX, offsetY);
+    if (index < 0) {
+        return {};
+    }
+    if (swipeResolvedItemIndex_.has_value()) {
+        return { swipeResolvedItemIndex_->index, swipeResolvedItemIndex_->indexInGroup };
+    }
+    return { index, -1 };
+}
+
+SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectStateKeyAtIndex(int32_t index) const
+{
+    if (swipeResolvedItemIndex_.has_value() && swipeResolvedItemIndex_->index == index) {
+        return { swipeResolvedItemIndex_->index, swipeResolvedItemIndex_->indexInGroup };
+    }
+    return { index, -1 };
+}
+
+RefPtr<FrameNode> ListPattern::GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const
+{
+    if (!stateKey.IsValid()) {
+        return nullptr;
+    }
+    swipeResolvedItemIndex_ = { stateKey.index, stateKey.indexInGroup >= 0 ? 1 : -1, stateKey.indexInGroup };
+    return GetSelectableItemAtIndex(stateKey.index);
+}
+
+void ListPattern::MarkSwipeItemSelectedByStateKey(const SwipeSelectStateKey& stateKey, bool isSelected)
+{
+    auto itemNode = GetSelectableItemAtStateKey(stateKey);
+    CHECK_NULL_VOID(itemNode);
+    auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(itemPattern);
+    if (!itemPattern->Selectable()) {
+        return;
+    }
+    itemPattern->MarkIsSelected(isSelected);
+}
+
+void ListPattern::BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& startKey,
+    const SwipeSelectStateKey& endKey, std::vector<SwipeSelectStateKey>& keys) const
+{
+    if (!startKey.IsValid() || !endKey.IsValid()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rangeStartKey = endKey < startKey ? endKey : startKey;
+    auto rangeEndKey = startKey < endKey ? endKey : startKey;
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
+        CHECK_NULL_CONTINUE(itemWrapper);
+        auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
+        if (!itemNode) {
+            itemNode = AceType::DynamicCast<FrameNode>(itemWrapper);
+        }
+        CHECK_NULL_CONTINUE(itemNode);
+        auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+        if (itemPattern) {
+            SwipeSelectStateKey stateKey { index, -1 };
+            if (!(stateKey < rangeStartKey) && !(rangeEndKey < stateKey)) {
+                keys.emplace_back(stateKey);
+            }
+            continue;
+        }
+        auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_CONTINUE(groupPattern);
+        for (int32_t groupIndex = groupPattern->GetDisplayStartIndexInGroup();
+             groupIndex <= groupPattern->GetDisplayEndIndexInGroup(); ++groupIndex) {
+            SwipeSelectStateKey stateKey { index, groupIndex };
+            if (!(stateKey < rangeStartKey) && !(rangeEndKey < stateKey)) {
+                keys.emplace_back(stateKey);
+            }
+        }
+    }
+}
+
+void ListPattern::ApplyEditModeToVisibleItems()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        SetEditModeForListItemOrGroup(child, true);
+    }
+    ApplyEditModeToCachedItems(true);
+}
+
+void ListPattern::RemoveEditModeFromItems()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
+        SetEditModeForListItemOrGroup(child, false);
+    }
+    ApplyEditModeToCachedItems(false);
 }
 
 RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()
@@ -5073,19 +5362,6 @@ void ListPattern::PostAsyncLoadTask()
     });
 }
 
-void ListPattern::PostAfterCurrentLayoutTask()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->HasContentClip() || paintProperty->GetContentClipValue().first != ContentClipMode::SAFE_AREA) {
-        safeAreaPad_.reset();
-        return;
-    }
-    host->PostBundle({}, false, LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA);
-}
-
 void ListPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
 {
     auto host = GetHost();
@@ -5106,7 +5382,8 @@ void ListPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
         CHECK_NULL_VOID(layoutProperty);
         // Mark container dirty to prevent skipMeasure or skipLayout.
         layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-        host->CreateLayoutTask(true, LayoutType::MEASURE_FOR_IGNORE);
+        host->SetLayoutDirtyMarked(true);
+        host->CreateLayoutTask(true, LayoutType::NONE);
     }
 }
 } // namespace OHOS::Ace::NG

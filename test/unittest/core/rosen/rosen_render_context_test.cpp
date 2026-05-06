@@ -139,27 +139,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RosenRenderContextTest003
- * @tc.desc: SetSandBox().
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTest003, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(100.0, 100.0));
-    rosenRenderContext->SetSandBox(parentPosition, false);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 1);
-    rosenRenderContext->SetSandBox(parentPosition, true);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 1);
-    rosenRenderContext->SetSandBox(std::nullopt, true);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 0);
-    rosenRenderContext->sandBoxCount_ = 2;
-    rosenRenderContext->SetSandBox(std::nullopt, true);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 0);
-}
-
-/**
  * @tc.name: RosenRenderContextTest004
  * @tc.desc: SetFrameWithoutAnimation().
  * @tc.type: FUNC
@@ -2631,5 +2610,166 @@ HWTEST_F(RosenRenderContextTest, GetModalNode001, TestSize.Level1)
     auto modalNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
     auto resultNode = rosenRenderContext->GetModalNode(modalNode);
     EXPECT_EQ(resultNode, modalNode);
+}
+
+/**
+ * @tc.name: IncrementGeometryTransitionCounter001
+ * @tc.desc: Test IncrementGeometryTransitionCounter increases counter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, IncrementGeometryTransitionCounter001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
+    rosenRenderContext->IncrementGeometryTransitionCounter();
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
+}
+
+/**
+ * @tc.name: IncrementGeometryTransitionCounter002
+ * @tc.desc: Test IncrementGeometryTransitionCounter multiple times.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, IncrementGeometryTransitionCounter002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->IncrementGeometryTransitionCounter();
+    rosenRenderContext->IncrementGeometryTransitionCounter();
+    rosenRenderContext->IncrementGeometryTransitionCounter();
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 3);
+}
+
+/**
+ * @tc.name: DecrementGeometryTransitionCounter001
+ * @tc.desc: Test DecrementGeometryTransitionCounter decreases counter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, DecrementGeometryTransitionCounter001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 3;
+    rosenRenderContext->DecrementGeometryTransitionCounter();
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 2);
+}
+
+/**
+ * @tc.name: DecrementGeometryTransitionCounter002
+ * @tc.desc: Test DecrementGeometryTransitionCounter to zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, DecrementGeometryTransitionCounter002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 1;
+    rosenRenderContext->DecrementGeometryTransitionCounter();
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
+}
+
+/**
+ * @tc.name: ClearGeometryTransitionCounter001
+ * @tc.desc: Test ClearGeometryTransitionCounter resets counter to zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ClearGeometryTransitionCounter001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 5;
+    rosenRenderContext->ClearGeometryTransitionCounter();
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
+}
+
+/**
+ * @tc.name: IsGeometryTransitionAnimating001
+ * @tc.desc: Test IsGeometryTransitionAnimating when counter is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, IsGeometryTransitionAnimating001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 0;
+    EXPECT_FALSE(rosenRenderContext->IsGeometryTransitionAnimating());
+}
+
+/**
+ * @tc.name: IsGeometryTransitionAnimating002
+ * @tc.desc: Test IsGeometryTransitionAnimating when counter is positive.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, IsGeometryTransitionAnimating002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->animatingGeometryTransitionCount_ = 2;
+    EXPECT_TRUE(rosenRenderContext->IsGeometryTransitionAnimating());
+}
+
+/**
+ * @tc.name: SetSandbox001
+ * @tc.desc: Test SetSandBox with valid position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetSandbox001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(100.0, 100.0));
+    rosenRenderContext->SetSandBox(parentPosition);
+    auto modifier = rosenRenderContext->rsNode_->GetModifierByType(Rosen::ModifierNG::RSModifierType::TRANSFORM);
+    EXPECT_NE(modifier, nullptr);
+}
+
+/**
+ * @tc.name: SetSandbox002
+ * @tc.desc: Test SetSandBox with nullopt to remove sandbox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetSandbox002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    rosenRenderContext->SetSandBox(std::nullopt);
+    auto modifier = rosenRenderContext->rsNode_->GetModifierByType(Rosen::ModifierNG::RSModifierType::TRANSFORM);
+    EXPECT_EQ(modifier, nullptr);
+}
+
+/**
+ * @tc.name: SetSandbox003
+ * @tc.desc: Test SetSandBox with zero offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetSandbox003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(0.0, 0.0));
+    rosenRenderContext->SetSandBox(parentPosition);
+    auto modifier = rosenRenderContext->rsNode_->GetModifierByType(Rosen::ModifierNG::RSModifierType::TRANSFORM);
+    EXPECT_NE(modifier, nullptr);
 }
 } // namespace OHOS::Ace::NG

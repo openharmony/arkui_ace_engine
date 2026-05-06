@@ -28,6 +28,11 @@
 
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
+type CustomEnvValue = any;
+type CustomEnvMeta = {
+  varToKey: Record<string, string>;
+  keyToVars: Record<string, string[]>;
+};
 type AnonymousEnvMonitorEntry<K extends SimpleTypeEnvKey = SimpleTypeEnvKey> = {
   anonymousMonitorFunc: (mon: IMonitor) => void;
   envValue: IEnvironmentValue<EnvTypeMap[K]>;
@@ -41,6 +46,7 @@ enum PrebuildPhase {
 
 //API Version 18
 const API_VERSION_ISOLATION_FOR_5_1: number = 18;
+const CUSTOM_ENV_DECO_META = '__custom_env_deco_meta__';
 
 // Declare MutableBuilder class to make it available for type-checking. See jsEnumStyle.js and
 // build-tools\ets-loader\declarations\common.d.ts
@@ -139,6 +145,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   private activeChangeListenerForInterop_: Set<(active: boolean) => void> = new Set<(active: boolean) => void>();
 
   protected __isEntryValue__Internal = false;
+  protected __isCustomEnvConstructionFinalized__Internal = false;
   protected readonly ___reusePool?: __ReusePool_Internal__;
   protected static preRenderingPool_: __ReusePool_Internal__ | undefined;
   protected preRenderedChildren_?: Map<string, PUV2ViewBase>;
@@ -192,6 +199,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
     this.__isBlockRecycleOrReuse__ = typeof globalThis.__CheckIsInBuilderNode__ === 'function' ? globalThis.__CheckIsInBuilderNode__(parent) : false;
+    this.__hasCustomEnvValue__ = this.__hasCustomEnvValue__ || !!(this as Record<string, unknown>)[CUSTOM_ENV_DECO_META];
     // Read the prototype flag set by @Active/@Inactive decorators
     const hasActiveOrInactiveDecorators: string = '__hasActiveOrInactiveDecorators__Internal';
     this.__needToActiveOrInactiveLifecycle__Internal = this[hasActiveOrInactiveDecorators] === true;
@@ -401,10 +409,33 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
   }
 
+  public findCustomValueByKey(key: string): CustomEnvValue {
+    stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
+    return this.nativeViewPartialUpdate.findCustomValueByKey(key);
+  }
+
   // Callback handler when instanceId changes in backend
   protected __onJSInstanceIdUpdate__Internal(): void {
     stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
     this.dirtDescendantElementIds_.clear();
+  }
+
+  protected __onCustomEnvValueUpdate__Internal(envKey: string): void {
+    stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no @CustomEnv property registered`);
+    let needUpdated: boolean = false;
+    this.__getCustomEnvPropertyNameToKey__Internal()
+      .forEach(([varName, customEnvKey]) => {
+        if (envKey && customEnvKey !== envKey) {
+          stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no matching @CustomEnv property`);
+          return;
+        }
+        ObserveV2.getObserve().fireChange(this, varName);
+        needUpdated = true;
+      });
+    if (needUpdated) {
+      stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update for key ${envKey}`);
+      ObserveV2.getObserve().updateDirty2(false);
+    }
   }
 
   public __isV2__Internal(): boolean {
@@ -663,6 +694,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   protected __hasEnvValue__: boolean = false;
+  protected __hasCustomEnvValue__: boolean = false;
 
   get __hasEnv__Internal(): boolean {
     if (this[EnvV2.ENV_DECO_META]) {
@@ -674,6 +706,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public __getEnvPropertyNameToKey__Internal(): [string, keyof EnvTypeMap][] {
     // there is no env in current view
     const meta = this[EnvV2.ENV_DECO_META] as EnvMeta | undefined;
+    if (!meta || !(typeof meta === 'object')) {
+      return [];
+    }
+    return Object.entries(meta.varToKey);
+  }
+
+  public __getCustomEnvPropertyNameToKey__Internal(): [string, string][] {
+    const meta = this[CUSTOM_ENV_DECO_META] as CustomEnvMeta | undefined;
     if (!meta || !(typeof meta === 'object')) {
       return [];
     }

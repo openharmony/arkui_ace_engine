@@ -18,7 +18,6 @@
 
 #include <mutex>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"

@@ -1154,6 +1154,7 @@ public:
     }
 
     int32_t OnInjectionEvent(const std::string& command) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;

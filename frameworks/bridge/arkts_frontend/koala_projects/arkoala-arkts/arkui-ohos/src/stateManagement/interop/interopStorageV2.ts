@@ -34,7 +34,7 @@ export class InteropAppStorageV2 {
     }
 
     // get value from Storage in ArkTS1.1
-    protected getDynamicValue_: (value: string) => object | undefined = (value: string) => {
+    protected getDynamicValue_: (value: string) => Any = (value: string) => {
         throw new Error('not implement');
     };
     protected removeDynamicValue_: (value: string | undefined) => boolean = (value: string | undefined) => {
@@ -67,9 +67,9 @@ export class InteropAppStorageV2 {
         const getKeys = (): Array<string> => {
             return AppStorageV2Impl.instance().keys();
         };
-        
+
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => object | undefined): void => {
+        const setGetValueFunc = (event: (value: string) => Any): void => {
             this.getDynamicValue_ = event;
         };
         const setRemoveValueFunc = (event: (value: string | undefined) => boolean): void => {

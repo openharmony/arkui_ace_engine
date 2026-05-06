@@ -36,6 +36,7 @@
 #endif
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace {
 class BezierVariableVelocityMotion;
@@ -1205,6 +1206,7 @@ private:
     void SetRemainVelocityCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragEndCallback(const RefPtr<Scrollable>& scrollable);
     void SetStartSnapAnimationCallback(const RefPtr<Scrollable>& scrollable);
+    void SetBackToTopCallback(const RefPtr<Scrollable>& scrollable);
     void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);

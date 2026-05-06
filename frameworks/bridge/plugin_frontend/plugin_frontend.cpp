@@ -18,6 +18,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "core/components/navigator/navigator_type.h"
 
 namespace OHOS::Ace {
 namespace {

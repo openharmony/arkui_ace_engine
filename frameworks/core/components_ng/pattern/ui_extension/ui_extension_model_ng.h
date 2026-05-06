@@ -39,7 +39,7 @@ public:
         const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
         bool transferringCaller = false, bool densityDpi = true, bool isWindowModeFollowHost = false) override;
     // for Embedded Component
-    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
+    void Create(const EmbeddedUIExtensionConfig& config) override;
     void Create(const UIExtensionConfig& config) override;
     void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;

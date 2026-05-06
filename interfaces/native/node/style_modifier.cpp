@@ -4689,6 +4689,39 @@ void ResetNextFocus(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetNextFocus(node->uiNodeHandle);
 }
 
+int32_t SetAccessibilityNextFocusId(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->string, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityNextFocusId(node->uiNodeHandle, item->string);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetAccessibilityNextFocusId(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityNextFocusId(node->uiNodeHandle);
+}
+
+int32_t SetAccessibilityDefaultFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size <= 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityDefaultFocus(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetAccessibilityDefaultFocus(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityDefaultFocus(node->uiNodeHandle);
+}
+
 int32_t SetFocusBox(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size != NUM_3) {
@@ -4962,14 +4995,14 @@ int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontColor(
-                node->uiNodeHandle, item->value[0].u32, nullptr);
+                node->uiNodeHandle, item->value[0].u32, nullptr, true);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setFontColor(node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontColor(
-                node->uiNodeHandle, item->value[0].u32, nullptr);
+                node->uiNodeHandle, item->value[0].u32, nullptr, true);
             break;
         case ARKUI_NODE_BUTTON:
             fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontColorPtr(
@@ -5970,7 +6003,7 @@ int32_t SetSelectedBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
             node->uiNodeHandle, item->value[0].u32, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputSelectedBackgroundColor(
-            node->uiNodeHandle, item->value[0].u32, nullptr);
+            node->uiNodeHandle, item->value[0].u32, nullptr, true);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -20173,6 +20206,8 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetDashGap,
         SetLayoutGravity,
         SetBorderRadiusType,
+        SetAccessibilityNextFocusId,
+        SetAccessibilityDefaultFocus,
         nullptr,
         nullptr,
         SetInspectorLabel,
@@ -20316,6 +20351,8 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetBorderRadiusType,
         nullptr,
         nullptr,
+        nullptr,
+        nullptr,
         GetInspectorLabel,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
@@ -20456,6 +20493,8 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetDashGap,
         ResetLayoutGravity,
         ResetBorderRadiusType,
+        ResetAccessibilityNextFocusId,
+        ResetAccessibilityDefaultFocus,
         nullptr,
         nullptr,
         ResetInspectorLabel,
@@ -22025,6 +22064,28 @@ int32_t SetContainerPickerIndicatorStyle(ArkUI_NodeHandle node, const ArkUI_Attr
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetContainerPickerDisplayedItemCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->setContainerPickerDisplayedItemCount(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetContainerPickerItemHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->setContainerPickerItemHeight(
+        node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUI_AttributeItem* GetContainerPickerSelectedIndex(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -22073,6 +22134,24 @@ const ArkUI_AttributeItem* GetContainerPickerIndicatorStyle(ArkUI_NodeHandle nod
     return &g_attributeItem;
 }
 
+const ArkUI_AttributeItem* GetContainerPickerDisplayedItemCount(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto count = fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerDisplayedItemCount(
+        node->uiNodeHandle);
+    g_numberValues[0].i32 = count;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetContainerPickerItemHeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto itemHeight = fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerItemHeight(
+        node->uiNodeHandle);
+    g_numberValues[0].f32 = itemHeight;
+    return &g_attributeItem;
+}
+
 void ResetContainerPickerSelectedIndex(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
@@ -22097,10 +22176,24 @@ void ResetContainerPickerIndicatorStyle(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerIndicator(node->uiNodeHandle);
 }
 
+void ResetContainerPickerDisplayedItemCount(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerDisplayedItemCount(
+        node->uiNodeHandle);
+}
+
+void ResetContainerPickerItemHeight(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerItemHeight(node->uiNodeHandle);
+}
+
 int32_t SetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetContainerPickerSelectedIndex, SetContainerPickerEnableHapticFeedback,
-        SetContainerPickerCanLoop, SetContainerPickerIndicatorStyle };
+        SetContainerPickerCanLoop, SetContainerPickerIndicatorStyle, SetContainerPickerDisplayedItemCount,
+        SetContainerPickerItemHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -22111,7 +22204,8 @@ int32_t SetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, co
 const ArkUI_AttributeItem* GetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetContainerPickerSelectedIndex, GetContainerPickerEnableHapticFeedback,
-        GetContainerPickerCanLoop, GetContainerPickerIndicatorStyle };
+        GetContainerPickerCanLoop, GetContainerPickerIndicatorStyle, GetContainerPickerDisplayedItemCount,
+        GetContainerPickerItemHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -22123,7 +22217,8 @@ const ArkUI_AttributeItem* GetContainerPickerAttribute(ArkUI_NodeHandle node, in
 void ResetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetContainerPickerSelectedIndex, ResetContainerPickerEnableHapticFeedback,
-        ResetContainerPickerCanLoop, ResetContainerPickerIndicatorStyle };
+        ResetContainerPickerCanLoop, ResetContainerPickerIndicatorStyle, ResetContainerPickerDisplayedItemCount,
+        ResetContainerPickerItemHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

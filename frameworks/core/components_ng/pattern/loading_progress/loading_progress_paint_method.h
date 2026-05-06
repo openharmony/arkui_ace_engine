@@ -61,8 +61,8 @@ public:
         }
         if (!loadingProgressModifier_->GetForegroundColorParseFailed() || themeScopeId) {
             color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
-            loadingProgressModifier_->SetColor(LinearColor(color_));
         }
+        loadingProgressModifier_->SetColor(LinearColor(color_));
         if (loadingProgressModifier_->GetOwner() == LoadingProgressOwner::SELF) {
             loadingProgressModifier_->ChangeSizeScaleData(1.0f);
             loadingProgressModifier_->StartRecycle();

@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
@@ -120,11 +121,7 @@ public:
         return "";
     }
 
-    const RefPtr<NG::PageInfo> GetLastPageInfo()
-    {
-        return nullptr;
-    }
-
+    const RefPtr<NG::PageInfo> GetLastPageInfo();
     std::string GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo)
     {
         return "";

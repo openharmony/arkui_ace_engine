@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/implementation/pan_recognizer_peer.h"
-#include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
+#include "core/interfaces/native/implementation/pan_gesture_options_proxy_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -49,7 +49,7 @@ HWTEST_F(PanRecognizerAccessorTest, getPanGestureOptionsTest, TestSize.Level1)
     for (auto [fingers, distance, direction] : testPlan) {
         auto mockGestureRecognizer_ = AceType::MakeRefPtr<NG::PanRecognizer>(fingers, direction, distance);
         peer_->Update(mockGestureRecognizer_);
-        Ark_PanGestureOptions result = accessor_->getPanGestureOptions(peer_);
+        Ark_PanGestureOptionsProxy result = accessor_->getPanGestureOptions(peer_);
         ASSERT_NE(result, nullptr);
         ASSERT_NE(result->handler, nullptr);
         EXPECT_EQ(result->handler->GetFingers(), fingers);

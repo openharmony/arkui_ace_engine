@@ -738,30 +738,40 @@ void RosenRenderContext::SetSurfaceCaptureCallback(std::function<std::shared_ptr
 }
 #endif
 
-void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
+void RosenRenderContext::IncrementGeometryTransitionCounter()
 {
-    FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition, force);
+    animatingGeometryTransitionCount_++;
+}
+
+void RosenRenderContext::DecrementGeometryTransitionCounter()
+{
+    animatingGeometryTransitionCount_--;
+}
+
+void RosenRenderContext::ClearGeometryTransitionCounter()
+{
+    animatingGeometryTransitionCount_ = 0;
+}
+
+bool RosenRenderContext::IsGeometryTransitionAnimating() const
+{
+    return animatingGeometryTransitionCount_ > 0;
+}
+
+void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition)
+{
+    FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition);
     CHECK_NULL_VOID(rsNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetHost());
+
     if (parentPosition.has_value()) {
-        if (!force) {
-            sandBoxCount_++;
-        }
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox",
-            std::to_string(rsNode_->GetId()).c_str());
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox [%{public}f, %{public}f]",
+            std::to_string(rsNode_->GetId()).c_str(), value.x_, value.y_);
         rsNode_->SetSandBox(value);
     } else {
-        if (!force) {
-            sandBoxCount_--;
-            if (sandBoxCount_ > 0) {
-                return;
-            }
-        }
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
-        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
@@ -6137,32 +6147,25 @@ void RosenRenderContext::PaintOverlayText()
 {
     CHECK_NULL_VOID(rsNode_);
     auto& overlay = GetOrCreateOverlay();
-    if (overlay->HasOverlayText()) {
-        auto overlayText = overlay->GetOverlayTextValue();
-        auto paintRect = GetPaintRectWithTransform();
-        std::shared_ptr<Rosen::RectF> overlayRect;
-        if (overlayTextModifier_) {
-            overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
-            auto overlayOffset = overlayTextModifier_->GetOverlayOffset();
-            auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
-            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
-                std::max(paragraphSize.Width(), paintRect.Width()),
-                std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
-            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
-        } else {
-            overlayTextModifier_ = std::make_shared<OverlayTextModifier>();
-            rsNode_->AddModifier(overlayTextModifier_);
-            overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
-            auto overlayOffset = overlayTextModifier_->GetOverlayOffset();
-            auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
-            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
-                std::max(paragraphSize.Width(), paintRect.Width()),
-                std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
-            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
-        }
+    if (!overlay->HasOverlayText()) {
+        return;
     }
+    auto overlayText = overlay->GetOverlayTextValue();
+    auto paintRect = GetPaintRectWithTransform();
+
+    if (!overlayTextModifier_) {
+        overlayTextModifier_ = std::make_shared<OverlayTextModifier>();
+        rsNode_->AddModifier(overlayTextModifier_);
+    }
+    overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
+    auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
+    auto overlayOffset = overlayTextModifier_->GetOverlayOffsetWithDirection(
+        SizeF(paintRect.Width(), paintRect.Height()), paragraphSize);
+    auto overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
+        std::max(paragraphSize.Width(), paintRect.Width()),
+        std::max(paragraphSize.Height(), paintRect.Height()));
+    rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
+    UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
 }
 
 void RosenRenderContext::OnOverlayTextUpdate(const OverlayOptions& overlay)

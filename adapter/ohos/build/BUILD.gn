@@ -40,6 +40,7 @@ component_modules = [
   "symbol",
   "rich_editor",
   "menu",
+  "lazy_column_layout",
 ]
 
 if (!ace_engine_feature_wearable) {

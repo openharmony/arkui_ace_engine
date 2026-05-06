@@ -462,3 +462,16 @@ if (globalThis.TextClock === undefined) {
     name: 'JSTextClock'
   };
 }
+
+// @ts-ignore
+if (globalThis.LazyColumnLayout === undefined) {
+  globalThis.LazyColumnLayout = {
+    create: function () {
+      getUINativeModule().loadNativeModule('LazyColumnLayout');
+      let module = globalThis.requireNapi('arkui.components.arklazycolumnlayout');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().lazyColumnLayout.create();
+    }
+  }
+}

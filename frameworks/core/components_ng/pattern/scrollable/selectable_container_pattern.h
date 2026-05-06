@@ -42,6 +42,29 @@ class SelectableContainerPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(SelectableContainerPattern, ScrollablePattern);
 
 public:
+    struct SwipeSelectStateKey {
+        int32_t index = -1;
+        int32_t indexInGroup = -1;
+
+        bool operator<(const SwipeSelectStateKey& other) const
+        {
+            if (index != other.index) {
+                return index < other.index;
+            }
+            return indexInGroup < other.indexInGroup;
+        }
+
+        bool operator==(const SwipeSelectStateKey& other) const
+        {
+            return index == other.index && indexInGroup == other.indexInGroup;
+        }
+
+        bool IsValid() const
+        {
+            return index >= 0;
+        }
+    };
+
     SelectableContainerPattern() = default;
     ~SelectableContainerPattern() override = default;
     virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() = 0;
@@ -86,17 +109,59 @@ public:
     void HandleSwipeSelectCancel();
     void UpdateSwipeSelection();
 
+    virtual bool NeedJudgeWithHotZone()
+    {
+        return false;
+    }
+
     virtual int32_t GetItemAtPosition(float offsetX, float offsetY) const
     {
         return -1;
     }
 
+    virtual bool IsInEditModeHotZone(const PointF& point) const
+    {
+        return GetItemAtPosition(point.GetX(), point.GetY()) >= 0;
+    }
+
     virtual void MarkSwipeItemSelected(int32_t index, bool isSelected) {}
+    virtual SwipeSelectStateKey GetSwipeSelectStateKeyAtPosition(float offsetX, float offsetY) const
+    {
+        return { GetItemAtPosition(offsetX, offsetY), -1 };
+    }
+    virtual SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const
+    {
+        return { index, -1 };
+    }
+    virtual RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const;
+    virtual RefPtr<FrameNode> GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const
+    {
+        return GetSelectableItemAtIndex(stateKey.index);
+    }
+    virtual void MarkSwipeItemSelectedByStateKey(const SwipeSelectStateKey& stateKey, bool isSelected)
+    {
+        MarkSwipeItemSelected(stateKey.index, isSelected);
+    }
+    virtual void BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& startKey,
+        const SwipeSelectStateKey& endKey, std::vector<SwipeSelectStateKey>& keys) const
+    {
+        if (!startKey.IsValid() || !endKey.IsValid()) {
+            return;
+        }
+        auto rangeStartKey = endKey < startKey ? endKey : startKey;
+        auto rangeEndKey = startKey < endKey ? endKey : startKey;
+        for (int32_t index = rangeStartKey.index; index <= rangeEndKey.index; ++index) {
+            auto stateKey = GetSwipeSelectStateKeyAtIndex(index);
+            if (!(stateKey < rangeStartKey) && !(rangeEndKey < stateKey)) {
+                keys.emplace_back(stateKey);
+            }
+        }
+    }
     void SwipeSelectAutoScroll(const PointF& globalPoint);
     void StopSwipeSelectAutoScroll();
 
-    void ApplyEditModeToVisibleItems();
-    void RemoveEditModeFromItems();
+    virtual void ApplyEditModeToVisibleItems();
+    virtual void RemoveEditModeFromItems();
 
 protected:
     virtual void ApplyEditModeToCachedItems(bool enabled) {}
@@ -166,9 +231,9 @@ private:
     std::function<void(bool)> enableEditModeChangeEvent_;
     enum class SwipeSelectState { INACTIVE, SELECTING, DESELECTING };
     SwipeSelectState swipeSelectState_ = SwipeSelectState::INACTIVE;
-    int32_t swipeStartIndex_ = -1;
-    int32_t swipeCurrentIndex_ = -1;
-    std::map<int32_t, bool> swipeOriginalStates_;
+    SwipeSelectStateKey swipeStartStateKey_;
+    SwipeSelectStateKey swipeCurrentStateKey_;
+    std::map<SwipeSelectStateKey, bool> swipeOriginalStates_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -889,16 +889,55 @@ bool ProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
             paintProperty->UpdateColor(progressTheme->GetCapsuleSelectColor());
             result = true;
         }
+        OnThemeScopeUpdateGradientColor();
     }
 
     if (themeScopeId && !isUserInitiatedBgColor_ && type != ProgressType::CAPSULE) {
         paintProperty->UpdateBackgroundColor(progressTheme->GetTrackBgColor());
         result = true;
     }
-    isUserInitiatedColor_ = (themeScopeId && isModifierInitiatedColor_) ? false : isUserInitiatedColor_;
-    isUserInitiatedBgColor_ = (themeScopeId && isModifierInitiatedBgColor_) ? false : isUserInitiatedBgColor_;
 
+    if (themeScopeId && !paintProperty->GetBorderColorSetByUser().value_or(false)) {
+        result = true;
+    }
     return result;
+}
+
+void ProgressPattern::OnThemeScopeUpdateGradientColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    const auto &type = paintProperty->GetProgressType();
+    auto progressTheme = host->GetTheme<ProgressTheme>(true);
+    CHECK_NULL_VOID(progressTheme);
+    Color colorVal;
+    Color beginColor;
+    Color endColor;
+    NG::Gradient gradient;
+    NG::GradientColor beginSideColor;
+    NG::GradientColor endSideColor;
+    colorVal = (type == ProgressType::CAPSULE) ? progressTheme->GetCapsuleSelectColor()
+                                               : progressTheme->GetTrackSelectedColor();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        endColor = (type == ProgressType::RING || type == ProgressType::SCALE)
+                       ? progressTheme->GetRingProgressEndSideColor()
+                       : colorVal;
+        beginColor = (type == ProgressType::RING || type == ProgressType::SCALE)
+                         ? progressTheme->GetRingProgressBeginSideColor()
+                         : colorVal;
+    } else {
+        endColor = progressTheme->GetRingProgressEndSideColor();
+        beginColor = progressTheme->GetRingProgressBeginSideColor();
+    }
+    beginSideColor.SetLinearColor(LinearColor(beginColor));
+    beginSideColor.SetDimension(Dimension(1.0f));
+    endSideColor.SetLinearColor(LinearColor(endColor));
+    endSideColor.SetDimension(Dimension(0.0f));
+    gradient.AddColor(endSideColor);
+    gradient.AddColor(beginSideColor);
+    paintProperty->UpdateGradientColor(gradient);
 }
 
 void ProgressPattern::ReportProgressEvent()
@@ -971,9 +1010,7 @@ void ProgressPattern::OnColorConfigurationUpdate()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>();
+    auto theme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
     auto pops = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(pops);
@@ -1000,9 +1037,7 @@ void ProgressPattern::ProcessColorOnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>();
+    auto theme = host->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
     auto pops = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(pops);

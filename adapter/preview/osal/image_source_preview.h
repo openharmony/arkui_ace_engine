@@ -25,7 +25,7 @@ class ImageSourcePreview : public ImageSource {
     DECLARE_ACE_TYPE(ImageSourcePreview, ImageSource);
 
 public:
-    explicit ImageSourcePreview(std::unique_ptr<SkCodec>&& codec) : codec_(std::move(codec)) {}
+    explicit ImageSourcePreview(std::unique_ptr<SkCodec> codec) : codec_(std::move(codec)) {}
     std::string GetProperty(const std::string& key) override;
     RefPtr<PixelMap> CreatePixelMap(
         const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) override;
@@ -40,7 +40,7 @@ public:
     std::vector<int32_t> GetDelayTime() override;
     bool IsHeifWithoutAlpha() override;
     ImageRotateOrientation GetImageOrientation() override;
-    
+
 private:
     std::unique_ptr<SkCodec> codec_;
 };

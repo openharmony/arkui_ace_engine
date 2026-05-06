@@ -25,6 +25,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr size_t DATA_PANEL_THEME_COLOR_COUNT = 9;
+}
+
 /**
  * DataPanelThemeWrapper defines colors and styles for DataPanel Component
  * basing on TokenTheme's data.
@@ -58,7 +62,9 @@ public:
         if (auto colors = theme.Colors(); colors) {
             // update only required attributes by TokenTheme tokens
             backgroundColor_ = colors->CompBackgroundTertiary();
-            percentageColors_ = {{colors->CompBackgroundEmphasize(), colors->CompBackgroundTertiary()}};
+            percentageColors_.assign(
+                DATA_PANEL_THEME_COLOR_COUNT,
+                std::make_pair(colors->CompBackgroundEmphasize(), colors->CompBackgroundTertiary()));
         }
     }
 

@@ -337,8 +337,8 @@ HWTEST_F(GridEditModeTestNg, SwipeSelectInitValues001, TestSize.Level1)
     CreateGrid();
     CreateFixedItems(5);
 
-    EXPECT_EQ(pattern_->swipeStartIndex_, -1);
-    EXPECT_EQ(pattern_->swipeCurrentIndex_, -1);
+    EXPECT_EQ(pattern_->swipeStartStateKey_.index, -1);
+    EXPECT_EQ(pattern_->swipeCurrentStateKey_.index, -1);
     EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
     EXPECT_TRUE(pattern_->swipeOriginalStates_.empty());
     EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);

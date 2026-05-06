@@ -21,7 +21,6 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
-#include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"

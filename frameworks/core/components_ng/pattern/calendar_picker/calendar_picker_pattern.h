@@ -123,6 +123,19 @@ public:
     void SetDialogShow(bool flag)
     {
         isDialogShow_ = flag;
+        if (!flag) {
+            dialogNode_.Reset();
+        }
+    }
+
+    void SetDialogNode(const WeakPtr<FrameNode>& dialogNode)
+    {
+        dialogNode_ = dialogNode;
+    }
+
+    WeakPtr<FrameNode> GetDialogNode() const
+    {
+        return dialogNode_;
     }
 
     CalendarPickerSelectedType CheckRegion(const Offset& globalLocation);
@@ -258,6 +271,7 @@ private:
     DimensionOffset offset_;
     CalendarSettingData calendarData_;
     bool isDialogShow_ = false;
+    WeakPtr<FrameNode> dialogNode_;
     bool isKeyWaiting_ = false;
     bool isFirtFocus_ = true;
     RefPtr<ClickEvent> clickListener_;

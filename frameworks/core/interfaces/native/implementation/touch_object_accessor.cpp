@@ -81,6 +81,12 @@ Ark_Float64 GetDisplayXImpl(Ark_TouchObject peer)
 void SetDisplayXImpl(Ark_TouchObject peer,
                      Ark_Float64 displayX)
 {
+    CHECK_NULL_VOID(peer);
+    auto* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto screenOffset = info->GetScreenLocation();
+    screenOffset.SetX(displayX);
+    info->SetScreenLocation(screenOffset);
 }
 Ark_Float64 GetDisplayYImpl(Ark_TouchObject peer)
 {
@@ -94,6 +100,12 @@ Ark_Float64 GetDisplayYImpl(Ark_TouchObject peer)
 void SetDisplayYImpl(Ark_TouchObject peer,
                      Ark_Float64 displayY)
 {
+    CHECK_NULL_VOID(peer);
+    auto* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto screenOffset = info->GetScreenLocation();
+    screenOffset.SetY(displayY);
+    info->SetScreenLocation(screenOffset);
 }
 Ark_Float64 GetWindowXImpl(Ark_TouchObject peer)
 {
@@ -107,6 +119,12 @@ Ark_Float64 GetWindowXImpl(Ark_TouchObject peer)
 void SetWindowXImpl(Ark_TouchObject peer,
                     Ark_Float64 windowX)
 {
+    CHECK_NULL_VOID(peer);
+    auto* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto globalOffset = info->GetGlobalLocation();
+    globalOffset.SetX(windowX);
+    info->SetGlobalLocation(globalOffset);
 }
 Ark_Float64 GetWindowYImpl(Ark_TouchObject peer)
 {
@@ -120,6 +138,12 @@ Ark_Float64 GetWindowYImpl(Ark_TouchObject peer)
 void SetWindowYImpl(Ark_TouchObject peer,
                     Ark_Float64 windowY)
 {
+    CHECK_NULL_VOID(peer);
+    auto* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto globalOffset = info->GetGlobalLocation();
+    globalOffset.SetY(windowY);
+    info->SetGlobalLocation(globalOffset);
 }
 Ark_Float64 GetXImpl(Ark_TouchObject peer)
 {
@@ -133,6 +157,12 @@ Ark_Float64 GetXImpl(Ark_TouchObject peer)
 void SetXImpl(Ark_TouchObject peer,
               Ark_Float64 x)
 {
+    CHECK_NULL_VOID(peer);
+    auto* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto localOffset = info->GetLocalLocation();
+    localOffset.SetX(x);
+    info->SetLocalLocation(localOffset);
 }
 Ark_Float64 GetYImpl(Ark_TouchObject peer)
 {
@@ -146,6 +176,12 @@ Ark_Float64 GetYImpl(Ark_TouchObject peer)
 void SetYImpl(Ark_TouchObject peer,
               Ark_Float64 y)
 {
+    CHECK_NULL_VOID(peer);
+    auto* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto localOffset = info->GetLocalLocation();
+    localOffset.SetY(y);
+    info->SetLocalLocation(localOffset);
 }
 Opt_InteractionHand GetHandImpl(Ark_TouchObject peer)
 {
@@ -219,6 +255,16 @@ Opt_Float64 GetGlobalDisplayXImpl(Ark_TouchObject peer)
 void SetGlobalDisplayXImpl(Ark_TouchObject peer,
                            const Opt_Float64* globalDisplayX)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(globalDisplayX);
+    if (globalDisplayX->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto globalDisplayOffset = info->GetGlobalDisplayLocation();
+    globalDisplayOffset.SetX(globalDisplayX->value);
+    info->SetGlobalDisplayLocation(globalDisplayOffset);
 }
 Opt_Float64 GetGlobalDisplayYImpl(Ark_TouchObject peer)
 {
@@ -232,6 +278,16 @@ Opt_Float64 GetGlobalDisplayYImpl(Ark_TouchObject peer)
 void SetGlobalDisplayYImpl(Ark_TouchObject peer,
                            const Opt_Float64* globalDisplayY)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(globalDisplayY);
+    if (globalDisplayY->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto globalDisplayOffset = info->GetGlobalDisplayLocation();
+    globalDisplayOffset.SetY(globalDisplayY->value);
+    info->SetGlobalDisplayLocation(globalDisplayOffset);
 }
 } // TouchObjectAccessor
 const GENERATED_ArkUITouchObjectAccessor* GetTouchObjectAccessor()
