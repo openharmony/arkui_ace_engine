@@ -114,6 +114,8 @@ protected:
     bool AllowShare() override;
 
 private:
+    void UpdateMagnifierTouchInfo(const GestureEvent& event, TouchType touchType);
+    void ResetMagnifierTouchInfo();
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
     void UpdatePattern(const OverlayRequest& request);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
@@ -127,6 +129,8 @@ private:
     bool needRefreshPasteButton_ = false;
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html", "autofill/secure" };
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
 };
 
 } // namespace OHOS::Ace::NG

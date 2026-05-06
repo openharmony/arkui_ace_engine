@@ -110,12 +110,16 @@ protected:
     RectF GetSelectAreaFromRects(SelectRectsType pos) override;
 
 private:
+    void UpdateMagnifierTouchInfo(const GestureEvent& event, TouchType touchType);
+    void ResetMagnifierTouchInfo();
     OffsetF GetHotPaintOffset();
     bool GetRenderClipValue() const;
     OffsetF handleGlobalOffset_;
     bool isDraggingFirstHandle_ = true;
     OffsetF hostPaintOffset_;
     bool isTriggerParentToScroll_ = false;
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
     ACE_DISALLOW_COPY_AND_MOVE(TextSelectOverlay);
 };
 

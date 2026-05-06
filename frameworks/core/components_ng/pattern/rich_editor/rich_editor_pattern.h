@@ -1270,6 +1270,8 @@ private:
     bool IsEnPreview();
     void SetMagnifierLocalOffset(Offset localOffset);
     void SetMagnifierOffsetWithAnimation(Offset offset);
+    void UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType);
+    void ResetMagnifierTouchInfo();
     void SetIsEnableSubWindowMenu();
     void UpdateSelectionAndHandleVisibility();
     void OnReportRichEditorEvent(const std::string& event);
@@ -1405,6 +1407,8 @@ private:
     bool editingLongPress_ = false;
     bool isTouchSelecting_ = false;
     int32_t selectingFingerId_ = -1;
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
     bool needMoveCaretToContentRect_ = false;
     std::queue<std::function<void()>> tasks_;
     bool isModifyingContent_ = false;

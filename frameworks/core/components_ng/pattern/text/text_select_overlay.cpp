@@ -14,9 +14,9 @@
  */
 
 #include "core/components_ng/pattern/text/text_select_overlay.h"
-
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "ui/base/geometry/ng/offset_t.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -171,7 +171,8 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     }
     localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
     if (textPattern->HasContent() && textPattern->GetOrCreateMagnifier()) {
-        textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
+        textPattern->GetMagnifierController()->SetLocalOffset(
+            localHandleOffset, magnifierTouchTimeStamp_, magnifierTouchType_);
     }
     // the handle position is calculated based on the middle of the handle height.
     auto handleOffset = GetHandleReferenceOffset(handleRect);
@@ -224,8 +225,10 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     if (textPattern->GetMagnifierController()) {
+        textPattern->GetMagnifierController()->ResetTouchInfo();
         textPattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
+    ResetMagnifierTouchInfo();
     auto textSelector = textPattern->GetTextSelector();
     textPattern->UpdateSelectionSpanType(textSelector.GetTextStart(), textSelector.GetTextEnd());
     textPattern->CalculateHandleOffsetAndShowOverlay();
@@ -381,13 +384,14 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
     overlayInfo.handlerColor = layoutProperty->GetCursorColor();
     OnUpdateOnCreateMenuCallback(overlayInfo);
     auto scrollableParent = FindScrollableParent();
+    auto weakParent = scrollableParent ? WeakClaim(AceType::RawPtr(scrollableParent)) : WeakPtr<ScrollablePattern>();
+    overlayInfo.onHandlePanMove = [weak = WeakClaim(this), weakParent](const GestureEvent& event, bool isFirst) {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->UpdateMagnifierTouchInfo(event, TouchType::MOVE);
+        overlay->TriggerScrollableParentToScroll(weakParent.Upgrade(), event.GetGlobalLocation(), false);
+    };
     if (scrollableParent) {
-        auto weakParent = WeakClaim(AceType::RawPtr(scrollableParent));
-        overlayInfo.onHandlePanMove = [weak = WeakClaim(this), weakParent](const GestureEvent& event, bool isFirst) {
-            auto overlay = weak.Upgrade();
-            CHECK_NULL_VOID(overlay);
-            overlay->TriggerScrollableParentToScroll(weakParent.Upgrade(), event.GetGlobalLocation(), false);
-        };
         overlayInfo.onHandlePanEnd = [weak = WeakClaim(this), weakParent](const GestureEvent& event, bool isFirst) {
             auto overlay = weak.Upgrade();
             CHECK_NULL_VOID(overlay);
@@ -573,6 +577,18 @@ void TextSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirs
     isDraggingFirstHandle_ = isFirst;
     hostPaintOffset_ = GetHotPaintOffset();
     textPattern->SetupMagnifier();
+}
+
+void TextSelectOverlay::UpdateMagnifierTouchInfo(const GestureEvent& event, TouchType touchType)
+{
+    magnifierTouchTimeStamp_ = event.GetTimeStamp();
+    magnifierTouchType_ = touchType;
+}
+
+void TextSelectOverlay::ResetMagnifierTouchInfo()
+{
+    magnifierTouchTimeStamp_ = TimeStamp();
+    magnifierTouchType_ = TouchType::UNKNOWN;
 }
 
 void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)

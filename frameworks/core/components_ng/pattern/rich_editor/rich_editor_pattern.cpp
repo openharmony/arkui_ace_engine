@@ -789,7 +789,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
 {
-    CHECK_NULL_VOID(!IsHandleMoving());
+    CHECK_NULL_VOID(!IsHandleMoving()); // Magnifier opened by long press can be closed via this path.
     if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
         ResetTouchSelectState();
         ResetTouchAndMoveCaretState();
@@ -8465,6 +8465,7 @@ void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
     auto acceptedTouchInfo = GetAcceptedTouchLocationInfo(info);
     CHECK_NULL_VOID(acceptedTouchInfo.has_value());
     auto touchInfo = acceptedTouchInfo.value();
+    UpdateMagnifierTouchInfo(info.GetTimeStamp(), touchInfo.GetTouchType());
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(touchInfo);
@@ -8480,9 +8481,11 @@ void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
     } else if (touchType == TouchType::MOVE) {
         HandleTouchMove(touchInfo);
     } else if (touchType == TouchType::CANCEL) {
+        IF_PRESENT(magnifierController_, ResetTouchInfo());
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
         HandleTouchCancelAfterLongPress();
         ResetTouchAndMoveCaretState();
+        ResetMagnifierTouchInfo();
     }
 }
 
@@ -8534,7 +8537,9 @@ void RichEditorPattern::HandleTouchUp()
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
     if (!isHandleMoving) {
+        IF_PRESENT(magnifierController_, ResetTouchInfo()); // Reset state of magnifier which opened by long press.
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
+        ResetMagnifierTouchInfo();
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (isLongPress_) {
@@ -8718,7 +8723,20 @@ void RichEditorPattern::SetMagnifierLocalOffset(Offset offset)
     auto localOffset = OffsetF{ offset.GetX(), offset.GetY() };
     auto localOffsetWithTrans = localOffset;
     selectOverlay_->GetLocalPointWithTransform(localOffsetWithTrans);
-    magnifierController_->SetLocalOffset(localOffsetWithTrans, localOffset);
+    magnifierController_->SetLocalOffset(
+        localOffsetWithTrans, magnifierTouchTimeStamp_, magnifierTouchType_, localOffset);
+}
+
+void RichEditorPattern::UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType)
+{
+    magnifierTouchTimeStamp_ = time;
+    magnifierTouchType_ = touchType;
+}
+
+void RichEditorPattern::ResetMagnifierTouchInfo()
+{
+    magnifierTouchTimeStamp_ = TimeStamp();
+    magnifierTouchType_ = TouchType::UNKNOWN;
 }
 
 void RichEditorPattern::SetMagnifierOffsetWithAnimation(Offset offset)

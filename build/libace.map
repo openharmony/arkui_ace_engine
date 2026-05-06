@@ -1418,7 +1418,9 @@
       "OHOS::Ace::NG::LazyGridLayoutPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)";
       "OHOS::Ace::NG::LazyGridLayoutPattern::OnAttachToMainTree()";
       "OHOS::Ace::NG::MagnifierController::RemoveMagnifierFrameNode()";
+      "OHOS::Ace::NG::MagnifierController::ResetTouchInfo()";
       "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";
+      "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1ll, 1000000000ll>>> const&, OHOS::Ace::TouchType, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";
       "OHOS::Ace::NG::MeasureProperty::UpdateMaxSizeWithCheck(OHOS::Ace::NG::CalcSize const&)";
       "OHOS::Ace::NG::MeasureProperty::UpdateMinSizeWithCheck(OHOS::Ace::NG::CalcSize const&)";
       "OHOS::Ace::NG::MenuOptionsParam OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::MenuOptionsParam, Ark_TextMenuItem>(Ark_TextMenuItem const&)";
