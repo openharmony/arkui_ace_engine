@@ -285,6 +285,10 @@ export class BuilderNode<T = undefined> {
         let ret = this._JSBuilderNode.postInputEvent(event);
         return ret;
     }
+    public postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+        let ret = this._JSBuilderNode.postInputEventWithStrategy(event, competitionStrategy);
+        return ret;
+    }
     public dispose(): void {
         this._JSBuilderNode.disposeNode();
         this.nodePtr_ = undefined;
