@@ -172,6 +172,68 @@ void SetImageOptionsImpl(Ark_NativePointer node,
         []() {});
     CHECK_NULL_VOID(imageAIOptions);
 }
+void SetImageOptions1Impl(Ark_NativePointer node,
+                          const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                          const Opt_ImageAIOptions* imageAIOptions,
+                          const Opt_String* reloadKey)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(src);
+    Converter::VisitUnion(*src,
+        [frameNode](const Ark_DrawableDescriptor& value) {
+            auto desc = Converter::Convert<DrawableDescriptor*>(value);
+            ImageModelStatic::SetDrawableDescriptor(frameNode, desc);
+        },
+        [frameNode](const auto& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            CHECK_NULL_VOID(info);
+            if (auto pixelMap = info->GetPixmap(); pixelMap) {
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            } else {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                    info->GetModuleName(), info->GetIsUriPureNumber());
+            }
+        },
+        []() {});
+    CHECK_NULL_VOID(imageAIOptions);
+    if (reloadKey) {
+        auto key = Converter::OptConvert<std::string>(*reloadKey);
+        if (key) {
+            ImageModelStatic::SetReloadKey(frameNode, *key);
+        }
+    }
+}
+void SetImageOptions2Impl(Ark_NativePointer node,
+                          const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                          const Opt_String* reloadKey)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(src);
+    Converter::VisitUnion(*src,
+        [frameNode](const Ark_DrawableDescriptor& value) {
+            auto desc = Converter::Convert<DrawableDescriptor*>(value);
+            ImageModelStatic::SetDrawableDescriptor(frameNode, desc);
+        },
+        [frameNode](const auto& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            CHECK_NULL_VOID(info);
+            if (auto pixelMap = info->GetPixmap(); pixelMap) {
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            } else {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                    info->GetModuleName(), info->GetIsUriPureNumber());
+            }
+        },
+        []() {});
+    if (reloadKey) {
+        auto key = Converter::OptConvert<std::string>(*reloadKey);
+        if (key) {
+            ImageModelStatic::SetReloadKey(frameNode, *key);
+        }
+    }
+}
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
 void SetAltImpl(Ark_NativePointer node,
@@ -558,6 +620,8 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
     static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
         ImageModifier::ConstructImpl,
         ImageInterfaceModifier::SetImageOptionsImpl,
+        ImageInterfaceModifier::SetImageOptions1Impl,
+        ImageInterfaceModifier::SetImageOptions2Impl,
         ImageAttributeModifier::SetAltImpl,
         ImageAttributeModifier::SetMatchTextDirectionImpl,
         ImageAttributeModifier::SetFitOriginalSizeImpl,

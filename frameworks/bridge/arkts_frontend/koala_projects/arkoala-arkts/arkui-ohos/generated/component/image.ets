@@ -94,7 +94,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setImageOptionsAttribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): void {
+    setImageOptions0Attribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (src !== undefined) {
@@ -135,7 +135,102 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setImageOptions1Attribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions, reloadKey?: string): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (src !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const srcTmpValue = src!
+            if (srcTmpValue instanceof PixelMap) {
+                thisSerializer.writeInt8((0).toByte())
+                const srcTmpValueForIdx0 = srcTmpValue as PixelMap
+                image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx0)
+            } else if (srcTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((1).toByte())
+                const srcTmpValueForIdx1 = srcTmpValue as ResourceStr
+                if (srcTmpValueForIdx1 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const srcTmpValueForIdx1ForIdx0 = srcTmpValueForIdx1 as string
+                    thisSerializer.writeString(srcTmpValueForIdx1ForIdx0)
+                } else if (srcTmpValueForIdx1 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const srcTmpValueForIdx1ForIdx1 = srcTmpValueForIdx1 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, srcTmpValueForIdx1ForIdx1)
+                }
+            } else if (srcTmpValue instanceof DrawableDescriptor) {
+                thisSerializer.writeInt8((2).toByte())
+                const srcTmpValueForIdx2 = srcTmpValue as DrawableDescriptor
+                DrawableDescriptor_serializer.write(thisSerializer, srcTmpValueForIdx2)
+            } else if (srcTmpValue instanceof ImageContent) {
+                thisSerializer.writeInt8((3).toByte())
+                const srcTmpValueForIdx3 = srcTmpValue as ImageContent
+                thisSerializer.writeInt32(srcTmpValueForIdx3.valueOf())
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (imageAIOptions !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const imageAIOptionsTmpValue = imageAIOptions!
+            ImageAIOptions_serializer.write(thisSerializer, imageAIOptionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (reloadKey !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const reloadKeyTmpValue = reloadKey!
+            thisSerializer.writeString(reloadKeyTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setImageOptions2Attribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, reloadKey?: string): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (src !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const srcTmpValue = src!
+            if (srcTmpValue instanceof PixelMap) {
+                thisSerializer.writeInt8((0).toByte())
+                const srcTmpValueForIdx0 = srcTmpValue as PixelMap
+                image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx0)
+            } else if (srcTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((1).toByte())
+                const srcTmpValueForIdx1 = srcTmpValue as ResourceStr
+                if (srcTmpValueForIdx1 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const srcTmpValueForIdx1ForIdx0 = srcTmpValueForIdx1 as string
+                    thisSerializer.writeString(srcTmpValueForIdx1ForIdx0)
+                } else if (srcTmpValueForIdx1 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const srcTmpValueForIdx1ForIdx1 = srcTmpValueForIdx1 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, srcTmpValueForIdx1ForIdx1)
+                }
+            } else if (srcTmpValue instanceof DrawableDescriptor) {
+                thisSerializer.writeInt8((2).toByte())
+                const srcTmpValueForIdx2 = srcTmpValue as DrawableDescriptor
+                DrawableDescriptor_serializer.write(thisSerializer, srcTmpValueForIdx2)
+            } else if (srcTmpValue instanceof ImageContent) {
+                thisSerializer.writeInt8((3).toByte())
+                const srcTmpValueForIdx3 = srcTmpValue as ImageContent
+                thisSerializer.writeInt32(srcTmpValueForIdx3.valueOf())
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (reloadKey !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const reloadKeyTmpValue = reloadKey!
+            thisSerializer.writeString(reloadKeyTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAltAttribute(value: string | global_resource_Resource | PixelMap | ImageAlt | undefined): void {
@@ -641,6 +736,12 @@ export interface ImageAttribute extends CommonMethod {
     setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         throw new Error('Unimplemented method setImageOptions')
     }
+    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions, reloadKey?: string): this {
+        throw new Error('Unimplemented method setImageOptions')
+    }
+    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, reloadKey?: string): this {
+        throw new Error('Unimplemented method setImageOptions')
+    }
     alt(value: string | global_resource_Resource | PixelMap | ImageAlt | undefined): this {
         throw new Error('Unimplemented method alt')
     }
@@ -757,7 +858,22 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
         const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
-        this.getPeer()?.setImageOptionsAttribute(src_casted, imageAIOptions_casted)
+        this.getPeer()?.setImageOptions0Attribute(src_casted, imageAIOptions_casted)
+        this.applyOptionsFinish('ImageAttribute');
+        return this
+    }
+    public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions, reloadKey?: string): this {
+        const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
+        const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
+        const reloadKey_casted = reloadKey as (string | undefined)
+        this.getPeer()?.setImageOptions1Attribute(src_casted, imageAIOptions_casted, reloadKey_casted)
+        this.applyOptionsFinish('ImageAttribute');
+        return this
+    }
+    public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, reloadKey?: string): this {
+        const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
+        const reloadKey_casted = reloadKey as (string | undefined)
+        this.getPeer()?.setImageOptions2Attribute(src_casted, reloadKey_casted)
         this.applyOptionsFinish('ImageAttribute');
         return this
     }
