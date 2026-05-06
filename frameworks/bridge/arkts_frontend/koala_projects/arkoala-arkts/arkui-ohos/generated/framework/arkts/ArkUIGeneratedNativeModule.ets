@@ -2138,6 +2138,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SideBarContainerAttribute_setMinContentWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SideBarContainerAttribute_setShowSideBarWithGesture(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _Slider_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _SliderInterface_setSliderOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void

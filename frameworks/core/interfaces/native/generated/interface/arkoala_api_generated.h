@@ -26314,6 +26314,8 @@ typedef struct GENERATED_ArkUISideBarContainerModifier {
                        const Opt_DividerStyle* value);
     void (*setMinContentWidth)(Ark_NativePointer node,
                                const Opt_Dimension* value);
+    void (*setShowSideBarWithGesture)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
 } GENERATED_ArkUISideBarContainerModifier;
 
 typedef struct GENERATED_ArkUISliderModifier {
