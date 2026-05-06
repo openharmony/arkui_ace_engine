@@ -1370,6 +1370,103 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeCanLoopTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeDisplayedItemCountTest
+ * @tc.desc: Test Picker displayed item count.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeDisplayedItemCountTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_NumberValue value[] = { {.i32 = 8} };
+    ArkUI_AttributeItem item = {
+        value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    auto ret = nodeAPI->setAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 9);
+
+    ArkUI_NumberValue abnormalValue[] = { {.i32 = 100} };
+    ArkUI_AttributeItem abnormalItem = {
+        abnormalValue, sizeof(abnormalValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT, &abnormalItem),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 7);
+
+    ArkUI_NumberValue minBoundaryValue[] = { {.i32 = 2} };
+    ArkUI_AttributeItem minBoundaryItem = {
+        minBoundaryValue, sizeof(minBoundaryValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT, &minBoundaryItem),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 3);
+
+    ArkUI_NumberValue maxBoundaryValue[] = { {.i32 = 9} };
+    ArkUI_AttributeItem maxBoundaryItem = {
+        maxBoundaryValue, sizeof(maxBoundaryValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT, &maxBoundaryItem),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 9);
+
+    EXPECT_EQ(
+        nodeAPI->resetAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(
+        nodeAPI->getAttribute(picker, NODE_PICKER_DISPLAYED_ITEM_COUNT)->value[0].i32, 7);
+    nodeAPI->disposeNode(picker);
+}
+
+/**
+ * @tc.name: NativeNodeItemHeightTest
+ * @tc.desc: Test Picker item height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeItemHeightTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto picker = nodeAPI->createNode(ARKUI_NODE_PICKER);
+
+    ArkUI_NumberValue value[] = { {.f32 = 50.0f} };
+    ArkUI_AttributeItem item = {
+        value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    auto ret = nodeAPI->setAttribute(picker, NODE_PICKER_ITEM_HEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 50.0f);
+
+    ArkUI_NumberValue abnormalValue[] = { {.f32 = 10.0f} };
+    ArkUI_AttributeItem abnormalItem = {
+        abnormalValue, sizeof(abnormalValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_ITEM_HEIGHT, &abnormalItem), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 40.0f);
+
+    ArkUI_NumberValue minBoundaryValue[] = { {.f32 = 40.0f} };
+    ArkUI_AttributeItem minBoundaryItem = {
+        minBoundaryValue, sizeof(minBoundaryValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_ITEM_HEIGHT, &minBoundaryItem), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 40.0f);
+
+    ArkUI_NumberValue maxBoundaryValue[] = { {.f32 = 64.0f} };
+    ArkUI_AttributeItem maxBoundaryItem = {
+        maxBoundaryValue, sizeof(maxBoundaryValue) / sizeof(ArkUI_NumberValue), "test"};
+    EXPECT_EQ(
+        nodeAPI->setAttribute(picker, NODE_PICKER_ITEM_HEIGHT, &maxBoundaryItem), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 64.0f);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(picker, NODE_PICKER_ITEM_HEIGHT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(picker, NODE_PICKER_ITEM_HEIGHT)->value[0].f32, 40.0f);
+    nodeAPI->disposeNode(picker);
+}
+
+/**
  * @tc.name: NativeNodeSelectionIndicatorTest
  * @tc.desc: Test Picker selection indicator.
  * @tc.type: FUNC

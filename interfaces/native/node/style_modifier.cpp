@@ -22064,6 +22064,28 @@ int32_t SetContainerPickerIndicatorStyle(ArkUI_NodeHandle node, const ArkUI_Attr
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetContainerPickerDisplayedItemCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->setContainerPickerDisplayedItemCount(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetContainerPickerItemHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->setContainerPickerItemHeight(
+        node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUI_AttributeItem* GetContainerPickerSelectedIndex(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -22112,6 +22134,24 @@ const ArkUI_AttributeItem* GetContainerPickerIndicatorStyle(ArkUI_NodeHandle nod
     return &g_attributeItem;
 }
 
+const ArkUI_AttributeItem* GetContainerPickerDisplayedItemCount(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto count = fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerDisplayedItemCount(
+        node->uiNodeHandle);
+    g_numberValues[0].i32 = count;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetContainerPickerItemHeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto itemHeight = fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerItemHeight(
+        node->uiNodeHandle);
+    g_numberValues[0].f32 = itemHeight;
+    return &g_attributeItem;
+}
+
 void ResetContainerPickerSelectedIndex(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
@@ -22136,10 +22176,24 @@ void ResetContainerPickerIndicatorStyle(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerIndicator(node->uiNodeHandle);
 }
 
+void ResetContainerPickerDisplayedItemCount(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerDisplayedItemCount(
+        node->uiNodeHandle);
+}
+
+void ResetContainerPickerItemHeight(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getContainerPickerModifier()->resetContainerPickerItemHeight(node->uiNodeHandle);
+}
+
 int32_t SetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetContainerPickerSelectedIndex, SetContainerPickerEnableHapticFeedback,
-        SetContainerPickerCanLoop, SetContainerPickerIndicatorStyle };
+        SetContainerPickerCanLoop, SetContainerPickerIndicatorStyle, SetContainerPickerDisplayedItemCount,
+        SetContainerPickerItemHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -22150,7 +22204,8 @@ int32_t SetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, co
 const ArkUI_AttributeItem* GetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetContainerPickerSelectedIndex, GetContainerPickerEnableHapticFeedback,
-        GetContainerPickerCanLoop, GetContainerPickerIndicatorStyle };
+        GetContainerPickerCanLoop, GetContainerPickerIndicatorStyle, GetContainerPickerDisplayedItemCount,
+        GetContainerPickerItemHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -22162,7 +22217,8 @@ const ArkUI_AttributeItem* GetContainerPickerAttribute(ArkUI_NodeHandle node, in
 void ResetContainerPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetContainerPickerSelectedIndex, ResetContainerPickerEnableHapticFeedback,
-        ResetContainerPickerCanLoop, ResetContainerPickerIndicatorStyle };
+        ResetContainerPickerCanLoop, ResetContainerPickerIndicatorStyle, ResetContainerPickerDisplayedItemCount,
+        ResetContainerPickerItemHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "containerPicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

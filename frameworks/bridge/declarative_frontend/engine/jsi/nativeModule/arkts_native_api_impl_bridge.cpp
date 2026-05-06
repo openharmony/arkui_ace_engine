@@ -5032,6 +5032,18 @@ void ArkUINativeModule::RegisterContainerPickerAttributes(Local<panda::ObjectRef
     containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerSelectionIndicator"),
         panda::FunctionRef::New(
             const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerSelectionIndicator));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerDisplayedItemCount"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::SetContainerPickerDisplayedItemCount));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerDisplayedItemCount"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerDisplayedItemCount));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerItemHeight"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::SetContainerPickerItemHeight));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerItemHeight"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerItemHeight));
     containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerOnChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::SetContainerPickerOnChange));
     containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerOnChange"),

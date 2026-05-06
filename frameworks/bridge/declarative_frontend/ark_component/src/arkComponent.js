@@ -27783,6 +27783,14 @@ class ArkContainerPickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ContainerPickerSelectionIndicatorModifier.identity, ContainerPickerSelectionIndicatorModifier, style);
     return this;
   }
+  displayedItemCount(count) {
+    modifierWithKey(this._modifiersWithKeys, ContainerPickerDisplayedItemCountModifier.identity, ContainerPickerDisplayedItemCountModifier, count);
+    return this;
+  }
+  itemHeight(height) {
+    modifierWithKey(this._modifiersWithKeys, ContainerPickerItemHeightModifier.identity, ContainerPickerItemHeightModifier, height);
+    return this;
+  }
 
 }
 
@@ -27888,6 +27896,34 @@ class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey {
   }
 }
 ContainerPickerSelectionIndicatorModifier.identity = Symbol('containerPickerSelectionIndicator');
+
+class ContainerPickerDisplayedItemCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerDisplayedItemCount(node);
+    } else {
+      getUINativeModule().containerPicker.setContainerPickerDisplayedItemCount(node, this.value);
+    }
+  }
+}
+ContainerPickerDisplayedItemCountModifier.identity = Symbol('containerPickerDisplayedItemCount');
+
+class ContainerPickerItemHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerItemHeight(node);
+    } else {
+      getUINativeModule().containerPicker.setContainerPickerItemHeight(node, this.value);
+    }
+  }
+}
+ContainerPickerItemHeightModifier.identity = Symbol('containerPickerItemHeight');
 // @ts-ignore
 if (globalThis.UIPickerComponent !== undefined) {
   globalThis.UIPickerComponent.attributeModifier = function (modifier) {

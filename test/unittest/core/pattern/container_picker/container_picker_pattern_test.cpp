@@ -42,6 +42,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float EPSILON = 0.001f;
+} // namespace
 
 class ContainerPickerPatternTest : public TestNG {
 public:
@@ -2607,6 +2610,72 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_GetDragDeltaLess
     offsetY = 300.0f; // Out of boundary
     result = pattern->GetDragDeltaLessThanJumpInterval(offsetY, originalDragDelta, useRebound, shiftDistance);
     EXPECT_EQ(result, 10.0f); // originalDragDelta + yOffset_
+}
+
+/**
+ * @tc.name: ContainerPickerUtilsTest_NormalizeDisplayedItemCount001
+ * @tc.desc: Test NormalizeDisplayedItemCount function with boundary and even number input
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_NormalizeDisplayedItemCount001, TestSize.Level1)
+{
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(1), 7);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(2), 3);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(8), 9);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(9), 9);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(10), 7);
+}
+
+/**
+ * @tc.name: ContainerPickerUtilsTest_ClampPickerItemHeight001
+ * @tc.desc: Test ClampPickerItemHeight function with lower and upper boundary input
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_ClampPickerItemHeight001, TestSize.Level1)
+{
+    auto defaultVp = static_cast<float>(Dimension(40.0, DimensionUnit::VP).ConvertToVp());
+
+    auto lower = ContainerPickerUtils::ClampPickerItemHeight(Dimension(39.0, DimensionUnit::VP));
+    auto min = ContainerPickerUtils::ClampPickerItemHeight(Dimension(40.0, DimensionUnit::VP));
+    auto max = ContainerPickerUtils::ClampPickerItemHeight(Dimension(64.0, DimensionUnit::VP));
+    auto higher = ContainerPickerUtils::ClampPickerItemHeight(Dimension(65.0, DimensionUnit::VP));
+
+    EXPECT_NEAR(lower.ConvertToVp(), defaultVp, EPSILON);
+    EXPECT_NEAR(min.ConvertToVp(), 40.0f, EPSILON);
+    EXPECT_NEAR(max.ConvertToVp(), 64.0f, EPSILON);
+    EXPECT_NEAR(higher.ConvertToVp(), defaultVp, EPSILON);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SyncPickerParamsFromLayout001
+ * @tc.desc: Test SyncPickerParamsFromLayout applies normalized count and clamped item height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SyncPickerParamsFromLayout001, TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateDisplayedItemCount(8);
+    layoutProperty->UpdateItemHeight(Dimension(50.0, DimensionUnit::VP));
+    pattern->SyncPickerParamsFromLayout();
+
+    auto expectedItemPx = static_cast<float>(Dimension(50.0, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(pattern->displayCount_, 9);
+    EXPECT_NEAR(pattern->GetPickerItemHeight(), expectedItemPx, EPSILON);
+    EXPECT_NEAR(pattern->pickerHeightBeforeRotate_, expectedItemPx * 9.0f, EPSILON);
+
+    layoutProperty->UpdateDisplayedItemCount(1);
+    layoutProperty->UpdateItemHeight(Dimension(100.0, DimensionUnit::VP));
+    pattern->SyncPickerParamsFromLayout();
+
+    auto defaultItemPx = static_cast<float>(Dimension(40.0, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(pattern->displayCount_, 7);
+    EXPECT_NEAR(pattern->GetPickerItemHeight(), defaultItemPx, EPSILON);
 }
 
 } // namespace OHOS::Ace::NG

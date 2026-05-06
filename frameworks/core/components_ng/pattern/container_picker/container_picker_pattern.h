@@ -87,6 +87,11 @@ public:
         return height_;
     }
 
+    float GetPickerItemHeight() const
+    {
+        return pickerItemHeight_;
+    }
+
     void SetContentMainSize(float contentMainSize)
     {
         contentMainSize_ = contentMainSize;
@@ -299,6 +304,8 @@ private:
     void PlayHaptic(float offset);
     bool InnerHandleScroll(bool isDown);
 
+    void SyncPickerParamsFromLayout();
+
     void InitDefaultParams()
     {
         pickerItemHeight_ = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
@@ -353,7 +360,7 @@ private:
     bool isModified_ = false;
 
     int32_t containerPickerId_ = -1;
-    int32_t displayCount_ = 7;
+    int32_t displayCount_ = ContainerPickerUtils::DEFAULT_DISPLAYED_ITEM_COUNT;
     int32_t totalItemCount_ = 0;
     int32_t prevTotalItemCount_ = 0;
     int32_t selectedIndex_ = 0;

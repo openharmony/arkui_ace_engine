@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
@@ -130,6 +131,26 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
     pickerPattern->SetIndicatorStyleVal(style);
 }
 
+void ContainerPickerModel::SetDisplayedItemCount(std::optional<int32_t> count)
+{
+    if (!count.has_value()) {
+        ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, DisplayedItemCount);
+        return;
+    }
+    int32_t normalized = ContainerPickerUtils::NormalizeDisplayedItemCount(count.value());
+    ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, DisplayedItemCount, normalized);
+}
+
+void ContainerPickerModel::SetItemHeight(std::optional<Dimension> height)
+{
+    if (!height.has_value()) {
+        ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, ItemHeight);
+        return;
+    }
+    Dimension d = ContainerPickerUtils::ClampPickerItemHeight(height.value());
+    ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, ItemHeight, d);
+}
+
 void ContainerPickerModel::SetSelectedIndex(FrameNode* frameNode, int32_t index)
 {
     CHECK_NULL_VOID(frameNode);
@@ -156,6 +177,28 @@ void ContainerPickerModel::SetEnableHapticFeedback(FrameNode* frameNode, bool is
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         ContainerPickerLayoutProperty, EnableHapticFeedback, isEnableHapticFeedback, frameNode);
+}
+
+void ContainerPickerModel::SetDisplayedItemCount(FrameNode* frameNode, std::optional<int32_t> count)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!count.has_value()) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, DisplayedItemCount, frameNode);
+        return;
+    }
+    int32_t n = ContainerPickerUtils::NormalizeDisplayedItemCount(count.value());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, DisplayedItemCount, n, frameNode);
+}
+
+void ContainerPickerModel::SetItemHeight(FrameNode* frameNode, std::optional<Dimension> height)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!height.has_value()) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, ItemHeight, frameNode);
+        return;
+    }
+    Dimension d = ContainerPickerUtils::ClampPickerItemHeight(height.value());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, ItemHeight, d, frameNode);
 }
 
 void ContainerPickerModel::SetOnChange(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange)
