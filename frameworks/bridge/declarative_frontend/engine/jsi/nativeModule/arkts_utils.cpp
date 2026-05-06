@@ -577,7 +577,7 @@ RefPtr<ResourceObject> ArkTSUtils::GetResourceObject(const EcmaVM* vm, const Loc
 
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
     std::vector<ResourceObjectParams> resObjParamsList;
-    auto size = static_cast<int32_t>(params->Length(vm));
+    auto size = static_cast<int32_t>(GetArrayLength(vm, params));
     for (int32_t i = 0; i < size; i++) {
         auto item = panda::ArrayRef::GetValueAt(vm, params, i);
 
@@ -668,7 +668,7 @@ bool IsGetResourceByName(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
         return false;
     }
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
-    if (params->Length(vm) == 0) {
+    if (ArkTSUtils::GetArrayLength(vm, params) == 0) {
         return false;
     }
     return true;
@@ -765,7 +765,7 @@ void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& typ
         return;
     }
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
-    auto paramCount = params->Length(vm);
+    auto paramCount = static_cast<uint32_t>(ArkTSUtils::GetArrayLength(vm, params));
     auto name = panda::StringRef::NewFromUtf8(vm, resName.c_str());
     if (resType == ResourceType::PLURAL || resType == ResourceType::STRING) {
         std::vector<Local<JSValueRef>> tmpParams;
@@ -1200,7 +1200,7 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg
     if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
         return false;
     }
-    int32_t length = static_cast<int32_t>(handle->Length(vm));
+    int32_t length = static_cast<int32_t>(GetArrayLength(vm, handle.ToLocal()));
     if (length != defaultLength) {
         return false;
     }
@@ -1791,7 +1791,7 @@ bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values,
     }
 
     Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(values);
-    for (size_t i = 0; i < valueArray->Length(vm); i++) {
+    for (size_t i = 0; i < GetArrayLength(vm, valueArray); i++) {
         Local<JSValueRef> value = valueArray->GetValueAt(vm, values, i);
         if (value->IsNumber()) {
             result.emplace_back(value->Uint32Value(vm));
@@ -1882,7 +1882,7 @@ std::string GetReplaceContentStr(
 
 void ReplaceHolder(const EcmaVM* vm, std::string& originStr, const Local<panda::ArrayRef>& params, int32_t containCount)
 {
-    auto size = static_cast<int32_t>(params->Length(vm));
+    auto size = static_cast<int32_t>(ArkTSUtils::GetArrayLength(vm, params));
     if (containCount == size) {
         return;
     }
