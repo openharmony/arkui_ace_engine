@@ -31,6 +31,20 @@ class ListEditModeModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ListEnableEditModeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableEditMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetEnableEditMode(node);
+    } else {
+      getUINativeModule().list.setEnableEditMode(node, this.value!);
+    }
+  }
+}
+
 class ListMultiSelectableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -794,6 +808,10 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   editMode(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ListEditModeModifier.identity, ListEditModeModifier, value);
+    return this;
+  }
+  enableEditMode(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ListEnableEditModeModifier.identity, ListEnableEditModeModifier, value);
     return this;
   }
   multiSelectable(value: boolean): this {

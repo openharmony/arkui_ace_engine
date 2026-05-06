@@ -177,6 +177,16 @@ void PanEventActuator::SetPanEventType(GestureTypeName typeName)
     gestureInfo->SetIsSystemGesture(true);
 }
 
+void PanEventActuator::SetPanEventTag(const std::string& tag)
+{
+    if (panEvents_.empty()) {
+        return;
+    }
+    auto gestureInfo = panRecognizer_->GetOrCreateGestureInfo();
+    CHECK_NULL_VOID(gestureInfo);
+    gestureInfo->SetTag(tag);
+}
+
 void PanEventActuator::DumpVelocityInfo(int32_t fingerId)
 {
     if (panRecognizer_) {

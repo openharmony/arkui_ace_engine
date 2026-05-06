@@ -65,6 +65,7 @@ public:
     void SetSyncLoad(bool enabled) override;
     void SetEditModeOptions(EditModeOptions& editModeOptions) override;
     void SetEnableEditMode(bool enableEditMode) override;
+    void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -169,6 +170,7 @@ public:
     static EditModeOptions GetEditModeOptions(FrameNode* frameNode);
     static void SetEnableEditMode(FrameNode* frameNode, bool enableEditMode);
     static bool GetEnableEditMode(FrameNode* frameNode);
+    static void SetEnableEditModeChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& changeEvent);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);

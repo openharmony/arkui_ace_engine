@@ -1643,6 +1643,13 @@ void GestureEventHub::RemovePanEvent(const RefPtr<PanEvent>& panEvent)
     panEventActuator_->RemovePanEvent(panEvent);
 }
 
+void GestureEventHub::SetPanEventTag(const std::string& tag)
+{
+    CHECK_NULL_VOID(panEventActuator_);
+    panEventActuator_->SetPanEventTag(tag);
+}
+
+
 void GestureEventHub::SetPanEventType(GestureTypeName typeName)
 {
     CHECK_NULL_VOID(panEventActuator_);

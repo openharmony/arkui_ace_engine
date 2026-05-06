@@ -1698,6 +1698,59 @@ HWTEST_F(ListGeneratedTestNg, ListItemGroupModelSetFooterStyle001, TestSize.Leve
 }
 
 /**
+ * @tc.name: ListEnableEditModeModifier001
+ * @tc.desc: Test List enableEditMode modifier updates pattern state and swipe-select pan event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEnableEditModeModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with items.
+     * @tc.expected: List enableEditMode is disabled by default.
+     */
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+    auto frameNode = AceType::RawPtr(frameNode_);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(pattern_->GetEnableEditMode());
+    EXPECT_FALSE(ListModelNG::GetEnableEditMode(frameNode));
+    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
+
+    /**
+     * @tc.steps: step2. Enable edit mode through static ListModelNG interface.
+     * @tc.expected: Pattern state changes, change event fires once, and swipe-select pan event is registered.
+     */
+    int32_t callbackCount = 0;
+    bool lastValue = false;
+    ListModelNG::SetEnableEditModeChangeEvent(frameNode, [&callbackCount, &lastValue](bool enableEditMode) {
+        ++callbackCount;
+        lastValue = enableEditMode;
+    });
+    ListModelNG::SetEnableEditMode(frameNode, true);
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_TRUE(ListModelNG::GetEnableEditMode(frameNode));
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_TRUE(lastValue);
+    pattern_->OnModifyDone();
+    EXPECT_NE(pattern_->swipeSelectPanEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the same value and then disable edit mode.
+     * @tc.expected: Same value does not fire change event; disabling unregisters swipe-select pan event.
+     */
+    ListModelNG::SetEnableEditMode(frameNode, true);
+    EXPECT_EQ(callbackCount, 1);
+    ListModelNG::SetEnableEditMode(frameNode, false);
+    EXPECT_FALSE(pattern_->GetEnableEditMode());
+    EXPECT_FALSE(ListModelNG::GetEnableEditMode(frameNode));
+    EXPECT_EQ(callbackCount, 2);
+    EXPECT_FALSE(lastValue);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
+}
+
+/**
  * @tc.name: ListSwipeSelectGetItemAtPosition001
  * @tc.desc: Test swipe multi-select can still resolve item index outside edit-mode hot zone
  * @tc.type: FUNC

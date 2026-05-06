@@ -4404,7 +4404,10 @@ struct ArkUIListModifier {
     ArkUI_Bool (*getListSyncLoad)(ArkUINodeHandle node);
     void (*setEditModeOptions)(ArkUINodeHandle node, ArkUIEditModeOptions options);
     void (*resetEditModeOptions)(ArkUINodeHandle node);
-    void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[1]);
+    void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
+    void (*setListEnableEditMode)(ArkUINodeHandle node, ArkUI_Bool enableEditMode);
+    void (*resetListEnableEditMode)(ArkUINodeHandle node);
+    ArkUI_Bool (*getListEnableEditMode)(ArkUINodeHandle node);
     void (*setListFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetListFadingEdge)(ArkUINodeHandle node);
