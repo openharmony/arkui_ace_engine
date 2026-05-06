@@ -34,6 +34,7 @@ constexpr float HALF = 0.5f;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr double DEFAULT_SCALE_VALUE = 1.0;
+constexpr float MAX_BLOCK_SCALE_FOR_MATERIAL = 3.0f;
 constexpr int32_t STEPS_MIN_NUMBER = 2;
 } // namespace
 SliderContentModifier::SliderContentModifier(const Parameters& parameters,
@@ -71,6 +72,10 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     blockBorderColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor.value_or(Color())));
     blockSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(parameters.blockSize);
+    
+    blockAlpha_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    blockScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    
     // non-animatable property
     stepRatio_ = AceType::MakeRefPtr<PropertyFloat>(parameters.stepRatio);
     sliderMode_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -106,6 +111,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(stepColor_);
     AttachProperty(blockBorderColor_);
     AttachProperty(blockSize_);
+    AttachProperty(blockAlpha_);
+    AttachProperty(blockScale_);
     AttachProperty(stepRatio_);
     AttachProperty(sliderMode_);
     AttachProperty(directionAxis_);
@@ -535,18 +542,18 @@ void SliderContentModifier::CreateDefaultBlockBrush(RSBrush& brush, float& radiu
     auto blockSize = blockSize_->Get();
     auto borderWidth = blockBorderWidth_->Get();
     if (GreatOrEqual(borderWidth * HALF, radius)) {
-        brush.SetColor(ToRSColor(blockBorderColor_->Get()));
+        brush.SetColor(ToRSColor(blockBorderColor_->Get().BlendOpacity(blockAlpha_->Get())));
         return;
     }
     std::vector<GradientColor> gradientColors = GetBlockColor();
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
-        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        colors.emplace_back(gradientColors[i].GetLinearColor().BlendOpacity(blockAlpha_->Get()).GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
     radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
-    float drawRadius = isEnlarge_ ? radius * scaleValue_ : radius;
+    float drawRadius = (isEnlarge_ ? radius * scaleValue_ : radius) * blockScale_->Get();
     RSRect blockRect = GetBlockRect(drawRadius);
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
@@ -576,14 +583,19 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         pen.SetAntiAlias(true);
         pen.SetWidth(borderWidth);
-        pen.SetColor(ToRSColor(blockBorderColor_->Get()));
+        pen.SetColor(ToRSColor(blockBorderColor_->Get().BlendOpacity(blockAlpha_->Get())));
         canvas.AttachPen(pen);
     }
     canvas.DrawCircle(
-        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), isEnlarge_ ? radius * scaleValue_ : radius);
+        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())),
+        (isEnlarge_ ? radius * scaleValue_ : radius) * blockScale_->Get());
     canvas.DetachBrush();
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         canvas.DetachPen();
+    }
+    
+    if (materialNodePositionCallback_) {
+        materialNodePositionCallback_(blockCenter.GetX(), blockCenter.GetY(), blockRadius);
     }
 }
 
@@ -595,11 +607,15 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
         return;
     }
 
+    if (GreatNotEqual(blockScale_->Get(), 1.0f)) {
+        return;
+    }
+
     auto& canvas = context.canvas;
     RSPen circleStatePen;
     circleStatePen.SetAntiAlias(true);
     // add animate color
-    circleStatePen.SetColor(ToRSColor(boardColor_->Get()));
+    circleStatePen.SetColor(ToRSColor(boardColor_->Get().BlendOpacity(blockAlpha_->Get())));
     circleStatePen.SetWidth(isEnlarge_ ? hotCircleShadowWidth_ * scaleValue_ : hotCircleShadowWidth_);
     canvas.AttachPen(circleStatePen);
     auto blockSize = blockSize_->Get();
@@ -809,6 +825,34 @@ RSRect SliderContentModifier::GetTrackRect()
         } else {
             rect.SetTop(backStart.GetY());
             rect.SetBottom(backEnd.GetY());
+        }
+    }
+    return rect;
+}
+
+RSRect SliderContentModifier::GetSelectedTrackRect()
+{
+    auto selectedBorderRadius = selectedBorderRadius_->Get();
+    auto direction = static_cast<Axis>(directionAxis_->Get());
+    auto blockCenter = GetBlockCenter();
+    auto trackThickness = trackThickness_->Get();
+    auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
+    auto rect = GetTrackRect();
+    auto insetOffset = .0f;
+    if (sliderMode == SliderModelNG::SliderMode::INSET) {
+        insetOffset = std::max(selectedBorderRadius, trackThickness * HALF);
+    }
+    if (!reverse_) {
+        if (direction == Axis::HORIZONTAL) {
+            rect.SetRight(blockCenter.GetX() + insetOffset);
+        } else {
+            rect.SetBottom(blockCenter.GetY() + insetOffset);
+        }
+    } else {
+        if (direction == Axis::HORIZONTAL) {
+            rect.SetLeft(blockCenter.GetX() - insetOffset);
+        } else {
+            rect.SetTop(blockCenter.GetY() - insetOffset);
         }
     }
     return rect;
@@ -1248,15 +1292,16 @@ void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
     if (GreatNotEqual(scaleValue_, DEFAULT_SCALE_VALUE)) {
         circleSize = circleSize * scaleValue_;
     }
+    auto maxCircleSize = circleSize * MAX_BLOCK_SCALE_FOR_MATERIAL;
     RectF rect;
     if (directionAxis_->Get() == static_cast<int32_t>(Axis::HORIZONTAL)) {
-        auto maxWidth = std::max(circleSize.Height(), frameSize.Height()) * HALF;
-        rect.SetOffset(OffsetF(-circleSize.Width(), blockCenterY_->Get() - maxWidth));
-        rect.SetSize(SizeF(circleSize.Width() / HALF + frameSize.Width(), maxWidth / HALF));
+        auto maxWidth = std::max(maxCircleSize.Height(), frameSize.Height()) * HALF;
+        rect.SetOffset(OffsetF(-maxCircleSize.Width(), blockCenterY_->Get() - maxWidth));
+        rect.SetSize(SizeF(maxCircleSize.Width() / HALF + frameSize.Width(), maxWidth / HALF));
     } else {
-        auto maxWidth = std::max(circleSize.Width(), frameSize.Width()) * HALF;
-        rect.SetOffset(OffsetF(blockCenterX_->Get() - maxWidth, -circleSize.Height()));
-        rect.SetSize(SizeF(maxWidth / HALF, circleSize.Height() / HALF + frameSize.Height()));
+        auto maxWidth = std::max(maxCircleSize.Width(), frameSize.Width()) * HALF;
+        rect.SetOffset(OffsetF(blockCenterX_->Get() - maxWidth, -maxCircleSize.Height()));
+        rect.SetSize(SizeF(maxWidth / HALF, maxCircleSize.Height() / HALF + frameSize.Height()));
     }
 
     SetBoundsRect(rect);

@@ -65,6 +65,7 @@ struct SharedTransitionOption;
 class UiMaterial;
 struct UiMaterialInfo;
 struct ImmersiveMaterialConfig;
+struct FrostedGlassParam;
 enum class MaterialType;
 enum class UiMaterialFilterQuality;
 }
@@ -376,6 +377,11 @@ public:
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}
     void SetSystemMaterial(const RefPtr<UiMaterial>& material);
+    virtual std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
+        const FrostedGlassParam& param, float dipScale)
+    {
+        return nullptr;
+    }
     virtual void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
     {}

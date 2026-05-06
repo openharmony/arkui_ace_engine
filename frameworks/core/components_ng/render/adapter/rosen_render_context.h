@@ -591,6 +591,9 @@ public:
 
     void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
 
+    std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
+        const FrostedGlassParam& param, float dipScale) override;
+
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
         

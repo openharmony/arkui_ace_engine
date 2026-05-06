@@ -18,6 +18,11 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "core/components_ng/base/view_abstract.h"
+#include "ui/properties/ui_material_structs.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/animation/curve.h"
+
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/multi_thread.h"
@@ -35,6 +40,8 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/particle/particle_pattern.h"
+#include "core/components_ng/property/particle_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -55,6 +62,27 @@ constexpr int32_t STEP_POINT_OFFSET = 1;
 constexpr int32_t DEFAULT_STEP = 1;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
+const std::string STR_SLIDER_LONG_PRESS = "ArkUISliderLongPressEvent";
+
+constexpr float DRAG_FRAME_PRESS_START_SCALE = 1.1f;
+constexpr float DRAG_FRAME_PRESS_END_SCALE = 1.0f;
+constexpr float DRAG_DEFORM_SCALE_X = 1.06f;
+constexpr float DRAG_DEFORM_SCALE_Y = 0.95f;
+constexpr int32_t DRAG_DEFORM_RESTORE_DELAY_MS = 500;
+constexpr int32_t DRAG_FRAME_ANIMATION_DURATION = 150;
+constexpr int32_t LONG_PRESS_DELAY_MS = 400;
+
+constexpr float SPRING_VELOCITY = 0.0f;
+constexpr float SPRING_MASS = 1.0f;
+constexpr float SPRING_STIFFNESS = 305.0f;
+constexpr float SPRING_DAMPING = 24.0f;
+
+constexpr float LOW_GRADE_SHRINK_SCALE = 0.88f;
+constexpr float LOW_GRADE_EXPAND_SCALE = 2.23f;
+constexpr float LOW_GRADE_SPRING_MASS = 1.0f;
+constexpr float LOW_GRADE_SPRING_STIFFNESS = 224.0f;
+constexpr float LOW_GRADE_SPRING_DAMPING = 12.0f;
+constexpr float NUMBER_TWO = 2.0f;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
@@ -140,6 +168,59 @@ inline std::string ToString(const BasicShapeType& type)
 }
 } // namespace
 
+RefPtr<NodePaintMethod> SliderPattern::CreateNodePaintMethod()
+{
+    if (!IsSliderVisible()) {
+        return nullptr;
+    }
+    auto paintParameters = UpdateContentParameters();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto theme = context->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (!sliderContentModifier_) {
+        sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(
+            paintParameters,
+            [weak = WeakClaim(this)](const PointF& imageCenter) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->UpdateImagePosition(imageCenter);
+            }, theme);
+        sliderContentModifier_->SetHost(GetHost());
+        RegisterMaterialNodePositionCallback();
+    }
+    InitAccessibilityVirtualNodeTask();
+    sliderContentModifier_->SetUseContentModifier(UseContentModifier());
+    auto overlayGlobalOffset = CalculateGlobalSafeOffset();
+    std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
+    SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
+    if (!sliderTipModifier_ && bubbleFlag_) {
+        sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            if (!pattern) {
+                return std::pair<OffsetF, float>();
+            }
+            auto blockCenter = pattern->GetBlockCenter();
+            auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
+            auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
+            return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
+        });
+    }
+    auto textDirection = TextDirection::AUTO;
+    auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
+    if (layoutProperty) {
+        textDirection = layoutProperty->GetLayoutDirection();
+    }
+    if ((HasPrefix() || HasSuffix()) && !contentModifierNode_ && !endsInitFlag_) {
+        endsInitFlag_ = true;
+        InitSliderEndsState();
+    }
+    return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
+        sliderTipModifier_, tipParameters, textDirection);
+}
+
 void SliderPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -175,6 +256,7 @@ void SliderPattern::OnModifyDone()
         pattern->InitEvent();
     };
     context->AddBuildFinishCallBack(callback);
+    ResetHostMaterialEffects();
 }
 
 void SliderPattern::InitEvent()
@@ -1105,6 +1187,8 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 void SliderPattern::HandleTouchDown(const Offset& location, SourceType sourceType)
 {
     axisFlag_ = false;
+    ShowMaterialNode();
+    StartLongPressTimer();
     if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK) {
         allowDragEvents_ = true;
         if (!AtPanArea(location, sourceType)) {
@@ -1135,6 +1219,9 @@ bool NeedFireClickEvent(const Offset& downLocation, const Offset& upLocation)
 
 void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
 {
+    if (longPressTask_) {
+        longPressTask_.Cancel();
+    }
     if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP &&
         lastTouchLocation_.has_value() && NeedFireClickEvent(lastTouchLocation_.value(), location)) {
         if (!AtPanArea(location, sourceType)) {
@@ -1151,6 +1238,9 @@ void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
         bubbleFlag_ = false;
     }
     mousePressedFlag_ = false;
+    
+    HideMaterialNode();
+    
     if (sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP) {
         FireChangeEvent(SliderChangeMode::Click);
     }
@@ -1198,6 +1288,11 @@ void SliderPattern::HandlingGestureStart(const GestureEvent& info)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        
+        if ((IsHighGradeMaterial() || IsMiddleGradeMaterial())) {
+            isDeformStarted_ = false;
+            deformRestoreTask_.Cancel();
+        }
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1259,6 +1354,13 @@ void SliderPattern::HandledGestureEvent()
 {
     panMoveFlag_ = false;
     axisOffset_ = 0.0;
+    
+    if ((IsHighGradeMaterial() || IsMiddleGradeMaterial()) && isDeformStarted_) {
+        deformRestoreTask_.Cancel();
+        RestoreDeformAnimation();
+        isDeformStarted_ = false;
+    }
+    
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1874,6 +1976,13 @@ void SliderPattern::FireChangeEvent(int32_t mode)
     ReportChangeEvent(value_, mode);
     valueChangeFlag_ = false;
     SendAccessibilityValueEvent(mode);
+    if ((IsHighGradeMaterial() || IsMiddleGradeMaterial()) && mode == SliderChangeMode::Moving) {
+        if (!isDeformStarted_) {
+            StartDeformAnimation();
+        } else {
+            ScheduleDeformRestore();
+        }
+    }
 }
 
 void SliderPattern::SendAccessibilityValueEvent(int32_t mode)
@@ -1974,6 +2083,186 @@ void SliderPattern::StartVibrateFeedback()
     }
 }
 #endif
+
+std::list<NG::ParticleOption> SliderPattern::CreateParticleOptions(const RSRect& selectedRect, const Color& themeColor)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, std::list<NG::ParticleOption>());
+    CHECK_NULL_RETURN(particleFrameNode_, std::list<NG::ParticleOption>());
+    CHECK_NULL_RETURN(sliderContentModifier_, std::list<NG::ParticleOption>());
+    
+    auto trackRect = sliderContentModifier_->GetTrackRect();
+    float trackWidth = trackRect.GetWidth();
+    float trackHeight = trackRect.GetHeight();
+    float trackX = trackRect.GetLeft();
+    float trackY = trackRect.GetTop();
+    
+    auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::list<NG::ParticleOption>());
+    auto direction = GetDirection();
+    auto reverse = GetReverseValue(layoutProperty);
+    
+    auto blockRadius = GetBlockRadius();
+    auto blockDiameter = blockRadius * NUMBER_TWO;
+    auto dragFrameSize = blockDiameter * GetDragFrameBaseScale();
+    auto maxEmitterLength = dragFrameSize * NUMBER_TWO;
+    
+    auto trackThickness = sliderContentModifier_->GetTrackThickness();
+    
+    float blockCenterX = circleCenter_.GetX() - trackX;
+    float blockCenterY = circleCenter_.GetY() - trackY;
+    
+    float emitterLength = 0.0f;
+    float emitterCenterX = 0.0f;
+    float emitterCenterY = 0.0f;
+    
+    if (direction == Axis::HORIZONTAL) {
+        float distanceToStart = blockCenterX;
+        float distanceToEnd = trackWidth - blockCenterX;
+        
+        if (!reverse) {
+            emitterLength = std::min(maxEmitterLength, distanceToStart);
+            emitterCenterX = blockCenterX - emitterLength;
+        } else {
+            emitterLength = std::min(maxEmitterLength, distanceToEnd);
+            emitterCenterX = blockCenterX;
+        }
+        emitterCenterY = 0.0f;
+    } else {
+        float distanceToStart = blockCenterY;
+        float distanceToEnd = trackHeight - blockCenterY;
+        
+        if (!reverse) {
+            emitterLength = std::min(maxEmitterLength, distanceToStart);
+            emitterCenterY = blockCenterY - emitterLength;
+        } else {
+            emitterLength = std::min(maxEmitterLength, distanceToEnd);
+            emitterCenterY = blockCenterY;
+        }
+        emitterCenterX = 0.0f;
+    }
+    
+    NG::EmitterOption emitter;
+    emitter.SetPosition(std::make_pair(
+        Dimension(emitterCenterX, DimensionUnit::PX),
+        Dimension(emitterCenterY, DimensionUnit::PX)));
+    emitter.SetSize(std::make_pair(
+        Dimension(emitterLength, DimensionUnit::PX),
+        Dimension(trackThickness, DimensionUnit::PX)));
+    emitter.SetShape(NG::ParticleEmitterShape::RECTANGLE);
+    emitter.SetEmitterRate(PARTICLE_EMITTER_RATE);
+    
+    NG::Particle particle;
+    particle.SetParticleType(NG::ParticleType::POINT);
+    particle.SetCount(-1);
+    particle.SetLifeTime(PARTICLE_LIFE_TIME);
+    particle.SetLifeTimeRange(PARTICLE_LIFE_TIME_RANGE);
+    
+    NG::PointParticleParameter pointParam;
+    pointParam.SetRadius(PARTICLE_RADIUS);
+    NG::ParticleConfig config;
+    config.SetPointParticleParameter(pointParam);
+    particle.SetConfig(config);
+    emitter.SetParticle(particle);
+    
+    NG::ParticleColorPropertyOption colorOption;
+    colorOption.SetRange(std::make_pair(Color::WHITE, themeColor));
+    NG::ParticleColorPropertyUpdater colorUpdater;
+    colorUpdater.SetUpdateType(NG::UpdaterType::CURVE);
+    NG::ParticleColorPropertyUpdaterConfig colorConfig;
+    std::list<NG::ParticlePropertyAnimation<Color>> colorAnimations;
+    NG::ParticlePropertyAnimation<Color> colorAnim1;
+    colorAnim1.SetFrom(Color::WHITE);
+    colorAnim1.SetTo(themeColor);
+    colorAnim1.SetStartMills(0);
+    colorAnim1.SetEndMills(PARTICLE_COLOR_END_MILLS);
+    colorAnimations.push_back(colorAnim1);
+    colorConfig.SetAnimationArray(colorAnimations);
+    colorUpdater.SetConfig(colorConfig);
+    colorOption.SetUpdater(colorUpdater);
+    
+    NG::ParticleFloatPropertyOption opacityOption;
+    opacityOption.SetRange(std::make_pair(1.0f, 1.0f));
+    NG::ParticleFloatPropertyUpdater opacityUpdater;
+    opacityUpdater.SetUpdaterType(NG::UpdaterType::CURVE);
+    NG::ParticleFloatPropertyUpdaterConfig opacityConfig;
+    std::list<NG::ParticlePropertyAnimation<float>> opacityAnimations;
+    NG::ParticlePropertyAnimation<float> opacityAnim1;
+    opacityAnim1.SetFrom(0.5f);
+    opacityAnim1.SetTo(0.0f);
+    opacityAnim1.SetStartMills(0);
+    opacityAnim1.SetEndMills(PARTICLE_OPACITY_END_MILLS);
+    opacityAnimations.push_back(opacityAnim1);
+    opacityConfig.SetAnimations(opacityAnimations);
+    opacityUpdater.SetConfig(opacityConfig);
+    opacityOption.SetUpdater(opacityUpdater);
+    
+    NG::VelocityProperty velocity;
+    velocity.SetSpeedRange(std::make_pair(2.0f, 8.0f));
+    velocity.SetAngleRange(std::make_pair(0.0f, 360.0f));
+    
+    NG::AccelerationProperty acceleration;
+    NG::ParticleFloatPropertyOption accelSpeed;
+    accelSpeed.SetRange(std::make_pair(10.0f, 20.0f));
+    NG::ParticleFloatPropertyUpdater accelSpeedUpdater;
+    accelSpeedUpdater.SetUpdaterType(NG::UpdaterType::RANDOM);
+    NG::ParticleFloatPropertyUpdaterConfig accelSpeedConfig;
+    std::list<NG::ParticlePropertyAnimation<float>> accelSpeedAnimations;
+    accelSpeedConfig.SetAnimations(accelSpeedAnimations);
+    accelSpeedUpdater.SetConfig(accelSpeedConfig);
+    accelSpeed.SetUpdater(accelSpeedUpdater);
+    acceleration.SetSpeed(accelSpeed);
+    
+    NG::ParticleFloatPropertyOption accelAngle;
+    accelAngle.SetRange(std::make_pair(0.0f, 360.0f));
+    NG::ParticleFloatPropertyUpdater accelAngleUpdater;
+    accelAngleUpdater.SetUpdaterType(NG::UpdaterType::RANDOM);
+    NG::ParticleFloatPropertyUpdaterConfig accelAngleConfig;
+    std::list<NG::ParticlePropertyAnimation<float>> accelAngleAnimations;
+    accelAngleConfig.SetAnimations(accelAngleAnimations);
+    accelAngleUpdater.SetConfig(accelAngleConfig);
+    accelAngle.SetUpdater(accelAngleUpdater);
+    acceleration.SetAngle(accelAngle);
+    
+    NG::ParticleOption particleOption;
+    particleOption.SetEmitterOption(emitter);
+    particleOption.SetParticleColorOption(colorOption);
+    particleOption.SetParticleOpacityOption(opacityOption);
+    particleOption.SetParticleVelocityOption(velocity);
+    particleOption.SetParticleAccelerationOption(acceleration);
+    
+    std::list<NG::ParticleOption> particleOptions;
+    particleOptions.push_back(particleOption);
+    return particleOptions;
+}
+
+void SliderPattern::StartParticleEffect()
+{
+    CHECK_NULL_VOID(particleFrameNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto sliderTheme = host->GetTheme<SliderTheme>(true);
+    CHECK_NULL_VOID(sliderTheme);
+    
+    auto selectedRect = sliderContentModifier_->GetSelectedTrackRect();
+    auto blockColor = paintProperty->GetBlockColor().value_or(sliderTheme->GetBlockColor());
+    auto particleOptions = CreateParticleOptions(selectedRect, blockColor);
+    
+    auto context = particleFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateParticleOptionArray(particleOptions);
+}
+
+void SliderPattern::StopParticleEffect()
+{
+    CHECK_NULL_VOID(particleFrameNode_);
+    auto context = particleFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    std::list<NG::ParticleOption> emptyOptions;
+    context->UpdateParticleOptionArray(emptyOptions);
+}
 
 RefPtr<AccessibilityProperty> SliderPattern::CreateAccessibilityProperty()
 {
@@ -2417,6 +2706,7 @@ void SliderPattern::SetPrefix(const RefPtr<NG::UINode>& prefix, const NG::Slider
         host->AddChild(prefixNodeStack_, 1);
         prefixNodeStack_->AddChild(prefixFrameNode);
         prefixNodeStack_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, PREFIX_SUFFIX_STACK_ZINDEX, prefixNodeStack_);
     }
     prefix->SetActive(false);
     prefixAccessibilityoptions_ = options;
@@ -2438,6 +2728,7 @@ void SliderPattern::SetSuffix(const RefPtr<NG::UINode>& suffix, const NG::Slider
         host->AddChild(suffixNodeStack_, 1);
         suffixNodeStack_->AddChild(suffixFrameNode);
         suffixNodeStack_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, PREFIX_SUFFIX_STACK_ZINDEX, suffixNodeStack_);
     }
     suffix->SetActive(false);
     suffixAccessibilityoptions_ = options;
@@ -2986,5 +3277,993 @@ bool SliderPattern::ReportInjectionResult(bool isSuccess, const std::string& rea
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "SliderResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
     return true;
+}
+
+bool SliderPattern::HasSystemMaterial() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto material = renderContext->GetSystemMaterial();
+    return material != nullptr;
+}
+
+bool SliderPattern::IsHighGradeMaterial() const
+{
+    return SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE;
+}
+
+bool SliderPattern::IsMiddleGradeMaterial() const
+{
+    return SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::GENTLE;
+}
+
+void SliderPattern::StartDeformAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    if (!dragFrameNode_ || !dragFrameNode_->IsOnMainTree()) {
+        return;
+    }
+    
+    auto frameRC = dragFrameNode_->GetRenderContext();
+    auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    
+    auto direction = GetDirection();
+    float scaleX = (direction == Axis::VERTICAL) ? DRAG_DEFORM_SCALE_Y : DRAG_DEFORM_SCALE_X;
+    float scaleY = (direction == Axis::VERTICAL) ? DRAG_DEFORM_SCALE_X : DRAG_DEFORM_SCALE_Y;
+    
+    AnimationOption option;
+    option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
+    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(
+        SPRING_VELOCITY, SPRING_MASS, SPRING_STIFFNESS, SPRING_DAMPING);
+    option.SetCurve(springCurve);
+    
+    AnimationUtils::Animate(option, [frameRC, pointRC, blurRC, scaleX, scaleY]() {
+        if (frameRC) {
+            frameRC->UpdateTransformScale({ scaleX, scaleY });
+        }
+        if (pointRC) {
+            pointRC->UpdateTransformScale({ scaleX, scaleY });
+        }
+        if (blurRC) {
+            blurRC->UpdateTransformScale({ scaleX, scaleY });
+        }
+    }, nullptr, nullptr, host->GetContextRefPtr());
+    
+    isDeformStarted_ = true;
+    ScheduleDeformRestore();
+}
+
+void SliderPattern::RestoreDeformAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    if (!dragFrameNode_ || !dragFrameNode_->IsOnMainTree()) {
+        return;
+    }
+    
+    auto frameRC = dragFrameNode_->GetRenderContext();
+    auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    
+    AnimationOption option;
+    option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
+    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(
+        SPRING_VELOCITY, SPRING_MASS, SPRING_STIFFNESS, SPRING_DAMPING);
+    option.SetCurve(springCurve);
+    
+    AnimationUtils::Animate(option, [frameRC, pointRC, blurRC]() {
+        if (frameRC) {
+            frameRC->UpdateTransformScale({ 1.0f, 1.0f });
+        }
+        if (pointRC) {
+            pointRC->UpdateTransformScale({ 1.0f, 1.0f });
+        }
+        if (blurRC) {
+            blurRC->UpdateTransformScale({ 1.0f, 1.0f });
+        }
+    }, nullptr, nullptr, host->GetContextRefPtr());
+}
+
+void SliderPattern::ScheduleDeformRestore()
+{
+    deformRestoreTask_.Cancel();
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    
+    deformRestoreTask_.Reset([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->isDeformStarted_) {
+            pattern->RestoreDeformAnimation();
+            pattern->isDeformStarted_ = false;
+        }
+    });
+    
+    taskExecutor->PostDelayedTask(deformRestoreTask_, TaskExecutor::TaskType::UI,
+        DRAG_DEFORM_RESTORE_DELAY_MS, "SliderDeformRestore");
+}
+
+float SliderPattern::GetBlockRadius() const
+{
+    return std::min(blockSize_.Width(), blockSize_.Height()) * HALF;
+}
+
+float SliderPattern::GetDragFrameBaseScale() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 2.0f);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(sliderLayoutProperty, 2.0f);
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    return sliderMode == SliderModel::SliderMode::INSET ? 3.0f : 2.0f;
+}
+
+void SliderPattern::CreateDragFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    if (!dragFrameNode_) {
+        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        dragFrameNode_ = FrameNode::CreateFrameNode(
+            V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, DRAG_FRAME_NODE_ZINDEX, dragFrameNode_);
+    }
+    
+    UpdateDragFrameNode();
+}
+
+void SliderPattern::UpdateDragFrameNode()
+{
+    CHECK_NULL_VOID(dragFrameNode_);
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    auto renderContext = dragFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = host->GetTheme<SliderTheme>(true);
+    CHECK_NULL_VOID(theme);
+    
+    auto blockRadius = GetBlockRadius();
+    auto blockDiameter = blockRadius * NUMBER_TWO;
+    auto frameSize = blockDiameter * GetDragFrameBaseScale();
+    
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
+    renderContext->UpdateBorderRadius(borderRadius);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    
+    dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+    
+    auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
+    ViewAbstract::SetLightPosition(AceType::RawPtr(dragFrameNode_),
+        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX),
+        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX),
+        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
+    ViewAbstract::SetLightColor(AceType::RawPtr(dragFrameNode_), blockColor);
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragFrameNode_), 0.5f);
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragFrameNode_), 2u);
+}
+
+void SliderPattern::CreateDragPointNode()
+{
+    if (dragPointNode_) {
+        return;
+    }
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = host->GetTheme<SliderTheme>(true);
+    CHECK_NULL_VOID(theme);
+    
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    dragPointNode_ = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, DRAG_POINT_NODE_ZINDEX, dragPointNode_);
+    
+    auto renderContext = dragPointNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    
+    auto blockRadius = GetBlockRadius();
+    
+    dragPointNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(blockRadius * NUMBER_TWO), CalcLength(blockRadius * NUMBER_TWO)));
+    
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(blockRadius, DimensionUnit::PX));
+    renderContext->UpdateBorderRadius(borderRadius);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    
+    auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
+    ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
+        CalcDimension(blockRadius, DimensionUnit::PX), CalcDimension(blockRadius, DimensionUnit::PX),
+        CalcDimension(blockRadius, DimensionUnit::PX));
+    ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), blockColor);
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 6.0f);
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragPointNode_), 2u);
+}
+
+void SliderPattern::CreateBlurCoverNode()
+{
+    if (blurCoverNode_) {
+        return;
+    }
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = host->GetTheme<SliderTheme>(true);
+    CHECK_NULL_VOID(theme);
+    
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    blurCoverNode_ = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, BLUR_COVER_NODE_ZINDEX, blurCoverNode_);
+    
+    auto renderContext = blurCoverNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    
+    auto blockRadius = GetBlockRadius();
+    auto blockDiameter = blockRadius * NUMBER_TWO;
+    auto frameSize = blockDiameter * GetDragFrameBaseScale();
+    
+    blurCoverNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+    
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
+    renderContext->UpdateBorderRadius(borderRadius);
+    
+    auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
+    ViewAbstract::SetLightPosition(AceType::RawPtr(blurCoverNode_),
+        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX),
+        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX),
+        CalcDimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
+    ViewAbstract::SetLightColor(AceType::RawPtr(blurCoverNode_), blockColor);
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(blurCoverNode_), 1.5f);
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(blurCoverNode_), 2u);
+}
+
+void SliderPattern::CreateSelectedTrackFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    if (!selectedTrackFrameNode_) {
+        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        selectedTrackFrameNode_ = FrameNode::CreateFrameNode(
+            V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, 1, selectedTrackFrameNode_);
+    }
+    
+    UpdateSelectedTrackFrameNode();
+}
+
+void SliderPattern::CreateParticleFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(sliderContentModifier_);
+    
+    if (!particleFrameNode_) {
+        auto particleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        particleFrameNode_ = FrameNode::CreateFrameNode(
+            V2::PARTICLE_ETS_TAG, particleNodeId, AceType::MakeRefPtr<ParticlePattern>(1));
+        
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, PARTICLE_NODE_ZINDEX, particleFrameNode_);
+    }
+    
+    auto trackRect = sliderContentModifier_->GetTrackRect();
+    float trackWidth = trackRect.GetWidth();
+    float trackHeight = trackRect.GetHeight();
+    float trackX = trackRect.GetLeft();
+    float trackY = trackRect.GetTop();
+    
+    particleFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(trackWidth), CalcLength(trackHeight)));
+    
+    auto particleRC = particleFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(particleRC);
+    particleRC->UpdatePosition(OffsetT<Dimension>(
+        Dimension(trackX, DimensionUnit::PX),
+        Dimension(trackY, DimensionUnit::PX)));
+    
+    float trackBorderRadiusValue = sliderContentModifier_->GetTrackBorderRadius();
+    BorderRadiusProperty trackBorderRadius;
+    trackBorderRadius.SetRadius(Dimension(trackBorderRadiusValue, DimensionUnit::PX));
+    particleRC->UpdateBorderRadius(trackBorderRadius);
+    particleRC->SetClipToBounds(true);
+}
+
+void SliderPattern::UpdateSelectedTrackFrameNode()
+{
+    if (!selectedTrackFrameNode_ || !sliderContentModifier_) {
+        return;
+    }
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = host->GetTheme<SliderTheme>(true);
+    CHECK_NULL_VOID(theme);
+    
+    auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    
+    auto direction = GetDirection();
+    auto reverse = GetReverseValue(layoutProperty);
+    
+    auto rect = sliderContentModifier_->GetSelectedTrackRect();
+    float borderRadiusValue = sliderContentModifier_->GetSelectedBorderRadius();
+    
+    float width = rect.GetWidth();
+    float height = rect.GetHeight();
+    float x = rect.GetLeft();
+    float y = rect.GetTop();
+    
+    selectedTrackFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(width), CalcLength(height)));
+    
+    auto trackRC = selectedTrackFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(trackRC);
+    
+    trackRC->UpdatePosition(OffsetT<Dimension>(Dimension(x), Dimension(y)));
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(borderRadiusValue, DimensionUnit::PX));
+    trackRC->UpdateBorderRadius(borderRadius);
+    
+    auto blockRadius = GetBlockRadius();
+    auto blockDiameter = blockRadius * NUMBER_TWO;
+    auto frameSize = blockDiameter * GetDragFrameBaseScale();
+    
+    auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
+    
+    float lightPosX = 0.0f;
+    float lightPosY = 0.0f;
+    
+    if (direction == Axis::HORIZONTAL) {
+        if (!reverse) {
+            lightPosX = circleCenter_.GetX() - frameSize / NUMBER_TWO - x;
+        } else {
+            lightPosX = circleCenter_.GetX() + frameSize / NUMBER_TWO - x;
+        }
+        lightPosY = circleCenter_.GetY() - y;
+    } else {
+        lightPosX = circleCenter_.GetX() - x;
+        if (!reverse) {
+            lightPosY = circleCenter_.GetY() - frameSize / NUMBER_TWO - y;
+        } else {
+            lightPosY = circleCenter_.GetY() + frameSize / NUMBER_TWO - y;
+        }
+    }
+    
+    ViewAbstract::SetLightPosition(AceType::RawPtr(selectedTrackFrameNode_),
+        CalcDimension(lightPosX, DimensionUnit::PX),
+        CalcDimension(lightPosY, DimensionUnit::PX),
+        CalcDimension(frameSize, DimensionUnit::PX));
+    ViewAbstract::SetLightColor(AceType::RawPtr(selectedTrackFrameNode_), blockColor);
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(selectedTrackFrameNode_), 1.0f);
+    ViewAbstract::SetLightIlluminated(AceType::RawPtr(selectedTrackFrameNode_), 3u);
+    ViewAbstract::SetIlluminatedBorderWidth(AceType::RawPtr(selectedTrackFrameNode_), Dimension(1, DimensionUnit::PX));
+    
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void SliderPattern::UpdateParticleFrameNode()
+{
+    if (!particleFrameNode_ || !sliderContentModifier_) {
+        return;
+    }
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    auto particleRC = particleFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(particleRC);
+    
+    if (!IsHighGradeMaterial()) {
+        std::list<NG::ParticleOption> emptyOptions;
+        particleRC->UpdateParticleOptionArray(emptyOptions);
+        return;
+    }
+    
+    auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = host->GetTheme<SliderTheme>(true);
+    CHECK_NULL_VOID(theme);
+    
+    auto selectedRect = sliderContentModifier_->GetSelectedTrackRect();
+    auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
+    auto particleOptions = CreateParticleOptions(selectedRect, blockColor);
+    
+    particleRC->UpdateParticleOptionArray(particleOptions);
+}
+
+void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    auto blockDiameter = blockRadius * NUMBER_TWO;
+    auto frameSize = blockDiameter * GetDragFrameBaseScale();
+    
+    float frameNodeX = centerX - frameSize / NUMBER_TWO;
+    float frameNodeY = centerY - frameSize / NUMBER_TWO;
+    
+    if (dragFrameNode_) {
+        dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+        auto frameRC = dragFrameNode_->GetRenderContext();
+        if (frameRC) {
+            frameRC->UpdatePosition(OffsetT<Dimension>(
+                Dimension(frameNodeX), Dimension(frameNodeY)));
+        }
+    }
+    
+    if (blurCoverNode_) {
+        blurCoverNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
+        auto blurRC = blurCoverNode_->GetRenderContext();
+        if (blurRC) {
+            blurRC->UpdatePosition(OffsetT<Dimension>(
+                Dimension(frameNodeX), Dimension(frameNodeY)));
+        }
+    }
+    
+    if (dragPointNode_) {
+        float pointNodeX = centerX - blockRadius;
+        float pointNodeY = centerY - blockRadius;
+        auto pointRC = dragPointNode_->GetRenderContext();
+        if (pointRC) {
+            pointRC->UpdatePosition(OffsetT<Dimension>(
+                Dimension(pointNodeX), Dimension(pointNodeY)));
+        }
+    }
+    
+    UpdateSelectedTrackFrameNode();
+    UpdateParticleFrameNode();
+    
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void SliderPattern::RegisterMaterialNodePositionCallback()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    
+    sliderContentModifier_->SetMaterialNodePositionCallback(
+        [weak = WeakClaim(this)](float centerX, float centerY, float blockRadius) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateMaterialNodePosition(centerX, centerY, blockRadius);
+        });
+}
+
+void SliderPattern::ShowMaterialNode()
+{
+    if (!HasSystemMaterial()) {
+        return;
+    }
+    if (!IsHighGradeMaterial() && !IsMiddleGradeMaterial()) {
+        return;
+    }
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    CreateDragPointNode();
+    CreateBlurCoverNode();
+    
+    auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    
+    if (dragPointNode_) {
+        auto blockRadius = GetBlockRadius();
+        auto pointRCNonNull = dragPointNode_->GetRenderContext();
+        if (pointRCNonNull) {
+            float pointNodeX = circleCenter_.GetX() - blockRadius;
+            float pointNodeY = circleCenter_.GetY() - blockRadius;
+            pointRCNonNull->UpdatePosition(OffsetT<Dimension>(
+                Dimension(pointNodeX), Dimension(pointNodeY)));
+        }
+        host->AddChild(dragPointNode_);
+    }
+    if (blurCoverNode_) {
+        host->AddChild(blurCoverNode_);
+    }
+    
+    AnimationUtils::ExecuteWithoutAnimation(
+        [pointRC, blurRC]() {
+            if (pointRC) { pointRC->UpdateOpacity(0.0); }
+            if (blurRC) {
+                blurRC->UpdateOpacity(0.0);
+                blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+            }
+        },
+        host->GetContextRefPtr());
+    
+    AnimationOption option = CreateDragAnimationOption();
+    AnimationUtils::Animate(option,
+        [pointRC, blurRC]() {
+            if (pointRC) { pointRC->UpdateOpacity(1.0); }
+            if (blurRC) {
+                blurRC->UpdateOpacity(1.0);
+                blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
+            }
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
+}
+
+void SliderPattern::HideMaterialNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    if (!IsHighGradeMaterial() && !IsMiddleGradeMaterial()) {
+        auto sliderModifier = sliderContentModifier_;
+        AnimationUtils::Animate(
+            CreateLowGradeSpringOption(),
+            [sliderModifier]() {
+                if (sliderModifier) {
+                    sliderModifier->SetBlockScale(1.0f);
+                }
+            },
+            nullptr, nullptr, host->GetContextRefPtr());
+        return;
+    }
+
+    auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
+    auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
+    
+    AnimationUtils::ExecuteWithoutAnimation(
+        [pointRC, blurRC, this]() { ResetMaterialNodeAppearance(pointRC, blurRC); },
+        host->GetContextRefPtr());
+    
+    AnimationOption option = CreateDragAnimationOption();
+    AnimationUtils::Animate(option,
+        [pointRC, blurRC, this]() {
+            AnimateHighGradeHide(pointRC, blurRC);
+        },
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (!pattern->mousePressedFlag_) {
+                pattern->HideMaterialNodes();
+            }
+        },
+        nullptr, host->GetContextRefPtr());
+}
+
+void SliderPattern::HideMaterialNodes()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    if (IsHighGradeMaterial() && selectedTrackFrameNode_) {
+        host->RemoveChild(selectedTrackFrameNode_);
+    }
+    if (IsHighGradeMaterial() && particleFrameNode_) {
+        host->RemoveChild(particleFrameNode_);
+    }
+    if (dragFrameNode_) {
+        host->RemoveChild(dragFrameNode_);
+    }
+    if (dragPointNode_) {
+        host->RemoveChild(dragPointNode_);
+    }
+    if (blurCoverNode_) {
+        host->RemoveChild(blurCoverNode_);
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
+}
+
+void SliderPattern::ResetMaterialNodeAppearance(
+    const RefPtr<RenderContext>& pointRC,
+    const RefPtr<RenderContext>& blurRC)
+{
+    if (isFrameNodeVisible_ && dragFrameNode_) {
+        auto frameRC = dragFrameNode_->GetRenderContext();
+        if (frameRC) {
+            frameRC->UpdateOpacity(1.0);
+            frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
+        }
+    }
+    if (pointRC) {
+        pointRC->UpdateOpacity(1.0);
+    }
+    if (blurRC) {
+        blurRC->UpdateOpacity(1.0);
+        blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
+    }
+}
+
+void SliderPattern::AnimateHighGradeHide(
+    const RefPtr<RenderContext>& pointRC,
+    const RefPtr<RenderContext>& blurRC)
+{
+    if (isFrameNodeVisible_ && dragFrameNode_) {
+        auto frameRC = dragFrameNode_->GetRenderContext();
+        if (frameRC) {
+            frameRC->UpdateOpacity(0.0);
+            frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+        }
+    }
+    if (pointRC) {
+        pointRC->UpdateOpacity(0.0);
+    }
+    if (blurRC) {
+        blurRC->UpdateOpacity(0.0);
+        blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+    }
+    
+    if (selectedTrackFrameNode_) {
+        auto trackRC = selectedTrackFrameNode_->GetRenderContext();
+        if (trackRC) {
+            trackRC->UpdateOpacity(0.0);
+        }
+    }
+    
+    if (particleFrameNode_) {
+        auto particleRC = particleFrameNode_->GetRenderContext();
+        if (particleRC) {
+            particleRC->UpdateOpacity(0.0);
+        }
+    }
+    
+    if (sliderContentModifier_) {
+        sliderContentModifier_->SetBlockAlpha(1.0f);
+    }
+}
+
+void SliderPattern::ApplyDragFrameNodeSystemMaterial()
+{
+    CHECK_NULL_VOID(dragFrameNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    
+    // Material effect temporarily disabled due to dependency issues
+    static const FrostedGlassParam dragFrameMaterialParam {
+        .blurParams = { 1.0f, 50.0f },
+        .weightsEmboss = { 0.8f, 0.8f },
+        .weightsEdl = { 1.0f, 0.7f },
+        .bgRates = { 0.1789f, -0.6972f },
+        .bgKBS = { 1.4384f, 0.0718f, 1.2f },
+        .bgPos = { 0.3f, 0.5f, 1.0f },
+        .bgNeg = { 0.5f, 0.5f, 1.0f },
+        .refractParams = { -0.008f, 0.15f, 0.22f },
+        .edLightParams = { 0.62f, 0.92f },
+        .edLightAngles = { 75.0f, 120.0f },
+        .edLightDir = { 0.0f, -1.0f },
+        .edLightRates = {},
+        .edLightKBS = { 1.0f, 0.1568f, 1.2f },
+        .edLightPos = { 1.0f, 1.5f, 2.0f },
+        .edLightNeg = { 1.7f, 3.0f, 1.0f },
+        .darkModeBlurParams = { 5.0f, 20.0f },
+        .darkModeWeightsEmboss = { 0.8f, 0.8f },
+        .darkModeBgRates = { 0.0023f, -0.0176f },
+        .darkModeBgKBS = { 0.8414f, 0.0765f, 1.2f },
+        .darkModeBgPos = { 0.3f, 1.0f, 1.0f },
+        .darkModeBgNeg = { 1.2f, 2.5f, 1.0f },
+        .darkModeEdLightAngles = { 75.0f, 120.0f },
+        .darkModeEdLightKBS = { 1.0f, 0.2268f, 1.2f },
+    };
+    
+    float dipScale = static_cast<float>(pipeline->GetDipScale());
+    auto renderContext = dragFrameNode_->GetRenderContext();
+    if (renderContext) {
+        auto filter = renderContext->CreateFrostedGlassFilter(dragFrameMaterialParam, dipScale);
+        if (filter) {
+            renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
+        }
+    }
+    ResetHostMaterialEffects();
+}
+
+void SliderPattern::ResetHostMaterialEffects()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    CHECK_NULL_VOID(material);
+    
+    MaterialUtils::CallSetMaterial(AceType::RawPtr(host), nullptr);
+    renderContext->UpdateUiMaterialFilter(nullptr);
+    
+    auto preBackgroundColor = renderContext->GetPreBackgroundColor();
+    if (preBackgroundColor.has_value()) {
+        renderContext->UpdateBackgroundColor(preBackgroundColor.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+        renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
+    }
+    
+    auto preBorderWidth = renderContext->GetPreBorderWidth();
+    if (preBorderWidth.has_value()) {
+        auto layoutProperty = host->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateBorderWidth(preBorderWidth.value());
+        }
+        renderContext->UpdateBorderWidth(preBorderWidth.value());
+    } else {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(Dimension(0));
+        borderWidth.leftDimen = Dimension(0);
+        borderWidth.rightDimen = Dimension(0);
+        borderWidth.topDimen = Dimension(0);
+        borderWidth.bottomDimen = Dimension(0);
+        auto layoutProperty = host->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateBorderWidth(borderWidth);
+        }
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+}
+
+AnimationOption SliderPattern::CreateDragAnimationOption() const
+{
+    AnimationOption option;
+    option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
+    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(
+        SPRING_VELOCITY,
+        SPRING_MASS,
+        SPRING_STIFFNESS,
+        SPRING_DAMPING);
+    option.SetCurve(springCurve);
+    return option;
+}
+
+AnimationOption SliderPattern::CreateLowGradeSpringOption() const
+{
+    AnimationOption option;
+    option.SetDuration(DRAG_FRAME_ANIMATION_DURATION);
+    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(
+        SPRING_VELOCITY,
+        LOW_GRADE_SPRING_MASS,
+        LOW_GRADE_SPRING_STIFFNESS,
+        LOW_GRADE_SPRING_DAMPING);
+    option.SetCurve(springCurve);
+    return option;
+}
+
+void SliderPattern::StartLongPressTimer()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    auto blockType = sliderPaintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT);
+    if (blockType != SliderModelNG::BlockStyleType::DEFAULT) {
+        return;
+    }
+    longPressTask_.Reset([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLongPress();
+    });
+    
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        longPressTask_, TaskExecutor::TaskType::UI, LONG_PRESS_DELAY_MS, STR_SLIDER_LONG_PRESS);
+}
+
+void SliderPattern::HandleLongPress()
+{
+    if (!HasSystemMaterial()) { return; }
+    
+    if (IsHighGradeMaterial()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetAlphaOffscreen(false);
+        HandleHighGradeLongPress();
+    } else if (IsMiddleGradeMaterial()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetAlphaOffscreen(false);
+        HandleMiddleGradeLongPress();
+    } else {
+        HandleLowGradeLongPress();
+    }
+}
+
+void SliderPattern::HandleHighGradeLongPress()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    CreateDragFrameNode();
+    CreateSelectedTrackFrameNode();
+    CreateParticleFrameNode();
+    host->AddChild(dragFrameNode_);
+    host->AddChild(selectedTrackFrameNode_);
+    host->AddChild(particleFrameNode_);
+    ApplyDragFrameNodeSystemMaterial();
+    
+    auto blockRadius = GetBlockRadius();
+    UpdateMaterialNodePosition(circleCenter_.GetX(), circleCenter_.GetY(), blockRadius);
+    
+    auto frameRC = dragFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(frameRC);
+    
+    auto trackRC = selectedTrackFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(trackRC);
+    
+    auto particleRC = particleFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(particleRC);
+    
+    auto sliderModifier = sliderContentModifier_;
+    
+    AnimationUtils::ExecuteWithoutAnimation(
+        [frameRC, trackRC, particleRC]() {
+            if (frameRC) {
+                frameRC->UpdateOpacity(0.0);
+                frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+            }
+            if (trackRC) {
+                trackRC->UpdateOpacity(0.0);
+            }
+            if (particleRC) {
+                particleRC->UpdateOpacity(0.0);
+            }
+        },
+        host->GetContextRefPtr());
+    
+    AnimationOption option = CreateDragAnimationOption();
+    AnimationUtils::Animate(option,
+        [frameRC, trackRC, particleRC, sliderModifier]() {
+            if (frameRC) {
+                frameRC->UpdateOpacity(1.0);
+                frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
+            }
+            if (trackRC) {
+                trackRC->UpdateOpacity(1.0);
+            }
+            if (particleRC) {
+                particleRC->UpdateOpacity(1.0);
+            }
+            if (sliderModifier) {
+                sliderModifier->SetBlockAlpha(0.0f);
+            }
+        },
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->isFrameNodeVisible_ = true;
+                pattern->StartParticleEffect();
+            }
+        },
+        nullptr, host->GetContextRefPtr());
+}
+
+void SliderPattern::HandleMiddleGradeLongPress()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    CreateDragFrameNode();
+    host->AddChild(dragFrameNode_);
+    ApplyDragFrameNodeSystemMaterial();
+    
+    auto blockRadius = GetBlockRadius();
+    UpdateMaterialNodePosition(circleCenter_.GetX(), circleCenter_.GetY(), blockRadius);
+    
+    auto frameRC = dragFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(frameRC);
+    
+    auto sliderModifier = sliderContentModifier_;
+    
+    AnimationUtils::ExecuteWithoutAnimation(
+        [frameRC]() {
+            frameRC->UpdateOpacity(0.0);
+            frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
+        },
+        host->GetContextRefPtr());
+    
+    AnimationOption option = CreateDragAnimationOption();
+    AnimationUtils::Animate(option,
+        [frameRC, sliderModifier]() {
+            frameRC->UpdateOpacity(1.0);
+            frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_END_SCALE, DRAG_FRAME_PRESS_END_SCALE });
+            if (sliderModifier) {
+                sliderModifier->SetBlockAlpha(0.0f);
+            }
+        },
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->isFrameNodeVisible_ = true;
+            }
+        },
+        nullptr, host->GetContextRefPtr());
+}
+
+void SliderPattern::HandleLowGradeLongPress()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    AnimationOption option = CreateLowGradeSpringOption();
+    AnimationUtils::Animate(option,
+        [this]() {
+            if (sliderContentModifier_) {
+                sliderContentModifier_->SetBlockScale(LOW_GRADE_SHRINK_SCALE);
+            }
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
+    
+    option.SetDuration(DRAG_FRAME_ANIMATION_DURATION * LOW_GRADE_DURATION_MULTIPLIER);
+    option.SetDelay(LOW_GRADE_ANIMATION_DELAY_MS);
+    AnimationUtils::Animate(option,
+        [this]() {
+            if (sliderContentModifier_) {
+                sliderContentModifier_->SetBlockScale(LOW_GRADE_EXPAND_SCALE);
+            }
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
+}
+
+bool SliderPattern::IsContentModifierNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return node == contentModifierNode_;
+}
+
+bool SliderPattern::IsMaterialNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return node == dragFrameNode_ || node == dragPointNode_ || node == blurCoverNode_ ||
+           node == selectedTrackFrameNode_ || node == particleFrameNode_;
+}
+
+bool SliderPattern::IsPrefixOrSuffixNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return (node == prefixNodeStack_ && HasPrefix()) || (node == suffixNodeStack_ && HasSuffix());
+}
+
+bool SliderPattern::IsImageBlockNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return node == imageFrameNode_;
 }
 } // namespace OHOS::Ace::NG
