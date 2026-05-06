@@ -15,10 +15,15 @@
 
 #include "bridge/cj_frontend/cppview/native_view.h"
 
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_layout_inspector_ffi.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
+#include "core/common/container_scope.h"
+#include "core/common/layout_inspector.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_partial_update_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 
 namespace OHOS::Ace::Framework {
@@ -28,11 +33,51 @@ std::string GetProcessViewId(int64_t id)
     return ViewStackModel::GetInstance()->ProcessViewId(std::to_string(id));
 }
 
+static void HandleProfilerNameMapping(NativeView* self)
+{
+    if (self == nullptr) {
+        return;
+    }
+    if (!OHOS::Ace::LayoutInspector::GetStateProfilerStatus()) {
+        return;
+    }
+    auto node = self->GetViewNode();
+    if (!node) {
+        LOGW("NativeView:HandleProfilerNameMapping node null skip flush");
+        return;
+    }
+    auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+    if (!uiNode) {
+        LOGW("NativeView:HandleProfilerNameMapping uiNode null skip flush");
+        return;
+    }
+    int32_t viewId = uiNode->GetId();
+    std::string tag;
+    auto customNode = AceType::DynamicCast<NG::CustomNode>(uiNode);
+    if (customNode && !customNode->GetJSViewName().empty()) {
+        tag = customNode->GetJSViewName();
+    } else {
+        tag = uiNode->GetTag();
+        if (tag.empty()) {
+            tag = "NativeView";
+        }
+    }
+    const auto& profilerViewName = self->GetCjProfilerViewName();
+    if (!profilerViewName.empty()) {
+        CjProfilerRegisterViewElementName(viewId, profilerViewName.c_str());
+    }
+    LOGI("NativeView:HandleProfilerNameMapping profiler keep name mapping viewId=%{public}d tag=%{public}s",
+        viewId, tag.c_str());
+}
+
 NativeView::NativeView(sptr<RemoteView> cjView) : cjView_(std::move(cjView))
 {
     LOGD("Native View constructed: %{public}" PRId64 ".", GetID());
     useNewPipeline_ = Container::IsCurrentUseNewPipeline();
     instanceId_ = Container::CurrentId();
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    EnsureCangjieProfilerStatusHookedForHybridAndEmbedded();
+#endif
 }
 
 NativeView::~NativeView()
@@ -92,6 +137,7 @@ RefPtr<AceType> NativeView::CreateUI()
                 ViewPartialUpdateModel::GetInstance()->FlushUpdateTask(updateTask);
             }
             self->pendingUpdateTasks_.clear();
+            HandleProfilerNameMapping(self);
         },
         .removeFunc = [weakThis]() {
             auto self = weakThis.promote();
@@ -146,9 +192,25 @@ RefPtr<AceType> NativeView::CreateUI()
                 self->cjView_->AboutToReuse(*val);
             }
     };
+    partialUpdateCallbacks.jsViewName = cjProfilerViewName_;
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(partialUpdateCallbacks));
 
     node_ = node;
+
+    auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+    if (uiNode) {
+        profilerElementId_ = uiNode->GetId();
+        if (!cjProfilerViewName_.empty()) {
+            CjProfilerRegisterViewElementName(profilerElementId_, cjProfilerViewName_.c_str());
+        }
+    }
+
+    {
+        auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+        if (uiNode) {
+            CjProfilerRegisterViewToElementId(GetID(), uiNode->GetId());
+        }
+    }
 
     return node;
 }
@@ -158,6 +220,9 @@ RefPtr<AceType> NativeView::InitialUIRender()
     needsUpdate_ = false;
     {
         cjView_->OnAboutToRender();
+    }
+    if (!cjProfilerViewName_.empty()) {
+        CjProfilerRegisterViewElementName(profilerElementId_, cjProfilerViewName_.c_str());
     }
     {
         cjView_->Render();
@@ -220,6 +285,16 @@ void NativeView::Destroy()
         LOGE("NativeView::Destroy error, nativeId: %{public}" PRId64 " cj view not exist.", GetID());
         return;
     }
+    auto holder = node_.Upgrade();
+    if (holder) {
+        auto uiNode = AceType::DynamicCast<NG::UINode>(holder);
+        if (uiNode) {
+            int32_t elmtId = uiNode->GetId();
+            LOGI("NativeView:Destroy unregister profiler elmtId=%{public}d", elmtId);
+            CjProfilerUnregisterViewElementName(elmtId);
+        }
+    }
+    CjProfilerUnregisterViewToElementId(GetID());
     LOGD("NativeView::Destroy start, nativeId: %{public}" PRId64 ", cjId: %{public}" PRId64, GetID(), cjView_->GetID());
     {
         cjView_->OnDisappear();

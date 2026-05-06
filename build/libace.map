@@ -583,6 +583,7 @@
       "OHOS::Ace::GestureRecognizer::DelFromReferee(unsigned int, OHOS::Ace::RefPtr<OHOS::Ace::GestureRecognizer> const&)";
       "OHOS::Ace::GestureRecognizer::HandleEvent(OHOS::Ace::AxisEvent const&)";
       "OHOS::Ace::GestureRecognizer::HandleEvent(OHOS::Ace::TouchEvent const&)";
+      "OHOS::Ace::GetCurrentTimestampMicroSecond()";
       "OHOS::Ace::GetMicroTickCount()";
       "OHOS::Ace::GetSysTimestamp()";
       "OHOS::Ace::GetTimeOfNow(int)";
@@ -681,6 +682,12 @@
       "OHOS::Ace::JsonValue::Replace(char const*, int)";
       "OHOS::Ace::KeyEvent::ConvertCodeToString() const";
       "OHOS::Ace::KeyToString(int)";
+      "OHOS::Ace::LayoutInspector::AppendJsStateProfilerStatusCallback(std::__h::function<void (bool)>&&)";
+      "OHOS::Ace::LayoutInspector::GetStateProfilerStatus()";
+      "OHOS::Ace::LayoutInspector::HasJsStateProfilerStatusCallback()";
+      "OHOS::Ace::LayoutInspector::SendMessage(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::LayoutInspector::SetJsStateProfilerStatusCallback(std::__h::function<void (bool)>&&)";
+      "OHOS::Ace::LayoutInspector::SetStateProfilerStatus(bool)";
       "OHOS::Ace::LayoutInspector::SupportInspector()";
       "OHOS::Ace::LetterSpacingSpan::LetterSpacingSpan(OHOS::Ace::Dimension, int, int)";
       "OHOS::Ace::LifeCycleCheckable::OnDetectedObjDestroyInUse()";
