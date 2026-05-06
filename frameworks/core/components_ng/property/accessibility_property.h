@@ -65,6 +65,9 @@ struct AccessibilityActionOptions {
     int32_t scrollStep = 1;
 };
 
+constexpr size_t ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES = 128;
+constexpr size_t ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT = 16;
+
 struct AccessibilityCustomAction {
     std::string actionName;
     std::function<void()> customActionCallback;

@@ -1185,6 +1185,8 @@ typedef struct arkui_component_idlize_Callback_I32_Void arkui_component_idlize_C
 typedef struct Opt_arkui_component_idlize_Callback_I32_Void Opt_arkui_component_idlize_Callback_I32_Void;
 typedef struct Array_AcceptableFileType Array_AcceptableFileType;
 typedef struct Opt_Array_AcceptableFileType Opt_Array_AcceptableFileType;
+typedef struct Array_AccessibilityCustomAction Array_AccessibilityCustomAction;
+typedef struct Opt_Array_AccessibilityCustomAction Opt_Array_AccessibilityCustomAction;
 typedef struct Array_AISessionEvent Array_AISessionEvent;
 typedef struct Opt_Array_AISessionEvent Opt_Array_AISessionEvent;
 typedef struct Array_AlertDialogButtonOptions Array_AlertDialogButtonOptions;
@@ -2923,6 +2925,8 @@ typedef struct Ark_WorkerOptions Ark_WorkerOptions;
 typedef struct Opt_WorkerOptions Opt_WorkerOptions;
 typedef struct Ark_XComponentParameters Ark_XComponentParameters;
 typedef struct Opt_XComponentParameters Opt_XComponentParameters;
+typedef struct Ark_AccessibilityCustomAction Ark_AccessibilityCustomAction;
+typedef struct Opt_AccessibilityCustomAction Opt_AccessibilityCustomAction;
 typedef struct Ark_AccessibilitySpanOptions Ark_AccessibilitySpanOptions;
 typedef struct Opt_AccessibilitySpanOptions Opt_AccessibilitySpanOptions;
 typedef struct Ark_ActionSheetButtonOptions Ark_ActionSheetButtonOptions;
@@ -10153,6 +10157,15 @@ typedef struct Opt_Array_AcceptableFileType {
     Ark_Tag tag;
     Array_AcceptableFileType value;
 } Opt_Array_AcceptableFileType;
+typedef struct Array_AccessibilityCustomAction {
+    /* kind: ContainerType */
+    Ark_AccessibilityCustomAction* array;
+    Ark_Int32 length;
+} Array_AccessibilityCustomAction;
+typedef struct Opt_Array_AccessibilityCustomAction {
+    Ark_Tag tag;
+    Array_AccessibilityCustomAction value;
+} Opt_Array_AccessibilityCustomAction;
 typedef struct Array_AISessionEvent {
     /* kind: ContainerType */
     Ark_AISessionEvent* array;
@@ -18975,6 +18988,15 @@ typedef struct Opt_XComponentParameters {
     Ark_Tag tag;
     Ark_XComponentParameters value;
 } Opt_XComponentParameters;
+typedef struct Ark_AccessibilityCustomAction {
+    /* kind: Interface */
+    Ark_ResourceStr name;
+    VoidCallback onAction;
+} Ark_AccessibilityCustomAction;
+typedef struct Opt_AccessibilityCustomAction {
+    Ark_Tag tag;
+    Ark_AccessibilityCustomAction value;
+} Opt_AccessibilityCustomAction;
 typedef struct Ark_AccessibilitySpanOptions {
     /* kind: Interface */
     Opt_ResourceStr accessibilityText;
@@ -24477,6 +24499,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                              const Opt_Union_String_Resource* value);
     void (*setAccessibilityActionOptions)(Ark_NativePointer node,
                                           const Opt_AccessibilityActionOptions* value);
+    void (*setAccessibilityCustomActions)(Ark_NativePointer node,
+                                          const Opt_Array_AccessibilityCustomAction* value);
     void (*setSmartGestureShortcut)(Ark_NativePointer node,
                                     const Ark_SmartGestureShortcutOptions* value);
     void (*setInspectorLabel)(Ark_NativePointer node,
