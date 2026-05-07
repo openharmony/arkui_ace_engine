@@ -731,6 +731,7 @@ private:
         const RefPtr<ListPattern>& pattern,
         const ListPredictLayoutParamV2& param,
         const ListMainSizeValues& listMainSizeValues,
+        int64_t deadline,
         bool show);
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);

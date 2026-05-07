@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -181,40 +182,16 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
             parent = parent->GetParent();
             continue;
         }
-        if (parent->GetTag() == V2::COMMON_VIEW_ETS_TAG || parent->GetTag() == V2::NODE_CONTAINER_ETS_TAG ||
-            parent->GetTag() == "BuilderProxyNode" || parent->GetTag() == V2::FLOW_ITEM_ETS_TAG) {
+        if (LazyLayoutUtils::IsAllowedIntermediateNode(parent)) {
             frameNode->SetNeedLazyLayout(true);
             parent = parent->GetParent();
             continue;
         }
-        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG && !IsVerticalContainer(parent)) {
-            LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
+        if (parent->GetTag() == V2::WATERFLOW_ETS_TAG || LazyLayoutUtils::IsVerticalScrollableParent(parent)) {
+            return;
         }
-        if (parent->GetTag() == V2::SCROLL_ETS_TAG) {
-            auto scrollLayoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
-            CHECK_NULL_VOID(scrollLayoutProperty);
-            auto scrollAxis = scrollLayoutProperty->GetAxisValue(Axis::VERTICAL);
-            if (scrollAxis != axis_) {
-                LOGF_ABORT("LazyGridLayout axis %{public}d must match Scroll axis %{public}d",
-                    static_cast<int32_t>(axis_), static_cast<int32_t>(scrollAxis));
-            }
-        }
-        return;
+        LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
     }
-}
-
-bool LazyGridLayoutPattern::IsVerticalContainer(const RefPtr<UINode>& node)
-{
-    CHECK_NULL_RETURN(node, false);
-    const std::string& nodeTag = node->GetTag();
-    if (nodeTag != V2::LIST_ETS_TAG && nodeTag != V2::SCROLL_ETS_TAG) {
-        return false;
-    }
-    auto frameNode = AceType::DynamicCast<FrameNode>(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    auto pattern = frameNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    return pattern->GetAxis() == Axis::VERTICAL;
 }
 
 void LazyGridLayoutPattern::DumpAdvanceInfo()

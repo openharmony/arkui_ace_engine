@@ -993,6 +993,7 @@ void WaterFlowLayoutSW::MeasureLazyChild(
                                 : info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]),
         .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
         .axis = Axis::VERTICAL,
+        .deadline = cacheDeadline_,
     };
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child));
