@@ -868,6 +868,7 @@ void PipelineContext::ReloadNodesResource()
                 bool forceDarkAllowed = frameNode->GetForceDarkAllowed();
                 ResourceParseUtils::SetNeedReload(forceDarkAllowed);
                 SetIsSystemColorChange(true);
+                frameNode->SetRerenderable(true);
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
                 SetIsSystemColorChange(originIsSystemColorChange);
                 ResourceParseUtils::SetNeedReload(false);
@@ -876,6 +877,7 @@ void PipelineContext::ReloadNodesResource()
             bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
             ResourceParseUtils::SetNeedReload(forceDarkAllowed);
             SetIsSystemColorChange(true);
+            needReloadNode->SetRerenderable(true);
             needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
             SetIsSystemColorChange(originIsSystemColorChange);
             ResourceParseUtils::SetNeedReload(false);
