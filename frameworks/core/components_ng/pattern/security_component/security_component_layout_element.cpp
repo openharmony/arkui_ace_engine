@@ -30,8 +30,6 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr double DEFAULT_SIZE_24 = 24;
-
 void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& iconWrap)
 {
@@ -58,8 +56,7 @@ void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
     auto iconNode = iconWrap_->GetHostNode();
     CHECK_NULL_VOID(iconNode);
 
-    width_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
-        theme->GetIconSize().ConvertToPx();
+    width_ = theme->GetIconSize().ConvertToPx();
     height_ = width_ * alpha_;
 
     UpdateUserSetSize(property);
