@@ -22,15 +22,14 @@
 #include <unordered_map>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/want/want_wrap.h"
 #include "base/utils/utils.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/overlay/content_cover_param.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/overlay_options.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
@@ -39,8 +38,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_ng/syntax/with_theme_node.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace {
 struct ModalUIExtensionCallbacks;
@@ -48,7 +45,11 @@ struct ModalUIExtensionConfig;
 struct ModalUIExtensionAllowedUpdateConfig;
 } // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
+class FrameNode;
+class UINode;
+class PipelineContext;
 struct CalendarSettingData;
+struct ContentCoverParam;
 
 enum class HideMenuType : int32_t {
     NORMAL = 0,
