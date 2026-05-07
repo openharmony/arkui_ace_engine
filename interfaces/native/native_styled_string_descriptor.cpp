@@ -74,8 +74,12 @@ int32_t OH_ArkUI_UnmarshallStyledStringDescriptor(
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(),
         ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
-    return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->unmarshallStyledStringDescriptor(
+    auto ret = OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->unmarshallStyledStringDescriptor(
         buffer, bufferSize, descriptor);
+    if (ret != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return static_cast<ArkUI_ErrorCode>(ret);
 }
 
 int32_t OH_ArkUI_MarshallStyledStringDescriptor(
@@ -83,8 +87,12 @@ int32_t OH_ArkUI_MarshallStyledStringDescriptor(
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(),
         ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
-    return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->marshallStyledStringDescriptor(
+    auto ret = OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->marshallStyledStringDescriptor(
         buffer, bufferSize, descriptor, resultSize);
+    if (ret != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return static_cast<ArkUI_ErrorCode>(ret);
 }
 
 const char* OH_ArkUI_ConvertToHtml(ArkUI_StyledString_Descriptor* descriptor)
