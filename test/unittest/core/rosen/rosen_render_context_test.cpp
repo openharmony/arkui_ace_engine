@@ -276,7 +276,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest014, TestSize.Level1)
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     std::optional<RenderContext::ContextParam> param = std::make_optional(RenderContext::ContextParam());
     bool isTextureExportNode = true;
-    std::shared_ptr<Rosen::RSUIContext> rsUIContext;
+    auto rsUIDirector = OHOS::Rosen::RSUIDirector::Create(nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
     std::shared_ptr<Rosen::RSNode> ret = rosenRenderContext->CreateHardwareSurface(
         param, isTextureExportNode, rsUIContext);
     EXPECT_TRUE(ret == nullptr);
