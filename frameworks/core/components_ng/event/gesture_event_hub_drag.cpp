@@ -1398,6 +1398,11 @@ void GestureEventHub::ShowMouseDragWindow(DragStartContext& ctx)
 void GestureEventHub::UpdateDragWindowVisibility(DragStartContext& ctx)
 {
     ShowSceneBoardTouchDragWindow(ctx);
+    // When default animation is disabled (e.g., FOLLOW_HAND_MORPH), transfer to framework immediately
+    if (ctx.preparedInfo.disableArkuiAnimation) {
+        TransferTouchDragWindowToFramework(ctx);
+        return;
+    }
     if (ctx.info.GetInputEventType() != InputEventType::MOUSE_BUTTON && ctx.needChangeFwkForLeaveWindow) {
         TransferTouchDragWindowToFramework(ctx);
         return;

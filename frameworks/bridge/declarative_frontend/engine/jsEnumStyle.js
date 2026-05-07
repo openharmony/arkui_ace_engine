@@ -4381,6 +4381,12 @@ let DragBehavior;
   DragBehavior[DragBehavior.MOVE = 1] = 'MOVE';
 })(DragBehavior || (DragBehavior = {}));
 
+let DragAnimationType;
+(function (DragAnimationType) {
+  DragAnimationType[DragAnimationType.DEFAULT = 0] = 'DEFAULT';
+  DragAnimationType[DragAnimationType.FOLLOW_HAND_MORPH = 1] = 'FOLLOW_HAND_MORPH';
+})(DragAnimationType || (DragAnimationType = {}));
+
 let PatternLockChallengeResult;
 (function (PatternLockChallengeResult) {
   PatternLockChallengeResult[PatternLockChallengeResult.CORRECT = 1] = 'CORRECT';
