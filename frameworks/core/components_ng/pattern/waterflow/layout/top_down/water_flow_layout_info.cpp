@@ -87,8 +87,7 @@ int32_t WaterFlowLayoutInfo::GetEndIndexByOffset(float offset) const
 float WaterFlowLayoutInfo::GetMaxMainHeight() const
 {
     if (!endPosArray_.empty()) {
-        const auto& margin = margins_.back();
-        return endPosArray_.back().first + (axis_ == Axis::VERTICAL ? margin.bottom : margin.right).value_or(0.0f);
+        return endPosArray_.back().first + BotMargin();
     }
     if (items_.empty()) {
         return 0.0f;
