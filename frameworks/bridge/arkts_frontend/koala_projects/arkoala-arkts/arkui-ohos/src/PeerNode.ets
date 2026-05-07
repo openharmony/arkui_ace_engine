@@ -271,7 +271,7 @@ export class PeerNode extends IncrementalNode {
 
     override dispose(): void {
         let parent = this.parent
-        if (parent != undefined && parent.isKind(PeerNodeType)) {
+        if (parent != undefined && (parent!.isKind(PeerNodeType) || parent!.isKind(BuilderRootNodeType))) {
             const node = parent as PeerNode
             if (!node.disposed) node.peer.removeChild(this.peer.ptr)
         }
