@@ -40,7 +40,7 @@ export class InteropAppStorageV2 {
     protected removeDynamicValue_: (value: string | undefined) => boolean = (value: string | undefined) => {
         throw new Error('not implement');
     };
-    protected getDynamicKeys_: () => Array<string> = () => {
+    protected getDynamicKeys_: () => Any = () => {
         throw new Error('not implement');
     };
 
@@ -75,7 +75,7 @@ export class InteropAppStorageV2 {
         const setRemoveValueFunc = (event: (value: string | undefined) => boolean): void => {
             this.removeDynamicValue_ = event;
         };
-        const setGetKeysFunc = (event: () => Array<string>): void => {
+        const setGetKeysFunc = (event: () => Any): void => {
             this.getDynamicKeys_ = event;
         };
 
@@ -141,9 +141,10 @@ export class InteropAppStorageV2 {
         AppStorageV2Impl.instance().keys().forEach((key: string) => {
             totalKeys.add(key);
         });
-        this.getDynamicKeys_().forEach((key: string) => {
-            totalKeys.add(key);
-        });
+        const dynamicKeys = ESValue.wrap(this.getDynamicKeys_());
+        for (const key of dynamicKeys) {
+            totalKeys.add(key.toString());
+        }
         return Array.from(totalKeys.keys());
     }
 }
