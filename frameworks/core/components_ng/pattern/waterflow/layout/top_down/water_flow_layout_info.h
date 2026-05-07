@@ -233,6 +233,16 @@ public:
         return endIndex_;
     }
 
+    inline float BotMargin() const
+    {
+        // InitSegments clears margins_ before the next layout pass reinitializes it.
+        // Height estimation can still query the cached end position in that window.
+        if (margins_.empty()) {
+            return 0.0f;
+        }
+        return (axis_ == Axis::VERTICAL ? margins_.back().bottom : margins_.back().right).value_or(0.0f);
+    }
+
 private:
     inline float TopMargin() const
     {
