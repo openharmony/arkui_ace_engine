@@ -396,11 +396,15 @@ void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWra
     }
 }
 
-bool FlexLayoutAlgorithm::IsMatchParentAlongAxis(bool isMainAxis, const RefPtr<LayoutWrapper>& child)
+std::pair<bool, bool> FlexLayoutAlgorithm::GetMatchParentFlagAlongMainAndCrossAxis(const RefPtr<LayoutWrapper>& child)
 {
-    CHECK_NULL_RETURN(child, false);
+    if (!child) {
+        return {false, false};
+    }
     auto childlayoutProperty = child->GetLayoutProperty();
-    CHECK_NULL_RETURN(childlayoutProperty, false);
+    if (!childlayoutProperty) {
+        return {false, false};
+    }
     auto childLayoutPolicy = childlayoutProperty->GetLayoutPolicyProperty();
     bool isCrossAxisMatch =
         IsHorizontal(direction_) ? childLayoutPolicy.has_value() && childLayoutPolicy.value().IsHeightMatch()
@@ -408,7 +412,7 @@ bool FlexLayoutAlgorithm::IsMatchParentAlongAxis(bool isMainAxis, const RefPtr<L
     bool isMainAxisMatch =
         IsHorizontal(direction_) ? childLayoutPolicy.has_value() && childLayoutPolicy.value().IsWidthMatch()
                                  : childLayoutPolicy.has_value() && childLayoutPolicy.value().IsHeightMatch();
-    return isMainAxis ? isMainAxisMatch : isCrossAxisMatch;
+    return {isMainAxisMatch, isCrossAxisMatch};
 }
 
 std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator FlexLayoutAlgorithm::FirstMeasureInWeightMode()
@@ -1197,6 +1201,9 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto host = layoutWrapper->GetHostNode();
     if (ShouldHandleMatchParentAlongSingleAxis(host)) {
+        childrenMatchParentAlongCrossAxisOnly_.clear();
+        childrenMatchParentAlongMainAxisOnly_.clear();
+        childrenMatchParentAlongBidirection_.clear();
         MeasureMatchParentChildren(layoutWrapper, realSize, layoutPolicy);
         SetFinalRealSize(layoutWrapper, realSize, layoutPolicy);
         layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
@@ -1208,11 +1215,22 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     ApplyPatternOperation(layoutWrapper, FlexOperatorType::UPDATE_MEASURE_RESULT, reinterpret_cast<uintptr_t>(this));
 }
 
-void FlexLayoutAlgorithm::HandleExpandAndNonCrossMatchChildren(const LayoutConstraintF& layoutConstraint,
-    IgnoreLayoutSafeAreaBundle& bundle, std::list<RefPtr<LayoutWrapper>>& childrenMatchParentAlongCrossAxis,
-    bool& shouldCorrectMainAixsSize)
+void FlexLayoutAlgorithm::UpdateConstraintOfIgnoreLayoutSafeAreaBundle(
+    IgnoreLayoutSafeAreaBundle& bundle, const LayoutConstraintF &dst)
+{
+    for (auto &child : bundle.first) {
+        auto geometryNode = child->GetGeometryNode();
+        if (geometryNode) {
+            geometryNode->SetParentLayoutConstraint(dst);
+        }
+    }
+}
+
+void FlexLayoutAlgorithm::HandleExpandAndNonCrossMatchChildren(
+    const SizeF& parentSize, const LayoutConstraintF& layoutConstraint, IgnoreLayoutSafeAreaBundle& bundle)
 {
     for (const auto& child : layoutPolicyChildren_) {
+        auto [isMainAxisMatch, isCrossAxisMatch] = GetMatchParentFlagAlongMainAndCrossAxis(child);
         auto childNode = child->GetHostNode();
         auto childlayoutProperty = childNode->GetLayoutProperty();
         if (childNode && childlayoutProperty && childlayoutProperty->IsExpandConstraintNeeded()) {
@@ -1221,56 +1239,86 @@ void FlexLayoutAlgorithm::HandleExpandAndNonCrossMatchChildren(const LayoutConst
             child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
             continue;
         }
-        bool isCrossAxisMatch = IsMatchParentAlongAxis(false, child);
+        if (!isMainAxisMatch) {
+            childrenMatchParentAlongCrossAxisOnly_.emplace_back(child);
+            continue;
+        }
         if (!isCrossAxisMatch) {
-            shouldCorrectMainAixsSize = false;
             child->Measure(layoutConstraint);
             crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(child));
-        } else {
-            childrenMatchParentAlongCrossAxis.emplace_back(child);
+            childrenMatchParentAlongMainAxisOnly_.emplace_back(child);
+            continue;
         }
+        childrenMatchParentAlongBidirection_.emplace_back(child);
     }
 }
 
-float FlexLayoutAlgorithm::MeasureCrossAxisMatchChildrenAndCorrect(const LayoutConstraintF& layoutConstraint,
-    const std::list<RefPtr<LayoutWrapper>>& childrenMatchParentAlongCrossAxis, bool& shouldCorrectMainAixsSize)
+bool FlexLayoutAlgorithm::MeasureCrossAxisMatchChildrenAndCorrect(const LayoutConstraintF& layoutConstraint)
 {
-    float mainAxisSizeCorrected = 0.0f;
-    for (const auto& child : childrenMatchParentAlongCrossAxis) {
+    if (childrenMatchParentAlongCrossAxisOnly_.empty()) {
+        return false;
+    }
+    for (const auto& child : childrenMatchParentAlongCrossAxisOnly_) {
         child->Measure(layoutConstraint);
-        if (!IsMatchParentAlongAxis(true, child)) {
-            mainAxisSizeCorrected += GetChildMainAxisSize(child) + space_;
+        mainAxisSize_ += GetChildMainAxisSize(child) + space_;
+        allocatedSize_ += GetChildMainAxisSize(child) + space_;
+    }
+    return true;
+}
+
+void FlexLayoutAlgorithm::MeasureMainAxisMatchChildren(LayoutConstraintF layoutConstraint)
+{
+    auto originalLayoutConstraint = layoutConstraint;
+    for (auto &child : childrenMatchParentAlongMainAxisOnly_) {
+        auto geometryNode = child->GetGeometryNode();
+        if (geometryNode) {
+            auto originCrossSize = GetCrossAxisSizeHelper(geometryNode->GetFrameSize(), direction_);
+            layoutConstraint.selfIdealSize.SetCrossSize(originCrossSize,
+                IsHorizontal(direction_) ? Axis::HORIZONTAL : Axis::VERTICAL);
+            child->Measure(layoutConstraint);
         } else {
-            shouldCorrectMainAixsSize = false;
+            child->Measure(originalLayoutConstraint);
         }
     }
-    return mainAxisSizeCorrected;
 }
 
 void FlexLayoutAlgorithm::MeasureMatchParentChildren(
-    LayoutWrapper* layoutWrapper, SizeF realSize, std::optional<NG::LayoutPolicyProperty> layoutPolicy)
+    LayoutWrapper* layoutWrapper, SizeF parentSize, std::optional<NG::LayoutPolicyProperty> layoutPolicy)
 {
-    auto originRealSize = realSize;
-    SetFinalRealSize(layoutWrapper, realSize, layoutPolicy);
+    if (layoutPolicyChildren_.empty()) {
+        return;
+    }
+    bool isParentMainAxisWrap =
+        IsHorizontal(direction_) ? Negative(parentSize.Width()) : Negative(parentSize.Height());
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    MinusPaddingToNonNegativeSize(padding, realSize);
-    layoutConstraint.parentIdealSize.SetSize(realSize);
+    auto originParentSize = parentSize;
+    SetFinalRealSize(layoutWrapper, parentSize, layoutPolicy);
+    MinusPaddingToNonNegativeSize(padding, parentSize);
+    layoutConstraint.parentIdealSize.SetSize(parentSize);
     IgnoreLayoutSafeAreaBundle bundle;
-    std::list<RefPtr<LayoutWrapper>> childrenMatchParentAlongCrossAxis;
-    bool shouldCorrectMainAixsSize = true;
-    HandleExpandAndNonCrossMatchChildren(layoutConstraint, bundle, childrenMatchParentAlongCrossAxis,
-        shouldCorrectMainAixsSize);
-    SetFinalRealSize(layoutWrapper, originRealSize, layoutPolicy);
-    MinusPaddingToNonNegativeSize(padding, originRealSize);
-    layoutConstraint.parentIdealSize.SetSize(originRealSize);
-    float mainAxisSizeCorrected = MeasureCrossAxisMatchChildrenAndCorrect(
-        layoutConstraint, childrenMatchParentAlongCrossAxis, shouldCorrectMainAixsSize);
-    if (shouldCorrectMainAixsSize) {
-        mainAxisSize_ += mainAxisSizeCorrected;
-        allocatedSize_ += mainAxisSizeCorrected;
+    bool hasMainAxisCorrected = false;
+    HandleExpandAndNonCrossMatchChildren(originParentSize, layoutConstraint, bundle);
+
+    auto finalParentSize = originParentSize;
+    SetFinalRealSize(layoutWrapper, originParentSize, layoutPolicy);
+    MinusPaddingToNonNegativeSize(padding, originParentSize);
+    layoutConstraint.parentIdealSize.SetSize(originParentSize);
+    hasMainAxisCorrected |= MeasureCrossAxisMatchChildrenAndCorrect(layoutConstraint);
+
+    SetFinalRealSize(layoutWrapper, finalParentSize, layoutPolicy);
+    MinusPaddingToNonNegativeSize(padding, finalParentSize);
+    layoutConstraint.parentIdealSize.SetSize(finalParentSize);
+    UpdateConstraintOfIgnoreLayoutSafeAreaBundle(bundle, layoutConstraint);
+
+    if (isParentMainAxisWrap && hasMainAxisCorrected) {
+        MeasureMainAxisMatchChildren(layoutConstraint);
+    }
+
+    for (auto &child : childrenMatchParentAlongBidirection_) {
+        child->Measure(layoutConstraint);
     }
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
