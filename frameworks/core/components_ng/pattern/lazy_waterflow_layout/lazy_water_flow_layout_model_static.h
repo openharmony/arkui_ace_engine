@@ -33,16 +33,13 @@ class ACE_EXPORT LazyWaterFlowLayoutModelStatic {
 public:
     using VisibleIndexesChangeEvent = std::function<void(int32_t, int32_t)>;
 
-    // Standalone FrameNode (NOT pushed onto the build stack); caller owns nodeId.
+    // Standalone FrameNode (not pushed onto the build stack); caller owns nodeId.
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    // nullopt resets.
     static void SetRowGap(FrameNode* frameNode, const std::optional<Dimension>& rowGap);
     static void SetColumnGap(FrameNode* frameNode, const std::optional<Dimension>& columnGap);
-    // Empty callback unregisters.
     static void SetOnVisibleIndexesChange(FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange);
 };
 
-// Vertical LazyVWaterFlow: adds columnsTemplate / itemFillPolicy.
 class ACE_EXPORT LazyVWaterFlowLayoutModelStatic : public LazyWaterFlowLayoutModelStatic {
 public:
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
