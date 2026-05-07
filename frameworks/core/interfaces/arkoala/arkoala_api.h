@@ -7765,6 +7765,16 @@ struct ArkUITextTimerModifier {
     void (*setTextTimerOnTimer)(ArkUINodeHandle node, void* callback);
     void (*resetTextTimerOnTimer)(ArkUINodeHandle node);
 };
+struct ArkUIContainerReaderModifier {
+    void (*create)();
+    void (*setBreakPointConfig)(ArkUINodeHandle node,
+        double* widthArr, uint32_t widthLen, double* heightArr, uint32_t heightLen);
+    void (*resetBreakPointConfig)(ArkUINodeHandle node);
+    void (*setOnSizeChange)(ArkUINodeHandle node, void* callback);
+    void (*setOnWidthBreakpointChange)(ArkUINodeHandle node, void* callback);
+    void (*setOnHeightBreakpointChange)(ArkUINodeHandle node, void* callback);
+    void (*setRenderFunction)(ArkUINodeHandle node, void* callback);
+};
 
 struct ArkUISymbolGlyphModifier {
     void (*create)(ArkUI_Uint32 symbolId);
@@ -9191,6 +9201,7 @@ struct ArkUINodeModifiers {
     ArkUI_Int32 version;
     const ArkUICommonModifier* (*getCommonModifier)();
     const ArkUICheckboxGroupModifier* (*getCheckboxGroupModifier)();
+    const ArkUIContainerReaderModifier* (*getContainerReaderModifier)();
     const ArkUICounterModifier* (*getCounterModifier)();
     const ArkUIRowModifier* (*getRowModifier)();
     const ArkUIRowSplitModifier* (*getRowSplitModifier)();

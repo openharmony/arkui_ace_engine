@@ -3543,6 +3543,10 @@
       "OHOS::Ace::RefPtr<OHOS::Ace::NG::TextAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::TextAccessibilityProperty>() const";
       "OHOS::Ace::RefPtr<OHOS::Ace::NG::TextFieldAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::TextFieldAccessibilityProperty>() const";
       OHOS::Ace::NG::GestureEventHub::*;
+      OHOS::Ace::NG::GetCommonWidthBreakpoint*;
+      OHOS::Ace::NG::GetCalcWidthBreakpoint*;
+      OHOS::Ace::NG::GetCommonHeightBreakpoint*;
+      OHOS::Ace::NG::GetCalcHeightBreakpoint*;
       OHOS::Ace::NG::Gradient::*;
       OHOS::Ace::NG::ImageLoadingContext::*;
       OHOS::Ace::NG::ImagePattern::*;

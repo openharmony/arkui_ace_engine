@@ -68,6 +68,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Checkbox", "checkbox" },
         { "CheckboxGroup", "checkbox" },
         { "ColumnSplit", "linearsplit" },
+        { "ContainerReader", "containerreader" },
         { "Counter", "counter" },
         { "DataPanel", "datapanel" },
         {"TextClock", "textclock"},

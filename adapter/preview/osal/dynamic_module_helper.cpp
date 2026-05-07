@@ -81,6 +81,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
     }
     static const std::unordered_map<std::string, std::string> soMap = {
         {"DynamicLayout", "dynamiclayout"},
+        { "ContainerReader", "containerreader" },
         {"Counter", "counter"},
         { "DataPanel", "datapanel" },
         {"Checkbox", "checkbox"},

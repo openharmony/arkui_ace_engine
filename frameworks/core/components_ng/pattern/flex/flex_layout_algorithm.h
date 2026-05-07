@@ -97,6 +97,8 @@ private:
     void UpdateFlexProperties(FlexItemProperties& flexItemProperties, const RefPtr<LayoutWrapper>& layoutWrapper);
     void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
+    void UpdateLayoutConstraintOnMainAxisWithoutUserDefined(LayoutConstraintF& layoutConstraint,
+        float size, const std::unique_ptr<MeasureProperty>& calcConstraint);
     void UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& layoutConstraint, float size);
     void AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper, bool includeLayoutPolicyChildren = false);
     void CheckIsGrowOrShrink(std::function<float(const RefPtr<LayoutWrapper>&)>& getFlex, float remainSpace,
@@ -125,6 +127,11 @@ private:
     std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator FirstMeasureInWeightMode();
     void SecondMeasureInWeightMode(std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator firstLoopIter);
     void FinalMeasureInWeightMode();
+    void MeasureContainerReaderNodesInWeight(std::vector<MagicLayoutNode>& containerReaderNodes, float crossAxisSize);
+    void MeasureContainerReaderNodesInPriority(std::vector<MagicLayoutNode>& containerReaderNodes,
+        float crossAxisSize, FlexItemProperties& flexItemProperties);
+    void MeasureContainerReaderNodesInGrowShrink(std::vector<MagicLayoutNode>& containerReaderNodes,
+        float crossAxisSize, FlexItemProperties& flexItemProperties, LayoutWrapper* containerLayoutWrapper);
     void MeasureInPriorityMode(FlexItemProperties& flexItemProperties);
     void SecondMeasureInGrowOrShrink();
     void PopOutOfDispayMagicNodesInPriorityMode(

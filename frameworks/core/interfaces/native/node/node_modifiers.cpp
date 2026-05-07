@@ -24,6 +24,7 @@
 #include "core/interfaces/native/node/column_modifier.h"
 #include "core/interfaces/native/node/column_split_modifier.h"
 #include "core/interfaces/native/node/common_shape_modifier.h"
+#include "core/interfaces/native/node/node_container_reader_modifier.h"
 #include "core/interfaces/native/node/counter_modifier.h"
 #include "core/interfaces/native/node/data_panel_modifier.h"
 #include "core/interfaces/native/node/divider_modifier.h"
@@ -159,6 +160,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .version = ARKUI_NODE_MODIFIERS_API_VERSION,
         .getCommonModifier = NodeModifier::GetCommonModifier,
         .getCheckboxGroupModifier = NodeModifier::GetCheckboxGroupModifier,
+        .getContainerReaderModifier = NodeModifier::GetContainerReaderModifier,
         .getCounterModifier = NodeModifier::GetCounterModifier,
         .getRowModifier = NodeModifier::GetRowModifier,
         .getRowSplitModifier = NodeModifier::GetRowSplitModifier,
