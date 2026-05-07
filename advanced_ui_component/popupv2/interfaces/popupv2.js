@@ -45,7 +45,7 @@ export const defaultTheme = {
             start: LengthMetrics.vp(12),
             end: LengthMetrics.vp(12)
         },
-        fillColor: '',
+        fillColor: ColorContent.ORIGIN,
         borderRadius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_s'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
     title: {
@@ -122,6 +122,7 @@ export const defaultTheme = {
 const noop = () => {
 };
 const POPUP_DEFAULT_MAXWIDTH = 400;
+const MAX_FONT_SCALE = 2;
 export function PopupV2(options, parent = null) {
     const __options__ = options;
     {
@@ -139,7 +140,7 @@ export function PopupV2(options, parent = null) {
                     onClose: options.onClose,
                     buttons: options.buttons,
                     maxWidth: options.maxWidth
-                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/common/utils/popupv2.ets", line: 201, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/common/utils/popupv2.ets", line: 202, col: 3 });
                 ViewV2.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -243,6 +244,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
         this.scrollMaxHeight = undefined;
         this.firstButtonHeight = 0;
         this.secondButtonHeight = 0;
+        this.appMaxFontScale = MAX_FONT_SCALE;
         this.listener = mediaquery.matchMediaSync('(orientation: landscape)');
         this.finalizeConstruction();
     }
@@ -274,6 +276,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
         this.scrollMaxHeight = undefined;
         this.firstButtonHeight = 0;
         this.secondButtonHeight = 0;
+        this.appMaxFontScale = MAX_FONT_SCALE;
     }
     getIconWidth() {
         return this.theme.icon.size.width;
@@ -500,6 +503,8 @@ export class PopupV2ComponentV2 extends ViewV2 {
         this.closeButtonFillColorWithTheme = theme.colors.iconSecondary;
     }
     aboutToAppear() {
+        let uiContext = this.getUIContext();
+        this.appMaxFontScale = uiContext.getMaxFontScale();
         this.listener.on('change', (mediaQueryResult) => {
             setTimeout(() => {
                 this.currentScreenStatus = mediaQueryResult.matches;
@@ -751,6 +756,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
                         Text.textAlign(this.getTitleTextAlign());
                         Text.attributeModifier.bind(this)(this.titleModifier);
+                        Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -820,6 +826,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
                         Text.textAlign(this.getTitleTextAlign());
                         Text.attributeModifier.bind(this)(this.messageModifier);
+                        Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                         Text.onAreaChange((_, rect) => {
                             this.textHeight = rect.height;
                             this.setScrollMaxHeight(undefined);
@@ -884,6 +891,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                     Text.minFontSize(this.getButtonMinFontSize());
                                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                     Text.attributeModifier.bind(this)(this.buttons?.[0]?.buttonTextModifier);
+                                    Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                                 }, Text);
                                 Text.pop();
                                 Button.pop();
@@ -936,6 +944,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                     Text.minFontSize(this.getButtonMinFontSize());
                                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                     Text.attributeModifier.bind(this)(this.buttons?.[1]?.buttonTextModifier);
+                                    Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                                 }, Text);
                                 Text.pop();
                                 Button.pop();
@@ -992,6 +1001,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         Text.constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() });
                         Text.textAlign(this.getTitleTextAlign());
                         Text.attributeModifier.bind(this)(this.messageModifier);
+                        Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                         Text.onAreaChange((_, rect) => {
                             this.textHeight = rect.height;
                             this.setScrollMaxHeight(undefined);
@@ -1088,7 +1098,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                         }
                                     });
                                     Button.onAreaChange((_, rect) => {
-                                        this.firstButtonHeight = rect.height;
+                                        this.firstButtonHeight = Number(rect.height);
                                     });
                                     Button.responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight));
                                 }, Button);
@@ -1103,6 +1113,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                     Text.minFontSize(this.getButtonMinFontSize());
                                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                     Text.attributeModifier.bind(this)(this.buttons?.[0]?.buttonTextModifier);
+                                    Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                                 }, Text);
                                 Text.pop();
                                 Button.pop();
@@ -1155,6 +1166,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                     Text.minFontSize(this.getButtonMinFontSize());
                                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                     Text.attributeModifier.bind(this)(this.buttons?.[1]?.buttonTextModifier);
+                                    Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                                 }, Text);
                                 Text.pop();
                                 Button.pop();
@@ -1300,5 +1312,7 @@ __decorate([
 __decorate([
     Local
 ], PopupV2ComponentV2.prototype, "secondButtonHeight", void 0);
-
+__decorate([
+    Local
+], PopupV2ComponentV2.prototype, "appMaxFontScale", void 0);
 export default { PopupV2 };
