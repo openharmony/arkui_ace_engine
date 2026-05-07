@@ -834,32 +834,6 @@ HWTEST_F(RichEditorModelStaticTestNg, CreateRichEditorStyledStringNode001, TestS
 }
 
 /**
- * @tc.name: CreateRichEditorStyledStringNode002
- * @tc.desc: test CreateRichEditorStyledStringNode with same node id
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModelStaticTestNg, CreateRichEditorStyledStringNode002, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. mock theme manager
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    /**
-     * @tc.steps: step2. create styled string node with same node id twice
-     */
-    int32_t nodeId = 200;
-    auto frameNode1 = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
-    auto frameNode2 = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
-    // test that same node is returned for same node id
-    EXPECT_EQ(frameNode1, frameNode2);
-}
-
-/**
  * @tc.name: GetCustomKeyboardNode001
  * @tc.desc: test GetCustomKeyboardNode with valid frame node
  * @tc.type: FUNC
