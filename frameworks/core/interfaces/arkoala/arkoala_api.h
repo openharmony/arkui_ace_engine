@@ -125,6 +125,7 @@ struct _ArkUIRSProperty;
 struct ArkUI_GridLayoutOptions;
 struct ArkUI_AccessibilityProvider;
 typedef struct ArkUI_InnerColor ArkUI_InnerColor;
+typedef struct ArkUI_ImmersiveMaterial ArkUI_ImmersiveMaterial;
 struct ArkUI_EditModeOptions {
     ArkUI_Bool enableGatherSelectedItemsAnimation;
     ArkUI_Bool useDefaultMultiSelectStyle;
@@ -9107,6 +9108,14 @@ struct ArkUIThemeModifier {
     ArkUI_Int32 (*getThemeScopeId)(ArkUINodeHandle node);
 };
 
+struct ArkUIMaterialModifier {
+    bool (*getDeviceSystemMaterialSupported)();
+    ArkUI_Int32 (*getGlobalMaterialLevel)();
+    void (*setSystemMaterialByHandle)(ArkUINodeHandle node, ArkUI_ImmersiveMaterial* material);
+    void (*resetSystemMaterial)(ArkUINodeHandle node);
+    bool (*getSystemMaterialHandle)(ArkUINodeHandle node, ArkUI_ImmersiveMaterial* material);
+};
+
 struct ArkUIAtomicServiceModifier {
     ArkUI_Int32 (*setMenuBarVisible)(ArkUIContext* context, ArkUI_Bool visible);
 };
@@ -9396,6 +9405,7 @@ struct ArkUINodeModifiers {
     const ArkUIDynamicLayoutModifier* (*getDynamicLayoutModifier)();
     const ArkUILazyColumnLayoutModifier* (*getLazyColumnLayoutModifier)();
     const ArkUILazyWaterFlowLayoutModifier* (*getLazyWaterFlowLayoutModifier)();
+    const ArkUIMaterialModifier* (*getMaterialModifier)();
 };
 
 // same as inner defines in property.h
