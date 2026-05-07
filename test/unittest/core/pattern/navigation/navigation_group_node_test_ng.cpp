@@ -1267,7 +1267,7 @@ HWTEST_F(NavigationGroupNodeTestNg, CleanHideNodesTest001, TestSize.Level1)
 
 /*
  * @tc.name: SetUseHomeDestinatoinTest001
- * @tc.desc: Test SetUseHomeDestinatoin and GetUseHomeDestination
+ * @tc.desc: Test SetUseHomeDestination and GetUseHomeDestination
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationGroupNodeTestNg, SetUseHomeDestinatoinTest001, TestSize.Level1)
@@ -1280,12 +1280,12 @@ HWTEST_F(NavigationGroupNodeTestNg, SetUseHomeDestinatoinTest001, TestSize.Level
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigation, nullptr);
 
-    navigation->SetUseHomeDestinatoin(true);
+    navigation->SetUseHomeDestination(true);
     auto useHomeDestination = navigation->GetUseHomeDestination();
     ASSERT_TRUE(useHomeDestination.has_value());
     EXPECT_TRUE(useHomeDestination.value());
 
-    navigation->SetUseHomeDestinatoin(false);
+    navigation->SetUseHomeDestination(false);
     useHomeDestination = navigation->GetUseHomeDestination();
     ASSERT_TRUE(useHomeDestination.has_value());
     EXPECT_FALSE(useHomeDestination.value());
