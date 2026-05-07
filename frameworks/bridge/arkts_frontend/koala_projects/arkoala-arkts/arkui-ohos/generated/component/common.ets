@@ -6852,7 +6852,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindSheet(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnVisibleAreaChangeAttribute(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): void {
+    setOnVisibleAreaChange0Attribute(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (ratios !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6872,7 +6872,37 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setOnVisibleAreaChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setOnVisibleAreaChange0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnVisibleAreaChange1Attribute(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined, measureFromViewport: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (ratios !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const ratiosTmpValue = ratios!
+            thisSerializer.writeInt32((ratiosTmpValue.length).toInt())
+            for (let ratiosTmpValueCounterI = 0; ratiosTmpValueCounterI < ratiosTmpValue.length; ratiosTmpValueCounterI++) {
+                const ratiosTmpValueTmpElement: double = ratiosTmpValue[ratiosTmpValueCounterI]
+                thisSerializer.writeFloat64(ratiosTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (event !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const eventTmpValue = event!
+            thisSerializer.holdAndWriteCallback(eventTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (measureFromViewport !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const measureFromViewportTmpValue = measureFromViewport!
+            thisSerializer.writeBoolean(measureFromViewportTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnVisibleAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnVisibleAreaApproximateChangeAttribute(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): void {
@@ -11662,6 +11692,7 @@ export type AccessibilityTransparentCallback = (event: TouchEvent) => void;
 export interface VisibleAreaEventOptions {
     ratios: Array<double>;
     expectedUpdateInterval?: int32;
+    measureFromViewport?: boolean;
 }
 export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: double) => void;
 export interface SelectionOptions {
@@ -12849,7 +12880,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         const ratios_casted = ratios as (Array<double> | undefined)
         const event_casted = event as (VisibleAreaChangeCallback | undefined)
-        this.getPeer()?.setOnVisibleAreaChangeAttribute(ratios_casted, event_casted)
+        this.getPeer()?.setOnVisibleAreaChange0Attribute(ratios_casted, event_casted)
+        return this
+    }
+    public onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined, measureFromViewport: boolean | undefined): this {
+        const ratios_casted = ratios as (Array<double> | undefined)
+        const event_casted = event as (VisibleAreaChangeCallback | undefined)
+        const measureFromViewport_casted = measureFromViewport as (boolean | undefined)
+        this.getPeer()?.setOnVisibleAreaChange1Attribute(ratios_casted, event_casted, measureFromViewport_casted)
         return this
     }
     public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
@@ -16271,6 +16309,14 @@ export class VisibleAreaEventOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForMeasureFromViewport = value.measureFromViewport
+        if (valueHolderForMeasureFromViewport !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMeasureFromViewportTmpValue = valueHolderForMeasureFromViewport!
+            valueSerializer.writeBoolean(valueHolderForMeasureFromViewportTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): VisibleAreaEventOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -16285,7 +16331,13 @@ export class VisibleAreaEventOptions_serializer {
             expectedUpdateIntervalTmpBuf = valueDeserializer.readInt32()
         }
         const expectedUpdateIntervalTmpResult: int32 | undefined = expectedUpdateIntervalTmpBuf
-        let value: VisibleAreaEventOptions = ({ratios: ratiosTmpResult, expectedUpdateInterval: expectedUpdateIntervalTmpResult} as VisibleAreaEventOptions)
+        const measureFromViewportTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let measureFromViewportTmpBuf: boolean | undefined = undefined
+        if ((measureFromViewportTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            measureFromViewportTmpBuf = valueDeserializer.readBoolean()
+        }
+        const measureFromViewportTmpResult: boolean | undefined = measureFromViewportTmpBuf
+        let value: VisibleAreaEventOptions = ({ratios: ratiosTmpResult, expectedUpdateInterval: expectedUpdateIntervalTmpResult, measureFromViewport: measureFromViewportTmpResult} as VisibleAreaEventOptions)
         return value
     }
 }
