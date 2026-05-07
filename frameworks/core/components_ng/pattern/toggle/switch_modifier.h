@@ -58,45 +58,21 @@ public:
         bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                        : direction_ == TextDirection::RTL;
         float halfHeight = actualSize_.Height() / 2.0f;
-        auto offsetNotRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
-                                ? (isSelect_->Get() ? actualSize_.Width() - halfHeight : halfHeight)
-                                : (isSelect_->Get() ? actualSize_.Width() - actualTrackRadius_ : actualTrackRadius_);
-        auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
-                               ? (isSelect_->Get() ? halfHeight : actualSize_.Width() - halfHeight)
-                               : (isSelect_->Get() ? actualTrackRadius_ : actualSize_.Width() - actualTrackRadius_);
-        if (!isCancelAnimation_ || !isFocusOrBlur_) {
-            AnimationOption colorOption = AnimationOption();
-            colorOption.SetDuration(colorAnimationDuration_);
-            colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
-            AnimationUtils::Animate(colorOption, [&]() {
-                animatableBoardColor_->Set(isSelect_->Get() ?
-                    LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-            }, nullptr, nullptr, host->GetContextRefPtr());
-        } else {
-            animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-        }
+        AnimateBoardColor(host);
+        float newPointOffset = CalcPointOffset(isRtl, halfHeight);
         AnimationOption pointOption = AnimationOption();
         pointOption.SetDuration(pointAnimationDuration_);
         pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
-        float newPointOffset = 0.0f;
-        if (!isDragEvent_) {
-            FixPointOffset();
-            if (isRtl) {
-                newPointOffset = offsetIsRtl;
-            } else {
-                newPointOffset = offsetNotRtl;
-            }
-        } else {
-            if (GreatOrEqual(actualSize_.Width(), actualSize_.Height())) {
-                newPointOffset = std::clamp(
-                    dragOffsetX_->Get() - offset_->Get().GetX(), halfHeight, actualSize_.Width() - halfHeight);
-            } else {
-                newPointOffset = std::clamp(dragOffsetX_->Get() - offset_->Get().GetX(), actualTrackRadius_,
-                    actualSize_.Width() - actualTrackRadius_);
-            }
+        std::function<void()> finishFunc = nullptr;
+        if (!isDragEvent_ && slideFinishedCallback_) {
+            finishFunc = [this]() {
+                if (slideFinishedCallback_) {
+                    slideFinishedCallback_();
+                }
+            };
         }
         AnimationUtils::Animate(
-            pointOption, [&]() { pointOffset_->Set(newPointOffset); }, nullptr, nullptr, host->GetContextRefPtr());
+            pointOption, [&]() { pointOffset_->Set(newPointOffset); }, finishFunc, nullptr, host->GetContextRefPtr());
     }
 
     void SetSwitchBoardColor(const RefPtr<FrameNode>& host)
@@ -195,12 +171,14 @@ public:
 
     void SetPointAlpha(float alpha)
     {
-        pointAlpha_ = alpha;
+        if (pointAlpha_) {
+            pointAlpha_->Set(alpha);
+        }
     }
 
     float GetPointAlpha() const
     {
-        return pointAlpha_;
+        return pointAlpha_ ? pointAlpha_->Get() : 1.0f;
     }
 
     void SetPointScale(float scale)
@@ -229,6 +207,12 @@ public:
     void SetMaterialNodePositionCallback(MaterialNodePositionCallback&& callback)
     {
         materialNodePositionCallback_ = std::move(callback);
+    }
+
+    using SlideFinishedCallback = std::function<void()>;
+    void SetSlideFinishedCallback(SlideFinishedCallback&& callback)
+    {
+        slideFinishedCallback_ = std::move(callback);
     }
 
     void SetFocusPointColor(Color color)
@@ -345,6 +329,45 @@ public:
 
 private:
     void FixPointOffset();
+    LinearColor CalcPointColor() const;
+    void DrawPoint(RSCanvas& canvas, float xOffset, float yOffset, float height,
+        const LinearColor& finalPointColor);
+    void AnimateBoardColor(const RefPtr<FrameNode>& host)
+    {
+        if (!isCancelAnimation_ || !isFocusOrBlur_) {
+            AnimationOption colorOption = AnimationOption();
+            colorOption.SetDuration(colorAnimationDuration_);
+            colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+            AnimationUtils::Animate(colorOption, [&]() {
+                animatableBoardColor_->Set(isSelect_->Get() ?
+                    LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
+            }, nullptr, nullptr, host->GetContextRefPtr());
+        } else {
+            animatableBoardColor_->Set(isSelect_->Get() ?
+                LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
+        }
+    }
+    float CalcPointOffset(bool isRtl, float halfHeight)
+    {
+        if (!isDragEvent_) {
+            FixPointOffset();
+            auto offsetNotRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
+                                    ? (isSelect_->Get() ? actualSize_.Width() - halfHeight : halfHeight)
+                                    : (isSelect_->Get() ? actualSize_.Width() - actualTrackRadius_
+                                        : actualTrackRadius_);
+            auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
+                                   ? (isSelect_->Get() ? halfHeight : actualSize_.Width() - halfHeight)
+                                   : (isSelect_->Get() ? actualTrackRadius_
+                                       : actualSize_.Width() - actualTrackRadius_);
+            return isRtl ? offsetIsRtl : offsetNotRtl;
+        }
+        if (GreatOrEqual(actualSize_.Width(), actualSize_.Height())) {
+            return std::clamp(
+                dragOffsetX_->Get() - offset_->Get().GetX(), halfHeight, actualSize_.Width() - halfHeight);
+        }
+        return std::clamp(dragOffsetX_->Get() - offset_->Get().GetX(), actualTrackRadius_,
+            actualSize_.Width() - actualTrackRadius_);
+    }
     float actualWidth_ = 0.0f;
     float actualHeight_ = 0.0f;
     float pointRadius_ = 0.0f;
@@ -397,9 +420,10 @@ private:
     RefPtr<PropertyFloat> animatePointRadius_;
     RefPtr<PropertyFloat> animateTrackRadius_;
     RefPtr<AnimatablePropertyFloat> animatePointScale_;
-    float pointAlpha_ = 1.0f;
+    RefPtr<AnimatablePropertyFloat> pointAlpha_;
     bool hasSystemMaterial_ = false;
     MaterialNodePositionCallback materialNodePositionCallback_;
+    SlideFinishedCallback slideFinishedCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchModifier);
 };

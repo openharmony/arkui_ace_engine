@@ -284,6 +284,8 @@ private:
     bool isFrameNodeVisible_ = false;
     CancelableCallback<void()> longPressTask_;
 
+    bool pendingHide_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     Dimension hotZoneHorizontalSize_;
