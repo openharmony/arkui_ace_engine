@@ -2812,6 +2812,7 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyVGrid(
     const RefPtr<ListPattern>& pattern,
     const ListPredictLayoutParamV2& param,
     const ListMainSizeValues& listMainSizeValues,
+    int64_t deadline,
     bool show)
 {
     auto frameNode = wrapper->GetHostNode();
@@ -2825,6 +2826,7 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyVGrid(
         .referenceEdge = index > pattern->GetEndIndex() ?
                           ReferenceEdge::START : ReferenceEdge::END,
         .axis = pattern->GetAxis(),
+        .deadline = deadline,
     };
     if (pattern->IsStackFromEnd()) {
         ref.viewPosStart = -listMainSizeValues.startPos;
@@ -2873,7 +2875,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         if (CanSupportNestedLazy(wrapper->GetHostNode(), frameNode)) {
-            ProcessPredictBuildLazyVGrid(wrapper, index, pattern, param, listMainSizeValues, show);
+            ProcessPredictBuildLazyVGrid(wrapper, index, pattern, param, listMainSizeValues, deadline, show);
         } else if (!isGroup) {
             auto frameNode = wrapper->GetHostNode();
             CHECK_NULL_VOID(frameNode);

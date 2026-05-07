@@ -225,6 +225,7 @@ bool WaterFlowLayoutAlgorithm::MeasureToTarget(
                 .referencePos = position.startMainPos + layoutInfo_->currentOffset_,
                 .referenceEdge = ReferenceEdge::START,
                 .axis = axis_,
+                .deadline = cacheDeadline,
             };
             itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
                 { itemCrossSize->second, mainSize_, axis_ }, ref, layoutProperty, itemWrapper));

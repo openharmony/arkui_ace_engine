@@ -210,8 +210,8 @@ int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
         if (NonNegative(userDefHeight)) {
             continue;
         }
-        auto child =
-            MeasureItem(i, { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset }, userDefHeight, false);
+        auto child = MeasureItem(i,
+            { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset }, userDefHeight, std::nullopt);
         CHECK_NULL_BREAK(child);
         if (!NearEqual(GetMeasuredHeight(child, axis_), info_->itemInfos_[i].mainSize)) {
             return i;
@@ -383,7 +383,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
         bool heightChange = false;
         for (int32_t i = info_->startIndex_; i <= bound; ++i) {
             auto item = MeasureItem(i, { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset },
-                WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i), false);
+                WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i), std::nullopt);
             CHECK_NULL_BREAK(item);
             if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[i].mainSize)) {
                 // refill from [i] if height doesn't match record
@@ -453,7 +453,7 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     for (int32_t i = info_->startIndex_; i < jumpIdx; ++i) {
         auto seg = info_->GetSegment(i);
         MeasureItem(i, { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset },
-            WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i), false);
+            WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i), std::nullopt);
     }
 }
 
@@ -506,7 +506,7 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i);
         if (force || Negative(itemHeight)) {
             auto item =
-                MeasureItem(i, { position.crossIndex, position.startMainPos }, itemHeight, cacheDeadline.has_value());
+                MeasureItem(i, { position.crossIndex, position.startMainPos }, itemHeight, cacheDeadline);
             if (item) {
                 itemHeight = GetMeasuredHeight(item, axis_);
             }
@@ -527,7 +527,7 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
             break;
         }
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i);
-        auto item = MeasureItem(i, { position.crossIndex, position.startMainPos }, itemHeight, false);
+        auto item = MeasureItem(i, { position.crossIndex, position.startMainPos }, itemHeight, std::nullopt);
         if (!item) {
             continue;
         }
@@ -553,9 +553,9 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
 }
 
 RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
-    int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, bool isCache) const
+    int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, std::optional<int64_t> deadline) const
 {
-    auto item = wrapper_->GetOrCreateChildByIndex(idx, !isCache, isCache);
+    auto item = wrapper_->GetOrCreateChildByIndex(idx, !deadline.has_value(), deadline.has_value());
     CHECK_NULL_RETURN(item, nullptr);
     // override user-defined main size
     if (NonNegative(userDefMainSize)) {
@@ -569,6 +569,7 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
             .referencePos = position.second + info_->currentOffset_,
             .referenceEdge = ReferenceEdge::START,
             .axis = axis_,
+            .deadline = deadline,
         };
         item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, ref, props_,
@@ -585,7 +586,7 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
         item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, props_, item));
     }
-    if (isCache) {
+    if (deadline.has_value()) {
         item->Layout();
         item->SetActive(false);
     }
@@ -646,7 +647,7 @@ void WaterFlowSegmentedLayout::SyncPreloadItem(LayoutWrapper* host, int32_t item
     } else {
         int32_t seg = info_->GetSegment(itemIdx);
         MeasureItem(itemIdx, { info_->itemInfos_[itemIdx].crossIdx, info_->itemInfos_[itemIdx].mainOffset },
-            WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, itemIdx), false);
+            WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, itemIdx), std::nullopt);
     }
 }
 
@@ -659,7 +660,7 @@ void WaterFlowSegmentedLayout::MeasureRemainingLazyChild(int32_t startIdx, int32
         if (itemLayoutProperty->GetNeedLazyLayout()) {
             int32_t seg = info_->GetSegment(idx);
             MeasureItem(idx, { info_->itemInfos_[idx].crossIdx, info_->itemInfos_[idx].mainOffset },
-                WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, idx), false);
+                WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, idx), std::nullopt);
             if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[idx].mainSize)) {
                 // refill from [idx] if height doesn't match record
                 info_->ClearCacheAfterIndex(idx - 1);
