@@ -446,6 +446,11 @@ void SwipeRecognizer::GetGestureEventInfo(GestureEvent& info)
     UpdateFingerListInfo();
     info.SetFingerList(fingerList_);
     info.SetGlobalPoint(globalPoint_);
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    SetGestureEventCurrentLocalLocation(info, touchPoint);
     info.SetSpeed(resultSpeed_);
     info.SetSourceDevice(deviceType_);
     info.SetDeviceId(deviceId_);

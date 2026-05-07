@@ -828,20 +828,39 @@ void PanRecognizer::GetGestureEventHalfInfo(GestureEvent* info)
     info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
 }
 
-GestureEvent PanRecognizer::GetGestureEventInfo()
+GestureEvent PanRecognizer::BuildGestureEventWithCurrentLocalInfo(
+    TouchEvent& touchPoint, Offset& localOffset, int32_t& postEventNodeId)
 {
     GestureEvent info;
     info.SetTimeStamp(time_);
     UpdateFingerListInfo();
     GetGestureEventHalfInfo(&info);
-    TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
-    auto postEventNodeId =
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    postEventNodeId =
         inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.postEventNodeId : touchPoint.postEventNodeId;
+    auto frameNodeWeak = GetAttachedNode();
     TransformForRecognizer(localPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
+    localOffset = Offset(localPoint.GetX(), localPoint.GetY());
+    auto globalOffset = Offset(globalPoint_.GetX(), globalPoint_.GetY());
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId, globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
+    return info;
+}
+
+GestureEvent PanRecognizer::GetGestureEventInfo()
+{
+    TouchEvent touchPoint = {};
+    Offset localOffset;
+    int32_t postEventNodeId = 0;
+    auto info = BuildGestureEventWithCurrentLocalInfo(touchPoint, localOffset, postEventNodeId);
     info.SetRawGlobalLocation(GetRawGlobalLocation(postEventNodeId));
     info.SetPointerId(inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.id : lastTouchEvent_.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
@@ -877,7 +896,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetPassThrough(lastTouchEvent_.passThrough);
         info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
     }
-    info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
+    info.SetGlobalPoint(globalPoint_).SetLocalLocation(localOffset);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetInputEventType(inputEventType_);
     info.SetForce(lastTouchEvent_.force);
