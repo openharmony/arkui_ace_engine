@@ -173,7 +173,7 @@ SizeF ScrollLayoutAlgorithm::MeasureLazyChild(LayoutWrapper* layoutWrapper, cons
     auto constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_RETURN(constraint, SizeF());
     auto viewPortLength = GetMainAxisSize(contentSize, axis);
-    SizeF estimatedIdealSize;
+    SizeF estimatedIdealSize = contentSize;
     if (LessOrEqual(viewPortLength, 0.0f)) {
         auto estimatedSize = CreateIdealSize(
             constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_PARENT);
@@ -201,7 +201,8 @@ SizeF ScrollLayoutAlgorithm::MeasureLazyChild(LayoutWrapper* layoutWrapper, cons
         estimatedIdealSize.SetWidth(selectScrollWidth);
     }
 
-    auto estimatedCurrentOffset = EstimateInitialOffset(axis, estimatedIdealSize, layoutWrapper);
+    auto estimatedCurrentOffset = currentOffset_;
+    EstimateInitialOffset(layoutWrapper, axis, estimatedIdealSize, estimatedCurrentOffset);
     auto estimatedContentStartOffset = contentStartOffset_;
     if (GreatOrEqual(contentStartOffset_ + contentEndOffset_, GetMainAxisSize(estimatedIdealSize, axis))) {
         estimatedContentStartOffset = 0;
@@ -282,21 +283,22 @@ double DimensionToFloat(const CalcDimension& value, float selfLength)
 }
 } // namespace
 
-double ScrollLayoutAlgorithm::EstimateInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper)
+void ScrollLayoutAlgorithm::EstimateInitialOffset(LayoutWrapper* layoutWrapper, Axis axis, SizeF selfSize,
+    double& estimateCurrentOffset)
 {
     auto scrollNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(scrollNode, 0.0f);
+    CHECK_NULL_VOID(scrollNode);
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_RETURN(scrollPattern, 0.0f);
+    CHECK_NULL_VOID(scrollPattern);
     if (scrollPattern->NeedSetInitialOffset()) {
         auto initialOffset = scrollPattern->GetInitialOffset();
         if (axis == Axis::VERTICAL) {
             auto offset = initialOffset.GetY();
-            return DimensionToFloat(offset, selfSize.Height()) - contentStartOffset_;
+            estimateCurrentOffset = DimensionToFloat(offset, selfSize.Height()) - contentStartOffset_;
+        } else {
+            estimateCurrentOffset = DimensionToFloat(initialOffset.GetX(), selfSize.Width()) - contentStartOffset_;
         }
-        return DimensionToFloat(initialOffset.GetX(), selfSize.Width()) - contentStartOffset_;
     }
-    return 0.0f;
 }
 
 void ScrollLayoutAlgorithm::UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper)
