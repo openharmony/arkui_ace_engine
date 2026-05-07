@@ -55,6 +55,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components/theme/ui_material_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -4874,12 +4875,14 @@ void OverlayManager::UpdateSheetRender(
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = sheetPageNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+
+    sheetNodePattern->ClearSheetRenderMaterial();
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
     }
-    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetNodePattern);
     sheetNodePattern->SetSheetBorderWidth();
     if (sheetStyle.borderStyle.has_value()) {
         sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
@@ -4899,17 +4902,7 @@ void OverlayManager::UpdateSheetRender(
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 
-    if (sheetStyle.systemMaterial) {
-        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
-        if (!MaterialUtils::CallSetMaterial(
-            AceType::RawPtr(sheetPageNode), AceType::RawPtr(sheetStyle.systemMaterial))) {
-            ViewAbstract::SetSystemMaterialImmediate(
-                AceType::RawPtr(sheetPageNode), AceType::RawPtr(sheetStyle.systemMaterial));
-        }
-    } else {
-        sheetRenderContext->SetSystemMaterial(nullptr);
-        sheetNodePattern->RemoveResObj("sheet.uiMaterial");
-    }
+    sheetNodePattern->SetSheetRenderMaterial();
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)

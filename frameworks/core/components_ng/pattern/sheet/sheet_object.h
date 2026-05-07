@@ -41,6 +41,10 @@ public:
     virtual RefPtr<InterpolatingSpring> GetSheetTransitionCurve(float dragVelocity) const;
     virtual std::function<void()> GetSheetTransitionFinishEvent(bool isTransitionIn);
     virtual std::function<void()> GetSheetAnimationEvent(bool isTransitionIn, float offset);
+    virtual bool SheetPopupWithSDFShape(const NG::SheetStyle& sheetStyle, const bool sheetPopupWithArrow,
+        const RefPtr<SheetPresentationPattern>& sheetPattern, const RefPtr<FrameNode>& sheetNode,
+        const RefPtr<RenderContext>& renderContext, const SizeF& sheetSize,
+        const NG::BorderRadiusProperty& borderRadius);
     virtual void ClipSheetNode();
     virtual void InitAnimationForOverlay(bool isTransitionIn, bool isFirstTransition);
     virtual void SetFinishEventForAnimationOption(
@@ -73,7 +77,7 @@ public:
         return PanDirection::VERTICAL;
     }
 
-    virtual bool CheckIfNeedSetOuterBorderProp() const
+    virtual bool CheckIfNeedSetOuterBorderProp()
     {
         return sheetType_ != SheetType::SHEET_POPUP;
     }
