@@ -170,6 +170,12 @@ export enum ExpandMode {
     NOT_EXPAND = 0,
     EXPAND = 1,
     LAZY_EXPAND = 2,
+    LAZY_NOT_EXPAND = 3,
+}
+export enum ChildrenCountMode {
+    ALL_EXPAND = 0,
+    ONLY_EXPANDED = 1,
+    ALL_NOT_EXPAND = 2,
 }
 export enum UIState {
     NORMAL = 0,
@@ -509,7 +515,15 @@ export class FrameNode implements MaterializedBase {
         return null;
     }
     public getChildrenCount(): int {
-        return FrameNodeExtender.getChildrenCount(this);
+        let childrenCountMode_casted: number = 0;
+        return FrameNodeExtender.getChildrenCount(this, childrenCountMode_casted);
+    }
+    public getChildrenCount(childrenCountMode: ChildrenCountMode): int {
+        let childrenCountMode_casted: number = 0;
+        if (childrenCountMode !== undefined && childrenCountMode !== null) {
+            childrenCountMode_casted = childrenCountMode;
+        }
+        return FrameNodeExtender.getChildrenCount(this, childrenCountMode_casted);
     }
     public dispose(): void {
         if (this.isDisposed()) {

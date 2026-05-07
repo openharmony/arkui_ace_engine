@@ -4751,7 +4751,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getParent(peer: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getChildrenCount(peer: KPointer): KInt
+    native static _FrameNodeExtender_getChildrenCount(peer: KPointer, childrenCountMode: number): KInt
     @ani.unsafe.Direct
     native static _FrameNodeExtender_dispose(peer: KPointer): void
     @ani.unsafe.Quick

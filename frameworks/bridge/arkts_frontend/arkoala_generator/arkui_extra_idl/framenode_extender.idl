@@ -59,7 +59,7 @@ interface FrameNodeExtender {
   static pointer getNextSibling(FrameNode peer);
   static pointer getPreviousSibling(FrameNode peer);
   static pointer getParent(FrameNode peer);
-  static i32 getChildrenCount(FrameNode peer);
+  static i32 getChildrenCount(FrameNode peer, number childrenCountMode);
   static void dispose(FrameNode peer);
   static Vector2 getPositionToWindow(FrameNode peer);
   static Vector2 getPositionToParent(FrameNode peer);
