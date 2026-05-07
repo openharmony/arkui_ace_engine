@@ -58,7 +58,6 @@ ScopeFocusAlgorithm LazyWaterFlowLayoutPattern::GetScopeFocusAlgorithm()
 void LazyWaterFlowLayoutPattern::OnActive()
 {
     idleDeadlineMissCount_ = 0;
-    // Mark dirty so the steady-state estimate stays warm under nested lazy.
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -129,12 +128,12 @@ void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange()
 void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange(const std::pair<int32_t, int32_t>& range)
 {
     CHECK_NULL_VOID(onVisibleIndexesChange_);
-    if (hasVisibleIndexesFired_ && range == lastVisibleIndexesRange_) {
+    if (hasVisibleIndexesChangeFired_ && range == lastVisibleIndexesRange_) {
         return;
     }
     onVisibleIndexesChange_(range.first, range.second);
     lastVisibleIndexesRange_ = range;
-    hasVisibleIndexesFired_ = true;
+    hasVisibleIndexesChangeFired_ = true;
 }
 
 void LazyWaterFlowLayoutPattern::OnInActive()
@@ -149,7 +148,6 @@ void LazyWaterFlowLayoutPattern::PostIdleTask()
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    // Miss counter is scoped to one idle chain; OnActive / a successful predict reset it.
     AddLazyWaterFlowPredictTask(context, [weak = WeakClaim(this)](int64_t deadline, bool) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -164,8 +162,8 @@ void LazyWaterFlowLayoutPattern::ProcessIdleTask(int64_t deadline)
         idleDeadlineMissCount_ = 0;
         return;
     }
-    // Deadline crossed by the time we entered. Re-post up to MAX_IDLE_DEADLINE_MISS_COUNT times for the
-    // "just at the frame boundary" case; beyond that, drop to avoid sustained main-thread contention.
+    // Deadline crossed before we ran. Re-post up to MAX_IDLE_DEADLINE_MISS_COUNT times to absorb frame
+    // boundary jitter; drop after that to avoid sustained main-thread contention.
     if (GetSysTimestamp() > deadline) {
         ++idleDeadlineMissCount_;
         if (idleDeadlineMissCount_ <= MAX_IDLE_DEADLINE_MISS_COUNT) {
@@ -178,8 +176,6 @@ void LazyWaterFlowLayoutPattern::ProcessIdleTask(int64_t deadline)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    // Setting layoutInfo_->deadline_ is what makes Algorithm enter PredictPass; ProcessOffscreenNode runs
-    // the offscreen Measure that consumes the budget.
     layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     layoutInfo_->deadline_ = deadline;
     FrameNode::ProcessOffscreenNode(host, true);
@@ -188,7 +184,7 @@ void LazyWaterFlowLayoutPattern::ProcessIdleTask(int64_t deadline)
 
 void LazyWaterFlowLayoutPattern::ResetVisibleIndexesChangeState()
 {
-    hasVisibleIndexesFired_ = false;
+    hasVisibleIndexesChangeFired_ = false;
     lastVisibleIndexesRange_ = { -2, -2 };
 }
 

@@ -34,7 +34,7 @@ class UINode;
 
 class ACE_EXPORT LazyWaterFlowLayoutModel {
 public:
-    // (startIndex, endIndex). -1 = not visible.
+    // Callback args: (startIndex, endIndex). -1 == not visible.
     using VisibleIndexesChangeEvent = std::function<void(int32_t, int32_t)>;
 
     static void Create();
@@ -46,10 +46,8 @@ public:
     static void SetOnVisibleIndexesChange(FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange);
 };
 
-// Vertical LazyVWaterFlow: adds columnsTemplate / itemFillPolicy.
 class ACE_EXPORT LazyVWaterFlowLayoutModel : public LazyWaterFlowLayoutModel {
 public:
-    // e.g. "1fr 1fr 1fr" or "100px 1fr 100px".
     static void SetColumnsTemplate(const std::string& value);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
     // Higher priority than columnsTemplate.

@@ -80,7 +80,6 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowGap, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnGap, Dimension, PROPERTY_UPDATE_MEASURE);
-    // e.g. "1fr 1fr" or "100px 1fr 100px"; defaults to "1fr".
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsTemplate, std::string, PROPERTY_UPDATE_MEASURE);
     // Higher priority than ColumnsTemplate.
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemFillPolicy, PresetFillType, PROPERTY_UPDATE_MEASURE);
