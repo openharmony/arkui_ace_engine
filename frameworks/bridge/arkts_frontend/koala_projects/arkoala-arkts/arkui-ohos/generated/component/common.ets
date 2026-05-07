@@ -11702,6 +11702,16 @@ export interface SmartGestureShortcutOptions {
 }
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<global_resource_Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>>;
+export enum EdgeLightMode {
+    EDGELIGHT_AUTO = 0,
+    EDGELIGHT_ENABLED = 1,
+    EDGELIGHT_DISABLED = 2
+}
+export enum DistortionMode {
+    DISTORTION_AUTO = 0,
+    DISTORTION_ENABLED = 1,
+    DISTORTION_DISABLED = 2
+}
 export interface InputEventInterceptResult {
     action: InputEventInterceptAction;
 }

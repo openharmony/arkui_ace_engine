@@ -17,7 +17,7 @@ import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
     BorderRadiuses } from 'arkui.component.units'
 import { AsyncCallback, Callback } from '@ohos.base'
 import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, TransitionEffect, KeyboardAvoidMode,
-    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui.component.common'
+    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions, DistortionMode, EdgeLightMode } from 'arkui.component.common'
 import { CustomBuilder } from 'arkui.component.builder'
 import { DialogAlignment } from 'arkui.component.alertDialog'
 import { DismissDialogAction } from 'arkui.component.actionSheet'
@@ -130,6 +130,8 @@ export default namespace promptAction {
         immersiveMode?: ImmersiveMode;
         levelOrder?: LevelOrder;
         systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface ShowDialogOptionsInternal {
@@ -168,6 +170,8 @@ export default namespace promptAction {
         onWillAppear?: (() => void);
         onWillDisappear?: (() => void);
         systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface ActionMenuOptionsInternal {
@@ -211,6 +215,8 @@ export default namespace promptAction {
         levelOrder?: LevelOrder;
         focusable?: boolean;
         systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface DialogOptionsInternal {

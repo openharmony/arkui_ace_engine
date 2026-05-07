@@ -616,6 +616,22 @@ void CustomDialogControllerPeerImpl::SetSystemMaterial(Opt_uiMaterial_Material s
     }
 }
 
+void CustomDialogControllerPeerImpl::SetDistortionMode(Opt_DistortionMode distortionMode)
+{
+    auto result = Converter::OptConvert<DistortionMode>(distortionMode);
+    if (result.has_value()) {
+        dialogProperties_.distortionMode = result.value();
+    }
+}
+
+void CustomDialogControllerPeerImpl::SetEdgeLightMode(Opt_EdgeLightMode edgeLightMode)
+{
+    auto result = Converter::OptConvert<EdgeLightMode>(edgeLightMode);
+    if (result.has_value()) {
+        dialogProperties_.edgeLightMode = result.value();
+    }
+}
+
 DialogProperties CustomDialogControllerPeerImpl::GetDialogProperties() const
 {
     return dialogProperties_;

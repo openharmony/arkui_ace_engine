@@ -65,6 +65,10 @@ const std::vector<DialogButtonDirection> DIALOG_BUTTONS_DIRECTION = { DialogButt
 constexpr int32_t ALERT_DIALOG_VALID_PRIMARY_BUTTON_NUM = 1;
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
+const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,
+    DistortionMode::DISTORTION_ENABLED, DistortionMode::DISTORTION_DISABLED };
+const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
+    EdgeLightMode::EDGELIGHT_ENABLED, EdgeLightMode::EDGELIGHT_DISABLED };
 } // namespace
 
 void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
@@ -434,6 +438,28 @@ void ParseAlertSystemMaterial(DialogProperties& properties, JSRef<JSObject> obj)
     }
 }
 
+void ParseAlertDistortionMode(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto distortionMode = obj->GetProperty("distortionMode");
+    if (distortionMode->IsNumber()) {
+        auto distortionModeVal = distortionMode->ToNumber<int32_t>();
+        if (distortionModeVal >= 0 && distortionModeVal < static_cast<int32_t>(DIALOG_DISTORTION_MODE.size())) {
+            properties.distortionMode = DIALOG_DISTORTION_MODE[distortionModeVal];
+        }
+    }
+}
+
+void ParseAlertEdgeLightMode(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto edgeLightMode = obj->GetProperty("edgeLightMode");
+    if (edgeLightMode->IsNumber()) {
+        auto edgeLightModeVal = edgeLightMode->ToNumber<int32_t>();
+        if (edgeLightModeVal >= 0 && edgeLightModeVal < static_cast<int32_t>(DIALOG_EDGELIGHT_MODE.size())) {
+            properties.edgeLightMode = DIALOG_EDGELIGHT_MODE[edgeLightModeVal];
+        }
+    }
+}
+
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -559,6 +585,8 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         properties.transitionEffect = ParseJsTransitionEffect(args);
         ParseAlertLevelOrder(properties, obj);
         ParseAlertSystemMaterial(properties, obj);
+        ParseAlertDistortionMode(properties, obj);
+        ParseAlertEdgeLightMode(properties, obj);
         JSViewAbstract::SetDialogProperties(obj, properties);
         JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
         JSViewAbstract::SetDialogBlurStyleOption(obj, properties);

@@ -380,6 +380,31 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
     bool isReadFirstNode)
 {
+    CHECK_NULL_VOID(node);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
+    auto isTopOrder = IsTopOrder(levelOrder);
+    bool isNeedFocus = isTopOrder && dialogProps.focusable;
+    
+    if (dialogPattern->NeedDistortion()) {
+        auto onFinishEvent = [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), isNeedFocus] {
+            auto overlayManager = weak.Upgrade();
+            auto node = nodeWK.Upgrade();
+            CHECK_NULL_VOID(overlayManager && node);
+            if (isNeedFocus) {
+                overlayManager->FocusOverlayNode(node);
+            }
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            dialogPattern->CallDialogDidAppearCallback();
+            overlayManager->ContentChangeReport(node, true);
+        };
+        dialogPattern->RegisterOnFinishEvent(onFinishEvent);
+        if (isTopOrder && isReadFirstNode) {
+            SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
+        }
+        return;
+    }
     auto pipeline = GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
@@ -390,15 +415,10 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
     option.SetCurve(Curves::SHARP);
     option.SetDuration(theme->GetOpacityAnimationDurIn());
     option.SetFillMode(FillMode::FORWARDS);
-    auto dialogPattern = node->GetPattern<DialogPattern>();
-    CHECK_NULL_VOID(dialogPattern);
     option = dialogPattern->GetOpenAnimation().value_or(option);
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
     auto onFinish = option.GetOnFinishEvent();
-    auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
-    auto isTopOrder = IsTopOrder(levelOrder);
-    bool isNeedFocus = isTopOrder && dialogProps.focusable;
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), onFinish, isNeedFocus] {
             if (onFinish) {

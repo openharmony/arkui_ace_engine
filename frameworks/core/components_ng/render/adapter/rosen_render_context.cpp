@@ -1807,6 +1807,12 @@ void RosenRenderContext::SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShap
 {
     FREE_RS_CONTEXT_CHECK(SetSDFShape, shape);
     CHECK_NULL_VOID(rsNode_ && shape);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::MENU_ETS_TAG) {
+        sdfShape_ = shape;
+        return;
+    }
     rsNode_->SetSDFShape(shape);
 }
 
@@ -8723,10 +8729,23 @@ void RosenRenderContext::SetUnionSpacing(float spacing)
     unionNode->SetUnionSpacing(spacing);
 }
 
+void RosenRenderContext::UpdateSubmenuDistortionParam()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (sdfShape_) {
+        rsNode_->SetSDFShape(sdfShape_);
+    }
+}
+
 void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
 {
 #ifndef PREVIEW
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isMenuNode = host->GetTag() == V2::MENU_ETS_TAG;
     if (!paintRect_.IsValid()) {
         ACE_SCOPED_TRACE("paintRect is not valid, updating DistortionParam is failed");
         return;
@@ -8754,8 +8773,7 @@ void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
     rootShape->Setter<Rosen::SDFDistortOpShapeLBCornerTag>(convertFunc2(param.lbCorner));
     rootShape->Setter<Rosen::SDFDistortOpShapeBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
     auto baseSdfShape = std::static_pointer_cast<RSNGShapeBase>(sdfShape);
-    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(baseSdfShape);
-    auto host = GetHost();
+    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(isMenuNode ? sdfShape_ : baseSdfShape);
     if (host) {
         ACE_SCOPED_TRACE("node setSDF-DistortionParam id:(%d) tag:(%s) rect:(%f,%f,%f,%f), radius:(%f) luCorner:(%f,%f)"
             " ruCorner:(%f,%f) lbCorner:(%f,%f) rbCorner:(%f,%f) barrelDistortion:(%f,%f,%f,%f)",

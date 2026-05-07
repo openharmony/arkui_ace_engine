@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace {
 class UiMaterial;
+enum class DistortionMode;
+enum class EdgeLightMode;
 class Component;
 class Gesture;
 
@@ -291,6 +293,8 @@ struct DialogProperties {
     std::optional<CalcDimension> height;
     std::optional<HoverModeAreaType> hoverModeArea;
     std::optional<int32_t> controllerId;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
     HasInvertColor hasInvertColor;
 
 #ifndef NG_BUILD
@@ -382,6 +386,8 @@ struct PromptDialogAttr {
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
     std::optional<double> levelOrder;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
     bool focusable = true;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;

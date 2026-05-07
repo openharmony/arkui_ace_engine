@@ -931,6 +931,8 @@ public:
 
     virtual void ResetEdgeLightFilter() {}
 
+    virtual void UpdateSubmenuDistortionParam() {}
+
     void SetIsFree(bool isFree)
     {
         isFree_ = isFree;

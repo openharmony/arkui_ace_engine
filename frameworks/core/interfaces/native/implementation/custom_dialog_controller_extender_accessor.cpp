@@ -70,6 +70,8 @@ Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControlle
     peer->SetLevelOrderExtender(value->levelOrderExtender);
     peer->SetFocusable(value->focusable);
     peer->SetSystemMaterial(value->systemMaterial);
+    peer->SetDistortionMode(value->distortionMode);
+    peer->SetEdgeLightMode(value->edgeLightMode);
 
     return AceType::RawPtr(peer);
 }

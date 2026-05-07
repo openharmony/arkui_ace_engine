@@ -27,6 +27,11 @@
 #include "ui/properties/ui_material.h"
 #include "ui/view/frame_node.h"
 
+namespace OHOS::Ace {
+enum class DistortionMode : int32_t;
+enum class EdgeLightMode : int32_t;
+}
+
 namespace OHOS::Ace::Kit {
 
 enum class MenuType {
@@ -54,6 +59,8 @@ struct MenuParam {
     int32_t targetId;
     std::string targetTag;
     RefPtr<UiMaterial> systemMaterial;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
 };
 
 class ACE_FORCE_EXPORT MenuView {

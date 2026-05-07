@@ -163,6 +163,14 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_Acti
         Dimension offsetX = isRtl ? dialogProps.offset.GetX() * (-1) : dialogProps.offset.GetX();
         dialogProps.offset.SetX(offsetX);
     }
+    auto distortionMode = Converter::OptConvert<DistortionMode>(options.distortionMode);
+    if (distortionMode) {
+        dialogProps.distortionMode = distortionMode.value();
+    }
+    auto edgeLightMode = Converter::OptConvert<EdgeLightMode>(options.edgeLightMode);
+    if (edgeLightMode) {
+        dialogProps.edgeLightMode = edgeLightMode.value();
+    }
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
     dialogProps.sheetsInfo = Converter::Convert<std::vector<ActionSheetInfo>>(options.sheets);
     auto transitionEffect = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);

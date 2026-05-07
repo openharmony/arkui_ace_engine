@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -74,6 +75,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/common/color_inverter.h"
+#if defined(ENABLE_ROSEN_BACKEND)
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -100,6 +104,7 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
+const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.20f, 0.00f, 0.83f, 0.83f);
 
 std::string GetBoolStr(bool isTure)
 {
@@ -400,7 +405,7 @@ void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogPr
         !dialogProperties.systemMaterial) {
         return;
     }
-    auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THICK);
     if (dialogProperties.systemMaterial) {
         material = dialogProperties.systemMaterial;
     }
@@ -588,6 +593,13 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     // Make dialog Content Column
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto contentColumnWrapper = contentColumn;
+    if (NeedDistortion()) {
+        SetHasExtraNodeForDistortion(true);
+        contentColumnWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        contentColumn->MountToParent(contentColumnWrapper);
+    }
     CHECK_NULL_VOID(contentColumn);
     ACE_UINODE_TRACE(contentColumn);
     if (!props.title.empty() || !props.subtitle.empty()) {
@@ -609,9 +621,9 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     }
 
     if (!props.customStyle) {
-        UpdateContentRenderContext(contentColumn, props);
+        UpdateContentRenderContext(contentColumnWrapper, props);
         if (props.height.has_value()) {
-            auto layoutProps = contentColumn->GetLayoutProperty<LinearLayoutProperty>();
+            auto layoutProps = contentColumnWrapper->GetLayoutProperty<LinearLayoutProperty>();
             CHECK_NULL_VOID(layoutProps);
             layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
             layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
@@ -652,7 +664,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     auto dialog = GetHost();
     ACE_UINODE_TRACE(dialog);
-    contentColumn->MountToParent(dialog);
+    contentColumnWrapper->MountToParent(dialog);
     AddExtraMaskNode(props);
     UpdateTextFontScale();
     if (isSuitableForElderly_ && NeedsButtonDirectionChange(props.buttons)) {
@@ -1478,7 +1490,9 @@ void DialogPattern::HandleBlurEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+    CHECK_NULL_VOID(
+        contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        !(contentRenderContext_->GetSystemMaterial() && contentRenderContext_->GetSystemMaterial()->IsForceShadow()));
     if (InvertShadowColor()) {
         return;
     }
@@ -1491,7 +1505,9 @@ void DialogPattern::HandleFocusEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+    CHECK_NULL_VOID(
+        contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        !(contentRenderContext_->GetSystemMaterial() && contentRenderContext_->GetSystemMaterial()->IsForceShadow()));
     if (InvertShadowColor()) {
         return;
     }
@@ -1550,6 +1566,7 @@ void DialogPattern::OnColorConfigurationUpdate()
     UpdateTitleAndContentColor();
     UpdateMaskColor();
     UpdateWrapperBackgroundStyle(host, dialogTheme_);
+    SetDialogSystemMaterial(DynamicCast<FrameNode>(host->GetFirstChild()), dialogProperties_);
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
@@ -2212,6 +2229,33 @@ bool DialogPattern::NeedUpdateHostWindowRect()
     }
 
     return false;
+}
+
+bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto contentNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_RETURN(contentNode, false);
+    auto renderContext = contentNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (NeedDistortion() && !isDialogShow_) {
+#if defined(ENABLE_ROSEN_BACKEND)
+        UpdateSDFRRectShape(DynamicCast<FrameNode>(host->GetFirstChild()));
+        lastPaintRect_ = renderContext->GetPaintRectWithoutTransform();
+#endif
+    }
+    CHECK_EQUAL_RETURN(isDialogShow_, false, false);
+
+    if (NeedDistortion()) {
+        PlayDistortion();
+    }
+    if (NeedEdgeLight()) {
+        PlayFlowLight();
+        lastPaintRect_ = renderContext->GetPaintRectWithoutTransform();
+    }
+    isDialogShow_ = false;
+    return true;
 }
 
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -3116,4 +3160,320 @@ void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::str
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_DIALOG);
 }
+
+bool DialogPattern::NeedDistortion()
+{
+    if (needDistortion_.has_value()) {
+        return needDistortion_.value();
+    }
+    if (dialogProperties_.transitionEffect || dialogProperties_.dialogTransitionEffect ||
+        dialogProperties_.maskTransitionEffect ||
+        dialogProperties_.isMask || dialogProperties_.customStyle || !dialogProperties_.systemMaterial ||
+        !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
+        needDistortion_ = false;
+    } else if (dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO) ==
+               DistortionMode::DISTORTION_ENABLED) {
+        needDistortion_ = true;
+    } else if (dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO) ==
+               DistortionMode::DISTORTION_DISABLED) {
+        needDistortion_ = false;
+    } else if (dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO) ==
+                   DistortionMode::DISTORTION_AUTO &&
+               dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) &&
+               (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE ||
+                   SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::GENTLE)) {
+        needDistortion_ = true;
+        if (dialogProperties_.openAnimation.has_value() && !MaterialUtils::IsMaterialEnabled()) {
+            needDistortion_ = false;
+        } else {
+            needDistortion_ = true;
+        }
+    } else {
+        needDistortion_ = false;
+    }
+    return needDistortion_.value_or(false);
+}
+
+bool DialogPattern::NeedEdgeLight()
+{
+    if (needFlowLight_.has_value()) {
+        return needFlowLight_.value();
+    }
+    if (dialogProperties_.isMask || dialogProperties_.customStyle || !dialogProperties_.systemMaterial ||
+        !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
+        needFlowLight_ = false;
+    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED) ==
+               EdgeLightMode::EDGELIGHT_ENABLED) {
+        needFlowLight_ = true;
+    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED) ==
+               EdgeLightMode::EDGELIGHT_DISABLED) {
+        needFlowLight_ = false;
+    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED) ==
+                   EdgeLightMode::EDGELIGHT_AUTO &&
+               dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) &&
+               SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE) {
+        needFlowLight_ = true;
+    } else {
+        needFlowLight_ = false;
+    }
+    return needFlowLight_.value_or(false);
+}
+
+void DialogPattern::PlayFlowLight()
+{
+    auto dialogNode = GetHost();
+    CHECK_NULL_VOID(dialogNode);
+    auto columnNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    CHECK_NULL_VOID(columnNode);
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    
+    EdgeLightParam param  {
+        .edgeLightPosition = EdgeLightPosition::BOTTOM,
+        .length = 300,
+        .intensity = 0.1,
+        .color = Color::WHITE,
+        .thickness = 200.0
+    };
+    ACE_UPDATE_NODE_RENDER_CONTEXT(EdgeLightParam, param, columnNode);
+
+    EdgeLightParam param1 {
+        .edgeLightPosition = EdgeLightPosition::TOP,
+        .length = 300,
+        .intensity = 0.1,
+        .color = Color::WHITE,
+        .thickness = 200.0
+    };
+
+    AnimationOption option;
+    option.SetDuration(500);
+    option.SetCurve(SHOW_SCALE_ANIMATION_CURVE);
+
+    /**
+     * Execute animation: move light effect position
+     * Move from initial position (-0.1, -0.1) to target position (0.4, -0.6)
+     * Simulate effect of border drawing diagonally from top-left to bottom-right
+     */
+    AnimationUtils::Animate(option, [columnNode, param1]() {
+        // Move light effect to target position
+        ACE_UPDATE_NODE_RENDER_CONTEXT(EdgeLightParam, param1, columnNode);
+    }, option.GetOnFinishEvent()); // Get and execute finish event
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Border draw animation applied successfully");
+
+    EdgeLightParam param2 {
+        .edgeLightPosition = EdgeLightPosition::TOP,
+        .length = 300,
+        .intensity = 0.3,
+        .color = Color::WHITE,
+        .thickness = 200.0
+    };
+    
+    AnimationOption option2;
+    option2.SetDuration(480);
+    option2.SetDelay(300);  // Set delay
+    option2.SetCurve(Curves::LINEAR);
+
+    /**
+     * Set animation finish event callback
+     * When animation completes, reset contour diagonal flow light parameters to avoid persistent light effect display
+     */
+    AnimationUtils::Animate(option2, [columnNode, param2]() {
+        // Move light effect to target position
+        ACE_UPDATE_NODE_RENDER_CONTEXT(EdgeLightParam, param2, columnNode);
+    }, option2.GetOnFinishEvent()); // Get and execute finish event
+
+    EdgeLightParam param3 {
+        .edgeLightPosition = EdgeLightPosition::TOP,
+        .length = 300,
+        .intensity = 0,
+        .color = Color::WHITE,
+        .thickness = 0.0
+    };
+    
+    AnimationOption option3;
+    option3.SetDuration(280);
+    option3.SetDelay(500);  // Set delay
+    option3.SetCurve(Curves::LINEAR);
+
+    /**
+     * Set animation finish event callback
+     * When animation completes, reset contour diagonal flow light parameters to avoid persistent light effect display
+     */
+    option3.SetOnFinishEvent([weakRender = WeakPtr<RenderContext>(renderContext)]() {
+        auto renderContext = weakRender.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetEdgeLightParam();
+    });
+    AnimationUtils::Animate(option3, [columnNode, param3]() {
+        // Move light effect to target position
+        ACE_UPDATE_NODE_RENDER_CONTEXT(EdgeLightParam, param3, columnNode);
+    }, option3.GetOnFinishEvent()); // Get and execute finish event
+}
+
+std::vector<RefPtr<RenderContext>> GetFirstRenderContexts(const RefPtr<UINode>& node)
+{
+    std::vector<RefPtr<RenderContext>> childContexts;
+    auto children = node->GetChildren();
+    for (const auto& child : children) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (frameNode) {
+            childContexts.push_back(frameNode->GetRenderContext());
+        } else {
+            auto renderContexts = GetFirstRenderContexts(child);
+            childContexts.insert(childContexts.end(), renderContexts.begin(), renderContexts.end());
+        }
+    }
+    return childContexts;
+}
+
+void DialogPattern::PlayDistortion()
+{
+    auto dialogNode = GetHost();
+    CHECK_NULL_VOID(dialogNode);
+    auto columnNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    CHECK_NULL_VOID(columnNode);
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    std::vector<RefPtr<RenderContext>> childContexts = GetFirstRenderContexts(columnNode);
+
+    /**
+     * Stage 1: Initial distortion effect
+     * Four corners shrink inward, creating a slight "collapse" effect
+     */
+    DistortionParam param {
+        .luCorner = { 0.4, 1 },  // Left-upper corner shrinks to 80% position
+        .ruCorner = { 0.6, 1 },    // Right-upper corner shrinks to 80% position
+        .lbCorner = { 0.4, 1.2 },    // Left-bottom corner shrinks to 80% position
+        .rbCorner = { 0.6, 1.2 },      // Right-bottom corner stays in place
+        .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
+    };
+    renderContext->UpdateDistortionParam(param);
+    for (const auto& childContext : childContexts) {
+        childContext->UpdateForegroundFilterDistortionParam(param);
+    }
+
+    /**
+     * Stage 2: Right stretch effect
+     * Left-upper corner moves to origin, right-upper corner stretches right to 80% height position
+     * Use spring interpolation, elasticity coefficient 200, damping 20
+     */
+    DistortionParam param1 {
+        .luCorner = { 0, 0 },     // Left-upper corner moves to origin
+        .ruCorner = { 1, 0 },   // Right-upper corner stretches right
+        .lbCorner = { 0.4, 1.2 },   // Left-bottom corner moves slightly right
+        .rbCorner = { 0.6, 1.2 },   // Right-bottom corner stays in place
+        .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
+    };
+    AnimationOption option;
+    option.SetDuration(1000);
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 247, 25));  // Spring curve
+    AnimationUtils::Animate(option, [renderContext, param1, childContexts]() {
+        renderContext->UpdateDistortionParam(param1);
+        for (const auto& childContext : childContexts) {
+            childContext->UpdateForegroundFilterDistortionParam(param1);
+        }
+    });
+
+    /**
+     * Stage 5: Add barrel distortion
+     * Add slight barrel distortion effect, parameter {0.5, 0.5}
+     * Use spring interpolation, elasticity coefficient 158, damping 17
+     */
+    DistortionParam param2 {
+        .luCorner = { 0, 0 },     // Left-upper corner moves to origin
+        .ruCorner = { 1, 0 },   // Right-upper corner stretches right
+        .lbCorner = { 0, 1 },   // Left-bottom corner moves slightly right
+        .rbCorner = { 1, 1 },   // Right-bottom corner stays in place
+        .barrelDistortion = {  0, 0, 0, 0 },  // Add barrel distortion Left-Right-Top-Bottom
+    };
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 110, 16));
+    AnimationUtils::Animate(option, [renderContext, param2, childContexts]() {
+        renderContext->UpdateDistortionParam(param2);
+        for (const auto& childContext : childContexts) {
+            childContext->UpdateForegroundFilterDistortionParam(param2);
+        }
+    });
+
+    /**
+     * Stage 5: Add barrel distortion
+     * Add slight barrel distortion effect, parameter {0.5, 0.5}
+     * Use spring interpolation, elasticity coefficient 158, damping 17
+     */
+    DistortionParam param3 {
+        .luCorner = { 0, 0 },     // Left-upper corner moves to origin
+        .ruCorner = { 1, 0 },   // Right-upper corner stretches right
+        .lbCorner = { 0, 1 },   // Left-bottom corner moves slightly right
+        .rbCorner = { 1, 1 },   // Right-bottom corner stays in place
+        .barrelDistortion = { 0.1, 0.1, -0.1, 0 },  // Add barrel distortion Left-Right-Top-Bottom
+    };
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 17));
+    AnimationUtils::Animate(option, [renderContext, param3, childContexts]() {
+        renderContext->UpdateDistortionParam(param3);
+        for (const auto& childContext : childContexts) {
+            childContext->UpdateForegroundFilterDistortionParam(param3);
+        }
+    });
+
+    /**
+     * Stage 6: Final recovery effect
+     * Remove all distortion, restore to normal state
+     * Set delay time 120ms, use default curve
+     */
+    DistortionParam param4 {
+        .luCorner = { 0, 0 },
+        .ruCorner = { 1, 0 },
+        .lbCorner = { 0, 1 },
+        .rbCorner = { 1, 1 },
+        .barrelDistortion = { 0, 0, 0, 0 },  // Remove barrel distortion
+    };
+    option.SetDelay(120);  // Set delay
+    AnimationUtils::Animate(option, [renderContext, param4, childContexts]() {
+        renderContext->UpdateDistortionParam(param4);
+        for (const auto& childContext : childContexts) {
+            childContext->UpdateForegroundFilterDistortionParam(param4);
+        }
+    }, onFinishEvent_);
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Distortion animation applied successfully");
+}
+
+#if defined(ENABLE_ROSEN_BACKEND)
+void DialogPattern::UpdateSDFRRectShape(const RefPtr<FrameNode>& contentNode)
+{
+    CHECK_NULL_VOID(contentNode);
+    auto shape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
+    auto shape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(shape0);
+    CHECK_NULL_VOID(shape);
+
+    auto renderContext = contentNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto borderRadius = renderContext->GetBorderRadius();
+    float radiusTopLeftPx =
+        borderRadius ? (borderRadius->radiusTopLeft ? borderRadius->radiusTopLeft.value().ConvertToPx() : 0) : 0;
+    float radiusTopRightPx =
+        borderRadius ? (borderRadius->radiusTopRight ? borderRadius->radiusTopRight.value().ConvertToPx() : 0) : 0;
+    float radiusBottomLeftPx =
+        borderRadius ? (borderRadius->radiusBottomLeft ? borderRadius->radiusBottomLeft.value().ConvertToPx() : 0) : 0;
+    float radiusBottomRightPx =
+        borderRadius ? (borderRadius->radiusBottomRight ? borderRadius->radiusBottomRight.value().ConvertToPx() : 0)
+                     : 0;
+
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    if (lastPaintRect_.Width() == paintRect.Width() && paintRect.Height() == paintRect.Height()) {
+        return;
+    }
+    OHOS::Rosen::RRect rrect(
+        OHOS::Rosen::RectF(
+            0,
+            0,
+            paintRect.Width(),
+            paintRect.Height()
+        ),
+        OHOS::Rosen::Vector4(radiusTopLeftPx, radiusTopRightPx, radiusBottomLeftPx, radiusBottomRightPx)
+    );
+    shape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
+    
+    renderContext->SetSDFShape(shape);
+}
+#endif
 } // namespace OHOS::Ace::NG

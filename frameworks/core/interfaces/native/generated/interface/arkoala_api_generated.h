@@ -4682,6 +4682,15 @@ typedef struct Opt_DismissReason {
     Ark_Tag tag;
     Ark_DismissReason value;
 } Opt_DismissReason;
+typedef enum Ark_DistortionMode {
+    ARK_DISTORTION_MODE_DISTORTION_AUTO = 0,
+    ARK_DISTORTION_MODE_DISTORTION_ENABLED = 1,
+    ARK_DISTORTION_MODE_DISTORTION_DISABLED = 2,
+} Ark_DistortionMode;
+typedef struct Opt_DistortionMode {
+    Ark_Tag tag;
+    Ark_DistortionMode value;
+} Opt_DistortionMode;
 typedef enum Ark_DistributionType {
     ARK_DISTRIBUTION_TYPE_UNIFORM = 0,
     ARK_DISTRIBUTION_TYPE_GAUSSIAN = 1,
@@ -4802,6 +4811,15 @@ typedef struct Opt_EdgeEffect {
     Ark_Tag tag;
     Ark_EdgeEffect value;
 } Opt_EdgeEffect;
+typedef enum Ark_EdgeLightMode {
+    ARK_EDGE_LIGHT_MODE_EDGELIGHT_AUTO = 0,
+    ARK_EDGE_LIGHT_MODE_EDGELIGHT_ENABLED = 1,
+    ARK_EDGE_LIGHT_MODE_EDGELIGHT_DISABLED = 2,
+} Ark_EdgeLightMode;
+typedef struct Opt_EdgeLightMode {
+    Ark_Tag tag;
+    Ark_EdgeLightMode value;
+} Opt_EdgeLightMode;
 typedef enum Ark_EffectDirection {
     ARK_EFFECT_DIRECTION_DOWN = 0,
     ARK_EFFECT_DIRECTION_UP = 1,
@@ -22286,6 +22304,8 @@ typedef struct Ark_ActionSheetOptions {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_ActionSheetOptions;
 typedef struct Opt_ActionSheetOptions {
     Ark_Tag tag;
@@ -22329,6 +22349,8 @@ typedef struct Ark_AlertDialogParamWithButtons {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
     Ark_AlertDialogButtonBaseOptions primaryButton;
     Ark_AlertDialogButtonBaseOptions secondaryButton;
 } Ark_AlertDialogParamWithButtons;
@@ -22374,6 +22396,8 @@ typedef struct Ark_AlertDialogParamWithConfirm {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
     Opt_AlertDialogButtonBaseOptions confirm;
 } Ark_AlertDialogParamWithConfirm;
 typedef struct Opt_AlertDialogParamWithConfirm {
@@ -22418,6 +22442,8 @@ typedef struct Ark_AlertDialogParamWithOptions {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
     Array_AlertDialogButtonOptions buttons;
     Opt_DialogButtonDirection buttonDirection;
 } Ark_AlertDialogParamWithOptions;
@@ -22608,6 +22634,8 @@ typedef struct Ark_CustomDialogControllerOptions {
     Opt_LevelOrder levelOrder;
     Opt_Boolean focusable;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
@@ -22655,6 +22683,8 @@ typedef struct Ark_CustomDialogControllerOptionsExtender {
     Opt_LevelOrderExtender levelOrderExtender;
     Opt_Boolean focusable;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_CustomDialogControllerOptionsExtender;
 typedef struct Opt_CustomDialogControllerOptionsExtender {
     Ark_Tag tag;
