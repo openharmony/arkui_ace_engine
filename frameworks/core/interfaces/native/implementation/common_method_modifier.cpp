@@ -5690,15 +5690,26 @@ void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
 }
-void SetBackgroundImpl(Ark_NativePointer node,
-                       const Opt_Union_CustomNodeBuilder_ResourceColor* content,
-                       const Opt_BackgroundOptions* options)
+
+void TryUpdateBackground(FrameNode* frameNode)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Alignment alignment = Alignment::CENTER;
-    uint32_t parsedEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
-    bool hasEdges = false;
+    auto geometryNode = frameNode->GetGeometryNode();
+    bool hasValidSize = geometryNode &&
+                       geometryNode->GetFrameSize().Width() > 0 &&
+                       geometryNode->GetFrameSize().Height() > 0;
+    if (hasValidSize) {
+        frameNode->UpdateBackground();
+    } else {
+        frameNode->SetIsNeedRefreshBackgroundBuilder(true);
+    }
+}
+
+void ParseBackgroundOptions(const Opt_BackgroundOptions* options,
+    Alignment& alignment, uint32_t& parsedEdges, bool& hasEdges)
+{
+    alignment = Alignment::CENTER;
+    parsedEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    hasEdges = false;
     if (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto alignOpt = Converter::OptConvert<Alignment>(options->value.align);
         if (alignOpt) {
@@ -5715,6 +5726,18 @@ void SetBackgroundImpl(Ark_NativePointer node,
             hasEdges = true;
         }
     }
+}
+
+void SetBackgroundImpl(Ark_NativePointer node,
+                       const Opt_Union_CustomNodeBuilder_ResourceColor* content,
+                       const Opt_BackgroundOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Alignment alignment;
+    uint32_t parsedEdges;
+    bool hasEdges;
+    ParseBackgroundOptions(options, alignment, parsedEdges, hasEdges);
     Converter::VisitUnionPtr(content,
         [frameNode, alignment, parsedEdges, hasEdges, node](const CustomNodeBuilder& builder) {
             CallbackHelper(builder).BuildAsync(
@@ -5730,6 +5753,7 @@ void SetBackgroundImpl(Ark_NativePointer node,
                     ViewAbstract::SetBackgroundAlign(frameNode, alignment);
                     ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
                     ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, alignment);
+                    TryUpdateBackground(frameNode);
                 }, node);
         },
         [frameNode, alignment, parsedEdges, hasEdges](const Ark_ResourceColor& resourceColor) {
@@ -5739,7 +5763,11 @@ void SetBackgroundImpl(Ark_NativePointer node,
             ViewAbstract::SetBackgroundAlign(frameNode, alignment);
             ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
             auto colorValue = Converter::OptConvertPtr<Color>(&resourceColor);
-            ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue.value_or(Color::TRANSPARENT));
+            if (colorValue.has_value()) {
+                ViewAbstract::SetCustomBackgroundColor(frameNode, colorValue.value());
+            } else {
+                ViewAbstract::SetCustomBackgroundColor(frameNode, Color::TRANSPARENT);
+            }
         },
         [frameNode]() {
             ViewAbstractModelStatic::ResetBackground(frameNode);
