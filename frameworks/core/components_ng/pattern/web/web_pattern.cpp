@@ -1268,6 +1268,7 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
         isMenuShownFromWeb_ = true;
         isLastEventMenuClose_ = false;
         isMenuShownFromWebBeforeStartClose_ = true;
+        OnCursorChange(OHOS::NWeb::CursorType::CT_TEMP_POINTER, nullptr, true);
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_APPEAR) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1297,6 +1298,8 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
         isMenuShownFromWebBeforeStartClose_ = false;
         isLastEventMenuClose_ = true;
         lastMenuCloseTimestamp_ = GetCurrentTimestamp();
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DISAPPEAR && isMenuShownFromWeb_) {
+        OnCursorChange(OHOS::NWeb::CursorType::CT_DRAG, nullptr, true);
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR && isMenuShownFromWeb_) {
         isMenuShownFromWeb_ = false;
     }
@@ -6484,7 +6487,8 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 }
 
 bool WebPattern::OnCursorChange(
-    const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo)
+    const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo,
+    bool useWebWindowID)
 {
     auto [type, info] = GetAndUpdateCursorStyleInfo(cursorType, cursorInfo);
     if (mouseEventDeviceId_ == RESERVED_DEVICEID1 || mouseEventDeviceId_ == RESERVED_DEVICEID2) {
@@ -6497,7 +6501,12 @@ bool WebPattern::OnCursorChange(
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto windowId = pipeline->GetWindowId();
+    uint32_t windowId = 0;
+    if (useWebWindowID && windowId_ > 0) {
+        windowId = windowId_;
+    } else {
+        windowId = pipeline->GetWindowId();
+    }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     auto container = Container::Current();
     if (container && container->IsUIExtensionWindow()) {
@@ -6540,6 +6549,10 @@ CursorStyleInfo WebPattern::GetAndUpdateCursorStyleInfo(
             type = cursorType_;
             info = nweb_cursorInfo_;
             isMouseLocked_ = false;
+            break;
+        case OHOS::NWeb::CursorType::CT_TEMP_POINTER:
+            type = OHOS::NWeb::CursorType::CT_POINTER;
+            info = nweb_cursorInfo_;
             break;
         case OHOS::NWeb::CursorType::CT_DRAG:
             type = cursorType_;
