@@ -186,7 +186,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg005, TestSize.Level1)
     instance->SetVisualState(VisualState::NORMAL);
     EXPECT_EQ(instance->GetVisualState(), 0);
     instance->SetVisualState(VisualState::HOVER);
-    EXPECT_EQ(instance->GetVisualState(), 0);
+    EXPECT_EQ(instance->GetVisualState(), 16);
     /**
      * @tc.steps: step2. clear visual state
      * @tc.expected: IsCurrentVisualStateProcess meeting expectations.

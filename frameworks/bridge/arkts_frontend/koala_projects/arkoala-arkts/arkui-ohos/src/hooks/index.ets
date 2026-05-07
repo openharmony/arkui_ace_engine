@@ -302,6 +302,7 @@ export function hookStateStyleImpl(peer: ArkCommonMethodPeer, value: StateStyles
     const UI_STATE_FOCUSED = 1 << 1;
     const UI_STATE_DISABLED = 1 << 2;
     const UI_STATE_SELECTED = 1 << 3;
+    const UI_STATE_HOVERED  = 1 << 4;
     
     let curState = 0;
     if (value?.normal) {
@@ -321,6 +322,9 @@ export function hookStateStyleImpl(peer: ArkCommonMethodPeer, value: StateStyles
     }
     if (value?.selected) {
         curState |= UI_STATE_SELECTED;
+    }
+    if (value?.hovered) {
+        curState |= UI_STATE_HOVERED;
     }
 
     let currentState = peer.getOrCreateStateStyleMutable(curState);
@@ -345,6 +349,9 @@ export function hookStateStyleImpl(peer: ArkCommonMethodPeer, value: StateStyles
     }
     if (currentState.value & UI_STATE_SELECTED) {
         value?.selected?.(cm)
+    }
+    if (currentState.value & UI_STATE_HOVERED) {
+        value?.hovered?.(cm)
     }
 
     cm.applyModifierPatch(peer)

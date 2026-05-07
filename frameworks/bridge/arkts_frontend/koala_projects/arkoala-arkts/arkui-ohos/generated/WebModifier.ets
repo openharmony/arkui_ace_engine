@@ -41,6 +41,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     applyFocusedAttribute(instance: WebAttribute): void { }
     applyDisabledAttribute(instance: WebAttribute): void { }
     applySelectedAttribute(instance: WebAttribute): void { }
+    applyHoveredAttribute(instance: WebAttribute): void { }
     public _Web_javaScriptAccess_0_0value?: boolean | undefined
     public _Web_fileAccess_0_0value?: boolean | undefined
     public _Web_onlineImageAccess_0_0value?: boolean | undefined

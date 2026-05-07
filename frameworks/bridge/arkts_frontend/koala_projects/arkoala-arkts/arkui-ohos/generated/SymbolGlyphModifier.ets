@@ -57,6 +57,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
     applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
     applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
+    applyHoveredAttribute(instance: SymbolGlyphAttribute): void { }
     // instructive change start
     public _setSymbolGlyphOptions_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     public _setSymbolGlyphOptions0_value?: global_resource_Resource | undefined

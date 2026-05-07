@@ -29,10 +29,11 @@ const UI_STATE_PRESSED = 1;
 const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
+const UI_STATE_HOVERED = 1 << 4;
 
 function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component?: ArkComponent): void {
-  if (modifier.applyPressedAttribute == undefined && modifier.applyFocusedAttribute == undefined &&
-    modifier.applyDisabledAttribute == undefined && modifier.applySelectedAttribute == undefined) {
+  if (modifier.applyPressedAttribute === undefined && modifier.applyFocusedAttribute === undefined &&
+    modifier.applyDisabledAttribute === undefined && modifier.applySelectedAttribute === undefined && modifier.applyHoveredAttribute === undefined) {
     return;
   }
   let state = 0;
@@ -47,6 +48,9 @@ function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nat
   }
   if (modifier.applySelectedAttribute !== undefined) {
     state |= UI_STATE_SELECTED;
+  }
+  if (modifier.applyHoveredAttribute !== undefined) {
+    state |= UI_STATE_HOVERED;
   }
 
   getUINativeModule().setSupportedUIState(nativeNode, state);
@@ -70,6 +74,9 @@ function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeN
   }
   if ((currentUIState & UI_STATE_SELECTED) && (modifier.applySelectedAttribute !== undefined)) {
     modifier.applySelectedAttribute(component as any);
+  }
+  if ((currentUIState & UI_STATE_HOVERED) && (modifier.applyHoveredAttribute !== undefined)) {
+    modifier.applyHoveredAttribute(component as any);
   }
 }
 
