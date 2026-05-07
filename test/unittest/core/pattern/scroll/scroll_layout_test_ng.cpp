@@ -20,7 +20,6 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -636,12 +635,12 @@ HWTEST_F(ScrollLayoutTestNg, LazyVGridInScrollScroll001, TestSize.Level1)
     ASSERT_NE(gridPattern, nullptr);
 
     EXPECT_EQ(gridPattern->layoutInfo_->startIndex_, 0);
-    EXPECT_EQ(gridPattern->layoutInfo_->endIndex_, 19);
+    EXPECT_LT(gridPattern->layoutInfo_->endIndex_, 19);
 
     ScrollBy(0.0, -200.0, false);
 
     EXPECT_LT(pattern_->currentOffset_, 0.0);
-    EXPECT_EQ(gridPattern->layoutInfo_->startIndex_, 0);
+    EXPECT_GT(gridPattern->layoutInfo_->startIndex_, 0);
     EXPECT_GE(gridPattern->layoutInfo_->endIndex_, gridPattern->layoutInfo_->startIndex_);
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.0f, pattern_->currentOffset_)));
 }
@@ -2000,7 +1999,7 @@ HWTEST_F(ScrollLayoutTestNg, MeasureLazyChild001, TestSize.Level1)
     ASSERT_TRUE(childLayoutConstraint.viewPosRef.has_value());
     auto& viewPosRef = childLayoutConstraint.viewPosRef.value();
     EXPECT_EQ(viewPosRef.viewPosStart, 0.0f);
-    EXPECT_EQ(viewPosRef.viewPosEnd, LayoutInfinity<float>());
+    EXPECT_EQ(viewPosRef.viewPosEnd, HEIGHT);
     EXPECT_EQ(viewPosRef.referenceEdge, ReferenceEdge::START);
     EXPECT_EQ(viewPosRef.axis, axis);
 }

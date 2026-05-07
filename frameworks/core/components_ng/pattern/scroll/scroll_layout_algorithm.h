@@ -103,7 +103,7 @@ public:
     void MarkAndCheckNewOpIncNode(const RefPtr<LayoutWrapper>& layoutWrapper, Axis axis);
 
 private:
-    double EstimateInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
+    void EstimateInitialOffset(LayoutWrapper* layoutWrapper, Axis axis, SizeF selfSize, double& estimateCurrentOffset);
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
