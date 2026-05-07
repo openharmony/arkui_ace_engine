@@ -28,7 +28,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/drag_drop_event.h"
-#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/gesture_event_hub_types.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"

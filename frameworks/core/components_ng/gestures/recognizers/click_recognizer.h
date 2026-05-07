@@ -27,7 +27,6 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/gestures/click_info.h"
-#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace {
 enum class AccessibilityEventType : size_t;
