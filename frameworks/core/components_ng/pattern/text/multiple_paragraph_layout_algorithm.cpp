@@ -868,8 +868,8 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize =
                     paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistributeWithEnv(
-                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
-                    textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
+                        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
             }
             spanParagraphStyle.isEndAddParagraphSpacing =
                 paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&

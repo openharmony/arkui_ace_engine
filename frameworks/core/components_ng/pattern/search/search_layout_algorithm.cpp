@@ -457,7 +457,7 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     auto searchIconFrameHight = searchIconSizeMeasure_.Height();
     auto searchIconHeight = layoutProperty->GetSearchIconUDSizeValue(
         Dimension(searchIconFrameHight)).ConvertToPxDistributeWithEnv(
-            minFontScale_, maxFontScale_, true, envFontScale_);
+        minFontScale_, maxFontScale_, true, envFontScale_);
     searchIconHeight +=
         searchTheme->GetHeight().ConvertToPxDistributeWithEnv(minFontScale_, maxFontScale_, true, envFontScale_) -
         searchTheme->GetIconHeight().ConvertToPxDistributeWithEnv(minFontScale_, maxFontScale_, true, envFontScale_);
