@@ -925,6 +925,11 @@ public:
         useDefaultBackToTop_ = useDefaultBackToTop;
     }
 
+    // Check if all parent components are active and visible
+    bool CheckParentsActive() const;
+    // Start back to top animation with performance optimization
+    void StartBackToTopAnimation();
+
     void OnStatusBarClick() override;
 
     void SetIsAllowMouse(bool enableScrollWithMouse)
@@ -1142,6 +1147,9 @@ private:
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void InitOption(AnimationOption& option, float duration, const RefPtr<Curve>& curve);
     float GetScrollDelta(float offset, bool& stopAnimation);
+    // Process spring offset animation callback
+    void ProcessSpringOffsetCallback(float offset);
+    float CalcSpringAdjustOffset(float offset) const;
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterTouchpadInteractionCallback();
@@ -1334,6 +1342,11 @@ private:
     bool isNeedCollectOffset_ = false;
     bool needFullSafeArea_ = false;
     ScrollToDirection scrollToDirection_ = ScrollToDirection::NONE;
+
+    // Back to top performance optimization
+    // Record the distance to skip during back to top animation
+    // Mark whether the skip distance has been applied
+    std::optional<float> backToTopSkipDistance_;
 };
 } // namespace OHOS::Ace::NG
 
