@@ -574,7 +574,6 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitemgroup
 frameworks/bridge/declarative_frontend/ark_component/components/arksearch.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arksymbolglyph.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkricheditor.js @arkui_rich_editor
-frameworks/bridge/declarative_frontend/ark_component/src_dir/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/types/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package-lock.json @arkuieco3
@@ -584,7 +583,6 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkfolderstack.j
 frameworks/bridge/declarative_frontend/ark_component/components/arklazywaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arklazycolumnlayout.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
-frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component_new/src/arkgauge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkcounter.ts @huawei_g_five
@@ -702,7 +700,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts @arkuis
 frameworks/bridge/declarative_frontend/ark_component/src/ArkWeb.ts @arkweb-committer-group
 frameworks/bridge/declarative_frontend/ark_component/src/ArkXComponent.ts @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/ark_component/src/import.ts @arkuieco3
-frameworks/bridge/declarative_frontend/ark_component/tsconfig.json @arkui_architecture
+frameworks/bridge/declarative_frontend/ark_component/tsconfig.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_layoutalgorithm/ @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/alphabet_indexer_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/blank_modifier.ts @arkuilayout1
