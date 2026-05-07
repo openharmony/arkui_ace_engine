@@ -2986,8 +2986,16 @@ void SwiperPattern::HandleFocusInternal()
         }
         if (itemNode->GetFirstFocusHubChild() == lastFocusNode) {
             currentFocusIndex_ = item.first;
+            auto childFrameNode = GetCurrentFrameNode(currentFocusIndex_);
+            if (childFrameNode) {
+                FlushFocus(childFrameNode);
+            }
             return;
         }
+    }
+    auto childFrameNode = GetCurrentFrameNode(currentFocusIndex_);
+    if (childFrameNode) {
+        FlushFocus(childFrameNode);
     }
 }
 
