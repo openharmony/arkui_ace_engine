@@ -230,6 +230,11 @@ public:
 
 private:
     void OnModifyDone() override;
+
+    bool NeedReadFontScaleFromEnv() override
+    {
+        return true;
+    }
     void OnAfterModifyDone() override;
     void SetAccessibilityAction();
     void SetAccessibilityClearAction();

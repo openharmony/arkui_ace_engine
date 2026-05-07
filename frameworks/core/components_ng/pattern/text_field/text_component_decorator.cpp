@@ -129,7 +129,7 @@ void CounterDecorator::UpdateTextFieldMargin()
         const auto& currentMargin = textFieldLayoutProperty->GetMarginProperty();
 
         auto counterHeight = MeasureTextNodeHeight();
-        auto curFontScale = pipeline->GetFontScale();
+        auto curFontScale = pipeline->GetFontScaleFromEnv(decoratedNode);
         auto standardHeight = theme->GetStandardCounterTextMargin().ConvertToPx();
         auto otherHeight = theme->GetCounterTextTopMargin().ConvertToPx() +
             theme->GetCounterTextBottomMargin().ConvertToPx() + counterHeight;
@@ -439,7 +439,7 @@ void CounterDecorator::HandleNonTextArea()
                          countX + textFieldPattern->GetPaddingRight();
     }
     updateCountXWithArea(textFieldPattern->GetAllResponseArea());
-    auto curFontScale = pipeline->GetFontScale();
+    auto curFontScale = pipeline->GetFontScaleFromEnv(textNode);
     auto countY = (NearEqual(curFontScale, 1.0f)) ? (frameRect.Height() + textGeometryNode->GetFrameRect().Height()) :
         (frameRect.Bottom() - frameRect.Top() + theme->GetCounterTextMarginOffset().ConvertToPx());
     textGeometryNode->SetFrameOffset(OffsetF(countX, countY));

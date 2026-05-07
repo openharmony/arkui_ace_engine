@@ -105,6 +105,11 @@ public:
     bool IsTextNode() const;
     bool DefaultSupportDrag() override;
     void OnModifyDone() override;
+
+    bool NeedReadFontScaleFromEnv() override
+    {
+        return true;
+    }
     void OnWindowHide() override;
     void OnWindowShow() override;
     void OnLanguageConfigurationUpdate() override;

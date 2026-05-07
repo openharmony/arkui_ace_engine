@@ -91,6 +91,7 @@ private:
     // cached data
     float maxFontScale_;
     float minFontScale_;
+    std::optional<float> envFontScale_;
     double searchHeight_;
     float searchWidthReducedLength_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);

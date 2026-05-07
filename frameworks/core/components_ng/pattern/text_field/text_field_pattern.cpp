@@ -9845,7 +9845,7 @@ void TextFieldPattern::DumpScaleInfo()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     auto fontWeightScale = pipeline->GetFontWeightScale();
     auto followSystem = pipeline->IsFollowSystem();
     float maxFontScale = pipeline->GetMaxAppFontScale();

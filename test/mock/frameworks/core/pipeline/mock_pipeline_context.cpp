@@ -1734,6 +1734,16 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
     return g_isContainerControlButtonVisible;
 }
 
+std::optional<float> NG::PipelineContext::ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    return std::nullopt;
+}
+
+float NG::PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    return 1.0f;
+}
+
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}

@@ -1576,7 +1576,9 @@ ArkUI_Float32 GetTextInputLetterSpacing(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    return TextFieldModelNG::GetLetterSpacing(frameNode).ConvertToFp();
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return TextFieldModelNG::GetLetterSpacing(frameNode).ConvertToFpWithEnv(pattern->GetEnvFontScale());
 }
 
 void SetTextInputLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr)

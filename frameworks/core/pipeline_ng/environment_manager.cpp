@@ -73,6 +73,20 @@ bool ReadScopeValue(
         outResult.value = value;
         return true;
     }
+    if (kind == EnvironmentPropertyKind::ENV) {
+        if (scope->GetEnvProperty(key, outResult.boolValue)) {
+            outResult.type = EnvironmentValueType::BOOLEAN;
+            return true;
+        }
+        if (scope->GetEnvProperty(key, outResult.numberValue)) {
+            outResult.type = EnvironmentValueType::NUMBER;
+            return true;
+        }
+        if (scope->GetEnvProperty(key, outResult.stringValue)) {
+            outResult.type = EnvironmentValueType::STRING;
+            return true;
+        }
+    }
     return false;
 }
 

@@ -210,6 +210,12 @@ void TextPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
     isDetachFromMainTree_ = false;
 }
 
@@ -3850,10 +3856,11 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
     auto lm = node->GetLeadingMarginValue({});
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFp();
-        textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToFp();
-        textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToFp();
-        textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToFp();
+        textStyle.fontSize =
+            node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFpWithEnv(GetEnvFontScale());
+        textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToFpWithEnv(GetEnvFontScale());
+        textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToFpWithEnv(GetEnvFontScale());
+        textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToFpWithEnv(GetEnvFontScale());
     } else {
         textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp();
         textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
@@ -4008,7 +4015,8 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
         symbolColorValue.substr(0, !symbolColorValue.empty() ? static_cast<int32_t>(symbolColorValue.size()) - 1 : 0);
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToFp();
+        symbolSpanStyle.fontSize =
+            node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToFpWithEnv(GetEnvFontScale());
     } else {
         symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
     }
@@ -5722,7 +5730,7 @@ void TextPattern::DumpScaleInfo()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     auto fontWeightScale = pipeline->GetFontWeightScale();
     auto followSystem = pipeline->IsFollowSystem();
     float maxFontScale = pipeline->GetMaxAppFontScale();
@@ -7647,7 +7655,7 @@ void TextPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     auto fontWeightScale = pipeline->GetFontWeightScale();
     json->Put("fontScale", std::to_string(fontScale).c_str());
     json->Put("fontWeightScale", std::to_string(fontWeightScale).c_str());

@@ -189,6 +189,7 @@ ace_unittest("pipeline_context_test_ng") {
 
     "$ace_root/frameworks/core/common/back_press_handler_manager.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/with_env_node.cpp",
     "$ace_root/frameworks/core/pipeline_ng/environment_manager.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
     "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",

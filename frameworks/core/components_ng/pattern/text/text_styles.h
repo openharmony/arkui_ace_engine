@@ -417,17 +417,18 @@ struct HandleInfoNG {
 PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign);
 
 ACE_FORCE_EXPORT TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false,
+    const RefPtr<Pattern>& pattern = nullptr);
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol = false);
+    TextStyle& textStyle, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
 
 ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false,
-    const std::unique_ptr<SymbolStyle>& symbolStyle = nullptr);
+    const std::unique_ptr<SymbolStyle>& symbolStyle = nullptr, const RefPtr<Pattern>& pattern = nullptr);
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
 void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme);
 
