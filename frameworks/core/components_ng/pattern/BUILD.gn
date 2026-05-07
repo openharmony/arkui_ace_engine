@@ -710,6 +710,7 @@ build_component_ng("pattern_ng") {
     }
   } else if (is_arkui_x) {
     deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
+    sources += [ "$ace_root/frameworks/core/components/dialog/dialog_properties.cpp" ]
   }
 
   if (defined(global_parts_info.graphic_graphic_3d) && !build_ohos_sdk) {
