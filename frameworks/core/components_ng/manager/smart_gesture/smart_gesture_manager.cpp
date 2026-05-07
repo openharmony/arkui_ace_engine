@@ -377,11 +377,14 @@ bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEv
     // Return value semantics: true only when smart gesture processing ends up executing
     // a concrete action successfully; false means the gesture should be treated as unhandled,
     // including monitor veto, invalid proposal, or a final NONE_ACTION proposal.
-    auto proposal = ResolveProposal(defaultProposal.value_or(BuildNoneActionProposal(trigger)));
+    auto fallbackProposal = defaultProposal.value_or(BuildNoneActionProposal(trigger));
+    auto proposal = ResolveProposal(fallbackProposal);
+    bool executeResult = false;
     if (proposal.has_value()) {
-        return ExecuteProposal(proposal.value(), event);
+        executeResult = ExecuteProposal(proposal.value(), event);
     }
-    return false;
+    RecordExecutionSnapshot(trigger, static_cast<bool>(GetMonitorHandle()), fallbackProposal, proposal, executeResult);
+    return executeResult;
 }
 
 void SmartGestureManager::RequestSelected(const std::string& inspectorId)
@@ -705,6 +708,33 @@ std::optional<SmartGestureProposal> SmartGestureManager::ResolveProposal(
         return std::nullopt;
     }
     return resolution.selectedProposal;
+}
+
+void SmartGestureManager::RecordExecutionSnapshot(SmartGestureTrigger trigger, bool hasMonitor,
+    const SmartGestureProposal& defaultProposal, const std::optional<SmartGestureProposal>& resolvedProposal,
+    bool executeResult) const
+{
+    auto context = GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+
+    SmartGestureExecutionSnapshot snapshot;
+    snapshot.trigger = trigger;
+    snapshot.hasMonitor = hasMonitor;
+    snapshot.defaultProposalType = defaultProposal.type;
+    auto defaultNode = defaultProposal.GetTargetNode();
+    snapshot.defaultProposalNodeId = defaultNode ? defaultNode->GetId() : -1;
+    if (resolvedProposal.has_value()) {
+        snapshot.resolvedProposalType = resolvedProposal->type;
+        auto resolvedNode = resolvedProposal->GetTargetNode();
+        snapshot.resolvedProposalNodeId = resolvedNode ? resolvedNode->GetId() : -1;
+    } else {
+        snapshot.resolvedProposalType = SmartGestureProposalType::NONE_ACTION;
+        snapshot.resolvedProposalNodeId = -1;
+    }
+    snapshot.executeResult = executeResult;
+    eventManager->RecordSmartGestureExecution(std::move(snapshot));
 }
 
 bool SmartGestureManager::ValidateProposal(const SmartGestureProposal& proposal) const

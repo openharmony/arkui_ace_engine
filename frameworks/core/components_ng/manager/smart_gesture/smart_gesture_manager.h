@@ -89,6 +89,9 @@ private:
     void RevealSelectedNodeIfNeeded(const RefPtr<FrameNode>& node);
     bool IsSelectedNodeValid(const RefPtr<FrameNode>& node) const;
     std::optional<SmartGestureProposal> ResolveProposal(const SmartGestureProposal& defaultProposal) const;
+    void RecordExecutionSnapshot(SmartGestureTrigger trigger, bool hasMonitor,
+        const SmartGestureProposal& defaultProposal, const std::optional<SmartGestureProposal>& resolvedProposal,
+        bool executeResult) const;
     bool ValidateProposal(const SmartGestureProposal& proposal) const;
     bool ValidateTargetNode(const RefPtr<FrameNode>& node) const;
     bool ValidateClickProposal(const SmartGestureProposal& proposal) const;

@@ -27,6 +27,7 @@
 #include "base/memory/referenced.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
@@ -76,6 +77,19 @@ struct AxisSnapshot {
     bool isInjected = false;
 };
 
+struct SmartGestureExecutionSnapshot {
+    void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
+    void Dump(std::unique_ptr<JsonValue>& json) const;
+
+    SmartGestureTrigger trigger = SmartGestureTrigger::TAP;
+    bool hasMonitor = false;
+    SmartGestureProposalType defaultProposalType = SmartGestureProposalType::NONE_ACTION;
+    int32_t defaultProposalNodeId = -1;
+    SmartGestureProposalType resolvedProposalType = SmartGestureProposalType::NONE_ACTION;
+    int32_t resolvedProposalNodeId = -1;
+    bool executeResult = false;
+};
+
 struct EventTree {
     std::list<AxisSnapshot> axis;
     std::list<TouchPointSnapshot> touchPoints;
@@ -83,6 +97,7 @@ struct EventTree {
 
     std::map<int32_t, std::list<RefPtr<GestureSnapshot>>> gestureTree;
     std::map<uint64_t, RefPtr<GestureSnapshot>> gestureMap;
+    std::deque<SmartGestureExecutionSnapshot> smartGestureExecutions;
 
     int32_t touchDownCount = 0;
     int32_t axisUpdateCount = 0;
@@ -101,6 +116,8 @@ struct EventTreeRecord {
 
     void AddGestureSnapshot(int32_t finger, RefPtr<GestureSnapshot>&& gesture);
 
+    void AddSmartGestureExecution(SmartGestureExecutionSnapshot&& snapshot);
+
     void AddGestureProcedure(uint64_t id, const std::string& procedure, const std::string& extraInfo,
         const std::string& state, const std::string& disposal, int64_t timestamp = 0);
 
@@ -115,6 +132,8 @@ struct EventTreeRecord {
     void Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int32_t startNumber = 0) const;
     void BuildTouchPoints(std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const;
     void BuildAxis(std::list<AxisSnapshot> axis, std::unique_ptr<JsonValue>& json) const;
+    void BuildSmartGestureExecutions(
+        std::deque<SmartGestureExecutionSnapshot> smartGestureExecutions, std::unique_ptr<JsonValue>& json) const;
 
     void BuildGestureTree(
         std::map<int32_t, std::list<RefPtr<GestureSnapshot>>> gestureTreeMap, std::unique_ptr<JsonValue>& json) const;

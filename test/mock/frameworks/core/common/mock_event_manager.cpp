@@ -9,9 +9,7 @@
 #include <chrono>
 #include "base/mousestyle/mouse_style.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
-#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
-#endif
 #include "core/event/focus_axis_event.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 

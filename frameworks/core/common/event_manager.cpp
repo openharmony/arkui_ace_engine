@@ -2563,6 +2563,11 @@ void EventManager::AddGestureSnapshot(
     }
 }
 
+void EventManager::RecordSmartGestureExecution(NG::SmartGestureExecutionSnapshot&& snapshot)
+{
+    eventTree_.AddSmartGestureExecution(std::move(snapshot));
+}
+
 void EventManager::SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults)
 {
     if (touchTestResults.empty()) {

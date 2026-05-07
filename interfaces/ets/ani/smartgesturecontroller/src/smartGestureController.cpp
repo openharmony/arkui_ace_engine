@@ -460,22 +460,6 @@ std::optional<bool> GetOptionalBoolPropertyByName(ani_env* env, ani_object objec
     return value == ANI_TRUE;
 }
 
-std::optional<bool> HasOwnProperty(ani_env* env, ani_object object, const char* key)
-{
-    CHECK_NULL_RETURN(env && object && key, std::nullopt);
-    ani_string aniKey = nullptr;
-    if (ANI_OK != env->String_NewUTF8(key, std::strlen(key), &aniKey)) {
-        return std::nullopt;
-    }
-
-    ani_boolean hasOwn = ANI_FALSE;
-    if (ANI_OK !=
-        env->Object_CallMethodByName_Boolean(object, "hasOwnProperty", "C{std.core.String}:z", &hasOwn, aniKey)) {
-        return std::nullopt;
-    }
-    return hasOwn == ANI_TRUE;
-}
-
 RefPtr<SmartGestureManager> GetManagerByInstanceId(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -599,10 +583,6 @@ public:
             return MonitorResolutionParseResult::SUCCESS;
         }
         if (IsUndefinedOrNull(env, selectedProposalRef)) {
-            auto hasOwnSelectedProposal = HasOwnProperty(env, value, SELECTED_PROPOSAL_KEY);
-            if (hasOwnSelectedProposal.has_value() && hasOwnSelectedProposal.value()) {
-                return MonitorResolutionParseResult::INVALID_SELECTED_PROPOSAL;
-            }
             return MonitorResolutionParseResult::SUCCESS;
         }
 

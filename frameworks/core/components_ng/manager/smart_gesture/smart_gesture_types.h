@@ -20,10 +20,9 @@
 #include <optional>
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-class FrameNode;
-
 enum class SmartGestureTrigger : uint8_t {
     TAP = 0,
     SLIDE_FORWARD,

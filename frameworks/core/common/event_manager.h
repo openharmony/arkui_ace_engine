@@ -303,6 +303,8 @@ public:
     void AddGestureSnapshot(
         int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
 
+    void RecordSmartGestureExecution(NG::SmartGestureExecutionSnapshot&& snapshot);
+
     RefPtr<NG::ResponseCtrl> GetResponseCtrl()
     {
         return responseCtrl_;
