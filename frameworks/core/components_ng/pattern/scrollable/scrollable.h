@@ -38,6 +38,10 @@ class ExtentPair;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 constexpr float FRICTION_FINAL_POSITION_THRESHOLD = 60.0f;
 
 struct SlidInfo {
@@ -81,9 +85,9 @@ class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
-    Scrollable() = default;
-    Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis) {}
-    Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis) {}
+    Scrollable();
+    Scrollable(ScrollPositionCallback&& callback, Axis axis);
+    Scrollable(const ScrollPositionCallback& callback, Axis axis);
     ~Scrollable() override;
 
     enum class AnimationState {

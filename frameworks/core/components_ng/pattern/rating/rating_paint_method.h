@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 
 namespace OHOS::Ace::NG {

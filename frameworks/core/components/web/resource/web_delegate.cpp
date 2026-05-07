@@ -14,6 +14,7 @@
  */
 
 #include "core/components/web/resource/web_delegate.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include <cctype>
 #include <cfloat>

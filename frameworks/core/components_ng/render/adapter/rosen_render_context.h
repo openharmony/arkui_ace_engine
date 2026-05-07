@@ -451,7 +451,7 @@ public:
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr, Rosen::Drawing::Rect* rect = nullptr);
     void SetActualForegroundColor(const Color& value) override;
-    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+    void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) override;

@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_AXIS_AXIS_ANIMATOR_H
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/base/modifier.h"
 #include "frameworks/core/components_ng/pattern/scrollable/axis/axis_scroll_motion.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
 

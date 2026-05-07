@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/common/container.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include <chrono>
 #include <cmath>
 #include <cinttypes>
@@ -27,6 +30,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

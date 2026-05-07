@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "ui/base/geometry/calc_dimension.h"
+#include "core/common/container.h"
 #include "ui/properties/color.h"
 
 #include "base/utils/utf_helper.h"

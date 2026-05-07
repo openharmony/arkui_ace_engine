@@ -17,6 +17,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/flex/flex_element.h"
 #include "core/event/key_event.h"
 #include "core/pipeline/base/composed_element.h"

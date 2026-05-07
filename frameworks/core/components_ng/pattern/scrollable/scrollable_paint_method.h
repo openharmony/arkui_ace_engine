@@ -16,9 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H
 
+#include <optional>
+
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
+class RenderContext;
 class ACE_FORCE_EXPORT ScrollablePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ScrollablePaintMethod, NodePaintMethod);
 public:

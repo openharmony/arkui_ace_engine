@@ -24,6 +24,10 @@
 #include "core/components/common/properties/text_enums.h"
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
+namespace OHOS::Ace {
+class Container;
+}
+
 namespace OHOS::Ace::NG {
 /**
  * The structure of Atomic Service (install free):

@@ -33,7 +33,6 @@
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
@@ -54,6 +53,10 @@
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+namespace NG {
+class DrawModifier;
+class CustomAnimatableArithmetic;
+} // namespace NG
 
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;

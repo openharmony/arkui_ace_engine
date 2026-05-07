@@ -14,6 +14,7 @@
  */
 #include "core/common/builder_util.h"
 
+#include "core/common/frontend.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

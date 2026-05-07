@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "focus_event_handler.h"
+#include "core/common/container.h"
 
 #include "core/common/event_manager.h"
 #include "core/components_ng/base/frame_node.h"

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/render/adapter/media_player_impl.h"
+#include "core/common/container.h"
 
 #include "base/i18n/localization.h"
 #include "core/components_ng/render/adapter/render_surface_impl.h"

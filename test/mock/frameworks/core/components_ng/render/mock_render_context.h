@@ -23,6 +23,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -196,7 +197,7 @@ public:
     }
 
 #ifdef ENHANCED_ANIMATION
-    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override;
+    void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
 
     void CancelTranslateXYAnimation() override;

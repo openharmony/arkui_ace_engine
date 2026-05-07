@@ -15,7 +15,9 @@
 
 #include "core/components_ng/syntax/repeat_model_ng.h"
 
+#include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/syntax/repeat_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/components_ng/render/animation_utils.h"

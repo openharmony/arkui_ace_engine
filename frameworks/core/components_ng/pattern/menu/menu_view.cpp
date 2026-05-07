@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"

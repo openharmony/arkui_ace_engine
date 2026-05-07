@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/ani/ani_theme_module.h"
+#include "core/common/container.h"
 
 #include <cstdint>
 

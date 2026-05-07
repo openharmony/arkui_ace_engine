@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/bridge/checkbox_custom_modifier.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 const int32_t ERROR_INT_CODE = -1;

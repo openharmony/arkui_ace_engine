@@ -33,6 +33,7 @@ build_component_ng("rich_editor_pattern_ng") {
     "rich_editor_scroll_controller.cpp",
     "rich_editor_select_overlay.cpp",
     "rich_editor_styled_string_controller.cpp",
+    "rich_editor_theme.cpp",
     "rich_editor_undo_manager.cpp",
     "selection_info.cpp",
   ]
@@ -42,6 +43,8 @@ build_component_ng("rich_editor_pattern_ng") {
     "bridge/rich_editor_dynamic_modifier.cpp",
     "bridge/rich_editor_dynamic_module.cpp",
   ]
+
+  component_deps = [ "theme" ]
 
   external_deps = []
 

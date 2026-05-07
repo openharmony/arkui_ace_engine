@@ -887,6 +887,7 @@ ohos_source_set("ace_components_mock") {
 ohos_source_set("ace_components_pattern") {
   testonly = true
   sources = [
+    "$ace_root/frameworks/core/components/text/text_theme.cpp",
     "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
     "$ace_root/component_ext/movingphoto/movingphoto_layout_algorithm.cpp",
     "$ace_root/component_ext/movingphoto/movingphoto_model_ng.cpp",
@@ -1021,6 +1022,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_model_ng.cpp",
@@ -1352,6 +1354,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_theme.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/selection_info.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/preview_menu_controller.cpp",

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid_col/grid_col_layout_pattern.h"

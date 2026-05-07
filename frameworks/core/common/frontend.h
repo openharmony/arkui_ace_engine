@@ -26,6 +26,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/resource_configuration.h"
 #include "bridge/common/utils/source_map.h"
+#include "core/common/frontend_type.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/router_recover_record.h"
 #include "core/event/ace_event_handler.h"
@@ -88,11 +89,6 @@ struct WindowConfig {
     }
 };
 
-enum class FrontendType {
-    JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS,
-    DYNAMIC_HYBRID_STATIC, STATIC_HYBRID_DYNAMIC
-};
-
 struct PageTarget;
 
 
@@ -121,7 +117,7 @@ public:
     ~Frontend() override;
 
     int32_t instanceId_ = -1;
-    enum State : uint8_t { ON_CREATE = 0, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
+    using State = FrontendState;
     static std::string stateToString(int state);
 
     static RefPtr<Frontend> Create();

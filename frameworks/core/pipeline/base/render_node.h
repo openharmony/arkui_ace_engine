@@ -23,7 +23,6 @@
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "base/utils/system_properties.h"
 #include "core/animation/animatable_properties.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/animation/property_animatable.h"
@@ -56,6 +55,7 @@ using AlignDeclarationPtr = AlignDeclaration*;
 enum class VisualState;
 
 ACE_FORCE_EXPORT extern const Dimension FOCUS_BOUNDARY;
+ACE_FORCE_EXPORT bool IsRosenBackendEnabledForRenderNode();
 
 class Component;
 
@@ -505,7 +505,7 @@ public:
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
-            if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
+            if (!inRecursion && IsRosenBackendEnabledForRenderNode()) {
                 MarkParentNeedRender();
             }
             if (hidden_) {
@@ -525,7 +525,7 @@ public:
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
-            if (SystemProperties::GetRosenBackendEnabled()) {
+            if (IsRosenBackendEnabledForRenderNode()) {
                 MarkParentNeedRender();
             }
         }
@@ -1117,7 +1117,7 @@ public:
     bool IsHeadRenderNode() const
     {
 #ifdef ENABLE_ROSEN_BACKEND
-        return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
+        return IsRosenBackendEnabledForRenderNode() ? isHeadRenderNode_ : false;
 #else
         return false;
 #endif

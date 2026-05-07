@@ -25,6 +25,7 @@
 namespace OHOS::Rosen {
 struct SessionUIParam;
 class RSObjAbsGeometry;
+class RSNode;
 enum class RSUINodeType : uint32_t;
 }
 
@@ -79,9 +80,9 @@ private:
     void GetUITreeInfo(const RefPtr<FrameNode>& node, int32_t depth, int32_t parentId, std::ostringstream& oss);
     void GetTotalUITreeInfo(std::string& info);
     void DumpRSNodeType(Rosen::RSUINodeType nodeType, std::ostringstream& oss);
-    void GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& rsNode, int32_t depth,
+    void GetRSNodeTreeInfo(const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t depth,
         std::ostringstream& oss);
-    void GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
+    void GetRSNodeInfo(const std::shared_ptr<Rosen::RSNode>& rsNode,
         std::ostringstream& oss);
     void IsFrameNodeAbnormal(TraverseInfo& info);
     void RemoveAbnormalId();

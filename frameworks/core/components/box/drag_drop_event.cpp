@@ -14,6 +14,7 @@
  */
 
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/gestures/long_press_recognizer.h"

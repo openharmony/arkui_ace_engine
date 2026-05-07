@@ -16,10 +16,13 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/properties/state_attributes.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"
 #include "core/gestures/gesture_processor.h"
@@ -275,6 +278,26 @@ RefPtr<GestureProcessor> ViewStackProcessor::GetOrCreateGestureProcessor()
 void ViewStackProcessor::ResetGestureProcessor()
 {
     gestureStack_.Reset();
+}
+
+void ViewStackProcessor::StartGetAccessRecordingFor(int32_t elmtId)
+{
+    accountGetAccessToNodeId_ = elmtId;
+    reservedNodeId_ = elmtId;
+    if (containerId_ != OHOS::Ace::INSTANCE_ID_UNDEFINED) {
+        restoreInstanceId_ = Container::CurrentId();
+        ContainerScope::UpdateCurrent(containerId_);
+    }
+}
+
+void ViewStackProcessor::StopGetAccessRecording()
+{
+    if (restoreInstanceId_ != OHOS::Ace::INSTANCE_ID_UNDEFINED) {
+        ContainerScope::UpdateCurrent(restoreInstanceId_);
+        restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
+    }
+    accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
+    reservedNodeId_ = ElementRegister::UndefinedElementId;
 }
 
 std::string ViewStackProcessor::GetKey()

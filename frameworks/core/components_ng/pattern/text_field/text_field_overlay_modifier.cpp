@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
+#include "core/common/container.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_field/text_field_free_scroller.h"

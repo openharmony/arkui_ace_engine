@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/common/container.h"
+#include "core/common/frontend.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/base/modifier.h"
 
 #include <sys/time.h>
 
@@ -55,6 +56,7 @@ constexpr int32_t DELTA_INDEX_3 = 3;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
 } // namespace
 
+ContainerPickerPattern::~ContainerPickerPattern() = default;
 void ContainerPickerPattern::SyncPickerParamsFromLayout()
 {
     constexpr float DEFAULT_DISPLAY_COUNT =

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 
+#include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/components/scroll/scroll_controller_base.h"

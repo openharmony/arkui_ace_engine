@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include <algorithm>
 #include <variant>
 #include "arkoala_api_generated.h"

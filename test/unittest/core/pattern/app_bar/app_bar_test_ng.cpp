@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/pipeline/container_window_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

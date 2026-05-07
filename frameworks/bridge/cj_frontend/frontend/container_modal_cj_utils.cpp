@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/frontend/container_modal_cj_utils.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/image/pixel_map.h"

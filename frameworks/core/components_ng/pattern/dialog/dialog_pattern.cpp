@@ -71,6 +71,7 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/common/color_inverter.h"

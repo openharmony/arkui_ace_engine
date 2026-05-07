@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/cppview/native_view.h"
 
+#include <inttypes.h>
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_layout_inspector_ffi.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "core/common/container_scope.h"

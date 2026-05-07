@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
+#include "core/common/container.h"
 
 #include <optional>
 

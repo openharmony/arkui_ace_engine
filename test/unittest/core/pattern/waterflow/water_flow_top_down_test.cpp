@@ -14,6 +14,9 @@
  */
 
 #include "water_flow_test_ng.h"
+
+#include "core/common/container.h"
+
 #define protected public
 #define private public
 // mock

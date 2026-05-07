@@ -15,6 +15,8 @@
 
 #include "bridge/cj_frontend/cppview/matrix2d.h"
 
+#include <inttypes.h>
+
 #include "core/components_ng/render/adapter/matrix2d.h"
 #include "core/pipeline/pipeline_base.h"
 

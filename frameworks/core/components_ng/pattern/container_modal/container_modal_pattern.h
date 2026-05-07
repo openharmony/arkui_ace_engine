@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "core/common/window.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_accessibility_property.h"

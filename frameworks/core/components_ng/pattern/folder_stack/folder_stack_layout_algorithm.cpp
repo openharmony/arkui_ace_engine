@@ -14,9 +14,11 @@
  */
 
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
+#include "core/common/container.h"
 
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
 

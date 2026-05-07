@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include <optional>
 #include "base/error/error_code.h"
 #include "core/components_ng/property/calc_length.h"

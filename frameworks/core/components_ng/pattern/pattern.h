@@ -31,6 +31,7 @@
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/event/pointer_event.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 

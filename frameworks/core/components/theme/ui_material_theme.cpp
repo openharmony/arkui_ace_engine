@@ -15,6 +15,7 @@
 
 #include "core/components/theme/ui_material_theme.h"
 
+#include "core/common/container.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"

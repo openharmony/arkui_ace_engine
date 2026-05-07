@@ -14,6 +14,7 @@
  */
 
 #include "core/image/image_source_info.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"

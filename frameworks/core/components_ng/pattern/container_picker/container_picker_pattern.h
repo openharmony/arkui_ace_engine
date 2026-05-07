@@ -33,6 +33,10 @@
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class ContainerPickerEventParam : public virtual AceType {
     DECLARE_ACE_TYPE(ContainerPickerEventParam, AceType);
 
@@ -51,7 +55,7 @@ class ACE_EXPORT ContainerPickerPattern : public NestableScrollContainer {
 
 public:
     ContainerPickerPattern() {};
-    ~ContainerPickerPattern() override = default;
+    ~ContainerPickerPattern() override;
 
     bool IsAtomicNode() const override
     {

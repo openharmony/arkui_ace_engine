@@ -23,6 +23,7 @@
 
 #define protected public
 #define private public
+#include "core/common/container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "water_flow_test_ng.h"

@@ -16,6 +16,7 @@
 #include "core/components/calendar/calendar_element.h"
 
 #include "base/i18n/localization.h"
+#include "core/common/ace_application_info.h"
 #include "core/event/key_event.h"
 #include "core/components/calendar/calendar_component_v2.h"
 #include "core/components/calendar/render_calendar.h"

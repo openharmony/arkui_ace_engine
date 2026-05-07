@@ -54,6 +54,8 @@ class RSSyncTransactionHandler;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+struct DecorButtonStyle;
+
 struct StorageWrapper {
     std::optional<napi_value> napiStorage_;
     std::optional<ani_object> aniStorage_;

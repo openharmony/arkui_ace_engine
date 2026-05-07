@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
 #include "core/animation/spring_curve.h"
+#include "core/common/container.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"

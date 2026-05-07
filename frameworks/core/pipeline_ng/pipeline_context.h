@@ -31,7 +31,6 @@
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/color_inverter.h"
-#include "core/common/frontend.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -645,10 +644,7 @@ public:
 
     void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
-    bool GetIsRequestVsync()
-    {
-        return window_->GetIsRequestVsync();
-    }
+    bool GetIsRequestVsync();
 
     bool IsLayouting() const override
     {
@@ -1292,11 +1288,7 @@ public:
 
     uint32_t ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params);
     void OnDumpBindAICaller(const std::vector<std::string>& params) const;
-    bool GetIsRequestFrame() const
-    {
-        CHECK_NULL_RETURN(window_, false);
-        return window_->GetIsRequestFrame();
-    }
+    bool GetIsRequestFrame() const;
 
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
     const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;

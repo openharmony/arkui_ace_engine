@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/base/modifier.h"
 
 #include "core/gestures/drag_event.h"
 
@@ -25,6 +26,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"

@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/linear_split/linear_split_layout_algorithm.h"
+#include "core/common/container.h"
+#include "core/common/frontend.h"
 
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
