@@ -36,6 +36,7 @@ struct EditModeOptions {
     bool enableGatherSelectedItemsAnimation = false;
     GetPreviewBadge getPreviewBadge;
     bool useDefaultMultiSelectStyle = true;
+    bool enableFingerMultiSelect = true;
 };
 
 class SelectableContainerPattern : public ScrollablePattern {

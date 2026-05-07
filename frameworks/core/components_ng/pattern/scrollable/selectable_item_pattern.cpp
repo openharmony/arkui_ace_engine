@@ -23,6 +23,9 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension EDIT_MODE_CHECK_BOX_PADDING = 8.0_vp;
+} // namespace
 
 void SelectableItemPattern::SetEditModeEnabled(bool enabled)
 {
@@ -61,10 +64,13 @@ void SelectableItemPattern::CreateEditModeCheckBox()
     }
 
     editModeCheckBoxNode_ = AceType::Claim(reinterpret_cast<FrameNode*>(checkboxHandle));
+    auto checkboxLayoutProperty = editModeCheckBoxNode_->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(checkboxLayoutProperty);
+    MarginProperty marginCheckbox;
+    marginCheckbox.SetEdges(CalcLength(EDIT_MODE_CHECK_BOX_PADDING));
+    checkboxLayoutProperty->UpdateMargin(marginCheckbox);
     editModeCheckBoxNode_->MarkModifyDone();
     host->AddChild(editModeCheckBoxNode_);
-    
-    UpdateEditModeCheckBoxPosition();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -89,7 +95,7 @@ void SelectableItemPattern::UpdateEditModeCheckBoxPosition()
     auto itemSize = geometryNode->GetFrameSize();
     auto cbGeometryNode = editModeCheckBoxNode_->GetGeometryNode();
     auto cbSize = cbGeometryNode ? cbGeometryNode->GetMarginFrameSize() : SizeF(0.0f, 0.0f);
-    float offsetX = itemSize.Width() - cbSize.Width();
+    float offsetX = !AceApplicationInfo::GetInstance().IsRightToLeft() ? (itemSize.Width() - cbSize.Width()) : 0.0f;
     float offsetY = itemSize.Height() - cbSize.Height();
     auto renderContext = editModeCheckBoxNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

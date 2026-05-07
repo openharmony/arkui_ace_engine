@@ -130,6 +130,7 @@ HWTEST_F(GridEditModeTestNg, EditModeOptionsToJsonDefault001, TestSize.Level1)
     auto editModeOptions = json->GetObject("editModeOptions");
     EXPECT_EQ(editModeOptions->GetString("useDefaultMultiSelectStyle"), "true");
     EXPECT_EQ(editModeOptions->GetString("enableGatherSelectedItemsAnimation"), "false");
+    EXPECT_EQ(editModeOptions->GetString("enableFingerMultiSelect"), "true");
 }
 
 /**
@@ -145,6 +146,7 @@ HWTEST_F(GridEditModeTestNg, EditModeOptionsToJsonCustom001, TestSize.Level1)
     EditModeOptions options;
     options.useDefaultMultiSelectStyle = false;
     options.enableGatherSelectedItemsAnimation = true;
+    options.enableFingerMultiSelect = false;
     pattern_->SetEditModeOptions(options);
 
     auto json = JsonUtil::Create(true);
@@ -153,6 +155,7 @@ HWTEST_F(GridEditModeTestNg, EditModeOptionsToJsonCustom001, TestSize.Level1)
     auto editModeOptions = json->GetObject("editModeOptions");
     EXPECT_EQ(editModeOptions->GetString("useDefaultMultiSelectStyle"), "false");
     EXPECT_EQ(editModeOptions->GetString("enableGatherSelectedItemsAnimation"), "true");
+    EXPECT_EQ(editModeOptions->GetString("enableFingerMultiSelect"), "false");
 }
 
 /**
@@ -171,6 +174,105 @@ HWTEST_F(GridEditModeTestNg, EditModeOptionsGetAfterSet001, TestSize.Level1)
 
     auto retrieved = pattern_->GetEditModeOptions();
     EXPECT_FALSE(retrieved.useDefaultMultiSelectStyle);
+}
+
+/**
+ * @tc.name: EditModeOptionsEnableFingerMultiSelectDefault001
+ * @tc.desc: Test enableFingerMultiSelect defaults to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeOptionsEnableFingerMultiSelectDefault001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    auto options = pattern_->GetEditModeOptions();
+    EXPECT_TRUE(options.enableFingerMultiSelect);
+}
+
+/**
+ * @tc.name: EditModeOptionsEnableFingerMultiSelectSetFalse001
+ * @tc.desc: Test setting enableFingerMultiSelect to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeOptionsEnableFingerMultiSelectSetFalse001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    EditModeOptions options;
+    options.enableFingerMultiSelect = false;
+    pattern_->SetEditModeOptions(options);
+
+    auto retrieved = pattern_->GetEditModeOptions();
+    EXPECT_FALSE(retrieved.enableFingerMultiSelect);
+}
+
+/**
+ * @tc.name: EditModeOptionsEnableFingerMultiSelectViaModelNG001
+ * @tc.desc: Test enableFingerMultiSelect via static GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeOptionsEnableFingerMultiSelectViaModelNG001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    EditModeOptions options;
+    options.enableFingerMultiSelect = false;
+    GridModelNG::SetEditModeOptions(AceType::RawPtr(frameNode_), options);
+
+    auto result = GridModelNG::GetEditModeOptions(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(result.enableFingerMultiSelect);
+}
+
+/**
+ * @tc.name: EditModeOptionsEnableFingerMultiSelectToJson001
+ * @tc.desc: Test ToJsonValue for enableFingerMultiSelect toggle
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeOptionsEnableFingerMultiSelectToJson001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    EditModeOptions options;
+    options.enableFingerMultiSelect = false;
+    pattern_->SetEditModeOptions(options);
+
+    auto json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+    auto editModeOptions = json->GetObject("editModeOptions");
+    EXPECT_EQ(editModeOptions->GetString("enableFingerMultiSelect"), "false");
+
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    auto json2 = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json2, filter);
+    auto editModeOptions2 = json2->GetObject("editModeOptions");
+    EXPECT_EQ(editModeOptions2->GetString("enableFingerMultiSelect"), "true");
+}
+
+/**
+ * @tc.name: EditModeOptionsAllFieldsRoundTrip001
+ * @tc.desc: Test all EditModeOptions fields survive set/get round trip
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeOptionsAllFieldsRoundTrip001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    EditModeOptions options;
+    options.enableGatherSelectedItemsAnimation = true;
+    options.useDefaultMultiSelectStyle = false;
+    options.enableFingerMultiSelect = false;
+    pattern_->SetEditModeOptions(options);
+
+    auto retrieved = pattern_->GetEditModeOptions();
+    EXPECT_TRUE(retrieved.enableGatherSelectedItemsAnimation);
+    EXPECT_FALSE(retrieved.useDefaultMultiSelectStyle);
+    EXPECT_FALSE(retrieved.enableFingerMultiSelect);
 }
 
 /**
@@ -342,6 +444,157 @@ HWTEST_F(GridEditModeTestNg, SwipeSelectInitValues001, TestSize.Level1)
     EXPECT_EQ(pattern_->swipeSelectState_, SelectableContainerPattern::SwipeSelectState::INACTIVE);
     EXPECT_TRUE(pattern_->swipeOriginalStates_.empty());
     EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
+}
+
+// ============================================================
+// Step 3: EnableEditModeChangeEvent — 双向绑定
+// ============================================================
+
+/**
+ * @tc.name: EnableEditModeChangeEventFireOnChange001
+ * @tc.desc: Test changeEvent fires when enableEditMode changes from false to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EnableEditModeChangeEventFireOnChange001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    bool callbackFired = false;
+    bool callbackValue = false;
+    pattern_->SetEnableEditModeChangeEvent([&](bool editMode) {
+        callbackFired = true;
+        callbackValue = editMode;
+    });
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(callbackFired);
+    EXPECT_TRUE(callbackValue);
+}
+
+/**
+ * @tc.name: EnableEditModeChangeEventFireOnFalse001
+ * @tc.desc: Test changeEvent fires when enableEditMode changes from true to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EnableEditModeChangeEventFireOnFalse001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditMode(true);
+
+    bool callbackFired = false;
+    bool callbackValue = true;
+    pattern_->SetEnableEditModeChangeEvent([&](bool editMode) {
+        callbackFired = true;
+        callbackValue = editMode;
+    });
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_TRUE(callbackFired);
+    EXPECT_FALSE(callbackValue);
+}
+
+/**
+ * @tc.name: EnableEditModeChangeEventNoFireSameValue001
+ * @tc.desc: Test changeEvent does NOT fire when setting same value
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EnableEditModeChangeEventNoFireSameValue001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditMode(true);
+
+    int32_t fireCount = 0;
+    pattern_->SetEnableEditModeChangeEvent([&](bool editMode) {
+        fireCount++;
+    });
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_EQ(fireCount, 0);
+}
+
+/**
+ * @tc.name: EnableEditModeChangeEventNoCallback001
+ * @tc.desc: Test no crash when no changeEvent registered and value changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EnableEditModeChangeEventNoCallback001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    EXPECT_NO_FATAL_FAILURE(pattern_->SetEnableEditMode(true));
+    EXPECT_NO_FATAL_FAILURE(pattern_->SetEnableEditMode(false));
+}
+
+/**
+ * @tc.name: EnableEditModeChangeEventFireTwice001
+ * @tc.desc: Test changeEvent fires on each toggle
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EnableEditModeChangeEventFireTwice001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    std::vector<bool> receivedValues;
+    pattern_->SetEnableEditModeChangeEvent([&](bool editMode) {
+        receivedValues.push_back(editMode);
+    });
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->SetEnableEditMode(false);
+    ASSERT_EQ(receivedValues.size(), 2U);
+    EXPECT_TRUE(receivedValues[0]);
+    EXPECT_FALSE(receivedValues[1]);
+}
+
+/**
+ * @tc.name: EnableEditModeChangeEventViaModelNG001
+ * @tc.desc: Test changeEvent fires when using GridModelNG::SetEnableEditMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EnableEditModeChangeEventViaModelNG001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    bool callbackFired = false;
+    bool callbackValue = false;
+    pattern_->SetEnableEditModeChangeEvent([&](bool editMode) {
+        callbackFired = true;
+        callbackValue = editMode;
+    });
+
+    GridModelNG::SetEnableEditMode(AceType::RawPtr(frameNode_), true);
+    EXPECT_TRUE(callbackFired);
+    EXPECT_TRUE(callbackValue);
+}
+
+/**
+ * @tc.name: EnableEditModeChangeEventViaModelNGStatic001
+ * @tc.desc: Test SetEnableEditModeChangeEvent via static GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EnableEditModeChangeEventViaModelNGStatic001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    bool callbackFired = false;
+    bool callbackValue = false;
+    GridModelNG::SetEnableEditModeChangeEvent(AceType::RawPtr(frameNode_), [&](bool editMode) {
+        callbackFired = true;
+        callbackValue = editMode;
+    });
+
+    GridModelNG::SetEnableEditMode(AceType::RawPtr(frameNode_), true);
+    EXPECT_TRUE(callbackFired);
+    EXPECT_TRUE(callbackValue);
 }
 
 } // namespace OHOS::Ace::NG

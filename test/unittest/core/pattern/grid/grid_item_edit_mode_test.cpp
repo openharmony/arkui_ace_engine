@@ -662,4 +662,94 @@ HWTEST_F(GridItemEditModeTestNg, OnEditModeCheckBoxClickDeselectFiresEvent001, T
     EXPECT_FALSE(eventValue);
 }
 
+// ============================================================
+// Checkbox margin padding (commit: add padding to checkbox)
+// ============================================================
+
+/**
+ * @tc.name: CheckBoxHasMarginPadding001
+ * @tc.desc: Test edit mode checkbox has margin padding applied
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemEditModeTestNg, CheckBoxHasMarginPadding001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    auto itemPattern = GetItemPattern(0);
+    ASSERT_NE(itemPattern, nullptr);
+
+    itemPattern->SetEditModeEnabled(true);
+    ASSERT_NE(itemPattern->editModeCheckBoxNode_, nullptr);
+
+    auto checkboxLayoutProperty = itemPattern->editModeCheckBoxNode_->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(checkboxLayoutProperty, nullptr);
+    const auto& margin = checkboxLayoutProperty->GetMarginProperty();
+    ASSERT_NE(margin, nullptr);
+    EXPECT_TRUE(margin->left.has_value() || margin->right.has_value()
+        || margin->top.has_value() || margin->bottom.has_value());
+}
+
+/**
+ * @tc.name: CreateEditModeCheckBoxNullHandleNoCrash001
+ * @tc.desc: Verify no crash when createCheckboxFrameNode returns null handle.
+ *           Tests the null-safety of the full CreateEditModeCheckBox flow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemEditModeTestNg, CreateEditModeCheckBoxNullHandleNoCrash001, TestSize.Level2)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    auto itemPattern = GetItemPattern(0);
+    ASSERT_NE(itemPattern, nullptr);
+    ASSERT_EQ(itemPattern->editModeCheckBoxNode_, nullptr);
+
+    EXPECT_NO_FATAL_FAILURE(itemPattern->CreateEditModeCheckBox());
+}
+
+/**
+ * @tc.name: UpdateEditModeCheckBoxPositionNoGeometryNoCrash001
+ * @tc.desc: Verify no crash when editModeCheckBoxNode_ has null geometry node,
+ *           which can happen if checkbox creation partially failed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemEditModeTestNg, UpdateEditModeCheckBoxPositionNoGeometryNoCrash001, TestSize.Level2)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    auto itemPattern = GetItemPattern(0);
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->SetEditModeEnabled(true);
+    ASSERT_NE(itemPattern->editModeCheckBoxNode_, nullptr);
+
+    EXPECT_NO_FATAL_FAILURE(itemPattern->UpdateEditModeCheckBoxPosition());
+}
+
+/**
+ * @tc.name: SyncCheckBoxFromItemNoCrashWithoutCheckBox001
+ * @tc.desc: Verify SyncCheckBoxFromItem does not crash when editModeCheckBoxNode_ is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemEditModeTestNg, SyncCheckBoxFromItemNoCrashWithoutCheckBox001, TestSize.Level2)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    auto itemPattern = GetItemPattern(0);
+    ASSERT_NE(itemPattern, nullptr);
+    ASSERT_EQ(itemPattern->editModeCheckBoxNode_, nullptr);
+
+    EXPECT_NO_FATAL_FAILURE(itemPattern->SyncCheckBoxFromItem());
+}
+
 } // namespace OHOS::Ace::NG
