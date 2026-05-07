@@ -261,4 +261,20 @@ RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItem(
     }
     return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
 }
+
+RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItemByIndex(
+    LayoutWrapper* layoutWrapper, int32_t index, bool isCache)
+{
+    CHECK_NULL_RETURN(layoutWrapper, nullptr);
+    const auto& layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
+        auto wrapper = layoutWrapper->GetChildByIndex(index, isCache);
+        if (!wrapper) {
+            wrapper = CreateDummyFlowItem();
+        }
+        return wrapper;
+    }
+    return layoutWrapper->GetChildByIndex(index, isCache);
+}
 } // namespace OHOS::Ace::NG

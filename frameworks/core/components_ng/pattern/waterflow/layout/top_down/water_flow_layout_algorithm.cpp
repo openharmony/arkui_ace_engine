@@ -309,8 +309,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             const bool inRange = item.first >= layoutInfo_->startIndex_ && item.first <= layoutInfo_->endIndex_;
             const bool isCache = !showCache && !inRange;
-            auto wrapper = WaterFlowLayoutUtils::GetWaterFlowItem(
-                layoutWrapper, GetChildIndexWithFooter(item.first), !isCache, isCache);
+            auto wrapper = WaterFlowLayoutUtils::GetWaterFlowItemByIndex(
+                layoutWrapper, GetChildIndexWithFooter(item.first), isCache);
             if (!wrapper) {
                 continue;
             }
