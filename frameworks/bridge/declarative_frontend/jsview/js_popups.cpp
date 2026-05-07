@@ -2430,6 +2430,18 @@ NG::SheetEffectEdge JSViewAbstract::ParseSheetEffectEdge(const JSRef<JSObject>& 
     return static_cast<NG::SheetEffectEdge>(sheetEffectEdge);
 }
 
+void JSViewPopups::ParseSheetEdgeLightMode(const JSRef<JSVal>& edgeLightMode, NG::SheetStyle& sheetStyle)
+{
+    sheetStyle.sheetEdgeLightMode.reset();
+    if (edgeLightMode->IsNumber()) {
+        auto sheetEdgeLightMode = edgeLightMode->ToNumber<int32_t>();
+        if (sheetEdgeLightMode >= static_cast<int>(EdgeLightMode::EDGELIGHT_AUTO) &&
+            sheetEdgeLightMode <= static_cast<int>(EdgeLightMode::EDGELIGHT_DISABLED)) {
+            sheetStyle.sheetEdgeLightMode = static_cast<EdgeLightMode>(sheetEdgeLightMode);
+        }
+    }
+}
+
 void JSViewAbstract::ParseSheetStyle(
     const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
@@ -2449,11 +2461,14 @@ void JSViewAbstract::ParseSheetStyle(
     auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
     auto systemMaterialObj = paramObj->GetProperty("systemMaterial");
+    auto edgeLightMode = paramObj->GetProperty("edgeLightMode");
     if (systemMaterialObj->IsObject()) {
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
         sheetStyle.systemMaterial = material->Copy();
     }
-    
+
+    JSViewPopups::ParseSheetEdgeLightMode(edgeLightMode, sheetStyle);
+
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
         auto prop = obj->GetProperty("instanceId_");

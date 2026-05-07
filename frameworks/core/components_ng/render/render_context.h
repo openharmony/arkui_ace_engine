@@ -67,6 +67,7 @@ struct UiMaterialInfo;
 struct ImmersiveMaterialConfig;
 enum class MaterialType;
 enum class UiMaterialFilterQuality;
+class RenderEdgeLightModifier;
 }
 
 namespace OHOS::Ace::Kit {
@@ -372,6 +373,9 @@ public:
     virtual void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) {}
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}
+
+    virtual void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) {}
+
     void SetSystemMaterial(const RefPtr<UiMaterial>& material);
     virtual void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)

@@ -38,6 +38,7 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_union_node.h"
 #include "rosen_render_context.h"
+#include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
@@ -1827,6 +1828,17 @@ void RosenRenderContext::ResetShadowPath()
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetShadowPath(nullptr);
+}
+
+void RosenRenderContext::SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter)
+{
+    FREE_RS_CONTEXT_CHECK(SetForegroundShader, edgeLightFilter);
+    CHECK_NULL_VOID(rsNode_);
+    if (!edgeLightFilter) {
+        rsNode_->SetForegroundShader(nullptr);
+        return;
+    }
+    rsNode_->SetForegroundShader(edgeLightFilter->GetEdgeLightEffect());
 }
 
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
