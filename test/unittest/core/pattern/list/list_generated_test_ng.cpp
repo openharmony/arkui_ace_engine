@@ -1786,4 +1786,48 @@ HWTEST_F(ListGeneratedTestNg, ListSwipeSelectMarkGroupItem001, TestSize.Level1)
     EXPECT_FALSE(listItems[1]->GetPattern<ListItemPattern>()->IsSelected());
     EXPECT_FALSE(listItems[2]->GetPattern<ListItemPattern>()->IsSelected());
 }
+
+/**
+ * @tc.name: SetListItemGroupParamStackFromEndContentOffset001
+ * @tc.desc: Test ListLayoutAlgorithm keeps visual content offset for ListItemGroup when stackFromEnd is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, SetListItemGroupParamStackFromEndContentOffset001, TestSize.Level1)
+{
+    auto contentEndOffset = 50.0f;
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listLayoutAlgorithm->isStackFromEnd_ = true;
+    listLayoutAlgorithm->totalItemCount_ = 1;
+    listLayoutAlgorithm->contentStartOffset_ = 0.0f;
+    listLayoutAlgorithm->contentEndOffset_ = contentEndOffset;
+    listLayoutAlgorithm->scrollSnapAlign_ = ScrollSnapAlign::NONE;
+    listLayoutAlgorithm->ProcessStackFromEnd();
+    EXPECT_EQ(listLayoutAlgorithm->contentStartOffset_, contentEndOffset);
+    EXPECT_EQ(listLayoutAlgorithm->contentEndOffset_, 0.0f);
+
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::NONE});
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ListLayoutProperty> groupLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = groupLayoutProperty;
+    listItemGroupPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, groupLayoutProperty);
+    layoutWrapper->hostNode_ = frameNode;
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(0, 0, 0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
+
+    listLayoutAlgorithm->SetListItemGroupParam(layoutWrapper, 0, 0.0f, true, listLayoutProperty, false);
+
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentStartOffset_, 0.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentEndOffset_, contentEndOffset);
+}
 } // namespace OHOS::Ace::NG
