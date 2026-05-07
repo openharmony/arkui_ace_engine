@@ -2517,7 +2517,7 @@ frameworks/core/components_ng/pattern/image_animator/ @arkui001
 frameworks/core/components_ng/pattern/image/ @arkui001
 frameworks/core/components_ng/pattern/indexer/ @arkui_navigation
 frameworks/core/components_ng/pattern/lazy_layout/ @arkuiscroll
-frameworks/core/components_ng/pattern/lazy_waterflow/ @arkuiscroll
+frameworks/core/components_ng/pattern/lazy_waterflow_layout/ @arkuiscroll
 frameworks/core/components_ng/pattern/lazy_column_layout/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_indicator/ @arkui_navigation
 frameworks/core/components_ng/pattern/linear_layout/ @arkuilayout1

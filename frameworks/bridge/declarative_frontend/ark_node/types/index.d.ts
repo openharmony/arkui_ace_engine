@@ -184,6 +184,8 @@ declare class ArkLazyVGridLayoutComponent extends ArkComponent {}
 
 declare class ArkLazyColumnLayoutComponent extends ArkComponent {}
 
+declare class ArkLazyVWaterFlowLayoutComponent extends ArkComponent {}
+
 declare class ArkContainerPickerComponent extends ArkComponent {}
 
 declare class SwiperController {}

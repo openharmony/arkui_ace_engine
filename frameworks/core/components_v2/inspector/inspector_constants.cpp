@@ -698,4 +698,7 @@ const char CUSTOM_ETS_TAG[] = "Custom";
 
 // LazyColumnLayout
 const char LAZY_COLUMN_LAYOUT_ETS_TAG[] = "LazyColumnLayout";
+
+// LazyVWaterFlowLayout
+const char LAZY_V_WATERFLOW_LAYOUT_ETS_TAG[] = "LazyVWaterFlowLayout";
 } // namespace OHOS::Ace::V2

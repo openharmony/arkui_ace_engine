@@ -16,11 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_LAYOUT_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_LAYOUT_UTILS_H
 
+#include <optional>
 #include <vector>
 
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+
+// Ancestor WaterFlow + whether the path crosses a FlowItem (a path through FlowItem makes the WaterFlow's
+// lane count irrelevant to the lazy contract).
+struct WaterFlowAncestorInfo {
+    RefPtr<FrameNode> node;
+    bool throughFlowItem = false;
+};
 
 struct ACE_FORCE_EXPORT LazyLayoutUtils {
     static bool IsAllowedIntermediateNode(const RefPtr<UINode>& node);
@@ -29,6 +37,11 @@ struct ACE_FORCE_EXPORT LazyLayoutUtils {
     static std::optional<ViewPosReference> GetViewPosReference(
         const RefPtr<FrameNode>& frameNode,
         const std::vector<std::string>& extraAllowedTags = {});
+
+    // True iff a WaterFlow ancestor exists WITHOUT crossing a FlowItem.
+    static bool HasDirectWaterFlowAncestor(const RefPtr<FrameNode>& frameNode);
+
+    static std::optional<WaterFlowAncestorInfo> FindWaterFlowAncestorInfo(const RefPtr<FrameNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::NG

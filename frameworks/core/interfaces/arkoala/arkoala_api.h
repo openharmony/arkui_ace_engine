@@ -9164,6 +9164,19 @@ struct ArkUIDynamicLayoutModifier {
     void (*createDynamicLayout)(void* params, ArkUI_Int32 type);
 };
 
+struct ArkUILazyWaterFlowLayoutModifier {
+    void (*setColumnsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap);
+    void (*resetColumnsGap)(ArkUINodeHandle node);
+    void (*setRowsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap);
+    void (*resetRowsGap)(ArkUINodeHandle node);
+    void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
+    void (*resetColumnsTemplate)(ArkUINodeHandle node);
+    void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* extraParam);
+    void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
+    void (*setItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 policy);
+    void (*resetItemFillPolicy)(ArkUINodeHandle node);
+};
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -9291,6 +9304,7 @@ struct ArkUINodeModifiers {
     const ArkUIMatrix4Modifier* (*getMatrix4Modifier)();
     const ArkUIDynamicLayoutModifier* (*getDynamicLayoutModifier)();
     const ArkUILazyColumnLayoutModifier* (*getLazyColumnLayoutModifier)();
+    const ArkUILazyWaterFlowLayoutModifier* (*getLazyWaterFlowLayoutModifier)();
 };
 
 // same as inner defines in property.h

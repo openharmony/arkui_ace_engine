@@ -198,6 +198,7 @@ static const std::unordered_set<std::string> supportedTargetsInCustomEnv = {
     "PinchRecognizer",
     "RotationRecognizer",
     "TouchRecognizer",
+    "LazyVWaterFlowLayout",
 };
 } // namespace OHOS::Ace::Framework
 

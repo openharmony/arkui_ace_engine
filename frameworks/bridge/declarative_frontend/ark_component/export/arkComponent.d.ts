@@ -2218,3 +2218,11 @@ declare class ArkLazyColumnLayoutComponent extends ArkComponent implements LazyC
     alignItems(value: HorizontalAlign | undefined): this;
     onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
 }
+
+declare class ArkLazyVWaterFlowLayoutComponent extends ArkComponent implements LazyVWaterFlowLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    columnsTemplate(value: string | ItemFillPolicy): this;
+    onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
+    columnsGap(value: LengthMetrics): this;
+    rowsGap(value: LengthMetrics): this;
+}

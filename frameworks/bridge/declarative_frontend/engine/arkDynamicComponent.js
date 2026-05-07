@@ -359,6 +359,19 @@ if (globalThis.WaterFlow === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.LazyVWaterFlowLayout === undefined) {
+  globalThis.LazyVWaterFlowLayout = {
+    create: function() {
+      getUINativeModule().loadNativeModule('LazyVWaterFlowLayout');
+      let module = globalThis.requireNapi('arkui.components.arklazywaterflowlayout');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().lazyVWaterFlowLayout.create();
+    }
+  }
+}
+
+// @ts-ignore
 if (globalThis.FlowItem === undefined) {
   globalThis.FlowItem = {
     create: function(params) {

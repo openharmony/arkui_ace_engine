@@ -159,6 +159,7 @@ interface Component3DAttribute extends CommonAttribute {}
 interface ContainerSpanAttribute extends CommonAttribute {}
 interface LazyVGridLayoutAttribute extends CommonAttribute {}
 interface LazyColumnLayoutAttribute extends CommonAttribute {}
+interface LazyVWaterFlowLayoutAttribute extends CommonAttribute {}
 
 type ResourceColor = Resource | string | number | Color;
 type ResourceStr = string | Resource;

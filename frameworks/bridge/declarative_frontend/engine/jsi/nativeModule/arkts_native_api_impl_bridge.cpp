@@ -542,6 +542,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         {"Rating"},
         { "FlowItem" },
         { "WaterFlow" },
+        { "LazyVWaterFlowLayout" },
         { "ColumnSplit" },
         { "RowSplit" },
         { "Marquee" },

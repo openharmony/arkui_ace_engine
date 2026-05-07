@@ -151,6 +151,7 @@ template("ace_core_interfaces_native_node") {
       "node/styled_string_impl.cpp",
       "runtime/runtime_init.cpp",
       "node/lazy_column_layout_modifier.cpp",
+      "node/lazy_water_flow_layout_modifier.cpp",
     ]
 
     if (!is_arkui_x) {

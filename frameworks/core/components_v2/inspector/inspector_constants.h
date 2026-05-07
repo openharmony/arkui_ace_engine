@@ -707,5 +707,8 @@ ACE_EXPORT extern const char CUSTOM_ETS_TAG[];
 
 // LazyColumnLayout
 ACE_EXPORT extern const char LAZY_COLUMN_LAYOUT_ETS_TAG[];
+
+// LazyVWaterFlowLayout
+ACE_EXPORT extern const char LAZY_V_WATERFLOW_LAYOUT_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

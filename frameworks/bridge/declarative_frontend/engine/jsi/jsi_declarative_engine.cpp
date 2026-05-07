@@ -836,6 +836,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "TimePickerDialog", "arkui.components.arktimepicker" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
         { "LazyColumnLayout", "arkui.components.arklazycolumnlayout" },
+        { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
