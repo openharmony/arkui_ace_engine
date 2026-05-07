@@ -21,7 +21,6 @@
 #include <map>
 
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace::NG {
 

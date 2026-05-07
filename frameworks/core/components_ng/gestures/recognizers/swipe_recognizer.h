@@ -23,7 +23,6 @@
 #include "base/utils/type_definition.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/event/touch_event.h"
-#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace::NG {
 
