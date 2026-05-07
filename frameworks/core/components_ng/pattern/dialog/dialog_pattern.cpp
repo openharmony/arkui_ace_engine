@@ -2228,6 +2228,7 @@ void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         InitHostWindowRect();
+        InitParentWindowRect();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         isFoldStatusChanged_ = false;
     }
@@ -2292,6 +2293,19 @@ void DialogPattern::InitHostWindowRect()
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     }
     TAG_LOGI(AceLogTag::ACE_DIALOG, "InitHostWindowRect: %{public}s", hostWindowRect_.ToString().c_str());
+}
+
+void DialogPattern::InitParentWindowRect()
+{
+    if (!dialogProperties_.isShowInSubWindow || isUIExtensionSubWindow_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(host->GetInstanceId());
+    CHECK_NULL_VOID(subwindow);
+    auto rect = subwindow->GetParentWindowRect();
+    parentWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
 }
 
 void DialogPattern::DumpInfo(std::unique_ptr<JsonValue>& json)

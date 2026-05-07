@@ -333,6 +333,16 @@ bool GetImmersiveMode(ani_env* env, ani_object object, OHOS::Ace::ImmersiveMode&
     return true;
 }
 
+bool GetDisplayModeInSubWindow(ani_env* env, ani_object object, OHOS::Ace::DialogDisplayModeInSubWindow& result)
+{
+    ani_int resultInt;
+    if (!GetEnumInt(env, object, "displayModeInSubWindow", "arkui.component.enums.DialogDisplayMode", resultInt)) {
+        return false;
+    }
+    result = static_cast<OHOS::Ace::DialogDisplayModeInSubWindow>(resultInt);
+    return true;
+}
+
 void UpdateDialogAlignment(OHOS::Ace::DialogAlignment& alignment)
 {
     bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -415,6 +425,7 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetDialogAlignment(env, object, dialogProps.alignment);
     GetOffsetParam(env, object, dialogProps.offset);
     GetBoolParam(env, object, "showInSubWindow", dialogProps.isShowInSubWindow);
+    GetDisplayModeInSubWindow(env, object, dialogProps.displayModeInSubWindow);
     GetBoolParam(env, object, "isModal", dialogProps.isModal);
     GetResourceColorParamOpt(env, object, "backgroundColor", dialogProps.backgroundColor);
     GetBackgroundBlurStyleParamOpt(env, object, dialogProps.backgroundBlurStyle);
@@ -995,6 +1006,7 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetDialogAlignment(env, object, dialogProps.alignment);
     GetOffsetParam(env, object, dialogProps.offset);
     GetBoolParam(env, object, "showInSubWindow", dialogProps.isShowInSubWindow);
+    GetDisplayModeInSubWindow(env, object, dialogProps.displayModeInSubWindow);
     GetBoolParam(env, object, "isModal", dialogProps.isModal);
     GetBoolParam(env, object, "autoCancel", dialogProps.autoCancel);
     GetResourceColorParamOpt(env, object, "maskColor", dialogProps.maskColor);

@@ -182,6 +182,7 @@ public:
     {
         dialogProperties_ = param;
         InitHostWindowRect();
+        InitParentWindowRect();
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
@@ -270,6 +271,11 @@ public:
         return hostWindowRect_;
     }
 
+    RectF GetParentWindowRect() const
+    {
+        return parentWindowRect_;
+    }
+
     void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
     {
         foldDisplayModeChangedCallbackId_ = id;
@@ -312,6 +318,7 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void InitParentWindowRect();
     void UpdateHostWindowRect();
     void UpdateFontScale();
 
@@ -567,6 +574,7 @@ private:
     bool isDialogDisposed_ = false;
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
+    RectF parentWindowRect_;
 };
 } // namespace OHOS::Ace::NG
 

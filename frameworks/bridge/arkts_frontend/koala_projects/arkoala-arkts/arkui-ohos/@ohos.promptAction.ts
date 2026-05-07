@@ -23,7 +23,7 @@ import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, Tr
 import { CustomBuilder } from 'arkui/framework'
 import { DialogAlignment } from 'arkui/framework'
 import { DismissDialogAction, LevelOrderExtender } from 'arkui/framework'
-import { BorderStyle, Alignment } from 'arkui/framework'
+import { BorderStyle, Alignment, DialogDisplayMode } from 'arkui/framework'
 import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
 import { AsyncCallback } from 'arkui/base';
@@ -174,6 +174,7 @@ declare namespace promptAction {
         offset?: Offset;
         showInSubWindow?: boolean;
         isModal?: boolean;
+        displayModeInSubWindow?: DialogDisplayMode;
         autoCancel?: boolean;
         transition?: TransitionEffect;
         dialogTransition?: TransitionEffect;

@@ -45,6 +45,7 @@ import arkui.component.units.EdgeWidths as EdgeWidths;
 import arkui.component.units.EdgeColors as EdgeColors;
 import arkui.component.units.EdgeStyles as EdgeStyles;
 import arkui.component.enums.BorderStyle as BorderStyle;
+import arkui.component.enums.DialogDisplayMode as DialogDisplayMode;
 import arkui.Graphics.LengthMetrics as LengthMetrics;
 import ohos.promptAction.LevelMode as LevelMode;
 import ohos.promptAction.ImmersiveMode as ImmersiveMode;
@@ -123,6 +124,8 @@ interface CustomDialogControllerOptionsExtender {
   attribute AnimateParam closeAnimation;
   [Optional]
   attribute boolean showInSubWindow;
+  [Optional]
+  attribute DialogDisplayMode displayModeInSubWindow;
   [Optional]
   attribute ResourceColor backgroundColor;
   [Optional]

@@ -84,6 +84,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     keyboardAvoidDistance_ = dialogPattern->GetDialogProperties().keyboardAvoidDistance;
     isUIExtensionSubWindow_ = dialogPattern->IsUIExtensionSubWindow();
     hostWindowRect_ = dialogPattern->GetHostWindowRect();
+    parentWindowRect_ = dialogPattern->GetParentWindowRect();
+    displayModeInSubWindow_ = dialogProp->GetDisplayModeInSubWindowValue(DialogDisplayModeInSubWindow::SCREEN_BASED);
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
@@ -100,6 +102,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
     isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
+    isWindowBased_ = displayModeInSubWindow_ == DialogDisplayModeInSubWindow::WINDOW_BASED && isShowInSubWindow_ &&
+        !customSize_ && !isUIExtensionSubWindow_ && expandDisplay_;
     AdjustHoverModeForWaterfall(hostNode);
 
     auto windowManager = pipeline->GetWindowManager();
@@ -966,6 +970,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto isHostWindowAlign = isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
+    maxSize = isWindowBased_ ? parentWindowRect_.GetSize() : maxSize;
     wrapperSize_ = layoutConstraint->maxSize;
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
@@ -984,7 +989,28 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     }
     auto childOffset = AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
     AvoidScreen(childOffset, prop, dialogChildSize_);
+    AvoidTitlebarInSubwindow(childOffset, prop);
     return childOffset;
+}
+
+void DialogLayoutAlgorithm::AvoidTitlebarInSubwindow(
+    OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp)
+{
+    CHECK_NULL_VOID(isWindowBased_);
+    auto host = dialogProp->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto currentWindowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    topLeftPoint += (parentWindowRect_.GetOffset() - OffsetF(currentWindowOffset.GetX(), currentWindowOffset.GetY()));
+    auto mainPipeline = DialogManager::GetMainPipelineContext(host);
+    CHECK_NULL_VOID(mainPipeline);
+    auto distanceFromTitle = parentWindowRect_.GetOffset().GetY() + floatButtonsHeight_ +
+                             mainPipeline->GetContainerModalTitleHeight() - topLeftPoint.GetY() -
+                             currentWindowOffset.GetY();
+    if (Positive(distanceFromTitle)) {
+        topLeftPoint.AddY(distanceFromTitle);
+    }
 }
 
 bool DialogLayoutAlgorithm::IsAlignmentByWholeScreen()

@@ -371,6 +371,14 @@ void CustomDialogControllerPeerImpl::SetShowInSubWindow(Opt_Boolean showInSubWin
     }
 }
 
+void CustomDialogControllerPeerImpl::SetDisplayModeInSubWindow(Opt_DialogDisplayMode displayModeInSubWindow)
+{
+    auto result = Converter::OptConvert<DialogDisplayModeInSubWindow>(displayModeInSubWindow);
+    if (result) {
+        dialogProperties_.displayModeInSubWindow = result.value();
+    }
+}
+
 void CustomDialogControllerPeerImpl::SetBackgroundColor(Opt_ResourceColor backgroundColor)
 {
     dialogProperties_.backgroundColor = Converter::OptConvert<Color>(backgroundColor);

@@ -53,8 +53,8 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
-const std::vector<DialogDisplayMode> DIALOG_DISPLAY_MODE = {
-    DialogDisplayMode::SCREEN_BASED, DialogDisplayMode::WINDOW_BASED };
+const std::vector<DialogDisplayModeInSubWindow> DIALOG_DISPLAY_MODE_IN_SUBWINDOW = {
+    DialogDisplayModeInSubWindow::SCREEN_BASED, DialogDisplayModeInSubWindow::WINDOW_BASED };
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -681,6 +681,7 @@ struct PromptAsyncContext {
     napi_value buttonsNApi = nullptr;
     napi_value autoCancel = nullptr;
     napi_value showInSubWindow = nullptr;
+    napi_value displayModeInSubWindowApi = nullptr;
     napi_value isModal = nullptr;
     napi_value alignmentApi = nullptr;
     napi_value offsetApi = nullptr;
@@ -743,7 +744,6 @@ struct PromptAsyncContext {
     napi_value dialogImmersiveModeApi = nullptr;
     napi_value focusableApi = nullptr;
     HasInvertColor hasInvertColor;
-    napi_value displayModeApi = nullptr;
     napi_value systemMaterialApi = nullptr;
 };
 
@@ -1413,18 +1413,20 @@ int32_t GetDialogKeyboardAvoidMode(napi_env env, napi_value keyboardAvoidModeApi
     return 0;
 }
 
-DialogDisplayMode GetDialogDisplayMode(napi_env env, napi_value displayModeApi)
+DialogDisplayModeInSubWindow GetDisplayModeInSubWindow(napi_env env,
+    const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    int32_t mode = 0;
+    CHECK_NULL_RETURN(asyncContext->showInSubWindowBool, DIALOG_DISPLAY_MODE_IN_SUBWINDOW[0]);
+    int32_t displayMode = 0;
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, displayModeApi, &valueType);
+    napi_typeof(env, asyncContext->displayModeInSubWindowApi, &valueType);
     if (valueType == napi_number) {
-        napi_get_value_int32(env, displayModeApi, &mode);
+        napi_get_value_int32(env, asyncContext->displayModeInSubWindowApi, &displayMode);
     }
-    if (mode >= 0 && mode < static_cast<int32_t>(DIALOG_DISPLAY_MODE.size())) {
-        return DIALOG_DISPLAY_MODE[mode];
+    if (displayMode >= 0 && displayMode < static_cast<int32_t>(DIALOG_DISPLAY_MODE_IN_SUBWINDOW.size())) {
+        return DIALOG_DISPLAY_MODE_IN_SUBWINDOW[displayMode];
     }
-    return DIALOG_DISPLAY_MODE[0];
+    return DIALOG_DISPLAY_MODE_IN_SUBWINDOW[0];
 }
 
 void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
@@ -1491,7 +1493,6 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
         napi_get_named_property(env, argv[index], "shadow", &asyncContext->shadowApi);
         napi_get_named_property(env, argv[index], "width", &asyncContext->widthApi);
         napi_get_named_property(env, argv[index], "height", &asyncContext->heightApi);
-        napi_get_named_property(env, argv[index], "displayModeInSubWindow", &asyncContext->displayModeApi);
 
         napi_typeof(env, asyncContext->builder, &valueType);
         if (valueType == napi_function) {
@@ -1500,6 +1501,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     }
     napi_get_named_property(env, argv[index], "enableHoverMode", &asyncContext->enableHoverMode);
     napi_get_named_property(env, argv[index], "showInSubWindow", &asyncContext->showInSubWindow);
+    napi_get_named_property(env, argv[index], "displayModeInSubWindow", &asyncContext->displayModeInSubWindowApi);
     napi_get_named_property(env, argv[index], "isModal", &asyncContext->isModal);
     napi_get_named_property(env, argv[index], "alignment", &asyncContext->alignmentApi);
     napi_get_named_property(env, argv[index], "offset", &asyncContext->offsetApi);
@@ -2639,6 +2641,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     GetDialogLevelModeAndUniqueId(env, asyncContext, dialogLevelMode, dialogLevelUniqueId, dialogImmersiveMode);
     PromptDialogAttr promptDialogAttr = { .autoCancel = asyncContext->autoCancelBool,
         .showInSubWindow = asyncContext->showInSubWindowBool,
+        .displayModeInSubWindow = GetDisplayModeInSubWindow(env, asyncContext),
         .isModal = asyncContext->isModalBool,
         .enableHoverMode = enableHoverMode,
         .customBuilder = std::move(builder),
@@ -2890,7 +2893,6 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
         promptDialogAttr.customBuilder = nullptr;
     } else {
         ParseCustomDialogIdCallback(asyncContext, openCallback);
-        promptDialogAttr.dialogDisplayMode = GetDialogDisplayMode(env, asyncContext->displayModeApi);
     }
 
     OpenCustomDialog(env, asyncContext, promptDialogAttr, openCallback);
@@ -2939,6 +2941,7 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     if (valueType == napi_boolean) {
         napi_get_value_bool(env, asyncContext->showInSubWindow, &asyncContext->showInSubWindowBool);
     }
+    napi_get_named_property(env, arg, "displayModeInSubWindow", &asyncContext->displayModeInSubWindowApi);
     napi_get_named_property(env, arg, "isModal", &asyncContext->isModal);
     napi_typeof(env, asyncContext->isModal, &valueType);
     if (valueType == napi_boolean) {
