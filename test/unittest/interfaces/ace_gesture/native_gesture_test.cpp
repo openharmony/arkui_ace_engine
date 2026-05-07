@@ -121,14 +121,14 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer003, TestSize.Level1)
     ArkUI_GestureDirectionMask directMaskNew = 1;
     ArkUI_GestureDirectionMask* directMask = &directMaskNew;
     OHOS::Ace::SwipeDirection direction = { OHOS::Ace::SwipeDirection::HORIZONTAL };
-    OHOS::Ace::NG::NGGestureRecognizer* gestureRecognizer = new OHOS::Ace::NG::SwipeRecognizer(1, direction, 100);
-    recognizer->recognizer = gestureRecognizer;
+    auto gestureRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::SwipeRecognizer>(1, direction, 100);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(gestureRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_DirectMask(recognizer, directMask);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     OHOS::Ace::PanDirection direction_another = { OHOS::Ace::PanDirection::LEFT };
-    OHOS::Ace::NG::NGGestureRecognizer* gestureRecognizer_another =
-        new OHOS::Ace::NG::PanRecognizer(1, direction_another, 5);
-    recognizer->recognizer = gestureRecognizer_another;
+    auto gestureRecognizer_another =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::PanRecognizer>(1, direction_another, 5);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(gestureRecognizer_another);
     recognizer->type = 2;
     ret = OH_ArkUI_GetGestureParam_DirectMask(recognizer, directMask);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
@@ -175,37 +175,37 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer006, TestSize.Level1)
     int fingerNew = 2;
     int* finger = &fingerNew;
     double distanceThreshold = std::numeric_limits<double>::infinity();
-    OHOS::Ace::NG::NGGestureRecognizer* tapRecognizer = new OHOS::Ace::NG::ClickRecognizer(1, 1, distanceThreshold);
-    recognizer->recognizer = tapRecognizer;
+    auto tapRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::ClickRecognizer>(1, 1, distanceThreshold);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(tapRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_FingerCount(recognizer, finger);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 1;
-    OHOS::Ace::NG::NGGestureRecognizer* longPressRecognizer =
-        new OHOS::Ace::NG::LongPressRecognizer(500, 1, true, false, false);
-    recognizer->recognizer = longPressRecognizer;
+    auto longPressRecognizer =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::LongPressRecognizer>(500, 1, true, false, false);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(longPressRecognizer);
     ret = OH_ArkUI_GetGestureParam_FingerCount(recognizer, finger);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 3;
-    OHOS::Ace::NG::NGGestureRecognizer* pinchRecognizer = new OHOS::Ace::NG::PinchRecognizer(1, 5);
-    recognizer->recognizer = pinchRecognizer;
+    auto pinchRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::PinchRecognizer>(1, 5);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(pinchRecognizer);
     ret = OH_ArkUI_GetGestureParam_FingerCount(recognizer, finger);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 4;
-    OHOS::Ace::NG::NGGestureRecognizer* rotationRecognizer = new OHOS::Ace::NG::RotationRecognizer(1, 1);
-    recognizer->recognizer = rotationRecognizer;
+    auto rotationRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::RotationRecognizer>(1, 1);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(rotationRecognizer);
     ret = OH_ArkUI_GetGestureParam_FingerCount(recognizer, finger);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 5;
     OHOS::Ace::SwipeDirection direction = { OHOS::Ace::SwipeDirection::HORIZONTAL };
-    OHOS::Ace::NG::NGGestureRecognizer* gestureRecognizer = new OHOS::Ace::NG::SwipeRecognizer(1, direction, 100);
-    recognizer->recognizer = gestureRecognizer;
+    auto gestureRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::SwipeRecognizer>(1, direction, 100);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(gestureRecognizer);
     ret = OH_ArkUI_GetGestureParam_FingerCount(recognizer, finger);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 2;
     OHOS::Ace::PanDirection direction_another = { OHOS::Ace::PanDirection::LEFT };
-    OHOS::Ace::NG::NGGestureRecognizer* gestureRecognizer_another =
-        new OHOS::Ace::NG::PanRecognizer(1, direction_another, 5);
-    recognizer->recognizer = gestureRecognizer_another;
+    auto gestureRecognizer_another =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::PanRecognizer>(1, direction_another, 5);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(gestureRecognizer_another);
     ret = OH_ArkUI_GetGestureParam_FingerCount(recognizer, finger);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = -1;
@@ -251,37 +251,37 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer009, TestSize.Level1)
     bool isLimitedNew = false;
     bool* isLimited = &isLimitedNew;
     double distanceThreshold = std::numeric_limits<double>::infinity();
-    OHOS::Ace::NG::NGGestureRecognizer* tapRecognizer = new OHOS::Ace::NG::ClickRecognizer(1, 1, distanceThreshold);
-    recognizer->recognizer = tapRecognizer;
+    auto tapRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::ClickRecognizer>(1, 1, distanceThreshold);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(tapRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_limitFingerCount(recognizer, isLimited);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 1;
-    OHOS::Ace::NG::NGGestureRecognizer* longPressRecognizer =
-        new OHOS::Ace::NG::LongPressRecognizer(500, 1, true, false, false);
-    recognizer->recognizer = longPressRecognizer;
+    auto longPressRecognizer =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::LongPressRecognizer>(500, 1, true, false, false);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(longPressRecognizer);
     ret = OH_ArkUI_GetGestureParam_limitFingerCount(recognizer, isLimited);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 3;
-    OHOS::Ace::NG::NGGestureRecognizer* pinchRecognizer = new OHOS::Ace::NG::PinchRecognizer(1, 5);
-    recognizer->recognizer = pinchRecognizer;
+    auto pinchRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::PinchRecognizer>(1, 5);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(pinchRecognizer);
     ret = OH_ArkUI_GetGestureParam_limitFingerCount(recognizer, isLimited);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 4;
-    OHOS::Ace::NG::NGGestureRecognizer* rotationRecognizer = new OHOS::Ace::NG::RotationRecognizer(1, 1);
-    recognizer->recognizer = rotationRecognizer;
+    auto rotationRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::RotationRecognizer>(1, 1);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(rotationRecognizer);
     ret = OH_ArkUI_GetGestureParam_limitFingerCount(recognizer, isLimited);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 5;
     OHOS::Ace::SwipeDirection direction = { OHOS::Ace::SwipeDirection::HORIZONTAL };
-    OHOS::Ace::NG::NGGestureRecognizer* gestureRecognizer = new OHOS::Ace::NG::SwipeRecognizer(1, direction, 100);
-    recognizer->recognizer = gestureRecognizer;
+    auto gestureRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::SwipeRecognizer>(1, direction, 100);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(gestureRecognizer);
     ret = OH_ArkUI_GetGestureParam_limitFingerCount(recognizer, isLimited);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 2;
     OHOS::Ace::PanDirection direction_another = { OHOS::Ace::PanDirection::LEFT };
-    OHOS::Ace::NG::NGGestureRecognizer* gestureRecognizer_another =
-        new OHOS::Ace::NG::PanRecognizer(1, direction_another, 5);
-    recognizer->recognizer = gestureRecognizer_another;
+    auto gestureRecognizer_another =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::PanRecognizer>(1, direction_another, 5);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(gestureRecognizer_another);
     ret = OH_ArkUI_GetGestureParam_limitFingerCount(recognizer, isLimited);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = -1;
@@ -326,9 +326,9 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer012, TestSize.Level1)
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     bool isRepeatNew = true;
     bool* isRepeat = &isRepeatNew;
-    OHOS::Ace::NG::NGGestureRecognizer* longPressRecognizer =
-        new OHOS::Ace::NG::LongPressRecognizer(500, 1, true, false, false);
-    recognizer->recognizer = longPressRecognizer;
+    auto longPressRecognizer =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::LongPressRecognizer>(500, 1, true, false, false);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(longPressRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_repeat(recognizer, isRepeat);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 2;
@@ -373,15 +373,15 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer015, TestSize.Level1)
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     double distanceNew = 5;
     double* distance = &distanceNew;
-    OHOS::Ace::NG::NGGestureRecognizer* pinchRecognizer = new OHOS::Ace::NG::PinchRecognizer(1, 5);
-    recognizer->recognizer = pinchRecognizer;
+    auto pinchRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::PinchRecognizer>(1, 5);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(pinchRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_distance(recognizer, distance);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 2;
     OHOS::Ace::PanDirection direction_another = { OHOS::Ace::PanDirection::LEFT };
-    OHOS::Ace::NG::NGGestureRecognizer* gestureRecognizer_another =
-        new OHOS::Ace::NG::PanRecognizer(1, direction_another, 5);
-    recognizer->recognizer = gestureRecognizer_another;
+    auto gestureRecognizer_another =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::PanRecognizer>(1, direction_another, 5);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(gestureRecognizer_another);
     ret = OH_ArkUI_GetGestureParam_distance(recognizer, distance);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 5;
@@ -428,8 +428,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer018, TestSize.Level1)
     double* speed = &speedNew;
     recognizer->type = 5;
     OHOS::Ace::SwipeDirection direction = { OHOS::Ace::SwipeDirection::HORIZONTAL };
-    OHOS::Ace::NG::NGGestureRecognizer* gestureRecognizer = new OHOS::Ace::NG::SwipeRecognizer(1, direction, 100);
-    recognizer->recognizer = gestureRecognizer;
+    auto gestureRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::SwipeRecognizer>(1, direction, 100);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(gestureRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_speed(recognizer, speed);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 2;
@@ -474,9 +474,9 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer021, TestSize.Level1)
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     int durationNew = 500;
     int* duration = &durationNew;
-    OHOS::Ace::NG::NGGestureRecognizer* longPressRecognizer =
-        new OHOS::Ace::NG::LongPressRecognizer(500, 1, true, false, false);
-    recognizer->recognizer = longPressRecognizer;
+    auto longPressRecognizer =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::LongPressRecognizer>(500, 1, true, false, false);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(longPressRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_duration(recognizer, duration);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 4;
@@ -521,8 +521,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer024, TestSize.Level1)
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     double angleNew = 1;
     double* angle = &angleNew;
-    OHOS::Ace::NG::NGGestureRecognizer* rotationRecognizer = new OHOS::Ace::NG::RotationRecognizer(1, 1);
-    recognizer->recognizer = rotationRecognizer;
+    auto rotationRecognizer = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::RotationRecognizer>(1, 1);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(rotationRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_angle(recognizer, angle);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = 2;
@@ -568,9 +568,9 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer027, TestSize.Level1)
     double distanceThresholdNew = std::numeric_limits<double>::infinity();
     double* distanceThreshold = &distanceThresholdNew;
     double distanceThresholdAnother = std::numeric_limits<double>::infinity();
-    OHOS::Ace::NG::NGGestureRecognizer* tapRecognizer =
-        new OHOS::Ace::NG::ClickRecognizer(1, 1, distanceThresholdAnother);
-    recognizer->recognizer = tapRecognizer;
+    auto tapRecognizer =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::ClickRecognizer>(1, 1, distanceThresholdAnother);
+    recognizer->recognizer = OHOS::Ace::AceType::RawPtr(tapRecognizer);
     auto ret = OH_ArkUI_GetGestureParam_distanceThreshold(recognizer, distanceThreshold);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     recognizer->type = -1;

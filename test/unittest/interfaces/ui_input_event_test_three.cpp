@@ -1306,4 +1306,68 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetDisplayY008, TestSize.Level1
     res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_CreateClonedEvent002
+ * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent must not crash when a history entry has
+ *           touchPointSize > 0 but touchPointes is NULL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent002, TestSize.Level1)
+{
+    ArkUIHistoryTouchEvent historyEntry {};
+    historyEntry.touchPointSize = 1;
+
+    ArkUITouchEvent touchEvent {};
+    touchEvent.historySize = 1;
+    touchEvent.historyEvents = &historyEntry;
+
+    ArkUI_UIInputEvent inputEvent {};
+    inputEvent.inputEvent = &touchEvent;
+    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+
+    ArkUI_UIInputEvent* clonedEvent = nullptr;
+    OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
+    if (clonedEvent) {
+        OH_ArkUI_PointerEvent_DestroyClonedEvent(clonedEvent);
+    }
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_CreateClonedEvent003
+ * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent returns 401 when touchPointSize > 0 but touchPointes is NULL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent003, TestSize.Level1)
+{
+    ArkUITouchEvent touchEvent {};
+    touchEvent.touchPointSize = 1;
+
+    ArkUI_UIInputEvent inputEvent {};
+    inputEvent.inputEvent = &touchEvent;
+    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+
+    ArkUI_UIInputEvent* clonedEvent = nullptr;
+    auto res = OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
+    EXPECT_EQ(res, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_CreateClonedEvent004
+ * @tc.desc: OH_ArkUI_PointerEvent_CreateClonedEvent returns 401 when historySize > 0 but historyEvents is NULL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent004, TestSize.Level1)
+{
+    ArkUITouchEvent touchEvent {};
+    touchEvent.historySize = 1;
+
+    ArkUI_UIInputEvent inputEvent {};
+    inputEvent.inputEvent = &touchEvent;
+    inputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+
+    ArkUI_UIInputEvent* clonedEvent = nullptr;
+    auto res = OH_ArkUI_PointerEvent_CreateClonedEvent(&inputEvent, &clonedEvent);
+    EXPECT_EQ(res, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace
