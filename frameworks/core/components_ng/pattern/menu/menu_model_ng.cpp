@@ -304,6 +304,7 @@ RefPtr<FrameNode> MenuModelNG::CreateMenu()
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE);
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
     } else {
@@ -339,6 +340,7 @@ void MenuModelNG::UpdateFontColorSetByUser(bool setByUser)
 
 void MenuModelNG::SetBorderRadius(const Dimension& radius)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_BORDER_RADIUS);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radius;
     borderRadius.radiusTopRight = radius;
@@ -357,6 +359,10 @@ void MenuModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
 {
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radiusTopLeft;
     borderRadius.radiusTopRight = radiusTopRight;
@@ -368,6 +374,10 @@ void MenuModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
 
 void MenuModelNG::SetBorderRadius(const NG::BorderRadiusProperty& borderRadius)
 {
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(borderRadius.radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(borderRadius.radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(borderRadius.radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(borderRadius.radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS);
     if (SystemProperties::ConfigChangePerform()) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
@@ -382,6 +392,14 @@ void MenuModelNG::SetBorderRadius(const NG::BorderRadiusProperty& borderRadius)
             }
             NG::BorderRadiusProperty& borderRadiusValue = const_cast<NG::BorderRadiusProperty&>(borderRadius);
             borderRadiusValue.ReloadResources();
+            ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+                borderRadiusValue.radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS, node);
+            ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+                borderRadiusValue.radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS, node);
+            ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+                borderRadiusValue.radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS, node);
+            ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+                borderRadiusValue.radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS, node);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, node);
             node->MarkModifyDone();
             node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -476,6 +494,7 @@ void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>&
 
 void MenuModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE, frameNode);
     if (fontSize.IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize, frameNode);
     } else {
@@ -500,6 +519,7 @@ void MenuModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::str
 
 void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& radius)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_BORDER_RADIUS, frameNode);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radius;
     borderRadius.radiusTopRight = radius;
@@ -526,6 +546,10 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
 {
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS, frameNode);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radiusTopLeft;
     borderRadius.radiusTopRight = radiusTopRight;
@@ -537,8 +561,16 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
 
 void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const NG::BorderRadiusProperty& borderRadius)
 {
+    CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(borderRadius.radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS,
+        frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(borderRadius.radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS,
+        frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(borderRadius.radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS,
+        frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(borderRadius.radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS,
+        frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->RemoveResObj("borderRadius");
@@ -550,6 +582,14 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const NG::BorderRadiusPr
             }
             NG::BorderRadiusProperty& borderRadiusValue = const_cast<NG::BorderRadiusProperty&>(borderRadius);
             borderRadiusValue.ReloadResources();
+            ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+                borderRadiusValue.radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS, node);
+            ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+                borderRadiusValue.radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS, node);
+            ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+                borderRadiusValue.radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS, node);
+            ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+                borderRadiusValue.radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS, node);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, node);
             node->MarkModifyDone();
             node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
