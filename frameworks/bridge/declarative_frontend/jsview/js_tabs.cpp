@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_tabs_function.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
@@ -1076,6 +1077,12 @@ void JSTabs::SetBarFloatingStyle(const JSCallbackInfo& info)
 
     if (object->GetProperty("adaptToHandedness")->IsBoolean()) {
         parameters.adaptToHandedness = object->GetProperty("adaptToHandedness")->ToBoolean();
+    }
+
+    auto systemMaterialObj = object->GetProperty("systemMaterial");
+    if (systemMaterialObj->IsObject()) {
+        const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
+        parameters.systemMaterial = material->Copy();
     }
 
     if (SystemProperties::ConfigChangePerform()) {
