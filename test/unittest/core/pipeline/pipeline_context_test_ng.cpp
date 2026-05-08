@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "core/common/event_manager.h"
+#include "core/pipeline/container_window_manager.h"
 #include <cstdio>
 #include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"

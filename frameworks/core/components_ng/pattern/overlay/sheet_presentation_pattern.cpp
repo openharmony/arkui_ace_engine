@@ -64,6 +64,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -94,6 +95,23 @@ constexpr Dimension ARROW_CORNER_P4_OFFSET_Y = 6.0_vp;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension SUBWINDOW_SHEET_TRANSLATION = 80.0_vp;
 } // namespace
+
+SheetPresentationPattern::SheetPresentationPattern(
+    int32_t targetId, const std::string& targetTag, std::function<void(const std::string&)>&& callback)
+    : LinearLayoutPattern(true), targetId_(targetId), targetTag_(targetTag), callback_(std::move(callback))
+{}
+
+SheetPresentationPattern::~SheetPresentationPattern() = default;
+
+RefPtr<NodeAnimatablePropertyFloat> SheetPresentationPattern::GetProperty()
+{
+    return property_;
+}
+
+void SheetPresentationPattern::SetProperty(const RefPtr<NodeAnimatablePropertyFloat>& property)
+{
+    property_ = property;
+}
 
 // MarkModifyDone must be called after UpdateSheetObject. InitSheetMode depends on SheetObject.
 void SheetPresentationPattern::OnModifyDone()
@@ -362,6 +380,33 @@ bool SheetPresentationPattern::IsScrollable() const
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     CHECK_NULL_RETURN(scrollPattern, false);
     return Positive(scrollPattern->GetScrollableDistance());
+}
+
+void SheetPresentationPattern::InitFoldState()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->InitIsFoldable();
+    if (container->IsFoldable()) {
+        currentFoldStatus_ = container->GetCurrentFoldStatus();
+    }
+}
+
+bool SheetPresentationPattern::IsFoldStatusChanged()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (!container->IsFoldable()) {
+        return false;
+    }
+    auto foldStatus = container->GetCurrentFoldStatus();
+    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+        static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
+    if (foldStatus != currentFoldStatus_) {
+        currentFoldStatus_ = foldStatus;
+        return true;
+    }
+    return false;
 }
 
 void SheetPresentationPattern::OnAttachToMainTree()

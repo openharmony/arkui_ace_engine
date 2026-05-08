@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
+#include "core/common/container.h"
 
 #include "text_layout_adapter.h"
 

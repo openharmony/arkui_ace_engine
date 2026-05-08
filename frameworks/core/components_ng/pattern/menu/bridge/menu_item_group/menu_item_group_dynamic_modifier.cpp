@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "frameworks/bridge/common/utils/utils.h"

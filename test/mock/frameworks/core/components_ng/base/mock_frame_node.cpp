@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 #include "base/json/json_util.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/pattern/badge/badge_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
@@ -108,6 +109,26 @@ void FrameNode::OnDelete()
 bool FrameNode::IsAtomicNode() const
 {
     return false;
+}
+
+bool FrameNode::HasPositionProp() const
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
+           renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
+}
+
+bool FrameNode::IsOutOfLayout() const
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
+}
+
+void FrameNode::UpdateOcclusionCullingStatus(bool enable)
+{
+    if (renderContext_) {
+        renderContext_->UpdateOcclusionCullingStatus(enable);
+    }
 }
 
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)

@@ -21,8 +21,9 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/geometry/ng/offset_t.h"
 
-#include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/common/back_press_handler_manager.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {

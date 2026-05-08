@@ -15,6 +15,7 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_caches.h"
 
+#include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {

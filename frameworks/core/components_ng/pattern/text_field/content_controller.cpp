@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/text_field/content_controller.h"
+#include "core/common/container.h"
 
 #include <algorithm>
 #include <cstdint>

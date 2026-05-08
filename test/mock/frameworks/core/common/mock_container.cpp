@@ -124,6 +124,11 @@ bool Container::Dump(const std::vector<std::string>& /* params */, std::vector<s
     return true;
 }
 
+FrontendType Container::GetFrontendType() const
+{
+    return FrontendType::JS;
+}
+
 void MockContainer::SetUp()
 {
     container_ = AceType::MakeRefPtr<::testing::NiceMock<MockContainer>>();

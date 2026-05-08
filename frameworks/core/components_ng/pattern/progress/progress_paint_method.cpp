@@ -15,6 +15,8 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
+#include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 void ProgressPaintMethod::GetThemeData(PaintWrapper* paintWrapper)

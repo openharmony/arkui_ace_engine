@@ -14,6 +14,7 @@
  */
 
 #include "core/components/text_overlay/render_text_overlay.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"

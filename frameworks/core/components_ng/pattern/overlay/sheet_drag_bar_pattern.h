@@ -28,6 +28,10 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 using ClickArrowCallback = std::function<void()>;
 
 class ACE_EXPORT SheetDragBarPattern : public Pattern {
@@ -35,7 +39,7 @@ class ACE_EXPORT SheetDragBarPattern : public Pattern {
 
 public:
     SheetDragBarPattern() = default;
-    ~SheetDragBarPattern() override = default;
+    ~SheetDragBarPattern() override;
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"

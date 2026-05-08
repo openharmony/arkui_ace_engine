@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
+#include "core/components_ng/base/modifier.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -40,6 +41,8 @@ const OffsetT<Dimension> POINT_L_TOUCH = OffsetT<Dimension>(6.0_vp, 12.0_vp);  /
 const OffsetT<Dimension> POINT_C_TOUCH = OffsetT<Dimension>(32.0_vp, 12.0_vp); // Center Point position.
 const OffsetT<Dimension> POINT_R_TOUCH = OffsetT<Dimension>(58.0_vp, 12.0_vp); // Right Point position.
 } // namespace
+
+SheetDragBarPattern::~SheetDragBarPattern() = default;
 
 void SheetDragBarPattern::OnModifyDone()
 {

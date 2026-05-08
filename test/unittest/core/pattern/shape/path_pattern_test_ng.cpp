@@ -24,6 +24,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
+#include "core/common/container.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/flex_property.h"
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
+#include "core/common/container.h"
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"

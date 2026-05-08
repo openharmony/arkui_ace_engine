@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/swiper/render_swiper.h"
+#include "core/common/container.h"
 #include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/jank_frame_report.h"

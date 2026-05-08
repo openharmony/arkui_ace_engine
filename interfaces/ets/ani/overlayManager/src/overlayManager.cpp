@@ -20,6 +20,7 @@
 #include "overlay_params.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"

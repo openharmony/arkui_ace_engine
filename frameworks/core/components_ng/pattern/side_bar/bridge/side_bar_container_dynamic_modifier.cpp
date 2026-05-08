@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "ui/base/utils/utils.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"

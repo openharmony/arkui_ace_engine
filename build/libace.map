@@ -437,9 +437,11 @@
       "OHOS::Ace::FeatureParam::IsSyncLoadEnabled()";
       "OHOS::Ace::FileUriHelper::GetRealPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
       "OHOS::Ace::FlexElement::AcceptFocusByRectOfLastFocus(OHOS::Ace::Rect const&)";
+      "OHOS::Ace::FlexElement::CanUpdate(OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
       "OHOS::Ace::FlexElement::RequestNextFocus(bool, bool, OHOS::Ace::Rect const&)";
       "OHOS::Ace::FlexElement::Update()";
       "OHOS::Ace::FOCUS_BOUNDARY";
+      "OHOS::Ace::IsRosenBackendEnabledForRenderNode()";
       "OHOS::Ace::FocusGroup::AcceptFocusByRectOfLastFocus(OHOS::Ace::Rect const&)";
       "OHOS::Ace::FocusGroup::AddChild(OHOS::Ace::RefPtr<OHOS::Ace::FocusNode> const&)";
       "OHOS::Ace::FocusGroup::DumpFocusTree(int)";
@@ -1535,6 +1537,7 @@
       "OHOS::Ace::NG::PaintProperty::UpdatePaintPropertyHost(OHOS::Ace::NG::PaintProperty const*)";
       "OHOS::Ace::NG::PaintWrapper::FlushContentModifier()";
       "OHOS::Ace::NG::PaintWrapper::FlushOverlayModifier()";
+      "OHOS::Ace::NG::PaintWrapper::GetRenderContext() const";
       "OHOS::Ace::NG::Paragraph::Create(OHOS::Ace::NG::ParagraphStyle const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FontCollection> const&)";
       "OHOS::Ace::NG::Paragraph::CreateRichEditorParagraph(OHOS::Ace::NG::ParagraphStyle const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FontCollection> const&, bool)";
       "OHOS::Ace::NG::ParagraphManager::GetLongestLineWithIndent() const";
@@ -1554,6 +1557,8 @@
       "OHOS::Ace::NG::Pattern::UnRegisterResource(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Pattern::OnInjectionEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::PickerAudioHapticFactory::GetInstance(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::PickerColumnPattern::PickerColumnPattern(bool)";
+      "OHOS::Ace::NG::PickerColumnPattern::~PickerColumnPattern()";
       "OHOS::Ace::NG::PickerColumnPattern::AddAnimationTextProperties(unsigned int, OHOS::Ace::RefPtr<OHOS::Ace::NG::TextLayoutProperty> const&)";
       "OHOS::Ace::NG::PickerColumnPattern::AddHotZoneRectToText()";
       "OHOS::Ace::NG::PickerColumnPattern::CalcAlgorithmOffset(OHOS::Ace::NG::PickerScrollDirection, double)";
@@ -3775,6 +3780,7 @@
       virtual?thunk?to?OHOS::Ace::NG::PickerColumnPattern::OnDirtyLayoutWrapperSwap*;
       virtual?thunk?to?OHOS::Ace::NG::PickerColumnPattern::OnWindowHide*;
       virtual?thunk?to?OHOS::Ace::NG::PickerColumnPattern::OnWindowShow*;
+      virtual?thunk?to?OHOS::Ace::NG::PickerColumnPattern::~PickerColumnPattern*;
       virtual?thunk?to?OHOS::Ace::NG::ScrollablePattern::~ScrollablePattern*;
       virtual?thunk?to?OHOS::Ace::NG::ScrollablePattern::AccumulatingTerminateHelper*;
       virtual?thunk?to?OHOS::Ace::NG::ScrollablePattern::CleanScrollingListener*;

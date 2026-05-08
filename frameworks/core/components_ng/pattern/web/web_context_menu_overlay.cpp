@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/web/web_context_menu_overlay.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include <algorithm>
 #include <optional>

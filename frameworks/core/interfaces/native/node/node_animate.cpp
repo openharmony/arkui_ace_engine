@@ -17,6 +17,7 @@
 #include "ui/animation/animation_constants.h"
 
 #include "base/error/error_code.h"
+#include "base/log/ace_trace.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"

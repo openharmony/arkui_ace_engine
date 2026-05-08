@@ -14,6 +14,7 @@
  */
 
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 
 namespace OHOS::Ace::NG {

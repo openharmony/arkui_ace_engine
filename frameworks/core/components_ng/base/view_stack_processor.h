@@ -23,14 +23,14 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
+#include "core/common/container_consts.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/gestures/gesture_processor.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
 enum class VisualState;
@@ -354,15 +354,7 @@ public:
      * next node creation will claim the given node id
      * see ClaimNodeId()
      */
-    void StartGetAccessRecordingFor(int32_t elmtId)
-    {
-        accountGetAccessToNodeId_ = elmtId;
-        reservedNodeId_ = elmtId;
-        if (containerId_ != OHOS::Ace::INSTANCE_ID_UNDEFINED) {
-            restoreInstanceId_ = Container::CurrentId();
-            ContainerScope::UpdateCurrent(containerId_);
-        }
-    }
+    void StartGetAccessRecordingFor(int32_t elmtId);
 
     int32_t ClaimNodeId()
     {
@@ -399,15 +391,7 @@ public:
     /**
      * inverse of StartGetAccessRecordingFor
      */
-    void StopGetAccessRecording()
-    {
-        if (restoreInstanceId_ != OHOS::Ace::INSTANCE_ID_UNDEFINED) {
-            ContainerScope::UpdateCurrent(restoreInstanceId_);
-            restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
-        }
-        accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
-        reservedNodeId_ = ElementRegister::UndefinedElementId;
-    }
+    void StopGetAccessRecording();
 
     void FlushImplicitAnimation();
 

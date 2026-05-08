@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/cppview/offscreen_rendering_context.h"
 
+#include <inttypes.h>
 #include <mutex>
 #include <utility>
 

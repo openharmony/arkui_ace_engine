@@ -44,6 +44,9 @@
 namespace OHOS::Ace {
 class CalcDimensionRect;
 struct TextDetectConfig;
+namespace NG {
+struct DrawingContext;
+} // namespace NG
 }
 
 namespace OHOS::Ace::Framework {

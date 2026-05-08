@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/svg/parse/svg_node.h"
+#include "core/common/container.h"
 
 #include "include/core/SkClipOp.h"
 

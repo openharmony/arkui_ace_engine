@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/image/image_cache.h"
@@ -210,6 +211,12 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
 const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
 {
     return clickOptimizer_;
+}
+
+bool PipelineContext::GetIsRequestFrame() const
+{
+    CHECK_NULL_RETURN(window_, false);
+    return window_->GetIsRequestFrame();
 }
 
 std::string PipelineContext::GetBundleName() const

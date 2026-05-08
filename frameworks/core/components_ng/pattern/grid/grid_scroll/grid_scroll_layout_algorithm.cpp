@@ -18,6 +18,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/feature_param.h"
+#include "core/common/frontend.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"

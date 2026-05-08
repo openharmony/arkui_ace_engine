@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/common/container.h"
 
 #include "interfaces/native/node/resource.h"
 

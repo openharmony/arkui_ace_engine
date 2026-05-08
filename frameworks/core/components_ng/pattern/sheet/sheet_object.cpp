@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/sheet/sheet_object.h"
+#include "core/components_ng/base/modifier.h"
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"

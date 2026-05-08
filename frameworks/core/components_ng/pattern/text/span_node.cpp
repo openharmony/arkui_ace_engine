@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/common/container.h"
 
 #include <cstdint>
 #include <optional>

@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 

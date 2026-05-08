@@ -583,7 +583,9 @@ void WaterFlowLayoutSW::ClearBack(float bound)
     bound += info_->expandHeight_;
     for (int32_t i = info_->EndIndex(); i > startIdx; --i) {
         auto* lane = info_->GetMutableLane(i);
-        CHECK_NULL_BREAK(lane);
+        if (!lane) {
+            break;
+        }
         float itemStartPos = lane->endPos - lane->items_.back().mainSize;
         if (LessNotEqual(itemStartPos, bound)) {
             break;
@@ -601,7 +603,9 @@ void WaterFlowLayoutSW::ClearFront()
     int32_t endIdx = info_->EndIndex();
     for (int32_t i = info_->StartIndex(); i < endIdx; ++i) {
         auto* lane = info_->GetMutableLane(i);
-        CHECK_NULL_BREAK(lane);
+        if (!lane) {
+            break;
+        }
         const float& itemLen = lane->items_.front().mainSize;
         if (NearZero(itemLen) && NearZero(lane->startPos)) {
             break;

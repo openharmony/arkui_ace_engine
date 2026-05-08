@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "arkoala_api_generated.h"
 
 #include "core/common/ace_application_info.h"

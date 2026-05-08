@@ -14,6 +14,7 @@
  */
 
 #include "base/log/event_report.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"

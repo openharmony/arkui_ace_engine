@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_container_modifier.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ShapeContainerPaintMethod : public NodePaintMethod {

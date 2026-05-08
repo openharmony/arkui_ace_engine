@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
 
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -45,4 +46,3 @@ void OverlayContainerPattern::BeforeCreateLayoutWrapper()
     }
 }
 } // namespace OHOS::Ace::NG
-
