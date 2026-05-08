@@ -159,6 +159,14 @@ export namespace extractors {
     return x as LengthMetrics;
   }
 
+  export function toDrawingTypefacePtr(ptr: drawing.Typeface): KPointer {
+    return 123;
+  }
+  export function fromDrawingTypefacePtr(ptr: KPointer): drawing.Typeface {
+    const x: Object = {};
+    return x as drawing.Typeface;
+  }
+
   export function toNodeControllerPtr(value: NodeController): KPointer {
     return 123;
   }
