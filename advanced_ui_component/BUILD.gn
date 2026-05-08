@@ -90,10 +90,14 @@ group("advanced_ui_component") {
       "chipgroupv2:chipgroupv2",
       "chipv2:chipv2",
       "composelistitem/interfaces:composelistitem",
+	  "composelistitem/interfaces:composelistitemv2",
       "composetitlebar/interfaces:composetitlebar",
+	  "composetitlebar/interfaces:composetitlebarv2",
       "counterv2:counterv2",
       "editabletitlebar/interfaces:editabletitlebar",
+	  "editabletitlebar/interfaces:editabletitlebarv2",
       "exceptionprompt/interfaces:exceptionprompt",
+	  "exceptionprompt/interfaces:exceptionpromptv2",
       "filter/interfaces:filter",
       "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
       "imageGeneratorDialog/interfaces:imageGeneratorDialog",
@@ -108,10 +112,12 @@ group("advanced_ui_component") {
       "subheader/interfaces:subheader",
       "subheaderv2/interfaces:subheaderv2",
       "swiperefresher/interfaces:swiperefresher",
+	  "swiperefresher/interfaces:swiperefresherv2",
       "tabtitlebar/interfaces:tabtitlebar",
       "toolbar/interfaces:toolbar",
       "toolbarv2/interfaces:toolbarv2",
       "treeview/interfaces:treeview",
+	  "treeview/interfaces:treeviewv2",
     ]
   }
 }
