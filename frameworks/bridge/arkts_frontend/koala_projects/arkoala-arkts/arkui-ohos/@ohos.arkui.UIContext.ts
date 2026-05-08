@@ -29,7 +29,7 @@ import { UIObserverGestureEventOps, DetachedRootEntryManager, FocusControllerImp
     CursorControllerImpl, OverlayManagerImpl, PromptActionImpl, FontImpl, MeasureUtilsImpl, MagnifierImpl,
     TextMenuControllerImpl, RouterImpl, MediaQueryImpl, SmartGestureControllerImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
-import { componentSnapshot, NodeIdentity } from '@ohos/arkui/componentSnapshot';
+import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
 import { focusController } from '@ohos/arkui/focusController';
 import { Frame } from 'arkui/Graphics';
@@ -93,6 +93,13 @@ export interface GestureTriggerInfo {
 
 export interface GestureObserverConfigs {
     actionPhases: Array<GestureActionPhase>;
+}
+
+export declare type NodeIdentity = string | int;
+
+export enum NodeRenderState {
+    ABOUT_TO_RENDER_IN = 0,
+    ABOUT_TO_RENDER_OUT = 1
 }
 
 export class UIInspector {
@@ -1507,6 +1514,7 @@ export abstract class FrameCallback {
 export declare type PanListenerCallback = (event: GestureEvent, current: GestureRecognizer, node?: FrameNode) => void;
 export declare type ClickEventListenerCallback = (event: ClickEvent, node?: FrameNode) => void;
 export declare type GestureEventListenerCallback = (event: GestureEvent, node?: FrameNode) => void;
+export declare type NodeRenderStateChangeCallback = (state: NodeRenderState, node?: FrameNode) => void;
 
 // Global gesture listener callback type
 export declare type GestureListenerCallback = (triggerInfo: GestureTriggerInfo) => void;
@@ -1854,6 +1862,15 @@ export class UIObserver {
 
     public offAfterPanEnd(callback?: PanListenerCallback): void {
         ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_.toInt(), 'afterPanEnd', callback);
+    }
+
+    public onNodeRenderState(nodeIdentity: NodeIdentity, callback: NodeRenderStateChangeCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnNodeRenderState(this.instanceId_.toInt(), nodeIdentity, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetOnNodeRenderState(this.instanceId_.toInt(), resourceId, nodeIdentity, callback);
+    }
+
+    public offNodeRenderState(nodeIdentity: NodeIdentity, callback?: NodeRenderStateChangeCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemoveOnNodeRenderState(this.instanceId_.toInt(), nodeIdentity, callback);
     }
 
     public onWillClick(callback: ClickEventListenerCallback): void {

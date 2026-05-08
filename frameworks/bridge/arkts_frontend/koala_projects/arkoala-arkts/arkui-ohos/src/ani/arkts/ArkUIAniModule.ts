@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
+import { KeyboardAvoidMode, PanListenerCallback, NodeIdentity, NodeRenderStateChangeCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
 import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus } from '@ohos.arkui.drawableDescriptor';
 import { Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
@@ -511,6 +511,8 @@ export class ArkUIAniModule {
     // for GestureEvent UIObserver
     native static _GestureEventUIObserver_SetPanListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: PanListenerCallback): void
     native static _GestureEventUIObserver_RemovePanListenerCallback(instanceId: KInt, tag: string, callback?: PanListenerCallback): void
+    native static _GestureEventUIObserver_SetOnNodeRenderState(instanceId: KInt, resourceId: KInt, nodeIdentity: NodeIdentity, callback: NodeRenderStateChangeCallback): void
+ 	native static _GestureEventUIObserver_RemoveOnNodeRenderState(instanceId: KInt, nodeIdentity: NodeIdentity, callback?: NodeRenderStateChangeCallback): void
     native static _GestureEventUIObserver_SetClickListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_RemoveClickListenerCallback(instanceId: KInt, tag: string, callback?: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_SetTapListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: GestureEventListenerCallback): void

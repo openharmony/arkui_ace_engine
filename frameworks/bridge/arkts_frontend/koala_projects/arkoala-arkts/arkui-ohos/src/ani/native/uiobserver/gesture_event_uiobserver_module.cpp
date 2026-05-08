@@ -43,7 +43,15 @@ struct CallbackResourceInfo {
     int32_t type;
 };
 
+struct CallbackResourceNodeInfo {
+    int32_t instanceId;
+    int32_t resourceId;
+    int32_t nodeId;
+    std::string nodeKey;
+};
+
 static std::mutex g_panListenerMutex;
+static std::mutex g_nodeRenderStateMutex;
 static std::mutex g_clickListenerMutex;
 static std::mutex g_globalGestureListenerMutex;
 
@@ -51,6 +59,8 @@ static std::map<ani_ref, CallbackResourceInfo> beforePanStartListenerCallbackMap
 static std::map<ani_ref, CallbackResourceInfo> beforePanEndListenerCallbackMap = {};
 static std::map<ani_ref, CallbackResourceInfo> afterPanStartListenerCallbackMap = {};
 static std::map<ani_ref, CallbackResourceInfo> afterPanEndListenerCallbackMap = {};
+
+static std::map<ani_ref, std::map<int32_t, CallbackResourceNodeInfo>> onNodeRenderStateCallbackMap = {};
 
 static std::map<ani_ref, CallbackResourceInfo> willClickListenerCallbackMap = {};
 static std::map<ani_ref, CallbackResourceInfo> didClickListenerCallbackMap = {};
@@ -144,6 +154,52 @@ void RegisterAfterPanEndCallback(ani_env* env, CallbackResourceInfo info, ani_re
         break;
     }
     afterPanEndListenerCallbackMap[callback] = info;
+}
+
+void RegisterNodeRenderStateCallback(
+    ani_env* env, CallbackResourceNodeInfo info, bool isStr, bool isInt, ani_ref& callback)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto nodeInfo = modifier->getArkUIAniGestureEventUIObserverModifier()->getNodeInfo(
+        info.instanceId, info.nodeId, info.nodeKey, isStr, isInt);
+    CHECK_NULL_VOID(nodeInfo.first);
+    auto isRegisterLimited = modifier->getArkUIAniGestureEventUIObserverModifier()->isNodeRenderStateRegisterLimited(
+        info.instanceId, info.resourceId, nodeInfo.second);
+    CHECK_NULL_VOID(!isRegisterLimited.first);
+    if (isRegisterLimited.second) {
+        AniUtils::AniThrow(
+            env, "register node render state change callback exceed limit.", NODE_RENDER_STATE_REGISTER_ERR_CODE);
+        return;
+    }
+
+    info.nodeId = nodeInfo.second;
+    bool isCached = false;
+    std::lock_guard<std::mutex> lock(g_nodeRenderStateMutex);
+    for (auto& item : onNodeRenderStateCallbackMap) {
+        ani_boolean isEquals = false;
+        env->Reference_StrictEquals(callback, item.first, &isEquals);
+        if (!isEquals) {
+            continue;
+        }
+        isCached = true;
+        auto iter = item.second.find(info.nodeId);
+        if (iter != item.second.end()) {
+            modifier->getArkUIAniGestureEventUIObserverModifier()->removeNodeRenderStateCallback(
+                info.instanceId, iter->second.resourceId, info.nodeId, false);
+        } else {
+            modifier->getArkUIAniGestureEventUIObserverModifier()->triggerNodeRenderStateForFirstRegister(
+                info.instanceId, info.resourceId, info.nodeId);
+        }
+        item.second[info.nodeId] = info;
+    }
+    if (!isCached) {
+        std::map<int32_t, CallbackResourceNodeInfo> map;
+        map[info.nodeId] = info;
+        onNodeRenderStateCallbackMap[callback] = map;
+        modifier->getArkUIAniGestureEventUIObserverModifier()->triggerNodeRenderStateForFirstRegister(
+            info.instanceId, info.resourceId, info.nodeId);
+    }
 }
 
 void RegisterWillClickCallback(ani_env* env, CallbackResourceInfo info, ani_ref& callback)
@@ -428,6 +484,56 @@ void UnregisterAfterPanEndCallback(ani_env* env, ani_int instanceId, const std::
     }
 }
 
+void UnregisterNodeRenderStateCallback(
+    ani_env* env, CallbackResourceNodeInfo info, bool isStr, bool isInt, ani_ref& callback)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto nodeInfo = modifier->getArkUIAniGestureEventUIObserverModifier()->getNodeInfo(
+        info.instanceId, info.nodeId, info.nodeKey, isStr, isInt);
+    CHECK_NULL_VOID(nodeInfo.first);
+
+    ani_boolean isUndef = false;
+    env->Reference_IsUndefined(callback, &isUndef);
+    if (isUndef || !callback) {
+        for (auto it = onNodeRenderStateCallbackMap.begin(); it != onNodeRenderStateCallbackMap.end();) {
+            auto iter = it->second.find(nodeInfo.second);
+            if (iter != it->second.end()) {
+                it->second.erase(iter);
+                if (it->second.empty()) {
+                    it = onNodeRenderStateCallbackMap.erase(it);
+                } else {
+                    ++it;
+                }
+            } else {
+                ++it;
+            }
+        }
+        modifier->getArkUIAniGestureEventUIObserverModifier()->removeNodeRenderStateCallback(
+            info.instanceId, 0, nodeInfo.second, true);
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(g_nodeRenderStateMutex);
+    for (auto it = onNodeRenderStateCallbackMap.begin(); it != onNodeRenderStateCallbackMap.end();) {
+        ani_boolean isEquals = false;
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
+        auto iter = it->second.find(nodeInfo.second);
+        if (isEquals && iter != it->second.end()) {
+            modifier->getArkUIAniGestureEventUIObserverModifier()->removeNodeRenderStateCallback(
+                info.instanceId, iter->second.resourceId, nodeInfo.second, false);
+            it->second.erase(iter);
+            if (it->second.empty()) {
+                it = onNodeRenderStateCallbackMap.erase(it);
+            } else {
+                ++it;
+            }
+        } else {
+            ++it;
+        }
+    }
+}
+
 void UnregisterWillClickCallback(ani_env* env, ani_int instanceId, const std::string& tag, ani_ref& callback)
 {
     CHECK_NULL_VOID(env);
@@ -609,6 +715,66 @@ void RemovePanListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClas
         UnregisterAfterPanEndCallback(env, instanceId, tagStr, fnObjGlobalRef);
     }
     ReleaseGlobalRef(env, fnObjGlobalRef);
+}
+
+void SetOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass,
+
+    ani_int instanceId, ani_int resourceId, ani_object nodeIdentity, ani_fn_object fnObj)
+{
+    CHECK_NULL_VOID(env);
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    auto isStr = AniUtils::IsString(env, nodeIdentity);
+    std::string nodeStr = "";
+    if (isStr) {
+        nodeStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(nodeIdentity));
+    }
+
+    ani_class intClass;
+    env->FindClass("std.core.Int", &intClass);
+    ani_boolean isInt;
+    env->Object_InstanceOf(nodeIdentity, intClass, &isInt);
+    ani_int aniValue = 0;
+    if (isInt) {
+        env->Object_CallMethodByName_Int(nodeIdentity, "toInt", ":i", &aniValue);
+    }
+
+    CallbackResourceNodeInfo info;
+    info.instanceId = static_cast<int32_t>(instanceId);
+    info.resourceId = static_cast<int32_t>(resourceId);
+    info.nodeId = static_cast<int32_t>(aniValue);
+    info.nodeKey = nodeStr;
+
+    RegisterNodeRenderStateCallback(env, info, isStr, isInt, fnObjGlobalRef);
+}
+
+void RemoveOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int instanceId,
+    ani_object nodeIdentity, ani_fn_object fnObj)
+{
+    CHECK_NULL_VOID(env);
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    auto isStr = AniUtils::IsString(env, nodeIdentity);
+    std::string nodeStr = "";
+    if (isStr) {
+        nodeStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(nodeIdentity));
+    }
+
+    ani_class intClass;
+    env->FindClass("std.core.Int", &intClass);
+    ani_boolean isInt;
+    env->Object_InstanceOf(nodeIdentity, intClass, &isInt);
+    ani_int aniValue = 0;
+    if (isInt) {
+        env->Object_CallMethodByName_Int(nodeIdentity, "toInt", ":i", &aniValue);
+    }
+    CallbackResourceNodeInfo info;
+    info.instanceId = static_cast<int32_t>(instanceId);
+    info.nodeId = static_cast<int32_t>(aniValue);
+    info.nodeKey = nodeStr;
+    UnregisterNodeRenderStateCallback(env, info, isStr, isInt, fnObjGlobalRef);
 }
 
 void SetClickListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
