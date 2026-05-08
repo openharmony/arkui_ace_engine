@@ -67,6 +67,8 @@ public:
     static AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
     static RefPtr<LayoutWrapper> GetWaterFlowItem(LayoutWrapper* layoutWrapper, int32_t index,
         bool addToRenderTree = true, bool isCache = false);
+    static RefPtr<LayoutWrapper> GetWaterFlowItemByIndex(
+        LayoutWrapper* layoutWrapper, int32_t index, bool isCache = false);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H
