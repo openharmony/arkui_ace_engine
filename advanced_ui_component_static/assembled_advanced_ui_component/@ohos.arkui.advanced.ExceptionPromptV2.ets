@@ -1,5 +1,7 @@
+'use static';
+
 /*
- * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,8 +112,8 @@ export struct ExceptionPromptV2 {
   maxAppFontScale: number = 1;
   systemFontScale?: number = 1;
   isFollowingSystemFontScale: boolean = false;
-  onTipClick?: () => void = undefined;
-  onActionTextClick?: () => void = undefined;
+  @Param onTipClick?: () => void = undefined;
+  @Param onActionTextClick?: () => void = undefined;
   private callbackId: number = 0;
   private envCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this)
   applicationContext: ApplicationContext = new ApplicationContext()
@@ -273,7 +275,7 @@ export struct ExceptionPromptV2 {
     if (this.callbackId) {
       let context: UIContext = this.getUIContext();
       if (context.getHostContext() !== undefined) {
-        this.applicationContext.offEnvironment(Double.toInt(this.callbackId),
+        this.applicationContext.offEnvironment(this.callbackId.toInt(),
           (err: BusinessError<void> | null): void => {
             hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
           })
