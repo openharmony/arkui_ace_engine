@@ -2207,6 +2207,8 @@ void ListLayoutAlgorithm::MeasureLazyVGridLayout(const RefPtr<LayoutWrapper>& wr
     ViewPosReference ref {
         .viewPosStart = startMainPos_,
         .viewPosEnd = endMainPos_,
+        .viewExtStart = startFixOffset_,
+        .viewExtEnd = endFixOffset_,
         .referencePos = referencePos,
         .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
         .axis = axis_,

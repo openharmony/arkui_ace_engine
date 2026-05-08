@@ -30,6 +30,9 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 #undef private
 #undef protected
@@ -1194,5 +1197,168 @@ HWTEST_F(ListContentClipTestNg, ContentClipCustomStickyHeaderFooter001, TestSize
     EXPECT_TRUE(footer->IsActive());
     float footerYOffset = GetChildY(group, footerIndex) + GetChildY(frameNode_, 1) + GetChildHeight(group, footerIndex);
     EXPECT_EQ(footerYOffset, HEIGHT); // Footer at component bottom boundary (Y=HEIGHT)
+}
+
+/**
+ * @tc.name: ContentClipBoundaryWithLazyVGridLayout001
+ * @tc.desc: Test List with LazyVGridLayout and ContentClip BOUNDARY mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipBoundaryWithLazyVGridLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout and content clip
+     */
+    int32_t lazyGridVisibleStart = -1;
+    int32_t lazyGridVisibleEnd = -1;
+
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    PaddingProperty padding = CreatePadding(0, 0, 0, 150);
+    layoutProperty_->UpdatePadding(padding);
+
+    LazyVGridLayoutModel lazyGridModel;
+    lazyGridModel.Create();
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    lazyGridModel.SetColumnsTemplate("1fr 1fr");
+
+    auto onVisibleIndexesChangeCallback = [&lazyGridVisibleStart, &lazyGridVisibleEnd](int32_t start, int32_t end) {
+        lazyGridVisibleStart = start;
+        lazyGridVisibleEnd = end;
+    };
+    lazyGridModel.SetOnVisibleIndexesChange(onVisibleIndexesChangeCallback);
+
+    auto lazyGridFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto lazyGridPattern = lazyGridFrameNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern, nullptr);
+
+    for (int32_t i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. check LazyVGridLayout visible indexes
+     * @tc.expected: visible indexes should exclude padding area
+     */
+    EXPECT_EQ(lazyGridVisibleStart, 0);
+    EXPECT_EQ(lazyGridVisibleEnd, 5);
+    EXPECT_LE(lazyGridVisibleEnd, lazyGridPattern->layoutInfo_->endIndex_);
+}
+
+/**
+ * @tc.name: ContentClipBoundaryWithLazyVGridLayout002
+ * @tc.desc: Test List with LazyVGridLayout and ContentClip BOUNDARY mode with scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipBoundaryWithLazyVGridLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout and content clip
+     */
+    int32_t lazyGridVisibleStart = -1;
+    int32_t lazyGridVisibleEnd = -1;
+
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    PaddingProperty padding = CreatePadding(0, 100, 0, 150);
+    layoutProperty_->UpdatePadding(padding);
+
+    LazyVGridLayoutModel lazyGridModel;
+    lazyGridModel.Create();
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    lazyGridModel.SetColumnsTemplate("1fr 1fr");
+
+    auto onVisibleIndexesChangeCallback = [&lazyGridVisibleStart, &lazyGridVisibleEnd](int32_t start, int32_t end) {
+        lazyGridVisibleStart = start;
+        lazyGridVisibleEnd = end;
+    };
+    lazyGridModel.SetOnVisibleIndexesChange(onVisibleIndexesChangeCallback);
+
+    auto lazyGridFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto lazyGridPattern = lazyGridFrameNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern, nullptr);
+
+    for (int32_t i = 0; i < 30; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+    EXPECT_EQ(lazyGridVisibleStart, 0);
+    EXPECT_EQ(lazyGridVisibleEnd, 3);
+
+    /**
+     * @tc.steps: step2. scroll and check visible indexes
+     * @tc.expected: visible indexes should update correctly after scroll
+     */
+    UpdateCurrentOffset(-210.f);
+
+    EXPECT_EQ(lazyGridVisibleStart, 4);
+    EXPECT_EQ(lazyGridVisibleEnd, 7);
+    EXPECT_GT(lazyGridVisibleStart, lazyGridPattern->layoutInfo_->startIndex_);
+    EXPECT_LE(lazyGridVisibleEnd, lazyGridPattern->layoutInfo_->endIndex_);
+}
+
+/**
+ * @tc.name: ContentClipSafeAreaWithLazyVGridLayout001
+ * @tc.desc: Test List with LazyVGridLayout and ContentClip SAFE_AREA mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithLazyVGridLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyVGridLayout and SAFE_AREA content clip
+     */
+    int32_t lazyGridVisibleStart = -1;
+    int32_t lazyGridVisibleEnd = -1;
+
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    PaddingProperty paddingProperty;
+    paddingProperty.bottom = std::make_optional<CalcLength>(150);
+    layoutProperty_->UpdateSafeAreaPadding(paddingProperty);
+
+    LazyVGridLayoutModel lazyGridModel;
+    lazyGridModel.Create();
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    lazyGridModel.SetColumnsTemplate("1fr 1fr");
+
+    auto onVisibleIndexesChangeCallback = [&lazyGridVisibleStart, &lazyGridVisibleEnd](int32_t start, int32_t end) {
+        lazyGridVisibleStart = start;
+        lazyGridVisibleEnd = end;
+    };
+    lazyGridModel.SetOnVisibleIndexesChange(onVisibleIndexesChangeCallback);
+
+    auto lazyGridFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto lazyGridPattern = lazyGridFrameNode->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern, nullptr);
+
+    for (int32_t i = 0; i < 20; i++) {
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+        ViewAbstract::SetHeight(CalcLength(100));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step2. check visible indexes
+     * @tc.expected: visible indexes should exclude safe area padding
+     */
+    EXPECT_EQ(lazyGridVisibleStart, 0);
+    EXPECT_EQ(lazyGridVisibleEnd, 5);
+    EXPECT_LE(lazyGridVisibleEnd, lazyGridPattern->layoutInfo_->endIndex_);
 }
 } // namespace OHOS::Ace::NG
