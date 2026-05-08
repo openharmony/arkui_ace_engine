@@ -247,9 +247,6 @@ public:
     {
         CheckLocalized();
         PropagateForegroundColorToChildren();
-        if (NeedReadFontScaleFromEnv()) {
-            ReadFontScaleFromEnv();
-        }
     }
 
     virtual bool NeedReadFontScaleFromEnv()

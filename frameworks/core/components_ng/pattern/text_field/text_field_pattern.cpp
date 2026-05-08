@@ -9855,6 +9855,9 @@ void TextFieldPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
     dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
     dumpLog.AddDesc(std::string("halfLeading: ").append(std::to_string(halfLeading)));
+    auto envFontScale = GetEnvFontScale();
+    dumpLog.AddDesc(std::string("envFontScale: ").append(envFontScale.has_value()
+        ? std::to_string(envFontScale.value()) : "NA"));
 }
 
 std::string TextFieldPattern::GetDumpTextValue() const
@@ -12224,6 +12227,12 @@ void TextFieldPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
     isDetachFromMainTree_ = false;
     CHECK_NULL_VOID(host);
     auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();

@@ -17,7 +17,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/environment_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -37,6 +39,13 @@ void DispatchLayoutFontScaleChangedToAffectedNode(
 
     auto frameNode = AceType::DynamicCast<FrameNode>(node);
     if (frameNode) {
+        auto pattern = frameNode->GetPattern();
+        if (pattern && pattern->NeedReadFontScaleFromEnv()) {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            if (pipeline) {
+                pattern->SetEnvFontScale(pipeline->ResolveFontScaleFromEnv(frameNode));
+            }
+        }
         ConfigurationChange configurationChange;
         configurationChange.fontScaleUpdate = true;
         frameNode->OnConfigurationUpdate(configurationChange);

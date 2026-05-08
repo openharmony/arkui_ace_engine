@@ -5739,6 +5739,9 @@ void TextPattern::DumpScaleInfo()
         .append(std::string(", IsFollowSystem: ")).append(std::to_string(followSystem))
         .append(std::string(", maxFontScale: ")).append(std::to_string(maxFontScale))
         .append(std::string(", ConfigHalfLeading: ")).append(std::to_string(halfLeading)));
+    auto envFontScale = GetEnvFontScale();
+    dumpLog.AddDesc(std::string("envFontScale: ").append(envFontScale.has_value()
+        ? std::to_string(envFontScale.value()) : "NA"));
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     auto minFontScale = textLayoutProp->GetMinFontScale().value_or(0.0f);

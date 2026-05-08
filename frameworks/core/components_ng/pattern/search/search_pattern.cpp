@@ -3794,4 +3794,16 @@ void SearchPattern::InitMargin(const RefPtr<SearchLayoutProperty>& property)
     }
     property->UpdateMargin(margin);
 }
+
+void SearchPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
