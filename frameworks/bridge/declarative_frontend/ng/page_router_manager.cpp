@@ -1468,7 +1468,7 @@ void PageRouterManager::StartBackToIndex(int32_t index, const std::string& param
     if (index > static_cast<int32_t>(restorePageStack_.size())) {
         do {
             auto targetIndex = index - static_cast<int32_t>(restorePageStack_.size()) - 1;
-            if (targetIndex < 0 || targetIndex >= static_cast<int32_t>(restorePageStack_.size())) {
+            if (targetIndex < 0 || targetIndex >= static_cast<int32_t>(pageRouterStack_.size())) {
                 break;
             }
             auto iter = pageRouterStack_.begin();
