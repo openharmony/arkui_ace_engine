@@ -4488,23 +4488,13 @@ void WebPattern::OnColorConfigurationUpdate()
     }
 }
 
-void WebPattern::OnLanguageConfigurationUpdate()
-{
-    CHECK_NULL_VOID(delegate_);
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    delegate_->SetIsSystemRtlEnable(isRtl);
-}
-
-void WebPattern::OnDirectionConfigurationUpdate()
-{
-    CHECK_NULL_VOID(delegate_);
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    delegate_->SetIsSystemRtlEnable(isRtl);
-}
-
 void WebPattern::OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy)
 {
-    scrollbarLayoutPolicy_ = layoutPolicy;
+    TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::OnScrollbarLayoutPolicyUpdate %{public}d", layoutPolicy);
+    if (scrollbarLayoutPolicy_ != layoutPolicy) {
+        scrollbarLayoutPolicy_ = layoutPolicy;
+        scrollbarLayoutPolicyChanged_ = true;
+    }
 }
 
 void WebPattern::OnModifyDone()
@@ -7712,17 +7702,24 @@ void WebPattern::OnActive()
         "WebPattern::OnActive webId:%{public}d, isActive:%{public}d",
         GetWebId(), isActive_);
     UpdateScrollBarWithBorderRadius();
+    UpdateScrollbarLayout();
     SetActiveStatusInner(true);
     delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
-    UpdateScrollbarLayout();
 }
 
 void WebPattern::UpdateScrollbarLayout()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::UpdateScrollbarLayout");
     CHECK_NULL_VOID(delegate_);
+    if (scrollbarLayoutPolicyChanged_ || ScrollbarLayoutPolicy::CONTENT != scrollbarLayoutPolicy_) {
+        delegate_->SetScrollbarLayoutPolicy(scrollbarLayoutPolicy_);
+        scrollbarLayoutPolicyChanged_ = false;
+    }
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    delegate_->SetIsSystemRtlEnable(isRtl);
-    delegate_->SetScrollbarLayoutPolicy(scrollbarLayoutPolicy_);
+    if (isLanguageRtl_ != isRtl || ScrollbarLayoutPolicy::CONTENT != scrollbarLayoutPolicy_) {
+        isLanguageRtl_ = isRtl;
+        delegate_->SetIsSystemRtlEnable(isRtl);
+    }
 }
 
 void WebPattern::OnVisibleAreaChange(bool isVisible)
