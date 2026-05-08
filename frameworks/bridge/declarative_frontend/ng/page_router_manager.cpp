@@ -1478,7 +1478,7 @@ void PageRouterManager::StartBackToIndex(int32_t index, const std::string& param
             auto pattern = targetPage->GetPattern<PagePattern>();
             CHECK_NULL_BREAK(pattern);
             NotifyForceFullScreenChangeIfNeeded(pattern->GetPageUrl(), targetPage->GetContextRefPtr());
-        } while(false);
+        } while (false);
         PopPageToIndex(index - static_cast<int32_t>(restorePageStack_.size()) - 1, params, true, true);
         return;
     }
