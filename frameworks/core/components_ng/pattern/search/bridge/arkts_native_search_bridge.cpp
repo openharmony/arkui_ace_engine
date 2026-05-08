@@ -984,11 +984,6 @@ ArkUINativeModuleValue SearchBridge::SetJsCancelButton(ArkUIRuntimeCallInfo* run
         CancelButtonStyle cancelButtonStyle = ConvertStrToCancelButtonStyle(styleString);
         style = static_cast<int32_t>(cancelButtonStyle);
     }
-    if ((thirdArg->IsNull() || thirdArg->IsUndefined()) && (forthArg->IsNull() || forthArg->IsUndefined()) &&
-        (fifthArg->IsNull() || fifthArg->IsUndefined())) {
-        GetArkUINodeModifiers()->getSearchModifier()->setJsSearchDefaultCancelButton(style);
-        return panda::JSValueRef::Undefined(vm);
-    }
     struct ArkUIIconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, 0, nullptr};
     CalcDimension iconSize;
     RefPtr<ResourceObject> sizeObject;
