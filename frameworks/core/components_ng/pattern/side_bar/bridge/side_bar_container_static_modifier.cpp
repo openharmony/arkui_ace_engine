@@ -138,6 +138,7 @@ void AssignCast(std::optional<SideBarContainerType>& dst, const Ark_SideBarConta
         case ARK_SIDE_BAR_CONTAINER_TYPE_EMBED: dst = SideBarContainerType::EMBED; break;
         case ARK_SIDE_BAR_CONTAINER_TYPE_OVERLAY: dst = SideBarContainerType::OVERLAY; break;
         case ARK_SIDE_BAR_CONTAINER_TYPE_AUTO: dst = SideBarContainerType::AUTO; break;
+        case ARK_SIDE_BAR_CONTAINER_TYPE_DISPLACE: dst = SideBarContainerType::DISPLACE; break;
         default: LOGE("SideBarContainerInterfaceModifier::Unexpected enum value in "
             "Ark_SideBarContainerType: %{public}d", src);
     }
