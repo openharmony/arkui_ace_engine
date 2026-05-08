@@ -6644,7 +6644,7 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     customAnimationToIndex_.reset();
     needUnmountIndexs_.insert(fromIndex);
     indexsInAnimation_.erase(toIndex);
-    customAnimationPrevIndex_ = toIndex;
+    customAnimationPrevIndex_ = fromIndex;
 
     if (!hasOnChanged) {
         const auto props = GetLayoutProperty<SwiperLayoutProperty>();
