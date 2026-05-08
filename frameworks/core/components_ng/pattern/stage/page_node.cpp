@@ -14,8 +14,6 @@
  */
 
 #include "core/components_ng/pattern/stage/page_node.h"
-
-#include "base/log/ace_trace.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {

@@ -15,7 +15,6 @@
 
 #include "base/subwindow/subwindow_manager.h"
 
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {

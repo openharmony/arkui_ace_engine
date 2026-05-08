@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
 #include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/utility/validators.h"

@@ -15,7 +15,6 @@
 
 #include "core/components/flex/flex_element.h"
 
-#include "core/common/container.h"
 #include "core/components/flex/flex_component.h"
 
 namespace OHOS::Ace {
@@ -73,22 +72,6 @@ bool FlexElement::AcceptFocusByRectOfLastFocus(const Rect& rect)
         return true;
     }
     return false;
-}
-
-bool FlexElement::CanUpdate(const RefPtr<Component>& newComponent)
-{
-    // The raw ptr is persistent during app process.
-    auto flexComponent = AceType::DynamicCast<ComponentGroup>(newComponent);
-    if (!flexComponent) {
-        return false;
-    }
-
-    // partial update does not produce children
-    auto pipelineContext = context_.Upgrade();
-    if (Container::IsCurrentUsePartialUpdate()) {
-        return true;
-    }
-    return GetChildren().size() == flexComponent->GetSizeOfChildren();
 }
 
 } // namespace OHOS::Ace

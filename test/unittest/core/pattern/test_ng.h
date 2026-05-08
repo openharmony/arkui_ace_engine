@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
-#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text/text_model.h"
 

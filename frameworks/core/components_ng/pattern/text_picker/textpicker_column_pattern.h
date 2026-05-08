@@ -37,10 +37,6 @@
 #endif
 
 namespace OHOS::Ace::NG {
-class AnimatablePropertyFloat;
-template<typename T, typename S>
-class NodeAnimatableProperty;
-using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 using EventCallback = std::function<void(bool)>;
 using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, uint32_t, bool)>;
 
@@ -93,7 +89,12 @@ class TextPickerColumnPattern : public LinearLayoutPattern {
 
 public:
     TextPickerColumnPattern() : LinearLayoutPattern(true) {};
-    ~TextPickerColumnPattern() override;
+    ~TextPickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     bool IsAtomicNode() const override
     {

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/common/container.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 

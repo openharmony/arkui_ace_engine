@@ -14,7 +14,6 @@
  */
 
 #include "bridge/cj_frontend/frontend/cj_app_bar_utils.h"
-#include "core/pipeline/container_window_manager.h"
 
 #include <cstddef>
 #include <cstdint>

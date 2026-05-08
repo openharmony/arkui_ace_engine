@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
-#include "core/common/container.h"
 
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/pattern.h"

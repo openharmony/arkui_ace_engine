@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/pipeline/container_window_manager.h"
 #include <cstdint>
 #include <ctime>
 

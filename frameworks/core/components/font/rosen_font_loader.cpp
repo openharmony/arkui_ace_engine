@@ -15,8 +15,6 @@
 
 #include "core/components/font/rosen_font_loader.h"
 
-#include <regex>
-
 #include "base/network/download_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"

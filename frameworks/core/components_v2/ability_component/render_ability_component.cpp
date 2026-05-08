@@ -14,7 +14,6 @@
  */
 
 #include "core/components_v2/ability_component/render_ability_component.h"
-#include "core/pipeline/container_window_manager.h"
 
 #include "core/components/container_modal/container_modal_constants.h"
 

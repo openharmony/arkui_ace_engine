@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
-#include "core/common/container.h"
 
 #include <algorithm>
 

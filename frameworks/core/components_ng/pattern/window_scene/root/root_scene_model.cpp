@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
 
-#include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/root/root_scene_node.h"
 

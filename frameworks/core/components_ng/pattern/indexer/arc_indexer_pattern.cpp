@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/accessibility/accessibility_manager.h"
 
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -29,8 +28,6 @@ constexpr float STR_DOT_ROTATE_ANGLE = 90.0;
 constexpr int32_t ANIMATION_DURATION_20 = 20;
 constexpr char BUTTON_ROLE[] = "Button";
 }
-
-ArcIndexerPattern::~ArcIndexerPattern() = default;
 
 void ArcIndexerPattern::OnModifyDone()
 {

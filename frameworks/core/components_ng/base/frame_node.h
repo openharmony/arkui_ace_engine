@@ -24,13 +24,13 @@
 #include <vector>
 
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
-#include "ui/base/modifier_property.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
@@ -41,7 +41,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/render/opinc_type.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/accessibility/accessibility_utils.h"
 
@@ -109,11 +109,6 @@ class SamplerManager;
 class SmartGestureProperty;
 class AccessibilityProperty;
 class SamplerManager;
-class RenderContext;
-class DrawModifier;
-class NodeAnimatablePropertyBase;
-class CustomAnimatableArithmetic;
-class ContentModifier;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -242,7 +237,16 @@ public:
     void UpdateGeometryTransition() override;
 
     struct ZIndexComparator {
-        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const;
+        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
+        {
+            auto left = weakLeft.Upgrade();
+            auto right = weakRight.Upgrade();
+            if (left && right) {
+                return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
+                       right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+            }
+            return false;
+        }
     };
 
     const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& GetFrameChildren() const
@@ -375,7 +379,7 @@ public:
     template<typename T>
     T* GetPatternPtr() const
     {
-        if (ACE_UNLIKELY(pattern_ && ShouldDetectAceObjTypeConvertion() && !DynamicCast<T>(pattern_))) {
+        if (ACE_UNLIKELY(pattern_ && SystemProperties::DetectAceObjTypeConvertion() && !DynamicCast<T>(pattern_))) {
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]", GetPatternTypeName(), T::TypeName());
         }
         return reinterpret_cast<T*>(RawPtr(pattern_));
@@ -404,7 +408,7 @@ public:
     template<typename T>
     T* GetLayoutPropertyPtr() const
     {
-        if (ACE_UNLIKELY(layoutProperty_ && ShouldDetectAceObjTypeConvertion() &&
+        if (ACE_UNLIKELY(layoutProperty_ && SystemProperties::DetectAceObjTypeConvertion() &&
                          !DynamicCast<T>(layoutProperty_))) {
             LOGF_ABORT(
                 "bad type conversion: from [%{public}s] to [%{public}s]", GetLayoutPropertyTypeName(), T::TypeName());
@@ -422,7 +426,7 @@ public:
     T* GetPaintPropertyPtr() const
     {
         if (ACE_UNLIKELY(
-                paintProperty_ && ShouldDetectAceObjTypeConvertion() && !DynamicCast<T>(paintProperty_))) {
+                paintProperty_ && SystemProperties::DetectAceObjTypeConvertion() && !DynamicCast<T>(paintProperty_))) {
             LOGF_ABORT(
                 "bad type conversion: from [%{public}s] to [%{public}s]", GetPaintPropertyTypeName(), T::TypeName());
         }
@@ -717,7 +721,12 @@ public:
         isLayoutDirtyMarked_ = marked;
     }
 
-    bool HasPositionProp() const;
+    bool HasPositionProp() const
+    {
+        CHECK_NULL_RETURN(renderContext_, false);
+        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
+               renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
+    }
 
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
@@ -1028,7 +1037,10 @@ public:
         accessibilityVisible_ = accessibilityVisible;
     }
 
-    bool IsOutOfLayout() const override;
+    bool IsOutOfLayout() const override
+    {
+        return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
+    }
     void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
@@ -1491,7 +1503,12 @@ public:
     }
     bool IsVerticalScrollable() const;
 
-    void UpdateOcclusionCullingStatus(bool enable);
+    void UpdateOcclusionCullingStatus(bool enable)
+    {
+        if (renderContext_) {
+            renderContext_->UpdateOcclusionCullingStatus(enable);
+        }
+    }
 
     const RefPtr<FrameNode>& GetCornerMarkNode() const
     {
@@ -1534,7 +1551,6 @@ protected:
     void OnCollectRemoved() override;
 
 private:
-    static bool ShouldDetectAceObjTypeConvertion();
     void DispatchAreaChangeWithThrottle(const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
     void GetCurrentAreaChangeInfo(
         uint64_t nanoTimestamp, int32_t areaChangeMinDepth, RectF& currFrameRect, OffsetF& currParentOffsetToWindow);
@@ -1733,7 +1749,7 @@ private:
     bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
-    RefPtr<RenderContext> renderContext_;
+    RefPtr<RenderContext> renderContext_ = RenderContext::Create();
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
     RefPtr<FocusHub> focusHub_;

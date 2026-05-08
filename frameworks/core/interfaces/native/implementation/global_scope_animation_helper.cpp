@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
 #include "global_scope_animation_helper.h"
 
 #include "base/log/jank_frame_report.h"

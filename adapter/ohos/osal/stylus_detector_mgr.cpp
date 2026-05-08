@@ -14,7 +14,6 @@
  */
 
 #include "core/common/stylus/stylus_detector_mgr.h"
-#include "core/common/container.h"
 
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_callback.h"

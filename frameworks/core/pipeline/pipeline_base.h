@@ -25,14 +25,12 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
-#include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
@@ -56,6 +54,7 @@
 #include "core/event/pointer_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -101,7 +100,6 @@ class Frontend;
 class ImageCache;
 class OffscreenCanvas;
 class Window;
-class WindowManager;
 class FontManager;
 class ManagerInterface;
 class NavigationController;

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
-#include "core/components_ng/base/modifier.h"
 
 #include <optional>
 

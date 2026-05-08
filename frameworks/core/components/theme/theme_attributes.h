@@ -18,8 +18,6 @@
 
 #include <string>
 
-#include "base/utils/macros.h"
-
 namespace OHOS::Ace {
 
 // theme attributes
@@ -73,7 +71,7 @@ extern const char THEME_PATTERN_SELECT[];
 extern const char THEME_PATTERN_SLIDER[];
 extern const char THEME_PATTERN_TEXT[];
 extern const char THEME_PATTERN_TEXTFIELD[];
-extern ACE_FORCE_EXPORT const char THEME_PATTERN_RICH_EDITOR[];
+extern const char THEME_PATTERN_RICH_EDITOR[];
 extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
@@ -99,7 +97,7 @@ extern const char THEME_PATTERN_CORNER_MARK[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
-extern ACE_FORCE_EXPORT const char PATTERN_BG_COLOR[];
+extern const char PATTERN_BG_COLOR[];
 extern const char PATTERN_UNDERLINE_ACTIVED_COLOR[];
 extern const char PATTERN_UNDERLINE_TYPING_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];

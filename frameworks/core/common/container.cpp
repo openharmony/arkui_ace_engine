@@ -15,7 +15,6 @@
 
 #include "core/common/container.h"
 #include "core/common/container_handler.h"
-#include "core/common/frontend.h"
 
 #include <dirent.h>
 #include "iremote_object.h"
@@ -33,7 +32,7 @@
 
 namespace OHOS::Ace {
 
-Container::Container() : state_(FrontendState::UNDEFINE) {}
+Container::Container() = default;
 
 Container::~Container() = default;
 
@@ -222,7 +221,7 @@ std::string Container::CurrentBundleName()
     return curContainer->GetBundleName();
 }
 
-bool Container::UpdateState(const FrontendState& state)
+bool Container::UpdateState(const Frontend::State& state)
 {
     std::lock_guard<std::mutex> lock(stateMutex_);
     if (state_ == state) {
@@ -230,11 +229,6 @@ bool Container::UpdateState(const FrontendState& state)
     }
     state_ = state;
     return true;
-}
-
-FrontendType Container::GetFrontendType() const
-{
-    return FrontendType::JS;
 }
 
 bool Container::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)

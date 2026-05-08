@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/linear_split/linear_split_paint_method.h"
 
 #include "core/components_ng/render/drawing_prop_convertor.h"

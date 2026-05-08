@@ -15,8 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/offscreen_canvas.h"
 
-#include <inttypes.h>
-
 #include "bridge/cj_frontend/cppview/offscreen_rendering_context.h"
 #include "core/components/common/properties/paint_state.h"
 

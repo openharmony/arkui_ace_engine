@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 
-#include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/long_press_gesture.h"

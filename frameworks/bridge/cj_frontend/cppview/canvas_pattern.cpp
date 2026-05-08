@@ -15,8 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/canvas_pattern.h"
 
-#include <inttypes.h>
-
 namespace OHOS::Ace::Framework {
 NativeCanvasPattern::NativeCanvasPattern() : FFIData() {}
 

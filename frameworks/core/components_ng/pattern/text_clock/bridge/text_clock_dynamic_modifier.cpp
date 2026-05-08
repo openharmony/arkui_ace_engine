@@ -14,7 +14,6 @@
  */
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
-#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text_clock/bridge/text_clock_custom_modifier.h"

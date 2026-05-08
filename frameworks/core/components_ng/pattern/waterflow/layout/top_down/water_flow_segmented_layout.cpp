@@ -212,9 +212,7 @@ int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
         }
         auto child = MeasureItem(i,
             { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset }, userDefHeight, std::nullopt);
-        if (!child) {
-            break;
-        }
+        CHECK_NULL_BREAK(child);
         if (!NearEqual(GetMeasuredHeight(child, axis_), info_->itemInfos_[i].mainSize)) {
             return i;
         }
@@ -386,9 +384,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
         for (int32_t i = info_->startIndex_; i <= bound; ++i) {
             auto item = MeasureItem(i, { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset },
                 WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i), std::nullopt);
-            if (!item) {
-                break;
-            }
+            CHECK_NULL_BREAK(item);
             if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[i].mainSize)) {
                 // refill from [i] if height doesn't match record
                 info_->ClearCacheAfterIndex(i - 1);

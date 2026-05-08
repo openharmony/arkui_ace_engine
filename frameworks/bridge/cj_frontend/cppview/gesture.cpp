@@ -15,8 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/gesture.h"
 
-#include <inttypes.h>
-
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/gesture_listener/gesture_component.h"
 #include "core/gestures/long_press_gesture.h"

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
-#include "core/common/container.h"
 
 #include "interfaces/native/node/node_model.h"
 

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/common/container.h"
 
 #include <cstddef>
 

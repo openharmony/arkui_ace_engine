@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 
 #include "base/utils/utils.h"

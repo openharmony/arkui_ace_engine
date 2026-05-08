@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/web/web_paint_method.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
-#include "core/components_ng/render/paint_wrapper.h"
-#include "core/components_ng/render/render_context.h"
 namespace OHOS::Ace::NG {
 CanvasDrawFunction WebPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {

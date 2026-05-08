@@ -34,7 +34,7 @@ struct IdParseResult {
 
 struct ResValueWrapper;
 
-class ACE_FORCE_EXPORT ThemeUtils {
+class ACE_EXPORT ThemeUtils {
 public:
     ThemeUtils() = delete;
     ~ThemeUtils() = delete;

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
-#include "core/common/container.h"
 #include <cmath>
 #include "ui/base/utils/utils.h"
 

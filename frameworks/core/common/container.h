@@ -87,7 +87,6 @@ using AbilityRuntimeContextCallback = std::function<void(int32_t)>;
 
 class PipelineBase;
 class ContainerHandler;
-class Frontend;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -334,7 +333,7 @@ public:
         return cardHapPath_;
     }
 
-    bool UpdateState(const FrontendState& state);
+    bool UpdateState(const Frontend::State& state);
 
     Settings& GetSettings()
     {
@@ -806,7 +805,7 @@ public:
     // Get the subFrontend of container
     virtual RefPtr<Frontend> GetSubFrontend() const { return nullptr; }
 
-    virtual FrontendType GetFrontendType() const;
+    virtual FrontendType GetFrontendType() const { return FrontendType::JS; }
 
     virtual bool IsArkTsFrontEnd() const { return false; }
 
@@ -849,7 +848,7 @@ protected:
     std::string cardHapPath_;
     bool useNewPipeline_ = false;
     std::mutex stateMutex_;
-    FrontendState state_;
+    Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
     // for common handler

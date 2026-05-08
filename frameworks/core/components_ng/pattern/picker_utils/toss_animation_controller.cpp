@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
-#include "core/components_ng/base/modifier.h"
 
 #include <sys/time.h>
 
@@ -31,13 +30,6 @@ constexpr float PICKER_SPRING_STIFFNESS = 20.f;
 constexpr float PICKER_SPRING_DAMPING = 10.f;
 constexpr double VMAX = 5.0;
 } // namespace
-
-TossAnimationController::~TossAnimationController() = default;
-
-RefPtr<NodeAnimatablePropertyFloat> TossAnimationController::GetTossNodeAnimation()
-{
-    return property_;
-}
 
 void TossAnimationController::SetStart(double y)
 {
@@ -112,6 +104,7 @@ void TossAnimationController::StartSpringMotion()
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
+    property_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     auto finishCallback = [weak, column]() {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);

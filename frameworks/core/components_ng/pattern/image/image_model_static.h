@@ -21,7 +21,6 @@
 #include "core/components/image/image_event.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/drawable/drawable_descriptor.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 class DrawingColorFilter;

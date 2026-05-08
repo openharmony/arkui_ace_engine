@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/components_ng/base/modifier.h"
 
 #include "base/log/jank_frame_report.h"
 #include "core/animation/scroll_motion.h"
@@ -22,7 +21,6 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/multi_thread.h"
-#include "core/common/container.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
@@ -96,16 +94,6 @@ constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 #endif
 
 } // namespace
-
-Scrollable::Scrollable() = default;
-
-Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis)
-    : callback_(std::move(callback)), axis_(axis)
-{}
-
-Scrollable::Scrollable(const ScrollPositionCallback& callback, Axis axis)
-    : callback_(callback), axis_(axis)
-{}
 
 double Scrollable::GetVelocityScale()
 {

@@ -14,7 +14,6 @@
  */
 
 #include "frameworks/bridge/common/dom/dom_text.h"
-#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::Framework {
 

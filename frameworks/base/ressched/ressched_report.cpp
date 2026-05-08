@@ -15,8 +15,6 @@
 
 #include "base/ressched/ressched_report.h"
 
-#include "core/common/container.h"
-
 namespace OHOS::Ace {
 std::atomic<int32_t> ResSchedReport::createPageCount(0);
 bool ResSchedReport::triggerExecuted(false);

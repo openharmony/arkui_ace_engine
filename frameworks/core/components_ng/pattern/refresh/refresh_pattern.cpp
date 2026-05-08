@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/components_ng/base/modifier.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -64,7 +63,6 @@ double NormalizeToPx(const Dimension& dimension, PipelineContext* context)
 }
 } // namespace
 
-RefreshPattern::~RefreshPattern() = default;
 
 Dimension RefreshPattern::GetTriggerRefreshDisTance()
 {

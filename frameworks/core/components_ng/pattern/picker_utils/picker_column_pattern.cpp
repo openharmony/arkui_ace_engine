@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
-#include "core/components_ng/base/modifier.h"
 
 #include "base/utils/measure_util.h"
 #include "base/utils/multi_thread.h"
@@ -38,15 +37,6 @@ constexpr char MEASURE_SIZE_STRING[] = "TEST";
 const Dimension FONT_SIZE = Dimension(2.0);
 const Dimension FOCUS_SIZE = Dimension(1.0);
 } // namespace
-
-PickerColumnPattern::PickerColumnPattern(bool isVertical) : LinearLayoutPattern(isVertical) {}
-
-PickerColumnPattern::~PickerColumnPattern()
-{
-    if (circleUtils_) {
-        delete circleUtils_;
-    }
-}
 
 void PickerColumnPattern::OnAttachToFrameNode()
 {

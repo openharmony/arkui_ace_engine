@@ -19,7 +19,6 @@
 
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/resource/resource_parse_utils.h"
 

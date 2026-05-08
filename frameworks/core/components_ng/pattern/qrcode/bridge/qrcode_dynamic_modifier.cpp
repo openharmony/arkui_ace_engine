@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "core/common/dynamic_module_helper.h"
-#include "core/common/container.h"
 #include "core/components/theme/app_theme.h"
  #include "core/interfaces/native/node/qrcode_modifier.h"
 
