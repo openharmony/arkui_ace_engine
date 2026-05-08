@@ -108,7 +108,7 @@ void LazyColumnLayoutAlgorithm::UpdateAttribute(const RefPtr<LazyColumnLayoutPro
     auto spaceDim = layoutProperty->GetSpace().value_or(Dimension(0));
     space_ = ConvertToPx(spaceDim, contentConstraint.scaleProperty, mainPercentRefer).value_or(0);
     space_ = std::max(space_, 0.0f);
-    horizontalAlign_ = layoutProperty->GetHorizontalAlign().value_or(HorizontalAlign::START);
+    horizontalAlign_ = layoutProperty->GetHorizontalAlign().value_or(HorizontalAlign::CENTER);
     isRtl_ = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
 }
 
