@@ -23,7 +23,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr char ENV_KEY_FONT_SCALE[] = "system.arkui.fontScale";
 
 void DispatchLayoutFontScaleChangedToAffectedNode(
     const RefPtr<UINode>& node, EnvironmentPropertyKind kind, const std::string& key)

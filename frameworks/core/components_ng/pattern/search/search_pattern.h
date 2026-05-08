@@ -230,7 +230,6 @@ public:
 
 private:
     void OnModifyDone() override;
-    void OnAttachToMainTree() override;
 
     bool NeedReadFontScaleFromEnv() override
     {

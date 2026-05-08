@@ -81,6 +81,10 @@ void JSWithEnv::SetFontScaleEnvProperty(const JSCallbackInfo& info)
         TAG_LOGW(AceLogTag::ACE_FOREACH, "JSWithEnv::SetFontScaleEnvProperty invalid args");
         return;
     }
+    if (envFontScale <= 0.0) {
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "JSWithEnv::SetFontScaleEnvProperty fontScale must be positive");
+        return;
+    }
     WithEnvModel::GetInstance()->SetEnvProperty(ENV_KEY_FONT_SCALE, envFontScale);
 }
     
