@@ -23,24 +23,22 @@ namespace {
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIPS_TIME_MAX = 4000; // ms
+
+bool IsDialogOrPopupTag(const std::string& tag)
+{
+    return tag == V2::POPUP_ETS_TAG || tag == V2::DIALOG_ETS_TAG;
+}
 } // namespace
-std::mutex SubwindowManager::instanceMutex_;
-std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
 thread_local RefPtr<Subwindow> SubwindowManager::currentSubwindow_;
-const std::unordered_set<SubwindowType> NORMAL_SUBWINDOW_TYPE = { SubwindowType::TYPE_MENU,
-    SubwindowType::TYPE_DIALOG, SubwindowType::TYPE_POPUP };
-const std::unordered_set<std::string> DIALOG_AND_POPUP_TAG = { V2::POPUP_ETS_TAG, V2::DIALOG_ETS_TAG };
 
 std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(instanceMutex_);
-    if (!instance_) {
-        instance_ = std::make_shared<SubwindowManager>();
-        if (instance_) {
-            instance_->isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
-        }
-    }
-    return instance_;
+    static std::shared_ptr<SubwindowManager> instance = [] {
+        auto manager = std::make_shared<SubwindowManager>();
+        manager->isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
+        return manager;
+    }();
+    return instance;
 }
 
 void SubwindowManager::AddContainerId(uint32_t windowId, int32_t containerId)
@@ -259,7 +257,7 @@ bool SubwindowManager::HasDialogOrPopup(int32_t containerId)
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_RETURN(rootNode, false);
     for (const auto& node : rootNode->GetChildren()) {
-        if (auto search = DIALOG_AND_POPUP_TAG.find(node->GetTag()); search != DIALOG_AND_POPUP_TAG.end()) {
+        if (IsDialogOrPopupTag(node->GetTag())) {
             return true;
         }
     }
@@ -1847,8 +1845,13 @@ void SubwindowManager::AddSubwindow(
 
 const std::vector<RefPtr<Subwindow>> SubwindowManager::GetSortSubwindow(int32_t instanceId)
 {
+    static constexpr std::array<SubwindowType, 3> normalSubWindowTypes = {
+        SubwindowType::TYPE_MENU,
+        SubwindowType::TYPE_DIALOG,
+        SubwindowType::TYPE_POPUP
+    };
     std::vector<RefPtr<Subwindow>> sortSubwindow;
-    for (SubwindowType type : NORMAL_SUBWINDOW_TYPE) {
+    for (SubwindowType type : normalSubWindowTypes) {
         auto subwindow = GetSubwindowByType(instanceId, type);
         if (subwindow) {
             sortSubwindow.push_back(subwindow);
