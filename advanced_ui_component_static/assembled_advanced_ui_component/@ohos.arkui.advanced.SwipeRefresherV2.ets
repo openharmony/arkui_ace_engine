@@ -1,3 +1,5 @@
+'use static'
+
 /*
  * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +19,17 @@
 import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { ComponentV2, Flex, FlexAlign, ItemAlign, LoadingProgress, ResourceStr, Text, UIContext, $r } from '@ohos.arkui.component';
+import {
+  ComponentV2,
+  Flex,
+  FlexAlign,
+  ItemAlign,
+  LoadingProgress,
+  ResourceStr,
+  Text,
+  UIContext,
+  $r
+} from '@ohos.arkui.component';
 import { LengthMetrics } from '@ohos.arkui.node';
 import { Param } from '@ohos.arkui.stateManagement';
 
@@ -39,7 +51,7 @@ export struct SwipeRefresherV2 {
   minFontSize: number = 1.75;
   maxFontSize: number = 2;
 
-  aboutToAppear() {
+  aboutToAppear(): void {
     try {
       let uiContent: UIContext = this.getUIContext();
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
@@ -47,7 +59,8 @@ export struct SwipeRefresherV2 {
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
-      hilog.error(0x3900, 'SwipeRefresherV2', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'SwipeRefresherV2',
+        `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
   }
 
@@ -60,7 +73,7 @@ export struct SwipeRefresherV2 {
     return Math.min(systemFontScale, this.maxAppFontScale);
   }
 
-  build() {
+  build(): void {
     Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
       if (this.isLoading) {
         LoadingProgress()
