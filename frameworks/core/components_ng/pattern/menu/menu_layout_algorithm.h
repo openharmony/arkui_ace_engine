@@ -160,7 +160,7 @@ protected:
     PreviewMenuParam param_;
     std::optional<Dimension> propTargetSpace_;
     std::optional<OffsetF> propTargetOffset_;
-    std::optional<SizeF> proptargetSize_;
+    std::optional<SizeF> propTargetSize_;
 
 private:
     enum class ErrorPositionType {
