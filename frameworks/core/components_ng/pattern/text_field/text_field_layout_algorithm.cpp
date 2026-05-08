@@ -1277,7 +1277,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
     modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), textStyle.GetTextDecorationColor(),
-        textStyle.GetTextDecorationStyle());
+        textStyle.GetTextDecorationStyle(), textStyle.GetLineThicknessScale());
 }
 
 bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyle,
@@ -1536,6 +1536,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     }
     if (layoutProperty->HasTextDecorationStyle()) {
         textStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
+    }
+    if (layoutProperty->HasLineThicknessScale()) {
+        textStyle.SetLineThicknessScale(layoutProperty->GetLineThicknessScale().value());
     }
     if (layoutProperty->HasLetterSpacing()) {
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());

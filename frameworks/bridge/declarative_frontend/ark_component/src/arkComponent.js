@@ -6747,11 +6747,13 @@ class TextAreaDecorationModifier extends ModifierWithKey {
       getUINativeModule().textArea.resetDecoration(node);
     }
     else {
-      getUINativeModule().textArea.setDecoration(node, this.value.type, this.value.color, this.value.style);
+      getUINativeModule().textArea.setDecoration(node, this.value.type, this.value.color,
+        this.value.style, this.value.thicknessScale);
     }
   }
   checkObjectDiff() {
-    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style ||
+        this.stageValue.thicknessScale !== this.value.thicknessScale) {
       return true;
     }
     if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
@@ -8792,11 +8794,13 @@ class TextInputDecorationModifier extends ModifierWithKey {
       getUINativeModule().textInput.resetDecoration(node);
     }
     else {
-      getUINativeModule().textInput.setDecoration(node, this.value.type, this.value.color, this.value.style);
+      getUINativeModule().textInput.setDecoration(node, this.value.type, this.value.color,
+        this.value.style, this.value.thicknessScale);
     }
   }
   checkObjectDiff() {
-    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style ||
+        this.stageValue.thicknessScale !== this.value.thicknessScale) {
       return true;
     }
     if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {

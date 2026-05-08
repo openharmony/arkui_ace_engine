@@ -1035,6 +1035,140 @@ HWTEST_F(TextFieldContentModifierTest, UpdateTextDecorationMeasureFlag003, TestS
 }
 
 /**
+ * @tc.name: SetLineThicknessScale001
+ * @tc.desc: Test SetTextDecoration with different lineThicknessScale values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, SetLineThicknessScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Test setting lineThicknessScale to specified value.
+     * tc.expected: lineThicknessScale_ is set correctly.
+     */
+    Color color = Color::BLUE;
+    TextDecorationStyle style = TextDecorationStyle::SOLID;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, 2.0f);
+    EXPECT_TRUE(textFieldContentModifier->lineThicknessScale_.has_value());
+    EXPECT_EQ(textFieldContentModifier->lineThicknessScale_.value(), 2.0f);
+
+    /**
+     * @tc.steps: step3. Test setting lineThicknessScale to default value.
+     * tc.expected: lineThicknessScale_ is set to default.
+     */
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, DEFAULT_LINE_THICKNESS_SCALE);
+    EXPECT_EQ(textFieldContentModifier->lineThicknessScale_.value(), DEFAULT_LINE_THICKNESS_SCALE);
+
+    /**
+     * @tc.steps: step4. Test setting lineThicknessScale to zero.
+     * tc.expected: lineThicknessScale_ is set to zero.
+     */
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, 0.0f);
+    EXPECT_EQ(textFieldContentModifier->lineThicknessScale_.value(), 0.0f);
+}
+/**
+ * @tc.name: SetLineThicknessScale002
+ * @tc.desc: Test SetTextDecoration update behavior with same/different lineThicknessScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, SetLineThicknessScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set initial lineThicknessScale value.
+     */
+    Color color = Color::RED;
+    TextDecorationStyle style = TextDecorationStyle::SOLID;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, 1.5f);
+    float oldAlpha = textFieldContentModifier->oldColorAlpha_;
+
+    /**
+     * @tc.steps: step3. Test calling with same lineThicknessScale (early return).
+     * tc.expected: step3. oldColorAlpha_ remains unchanged.
+     */
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, 1.5f);
+    EXPECT_EQ(textFieldContentModifier->oldColorAlpha_, oldAlpha);
+
+    /**
+     * @tc.steps: step4. Set initial decoration with lineThicknessScale.
+     */
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, 2.5f);
+
+    /**
+     * @tc.steps: step5. Change textDecoration to NONE with same lineThicknessScale.
+     * tc.expected: textDecorationAnimatable_ is set to true, lineThicknessScale_ preserved.
+     */
+    textFieldContentModifier->SetTextDecoration(TextDecoration::NONE, color, style, 2.5f);
+    EXPECT_TRUE(textFieldContentModifier->textDecorationAnimatable_);
+    EXPECT_EQ(textFieldContentModifier->lineThicknessScale_.value(), 2.5f);
+}
+
+/**
+ * @tc.name: ModifyDecorationInTextStyle001
+ * @tc.desc: Test ModifyDecorationInTextStyle applies lineThicknessScale in various scenarios.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyDecorationInTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Test with custom lineThicknessScale.
+     * tc.expected: textStyle has correct lineThicknessScale.
+     */
+    Color color = Color::BLUE;
+    TextDecorationStyle style = TextDecorationStyle::DOTTED;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, 1.8f);
+    TextStyle textStyle;
+    textFieldContentModifier->ModifyDecorationInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetLineThicknessScale(), 1.8f);
+
+    /**
+     * @tc.steps: step3. Test with default lineThicknessScale.
+     * tc.expected: textStyle has default lineThicknessScale.
+     */
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, DEFAULT_LINE_THICKNESS_SCALE);
+    TextStyle textStyle2;
+    textFieldContentModifier->ModifyDecorationInTextStyle(textStyle2);
+    EXPECT_EQ(textStyle2.GetLineThicknessScale(), DEFAULT_LINE_THICKNESS_SCALE);
+
+    /**
+     * @tc.steps: step4. Test with textDecorationAnimatable scenario.
+     * tc.expected: textStyle has correct lineThicknessScale.
+     */
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style, 2.0f);
+    textFieldContentModifier->SetTextDecoration(TextDecoration::NONE, color, style, 2.0f);
+    EXPECT_TRUE(textFieldContentModifier->textDecorationAnimatable_);
+    textFieldContentModifier->textDecorationColorAlpha_->Set(128.0f);
+    TextStyle textStyle3;
+    textFieldContentModifier->ModifyDecorationInTextStyle(textStyle3);
+    EXPECT_EQ(textStyle3.GetLineThicknessScale(), 2.0f);
+}
+
+/**
  * @tc.name: ModifyTextStyle006
  * @tc.desc: Test ModifyTextStyle when AdaptTextSize is false, adaptMinFontSize and adaptMaxFontSize should not be set.
  * @tc.type: FUNC

@@ -499,6 +499,7 @@ void SetDecorationImpl(Ark_NativePointer node, const Opt_TextDecorationOptions* 
     SearchModelStatic::SetTextDecoration(frameNode, options->textDecoration);
     SearchModelStatic::SetTextDecorationColor(frameNode, options->color);
     SearchModelStatic::SetTextDecorationStyle(frameNode, options->textDecorationStyle);
+    SearchModelStatic::SetLineThicknessScale(frameNode, options->lineThicknessScale);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node, const Opt_Union_F64_String_Resource* value)
 {

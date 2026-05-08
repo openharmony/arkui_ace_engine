@@ -1696,6 +1696,7 @@ struct CJUITextAreaModifier {
     void (*setTextAreaDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
         ArkUI_Int32 style, void* resRawPtr);
     void (*resetTextAreaDecoration)(ArkUINodeHandle node);
+    void (*getTextAreaDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
     void (*setTextAreaLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetTextAreaLetterSpacing)(ArkUINodeHandle node);
     void (*setTextAreaLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
@@ -1897,6 +1898,7 @@ struct CJUITextInputModifier {
     void (*setTextInputDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
                                    ArkUI_Int32 style, void* resRawPtr);
     void (*resetTextInputDecoration)(ArkUINodeHandle node);
+    void (*getTextInputDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
     void (*setTextInputLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetTextInputLetterSpacing)(ArkUINodeHandle node);
     void (*setTextInputLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
@@ -2880,6 +2882,7 @@ struct CJUISearchModifier {
     void (*setSearchDecoration)(
         ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style, void* resRawPtr);
     void (*resetSearchDecoration)(ArkUINodeHandle node);
+    void (*getSearchDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
     void (*setSearchLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetSearchLetterSpacing)(ArkUINodeHandle node);
     void (*setSearchLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);

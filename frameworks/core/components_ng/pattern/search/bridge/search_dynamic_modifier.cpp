@@ -49,6 +49,7 @@ constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
@@ -763,14 +764,15 @@ void ResetSearchDividerColor(ArkUINodeHandle node)
     }
 }
 
-void SetSearchDecoration(
-    ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style, void* resRawPtr)
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+    ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE, void* resRawPtr = nullptr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     SearchModelNG::SetTextDecorationColor(frameNode, Color(color));
     SearchModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+    SearchModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
@@ -781,6 +783,12 @@ void SetSearchDecoration(
     }
 }
 
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+    ArkUI_Int32 style, void* resRawPtr)
+{
+    SetSearchDecoration(node, decoration, color, style, DEFAULT_LINE_THICKNESS_SCALE, resRawPtr);
+}
+
 void ResetSearchDecoration(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
@@ -788,6 +796,7 @@ void ResetSearchDecoration(ArkUINodeHandle node)
     SearchModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     SearchModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     SearchModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    SearchModelNG::SetLineThicknessScale(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -2152,6 +2161,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchInspectorId = nullptr,
             .setSearchDecoration = nullptr,
             .resetSearchDecoration = nullptr,
+            .getSearchDecoration = nullptr,
             .setSearchLetterSpacing = nullptr,
             .resetSearchLetterSpacing = nullptr,
             .setSearchLineHeight = nullptr,
@@ -2319,6 +2329,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchInspectorId = ResetSearchInspectorId,
         .setSearchDecoration = SetSearchDecoration,
         .resetSearchDecoration = ResetSearchDecoration,
+        .getSearchDecoration = nullptr,
         .setSearchLetterSpacing = SetSearchLetterSpacing,
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,
@@ -2482,6 +2493,7 @@ const CJUISearchModifier* GetCJUISearchModifier()
         .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchDecoration = SetSearchDecoration,
         .resetSearchDecoration = ResetSearchDecoration,
+        .getSearchDecoration = nullptr,
         .setSearchLetterSpacing = SetSearchLetterSpacing,
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,

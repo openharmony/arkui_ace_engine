@@ -779,6 +779,7 @@ void SetDecorationImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetTextDecoration(frameNode, options.textDecoration);
     TextFieldModelStatic::SetTextDecorationColor(frameNode, options.color);
     TextFieldModelStatic::SetTextDecorationStyle(frameNode, options.textDecorationStyle);
+    TextFieldModelStatic::SetLineThicknessScale(frameNode, options.lineThicknessScale);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node,
                           const Opt_Union_F64_String_Resource* value)
