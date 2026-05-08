@@ -2047,6 +2047,8 @@ frameworks/core/components/common/properties/marquee_option.h @arkui_framework_x
 frameworks/core/components/common/properties/motion_path_evaluator.cpp @arkui_framework_xnode
 frameworks/core/components/common/properties/motion_path_evaluator.h @arkui_framework_xnode
 frameworks/core/components/common/properties/motion_path_option.h @arkui_framework_xnode
+frameworks/core/components/common/properties/os_content.cpp @arkuiscroll
+frameworks/core/components/common/properties/os_content.h @arkuiscroll
 frameworks/core/components/common/properties/outline_style.h @arkui_framework_xnode
 frameworks/core/components/common/properties/page_transition_option.cpp @arkuicodepulse
 frameworks/core/components/common/properties/page_transition_option.h @arkuicodepulse
@@ -3619,6 +3621,9 @@ test/unittest/core/common/task_runner_adapter_impl/task_runner_adapter_test.cpp 
 test/unittest/core/common/vibrator/ @arkui_framework_xnode
 test/unittest/core/common/transform/ @ArkUI_Event
 test/unittest/core/common/statistic_event/ @arkui_framework_xnode
+test/unittest/core/components/BUILD.gn @arkuiscroll
+test/unittest/core/components/common/properties/os_content_test.cpp @arkuiscroll
+test/unittest/core/components/common/properties/os_content_test.h @arkuiscroll
 test/unittest/core/event/ @ArkUI_Event
 test/unittest/core/gestures/ @ArkUI_Event
 test/unittest/core/image_file_cache/ @arkui001
