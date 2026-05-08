@@ -2737,6 +2737,7 @@ frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp @arkuicod
 frameworks/core/components_ng/render/adapter/rosen_luminance_sampling_helper.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_luminance_sampling_helper.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/sampler_manager.h @arkuicodepulse
+frameworks/core/components_ng/render/adapter/sheet_popup_shape.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_image.cpp @arkui001
@@ -2829,6 +2830,7 @@ frameworks/core/components_ng/render/render_surface.h @arkuilayout1
 frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout1
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout1
 frameworks/core/components_ng/render/snapshot_param.h @ArkUI_Event
+frameworks/core/components_ng/render/sheet_popup_shape.h @arkuicodepulse
 frameworks/core/components_ng/token_theme/ @arkui_framework_resource
 frameworks/core/drawable/ @arkui001
 frameworks/core/pipeline_ng/ @arkui_architecture

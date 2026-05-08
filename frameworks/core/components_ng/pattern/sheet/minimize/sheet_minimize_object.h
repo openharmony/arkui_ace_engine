@@ -67,7 +67,7 @@ public:
         return PanDirection::ALL;
     }
 
-    bool CheckIfNeedSetOuterBorderProp() const override
+    bool CheckIfNeedSetOuterBorderProp() override
     {
         return false;
     }
