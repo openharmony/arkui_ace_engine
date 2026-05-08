@@ -28,6 +28,13 @@
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+enum class FloatingBarPosition {
+    CENTER = 0,
+    LEFT,
+    RIGHT,
+};
+}
 
 class TabsNode;
 
@@ -54,11 +61,7 @@ public:
         return MakeRefPtr<TabsLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        ACE_UINODE_TRACE(GetHost());
-        return MakeRefPtr<TabsLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -176,6 +179,19 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
 
+    void OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void ResetTabBarFollowHandPosition();
+    void SetFloatingBarMargin(std::optional<float> floatingBarMargin)
+    {
+        floatingBarMargin_ = floatingBarMargin;
+    }
+    bool IsFloatingBar() const
+    {
+        return isFloatingBar_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
@@ -207,6 +223,17 @@ private:
     RefPtr<FocusHub> GetCurrentFocusNode(FocusIntension intension);
     void InitAccessibilityZIndex();
 
+    void InitFloatingBar();
+    void UpdateBgMaskNode();
+    GradientColor CreatePercentGradientColor(float percent, Color color);
+    void InitTouchEvent();
+    void OnTouchEvent(const TouchEventInfo& info);
+    void FollowHandAnimation();
+    void InitTabBarTransformAttributeIfNeeded();
+    void HandleOnTouchScaleAnimation();
+    void HandleOnTouchDelayScaleAnimation();
+    void OnFollowHandAnimationFinish();
+
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
@@ -224,6 +251,14 @@ private:
     bool interceptStatus_ = false;
     BarPosition barPosition_ = BarPosition::END; // default accessibilityZIndex is consistent with BarPosition::END
     std::optional<TabChangeInfo> lastTabChangeInfo_;
+
+    bool isFloatingBar_ = false;
+    bool lastFloatingBar_ = false;
+    FloatingBarPosition floatingBarPosition_ = FloatingBarPosition::CENTER;
+    RefPtr<TouchEventImpl> touchListener_ = nullptr;
+    int32_t floatTabBarFollowHandAnimationCount_ = 0;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> floatTabBarFollowHandAnimations_;
+    std::optional<float> floatingBarMargin_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

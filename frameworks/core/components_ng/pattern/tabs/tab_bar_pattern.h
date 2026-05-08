@@ -673,6 +673,8 @@ public:
         shouldPlayMaskAnimation_ = shouldPlayMaskAnimation;
     }
 
+    int32_t GetChildrenSize() const;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

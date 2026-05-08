@@ -1818,4 +1818,95 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
     RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
 }
+
+void TabsModelNG::SetBarFloatingStyle(const BarFloatingStyleParameters& parameters)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, parameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        ProcessDimensionWithResourceObj(tabsNode, "smallBarWidth", parameters.smallBarWidthObject);
+        ProcessDimensionWithResourceObj(tabsNode, "mediumBarWidth", parameters.mediumBarWidthObject);
+        ProcessDimensionWithResourceObj(tabsNode, "largeBarWidth", parameters.largeBarWidthObject);
+        ProcessDimensionWithResourceObj(tabsNode, "barSideMargin", parameters.barSideMarginObject);
+        ProcessDimensionWithResourceObj(tabsNode, "barBottomMargin", parameters.barBottomMarginObject);
+        ProcessColorWithResourceObj(tabsNode, "maskColor", parameters.maskColorObject);
+        ProcessDimensionWithResourceObj(tabsNode, "maskHeight", parameters.maskHeightObject);
+    }
+}
+
+void TabsModelNG::ResetBarFloatingStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle);
+}
+
+void TabsModelNG::ProcessDimensionWithResourceObj(
+    FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
+            BarFloatingStyleParameters param;
+            ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+                TabsLayoutProperty, BarFloatingStyle, param, AceType::RawPtr(node), param);
+            std::optional<Dimension> optResult;
+            if (parseOk) {
+                optResult = result;
+            } else {
+                optResult = std::nullopt;
+            }
+            if (name == "smallBarWidth") {
+                param.smallBarWidth = optResult;
+            } else if (name == "mediumBarWidth") {
+                param.mediumBarWidth = optResult;
+            } else if (name == "largeBarWidth") {
+                param.largeBarWidth = optResult;
+            } else if (name == "barSideMargin") {
+                param.barSideMargin = optResult;
+            } else if (name == "barBottomMargin") {
+                param.barBottomMargin = optResult;
+            } else if (name == "maskHeight") {
+                param.maskHeight = optResult;
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, param, AceType::RawPtr(node));
+        };
+        pattern->AddResObj("tabs." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("tabs." + name);
+    }
+}
+
+void TabsModelNG::ProcessColorWithResourceObj(
+    FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            Color result;
+            bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
+            BarFloatingStyleParameters param;
+            ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+                TabsLayoutProperty, BarFloatingStyle, param, AceType::RawPtr(node), param);
+            if (parseOk) {
+                param.maskColor = result;
+            } else {
+                param.maskColor = std::nullopt;
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, param, AceType::RawPtr(node));
+        };
+        pattern->AddResObj("tabs." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("tabs." + name);
+    }
+}
 } // namespace OHOS::Ace::NG
