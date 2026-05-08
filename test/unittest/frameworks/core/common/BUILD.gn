@@ -21,6 +21,12 @@ ohos_unittest("container_scope_test") {
     "container_scope_test.cpp",
   ]
 
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    defines = [ "ENABLE_CONTAINER_SCOPE_TRACKING" ]
+
+    external_deps = [ "bounds_checking_function:libsec_static" ]
+  }
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 

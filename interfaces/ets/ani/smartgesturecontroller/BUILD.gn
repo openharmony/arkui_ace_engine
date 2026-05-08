@@ -27,6 +27,9 @@ ohos_shared_library("smartGestureController_ani") {
     "napi:ace_napi",
     "runtime_core:ani",
   ]
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    external_deps += [ "bounds_checking_function:libsec_static" ]
+  }
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"
   subsystem_name = "arkui"
