@@ -81,6 +81,8 @@ public:
     void SetLevelOrderExtender(Opt_LevelOrderExtender levelOrderExtender);
     void SetFocusable(Opt_Boolean focusable);
     void SetSystemMaterial(Opt_uiMaterial_Material systemMaterial);
+    void SetDistortionMode(Opt_DistortionMode distortionMode);
+    void SetEdgeLightMode(Opt_EdgeLightMode edgeLightMode);
 
     DialogProperties GetDialogProperties() const;
 

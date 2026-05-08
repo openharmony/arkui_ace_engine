@@ -745,6 +745,8 @@ struct PromptAsyncContext {
     napi_value focusableApi = nullptr;
     HasInvertColor hasInvertColor;
     napi_value systemMaterialApi = nullptr;
+    napi_value distortionModeApi = nullptr;
+    napi_value edgeLightModeApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1524,6 +1526,8 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
     napi_get_named_property(env, argv[index], "focusable", &asyncContext->focusableApi);
     napi_get_named_property(env, argv[index], "systemMaterial", &asyncContext->systemMaterialApi);
+    napi_get_named_property(env, argv[index], "distortionMode", &asyncContext->distortionModeApi);
+    napi_get_named_property(env, argv[index], "edgeLightMode", &asyncContext->edgeLightModeApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
 }
@@ -1646,6 +1650,34 @@ RefPtr<UiMaterial> GetSystemMaterialParam(napi_env env, const std::shared_ptr<Pr
     UiMaterial* material = nullptr;
     napi_unwrap(env, asyncContext->systemMaterialApi, reinterpret_cast<void**>(&material));
     return material ? material->Copy() : nullptr;
+}
+
+DistortionMode GetDistortionModeParam(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    int32_t distortionMode = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->distortionModeApi, &valueType);
+    if (valueType != napi_number) {
+        return static_cast<DistortionMode>(distortionMode);
+    }
+
+    napi_get_value_int32(env, asyncContext->distortionModeApi, &distortionMode);
+    return static_cast<DistortionMode>(distortionMode);
+}
+
+EdgeLightMode GetEdgeLightModeParam(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    int32_t edgeLightMode = 2;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->edgeLightModeApi, &valueType);
+    if (valueType != napi_number) {
+        return static_cast<EdgeLightMode>(edgeLightMode);
+    }
+
+    napi_get_value_int32(env, asyncContext->edgeLightModeApi, &edgeLightMode);
+    return static_cast<EdgeLightMode>(edgeLightMode);
 }
 
 PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -1792,6 +1824,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
             napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
             napi_get_named_property(env, argv[0], "systemMaterial", &asyncContext->systemMaterialApi);
+            napi_get_named_property(env, argv[0], "distortionMode", &asyncContext->distortionModeApi);
+            napi_get_named_property(env, argv[0], "edgeLightMode", &asyncContext->edgeLightModeApi);
             napi_get_named_property(env, argv[0], "onDidAppear", &asyncContext->onDidAppear);
             napi_get_named_property(env, argv[0], "onDidDisappear", &asyncContext->onDidDisappear);
             napi_get_named_property(env, argv[0], "onWillAppear", &asyncContext->onWillAppear);
@@ -1983,6 +2017,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
         .systemMaterial = GetSystemMaterialParam(asyncContext->env, asyncContext),
+        .distortionMode = GetDistortionModeParam(env, asyncContext),
+        .edgeLightMode = GetEdgeLightModeParam(env, asyncContext),
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -2204,6 +2240,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
             napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
             napi_get_named_property(env, argv[0], "systemMaterial", &asyncContext->systemMaterialApi);
+            napi_get_named_property(env, argv[0], "distortionMode", &asyncContext->distortionModeApi);
+            napi_get_named_property(env, argv[0], "edgeLightMode", &asyncContext->edgeLightModeApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             if (!HasProperty(env, argv[0], "buttons")) {
                 DeleteContextAndThrowError(env, asyncContext, "Required input parameters are missing.");
@@ -2328,6 +2366,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
         .systemMaterial = GetSystemMaterialParam(env, asyncContext),
+        .distortionMode = GetDistortionModeParam(env, asyncContext),
+        .edgeLightMode = GetEdgeLightModeParam(env, asyncContext),
     };
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -2679,6 +2719,8 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
         .systemMaterial = GetSystemMaterialParam(env, asyncContext),
+        .distortionMode = GetDistortionModeParam(env, asyncContext),
+        .edgeLightMode = GetEdgeLightModeParam(env, asyncContext),
     };
     return promptDialogAttr;
 }
@@ -2968,6 +3010,8 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     napi_get_named_property(env, arg, "immersiveMode", &asyncContext->dialogImmersiveModeApi);
     napi_get_named_property(env, arg, "focusable", &asyncContext->focusableApi);
     napi_get_named_property(env, arg, "systemMaterial", &asyncContext->systemMaterialApi);
+    napi_get_named_property(env, arg, "distortionMode", &asyncContext->distortionModeApi);
+    napi_get_named_property(env, arg, "edgeLightMode", &asyncContext->edgeLightModeApi);
 
     ParseBaseDialogOptionsEvent(env, arg, asyncContext);
 }

@@ -41,6 +41,18 @@ class PipelineContext;
 class FrameNode;
 } // namespace OHOS::Ace::NG
 
+enum class DistortionMode: int32_t {
+    DISTORTION_AUTO = 0,
+    DISTORTION_ENABLED = 1,
+    DISTORTION_DISABLED = 2,
+};
+
+enum class EdgeLightMode: int32_t {
+    EDGELIGHT_AUTO = 0,
+    EDGELIGHT_ENABLED = 1,
+    EDGELIGHT_DISABLED = 2,
+};
+
 struct UiMaterialParam {
     Shadow shadow;
     Color backgroundColor;

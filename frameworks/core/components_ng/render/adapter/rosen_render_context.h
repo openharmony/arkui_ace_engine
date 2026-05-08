@@ -588,6 +588,8 @@ public:
 
     void UpdateOverlayText() override;
 
+    void UpdateSubmenuDistortionParam() override;
+
     void UpdateDistortionParam(const DistortionParam& param) override;
 
     void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
@@ -989,6 +991,7 @@ private:
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> sdfShape_;
 };
 } // namespace OHOS::Ace::NG
 
