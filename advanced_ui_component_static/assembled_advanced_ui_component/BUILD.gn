@@ -36,6 +36,7 @@ generate_static_abc("assembled_advanced_ets_abc") {
       "./@ohos.arkui.advanced.SubHeader.ets",
       "./@ohos.arkui.advanced.SubHeaderV2.ets",
       "./@ohos.arkui.advanced.SwipeRefresher.ets",
+      "./@ohos.arkui.advanced.SwipeRefresherV2.ets",
       "./@ohos.arkui.advanced.TabTitleBar.ets",
       "./@ohos.arkui.advanced.ToolBar.ets",
       "./@ohos.arkui.advanced.ToolBarV2.ets",
