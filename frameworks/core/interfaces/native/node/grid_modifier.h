@@ -55,6 +55,9 @@ void SetGridOnItemDragLeave(ArkUINodeHandle node, void* extraParam);
 void SetGridOnItemDragMove(ArkUINodeHandle node, void* extraParam);
 void SetGridOnItemDragStart(ArkUINodeHandle node, void* extraParam);
 void SetGridOnItemDrop(ArkUINodeHandle node, void* extraParam);
+void SetOnGridEditModeChange(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridEditModeChange(ArkUINodeHandle node);
+void SetOnGridEditModeChangeCallBack(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_MODIFIER_H

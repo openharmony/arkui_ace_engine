@@ -1549,6 +1549,10 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridEditModeOptionsModifier.identity, GridEditModeOptionsModifier, options);
     return this;
   }
+  onEditModeChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, GridOnEditModeChangeModifier.identity, GridOnEditModeChangeModifier, callback);
+    return this;
+  }
   enableEditMode(value) {
     modifierWithKey(this._modifiersWithKeys, GridEnableEditModeModifier.identity, GridEnableEditModeModifier, value);
     return this;
@@ -2155,6 +2159,20 @@ class GridEditModeOptionsModifier extends ModifierWithKey {
   }
 }
 GridEditModeOptionsModifier.identity = Symbol('gridEditModeOptions');
+class GridOnEditModeChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnEditModeChange(node);
+    }
+    else {
+      getUINativeModule().grid.setOnEditModeChange(node, this.value);
+    }
+  }
+}
+GridOnEditModeChangeModifier.identity = Symbol('gridOnEditModeChange');
 class GridEnableEditModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

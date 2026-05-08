@@ -1596,6 +1596,7 @@ enum ArkUIEventSubKind {
     ON_GRID_ITEM_DRAG_MOVE,
     ON_GRID_ITEM_DRAG_LEAVE,
     ON_GRID_ITEM_DROP,
+    ON_GRID_EDIT_MODE_CHANGE,
 
     ON_GRID_ITEM_SELECT = ARKUI_MAX_EVENT_NUM * ARKUI_GRID_ITEM,
 
@@ -4988,6 +4989,8 @@ struct ArkUIGridModifier {
     void (*setGridEnableEditMode)(ArkUINodeHandle node, ArkUI_Bool enableEditMode);
     void (*resetGridEnableEditMode)(ArkUINodeHandle node);
     ArkUI_Bool (*getGridEnableEditMode)(ArkUINodeHandle node);
+    void (*setOnGridEditModeChangeCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridEditModeChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {

@@ -499,6 +499,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onScrollStop", &JSGrid::JsOnScrollStop);
     JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
     JSClass<JSGrid>::StaticMethod("onScrollFrameBegin", &JSGrid::JsOnScrollFrameBegin);
+    JSClass<JSGrid>::StaticMethod("onEditModeChange", &JSGrid::JsOnEditModeChange);
 
     JSClass<JSGrid>::InheritAndBind<JSScrollableBase>(globalObj);
 }
@@ -600,8 +601,26 @@ void JSGrid::JsEnableEditMode(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &newJSVal);
         };
-        GridModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
+        GridModel::GetInstance()->SetEnableEditModeBindingEvent(std::move(changeEvent));
     }
+}
+
+void JSGrid::JsOnEditModeChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                           node = targetNode](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.OnEditModeChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(1, &newJSVal);
+    };
+    GridModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
 }
 
 void JSGrid::SetMaxCount(const JSCallbackInfo& info)

@@ -1081,6 +1081,23 @@ void GridModelNG::SetEnableEditModeChangeEvent(FrameNode* frameNode, std::functi
     pattern->SetEnableEditModeChangeEvent(std::move(changeEvent));
 }
 
+void GridModelNG::SetEnableEditModeBindingEvent(FrameNode* frameNode, std::function<void(bool)>&& bindingEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
+void GridModelNG::SetEnableEditModeBindingEvent(std::function<void(bool)>&& bindingEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
 void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

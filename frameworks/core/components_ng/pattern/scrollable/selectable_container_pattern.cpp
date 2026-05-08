@@ -22,9 +22,10 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
+constexpr int32_t TWO_FINGER_COUNT = 2;
 
 PointF ConvertGlobalToHostLocalPoint(
-    const RefPtr<SelectableContainerPattern>& pattern, const std::shared_ptr<BaseGestureEvent>& event)
+    SelectableContainerPattern* pattern, const std::shared_ptr<BaseGestureEvent>& event)
 {
     CHECK_NULL_RETURN(pattern, PointF());
     CHECK_NULL_RETURN(event, PointF());
@@ -463,6 +464,49 @@ RefPtr<FrameNode> SelectableContainerPattern::GetSelectableItemAtIndex(int32_t i
     return AceType::DynamicCast<FrameNode>(node);
 }
 
+void SelectableContainerPattern::TryEnterEditModeForSwipeSelect()
+{
+    if (GetEnableEditMode()) {
+        return;
+    }
+    enableEditMode_ = true;
+    if (IsDefaultMultiSelectStyleEnabled()) {
+        ApplyEditModeToVisibleItems();
+    }
+    FireEnableEditModeChangeEvent(true);
+}
+
+GestureJudgeResult SelectableContainerPattern::JudgeSwipeSelectGesture(
+    const RefPtr<NG::GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& event)
+{
+    CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
+    if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
+        gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON && isMouseEventInit_) {
+        return GestureJudgeResult::CONTINUE;
+    }
+    if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
+        gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN) {
+        if (!GetEnableEditMode()) {
+            auto fingerCount = static_cast<int32_t>(event->GetFingerList().size());
+            return fingerCount == TWO_FINGER_COUNT ? GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
+        }
+        if (NeedJudgeWithHotZone()) {
+            return IsInEditModeHotZone(ConvertGlobalToHostLocalPoint(this, event)) ?
+                GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
+        }
+        return GestureJudgeResult::CONTINUE;
+    }
+    if (NeedJudgeWithHotZone()) {
+        if (gestureInfo->GetRecognizerType() == GestureTypeName::PAN_GESTURE &&
+            gestureInfo->GetType() != GestureTypeName::BOXSELECT &&
+            gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN) {
+            return IsInEditModeHotZone(ConvertGlobalToHostLocalPoint(this, event)) ?
+                GestureJudgeResult::REJECT : GestureJudgeResult::CONTINUE;
+        }
+    }
+    return GestureJudgeResult::CONTINUE;
+}
+
 void SelectableContainerPattern::InitSwipeSelectEvent()
 {
     auto host = GetHost();
@@ -473,6 +517,7 @@ void SelectableContainerPattern::InitSwipeSelectEvent()
         auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->TryEnterEditModeForSwipeSelect();
             pattern->HandleSwipeSelectStart(info);
         };
 
@@ -505,27 +550,9 @@ void SelectableContainerPattern::InitSwipeSelectEvent()
     gestureHub->SetExcludedAxisForPanEvent(true);
     gestureHub->SetOnGestureJudgeNativeBegin([weak = WeakClaim(this)](const RefPtr<NG::GestureInfo>& gestureInfo,
                                              const std::shared_ptr<BaseGestureEvent>& event) -> GestureJudgeResult {
-        CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, GestureJudgeResult::CONTINUE);
-        if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
-            gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON && pattern->isMouseEventInit_) {
-            return GestureJudgeResult::CONTINUE;
-        }
-        if (pattern->NeedJudgeWithHotZone()) {
-            if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
-                gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN) {
-                return pattern->IsInEditModeHotZone(ConvertGlobalToHostLocalPoint(pattern, event)) ?
-                    GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
-            }
-            if (gestureInfo->GetRecognizerType() == GestureTypeName::PAN_GESTURE &&
-                gestureInfo->GetType() != GestureTypeName::BOXSELECT &&
-                gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN) {
-                return pattern->IsInEditModeHotZone(ConvertGlobalToHostLocalPoint(pattern, event)) ?
-                    GestureJudgeResult::REJECT : GestureJudgeResult::CONTINUE;
-            }
-        }
-        return GestureJudgeResult::CONTINUE;
+        return pattern->JudgeSwipeSelectGesture(gestureInfo, event);
     });
 }
 
@@ -550,6 +577,11 @@ void SelectableContainerPattern::UninitSwipeSelectEvent()
                 return GestureJudgeResult::CONTINUE;
             });
     }
+}
+
+bool SelectableContainerPattern::ShouldEnableTwoFingerSelect() const
+{
+    return HasEnableEditModeBinding() && editModeOptions_.enableFingerMultiSelect && !enableEditMode_;
 }
 
 void SelectableContainerPattern::HandleSwipeSelectStart(const GestureEvent& info)

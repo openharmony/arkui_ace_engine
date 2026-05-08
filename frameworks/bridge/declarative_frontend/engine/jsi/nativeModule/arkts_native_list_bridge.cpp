@@ -606,9 +606,9 @@ ArkUINativeModuleValue ListBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runt
         if (useDefaultStyle->IsBoolean()) {
             options.useDefaultMultiSelectStyle = useDefaultStyle->ToBoolean(vm)->Value();
         }
-        auto fingerSelect = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableFingerMultiSelect"));
-        if (fingerSelect->IsBoolean()) {
-            options.enableFingerMultiSelect = fingerSelect->ToBoolean(vm)->Value();
+        auto twoFingerSelect = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableTwoFingerMultiSelect"));
+        if (twoFingerSelect->IsBoolean()) {
+            options.enableFingerMultiSelect = twoFingerSelect->ToBoolean(vm)->Value();
         }
     }
     ListModelNG::SetEditModeOptions(frameNode, options);

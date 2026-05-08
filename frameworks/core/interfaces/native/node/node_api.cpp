@@ -694,6 +694,7 @@ const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetGridOnItemDragMove,
     NodeModifier::SetGridOnItemDragLeave,
     NodeModifier::SetGridOnItemDrop,
+    NodeModifier::SetOnGridEditModeChange,
 };
 
 const ComponentAsyncEventHandler GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -939,6 +940,7 @@ const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnGridItemDragMove,
     NodeModifier::ResetOnGridItemDragStart,
     NodeModifier::ResetOnGridItemDrop,
+    NodeModifier::ResetOnGridEditModeChange,
 };
 
 const ResetComponentAsyncEventHandler GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

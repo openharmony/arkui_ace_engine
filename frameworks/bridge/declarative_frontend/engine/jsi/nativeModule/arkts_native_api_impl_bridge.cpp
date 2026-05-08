@@ -2220,6 +2220,10 @@ void ArkUINativeModule::RegisterGridAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetEnableEditMode));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridEnableEditMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetEnableEditMode));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnEditModeChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetOnEditModeChange));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnEditModeChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetOnEditModeChange));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridScroller"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetGridScroller));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridLayoutOptions"),
