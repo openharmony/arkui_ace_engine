@@ -570,6 +570,7 @@ public:
     virtual void OnPositionEdgesUpdate(const EdgesParam& value) {}
     virtual void RecalculatePosition() {}
     virtual void OnZIndexUpdate(int32_t value) {}
+    virtual void SortChildrenByZIndex() {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnPreBackgroundColorUpdate(const Color& value) {}

@@ -4517,6 +4517,13 @@ void RosenRenderContext::RecalculatePosition()
     SetPositionToRSNode();
 }
 
+void RosenRenderContext::SortChildrenByZIndex()
+{
+    FREE_RS_CONTEXT_CHECK(SortChildrenByZIndex);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->ReSortChildrenByZIndex();
+}
+
 void RosenRenderContext::OnZIndexUpdate(int32_t value)
 {
     FREE_RS_CONTEXT_CHECK(OnZIndexUpdate, value);
