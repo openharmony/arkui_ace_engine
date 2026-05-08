@@ -1877,6 +1877,14 @@ RefPtr<UINode> FindAccessibleFocusNodeInExtMenu(const RefPtr<FrameNode>& extensi
     return nullptr;
 }
 
+RefPtr<UINode> GetExtensionInnerMenu(RefPtr<FrameNode>& extensionMenu)
+{
+    CHECK_NULL_RETURN(extensionMenu, nullptr);
+    auto extensionMenuScroll = extensionMenu->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(extensionMenuScroll, nullptr);
+    return extensionMenuScroll->GetChildAtIndex(0);
+}
+
 void GetAutoFillSubMenuOptionsParams(std::vector<MenuOptionsParam>& subMenuOptionsParams)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -2699,9 +2707,10 @@ RefPtr<FrameNode> SelectOverlayNode::GetExtensionMenuOutterrMenu(std::vector<Opt
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     CHECK_NULL_RETURN(menu, nullptr);
-    menu->SetThemeScopeId(GetThemeScopeId());
     menuWrapper->RemoveChild(menu);
     menuWrapper.Reset();
+    menu->AllowUseParentTheme(false);
+    menu->SetThemeScopeId(themeScopeId);
     if (menuParam.blurStyleOption->colorMode != ThemeColorMode::SYSTEM) {
         const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
         if (menuModifier) {
@@ -3586,6 +3595,20 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
         UpdateMenuInner(info, noAnimation, false);
     }
+    if (info && extensionMenu_) {
+        auto caller = info->callerFrameNode.Upgrade();
+        auto callerThemeScopId = 0;
+        if (caller) {
+            callerThemeScopId = caller->GetThemeScopeId();
+        }
+        auto extensionInnerMenu = GetExtensionInnerMenu(extensionMenu_);
+        if (extensionInnerMenu) {
+            auto children = extensionInnerMenu->GetChildren();
+            for (const auto& child : children) {
+                child->SetThemeScopeId(callerThemeScopId);
+            }
+        }
+    }
     selectMenu_->MarkModifyDone();
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (selectMenuInner_) {
@@ -4203,6 +4226,45 @@ void UpdateMenuItemsColors(const RefPtr<FrameNode>& menuNode, const Color& textC
     menuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void UpdateMenuItemsTextAndSymbolColors(const RefPtr<UINode>& menuInnerNode)
+{
+    CHECK_NULL_VOID(menuInnerNode);
+    auto children = menuInnerNode->GetChildren();
+    auto theme = menuInnerNode->GetTheme<SelectTheme>(true);
+    CHECK_NULL_VOID(theme);
+    for (const auto& child : children) {
+        auto menuItem = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(menuItem);
+        V2::ItemDivider divider;
+        GetExtensionMenuItemDividerInfo(menuItem, divider);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        if (menuItemModifier) {
+            menuItemModifier->updateDividerColor(menuItem, divider.color);
+        }
+        auto row = menuItem->GetChildAtIndex(0);
+        CHECK_NULL_VOID(row);
+        auto rowChildren = row->GetChildren();
+        for (const auto& rowChild : rowChildren) {
+            auto node = AceType::DynamicCast<FrameNode>(rowChild);
+            CHECK_NULL_VOID(node);
+            if (node->GetTag() == V2::SYMBOL_ETS_TAG) {
+                auto layoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
+                layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
+                node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            }
+            if (node->GetTag() == V2::TEXT_ETS_TAG) {
+                auto textRenderContext = node->GetRenderContext();
+                CHECK_NULL_VOID(textRenderContext);
+                textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
+                node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                UpdateTextColor(node, theme->GetMenuFontColor());
+            }
+        }
+    }
+    menuInnerNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void UpdateFuncButtonsColors(const RefPtr<FrameNode>& moreButton, const RefPtr<FrameNode>& backButton,
     const Color& clickedColor, const Color& hoverColor)
 {
@@ -4236,6 +4298,10 @@ void SelectOverlayNode::UpdateMenuColors()
 
     UpdateMenuItemsColors(selectMenuInner_, textColor, clickedColor, hoverColor);
     UpdateFuncButtonsColors(moreButton_, backButton_, clickedColor, hoverColor);
+    auto extensionInnerMenu = GetExtensionInnerMenu(extensionMenu_);
+    if (extensionInnerMenu) {
+        UpdateMenuItemsTextAndSymbolColors(extensionInnerMenu);
+    }
 
     if (moreOrBackSymbol_) {
         auto layoutProperty = moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
