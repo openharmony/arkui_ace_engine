@@ -206,12 +206,12 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, MenuSystemMaterialModifier.identity, MenuSystemMaterialModifier, menuSystemMaterial);
     return this;
   }
-  menuBackgroundBlurStyleOptions(menuBackgroundBlurStyleOptions: Optional<BackgroundBlurStyleOptions>) {
+  menuBackgroundBlurStyleOptions(menuBackgroundBlurStyleOptions: Optional<BackgroundBlurStyleOptions>): this {
     modifierWithKey(
       this._modifiersWithKeys, MenuBackgroundBlurStyleOptionsModifier.identity, MenuBackgroundBlurStyleOptionsModifier, menuBackgroundBlurStyleOptions);
     return this;
   }
-  menuBackgroundEffect(menuBackgroundEffect: Optional<BackgroundEffectOptions>) {
+  menuBackgroundEffect(menuBackgroundEffect: Optional<BackgroundEffectOptions>): this {
     modifierWithKey(
       this._modifiersWithKeys, MenuBackgroundEffectModifier.identity, MenuBackgroundEffectModifier, menuBackgroundEffect);
     return this;
