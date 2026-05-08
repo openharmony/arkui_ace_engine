@@ -230,14 +230,18 @@ advanced_ui_component/chipgroupv2/ @arkuitoolchain
 advanced_ui_component/chip/ @arkuitoolchain
 advanced_ui_component/chipv2/ @arkuitoolchain
 advanced_ui_component/composelistitem/ @arkuiadvancedcomponent
+advanced_ui_component/composelistitemv2/ @arkuiadvancedcomponent
 advanced_ui_component/composetitlebar/ @arkuiadvancedcomponent
+advanced_ui_component/composetitlebarv2/ @arkuiadvancedcomponent
 advanced_ui_component/counter/ @arkuitoolchain
 advanced_ui_component/counterv2/ @arkuitoolchain
 advanced_ui_component/dialog/ @arkuiadvancedcomponent
 advanced_ui_component/dialogv2/ @arkuiadvancedcomponent
 advanced_ui_component/downloadfilebutton/
 advanced_ui_component/editabletitlebar/ @arkuiadvancedcomponent
+advanced_ui_component/editabletitlebarv2/ @arkuiadvancedcomponent
 advanced_ui_component/exceptionprompt/ @arkuiadvancedcomponent
+advanced_ui_component/exceptionpromptv2/ @arkuiadvancedcomponent
 advanced_ui_component/filter/ @arkuiadvancedcomponent
 advanced_ui_component/foldsplitcontainer/ @arkuilayout1
 advanced_ui_component/formmenu/ @form_framework
@@ -253,13 +257,16 @@ advanced_ui_component/selectionmenu/ @huawei_g_five
 advanced_ui_component_static/selectionmenu/ @huawei_g_five
 advanced_ui_component/selecttitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/splitlayout/ @arkuiadvancedcomponent
+advanced_ui_component/splitlayoutv2/ @arkuiadvancedcomponent
 advanced_ui_component/subheader/ @arkuiadvancedcomponent
 advanced_ui_component/subheaderv2/ @arkuiadvancedcomponent
 advanced_ui_component/swiperefresher/ @arkuiadvancedcomponent
+advanced_ui_component/swiperefresherv2/ @arkuiadvancedcomponent
 advanced_ui_component/tabtitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbarv2/ @arkuiadvancedcomponent
 advanced_ui_component/treeview/ @arkuiadvancedcomponent
+advanced_ui_component/treeviewv2/ @arkuiadvancedcomponent
 advanced_ui_component_static/multinavigation/ @arkui_navigation
 advanced_ui_component_static/arcbutton/ @arkuipopupwindow_all
 advanced_ui_component_static/arcslider/ @arkuipopupwindow_all
