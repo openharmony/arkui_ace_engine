@@ -97,10 +97,13 @@ struct ACE_EXPORT DepthPosition {
 struct ACE_EXPORT SpatialEffectParams {
     std::optional<DepthPosition> position;
     float occlusionWeight = 0.0f;
+    float depth = 0.0f;
 
     bool operator==(const SpatialEffectParams& other) const
     {
-        return position == other.position && NearEqual(occlusionWeight, other.occlusionWeight);
+        return position == other.position
+            && NearEqual(occlusionWeight, other.occlusionWeight)
+            && NearEqual(depth, other.depth);
     }
 
     bool operator!=(const SpatialEffectParams& other) const
@@ -112,6 +115,7 @@ struct ACE_EXPORT SpatialEffectParams {
     {
         position.reset();
         occlusionWeight = 0.0f;
+        depth = 0.0f;
     }
 };
 
