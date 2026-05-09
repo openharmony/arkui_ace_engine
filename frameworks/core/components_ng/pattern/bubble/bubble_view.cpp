@@ -871,8 +871,37 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     bubblePattern->SetIsShadowStyle(param->IsShadowStyle());
     bubblePattern->SetShadow(param->GetShadow());
     bool wasUserSetMaterial = bubblePattern->IsUserSetMaterial();
+    auto previousMaterial = renderContext ? renderContext->GetSystemMaterial() : nullptr;
+    // Get previous and current material types
+    MaterialType previousMaterialType = MaterialType::NONE;
+    MaterialType currentMaterialType = MaterialType::NONE;
+
+    if (previousMaterial) {
+        auto typeOpt = MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(previousMaterial));
+        if (typeOpt.has_value()) {
+            previousMaterialType = typeOpt.value();
+        }
+    }
+
+    auto currentMaterial = param->GetSystemMaterial();
+    if (MaterialUtils::IsEnableMaterialParam(currentMaterial)) {
+        auto typeOpt = MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(currentMaterial));
+        if (typeOpt.has_value()) {
+            currentMaterialType = typeOpt.value();
+        }
+    }
+    // Reset SDF shape when material type changes
+    if (wasUserSetMaterial && previousMaterialType != currentMaterialType) {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(childNode), nullptr);
+        if (renderContext) {
+            renderContext->SetSDFShape(nullptr);
+        }
+    }
     bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(childNode, param);
     bubblePattern->SetIsUserSetMaterial(isUserSetMaterial);
+    if (isUserSetMaterial) {
+        renderContext->SetClipToBounds(true);
+    }
     // Clear SystemMaterial when transitioning from having material to no material
     if (wasUserSetMaterial && !isUserSetMaterial) {
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(childNode), nullptr);
@@ -1333,11 +1362,12 @@ RefPtr<OverlayManager> BubbleView::GetPopupOverlayManager(const RefPtr<UINode>& 
 bool BubbleView::ShouldUpdateShadow(const RefPtr<PopupParam>& param)
 {
     auto systemMaterial = param->GetSystemMaterial();
-    if (!systemMaterial || !MaterialUtils::CheckMaterialValid(systemMaterial->GetType())) {
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(systemMaterial));
+    if (!nativeMaterial) {
         return true;  // Should update shadow when no valid material
     }
 
-    auto materialType = MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(systemMaterial));
+    auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
     if (!materialType.has_value()) {
         return true;  // Should update shadow when material type is unknown
     }

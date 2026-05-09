@@ -2050,6 +2050,17 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
     }
 }
 
+void RosenRenderContext::ClearClipBounds()
+{
+    FREE_RS_CONTEXT_CHECK(ClearClipBounds);
+    CHECK_NULL_VOID(rsNode_);
+    ResetClipShape();
+    AddOrUpdateModifier<Rosen::ModifierNG::RSBoundsClipModifier,
+        &Rosen::ModifierNG::RSBoundsClipModifier::SetClipBounds, std::shared_ptr<Rosen::RSPath>>(
+        clipBoundModifier_, nullptr);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& width, Dimension& height)
 {
     if (particleImageContextMap_.find(src) != particleImageContextMap_.end()) {

@@ -348,7 +348,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level0)
  * @tc.desc: Test event function of bubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level0)
+HWTEST_F(BubbleTestNg, BubblePatternTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -977,7 +977,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level0)
  * @tc.desc: Test BubblePaintMethod UpdateArrowOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level0)
+HWTEST_F(BubbleTestNg, BubblePaintMethodTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1028,7 +1028,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level0)
  * @tc.desc: Test BubblePaintMethod PaintMask.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level0)
+HWTEST_F(BubbleTestNg, BubblePaintMethodTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
