@@ -1032,10 +1032,10 @@ std::vector<Rosen::Rect> WindowPattern::GetHotAreas()
     return session_->GetTouchHotAreas();
 }
 
-bool WindowPattern::GetSessionTouchable()
+bool WindowPattern::GetSessionTouchable() const
 {
     CHECK_NULL_RETURN(session_, false);
-    if (!session_->GetSystemTouchable() || !session_->GetForegroundInteractiveStatus()) {
+    if (!session_->GetSessionTouchable()) {
         return false;
     }
     return true;
