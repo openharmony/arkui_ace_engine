@@ -24,7 +24,7 @@ import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
-import { ChildrenMainSize, AttributeModifier, hookListItemGroupChildrenMainSizeImpl, hookListItemGroupOptionsImpl, extractors, hookListItemGroupAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ChildrenMainSize, AttributeModifier, hookListItemGroupChildrenMainSizeImpl, extractors, hookListItemGroupAttributeModifier, AttributeUpdater } from '#handwritten'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
@@ -115,7 +115,9 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         return (this.peer as ArkListItemGroupPeer)
     }
     public setListItemGroupOptions(options?: ListItemGroupOptions): this {
-        hookListItemGroupOptionsImpl(this, options)
+        const options_casted = options as (ListItemGroupOptions | undefined)
+        this.getPeer()?.setListItemGroupOptionsAttribute(options_casted)
+        this.applyOptionsFinish('ListItemGroupAttribute');
         return this
     }
     public divider(value: ListDividerOptions | null | undefined): this {
