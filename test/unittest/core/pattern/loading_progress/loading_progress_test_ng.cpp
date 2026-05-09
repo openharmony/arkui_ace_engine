@@ -413,11 +413,36 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest007, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     modelNg.SetColor(COLOR_DEFAULT);
     modelNg.SetColorByUser(true);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateForegroundColorFlag(true);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
     modelNg.SetColorByUser(false);
-    frameNode->SetThemeScopeId(334455);
+    renderContext->UpdateForegroundColorFlag(false);
     EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: LoadingProgressPatternTest008
+ * @tc.desc: Test Pattern OnAttachToMainTree function of loadingProgress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest008, TestSize.Level0)
+{
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressThemeWrapper>()));
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    loadingProgressPattern->OnAttachToMainTree();
+    EXPECT_EQ(paintProperty->GetColorValue(), COLOR_DEFAULT);
 }
 
 /**
