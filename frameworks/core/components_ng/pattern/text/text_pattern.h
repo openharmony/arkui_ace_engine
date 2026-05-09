@@ -105,11 +105,6 @@ public:
     bool IsTextNode() const;
     bool DefaultSupportDrag() override;
     void OnModifyDone() override;
-
-    bool NeedReadFontScaleFromEnv() override
-    {
-        return true;
-    }
     void OnWindowHide() override;
     void OnWindowShow() override;
     void OnLanguageConfigurationUpdate() override;
@@ -135,6 +130,12 @@ public:
     void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
+
+    bool NeedReadFontScaleFromEnv() override
+    {
+        return true;
+    }
+
     void DumpParagraphsInfo();
     TextSelector GetTextSelector() const;
     const std::u16string& GetTextForDisplay() const;

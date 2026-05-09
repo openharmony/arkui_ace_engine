@@ -256,8 +256,12 @@ public:
 
     void ReadFontScaleFromEnv();
 
-    std::optional<float> GetEnvFontScale() const
+    std::optional<float> GetEnvFontScale()
     {
+        if (NeedReadFontScaleFromEnv() && !isEnvFontScaleInited_) {
+            ReadFontScaleFromEnv();
+            isEnvFontScaleInited_ = true;
+        }
         return envFontScale_;
     }
 
@@ -897,6 +901,7 @@ protected:
     WeakPtr<FrameNode> frameNode_;
     RefPtr<PatternResourceManager> resourceMgr_;
     std::optional<float> envFontScale_;
+    bool isEnvFontScaleInited_ = false;
 
     std::function<bool()> onNeedSoftkeyboardCallback_;
 private:

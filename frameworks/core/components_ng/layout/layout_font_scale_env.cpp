@@ -35,7 +35,6 @@ void DispatchLayoutFontScaleChangedToAffectedNode(
     if (customNode) {
         customNode->MarkNeedUpdate();
     }
-
     auto frameNode = AceType::DynamicCast<FrameNode>(node);
     if (frameNode) {
         auto pattern = frameNode->GetPattern();
