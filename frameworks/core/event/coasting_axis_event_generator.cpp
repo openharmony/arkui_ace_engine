@@ -20,6 +20,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {

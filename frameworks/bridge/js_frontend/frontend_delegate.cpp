@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"

@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/event/overflow_scroll_event_hub.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"

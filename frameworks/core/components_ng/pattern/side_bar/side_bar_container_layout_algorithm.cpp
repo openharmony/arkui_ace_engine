@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"
 #include "core/common/container.h"
 
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {

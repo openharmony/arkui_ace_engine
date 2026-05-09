@@ -22,6 +22,8 @@
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"

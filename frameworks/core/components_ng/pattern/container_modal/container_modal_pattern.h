@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/rrect.h"
 #include "base/memory/referenced.h"
 #include "core/common/window.h"
 #include "core/components/container_modal/container_modal_constants.h"

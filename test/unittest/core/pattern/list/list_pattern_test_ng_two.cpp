@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 

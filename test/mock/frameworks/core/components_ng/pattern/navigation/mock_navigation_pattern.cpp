@@ -5,6 +5,8 @@
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
+
 namespace OHOS::Ace::NG {
 NavigationPattern::NavigationPattern() = default;
 

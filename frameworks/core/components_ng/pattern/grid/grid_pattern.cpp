@@ -21,6 +21,7 @@
 #include "base/utils/system_properties.h"
 #include "core/animation/curves.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"

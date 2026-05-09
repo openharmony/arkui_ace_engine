@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/error/error_code.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"

@@ -19,6 +19,7 @@
 #define protected public
 
 #include "core/common/event_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"

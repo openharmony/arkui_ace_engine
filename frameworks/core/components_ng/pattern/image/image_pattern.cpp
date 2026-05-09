@@ -46,6 +46,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/drawable/animated_drawable_descriptor.h"
+#include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

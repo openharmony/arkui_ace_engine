@@ -26,6 +26,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/event/touch_event.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"

@@ -44,6 +44,10 @@
 #include "frameworks/core/common/event_manager.h"
 #include "frameworks/core/components_ng/pattern/text_drag/text_drag_base.h"
 
+namespace OHOS::Ace {
+class DragWindow;
+}
+
 namespace OHOS::Ace::NG {
 
 struct DragStartContext {

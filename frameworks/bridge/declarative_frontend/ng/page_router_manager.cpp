@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
