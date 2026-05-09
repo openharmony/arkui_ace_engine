@@ -822,6 +822,14 @@ class SmartGestureMonitorRegistry final {
 public:
     static bool Register(ani_env* env, int32_t instanceId, ani_fn_object callback)
     {
+        auto iter = states_.find(instanceId);
+        if (iter != states_.end()) {
+            for (const auto& state : iter->second) {
+                if (state && state->MatchesCallback(env, callback)) {
+                    return true;
+                }
+            }
+        }
         auto state = SmartGestureMonitorState::Create(env, instanceId, callback);
         CHECK_NULL_RETURN(state, false);
         states_[instanceId].emplace_back(std::move(state));
@@ -830,30 +838,28 @@ public:
 
     static bool Unregister(ani_env* env, int32_t instanceId, ani_fn_object callback)
     {
-        std::vector<std::shared_ptr<SmartGestureMonitorState>> statesToDetach;
+        std::shared_ptr<SmartGestureMonitorState> stateToDetach;
         auto iter = states_.find(instanceId);
         if (iter == states_.end() || iter->second.empty()) {
             return false;
         }
         auto& stateStack = iter->second;
-        auto removeIter = std::remove_if(stateStack.begin(), stateStack.end(),
-            [&statesToDetach, env, callback](const std::shared_ptr<SmartGestureMonitorState>& state) {
-                if (!state || !state->MatchesCallback(env, callback)) {
-                    return false;
-                }
-                statesToDetach.emplace_back(state);
-                return true;
-            });
-        stateStack.erase(removeIter, stateStack.end());
+        for (auto reverseIter = stateStack.rbegin(); reverseIter != stateStack.rend(); ++reverseIter) {
+            auto state = *reverseIter;
+            if (!state || !state->MatchesCallback(env, callback)) {
+                continue;
+            }
+            stateToDetach = state;
+            stateStack.erase(std::next(reverseIter).base());
+            break;
+        }
         if (stateStack.empty()) {
             states_.erase(iter);
         }
-        for (const auto& state : statesToDetach) {
-            if (state) {
-                state->Detach();
-            }
+        if (stateToDetach) {
+            stateToDetach->Detach();
         }
-        return !statesToDetach.empty();
+        return stateToDetach != nullptr;
     }
 
     static bool Clear(int32_t instanceId)

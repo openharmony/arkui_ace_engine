@@ -46,6 +46,25 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+ACE_FORCE_EXPORT
+SmartGestureProposal::SmartGestureProposal(
+    SmartGestureProposalType proposalType, SmartGestureOperateIntention intention, const RefPtr<FrameNode>& node)
+    : type(proposalType), operateIntention(intention), targetNode(node)
+{}
+
+ACE_FORCE_EXPORT
+SmartGestureProposal::SmartGestureProposal(SmartGestureProposalType proposalType,
+    SmartGestureOperateIntention intention, const RefPtr<FrameNode>& node, const ScrollingConfig& config)
+    : type(proposalType), operateIntention(intention), targetNode(node), scrollingConfig(config)
+{}
+
+ACE_FORCE_EXPORT
+RefPtr<FrameNode> SmartGestureProposal::GetTargetNode() const
+{
+    return targetNode.Upgrade();
+}
+
 namespace {
 constexpr double HALF_DIVISOR = 2.0;
 constexpr int32_t CENTER_HIT_TEST_TOUCH_ID = 0;
@@ -597,8 +616,7 @@ SmartGestureProposal SmartGestureManager::BuildSlideForwardProposal(
         }
         return SmartGestureProposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::SLIDE_FORWARD);
     }
-    auto centerHitProposal = SmartGestureDecider::BuildCenterHitProposal(centerHitPath);
-    return centerHitProposal;
+    return SmartGestureDecider::BuildCenterHitProposal(centerHitPath);
 }
 
 void SmartGestureManager::RevealSelectedNodeIfNeeded(const RefPtr<FrameNode>& node)

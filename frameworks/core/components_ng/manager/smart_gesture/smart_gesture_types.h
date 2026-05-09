@@ -75,18 +75,11 @@ struct SmartGestureProposal {
         : type(proposalType), operateIntention(intention)
     {}
     SmartGestureProposal(
-        SmartGestureProposalType proposalType, SmartGestureOperateIntention intention, const RefPtr<FrameNode>& node)
-        : type(proposalType), operateIntention(intention), targetNode(node)
-    {}
+        SmartGestureProposalType proposalType, SmartGestureOperateIntention intention, const RefPtr<FrameNode>& node);
     SmartGestureProposal(SmartGestureProposalType proposalType, SmartGestureOperateIntention intention,
-        const RefPtr<FrameNode>& node, const ScrollingConfig& config)
-        : type(proposalType), operateIntention(intention), targetNode(node), scrollingConfig(config)
-    {}
+        const RefPtr<FrameNode>& node, const ScrollingConfig& config);
 
-    RefPtr<FrameNode> GetTargetNode() const
-    {
-        return targetNode.Upgrade();
-    }
+    RefPtr<FrameNode> GetTargetNode() const;
 };
 
 struct SmartGestureHandlingResolution {
