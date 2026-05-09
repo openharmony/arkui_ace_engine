@@ -18,6 +18,7 @@ import arkui.component.common.ClickEvent as ClickEvent;
 import arkui.component.gesture.GestureEvent as GestureEvent;
 import arkui.component.gesture.GestureRecognizer as GestureRecognizer;
 import arkui.FrameNode.FrameNode as FrameNode;
+import ohos.arkui.UIContext.NodeRenderStateChangeCallback as NodeRenderStateChangeCallback;
 import ohos.arkui.UIContext.GestureActionPhase as GestureActionPhase;
 import ohos.arkui.UIContext.GestureListenerType as GestureListenerType;
 
@@ -49,6 +50,8 @@ interface UIObserverGestureEventOps {
     static i32 setOnBeforePanEnd(i32 instanceId, UIObserver_PanListenerCallback callback);
     static i32 setOnAfterPanStart(i32 instanceId, UIObserver_PanListenerCallback callback);
     static i32 setOnAfterPanEnd(i32 instanceId, UIObserver_PanListenerCallback callback);
+
+    static i32 setOnNodeRenderState(i32 instanceId, (String or i32) nodeIdentity, NodeRenderStateChangeCallback callback);
 
     static i32 setOnWillClick(i32 instanceId, UIObserver_ClickEventListenerCallback callback);
     static i32 setOnDidClick(i32 instanceId, UIObserver_ClickEventListenerCallback callback);

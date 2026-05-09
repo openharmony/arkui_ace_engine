@@ -55,8 +55,8 @@ public:
         }
         json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("alignItems",
-            propHorizontalAlign_.value_or(HorizontalAlign::START) == HorizontalAlign::START ? "HorizontalAlign.Start"
-            : propHorizontalAlign_.value_or(HorizontalAlign::START) == HorizontalAlign::CENTER
+            propHorizontalAlign_.value_or(HorizontalAlign::CENTER) == HorizontalAlign::START ? "HorizontalAlign.Start"
+            : propHorizontalAlign_.value_or(HorizontalAlign::CENTER) == HorizontalAlign::CENTER
                 ? "HorizontalAlign.Center"
                 : "HorizontalAlign.End",
             filter);

@@ -101,6 +101,9 @@ declare_args() {
 
   #Enable back to top
   ace_engine_feature_enable_back_to_top = false
+
+  #Enable container_scope tracking
+  ace_engine_feature_enable_container_scope_tracking = false
 }
 
 enable_dump_drawcmd = false
@@ -395,4 +398,8 @@ if (ace_engine_feature_enable_default_click_sound) {
 
 if (ace_engine_feature_enable_back_to_top) {
     ace_common_defines += [ "ENABLE_BACK_TO_TOP" ]
+}
+
+if (ace_engine_feature_enable_container_scope_tracking) {
+    ace_common_defines += [ "ENABLE_CONTAINER_SCOPE_TRACKING" ]
 }

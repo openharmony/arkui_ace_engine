@@ -27,6 +27,8 @@
 
 namespace OHOS::Ace {
 class UiMaterial;
+enum class DistortionMode : int32_t;
+enum class EdgeLightMode : int32_t;
 }
 
 namespace OHOS::Ace::NG {
@@ -151,6 +153,8 @@ struct ACE_FORCE_EXPORT MenuParam {
     RefPtr<UiMaterial> systemMaterial;
     std::optional<DisplayMode> scrollBar;
     std::optional<Dimension> maxHeight;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
     bool isDarkMode = false;
     bool isWithTheme = false;
     bool reuse = true;

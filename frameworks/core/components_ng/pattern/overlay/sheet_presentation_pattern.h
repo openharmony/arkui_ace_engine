@@ -1125,6 +1125,18 @@ public:
         return needDoubleAvoidAfterLayout_;
     }
 
+    void SetSheetEdgeLightMode(const SheetStyle& sheetStyle)
+    {
+        if (sheetStyle.sheetEdgeLightMode.has_value()) {
+            sheetEdgeLightMode_ = sheetStyle.sheetEdgeLightMode.value();
+        }
+    }
+
+    EdgeLightMode GetSheetEdgeLightMode()
+    {
+        return sheetEdgeLightMode_;
+    }
+
     void SetEnableDragControl(bool enable)
     {
         enableDragControl_ = enable;
@@ -1272,6 +1284,8 @@ private:
     bool isOnDisappearing_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
     SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
+
+    EdgeLightMode sheetEdgeLightMode_ = EdgeLightMode::EDGELIGHT_DISABLED;
 
     //record sheet sored detent index
     uint32_t detentsIndex_ = 0;

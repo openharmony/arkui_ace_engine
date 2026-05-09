@@ -94,6 +94,9 @@ HWTEST_F(TextTestNgOne, TextSelectOverlayTestGetSelectAreaFromHandle001, TestSiz
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
 
+    /**
+ 	 * @tc.steps: create pattern
+ 	 */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
@@ -137,6 +140,9 @@ HWTEST_F(TextTestNgOne, TextSelectOverlayTestGetSelectAreaFromHandle002, TestSiz
  */
 HWTEST_F(TextTestNgOne, TextSelectOverlayTestOnUpdateMenuInfo001, TestSize.Level1)
 {
+    /**
+ 	 * @tc.steps: create pattern
+ 	 */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto textSelectOverlay = pattern->GetSelectOverlay();

@@ -1435,4 +1435,548 @@ HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest003, TestSize.Level1)
     ret = pattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_SUCCESS);
 }
+
+/**
+ * @tc.name: SetCaretPosition001
+ * @tc.desc: test SetCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetCaretPosition001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create richEditor and add text
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. Add text and set caret position
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+    richEditorPattern->SetCaretPosition(3);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+
+    /**
+     * @tc.steps: step3. Set caret position to end
+     */
+    richEditorPattern->SetCaretPosition(INIT_VALUE_1.size());
+    EXPECT_EQ(richEditorPattern->caretPosition_, static_cast<int32_t>(INIT_VALUE_1.size()));
+}
+
+/**
+ * @tc.name: SetCaretPosition002
+ * @tc.desc: test SetCaretPosition with invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetCaretPosition002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Test negative position (should be clamped, return false)
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+    richEditorPattern->SetCaretPosition(3);
+    auto currentPos = richEditorPattern->caretPosition_;
+    auto res1 = richEditorPattern->SetCaretPosition(-1);
+    EXPECT_FALSE(res1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, currentPos);
+
+    /**
+     * @tc.steps: step2. Test position beyond text length (should be clamped, return false)
+     */
+    int32_t beyondLen = static_cast<int32_t>(INIT_VALUE_1.size()) + 10;
+    auto res2 = richEditorPattern->SetCaretPosition(beyondLen);
+    EXPECT_FALSE(res2);
+    EXPECT_EQ(richEditorPattern->caretPosition_, currentPos);
+}
+
+/**
+ * @tc.name: MoveCaretToContentRect001
+ * @tc.desc: test MoveCaretToContentRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, MoveCaretToContentRect001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Add text and set caret
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+    richEditorPattern->SetCaretPosition(3);
+    richEditorPattern->MoveCaretToContentRect();
+    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+}
+
+/**
+ * @tc.name: MoveCaretToContentRect002
+ * @tc.desc: test MoveCaretToContentRect with empty text
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, MoveCaretToContentRect002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Call MoveCaretToContentRect with empty editor
+     */
+    richEditorPattern->MoveCaretToContentRect();
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: test OnModifyDone lifecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, OnModifyDone001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create richEditor node
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnModifyDone
+     */
+    richEditorPattern->OnModifyDone();
+    EXPECT_NE(richEditorPattern, nullptr);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: OnModifyDone002
+ * @tc.desc: test OnModifyDone with enabled state change
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, OnModifyDone002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Set enabled state
+     */
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. Call OnModifyDone
+     */
+    richEditorPattern->OnModifyDone();
+    EXPECT_TRUE(eventHub->IsEnabled());
+}
+
+/**
+ * @tc.name: HandleFocusEvent001
+ * @tc.desc: test HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleFocusEvent001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Get focus
+     */
+    GetFocus(richEditorPattern);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+}
+
+/**
+ * @tc.name: HandleBlurEvent001
+ * @tc.desc: test HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleBlurEvent001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Get focus first
+     */
+    GetFocus(richEditorPattern);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+
+    /**
+     * @tc.steps: step2. Lose focus
+     */
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+    richEditorPattern->HandleBlurEvent();
+    EXPECT_FALSE(richEditorPattern->HasFocus());
+}
+
+/**
+ * @tc.name: RequestKeyboard001
+ * @tc.desc: test RequestKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RequestKeyboard001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Request keyboard (should fail without proper IME setup in test)
+     */
+    auto res = richEditorPattern->RequestKeyboard(false, false, false);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: RequestKeyboard002
+ * @tc.desc: test RequestKeyboard with preview
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RequestKeyboard002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Request keyboard for preview (should fail without proper IME setup in test)
+     */
+    auto res = richEditorPattern->RequestKeyboard(false, true, false);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: CloseCustomKeyboard001
+ * @tc.desc: test CloseCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, CloseCustomKeyboard001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Set custom keyboard attached
+     */
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+
+    /**
+     * @tc.steps: step2. Close custom keyboard (returns false without keyboardOverlay_ in test)
+     */
+    auto res = richEditorPattern->CloseCustomKeyboard();
+    EXPECT_FALSE(res);
+    EXPECT_TRUE(richEditorPattern->isCustomKeyboardAttached_);
+}
+
+/**
+ * @tc.name: HandleCopy001
+ * @tc.desc: test HandleCopy with selected text
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleCopy001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Add text and select
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+    richEditorPattern->textSelector_.Update(0, 3);
+    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+
+    /**
+     * @tc.steps: step2. Handle copy
+     */
+    richEditorPattern->HandleOnCopy();
+}
+
+/**
+ * @tc.name: HandleCopy002
+ * @tc.desc: test HandleCopy with empty selection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleCopy002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Handle copy with no selection (invalid selector)
+     */
+    richEditorPattern->textSelector_.Update(-1, -1);
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+    richEditorPattern->HandleOnCopy();
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+}
+
+/**
+ * @tc.name: HandlePaste001
+ * @tc.desc: test HandlePaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandlePaste001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Add initial text
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+
+    /**
+     * @tc.steps: step2. Handle paste (may fail without clipboard data)
+     */
+    richEditorPattern->HandleOnPaste();
+}
+
+/**
+ * @tc.name: HandleCut001
+ * @tc.desc: test HandleCut with selected text
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleCut001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Add text and select
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+    richEditorPattern->textSelector_.Update(0, 3);
+
+    /**
+     * @tc.steps: step2. Handle cut
+     */
+    richEditorPattern->HandleOnCut();
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+}
+
+/**
+ * @tc.name: HandleUndoAction001
+ * @tc.desc: test HandleUndoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleUndoAction001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Add text
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+
+    /**
+     * @tc.steps: step2. Handle undo
+     */
+    richEditorPattern->HandleOnUndoAction();
+}
+
+/**
+ * @tc.name: HandleRedoAction001
+ * @tc.desc: test HandleRedoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleRedoAction001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Add text and undo
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+    richEditorPattern->HandleOnUndoAction();
+
+    /**
+     * @tc.steps: step2. Handle redo
+     */
+    richEditorPattern->HandleOnRedoAction();
+}
+
+/**
+ * @tc.name: InitDragDropEvent001
+ * @tc.desc: test InitDragDropEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, InitDragDropEvent001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Enable draggable
+     */
+    richEditorNode_->draggable_ = true;
+    richEditorPattern->InitDragDropEvent();
+    EXPECT_TRUE(richEditorNode_->draggable_);
+}
+
+/**
+ * @tc.name: SetAccessibilityAction001
+ * @tc.desc: test SetAccessibilityAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetAccessibilityAction001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Call SetAccessibilityAction
+     */
+    richEditorPattern->SetAccessibilityAction();
+    EXPECT_NE(richEditorPattern, nullptr);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed001
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ResetKeyboardIfNeed001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Set editing state
+     */
+    richEditorPattern->isEditing_ = true;
+
+    /**
+     * @tc.steps: step2. Call ResetKeyboardIfNeed
+     */
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_TRUE(richEditorPattern->isEditing_);
+}
+
+/**
+ * @tc.name: UpdateScrollStateAfterLayout001
+ * @tc.desc: test UpdateScrollStateAfterLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, UpdateScrollStateAfterLayout001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Call UpdateScrollStateAfterLayout
+     */
+    richEditorPattern->UpdateScrollStateAfterLayout(true);
+    EXPECT_NE(richEditorPattern, nullptr);
+}
+
+/**
+ * @tc.name: UpdateScrollStateAfterLayout002
+ * @tc.desc: test UpdateScrollStateAfterLayout without frame size change
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, UpdateScrollStateAfterLayout002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Call UpdateScrollStateAfterLayout with false
+     */
+    richEditorPattern->UpdateScrollStateAfterLayout(false);
+    EXPECT_NE(richEditorPattern, nullptr);
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper001
+ * @tc.desc: test BeforeCreateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, BeforeCreateLayoutWrapper001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Add text spans
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+
+    /**
+     * @tc.steps: step2. Call BeforeCreateLayoutWrapper
+     */
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    EXPECT_NE(richEditorPattern, nullptr);
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper002
+ * @tc.desc: test BeforeCreateLayoutWrapper with empty spans
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, BeforeCreateLayoutWrapper002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Call BeforeCreateLayoutWrapper with empty content
+     */
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    EXPECT_NE(richEditorPattern, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -21,10 +21,10 @@
 #include "common_ani_modifier.h"
 #include "securec.h"
 #include "ui/properties/color.h"
+#include "base/log/container_scope_wrapper.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/extension_handler.h"
@@ -61,7 +61,6 @@
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "frameworks/core/common/container.h"
 #include "frameworks/core/common/window_free_container.h"
-#include "frameworks/core/common/container_scope.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 #include "core/components_ng/token_theme/token_colors.h"
 #include "ui/base/geometry/ng/size_t.h"
@@ -110,6 +109,9 @@ int32_t GetMainInstanceId(int32_t instanceId)
 }
 
 static thread_local std::vector<int32_t> restoreInstanceIds_;
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+static thread_local std::vector<uint64_t> pushedUids_;
+#endif
 static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
 static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
 
@@ -175,16 +177,33 @@ void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_I
 void SyncInstanceId(ArkUI_Int32 instanceId)
 {
     restoreInstanceIds_.emplace_back(ContainerScope::CurrentId());
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+    pushedUids_.emplace_back(CURRENT_ID_PUSH(instanceId, CurrentIdSourceType::ANI_INTERFACE));
+#else
     ContainerScope::UpdateCurrent(instanceId);
+#endif
 }
 
 void RestoreInstanceId()
 {
     if (restoreInstanceIds_.empty()) {
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+        CURRENT_ID_POP(0, -1, CurrentIdSourceType::ANI_INTERFACE);
+#else
         ContainerScope::UpdateCurrent(-1);
+#endif
         return;
     }
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+    uint64_t uid = 0;
+    if (!pushedUids_.empty()) {
+        uid = pushedUids_.back();
+        pushedUids_.pop_back();
+    }
+    CURRENT_ID_POP(uid, restoreInstanceIds_.back(), CurrentIdSourceType::ANI_INTERFACE);
+#else
     ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
+#endif
     restoreInstanceIds_.pop_back();
 }
 
@@ -528,7 +547,7 @@ ani_double Vp2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    ContainerScope cope(instanceId);
+    ContainerScope scope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     return value * density;
 }
@@ -538,7 +557,7 @@ ani_double Px2vp(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    ContainerScope cope(instanceId);
+    ContainerScope scope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
         return 0;
@@ -551,7 +570,7 @@ ani_double Fp2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    ContainerScope cope(instanceId);
+    ContainerScope scope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
         return 0;
@@ -571,7 +590,7 @@ ani_double Px2fp(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    ContainerScope cope(instanceId);
+    ContainerScope scope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
         return 0;
@@ -593,7 +612,7 @@ ani_double Lpx2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    ContainerScope cope(instanceId);
+    ContainerScope scope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
         return 0;
@@ -622,7 +641,7 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    ContainerScope cope(instanceId);
+    ContainerScope scope(instanceId);
     CHECK_NULL_RETURN(value, 0);
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, 0);

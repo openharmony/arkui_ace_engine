@@ -7,10 +7,9 @@
         "src/ArkComponent.ts"
     ],
     "compilerOptions": {
-        "module": "none",
+        "module": "es6",
         "target": "ES2016",
         "outDir": "dist",
-        "outFile": "dist/arkComponent.js",
         "rootDir": "./src/",
         "declaration": true,
         "noEmitOnError": false,

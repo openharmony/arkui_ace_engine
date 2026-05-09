@@ -7066,6 +7066,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _UIObserverGestureEventOps_setOnAfterPanEnd(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInt
     @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnNodeRenderState(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInt
+    @ani.unsafe.Direct
     native static _UIObserverGestureEventOps_setOnWillClick(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInt
     @ani.unsafe.Direct
     native static _UIObserverGestureEventOps_setOnDidClick(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInt

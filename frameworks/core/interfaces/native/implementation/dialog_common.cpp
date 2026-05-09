@@ -17,6 +17,7 @@
 
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
 #include "dismiss_dialog_action_peer.h"
@@ -113,6 +114,28 @@ MenuKeyboardAvoidMode Convert(const Ark_MenuKeyboardAvoidMode& options)
         return MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
     }
     return MenuKeyboardAvoidMode::NONE;
+}
+
+template<>
+DistortionMode Convert(const Ark_DistortionMode& options)
+{
+    if (options == Ark_DistortionMode::ARK_DISTORTION_MODE_DISTORTION_ENABLED) {
+        return DistortionMode::DISTORTION_ENABLED;
+    } else if (options == Ark_DistortionMode::ARK_DISTORTION_MODE_DISTORTION_DISABLED) {
+        return DistortionMode::DISTORTION_DISABLED;
+    }
+    return DistortionMode::DISTORTION_AUTO;
+}
+
+template<>
+EdgeLightMode Convert(const Ark_EdgeLightMode& options)
+{
+    if (options == Ark_EdgeLightMode::ARK_EDGE_LIGHT_MODE_EDGELIGHT_AUTO) {
+        return EdgeLightMode::EDGELIGHT_AUTO;
+    } else if (options == Ark_EdgeLightMode::ARK_EDGE_LIGHT_MODE_EDGELIGHT_ENABLED) {
+        return EdgeLightMode::EDGELIGHT_ENABLED;
+    }
+    return EdgeLightMode::EDGELIGHT_DISABLED;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG

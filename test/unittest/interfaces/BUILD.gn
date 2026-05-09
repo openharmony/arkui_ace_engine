@@ -564,6 +564,7 @@ ohos_unittest("drag_and_drop_test") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",

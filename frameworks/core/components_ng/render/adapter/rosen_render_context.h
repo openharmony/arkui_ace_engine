@@ -262,6 +262,8 @@ public:
     void SetShadowPath(const std::string path) override;
     void ResetShadowPath() override;
 
+    void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
+
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
@@ -587,6 +589,8 @@ public:
     void UpdateCustomBackground() override;
 
     void UpdateOverlayText() override;
+
+    void UpdateSubmenuDistortionParam() override;
 
     void UpdateDistortionParam(const DistortionParam& param) override;
 
@@ -989,6 +993,7 @@ private:
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> sdfShape_;
 };
 } // namespace OHOS::Ace::NG
 

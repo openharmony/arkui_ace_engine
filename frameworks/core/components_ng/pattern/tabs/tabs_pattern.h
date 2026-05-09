@@ -233,6 +233,8 @@ private:
     void HandleOnTouchScaleAnimation();
     void HandleOnTouchDelayScaleAnimation();
     void OnFollowHandAnimationFinish();
+    void ApplySystemMaterial();
+    void ResetSystemMaterial();
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;

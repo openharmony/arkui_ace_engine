@@ -34,6 +34,9 @@ const UI_STATE_HOVERED = 1 << 4;
 
 export function applyUIAttributes<T, MethodSet extends T>(modifier: AttributeModifier<T>, attributeSet: MethodSet, state: int32 = 0): void {     
     modifier.applyNormalAttribute(attributeSet as T);
+    if (state & UI_STATE_HOVERED) {
+        modifier.applyHoveredAttribute(attributeSet as T);
+    }
     if (state & UI_STATE_PRESSED) {
         modifier.applyPressedAttribute(attributeSet as T);
     }
@@ -45,9 +48,6 @@ export function applyUIAttributes<T, MethodSet extends T>(modifier: AttributeMod
     }
     if (state & UI_STATE_SELECTED) {
         modifier.applySelectedAttribute(attributeSet as T);
-    }
-    if (state & UI_STATE_HOVERED) {
-        modifier.applyHoveredAttribute(attributeSet as T);
     }
 }
 
@@ -55,6 +55,9 @@ export function applyUIAttributesUpdate<T, MethodSet extends T>(modifier: Attrib
     if (state == UI_STATE_NORMAL && !isInit) {
         modifier.applyNormalAttribute(attributeSet as T);
     }
+    if (state & UI_STATE_HOVERED) {
+        modifier.applyHoveredAttribute(attributeSet as T);
+    }
     if (state & UI_STATE_PRESSED) {
         modifier.applyPressedAttribute(attributeSet as T);
     }
@@ -66,9 +69,6 @@ export function applyUIAttributesUpdate<T, MethodSet extends T>(modifier: Attrib
     }
     if (state & UI_STATE_SELECTED) {
         modifier.applySelectedAttribute(attributeSet as T);
-    }
-    if (state & UI_STATE_HOVERED) {
-        modifier.applyHoveredAttribute(attributeSet as T);
     }
 }
  

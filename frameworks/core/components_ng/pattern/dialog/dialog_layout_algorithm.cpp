@@ -292,6 +292,14 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper, 
     RefPtr<LayoutWrapper> scroll;
     RefPtr<LayoutWrapper> list;
     auto child = layoutWrapper->GetAllChildrenWithBuild().front();
+
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    if (dialogPattern->GetHasExtraNodeForDistortion()) {
+        child = child->GetAllChildrenWithBuild().front();
+    }
     CHECK_NULL_VOID(child);
     restWidth = child->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Width();
     restHeight = child->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Height();

@@ -83,7 +83,7 @@ private:
     float endPos_ = 0.0f;
     float space_ = 0.0f;
     LayoutConstraintF childLayoutConstraint_;
-    HorizontalAlign horizontalAlign_ = HorizontalAlign::START;
+    HorizontalAlign horizontalAlign_ = HorizontalAlign::CENTER;
     bool isRtl_ = false;
 
     // cache

@@ -1064,6 +1064,15 @@ void ViewAbstractModelNG::SetAccessibilityNextFocusId(const std::string& nextFoc
     accessibilityProperty->SetAccessibilityNextFocusInspectorKey(nextFocusId);
 }
 
+void ViewAbstractModelNG::SetAccessibilityNextFocusParams(const AccessibilityNextFocusParams& params)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityNextFocusParams(params);
+}
+
 void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importance)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1280,6 +1289,15 @@ void ViewAbstractModelNG::SetAccessibilityNextFocusId(FrameNode* frameNode, cons
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityNextFocusInspectorKey(nextFocusId);
+}
+
+void ViewAbstractModelNG::SetAccessibilityNextFocusParams(
+    FrameNode* frameNode, const AccessibilityNextFocusParams& params)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityNextFocusParams(params);
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool accessible)

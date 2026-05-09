@@ -152,6 +152,7 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::u16string& 
         return;
     }
     switch (property->GetTextInputType().value()) {
+        case TextInputType::ONE_TIME_CODE_NUMBER:
         case TextInputType::NUMBER: {
             textChanged |= FilterWithEvent(DIGIT_WHITE_LIST, result);
             break;

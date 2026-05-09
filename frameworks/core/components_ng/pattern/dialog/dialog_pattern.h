@@ -403,6 +403,23 @@ public:
     RefPtr<FrameNode> GetMaskNode();
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void RegisterOnFinishEvent(std::function<void()>&& onFinishEvent)
+    {
+        onFinishEvent_ = std::move(onFinishEvent);
+    }
+
+    void SetHasExtraNodeForDistortion(bool hasExtraNodeForDistortion)
+    {
+        hasExtraNodeForDistortion_ = hasExtraNodeForDistortion;
+    }
+    
+    bool GetHasExtraNodeForDistortion()
+    {
+        return hasExtraNodeForDistortion_;
+    }
+
+    bool NeedDistortion();
+    bool NeedEdgeLight();
 
 private:
     bool AvoidKeyboard() const override
@@ -418,6 +435,7 @@ private:
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
     void RegisterHoverModeChangeCallback();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     RectF GetContentRect(const RefPtr<FrameNode>& contentNode);
@@ -507,6 +525,11 @@ private:
     Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode);
     bool InvertShadowColor();
     void OnWindowShow() override;
+    void PlayFlowLight();
+    void PlayDistortion();
+#if defined(ENABLE_ROSEN_BACKEND)
+    void UpdateSDFRRectShape(const RefPtr<FrameNode>& contentNode);
+#endif
     void ReportActionSheetOnInjectionEvent(bool result,
         std::string reason, int32_t sheetIndex = -1, int32_t buttonIndex = -1);
     int32_t OnInjectionEvent(const std::string& command) override;
@@ -532,6 +555,8 @@ private:
     std::optional<AnimationOption> closeAnimation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
     std::optional<int32_t> hoverModeChangedCallbackId_;
+    std::optional<bool> needDistortion_;
+    std::optional<bool> needFlowLight_;
     bool isFoldStatusChanged_ = false;
 
     // XTS inspector values
@@ -575,6 +600,10 @@ private:
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
     RectF parentWindowRect_;
+    RectF lastPaintRect_;
+    bool isDialogShow_ = true;
+    bool hasExtraNodeForDistortion_ = false;
+    std::function<void()> onFinishEvent_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 
