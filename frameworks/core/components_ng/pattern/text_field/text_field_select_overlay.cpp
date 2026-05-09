@@ -361,7 +361,17 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
     overlayInfo.clipHandleDrawRect = IsClipHandleWithViewPort();
+#ifdef CROSS_PLATFORM
+    bool isUsingMouse = IsUsingMouse();
+    if ((static_cast<uint32_t>(requestCode) &
+        static_cast<uint32_t>(RequestCode::RIGHT_CLICK)) == static_cast<uint32_t>(RequestCode::RIGHT_CLICK)) {
+        SetUsingMouse(true);
+    }
+#endif
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+#ifdef CROSS_PLATFORM
+    SetUsingMouse(isUsingMouse);
+#endif
     auto textFieldPattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();

@@ -5588,7 +5588,11 @@ void TextFieldPattern::HandleRightMouseReleaseEvent(MouseInfo& info)
         OffsetF rightClickOffset = OffsetF(
             static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
         selectOverlay_->SetMouseMenuOffset(rightClickOffset);
+#ifdef CROSS_PLATFORM
+        ProcessOverlay({ .requestCode = static_cast<int32_t>(TextFieldSelectOverlay::RequestCode::RIGHT_CLICK) });
+#else
         ProcessOverlay();
+#endif
     }
 }
 
