@@ -4957,6 +4957,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     if (isStartByUIContext) {
         currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->SetSheetEdgeLightMode(currentStyle);
         sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
         UpdateSheetRenderProperty(sheetNode, currentStyle, isPartialUpdate);
         sheetNodePattern->UpdateDragBarStatus();
@@ -4976,6 +4977,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
         auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         layoutProperty->UpdateSheetStyle(sheetStyle);
         sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->SetSheetEdgeLightMode(sheetStyle);
         sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
         UpdateSheetRenderProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
@@ -5012,6 +5014,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     layoutProperty->UpdateSheetStyle(sheetStyle);
     sheetNodePattern->UpdateSheetType();
+    sheetNodePattern->SetSheetEdgeLightMode(sheetStyle);
     sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
     UpdateSheetRenderProperty(sheetNode, sheetStyle, false);
     sheetNodePattern->SetBottomOffset(sheetStyle);

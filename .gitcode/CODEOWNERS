@@ -2768,6 +2768,7 @@ frameworks/core/components_ng/render/adapter/rosen_transition_effect.h @arkuicod
 frameworks/core/components_ng/render/adapter/rosen_transition_effect_impl.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_window.cpp @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_window.h @arkui_framework_xnode
+frameworks/core/components_ng/render/adapter/sheet_render_edge_light_modifier.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/skia_color_filter.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/skia_color_filter.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/skia_decoration_painter.cpp @arkuicodepulse
