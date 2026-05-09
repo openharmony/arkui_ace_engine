@@ -196,7 +196,8 @@ export struct ComposeTitleBarV2 {
     }
     .onAppear(() => {
       try {
-        this.uniqueIdValue = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+        this.uniqueIdValue =
+          this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
       } catch (exception) {
         let code: undefined| int = (exception as ClassCastError)?.code;
         let message: undefined | string = (exception as ClassCastError)?.message;
