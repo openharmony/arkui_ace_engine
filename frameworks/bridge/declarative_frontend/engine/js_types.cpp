@@ -17,17 +17,8 @@
 
 namespace OHOS::Ace::Framework {
 
-namespace {
-bool IsClickPreventDefaultSupported(const std::string& patternName)
-{
-    return patternName == "RichEditor" || patternName == "Hyperlink";
-}
-
-bool IsTouchPreventDefaultSupported(const std::string& patternName)
-{
-    return patternName == "Hyperlink";
-}
-} // namespace
+static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
+static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
 
 #ifdef USE_ARK_ENGINE
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
@@ -70,7 +61,7 @@ Local<JSValueRef> JsClickPreventDefault(panda::JsiRuntimeCallInfo *info)
         info->GetVM(), 0));
     if (eventInfo) {
         auto patternName = eventInfo->GetPatternName();
-        if (!IsClickPreventDefaultSupported(patternName)) {
+        if (g_clickPreventDefPattern.find(patternName.c_str()) == g_clickPreventDefPattern.end()) {
             JSException::Throw(ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION, "%s",
                 "Component does not support prevent function.");
             return JSValueRef::Undefined(info->GetVM());
@@ -87,7 +78,7 @@ Local<JSValueRef> JsTouchPreventDefault(panda::JsiRuntimeCallInfo *info)
         info->GetVM(), 0));
     if (eventInfo) {
         auto patternName = eventInfo->GetPatternName();
-        if (!IsTouchPreventDefaultSupported(patternName)) {
+        if (g_touchPreventDefPattern.find(patternName.c_str()) == g_touchPreventDefPattern.end()) {
             JSException::Throw(ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION, "%s",
                 "Component does not support prevent function.");
             return JSValueRef::Undefined(info->GetVM());

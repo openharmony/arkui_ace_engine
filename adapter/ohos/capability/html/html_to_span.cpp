@@ -37,23 +37,14 @@ constexpr int FOURTH_PARAM = 3;
 
 constexpr int MAX_STYLE_FORMAT_NUMBER = 3;
 
-const std::unordered_map<std::string, std::pair<int, int>>& GetHeadingStylesMap()
-{
-    static const std::unordered_map<std::string, std::pair<int, int>> headingStyles = {
-        { "h1", { 30, 40 } },
-        { "h2", { 24, 32 } },
-        { "h3", { 20, 27 } },
-        { "h4", { 16, 21 } },
-        { "h5", { 14, 19 } },
-        { "h6", { 12, 16 } }
-    };
-    return headingStyles;
-}
+const std::unordered_map<std::string, std::pair<int, int>> HEADING_STYLES = {
+    { "h1", { 30, 40 } }, { "h2", { 24, 32 } }, { "h3", { 20, 27 } },
+    { "h4", { 16, 21 } }, { "h5", { 14, 19 } }, { "h6", { 12, 16 } }
+};
 
 bool IsHeadingTag(const std::string& element)
 {
-    const auto& headingStyles = GetHeadingStylesMap();
-    return headingStyles.find(element) != headingStyles.end();
+    return HEADING_STYLES.find(element) != HEADING_STYLES.end();
 }
 
 bool EndsWithLineBreak(const std::string& content)
@@ -992,9 +983,8 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
 void HtmlToSpan::AddHeadingStyleSpan(const std::string& element, SpanInfo& info)
 {
     std::map<std::string, StyleValue> styles;
-    const auto& headingStyles = GetHeadingStylesMap();
-    auto headingIt = headingStyles.find(element);
-    if (headingIt == headingStyles.end()) {
+    auto headingIt = HEADING_STYLES.find(element);
+    if (headingIt == HEADING_STYLES.end()) {
         return;
     }
     InitFont("font-weight", "bold", "font", styles);

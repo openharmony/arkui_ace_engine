@@ -22,10 +22,14 @@ namespace {
 static RefPtr<Subwindow> g_currentWindow;
 } // namespace
 
+std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
+
 std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 {
-    static std::shared_ptr<SubwindowManager> instance = std::make_shared<SubwindowManager>();
-    return instance;
+    if (!instance_) {
+        instance_ = std::make_shared<SubwindowManager>();
+    }
+    return instance_;
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId) {}
