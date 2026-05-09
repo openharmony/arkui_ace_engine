@@ -31,6 +31,7 @@
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
 #include "ui/view/components/tabs/tabs_data.h"
+#include "ui/properties/ui_material.h"
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
@@ -121,6 +122,7 @@ struct BarFloatingStyleParameters {
     std::optional<Color> maskColor;
     std::optional<Dimension> maskHeight;
     std::optional<bool> adaptToHandedness;
+    RefPtr<UiMaterial> systemMaterial;
 
     RefPtr<ResourceObject> smallBarWidthObject;
     RefPtr<ResourceObject> mediumBarWidthObject;
@@ -135,7 +137,8 @@ struct BarFloatingStyleParameters {
         return (smallBarWidth == parameters.smallBarWidth) && (mediumBarWidth == parameters.mediumBarWidth) &&
                (largeBarWidth == parameters.largeBarWidth) && (barSideMargin == parameters.barSideMargin) &&
                (barBottomMargin == parameters.barBottomMargin) && (maskColor == parameters.maskColor) &&
-               (maskHeight == parameters.maskHeight) && (adaptToHandedness == parameters.adaptToHandedness);
+               (maskHeight == parameters.maskHeight) && (adaptToHandedness == parameters.adaptToHandedness) &&
+               (systemMaterial == parameters.systemMaterial);
     }
 };
 
