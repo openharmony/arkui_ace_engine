@@ -30,7 +30,9 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
+#include "core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/property/property.h"
@@ -64,6 +66,7 @@ double NormalizeToPx(const Dimension& dimension, PipelineContext* context)
 }
 } // namespace
 
+RefreshPattern::RefreshPattern() = default;
 RefreshPattern::~RefreshPattern() = default;
 
 Dimension RefreshPattern::GetTriggerRefreshDisTance()

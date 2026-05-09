@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_GRID_ITEM_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_GRID_ITEM_COMPONENT_H
 
-#include "core/components/grid/grid_item_element.h"
-#include "core/components/grid/render_grid_item.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/sole_child_component.h"
 

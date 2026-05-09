@@ -16,10 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_REFRESH_THEME_WRAPPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_REFRESH_THEME_WRAPPER_H
 
-#include <memory>
-
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 

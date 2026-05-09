@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> WaterFlowItemNode::GetOrCreateFlowItem(

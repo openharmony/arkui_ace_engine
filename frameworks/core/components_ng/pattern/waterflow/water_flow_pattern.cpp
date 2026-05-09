@@ -20,6 +20,10 @@
 #include "base/utils/system_properties.h"
 #include "core/animation/curves.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
@@ -38,6 +42,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/waterflow/water_flow_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,6 +61,11 @@ RefPtr<EventHub> WaterFlowPattern::CreateEventHub()
 RefPtr<AccessibilityProperty> WaterFlowPattern::CreateAccessibilityProperty()
 {
     return MakeRefPtr<WaterFlowAccessibilityProperty>();
+}
+
+FocusPattern WaterFlowPattern::GetFocusPattern() const
+{
+    return { FocusType::SCOPE, true };
 }
 
 SizeF WaterFlowPattern::GetContentSize() const

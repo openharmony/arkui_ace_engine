@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "refresh_test_ng.h"
+#include "core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
