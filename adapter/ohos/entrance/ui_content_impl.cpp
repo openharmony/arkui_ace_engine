@@ -6712,6 +6712,11 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
     UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]
         (ContentChangeConfig config) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (!taskExecutor) {
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            taskExecutor = pipeline->GetTaskExecutor();
+        }
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [config]() {
@@ -6729,6 +6734,11 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
     });
     UiSessionManager::GetInstance()->SetStopContentChangeDetectCallback([weakTaskExecutor = taskExecutor]() {
         auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (!taskExecutor) {
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            taskExecutor = pipeline->GetTaskExecutor();
+        }
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             []() {
