@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
+#include <algorithm>
+
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
@@ -24,6 +26,22 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+
+bool HasLpxUnit(const std::vector<Dimension>& dimensions)
+{
+    return std::any_of(dimensions.begin(), dimensions.end(),
+        [](const Dimension& dimension) { return dimension.Unit() == DimensionUnit::LPX; });
+}
+
+void UpdateVectorLpxAttribute(FrameNode* frameNode, const std::vector<Dimension>& dimensions, LpxAttribute attribute)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (HasLpxUnit(dimensions)) {
+        frameNode->RegisterLpxAttribute(attribute);
+    } else {
+        frameNode->UnRegisterLpxAttribute(attribute);
+    }
+}
 }
 
 void ScrollModelNG::Create()
@@ -381,8 +399,12 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
         pattern->SetScrollSnapUpdate(true);
     }
     if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(intervalSize, LpxAttribute::LPX_SCROLL_INTERVAL_SIZE, frameNode);
         pattern->SetIntervalSize(intervalSize);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_INTERVAL_SIZE);
     }
+    UpdateVectorLpxAttribute(frameNode, snapPaginations, LpxAttribute::LPX_SCROLL_SNAP_PAGINATIONS);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
@@ -412,6 +434,7 @@ float ScrollModelNG::GetScrollBarWidth(FrameNode* frameNode)
 
 void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(dimension, LpxAttribute::LPX_SCROLL_BAR_WIDTH);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension);
 }
 
@@ -492,8 +515,12 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
         pattern->SetScrollSnapUpdate(true);
     }
     if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(intervalSize, LpxAttribute::LPX_SCROLL_INTERVAL_SIZE, frameNode);
         pattern->SetIntervalSize(intervalSize);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_INTERVAL_SIZE);
     }
+    UpdateVectorLpxAttribute(frameNode, snapPaginations, LpxAttribute::LPX_SCROLL_SNAP_PAGINATIONS);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
@@ -528,6 +555,7 @@ void ScrollModelNG::ResetScrollBarColor(FrameNode* frameNode)
 
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimension, LpxAttribute::LPX_SCROLL_BAR_WIDTH, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension, frameNode);
 }
 
@@ -612,6 +640,8 @@ void ScrollModelNG::SetInitialOffset(const OffsetT<CalcDimension>& offset)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.GetX(), LpxAttribute::LPX_INITIAL_OFFSET_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.GetY(), LpxAttribute::LPX_INITIAL_OFFSET_Y, frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetInitialOffset(offset);
@@ -620,6 +650,8 @@ void ScrollModelNG::SetInitialOffset(const OffsetT<CalcDimension>& offset)
 void ScrollModelNG::SetInitialOffset(FrameNode* frameNode, const OffsetT<CalcDimension>& offset)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.GetX(), LpxAttribute::LPX_INITIAL_OFFSET_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.GetY(), LpxAttribute::LPX_INITIAL_OFFSET_Y, frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetInitialOffset(offset);
@@ -669,10 +701,15 @@ void ScrollModelNG::CreateWithResourceObjIntervalSize(const RefPtr<ResourceObjec
         auto scrollSnapAlign = layoutProperty->GetScrollSnapAlignValue(ScrollSnapAlign::NONE);
         CalcDimension intervalSize;
         if (!ResourceParseUtils::ParseResDimensionVp(resObj, intervalSize)) {
-            intervalSize = CalcDimension(0.0);
+            intervalSize = 0.0_vp;
         }
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(intervalSize, LpxAttribute::LPX_SCROLL_INTERVAL_SIZE, frameNode);
             pattern->SetIntervalSize(intervalSize);
+        } else {
+            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_INTERVAL_SIZE);
         }
     };
     pattern->AddResObj("ScrollIntervalSize", resObj, std::move(updateFunc));
@@ -699,10 +736,15 @@ void ScrollModelNG::CreateWithResourceObjIntervalSize(
         auto scrollSnapAlign = layoutProperty->GetScrollSnapAlignValue(ScrollSnapAlign::NONE);
         CalcDimension intervalSize;
         if (!ResourceParseUtils::ParseResDimensionVp(resObj, intervalSize)) {
-            intervalSize = CalcDimension(0.0);
+            intervalSize = 0.0_vp;
         }
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(intervalSize, LpxAttribute::LPX_SCROLL_INTERVAL_SIZE, frameNode);
             pattern->SetIntervalSize(intervalSize);
+        } else {
+            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_INTERVAL_SIZE);
         }
     };
     pattern->AddResObj("ScrollIntervalSize", resObj, std::move(updateFunc));
@@ -760,6 +802,10 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(
         if (!CheckSnapPaginations(snapPaginationsTmp)) {
             std::vector<Dimension>().swap(snapPaginationsTmp);
         }
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        UpdateVectorLpxAttribute(AceType::RawPtr(frameNode), snapPaginationsTmp,
+            LpxAttribute::LPX_SCROLL_SNAP_PAGINATIONS);
         pattern->SetSnapPaginations(snapPaginationsTmp);
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
@@ -793,6 +839,10 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(
         if (!CheckSnapPaginations(snapPaginationsTmp)) {
             std::vector<Dimension>().swap(snapPaginationsTmp);
         }
+        auto frameNode = pattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        UpdateVectorLpxAttribute(AceType::RawPtr(frameNode), snapPaginationsTmp,
+            LpxAttribute::LPX_SCROLL_SNAP_PAGINATIONS);
         pattern->SetSnapPaginations(snapPaginationsTmp);
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);

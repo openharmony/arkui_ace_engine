@@ -34,8 +34,11 @@ RefPtr<FrameNode> LazyGridLayoutModelStatic::CreateFrameNode(int32_t nodeId)
 void LazyGridLayoutModelStatic::SetRowGap(FrameNode* frameNode, const std::optional<Dimension>& rowGap)
 {
     if (rowGap) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(rowGap.value(), LpxAttribute::LPX_ROWS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, RowGap, rowGap.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ROWS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(LazyGridLayoutProperty, RowGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
@@ -43,8 +46,11 @@ void LazyGridLayoutModelStatic::SetRowGap(FrameNode* frameNode, const std::optio
 void LazyGridLayoutModelStatic::SetColumnGap(FrameNode* frameNode, const std::optional<Dimension>& columnGap)
 {
     if (columnGap) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(columnGap.value(), LpxAttribute::LPX_COLUMNS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnGap, columnGap.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_COLUMNS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(LazyGridLayoutProperty, ColumnGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
