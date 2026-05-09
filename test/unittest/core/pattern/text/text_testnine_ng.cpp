@@ -18,6 +18,7 @@
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -69,7 +70,7 @@ HWTEST_F(TextTestNineNg, OnHandleScrolling001, TestSize.Level1)
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     RefPtr<FrameNode> scrollableNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto scrollNode = AccessibilityManager::WeakClaim(AceType::RawPtr(scrollableNode));
@@ -89,6 +90,7 @@ HWTEST_F(TextTestNineNg, GlobalOffsetInSelectedArea001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->GetSelectOverlay();
     EXPECT_FALSE(pattern->selectOverlay_->HasRenderTransform());
     Offset globalOffset(1.0, 1.0);
     EXPECT_FALSE(pattern->GlobalOffsetInSelectedArea(globalOffset));
@@ -112,7 +114,7 @@ HWTEST_F(TextTestNineNg, HandleOnTranslate001, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     FlushUITasks(frameNode);
 
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 5, 5) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
@@ -143,7 +145,7 @@ HWTEST_F(TextTestNineNg, OnHandleMoveStart001, TestSize.Level1)
 
     GestureEvent info;
     auto manager = SelectContentOverlayManager::GetOverlayManager();
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     textSelectOverlay->OnBind(manager);
     textSelectOverlay->OnOverlayClick(info, true);
     textSelectOverlay->OnHandleMoveStart(info, true);
@@ -197,7 +199,7 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
      * @tc.step: step4. test OnMenuItemAction
      */
     pattern->isMousePressed_ = true;
-    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
     pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::MOUSE_MENU);
     EXPECT_FALSE(pattern->SelectOverlayIsOn());
     pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::MOUSE_MENU);
@@ -258,6 +260,7 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction002, TestSize.Level1)
      * @tc.step: step4. test OnMenuItemAction
      */
     pattern->isMousePressed_ = true;
+    pattern->GetSelectOverlay();
     auto info = pattern->selectOverlay_->GetSelectOverlayInfos();
     info->menuCallback.onAIMenuOption("");
     EXPECT_FALSE(pattern->SelectOverlayIsOn());
@@ -293,6 +296,7 @@ HWTEST_F(TextTestNineNg, CheckHandleVisible001, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameSize(SizeF(150.0f, 75.0f));
 
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->enableHandleLevel_ = true;
     pattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
     auto isShow1 = pattern->selectOverlay_->CheckHandleVisible(RectF(0.0f, 0.0f, 10.0f, 10.0f));
@@ -530,6 +534,7 @@ HWTEST_F(TextTestNineNg, CheckAndAdjustHandle001, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     frameNode->GetRenderContext()->UpdateClipEdge(false);
     RectF paintRect = { 0, 0, 10, 10 };
+    pattern->GetSelectOverlay();
     auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
     EXPECT_TRUE(result);
 }
@@ -544,6 +549,7 @@ HWTEST_F(TextTestNineNg, CheckAndAdjustHandle002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     frameNode->GetRenderContext()->UpdateClipEdge(true);
     RectF paintRect = { 0, 0, 10, 10 };
+    pattern->GetSelectOverlay();
     auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
     EXPECT_FALSE(result);
 }
@@ -558,6 +564,7 @@ HWTEST_F(TextTestNineNg, CheckAndAdjustHandle003, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     frameNode->GetRenderContext()->UpdateClipEdge(false);
     RectF paintRect = { 0, 0, 10, 10 };
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
     auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
     EXPECT_TRUE(result);
@@ -576,6 +583,7 @@ HWTEST_F(TextTestNineNg, OnHandleMove001, TestSize.Level1)
     RectF handleRect = { 0, 0, 10, 10 };
     bool isFirst = true;
     pattern->textForDisplay_ = u"";
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
     pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
     EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
@@ -595,6 +603,7 @@ HWTEST_F(TextTestNineNg, OnHandleMove002, TestSize.Level1)
     RectF handleRect = { 0, 0, 10, 10 };
     bool isFirst = true;
     pattern->textForDisplay_ = u"1";
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
     EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
 }
@@ -610,6 +619,7 @@ HWTEST_F(TextTestNineNg, OnCloseOverlay001, TestSize.Level1)
     pattern->HandleOnSelectAll();
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
     auto info = AceType::MakeRefPtr<OverlayInfo>();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnCloseOverlay(OptionMenuType::MOUSE_MENU, CloseReason::CLOSE_REASON_HOLD_BY_OTHER, info);
     EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
 }
@@ -625,6 +635,7 @@ HWTEST_F(TextTestNineNg, OnCloseOverlay002, TestSize.Level1)
     pattern->HandleOnSelectAll();
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
     auto info = AceType::MakeRefPtr<OverlayInfo>();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnCloseOverlay(OptionMenuType::MOUSE_MENU, CloseReason::CLOSE_REASON_TOOL_BAR, info);
     EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
 }
@@ -640,6 +651,7 @@ HWTEST_F(TextTestNineNg, OnCloseOverlay003, TestSize.Level1)
     pattern->HandleOnSelectAll();
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
     auto info = AceType::MakeRefPtr<OverlayInfo>();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnCloseOverlay(OptionMenuType::MOUSE_MENU, CloseReason::CLOSE_REASON_BACK_PRESSED, info);
     EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
 }
@@ -655,6 +667,7 @@ HWTEST_F(TextTestNineNg, OnHandleGlobalTouchEvent001, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     pattern->HandleOnSelectAll();
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN, false);
     EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
 }
@@ -669,6 +682,7 @@ HWTEST_F(TextTestNineNg, OnHandleGlobalTouchEvent002, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
     pattern->HandleOnSelectAll();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN, true);
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
 }
@@ -683,6 +697,7 @@ HWTEST_F(TextTestNineNg, OnHandleGlobalTouchEvent003, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
     pattern->HandleOnSelectAll();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::DOWN, false);
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
 }
@@ -697,6 +712,7 @@ HWTEST_F(TextTestNineNg, OnHandleGlobalTouchEvent004, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
     pattern->HandleOnSelectAll();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::UP, false);
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
 }
@@ -713,6 +729,7 @@ HWTEST_F(TextTestNineNg, FindScrollableParent001, TestSize.Level1)
         []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
     textNode->SetParent(pageNode);
 
+    pattern->GetSelectOverlay();
     auto value = pattern->selectOverlay_->FindScrollableParent();
     EXPECT_EQ(value, nullptr);
 }
@@ -731,6 +748,7 @@ HWTEST_F(TextTestNineNg, FindScrollableParent002, TestSize.Level1)
     auto listPattern = listNode->GetPattern<ListPattern>();
     listPattern->isScrollable_ = true;
 
+    pattern->GetSelectOverlay();
     auto value = pattern->selectOverlay_->FindScrollableParent();
     EXPECT_EQ(value, listPattern);
 }
@@ -749,6 +767,7 @@ HWTEST_F(TextTestNineNg, FindScrollableParent003, TestSize.Level1)
     auto listPattern = listNode->GetPattern<ListPattern>();
     listPattern->isScrollable_ = false;
 
+    pattern->GetSelectOverlay();
     auto value = pattern->selectOverlay_->FindScrollableParent();
     EXPECT_EQ(value, nullptr);
 }

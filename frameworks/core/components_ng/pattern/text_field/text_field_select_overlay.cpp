@@ -155,6 +155,12 @@ void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, Tou
 {
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
     SetLastSourceType(sourceType);
+
+    if (IsTouchUp(sourceType, touchType) &&
+        GetClearPolicy() == TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH) {
+        OnResetTextSelection();
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    }
 }
 
 void TextFieldSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)
@@ -291,9 +297,12 @@ void TextFieldSelectOverlay::CloseMagnifier()
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->GetMagnifierController()->GetShowMagnifier()) {
+    if (pattern->GetMagnifierController() && pattern->GetMagnifierController()->GetShowMagnifier()) {
+        pattern->GetMagnifierController()->ResetTouchInfo();
         pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
+    pattern->ResetMagnifierTouchInfo();
+    ResetMagnifierTouchInfo();
 }
 
 void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag)
@@ -381,6 +390,23 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
             return GreatNotEqual(first.Left(), second.Left());
         };
     }
+    overlayInfo.onHandlePanMove = [weak = WeakClaim(this)](const GestureEvent& event, bool isFirst) {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->UpdateMagnifierTouchInfo(event, TouchType::MOVE); // used by UpdateMagnifier via OnHandleMove
+    };
+}
+
+void TextFieldSelectOverlay::UpdateMagnifierTouchInfo(const GestureEvent& event, TouchType touchType)
+{
+    magnifierTouchTimeStamp_ = event.GetTimeStamp();
+    magnifierTouchType_ = touchType;
+}
+
+void TextFieldSelectOverlay::ResetMagnifierTouchInfo()
+{
+    magnifierTouchTimeStamp_ = TimeStamp();
+    magnifierTouchType_ = TouchType::UNKNOWN;
 }
 
 RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
@@ -632,8 +658,11 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         overlayManager->MarkInfoChange(DIRTY_COPY_ALL_ITEM);
     }
     if (pattern->GetMagnifierController()) {
+        pattern->GetMagnifierController()->ResetTouchInfo();
         pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
+    pattern->ResetMagnifierTouchInfo();
+    ResetMagnifierTouchInfo();
     auto selectController = pattern->GetTextSelectController();
     TriggerContentToScroll(OffsetF(), true);
     overlayManager->ShowOptionMenu();
@@ -870,6 +899,7 @@ void TextFieldSelectOverlay::UpdateMagnifier(const OffsetF& offset, bool updateO
     if (!pattern->GetMagnifierController() || !SelectOverlayIsOn()) {
         return;
     }
+    pattern->UpdateMagnifierTouchInfo(magnifierTouchTimeStamp_, magnifierTouchType_);
     if (IsSingleHandle()) {
         if (updateOnScroll || !pattern->GetContentScrollerIsScrolling()) {
             pattern->SetMagnifierLocalOffsetToFloatingCaretPos();
@@ -880,7 +910,8 @@ void TextFieldSelectOverlay::UpdateMagnifier(const OffsetF& offset, bool updateO
     if (IsOverlayMode()) {
         GetLocalPointWithTransform(magnifierLocalOffset);
     }
-    pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
+    pattern->GetMagnifierController()->SetLocalOffset(
+        magnifierLocalOffset, magnifierTouchTimeStamp_, magnifierTouchType_);
 }
 
 bool TextFieldSelectOverlay::CheckIfInterruptProcessing(const OverlayRequest& request)

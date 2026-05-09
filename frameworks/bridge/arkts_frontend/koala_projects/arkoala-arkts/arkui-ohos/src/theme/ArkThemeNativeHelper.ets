@@ -142,10 +142,19 @@ export class ArkThemeNativeHelper {
     public static convertColorsToArray(colors: Colors | CustomColors | undefined): ResourceColor[] {
         const basisColors = ArkThemeScopeManager.getSystemColors();
         if (!colors) {
-            return new Array<ResourceColor>(Object.keys(basisColors).length);
+            const cls = Class.of(basisColors as Object);
+            const fieldsLength = reflect.getInstanceFieldsRecursive(cls).length;
+            const gettersLength = reflect.getInstanceGettersRecursive(cls).length;
+            return new Array<ResourceColor>(fieldsLength + gettersLength);
         }
         const colorArray: ResourceColor[] = [];
-        for (let attr of Object.values(colors)) {
+        const values = [
+            ...reflect.getInstanceGettersRecursive(Class.of(colors as Object))
+                .map(getter => getter.invoke(colors as Object)),
+            ...reflect.getInstanceFieldsRecursive(Class.of(colors as Object))
+                .map(field => field.getValue(colors as Object))
+        ];
+        for (let attr of values) {
             const value: ResourceColor = attr as ResourceColor;
             if (ArkColorsImpl.checkIsColor(value)) {
                 colorArray.push(value as Color);

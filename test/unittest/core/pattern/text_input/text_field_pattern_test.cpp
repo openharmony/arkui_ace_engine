@@ -1514,6 +1514,12 @@ HWTEST_F(TextFieldPatternTest, TextPattern065, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps:
+     *   step2. ConvertGlobalToLocalOffset
+     */
+
     GestureEvent info;
     pattern->selectOverlay_->hasTransform_ = false;
     pattern->ConvertGlobalToLocalOffset(info.GetGlobalLocation());

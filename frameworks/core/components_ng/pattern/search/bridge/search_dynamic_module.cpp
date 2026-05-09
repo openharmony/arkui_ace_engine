@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/search/bridge/search_dynamic_module.h"
 
+#include "core/common/container.h"
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/search/bridge/arkts_native_search_bridge.h"

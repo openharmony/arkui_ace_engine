@@ -127,12 +127,18 @@ HWTEST_F(RichEditorSpanNodeTestNg, RichEditorPatternTestCreateTextSpanNode001, T
  */
 HWTEST_F(RichEditorSpanNodeTestNg, InsertValueToSpanNode001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get rich editor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
     std::u16string insertValue = u"abc";
 
+    /**
+     * @tc.steps: step2. create span node
+     */
     auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 0);
     TextInsertValueInfo info;
     info.spanIndex_ = 0;

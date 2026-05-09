@@ -23,7 +23,6 @@
 #include "frameworks/base/utils/macros.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_model.h"
-#include "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.h"
 
 namespace OHOS::Ace::NG {
 

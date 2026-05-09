@@ -15,6 +15,8 @@
 
 #include "checkboxgroup_test_min.h"
 
+#include "core/components_ng/pattern/stage/stage_manager.h"
+
 using namespace testing;
 
 namespace OHOS::Ace::NG {

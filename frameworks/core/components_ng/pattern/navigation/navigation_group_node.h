@@ -34,6 +34,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class NavigationManager;
 
 struct TransitionUnitInfo {
     const RefPtr<FrameNode>& transitionNode;
@@ -113,7 +114,10 @@ public:
     {
         return useHomeDestination_;
     }
-    void SetUseHomeDestinatoin(bool use);
+    void SetUseHomeDestination(bool use)
+    {
+        useHomeDestination_ = use;
+    }
 
     void CreateHomeDestinationIfNeeded();
 
@@ -148,6 +152,13 @@ public:
     {
         return contentNode_;
     }
+
+    const RefPtr<UINode>& GetOverlayNode() const
+    {
+        return overlayNode_;
+    }
+    RefPtr<FrameNode> GetOrCreateOverlayNode();
+    bool UpdateOverlayNodeVisibility();
 
     void SetDividerNode(const RefPtr<UINode>& dividerNode)
     {
@@ -231,6 +242,10 @@ public:
         bool isNavBarOrHomeDestination = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
         bool isNavBarOrHomeDestination = false);
+    void UpdateContainerVisibility(const RefPtr<FrameNode>& node, VisibleType visibleType);
+    void UpdateVisibilityAfterOverlayPush(const RefPtr<FrameNode>& curNode);
+    void UpdateVisibilityInOverlayPop(const RefPtr<FrameNode>& curNode);
+    void UpdateVisibilityAfterOverlayTransition(const RefPtr<NavDestinationGroupNode>& navDestination);
     virtual void CreateAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBarOrHomeDestination = false);
     virtual void CreateAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
@@ -250,7 +265,7 @@ public:
         const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBarOrHomeDestination);
     void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBarOrHomeDestination, bool isAnimated = true);
     void NotifyPageHide();
-    void UpdateLastStandardIndex();
+    void UpdateLastStandardIndex(bool& hasFullScreenOverlay);
 
     int32_t GetPreLastStandardIndex() const
     {
@@ -270,12 +285,14 @@ public:
         bool isTransitionIn);
 
     void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList,
-        const std::vector<WeakPtr<FrameNode>>& curNavList);
+        const std::vector<WeakPtr<FrameNode>>& curNavList, bool onlyHandleCurrentOverlay = false);
     void InitPopCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList,
-        bool isNavbarNeedAnimation);
+        bool isNavbarNeedAnimation, bool skipUnderlyingAnimation = false);
     void InitPushPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& prevNavList,
-        const std::vector<WeakPtr<FrameNode>>& curNavList, bool isNavbarNeedAnimation);
-    void InitPushCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList);
+        const std::vector<WeakPtr<FrameNode>>& curNavList, bool isNavbarNeedAnimation,
+        bool skipUnderlyingAnimation = false);
+    void InitPushCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList,
+        bool onlyHandleCurrentOverlay = false);
 
     std::vector<WeakPtr<NavDestinationGroupNode>> FindNodesPoped(const RefPtr<FrameNode>& preNode,
         const RefPtr<FrameNode>& curNode);
@@ -297,6 +314,10 @@ public:
     void SetIsOnAnimation(bool isOnAnimation)
     {
         isOnAnimation_ = isOnAnimation;
+    }
+    bool IsOnAnimation() const
+    {
+        return isOnAnimation_;
     }
     RefPtr<FrameNode> GetTopDestination();
     void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override;
@@ -442,7 +463,7 @@ private:
         const RefPtr<UINode>& preLastStandardNode);
     bool ReorderNavDestination(
         const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
-        RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
+        RefPtr<FrameNode>& navigationContentNode, int32_t& slot, int32_t& overlaySlot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged,
         const RefPtr<NavDestinationGroupNode>& preLastStandardNode);
@@ -487,6 +508,7 @@ private:
     RefPtr<UINode> customHomeDestination_;
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
+    RefPtr<UINode> overlayNode_;
     RefPtr<UINode> dividerNode_;
     RefPtr<UINode> dragBarNode_;
     bool isStaticPlaceholder_ = false;

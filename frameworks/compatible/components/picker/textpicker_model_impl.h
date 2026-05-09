@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_TEXTPICKER_MODEL_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_TEXTPICKER_MODEL_IMPL_H
 
-#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
+
+namespace OHOS::Ace {
+class TextTheme;
+}
 
 namespace OHOS::Ace::Framework {
 class TextPickerModelImpl : public TextPickerModel {

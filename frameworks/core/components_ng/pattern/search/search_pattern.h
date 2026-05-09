@@ -376,7 +376,7 @@ private:
     bool isFocusTextColorSet_ = false;
     bool directionKeysMoveFocusOut_ = false;
     bool isNotifyChildAction_ = false;
-    bool isSearchButtonUsingThemeColor_ = false;
+    bool isSearchButtonUsingThemeColor_ = true;
     Color searchNormalColor_;
     Color transparentColor_ = Color::TRANSPARENT;
 

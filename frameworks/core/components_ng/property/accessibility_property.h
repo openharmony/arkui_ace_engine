@@ -60,6 +60,11 @@ struct AccessibilityActionOptions {
     int32_t scrollStep = 1;
 };
 
+struct AccessibilityCustomAction {
+    std::string actionName;
+    std::function<void()> customActionCallback;
+};
+
 struct OverlayAccessibilityProperty {
     bool isModal = true; // true means cannot focus lower component of dialog like components
 };
@@ -688,6 +693,10 @@ public:
     void SetAccessibilityActionOptions(const AccessibilityActionOptions& accessibilityActionOptions);
     AccessibilityActionOptions GetAccessibilityActionOptions();
     void ResetAccessibilityActionOptions();
+    void SetAccessibilityCustomActions(const std::vector<AccessibilityCustomAction>& accessibilityCustomActions);
+    std::vector<AccessibilityCustomAction> GetAccessibilityCustomActions();
+    void ResetAccessibilityCustomActions();
+    bool ActActionCustom(const std::string& actionName);
 
     // used to indicate whether a dialog like component is modal
     void SetIsAccessibilityModal(bool isModal);
@@ -831,6 +840,7 @@ protected:
     std::optional<OverlayAccessibilityProperty> overlayProperty_;
     std::optional<bool> isHeaderOrFooter_;
     std::optional<AccessibilityActionOptions> accessibilityActionOptions_;
+    std::optional<std::vector<AccessibilityCustomAction>> accessibilityCustomActions_;
 };
 } // namespace OHOS::Ace::NG
 

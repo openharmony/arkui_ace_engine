@@ -1130,7 +1130,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     static create<V>(id: KoalaCallsiteKey, paramCount: int32, compute?: () => V, cleanup?: (value: V | undefined) => void, reuseKey?: string): ScopeImpl<V> {
         const instance = new ScopeImpl<V>()
         instance._id = id // special type to distinguish scopes
-        instance.params = paramCount > 0 ? new Array<Disposable | undefined>(paramCount) : undefined
+        instance.params = paramCount > 0 ? Array.create<Disposable | undefined>(paramCount, undefined) : undefined
         instance.myCompute = compute
         instance.myCleanup = cleanup
         instance._reuseKey = reuseKey

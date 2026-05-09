@@ -17,7 +17,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "test/mock/adapter/mock_ui_session_manager.h"
+#include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
 #include "test/mock/frameworks/base/window/mock_foldable_window.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -64,6 +64,14 @@ void ModalPresentationPatternTestNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+            return sheetTheme;
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -79,6 +87,14 @@ void ModalPresentationPatternTestNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme
                 return nullptr;
             }
         });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme.Upgrade();
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 

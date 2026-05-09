@@ -395,6 +395,13 @@ public:
     bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
     bool IsHomeDestination(const std::string& name) const override;
 
+    using PushDestinationInnerCallback = std::function<void(const std::string&, const std::string&, bool)>;
+    void SetPushDestinationInnerCallback(PushDestinationInnerCallback&& callback)
+    {
+        pushDestinationInnerCallback_ = std::move(callback);
+    }
+    void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) override;
+
 protected:
     RefPtr<PathStack> dataSourceObj_;
     std::function<void()> onStateChangedCallback_;
@@ -402,6 +409,7 @@ protected:
     NavDestinationBuilderCallback navDestBuilder_;
     std::optional<HomePathInfo> homePathInfo_;
     WeakPtr<NG::NavDestinationGroupNode> homeDestinationNode_;
+    PushDestinationInnerCallback pushDestinationInnerCallback_;
 
 private:
     void SetIsReplace(int32_t value)

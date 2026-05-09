@@ -88,8 +88,11 @@ public:
     std::unique_ptr<Rosen::Typography> GetParagraph(double contextWidth) const
     {
         CHECK_NULL_RETURN(property_, nullptr);
-        const Dimension fontSize = Dimension(40);
         auto overlayOptions = property_->Get().GetOverlayOptions();
+        if (overlayOptions.content.empty()) {
+            return nullptr;
+        }
+        const Dimension fontSize = Dimension(40);
         // create paragraph
         TextStyle textStyle;
         textStyle.SetFontSize(fontSize);
@@ -116,7 +119,11 @@ public:
     {
         auto paragraph = GetParagraph(contextWidth);
         CHECK_NULL_RETURN(paragraph, SizeF());
-        return SizeF(static_cast<float>(paragraph->GetActualWidth()), static_cast<float>(paragraph->GetHeight()));
+        auto actualWidth = paragraph->GetActualWidth();
+        if (actualWidth < 0.0 || std::isinf(actualWidth) || std::isnan(actualWidth)) {
+            return SizeF();
+        }
+        return SizeF(static_cast<float>(actualWidth), static_cast<float>(paragraph->GetHeight()));
     }
 
     void SetCustomData(const OverlayTextData& data)
@@ -139,6 +146,13 @@ public:
             overlayOffset = OffsetF(dx, dy);
         }
         return overlayOffset;
+    }
+
+    OffsetF GetOverlayOffsetWithDirection(const SizeF& parentSize, const SizeF& childSize)
+    {
+        CHECK_NULL_RETURN(property_, OffsetF());
+        auto overlayOptions = property_->Get().GetOverlayOptions();
+        return GetTextPosition(parentSize, childSize, overlayOptions);
     }
 
     bool IsCustomFont()

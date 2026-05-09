@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CALENDAR_CALENDAR_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CALENDAR_CALENDAR_MODEL_H
 
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_data.h"
 
 namespace OHOS::Ace {

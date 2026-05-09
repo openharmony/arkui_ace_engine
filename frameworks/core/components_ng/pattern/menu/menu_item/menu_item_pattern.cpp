@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include "menu_item_model.h"
@@ -51,6 +52,10 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
+
+MenuItemPattern::MenuItemPattern(bool isOptionPattern, int index) : index_(index), isOptionPattern_(isOptionPattern) {}
+
+MenuItemPattern::~MenuItemPattern() = default;
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 // default clicked & hover color for background blend when theme is null(value from SelectTheme)
@@ -497,7 +502,7 @@ void MenuItemPattern::ClearFocusStyle()
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         isFocusShadowSet_ = false;
     }
     auto paintProperty = GetPaintProperty<MenuItemPaintProperty>();
@@ -563,7 +568,7 @@ void MenuItemPattern::HandleBlurEvent()
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         isFocusShadowSet_ = false;
     }
 
@@ -722,6 +727,11 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (menuPattern->GetScrollBar().has_value()) {
         param.scrollBar = menuPattern->GetScrollBar().value();
     }
+    if (outterMenuLayoutProps->GetMenuTargetSpace().has_value()) {
+        param.targetSpace = outterMenuLayoutProps->GetMenuTargetSpace();
+        param.targetOffset = outterMenuLayoutProps->GetTargetOffset();
+        param.targetSize = outterMenuLayoutProps->GetTargetMenuSize();
+    }
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
@@ -780,7 +790,8 @@ void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
 void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
 {
     CHECK_NULL_VOID(subMenu);
-    auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto accessibilityProperty = AceType::DynamicCast<MenuAccessibilityProperty>(
+        subMenu->GetAccessibilityProperty<AccessibilityProperty>());
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
@@ -1048,6 +1059,10 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuNode = GetMenu(true);
+    CHECK_NULL_VOID(menuNode);
+    auto menuRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuRenderContext);
     menuWrapperPattern->IncreaseEmbeddedSubMenuCount();
     auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(rightRow);
@@ -1067,13 +1082,17 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     AnimationOption option = AnimationOption();
     auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
     option.SetCurve(rotateOption);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), expandableNodeWk = WeakClaim(RawPtr(expandableNode))]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto expandableNode = expandableNodeWk.Upgrade();
-        CHECK_NULL_VOID(expandableNode);
-        pattern->SetShowEmbeddedMenuParams(expandableNode);
-    }, nullptr, nullptr, host->GetContextRefPtr());
+    AnimationUtils::Animate(
+        option,
+        [menuRenderContext, weak = WeakClaim(this), expandableNodeWk = WeakClaim(RawPtr(expandableNode))]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto expandableNode = expandableNodeWk.Upgrade();
+            CHECK_NULL_VOID(expandableNode);
+            pattern->SetShowEmbeddedMenuParams(expandableNode);
+            menuRenderContext->UpdateSubmenuDistortionParam();
+        },
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode)
@@ -1126,6 +1145,10 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuNode = GetMenu(true);
+    CHECK_NULL_VOID(menuNode);
+    auto menuRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuRenderContext);
     menuWrapperPattern->DecreaseEmbeddedSubMenuCount();
     auto expandableAreaContext = expandableNode->GetRenderContext();
     CHECK_NULL_VOID(expandableAreaContext);
@@ -1138,7 +1161,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         expandableAreaContext->UpdateChainedTransition(opacity);
     }
 
-    AnimationUtils::Animate(option, [host, expandableNode, menuWrapperPattern]() {
+    AnimationUtils::Animate(option, [host, menuRenderContext, expandableNode, menuWrapperPattern]() {
         host->RemoveChild(expandableNode, true);
         host->MarkModifyDone();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1164,6 +1187,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         auto menuItemPattern = host->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(menuItemPattern);
         menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
+        menuRenderContext->UpdateSubmenuDistortionParam();
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
 

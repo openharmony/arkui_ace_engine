@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -51,7 +52,6 @@ const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 const int32_t INVISIBLE_OPTIONS_COUNT = 2;
-const int32_t COLUMNS_SIZE = 3;
 const int32_t COLUMNS_ZERO = 0;
 const int32_t COLUMNS_ONE = 1;
 const int32_t COLUMNS_TWO = 2;
@@ -2292,10 +2292,11 @@ int DatePickerPattern::LunarDateCompare(const LunarDate& left, const LunarDate& 
     return leftEqualRight;
 }
 
-void DatePickerPattern::InitColumnsOrder(RefPtr<FrameNode>* columns) const
+void DatePickerPattern::InitColumnsOrder(RefPtr<FrameNode> (*columns)[COLUMNS_SIZE]) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(columns);
     int index = 0;
     int order[COLUMNS_SIZE];
     if (dateOrder_ == "M-d-y") {
@@ -2316,7 +2317,7 @@ void DatePickerPattern::InitColumnsOrder(RefPtr<FrameNode>* columns) const
         auto blendChild = stackChild->GetLastChild();
         CHECK_NULL_VOID(blendChild);
         auto child = blendChild->GetLastChild();
-        columns[order[index]] = GetColumn(child->GetId());
+        (*columns)[order[index]] = GetColumn(child->GetId());
         index++;
     }
 }
@@ -2339,7 +2340,7 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     RefPtr<FrameNode> dayColumn;
     RefPtr<FrameNode> columns[COLUMNS_SIZE];
 
-    InitColumnsOrder(columns);
+    InitColumnsOrder(&columns);
     yearColumn = columns[COLUMNS_ZERO];
     monthColumn = columns[COLUMNS_ONE];
     dayColumn = columns[COLUMNS_TWO];
@@ -2464,7 +2465,7 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
 
     RefPtr<FrameNode> columns[COLUMNS_SIZE];
 
-    InitColumnsOrder(columns);
+    InitColumnsOrder(&columns);
     yearColumn = columns[COLUMNS_ZERO];
     monthColumn = columns[COLUMNS_ONE];
     dayColumn = columns[COLUMNS_TWO];
@@ -3507,7 +3508,8 @@ bool DatePickerPattern::ValidateDateParameters(const std::unique_ptr<JsonValue>&
         year = yearValue->GetInt();
         month = monthValue->GetInt();
         day = dayValue->GetInt();
-        if (year < MIN_YEAR || month < MIN_MONTH || month > MAX_MONTH || day < MIN_DAY ||
+        if (year < MIN_YEAR || month < static_cast<int32_t>(MIN_MONTH) ||
+            month > static_cast<int32_t>(MAX_MONTH) || day < static_cast<int32_t>(MIN_DAY) ||
             day > static_cast<int32_t>(PickerDate::GetMaxDay(year, month))) {
             return false;
         }

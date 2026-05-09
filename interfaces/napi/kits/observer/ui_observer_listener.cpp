@@ -29,6 +29,19 @@ constexpr int32_t PARAM_SIZE_THREE = 3;
 constexpr int32_t PARAM_SIZE_SIX = 6;
 constexpr int32_t PARAM_SIZE_SEVEN = 7;
 
+bool IsNullOrUndefined(napi_env env, napi_value value)
+{
+    if (value == nullptr) {
+        return true;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    if (napi_typeof(env, value, &valueType) != napi_ok) {
+        return true;
+    }
+    return valueType == napi_null || valueType == napi_undefined;
+}
+
 bool CheckKeysPressed(const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
 {
     auto hasKeyCode = [pressedKeyCodes](const KeyCode& keyCode) -> bool {
@@ -271,8 +284,8 @@ static napi_value GetCurrentLocalPositionForTapLocation(napi_env env, napi_callb
     napi_create_object(env, &result);
     napi_value x = nullptr;
     napi_value y = nullptr;
-    napi_create_double(env, offset.GetX(), &x);
-    napi_create_double(env, offset.GetY(), &y);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), &x);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetY()), &y);
     napi_set_named_property(env, result, "x", x);
     napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
@@ -298,8 +311,8 @@ static napi_value GetCurrentLocalPositionForFingerInfo(napi_env env, napi_callba
     napi_create_object(env, &result);
     napi_value x = nullptr;
     napi_value y = nullptr;
-    napi_create_double(env, offset.GetX(), &x);
-    napi_create_double(env, offset.GetY(), &y);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), &x);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetY()), &y);
     napi_set_named_property(env, result, "x", x);
     napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
@@ -325,8 +338,8 @@ static napi_value GetCurrentLocalPositionForClickEvent(napi_env env, napi_callba
     napi_create_object(env, &result);
     napi_value x = nullptr;
     napi_value y = nullptr;
-    napi_create_double(env, offset.GetX(), &x);
-    napi_create_double(env, offset.GetY(), &y);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), &x);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetY()), &y);
     napi_set_named_property(env, result, "x", x);
     napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
@@ -352,8 +365,8 @@ static napi_value GetCurrentLocalPositionForGestureEvent(napi_env env, napi_call
     napi_create_object(env, &result);
     napi_value x = nullptr;
     napi_value y = nullptr;
-    napi_create_double(env, offset.GetX(), &x);
-    napi_create_double(env, offset.GetY(), &y);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), &x);
+    napi_create_double(env, PipelineBase::Px2VpWithCurrentDensity(offset.GetY()), &y);
     napi_set_named_property(env, result, "x", x);
     napi_set_named_property(env, result, "y", y);
     napi_value newResult = nullptr;
@@ -1076,7 +1089,7 @@ void UIObserverListener::AddGestureEventInfoOne(napi_value objValueEvent, const 
         napi_set_named_property(env_, objValueEvent, "speed", napiSpeed);
     }
     napi_value napiGetCurrentLocalPosition = GetNamedProperty(env_, objValueEvent, GET_CURRENT_LOCAL_POSITION);
-    if (GetValueType(env_, napiGetCurrentLocalPosition) == napi_null &&
+    if (IsNullOrUndefined(env_, napiGetCurrentLocalPosition) &&
         SetCurrentLocalLocationForGestureEvent(env_, objValueEvent, gestureEventInfo)) {
         napi_value funcValue = nullptr;
         napi_create_function(
@@ -1432,7 +1445,7 @@ void UIObserverListener::AddClickEventInfoTwo(napi_value objValueClickEvent, con
         napi_set_named_property(env_, objValueClickEvent, "y", napiY);
     }
     napi_value napiGetCurrentLocalPosition = GetNamedProperty(env_, objValueClickEvent, GET_CURRENT_LOCAL_POSITION);
-    if (GetValueType(env_, napiGetCurrentLocalPosition) != napi_null &&
+    if (IsNullOrUndefined(env_, napiGetCurrentLocalPosition) &&
         SetCurrentLocalLocationForClickEvent(env_, objValueClickEvent, clickInfo)) {
         napi_value funcValue = nullptr;
         napi_create_function(

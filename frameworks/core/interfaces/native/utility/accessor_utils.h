@@ -16,7 +16,7 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_ACCESSOR_UTILS_H
 
 #include "arkoala_api_generated.h"
-#include "core/event/key_event.h"
+#include "core/event/key_code.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "frameworks/base/utils/string_utils.h"
 

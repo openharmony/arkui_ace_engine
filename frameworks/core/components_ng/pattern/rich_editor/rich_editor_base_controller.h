@@ -38,6 +38,7 @@ public:
     void CloseSelectionMenu() override;
     bool IsEditing() override;
     void StopEditing() override;
+    void ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end) override;
     void DeleteBackward() override;
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;

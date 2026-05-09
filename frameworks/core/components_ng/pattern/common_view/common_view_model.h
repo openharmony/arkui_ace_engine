@@ -28,10 +28,6 @@ public:
     virtual ~CommonViewModel() = default;
 
     virtual void Create(bool isLayoutNode) = 0;
-
-private:
-    static std::unique_ptr<CommonViewModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COMMON_VIEW_COMMON_VIEW_MODEL_H

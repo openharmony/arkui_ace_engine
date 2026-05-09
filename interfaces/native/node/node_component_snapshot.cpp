@@ -19,6 +19,7 @@
 #include "pixelmap_native_impl.h"
 
 #include "base/utils/utils.h"
+#include "interfaces/native/native_error_message_macros.h"
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 
@@ -29,7 +30,11 @@ extern "C" {
 ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions()
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, nullptr);
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_INTERNAL_ERROR,
+            "OH_ArkUI_CreateSnapshotOptions", "Native module not initialized");
+        return nullptr;
+    }
     auto snapshotOptions = impl->getSnapshotAPI()->createSnapshotOptions();
     return reinterpret_cast<ArkUI_SnapshotOptions*>(snapshotOptions);
 }
@@ -37,7 +42,11 @@ ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions()
 void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_VOID(impl);
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_INTERNAL_ERROR,
+            "OH_ArkUI_DestroySnapshotOptions", "Native module not initialized");
+        return;
+    }
     auto options = reinterpret_cast<ArkUISnapshotOptions*>(snapshotOptions);
     impl->getSnapshotAPI()->destroySnapshotOptions(options);
 }

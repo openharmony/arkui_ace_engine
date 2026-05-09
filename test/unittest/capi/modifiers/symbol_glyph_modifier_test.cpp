@@ -15,15 +15,18 @@
 #include <gtest/gtest.h>
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/interfaces/native/implementation/symbol_effect_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "generated/type_helpers.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+using TypeHelper::WriteTo;
 namespace {
 const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
 const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
@@ -67,6 +70,17 @@ std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resou
     { INT_RES_4_ID, INT_RES_4_STR, 12345 },
     { INT_RES_5_ID, INT_RES_5_STR, 123456 },
 };
+
+const auto ATTRIBUTE_VARIABLE_FONT_WEIGHT_NAME = "variableFontWeight";
+const int32_t ATTRIBUTE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE = 400;
+const auto ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME = "enableVariableFontWeight";
+const bool ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE = false;
+const auto ATTRIBUTE_ENABLE_DEVICE_FONT_WEIGHT_CATEGORY_NAME = "enableDeviceFontWeightCategory";
+
+constexpr int32_t WEIGHT_W100 = 100;
+constexpr int32_t WEIGHT_W400 = 400;
+constexpr int32_t WEIGHT_W700 = 700;
+constexpr int32_t WEIGHT_W900 = 900;
 
 } // namespace
 
@@ -205,11 +219,12 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
  */
 HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setFontWeight, nullptr);
+    // setFontWeight renamed to setFontWeight0 after setFontWeight1 was added
+    ASSERT_NE(modifier_->setFontWeight0, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
     std::optional<std::string> result;
     for (const auto &[weight, expectValue] : Converter::FONT_WEIGHT_TEST_PLAN) {
-        modifier_->setFontWeight(node_, &weight);
+        modifier_->setFontWeight0(node_, &weight);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
         EXPECT_THAT(result, Eq(expectValue));
@@ -223,7 +238,8 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestValidValues, TestSize.Level1)
  */
 HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setFontWeight, nullptr);
+    // setFontWeight renamed to setFontWeight0 after setFontWeight1 was added
+    ASSERT_NE(modifier_->setFontWeight0, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
     std::optional<std::string> result;
 
@@ -232,11 +248,154 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestInvalidValues, TestSize.Level
         { Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("1000"), "FontWeight.Normal" },
     };
     for (const auto &[weight, expectValue] : testPlan) {
-        modifier_->setFontWeight(node_, &weight);
+        modifier_->setFontWeight0(node_, &weight);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
         EXPECT_THAT(result, Eq(expectValue));
     }
+}
+
+/**
+ * @tc.name: setFontWeight1TestValidValues
+ * @tc.desc: setFontWeight1 with valid fontWeight values (int, enum, ResourceStr)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontWeight1TestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFontWeight1, nullptr);
+    typedef std::pair<Opt_Union_I32_FontWeight_ResourceStr, std::string> FontWeightResourceStrTestStep;
+    const std::vector<FontWeightResourceStrTestStep> testPlan = {
+        { Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(100), "100" },
+        { Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(400), "400" },
+        { Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(700), "700" },
+        { Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
+            "FontWeight.Bold" },
+        { Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER),
+            "FontWeight.Lighter" },
+    };
+    std::unique_ptr<JsonValue> jsonValue;
+    std::optional<std::string> result;
+    for (const auto& [weight, expectValue] : testPlan) {
+        modifier_->setFontWeight1(node_, &weight, nullptr);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
+        EXPECT_THAT(result, Eq(expectValue));
+    }
+}
+
+/**
+ * @tc.name: setFontWeight1TestNullConfigsResets
+ * @tc.desc: setFontWeight1 with null fontWeightConfigs resets variable/enabled flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontWeight1TestNullConfigsResets, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFontWeight1, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Set variable font weight and enable flags via Model API
+    SymbolModelNG::SetVariableFontWeight(frameNode, WEIGHT_W700);
+    SymbolModelNG::SetEnableVariableFontWeight(frameNode, true);
+    SymbolModelNG::SetEnableDeviceFontWeightCategory(frameNode, true);
+
+    // Call setFontWeight1 with null configs should reset all
+    auto weight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(400);
+    modifier_->setFontWeight1(node_, &weight, nullptr);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto variableResult = GetAttrValue<int>(jsonValue, ATTRIBUTE_VARIABLE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(variableResult, Eq(ATTRIBUTE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE));
+
+    auto enableResult = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(enableResult, Eq(ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE));
+}
+
+/**
+ * @tc.name: setFontWeight1TestEnableVariableFontWeight
+ * @tc.desc: setFontWeight1 with enableVariableFontWeight config
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontWeight1TestEnableVariableFontWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFontWeight1, nullptr);
+
+    auto weight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(WEIGHT_W700);
+
+    // Test with enableVariableFontWeight = true
+    Opt_FontWeightConfigs configs = {};
+    WriteTo(configs).enableVariableFontWeight = Converter::ArkValue<Opt_Boolean>(true);
+
+    modifier_->setFontWeight1(node_, &weight, &configs);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+
+    auto enableResult = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(enableResult, Eq(true));
+}
+
+/**
+ * @tc.name: setFontWeight1TestEnableVariableFontWeightFalse
+ * @tc.desc: setFontWeight1 with enableVariableFontWeight = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontWeight1TestEnableVariableFontWeightFalse, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFontWeight1, nullptr);
+
+    auto weight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(WEIGHT_W700);
+
+    Opt_FontWeightConfigs configs = {};
+    WriteTo(configs).enableVariableFontWeight = Converter::ArkValue<Opt_Boolean>(false);
+
+    modifier_->setFontWeight1(node_, &weight, &configs);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+
+    auto enableResult = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(enableResult, Eq(false));
+}
+
+/**
+ * @tc.name: setFontWeight1TestEnableDeviceFontWeightCategory
+ * @tc.desc: setFontWeight1 with enableDeviceFontWeightCategory config
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontWeight1TestEnableDeviceFontWeightCategory, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFontWeight1, nullptr);
+
+    auto weight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(WEIGHT_W400);
+
+    Opt_FontWeightConfigs configs = {};
+    WriteTo(configs).enableDeviceFontWeightCategory = Converter::ArkValue<Opt_Boolean>(false);
+
+    modifier_->setFontWeight1(node_, &weight, &configs);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+
+    auto result = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_DEVICE_FONT_WEIGHT_CATEGORY_NAME);
+    EXPECT_THAT(result, Eq(false));
+}
+
+/**
+ * @tc.name: setFontWeight1TestUndefinedEnableDeviceFontWeightDefaults
+ * @tc.desc: setFontWeight1 with enableDeviceFontWeightCategory undefined defaults to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setFontWeight1TestUndefinedEnableDeviceFontWeightDefaults, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFontWeight1, nullptr);
+
+    auto weight = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(WEIGHT_W400);
+
+    // Only set enableVariableFontWeight, leave enableDeviceFontWeightCategory undefined
+    Opt_FontWeightConfigs configs = {};
+    WriteTo(configs).enableVariableFontWeight = Converter::ArkValue<Opt_Boolean>(true);
+
+    modifier_->setFontWeight1(node_, &weight, &configs);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+
+    // enableDeviceFontWeightCategory should default to true when undefined
+    auto result = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_DEVICE_FONT_WEIGHT_CATEGORY_NAME);
+    EXPECT_THAT(result, Eq(true));
 }
 
 /*
@@ -724,6 +883,137 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setMaxFontScaleTestInvalidValues, Tes
     for (auto& [input, value, expected] : testFixtureMaxFontScaleNumInvalidValues) {
         checkValue(input, expected, Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
+}
+
+/**
+ * @tc.name: setVariableFontWeightTestValidValues
+ * @tc.desc: Verify variableFontWeight is correctly set with different numeric values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setVariableFontWeightTestValidValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    const std::vector<std::pair<int32_t, int32_t>> testPlan = {
+        { WEIGHT_W100, WEIGHT_W100 },
+        { WEIGHT_W400, WEIGHT_W400 },
+        { WEIGHT_W700, WEIGHT_W700 },
+        { WEIGHT_W900, WEIGHT_W900 },
+    };
+    for (const auto& [input, expected] : testPlan) {
+        SymbolModelNG::SetVariableFontWeight(frameNode, input);
+        std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<int>(jsonValue, ATTRIBUTE_VARIABLE_FONT_WEIGHT_NAME);
+        EXPECT_THAT(result, Eq(expected)) << "Failed for input: " << input;
+    }
+}
+
+/**
+ * @tc.name: setVariableFontWeightTestReset
+ * @tc.desc: Verify variableFontWeight is reset to default after reset call
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setVariableFontWeightTestReset, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetVariableFontWeight(frameNode, WEIGHT_W700);
+    SymbolModelNG::ResetVariableFontWeight(frameNode);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<int>(jsonValue, ATTRIBUTE_VARIABLE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE));
+}
+
+/**
+ * @tc.name: setEnableVariableFontWeightTestTrue
+ * @tc.desc: Verify enableVariableFontWeight is set to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setEnableVariableFontWeightTestTrue, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetEnableVariableFontWeight(frameNode, true);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(result, Eq(true));
+}
+
+/**
+ * @tc.name: setEnableVariableFontWeightTestFalse
+ * @tc.desc: Verify enableVariableFontWeight is set to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setEnableVariableFontWeightTestFalse, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetEnableVariableFontWeight(frameNode, false);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(result, Eq(false));
+}
+
+/**
+ * @tc.name: setEnableVariableFontWeightTestReset
+ * @tc.desc: Verify enableVariableFontWeight is reset to default (false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setEnableVariableFontWeightTestReset, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetEnableVariableFontWeight(frameNode, true);
+    SymbolModelNG::ResetEnableVariableFontWeight(frameNode);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE));
+}
+
+/**
+ * @tc.name: setEnableDeviceFontWeightCategoryTestTrue
+ * @tc.desc: Verify enableDeviceFontWeightCategory is set to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setEnableDeviceFontWeightCategoryTestTrue, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetEnableDeviceFontWeightCategory(frameNode, true);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_DEVICE_FONT_WEIGHT_CATEGORY_NAME);
+    EXPECT_THAT(result, Eq(true));
+}
+
+/**
+ * @tc.name: setEnableDeviceFontWeightCategoryTestFalse
+ * @tc.desc: Verify enableDeviceFontWeightCategory is set to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setEnableDeviceFontWeightCategoryTestFalse, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetEnableDeviceFontWeightCategory(frameNode, false);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_DEVICE_FONT_WEIGHT_CATEGORY_NAME);
+    EXPECT_THAT(result, Eq(false));
+}
+
+/**
+ * @tc.name: setEnableDeviceFontWeightCategoryTestReset
+ * @tc.desc: Verify enableDeviceFontWeightCategory is reset to default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setEnableDeviceFontWeightCategoryTestReset, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetEnableDeviceFontWeightCategory(frameNode, true);
+    SymbolModelNG::ResetEnableDeviceFontWeightCategory(frameNode);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<bool>(jsonValue, ATTRIBUTE_ENABLE_DEVICE_FONT_WEIGHT_CATEGORY_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE));
 }
 
 } // namespace OHOS::Ace::NG

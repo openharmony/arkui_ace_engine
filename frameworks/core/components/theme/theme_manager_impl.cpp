@@ -87,6 +87,7 @@
 #include "core/components_ng/pattern/menu/menu_theme_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/pattern/scrollable/selectable_theme.h"
 #include "core/components_ng/pattern/select/select_theme_wrapper.h"
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
 #include "core/components_ng/pattern/toggle/switch_theme_wrapper.h"
@@ -101,6 +102,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_theme_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme_wrapper.h"
 #include "core/components_ng/pattern/search/search_theme_wrapper.h"
+#include "core/components_ng/pattern/sheet/sheet_theme_wrapper.h"
 #include "core/components_ng/pattern/slider/slider_theme_wrapper.h"
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/badge/badge_theme_wrapper.h"
@@ -195,6 +197,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::ContainerModalTheme::TypeId(), &ThemeBuildFunc<NG::ContainerModalTheme::Builder> },
     { AgingAdapationDialogTheme::TypeId(), &ThemeBuildFunc<AgingAdapationDialogTheme::Builder> },
     { NG::ScrollableTheme::TypeId(), &ThemeBuildFunc<NG::ScrollableTheme::Builder> },
+    { NG::SelectableTheme::TypeId(), &ThemeBuildFunc<NG::SelectableTheme::Builder> },
     { NG::SwiperTheme::TypeId(), &ThemeBuildFunc<NG::SwiperTheme::Builder> },
     { NG::LinearIndicatorTheme::TypeId(), &ThemeBuildFunc<NG::LinearIndicatorTheme::Builder> },
     { NG::RefreshThemeNG::TypeId(), &ThemeBuildFunc<NG::RefreshThemeNG::Builder> },
@@ -246,6 +249,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { IndexerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::IndexerThemeWrapper::WrapperBuilder> },
         { TabTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TabThemeWrapper::WrapperBuilder> },
         { SwiperIndicatorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwiperThemeWrapper::WrapperBuilder> },
+        { NG::SheetTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SheetThemeWrapper::WrapperBuilder> },
         { NG::MenuTheme::TypeId(), &ThemeWrapperBuildFunc<NG::MenuThemeWrapper::WrapperBuilder> }
     };
 

@@ -222,6 +222,8 @@ public:
     static bool CallSwiperIsFakeDragging(FrameNode* frameNode);
     static void CallSwiperShowPrevious(FrameNode* frameNode);
     static void CallSwiperShowNext(FrameNode* frameNode);
+    static void AddDigitIndicatorLpx(FrameNode* frameNode, const SwiperDigitalParameters& params);
+    static void AddDotIndicatorLpx(FrameNode* frameNode, const SwiperParameters& params);
 };
 
 } // namespace OHOS::Ace::NG

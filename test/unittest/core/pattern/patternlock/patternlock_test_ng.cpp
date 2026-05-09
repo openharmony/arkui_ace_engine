@@ -16,6 +16,7 @@
 #include "patternlock_test_ng.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/pattern/patternlock/patternlock_theme_wrapper.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
 void PatternLockTestNg::SetUpTestSuite()
@@ -1759,5 +1760,162 @@ HWTEST_F(PatternLockTestNg, PatternLockTestGetTouchOffsetToNode001, TestSize.Lev
     auto NodeOffset = pattern->GetTouchOffsetToNode();
     auto offsetZero = OffsetF(0.0f, 0.0f);
     EXPECT_EQ(NodeOffset, offsetZero);
+}
+
+/**
+ * @tc.name: PatternLockOnThemeScopeUpdateTest001
+ * @tc.desc: Test OnThemeScopeUpdate returns false when host is null or API version is less than 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockOnThemeScopeUpdateTest001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+
+    auto detachedPattern = AceType::MakeRefPtr<PatternLockPattern>();
+    EXPECT_FALSE(detachedPattern->OnThemeScopeUpdate(0));
+
+    Create([](PatternLockModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    EXPECT_FALSE(pattern_->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: PatternLockOnThemeScopeUpdateTest002
+ * @tc.desc: Test OnThemeScopeUpdate updates theme colors when SetByUser flags are not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockOnThemeScopeUpdateTest002, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    Create([](PatternLockModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto theme = host->GetTheme<V2::PatternLockTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    auto focusHub = host->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    paintProperty->UpdatePathColor(TEST_THEME_SCOPE_PATH_CUSTOM_COLOR);
+    paintProperty->UpdateRegularColor(TEST_THEME_SCOPE_REGULAR_CUSTOM_COLOR);
+    paintProperty->UpdateActiveColor(TEST_THEME_SCOPE_ACTIVE_CUSTOM_COLOR);
+    paintProperty->UpdateSelectedColor(TEST_THEME_SCOPE_SELECTED_CUSTOM_COLOR);
+    paintProperty->ResetPathColorSetByUser();
+    paintProperty->ResetRegularColorSetByUser();
+    paintProperty->ResetActiveColorSetByUser();
+    paintProperty->ResetSelectedColorSetByUser();
+
+    ASSERT_NE(paintProperty->GetPathColor().value(), theme->GetPathColor());
+    ASSERT_NE(paintProperty->GetRegularColor().value(), theme->GetRegularColor());
+    ASSERT_NE(paintProperty->GetActiveColor().value(), theme->GetActiveColor());
+    ASSERT_NE(paintProperty->GetSelectedColor().value(), theme->GetSelectedColor());
+
+    EXPECT_TRUE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    EXPECT_EQ(paintProperty->GetPathColor().value(), theme->GetPathColor());
+    EXPECT_EQ(paintProperty->GetRegularColor().value(), theme->GetRegularColor());
+    EXPECT_EQ(paintProperty->GetActiveColor().value(), theme->GetActiveColor());
+    EXPECT_EQ(paintProperty->GetSelectedColor().value(), theme->GetSelectedColor());
+    EXPECT_EQ(focusHub->GetPaintColor(), theme->GetFocusColor());
+
+    pipeline->SetIsSystemColorChange(false);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: PatternLockOnThemeScopeUpdateTest003
+ * @tc.desc: Test OnThemeScopeUpdate updates theme colors when SetByUser flags are explicitly false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockOnThemeScopeUpdateTest003, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    Create([](PatternLockModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto theme = host->GetTheme<V2::PatternLockTheme>(true);
+    ASSERT_NE(theme, nullptr);
+
+    paintProperty->UpdatePathColor(TEST_THEME_SCOPE_PATH_CUSTOM_COLOR);
+    paintProperty->UpdateRegularColor(TEST_THEME_SCOPE_REGULAR_CUSTOM_COLOR);
+    paintProperty->UpdateActiveColor(TEST_THEME_SCOPE_ACTIVE_CUSTOM_COLOR);
+    paintProperty->UpdateSelectedColor(TEST_THEME_SCOPE_SELECTED_CUSTOM_COLOR);
+    paintProperty->UpdatePathColorSetByUser(false);
+    paintProperty->UpdateRegularColorSetByUser(false);
+    paintProperty->UpdateActiveColorSetByUser(false);
+    paintProperty->UpdateSelectedColorSetByUser(false);
+
+    EXPECT_TRUE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    EXPECT_EQ(paintProperty->GetPathColor().value(), theme->GetPathColor());
+    EXPECT_EQ(paintProperty->GetRegularColor().value(), theme->GetRegularColor());
+    EXPECT_EQ(paintProperty->GetActiveColor().value(), theme->GetActiveColor());
+    EXPECT_EQ(paintProperty->GetSelectedColor().value(), theme->GetSelectedColor());
+
+    pipeline->SetIsSystemColorChange(false);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: PatternLockOnThemeScopeUpdateTest004
+ * @tc.desc: Test OnThemeScopeUpdate keeps custom colors when SetByUser flags are true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockOnThemeScopeUpdateTest004, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    Create([](PatternLockModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+    auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto theme = host->GetTheme<V2::PatternLockTheme>(true);
+    ASSERT_NE(theme, nullptr);
+
+    paintProperty->UpdatePathColor(TEST_THEME_SCOPE_PATH_CUSTOM_COLOR);
+    paintProperty->UpdateRegularColor(TEST_THEME_SCOPE_REGULAR_CUSTOM_COLOR);
+    paintProperty->UpdateActiveColor(TEST_THEME_SCOPE_ACTIVE_CUSTOM_COLOR);
+    paintProperty->UpdateSelectedColor(TEST_THEME_SCOPE_SELECTED_CUSTOM_COLOR);
+    paintProperty->UpdatePathColorSetByUser(true);
+    paintProperty->UpdateRegularColorSetByUser(true);
+    paintProperty->UpdateActiveColorSetByUser(true);
+    paintProperty->UpdateSelectedColorSetByUser(true);
+
+    ASSERT_NE(TEST_THEME_SCOPE_PATH_CUSTOM_COLOR, theme->GetPathColor());
+    ASSERT_NE(TEST_THEME_SCOPE_REGULAR_CUSTOM_COLOR, theme->GetRegularColor());
+    ASSERT_NE(TEST_THEME_SCOPE_ACTIVE_CUSTOM_COLOR, theme->GetActiveColor());
+    ASSERT_NE(TEST_THEME_SCOPE_SELECTED_CUSTOM_COLOR, theme->GetSelectedColor());
+
+    EXPECT_TRUE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    EXPECT_EQ(paintProperty->GetPathColor().value(), TEST_THEME_SCOPE_PATH_CUSTOM_COLOR);
+    EXPECT_EQ(paintProperty->GetRegularColor().value(), TEST_THEME_SCOPE_REGULAR_CUSTOM_COLOR);
+    EXPECT_EQ(paintProperty->GetActiveColor().value(), TEST_THEME_SCOPE_ACTIVE_CUSTOM_COLOR);
+    EXPECT_EQ(paintProperty->GetSelectedColor().value(), TEST_THEME_SCOPE_SELECTED_CUSTOM_COLOR);
+
+    pipeline->SetIsSystemColorChange(false);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

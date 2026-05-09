@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline/pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
 #include <cstdlib>
 #include "base/utils/utils.h"
 

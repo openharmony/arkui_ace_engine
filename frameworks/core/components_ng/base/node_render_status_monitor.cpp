@@ -18,6 +18,7 @@
 #include "base/log/ace_trace.h"
 #include "ui/base/utils/utils.h"
 
+#include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -30,8 +31,35 @@ bool NodeRenderStatusMonitor::IsRegisterNodeRenderStateChangeCallbackExceedLimit
     return nodeRenderStatusListeners_.size() >= MAX_NODE_RENDER_STATE_LISTENERS;
 }
 
+// return value is <isAbnormal, isLimited>
+std::pair<bool, bool> NodeRenderStatusMonitor::IsNodeRenderStateRegisterLimited(int32_t resourceId, int32_t nodeId)
+
+{
+    std::pair<bool, bool> isAbnormal(true, false);
+    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetUINodeById(nodeId);
+    CHECK_NULL_RETURN(node, isAbnormal);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, isAbnormal);
+    auto frameNodePtr = AceType::RawPtr(frameNode);
+    auto iter = nodeRenderStatusListeners_.find(frameNodePtr);
+    if (iter == nodeRenderStatusListeners_.end()) {
+        return isAbnormal;
+    }
+    CHECK_NULL_RETURN(iter->second, isAbnormal);
+    auto& holder = iter->second->nodeRenderStatusListeners;
+    for (auto& item : holder) {
+        if (item && item->resourceId == resourceId) {
+            return { false, false };
+        }
+    }
+    if (nodeRenderStatusListeners_.size() < MAX_NODE_RENDER_STATE_LISTENERS) {
+        return isAbnormal;
+    }
+    return { false, true };
+}
+
 MonitorRegisterResult NodeRenderStatusMonitor::RegisterNodeRenderStatusListener(
-    FrameNode* frameNode, NodeRenderStatusHandleFunc&& func, MonitorSourceType type)
+    FrameNode* frameNode, NodeRenderStatusHandleFunc&& func, MonitorSourceType type, int32_t resourceId)
 {
     MonitorRegisterResult result;
     CHECK_NULL_RETURN(frameNode, result);
@@ -43,7 +71,7 @@ MonitorRegisterResult NodeRenderStatusMonitor::RegisterNodeRenderStatusListener(
     auto iter = nodeRenderStatusListeners_.find(frameNode);
     if (iter == nodeRenderStatusListeners_.end()) {
         auto id = NodeRenderStatusMonitor::GenerateId();
-        auto listener = std::make_shared<NodeRenderStatusListener>(type, id, std::move(func));
+        auto listener = std::make_shared<NodeRenderStatusListener>(type, id, std::move(func), resourceId);
         auto sourceListener = std::make_shared<NodeRenderStatusSourceListener>(
             state, std::list<std::shared_ptr<NodeRenderStatusListener>>({ listener }));
         nodeRenderStatusListeners_.emplace(frameNode, std::move(sourceListener));
@@ -52,7 +80,7 @@ MonitorRegisterResult NodeRenderStatusMonitor::RegisterNodeRenderStatusListener(
     CHECK_NULL_RETURN(iter->second, result);
     auto& holder = iter->second->nodeRenderStatusListeners;
     // OBSERVER can only be registered once
-    if (type == MonitorSourceType::OBSERVER &&
+    if (resourceId == 0 && type == MonitorSourceType::OBSERVER &&
         std::any_of(holder.begin(), holder.end(), [](const std::shared_ptr<NodeRenderStatusListener>& listener) {
             return listener->sourceType == MonitorSourceType::OBSERVER;
         })) {
@@ -60,7 +88,7 @@ MonitorRegisterResult NodeRenderStatusMonitor::RegisterNodeRenderStatusListener(
     }
 
     auto id = NodeRenderStatusMonitor::GenerateId();
-    holder.emplace_back(std::make_shared<NodeRenderStatusListener>(type, id, std::move(func)));
+    holder.emplace_back(std::make_shared<NodeRenderStatusListener>(type, id, std::move(func), resourceId));
     return { id, state };
 }
 
@@ -173,6 +201,60 @@ int32_t NodeRenderStatusMonitor::GenerateId()
     static std::atomic<int32_t> gInstanceId;
     int32_t id = gInstanceId.fetch_add(1);
     return id;
+}
+
+void NodeRenderStatusMonitor::RemoveNodeRenderStateCallbackByResourceId(
+    int32_t nodeId, int32_t resourceId, bool isRemoveAll)
+{
+    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetUINodeById(nodeId);
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePtr = AceType::RawPtr(frameNode);
+    if (isRemoveAll) {
+        nodeRenderStatusListeners_.erase(frameNodePtr);
+        return;
+    }
+
+    auto iter = nodeRenderStatusListeners_.find(frameNodePtr);
+    if (iter != nodeRenderStatusListeners_.end()) {
+        auto& sourceListener = iter->second;
+        CHECK_NULL_VOID(sourceListener);
+        auto& list = sourceListener->nodeRenderStatusListeners;
+        for (auto it = list.begin(); it != list.end();) {
+            if ((*it) && (*it)->resourceId == resourceId) {
+                it = list.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+}
+
+void NodeRenderStatusMonitor::TriggerCallbackForFirstRegister(int32_t nodeId, int32_t resourceId)
+{
+    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetUINodeById(nodeId);
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePtr = AceType::RawPtr(frameNode);
+    auto state = GetNodeCurrentRenderState(frameNodePtr);
+
+    auto iter = nodeRenderStatusListeners_.find(frameNodePtr);
+    if (iter != nodeRenderStatusListeners_.end()) {
+        auto& sourceListener = iter->second;
+        CHECK_NULL_VOID(sourceListener);
+        sourceListener->nodeRenderState = state;
+        auto& list = sourceListener->nodeRenderStatusListeners;
+        for (auto it = list.begin(); it != list.end();) {
+            if ((*it) && (*it)->resourceId == resourceId) {
+                auto func = (*it)->func;
+                func(frameNodePtr, state, RenderMonitorReason::RENDER_CHANGE);
+                break;
+            }
+            ++it;
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

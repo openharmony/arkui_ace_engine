@@ -72,6 +72,7 @@ public:
     void SetOnDidZoom(std::function<void(float)>&& event) override;
     void SetOnZoomStart(std::function<void()>&& event) override;
     void SetOnZoomStop(std::function<void()>&& event) override;
+    void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<FrameNode> CreateFrameNodeMultiThread(int32_t nodeId);
@@ -133,6 +134,8 @@ public:
     static void SetOnDidZoom(FrameNode* frameNode, std::function<void(float)>&& event);
     static void SetOnZoomStart(FrameNode* frameNode, std::function<void()>&& event);
     static void SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& event);
+    static void CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+
 private:
     static bool CheckSnapPaginations(const std::vector<Dimension>& snapPaginations);
     static bool HasResObj(const std::vector<RefPtr<ResourceObject>>& resObjs);

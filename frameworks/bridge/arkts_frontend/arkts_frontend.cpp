@@ -205,6 +205,7 @@ ArktsFrontend::ArktsFrontend(void* runtime)
     }
     type_ = FrontendType::ARK_TS;
     env->GetVM(&vm_);
+    pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
 }
 
 ArktsFrontend::~ArktsFrontend()
@@ -1329,6 +1330,73 @@ int32_t ArktsFrontend::GetCurrentPageIndex() const
 {
     CHECK_NULL_RETURN(pageRouterManager_, -1);
     return pageRouterManager_->GetCurrentPageIndex();
+}
+
+UIContentErrorCode ArktsFrontend::RunIntentPage()
+{
+    if (pageRouterManager_) {
+        taskExecutor_->PostTask(
+            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_)]() {
+                auto pageRouterManager = weakPtr.Upgrade();
+                CHECK_NULL_VOID(pageRouterManager);
+                pageRouterManager->RunIntentPageExtender();
+            },
+            TaskExecutor::TaskType::JS, "ArkUIRunIntentPage");
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    return UIContentErrorCode::NULL_POINTER;
+}
+
+void ArktsFrontend::CallRunIntentPageFromNative(const std::string& url, const std::string& paramStr)
+{
+    CHECK_NULL_VOID(vm_);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+    ani_status status;
+    ani_class routerUtilCls;
+    const char* clsMangling = "arkui.base.Router.RouterUtil";
+    if ((status = env->FindClass(clsMangling, &routerUtilCls)) != ANI_OK) {
+        LOGE("AceRouter Cannot find class: %{public}s, status:%{public}d", clsMangling, status);
+        return;
+    }
+    ani_static_method runIntentPageMethod;
+    const char* methodName = "runIntentPageFromNative";
+    const char* methodMangling = "iC{std.core.String}C{std.core.String}C{std.core.RuntimeLinker}:";
+    if ((status = env->Class_FindStaticMethod(
+        routerUtilCls, methodName, methodMangling, &runIntentPageMethod)) != ANI_OK) {
+        LOGE("AceRouter Cannot find method: %{public}s, status:%{public}d", methodName, status);
+        return;
+    }
+    ani_string urlStr;
+    if ((status = env->String_NewUTF8(url.c_str(), url.size(), &urlStr)) != ANI_OK) {
+        LOGE("AceRouter failed to create url string, status:%{public}d", status);
+        return;
+    }
+    ani_string paramAniStr;
+    if ((status = env->String_NewUTF8(paramStr.c_str(), paramStr.size(), &paramAniStr)) != ANI_OK) {
+        LOGE("AceRouter failed to create param string, status:%{public}d", status);
+        return;
+    }
+    auto instanceId = Container::CurrentIdSafely();
+    if ((status = env->Class_CallStaticMethod_Void(routerUtilCls, runIntentPageMethod,
+        static_cast<ani_int>(instanceId), urlStr, paramAniStr, (ani_object)linkerRef_)) != ANI_OK) {
+        LOGE("AceRouter failed to call runIntentPageFromNative, status:%{public}d", status);
+        return;
+    }
+}
+
+UIContentErrorCode ArktsFrontend::SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+    const std::function<void()>&& loadPageCallback)
+{
+    taskExecutor_->PostTask(
+        [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), intentInfoSerialized, isColdStart,
+            callback = std::move(loadPageCallback)]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->SetRouterIntentInfo(intentInfoSerialized, isColdStart, std::move(callback));
+        },
+        TaskExecutor::TaskType::JS, "ArkUISetRouterIntentInfo");
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void ArktsFrontend::ReplaceExtender(

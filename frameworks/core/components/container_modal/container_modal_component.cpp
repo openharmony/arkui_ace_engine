@@ -14,6 +14,8 @@
  */
 
 #include "core/components/container_modal/container_modal_component.h"
+#include "core/pipeline/container_window_manager.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/clip/clip_component.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -22,6 +24,7 @@
 #include "core/components/padding/padding_component.h"
 #include "core/components/tween/tween_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/pan_gesture.h"
 
 namespace OHOS::Ace {

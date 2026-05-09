@@ -55,6 +55,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_test_done_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
@@ -87,6 +88,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/depth_option.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -94,10 +96,12 @@
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/event/key_event.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/common/color_inverter.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
@@ -160,6 +164,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr int32_t SMART_GESTURE_SHORTCUT_PRIMARY = 0;
 constexpr int32_t SECOND_INDEX = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
@@ -1658,6 +1663,53 @@ void RegisterRadiusRes(NG::BorderRadiusProperty& radius,
         radius.AddResource("radius.bottomEnd", bottomEndResObj, std::move(updateFunc));
     } else {
         radius.RemoveResource("radius.bottomEnd");
+    }
+}
+
+void ParseEdgeLightParam(const JSRef<JSObject>& jsObj, NG::EdgeLightParam& param)
+{
+    auto length = jsObj->GetProperty("length");
+    CalcDimension edgeLightLength;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(length, edgeLightLength, false)) {
+        edgeLightLength.Reset();
+    }
+    param.length = edgeLightLength;
+
+    auto intensity = jsObj->GetProperty("intensity");
+    auto edgeLightIntensity = 1.0;
+    if (JSViewAbstract::ParseJsDouble(intensity, edgeLightIntensity)) {
+        if (LessNotEqual(edgeLightIntensity, 0.0)) {
+            edgeLightIntensity = 0.0;
+        } else if (GreatNotEqual(edgeLightIntensity, 1.0)) {
+            edgeLightIntensity = 1.0;
+        }
+    }
+    param.intensity = edgeLightIntensity;
+
+    auto thickness = jsObj->GetProperty("thickness");
+    CalcDimension edgeLightThickness;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(thickness, edgeLightThickness, true)) {
+        edgeLightThickness.Reset();
+    }
+    param.thickness = edgeLightThickness;
+
+    auto position = jsObj->GetProperty("position");
+    auto edgeLightPosition = NG::EdgeLightPosition::TOP_LEFT;
+    if (position->IsNumber()) {
+        int32_t posValue = position->ToNumber<int32_t>();
+        if (posValue >= static_cast<int32_t>(NG::EdgeLightPosition::TOP_LEFT) &&
+            posValue <= static_cast<int32_t>(NG::EdgeLightPosition::RIGHT)) {
+            edgeLightPosition = static_cast<NG::EdgeLightPosition>(posValue);
+        }
+    }
+    param.edgeLightPosition = edgeLightPosition;
+
+    auto color = jsObj->GetProperty("color");
+    Color edgeLightColor = Color::WHITE;
+    if (JSViewAbstract::ParseJsColor(color, edgeLightColor)) {
+        param.color = edgeLightColor;
+    } else {
+        param.color = Color::WHITE;
     }
 }
 } // namespace
@@ -3956,6 +4008,9 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
 
 DepthVector3 JSViewAbstract::ParseDepthVector3(const JSRef<JSVal>& vectorValue)
 {
+    if (!vectorValue->IsObject()) {
+        return DepthVector3();
+    }
     auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     DepthVector3 vector;
     auto xValue = vectorObj->GetProperty("x");
@@ -6227,6 +6282,25 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::JSEdgeLight(const JSCallbackInfo& info)
+{
+    auto jsVal = info[0];
+    if (!jsVal->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetEdgeLightParam(std::nullopt);
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
+    NG::EdgeLightParam param {
+        .edgeLightPosition = NG::EdgeLightPosition::TOP_LEFT,
+        .length = CalcDimension(),
+        .intensity = 1.0f,
+        .thickness = CalcDimension(),
+        .color = Color::WHITE 
+    };
+    ParseEdgeLightParam(jsObj, param);
+    ViewAbstractModel::GetInstance()->SetEdgeLightParam(param);
+}
+
 bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
     std::string& resName, bool isParseType)
 {
@@ -6824,7 +6898,6 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     if (!resourceWrapper) {
         return false;
     }
-
     if (resIdNum == -1) {
         return ParseResourceToDoubleByName(jsObj, resType, resourceWrapper, result);
     }
@@ -10144,11 +10217,14 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod(
         "shouldBuiltInRecognizerParallelWith", &JSViewAbstract::JsShouldBuiltInRecognizerParallelWith);
     JSClass<JSViewAbstract>::StaticMethod(
+        "shouldRecognizerParallelWith", &JSViewAbstract::JsShouldRecognizerParallelWith);
+    JSClass<JSViewAbstract>::StaticMethod(
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchTestDone", &JSViewAbstract::JsOnTouchTestDone);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("enableClickSoundEffect", &JSViewAbstract::JsSetEnableClickSoundEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSViewAbstract>::StaticMethod("inspectorLabel", &JSViewAbstract::JsInspectorLabel);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("onSizeChange", &JSViewAbstract::JsOnSizeChange);
@@ -10186,6 +10262,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod(
         "onVisibleAreaApproximateChange", &JSViewAbstract::JsOnVisibleAreaApproximateChange);
+    JSClass<JSViewAbstract>::StaticMethod("smartGestureShortcut", &JSViewAbstract::JsSmartGestureShortcut);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
@@ -10195,6 +10272,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("dragPreview", &JSViewAbstract::JsDragPreview);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityTextHint", &JSViewAbstract::JsAccessibilityTextHint);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityActionOptions", &JSViewAbstract::JsAccessibilityActionOptions);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityCustomActions", &JSViewAbstract::JsAccessibilityCustomActions);
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
@@ -10233,6 +10311,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("allowForceDark", &JSViewAbstract::JSAllowForceDark);
     JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
+
+    JSClass<JSViewAbstract>::StaticMethod("edgeLight", &JSViewAbstract::JSEdgeLight);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -10811,11 +10891,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -10834,11 +10911,8 @@ bool JSViewAbstract::ParseShadowProps(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    double radius = 0.0;
+    double radius = -1.0;
     ParseShadowPropsUpdate(jsObj, radius, shadow);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(jsObj, shadow);
 
@@ -11628,6 +11702,28 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
         std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
+void JSViewAbstract::JsShouldRecognizerParallelWith(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetShouldRecognizerParallelWith(nullptr);
+        return;
+    }
+
+    auto jsParallelGestureToFunc =
+        AceType::MakeRefPtr<JsShouldBuiltInRecognizerParallelWithFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto shouldRecognizerParallelWithFunc =
+        [execCtx = info.GetExecutionContext(), func = jsParallelGestureToFunc, node = frameNode](
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        ACE_SCORING_EVENT("shouldRecognizerParallelWith");
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(current, others);
+    };
+    ViewAbstractModel::GetInstance()->SetShouldRecognizerParallelWith(std::move(shouldRecognizerParallelWithFunc));
+}
+
 void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
@@ -11835,6 +11931,41 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
     };
     ViewAbstractModel::GetInstance()->SetOnVisibleAreaApproximateChange(
         std::move(onVisibleChange), ratioVec, expectedUpdateInterval, measureFromViewport);
+}
+
+void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
+{
+    if (info.Length() != PARAMETER_LENGTH_FIRST) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    auto options = JSRef<JSObject>::Cast(info[0]);
+    auto actionValue = options->GetProperty("action");
+    auto enabledValue = options->GetProperty("enabled");
+    if (!actionValue->IsNumber() || !enabledValue->IsBoolean()) {
+        return;
+    }
+
+    int32_t action = actionValue->ToNumber<int32_t>();
+    if (action != SMART_GESTURE_SHORTCUT_PRIMARY) {
+        return;
+    }
+    bool enabled = enabledValue->ToBoolean();
+    bool selectable = false;
+    auto selectableValue = options->GetProperty("selectable");
+    if (selectableValue->IsBoolean()) {
+        selectable = selectableValue->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetSmartGestureShortcut(action, enabled, selectable);
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
@@ -12161,15 +12292,18 @@ void JSViewAbstract::JSUseUnion(const JSCallbackInfo& info)
         useUnion = argUnion->ToBoolean();
     }
     JSRef<JSVal> jsVal = info[1];
+    NG::CenterGravityOptions param {
+        .gravityCenter = false,
+        .gravityIntensity = 0.0f
+    };
+    auto intensity = 0.0;
     if (jsVal->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
-        NG::CenterGravityOptions param;
-        auto intensity = 0.0;
         ParseJsBool(jsObj->GetProperty("gravityCenter"), param.gravityCenter);
         ParseJsDouble(jsObj->GetProperty("gravityIntensity"), intensity);
         param.gravityIntensity = intensity;
-        ViewAbstractModel::GetInstance()->SetCenterGravityOptions(param);
     }
+    ViewAbstractModel::GetInstance()->SetCenterGravityOptions(param);
     ViewAbstractModel::GetInstance()->SetUseUnion(useUnion);
 }
 
@@ -13063,6 +13197,23 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetDebugLine(debugLine);
+}
+
+void JSViewAbstract::JsInspectorLabel(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetInspectorLabel("");
+        return;
+    }
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string inspectorLabel;
+    if (!ParseJsString(jsValue, inspectorLabel)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetInspectorLabel(inspectorLabel);
 }
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)

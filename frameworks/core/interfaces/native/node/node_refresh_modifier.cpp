@@ -35,11 +35,13 @@ ArkUI_Bool GetRefreshing(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(RefreshModelNG::GetRefreshing(frameNode));
 }
 
-void SetRefreshOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+void SetRefreshOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_VoidPtr resObjRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefreshModelNG::SetRefreshOffset(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    RefreshModelNG::CreateWithResourceObjRefreshOffset(
+        frameNode, AceType::Claim(static_cast<ResourceObject*>(resObjRawPtr)));
 }
 
 void ResetRefreshOffset(ArkUINodeHandle node)
@@ -47,6 +49,7 @@ void ResetRefreshOffset(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefreshModelNG::SetRefreshOffset(frameNode, Dimension(0.0f, DimensionUnit::VP));
+    RefreshModelNG::CreateWithResourceObjRefreshOffset(frameNode, nullptr);
 }
 
 void SetPullToRefresh(ArkUINodeHandle node, ArkUI_Bool value)
@@ -194,20 +197,24 @@ void ResetRefreshOnOffsetChangeCallback(ArkUINodeHandle node)
     RefreshModelNG::SetOnOffsetChange(frameNode, nullptr);
 }
 
-void SetMaxPullDownDistance(ArkUINodeHandle node, ArkUI_Float32 distance)
+void SetMaxPullDownDistance(ArkUINodeHandle node, ArkUI_Float32 distance, ArkUI_VoidPtr resObjRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<float> distanceValue = std::max(distance, 0.0f);
     RefreshModelNG::SetMaxPullDownDistance(frameNode, distanceValue);
+    RefreshModelNG::CreateWithResourceObjMaxPullDownDistance(
+        frameNode, AceType::Claim(static_cast<ResourceObject*>(resObjRawPtr)));
 }
 
-void ResetMaxPullDownDistance(ArkUINodeHandle node)
+void ResetMaxPullDownDistance(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<float> distanceValue = std::nullopt;
     RefreshModelNG::SetMaxPullDownDistance(frameNode, distanceValue);
+    RefreshModelNG::CreateWithResourceObjMaxPullDownDistance(
+        frameNode, AceType::Claim(static_cast<ResourceObject*>(resObjRawPtr)));
 }
 
 ArkUI_Float32 GetMaxPullDownDistance(ArkUINodeHandle node)

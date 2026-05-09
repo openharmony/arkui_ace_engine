@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 
+#include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
@@ -94,6 +95,8 @@ void GestureModelNG::Finish()
 
     GestureEventFunc clickEvent = NG::GetTapGestureEventFunc(gesture);
     if (clickEvent) {
+        auto commonClickEvent = clickEvent;
+        gestureEventHub->SetCommonClickEvent(std::move(commonClickEvent));
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(true, false);

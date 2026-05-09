@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
 #include "image_bitmap_peer_impl.h"
 #include "offscreen_canvas_rendering_context2d_peer_impl.h"

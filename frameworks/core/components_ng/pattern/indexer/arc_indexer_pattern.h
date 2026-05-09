@@ -23,12 +23,20 @@
 #include "core/components_ng/pattern/indexer/arc_indexer_layout_property.h"
 #include "core/components_ng/pattern/indexer/arc_indexer_paint_property.h"
 
+namespace OHOS::Ace {
+class AccessibilitySAObserverCallback;
+}
+
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class ArcIndexerPattern : public IndexerPattern {
     DECLARE_ACE_TYPE(ArcIndexerPattern, IndexerPattern);
 public:
     ArcIndexerPattern() = default;
-    ~ArcIndexerPattern() override = default;
+    ~ArcIndexerPattern() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {

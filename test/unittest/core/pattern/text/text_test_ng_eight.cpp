@@ -14,6 +14,7 @@
  */
 
 #include "text_base.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
@@ -152,6 +153,48 @@ HWTEST_F(TextTestNgEight, ToJsonValue007, TestSize.Level1)
     pattern->SetTextDetectEnable(true);
     pattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("enableDataDetector"), "true");
+}
+
+/**
+ * @tc.name: PreviewMenuToJsonValue001
+ * @tc.desc: Test textPattern ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEight, PreviewMenuToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"");
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto json = JsonUtil::Create(true);
+    /**
+     * @tc.steps: step2. Do BindPreviewMenu.
+     */
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+    SelectMenuParam menuParam;
+    pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    pattern->ToJsonValue(json, filter);
+    std::string bindSelectionMenuStr = json->GetValue("bindSelectionMenu")->GetString();
+    EXPECT_FALSE(bindSelectionMenuStr.empty());
+    EXPECT_EQ(bindSelectionMenuStr, "[{\"spanType\":1,\"responseType\":1,\"menuType\":1}]");
 }
 
 /**
@@ -419,6 +462,7 @@ HWTEST_F(TextTestNgEight, HandleSingleClickEvent001, TestSize.Level1)
     pattern->isMousePressed_ = true;
     pattern->clickedSpanPosition_ = -1;
     pattern->HandleSingleClickEvent(info);
+    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
     EXPECT_TRUE(pattern->selectOverlay_->originalMenuIsShow_);
 }
 
@@ -770,7 +814,7 @@ HWTEST_F(TextTestNgEight, InitCopyOption001, TestSize.Level1)
     RefPtr<GestureEventHub> gestureEventHub =
         AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto longPressCallback = [](GestureEvent& info) {};
-    pattern->longPressEvent_ = AIWriteAdapter::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    pattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
     pattern->hasSpanStringLongPressEvent_ = false;
     pattern->onClick_ = [](GestureEvent& info) {};
     pattern->textDetectEnable_ = true;

@@ -49,6 +49,8 @@ public:
     static void JSSetImageRawDataCacheSize(const JSCallbackInfo& info);
     static void JSSetCustomKeyboardContinueFeature(const JSCallbackInfo& info);
     static void JSIsEasySplit(const JSCallbackInfo& info);
+    static void JSSetTextSelectionClearPolicy(const JSCallbackInfo& info);
+
 private:
     static void AnimateToInner(const JSCallbackInfo& info, bool immediately);
 };

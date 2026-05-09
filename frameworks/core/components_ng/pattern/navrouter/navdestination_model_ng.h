@@ -65,7 +65,9 @@ public:
     void SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& popCallback) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetHideToolBar(bool hideToolBar, bool animated) override;
+    void SetFullScreenOverlay(std::optional<bool> fullScreenOverlay) override;
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
+    static void SetFullScreenOverlay(FrameNode* frameNode, std::optional<bool> fullScreenOverlay);
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;

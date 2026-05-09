@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
+#include "core/common/container.h"
 
 #include <algorithm>
 #include <cmath>
@@ -244,7 +245,7 @@ bool CustomPaintPaintMethod::ParseFilter(std::string& filter, std::vector<Filter
 bool CustomPaintPaintMethod::HasShadow() const
 {
     return !(NearZero(state_.shadow.GetOffset().GetX()) && NearZero(state_.shadow.GetOffset().GetY()) &&
-             NearZero(state_.shadow.GetBlurRadius()));
+        LessOrEqual(state_.shadow.GetBlurRadius(), 0.0f));
 }
 
 void CustomPaintPaintMethod::UpdateLineDash(RSPen& pen)

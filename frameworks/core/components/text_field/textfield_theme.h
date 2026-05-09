@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_FIELD_TEXTFIELD_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"

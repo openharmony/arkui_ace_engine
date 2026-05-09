@@ -1570,6 +1570,9 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level0)
  */
 HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level0)
 {
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
     ASSERT_NE(themeConstants, nullptr);
     auto progressThemeWrapper = ProgressThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants);
@@ -1600,7 +1603,6 @@ HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level0)
     ASSERT_NE(tokenTheme, nullptr);
     progressThemeWrapper->ApplyTokenTheme(*tokenTheme);
     EXPECT_EQ(progressTheme->GetLoadingColor(), colors[TokenColors::ICON_SECONDARY]);
-    EXPECT_EQ(progressTheme->GetCapsuleBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
     EXPECT_EQ(progressTheme->GetRingProgressBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
     EXPECT_EQ(progressTheme->GetTrackBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
     EXPECT_EQ(progressTheme->GetCapsuleSelectColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
@@ -2152,11 +2154,9 @@ HWTEST_F(ProgressTestNg, ProgressPatternOnColorConfigurationUpdateTest001, TestS
     paintProperty->UpdateProgressType(ProgressType::CAPSULE);
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto pipeline = host->GetContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<ProgressTheme>();
+    auto theme = host->GetTheme<ProgressTheme>(true);
     ASSERT_NE(theme, nullptr);
-    Color testColor = theme->GetCapsuleParseFailedSelectColor();
+    Color testColor = theme->GetCapsuleSelectColor();
     pattern->OnColorConfigurationUpdate();
     paintProperty->UpdateCapsuleStyleFontColorSetByUser(true);
     pattern->OnColorConfigurationUpdate();

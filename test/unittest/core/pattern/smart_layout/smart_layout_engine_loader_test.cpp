@@ -72,6 +72,7 @@ public:
     {
         return SmartLayoutRect();
     }
+    void SetAvoidSafeArea(bool avoid) override {}
     LayoutContext& GetContext() override
     {
         return context_;

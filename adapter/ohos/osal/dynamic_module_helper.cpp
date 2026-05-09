@@ -68,6 +68,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Checkbox", "checkbox" },
         { "CheckboxGroup", "checkbox" },
         { "ColumnSplit", "linearsplit" },
+        { "ContainerReader", "containerreader" },
         { "Counter", "counter" },
         { "DataPanel", "datapanel" },
         {"TextClock", "textclock"},
@@ -93,9 +94,11 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "TimePicker", "timepicker" },
         { "TimePickerDialog", "timepicker" },
         { "WaterFlow", "waterflow" },
+        { "LazyVWaterFlowLayout", "lazywaterflowlayout" },
         { "Menu", "menu" },
         { "MenuItem", "menu" },
         { "MenuItemGroup", "menu" },
+        { "LazyColumnLayout", "lazycolumnlayout" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

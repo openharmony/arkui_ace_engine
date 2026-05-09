@@ -14,6 +14,7 @@
  */
 
 #include "core/common/dynamic_module_helper.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/interfaces/native/node/rating_modifier.h"

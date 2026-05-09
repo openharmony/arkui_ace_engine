@@ -15,7 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_impl.h"
@@ -105,7 +107,7 @@ void SetColumnSplitClip(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::SetClipEdge(frameNode, value);
+    ViewAbstract::SetClipEdge(frameNode, value);
 }
 
 void SetColumnSplitClipShape(ArkUINodeHandle node, void* value)
@@ -114,7 +116,7 @@ void SetColumnSplitClipShape(ArkUINodeHandle node, void* value)
     CHECK_NULL_VOID(frameNode);
     auto clipShape = AceType::Claim(reinterpret_cast<BasicShape*>(value));
     CHECK_NULL_VOID(clipShape);
-    ViewAbstractModelNG::SetClipShape(frameNode, clipShape);
+    ViewAbstract::SetClipShape(frameNode, clipShape);
 }
 
 #ifndef CROSS_PLATFORM

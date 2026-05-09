@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
 
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace::NG {
 float XComponentUtils::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)

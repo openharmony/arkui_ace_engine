@@ -88,6 +88,8 @@ public:
     static void SetSelectDetectEnable(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
+    static bool BindPreviewMenu(const JSRef<JSVal> argsMenuOptions, NG::TextResponseType responseType,
+        NG::TextSpanType textSpanType, std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam);

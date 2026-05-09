@@ -15,6 +15,7 @@
 
 #include "core/components/select/select_element.h"
 
+#include "core/components/text/text_component.h"
 #include "core/components/box/render_box.h"
 #include "core/components/select/render_select.h"
 #include "core/components/text/render_text.h"

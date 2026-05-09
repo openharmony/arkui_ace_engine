@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "ui/properties/ng/measure_property.h"
+#include "core/components_ng/property/measure_type.h"
 
 namespace OHOS::Ace {
 class JsonValue;
@@ -29,13 +30,6 @@ class JsonValue;
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-
-enum class MeasureType {
-    MATCH_PARENT,
-    MATCH_CONTENT,
-    MATCH_PARENT_CROSS_AXIS,
-    MATCH_PARENT_MAIN_AXIS,
-};
 
 class ACE_FORCE_EXPORT CalcSize {
 public:

@@ -215,10 +215,27 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
     ListItemGroupModel::GetInstance()->Create(options);
 
     Dimension space;
-    if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsNonNegative()) {
-        ListItemGroupModel::GetInstance()->SetSpace(space);
+    RefPtr<ResourceObject> resObj;
+    auto spaceWidthValue = obj->GetProperty("spaceWidth");
+    auto spaceValue = obj->GetProperty("space");
+    if (spaceValue->IsUndefined() || spaceValue->IsNull()) {
+        ListItemGroupModel::GetInstance()->ResetSpace();
     }
-
+    if (spaceWidthValue->IsUndefined() || spaceWidthValue->IsNull()) {
+        ListItemGroupModel::GetInstance()->ResetSpaceWidth();
+    }
+    if (obj->HasProperty("spaceWidth") && !spaceWidthValue->IsUndefined() && !spaceWidthValue->IsNull()) {
+        if (ConvertFromJSValue(spaceWidthValue, space, resObj)) {
+            ListItemGroupModel::GetInstance()->SetSpaceWidth(space);
+        } else {
+            ListItemGroupModel::GetInstance()->ResetSpaceWidth();
+        }
+    } else if (ConvertFromJSValue(spaceValue, space) && space.IsNonNegative()) {
+        ListItemGroupModel::GetInstance()->SetSpace(space);
+    } else {
+        ListItemGroupModel::GetInstance()->ResetSpace();
+    }
+    ListItemGroupModel::GetInstance()->CreateWithResourceObjSpace(resObj);
     if (obj->HasProperty("headerComponent")) {
         auto headerComponentObject = obj->GetProperty("headerComponent");
         if (!ParseHeaderAndFooterContent(headerComponentObject, true)) {

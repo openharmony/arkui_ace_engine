@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_item_pattern.h"
@@ -771,6 +772,9 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
 
 void TabContentModelStatic::InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
     CHECK_NULL_VOID(textLayoutProperty);
     auto& textStyle = textLayoutProperty->GetTextLineStyle();
     CHECK_NULL_VOID(textStyle);

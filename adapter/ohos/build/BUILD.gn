@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 component_modules = [
+  "container_reader",
   "dynamiclayout",
   "counter",
   "data_panel",
@@ -27,6 +28,7 @@ component_modules = [
   "qrcode",
   "rating",
   "waterflow",
+  "lazy_waterflow_layout",
   "linear_split",
   "side_bar",
   "marquee",
@@ -40,6 +42,7 @@ component_modules = [
   "symbol",
   "rich_editor",
   "menu",
+  "lazy_column_layout",
 ]
 
 if (!ace_engine_feature_wearable) {

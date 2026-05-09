@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/marquee_modifier.h"
+#include "core/common/container.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
 #ifndef CROSS_PLATFORM

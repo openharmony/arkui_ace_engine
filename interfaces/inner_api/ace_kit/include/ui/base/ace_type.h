@@ -53,13 +53,13 @@ class AceType : public virtual TypeInfoBase, public virtual Referenced {
 public:
     ~AceType() override = default;
 
-    template<class T>
-    static T* DynamicCast(AceType* rawPtr)
+    template<class T, class O>
+    static T* DynamicCast(O* rawPtr)
     {
         return TypeInfoHelper::DynamicCast<T>(rawPtr);
     }
-    template<class T>
-    static const T* DynamicCast(const AceType* rawPtr)
+    template<class T, class O>
+    static const T* DynamicCast(const O* rawPtr)
     {
         return TypeInfoHelper::DynamicCast<T>(rawPtr);
     }
@@ -69,6 +69,11 @@ public:
         return Claim(DynamicCast<T>(RawPtr(ptr)));
     }
     template<class T, class O>
+    static RefPtr<T> DynamicCast(RefPtr<O>&& ptr)
+    {
+        return Transfer<T>(ptr);
+    }
+    template<class T, class O>
     static WeakPtr<T> DynamicCast(const WeakPtr<O>& weak)
     {
         auto ptr = weak.Upgrade();
@@ -76,7 +81,8 @@ public:
     }
 
     // Get type info by instance.
-    static AceType::IdType TypeId(const AceType* rawPtr)
+    template<class T>
+    static AceType::IdType TypeId(const T* rawPtr)
     {
         return TypeInfoHelper::TypeId(rawPtr);
     }
@@ -85,11 +91,13 @@ public:
     {
         return TypeId(AceType::RawPtr(ptr));
     }
-    static AceType::IdType TypeId(const AceType& instance)
+    template<class T, std::enable_if_t<!std::is_pointer_v<T>, bool> = true>
+    static AceType::IdType TypeId(const T& instance)
     {
         return TypeInfoHelper::TypeId(instance);
     }
-    static const char* TypeName(const AceType* rawPtr)
+    template<class T>
+    static const char* TypeName(const T* rawPtr)
     {
         return TypeInfoHelper::TypeName(rawPtr);
     }
@@ -98,7 +106,8 @@ public:
     {
         return TypeName(AceType::RawPtr(ptr));
     }
-    static const char* TypeName(const AceType& instance)
+    template<class T, std::enable_if_t<!std::is_pointer_v<T>, bool> = true>
+    static const char* TypeName(const T& instance)
     {
         return TypeInfoHelper::TypeName(instance);
     }
@@ -116,15 +125,15 @@ public:
     }
 
     // Check whether instance is the specified type
-    template<class T>
-    static bool InstanceOf(const AceType* rawPtr)
+    template<class T, class O>
+    static bool InstanceOf(const O* rawPtr)
     {
         return TypeInfoHelper::InstanceOf<T>(rawPtr);
     }
-    template<class T>
-    static bool InstanceOf(const AceType& instance)
+    template<class T, class O, std::enable_if_t<!std::is_pointer_v<O>, bool> = true>
+    static bool InstanceOf(const O& instance)
     {
-        return TypeInfoHelper::InstanceOf<T>(&instance);
+        return TypeInfoHelper::InstanceOf<T>(instance);
     }
     template<class T, class O>
     static bool InstanceOf(const RefPtr<O>& ptr)

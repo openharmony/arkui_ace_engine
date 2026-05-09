@@ -25,6 +25,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -181,7 +182,7 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     
     auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();

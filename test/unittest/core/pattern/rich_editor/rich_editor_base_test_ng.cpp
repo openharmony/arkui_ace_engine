@@ -1390,4 +1390,49 @@ HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest002, TestSize.Level1)
     ret = pattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_SUCCESS);
 }
+
+/**
+ * @tc.name: OnInjectionEventTest003
+ * @tc.desc: Test RichEditorPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create richEditor node
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get RichEditorPattern
+     */
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    std::string command = R"()";
+    auto ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({)";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"addText", "params":{"value":"222222222222"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"selectText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"selectText", "selectionStart":-1, "selectionEnd":-1})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"clear"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG

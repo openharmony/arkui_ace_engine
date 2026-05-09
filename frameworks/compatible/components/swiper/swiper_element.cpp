@@ -16,6 +16,7 @@
 #include "compatible/components/swiper/swiper_element.h"
 
 #include "compatible/components/swiper/render_swiper.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 namespace {

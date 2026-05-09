@@ -56,7 +56,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     public defaultConsumerV2__?: Map<string, string>;
     public connectConsumerV2__?: Map<string, string>;
 
-    private myReusePool__ : __ReusePool  | undefined;
+    private myReusePool__ : __ReusePool_Internal__  | undefined;
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
 
     public hasBeenRecycled_: boolean = false;
@@ -159,6 +159,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
         stateMgmtConsole.debug(`${this.debugInfo__()}: @ComponentV2 freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
 
         this.__customComponentExecuteInit__Internal();
+        this.__isCustomEnvConstructionFinalized__Internal = true;
     }
 
     public debugInfo__(): string {
@@ -277,6 +278,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // Freezes the component when it is moved to the recycle pool to prevent elementId updates
     private freezeRecycledComponent(): void {
         this.activeCount_--;
+        if (this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+            this.__customComponentExecuteInactive__Internal();
+        }
         ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
     }
 
@@ -296,6 +300,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             });
         }
         this.elmtIdsDelayedUpdate.clear();
+        if (this.activeCount_ === 1 && this.__needToActiveOrInactiveLifecycle__Internal) {
+            this.__customComponentExecuteActive__Internal();
+        }
         ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
     }
 
@@ -428,6 +435,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             this.parent_.removeChild(this);
         }
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
+
+        if (this.__anonymousEnvMonitorFuncMap__Internal) {
+          this.__anonymousEnvMonitorFuncMap__Internal.forEach((entry, key) => {
+            ObserveV2.getObserve().clearMonitorPath(entry.envValue, simpleEnvMetaMap[key].prop, entry.anonymousMonitorFunc);
+          });
+          this.__anonymousEnvMonitorFuncMap__Internal.clear();
+        }
         // if memory watch register the callback func, then report such information to memory watch
         // when custom node destroyed
         if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
@@ -824,15 +838,30 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // and `aboutToReuseInternal` for @ReusableV2 components.
     public setActiveInternal(active: boolean, isReuse: boolean = false): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
-        stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${this.isCompFreezeAllowed()}`);
-        if (this.isCompFreezeAllowed() && !isReuse) {
+        const isCompFreezeAllowed = this.isCompFreezeAllowed();
+        stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${isCompFreezeAllowed}`);
+        if (!isCompFreezeAllowed && !isReuse && this.__needToActiveOrInactiveLifecycle__Internal) {
+            // Non-freeze state: use __activeCountForNonFreeze__Internal
+            // Only execute when @Active/@Inactive decorator is used for performance
+            const oldCount = this.__activeCountForNonFreeze__Internal;
+            this.setActiveCountForNonFreeze(active);
+            this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount);
+        }
+        if (isCompFreezeAllowed && !isReuse) {
             stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+            const oldCount = this.activeCount_;
             this.setActiveCount(active);
             if (this.isViewActive()) {
                 this.performDelayedUpdate();
                 ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+                if (oldCount === 0 && this.activeCount_ > 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+                    this.__customComponentExecuteActive__Internal();
+                }
             } else {
                 ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
+                if (oldCount > 0 && this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+                    this.__customComponentExecuteInactive__Internal();
+                }
             }
         }
         // Propagate state to all child View
@@ -956,7 +985,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // GLOBAL POOL PATH
     // Component may come from a different parent entirely,
     // so we need to re-parent and update its id_.
-    private reparentFromGlobalPool(recycledNode: ViewV2, elmtId: number, globalPool: __ReusePool): void {
+    private reparentFromGlobalPool(recycledNode: ViewV2, elmtId: number, globalPool: __ReusePool_Internal__): void {
         const oldParent = recycledNode.getParent?.();
         const oldElmtId = recycledNode.id__();
 
@@ -1013,7 +1042,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     	// In aliasing cases, matching reuseId strings alone can cause duplicates,
     	// so we use the constructor reference to uniquely store/retrieve pool keys.
         if (globalPool && componentClass && (!reuseId || reuseId === componentClass.name)) {
-            __ReusePool.registerCtorName(componentClass, reuseId);
+            __ReusePool_Internal__.registerCtorName(componentClass, reuseId);
         }
 
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1240,7 +1269,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
     public __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined {
         const meta = this[ObserveV2.V2_DECO_META];
-        if (!meta || !Object.prototype.hasOwnProperty.call(meta, propertyName)) {
+        const methodMeta = this[ObserveV2.V2_DECO_METHOD_META];
+        const isInMeta = meta && Object.prototype.hasOwnProperty.call(meta, propertyName);
+        const isInMethodMeta = methodMeta && Object.prototype.hasOwnProperty.call(methodMeta, propertyName);
+        if (!isInMeta && !isInMethodMeta) {
             return undefined;
         }
         const prop = Reflect.get(this, propertyName);

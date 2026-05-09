@@ -15,12 +15,13 @@
 
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 
+#include <array>
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -34,36 +35,26 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<GridModel> GridModel::instance_ = nullptr;
-std::mutex GridModel::mutex_;
-
 GridModel* GridModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::GridModelNG());
+    static NG::GridModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::GridModelNG());
-            } else {
-                instance_.reset(new Framework::GridModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::GridModelNG instance;
+        return &instance;
+    } else {
+        static Framework::GridModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
-const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
-const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
-    FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 const size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
 const size_t GRID_ITEM_RECT_RESULT_LENGTH = 4;
 
@@ -468,6 +459,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
     JSClass<JSGrid>::StaticMethod("editModeOptions", &JSGrid::SetEditModeOptions);
+    JSClass<JSGrid>::StaticMethod("enableEditMode", &JSGrid::JsEnableEditMode, opt);
     JSClass<JSGrid>::StaticMethod("multiSelectable", &JSGrid::SetMultiSelectable, opt);
     JSClass<JSGrid>::StaticMethod("maxCount", &JSGrid::SetMaxCount, opt);
     JSClass<JSGrid>::StaticMethod("minCount", &JSGrid::SetMinCount, opt);
@@ -525,10 +517,13 @@ void JSGrid::SetScrollBarColor(const JSCallbackInfo& info)
 
 void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 {
-    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    RefPtr<ResourceObject> resObj;
+    auto scrollWidthValue = scrollWidth[0];
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth, resObj);
     if (!scrollBarWidth.empty()) {
         GridModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
     }
+    GridModel::GetInstance()->CreateWithResourceObjScrollBarWidth(resObj);
 }
 
 void JSGrid::SetCachedCount(const JSCallbackInfo& info)
@@ -564,6 +559,41 @@ void JSGrid::SetEditModeOptions(const JSCallbackInfo& info)
     NG::EditModeOptions options;
     JSScrollable::ParseEditModeOptions(info, options);
     GridModel::GetInstance()->SetEditModeOptions(options);
+}
+
+void JSGrid::JsEnableEditMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool enableEditMode = false;
+    JSRef<JSVal> changeEventVal;
+    auto enableVal = info[0];
+    if (enableVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(enableVal);
+        enableVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+    if (enableVal->IsBoolean()) {
+        enableEditMode = enableVal->ToBoolean();
+    }
+    GridModel::GetInstance()->SetEnableEditMode(enableEditMode);
+
+    if (changeEventVal->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                               bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Grid.EnableEditModeChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(1, &newJSVal);
+        };
+        GridModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
+    }
 }
 
 void JSGrid::SetMaxCount(const JSCallbackInfo& info)
@@ -622,6 +652,12 @@ void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 
 void JSGrid::SetLayoutDirection(int32_t value)
 {
+    static constexpr std::array<FlexDirection, 4> LAYOUT_DIRECTION = {
+        FlexDirection::ROW,
+        FlexDirection::COLUMN,
+        FlexDirection::ROW_REVERSE,
+        FlexDirection::COLUMN_REVERSE
+    };
     if (value < 0 || value >= static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
         return;
     }

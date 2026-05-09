@@ -65,6 +65,8 @@ struct ArkUI_ParallelInnerGestureEvent {
     int32_t count;
 };
 
+struct ArkUI_ParallelGestureEvent : public ArkUI_ParallelInnerGestureEvent {};
+
 #endif
 
 namespace OHOS::Ace::GestureModel {
@@ -112,6 +114,9 @@ int32_t SetGestureInterrupterToNodeWithUserData(ArkUI_NodeHandle node, void* use
 
 int32_t SetInnerGestureParallelTo(ArkUI_NodeHandle node, void* userData,
     ArkUI_GestureRecognizer* (*parallelInnerGesture)(ArkUI_ParallelInnerGestureEvent* event));
+
+ArkUI_ErrorCode SetGestureParallelTo(ArkUI_NodeHandle node, void* userData,
+    ArkUI_GestureRecognizer* (*parallelGesture)(ArkUI_ParallelGestureEvent* event));
 
 }; // namespace OHOS::Ace::GestureModel
 #endif // INTERFACES_NATIVE_NODE_GESTURE_IMPL_H

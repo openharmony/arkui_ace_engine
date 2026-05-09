@@ -21,13 +21,13 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/common/resource/resource_object.h"
+#include "ui/properties/blur_style_option.h"
 #include "ui/properties/ui_material.h"
 
 #define ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(name)                                   \

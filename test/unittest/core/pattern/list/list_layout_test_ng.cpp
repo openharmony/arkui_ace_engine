@@ -19,6 +19,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -714,6 +715,44 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
     item2Rect = GetChildRect(group2, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
+}
+
+/**
+ * @tc.name: ContentOffsetStackFromEnd001
+ * @tc.desc: Test ListItemGroup sticky header position when List sets stackFromEnd and contentEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ContentOffsetStackFromEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create stackFromEnd List with ListItemGroup and contentEndOffset.
+     */
+    const int32_t groupNumber = 5;
+    const float contentEndOffset = 50.0f;
+    const float expectedHeaderTop = 0.0f;
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetContentEndOffset(contentEndOffset);
+    model.SetSticky(V2::StickyStyle::HEADER);
+    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. jump to the first item in a non-tail group.
+     * @tc.expected: sticky header position is not affected by contentEndOffset.
+     */
+    JumpToItemInGroup(groupNumber - 2, 0, false, ScrollAlign::START);
+    auto group = GetChildFrameNode(frameNode_, groupNumber - 2);
+    ASSERT_NE(group, nullptr);
+    auto groupPos = group->GetGeometryNode()->GetFrameRect().Top();
+    auto headerRect = GetChildRect(group, 0);
+    EXPECT_EQ(headerRect.Top() + groupPos, expectedHeaderTop);
+
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
+    group = GetChildFrameNode(frameNode_, groupNumber - 2);
+    groupPos = group->GetGeometryNode()->GetFrameRect().Top();
+    headerRect = GetChildRect(group, 0);
+    EXPECT_EQ(headerRect.Top() + groupPos, expectedHeaderTop);
 }
 
 /**

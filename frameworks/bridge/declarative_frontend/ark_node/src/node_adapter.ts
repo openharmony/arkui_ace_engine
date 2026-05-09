@@ -56,7 +56,7 @@ class NodeAdapter {
             getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this),
                 'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
         }
-        let hostNode = this.attachedNodeRef_.deref();
+        let hostNode = this.attachedNodeRef_?.deref();
         if (hostNode !== undefined) {
             NodeAdapter.detachNodeAdapter(hostNode);
         }
@@ -149,7 +149,7 @@ class NodeAdapter {
         if (this.onDetachFromNode !== undefined) {
             this.onDetachFromNode();
         }
-        let attachedNode = this.attachedNodeRef_.deref();
+        let attachedNode = this.attachedNodeRef_?.deref();
         if (attachedNode !== undefined) {
             attachedNode.setAdapterRef(undefined);
         }

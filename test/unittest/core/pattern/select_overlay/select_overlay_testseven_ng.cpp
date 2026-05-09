@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/base/constants.h"
 #undef private
 #undef protected
@@ -1560,5 +1561,137 @@ HWTEST_F(SelectOverlaySevenTestNg, GetIsMenuShowInSubWindow, TestSize.Level1)
 
     auto result = overlayLayoutAlgorithm->GetIsMenuShowInSubWindow(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(result, pattern->GetIsMenuShowInSubWindow());
+}
+
+/**
+ * @tc.name: SelectOverlayNode_UpdateExtensionMenuVisibility001
+ * @tc.desc: Test UpdateExtensionMenuVisibility with extension menu enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlaySevenTestNg, SelectOverlayNode_UpdateExtensionMenuVisibility001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and setup extension menu
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuIsShow = true;
+    infoPtr->menuInfo.menuDisable = false;
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set extension menu state
+     */
+    selectOverlayNode->isExtensionMenu_ = true;
+    selectOverlayNode->extensionMenu_ = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::SELECT_OVERLAY_EXTENSION_MENU));
+
+    /**
+     * @tc.steps: step3. Call UpdateExtensionMenuVisibility
+     * @tc.expected: Should execute SHOW trigger for extension menu
+     */
+    selectOverlayNode->UpdateExtensionMenuVisibility(infoPtr);
+    EXPECT_NE(selectOverlayNode, nullptr);
+    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_UpdateExtensionMenuVisibility002
+ * @tc.desc: Test UpdateExtensionMenuVisibility with menu disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlaySevenTestNg, SelectOverlayNode_UpdateExtensionMenuVisibility002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and setup extension menu
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuIsShow = false;
+    infoPtr->menuInfo.menuDisable = true;
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set extension menu state and backButton
+     */
+    selectOverlayNode->isExtensionMenu_ = true;
+    selectOverlayNode->extensionMenu_ = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::SELECT_OVERLAY_EXTENSION_MENU));
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("BackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->moreOrBackSymbol_ = FrameNode::GetOrCreateFrameNode("Symbol",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+
+    /**
+     * @tc.steps: step3. Call UpdateExtensionMenuVisibility with disabled menu
+     * @tc.expected: Should execute HIDE trigger and remove moreOrBackSymbol
+     */
+    selectOverlayNode->UpdateExtensionMenuVisibility(infoPtr);
+    EXPECT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->moreOrBackSymbol_, nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_UpdateExtensionMenuVisibility003
+ * @tc.desc: Test UpdateExtensionMenuVisibility when extension menu is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlaySevenTestNg, SelectOverlayNode_UpdateExtensionMenuVisibility003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode without extension menu
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->isExtensionMenu_ = false;
+    selectOverlayNode->extensionMenu_ = nullptr;
+
+    /**
+     * @tc.steps: step2. Call UpdateExtensionMenuVisibility with null extension menu
+     * @tc.expected: Should return early without crashing
+     */
+    selectOverlayNode->UpdateExtensionMenuVisibility(infoPtr);
+    EXPECT_NE(selectOverlayNode, nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_CreateSelectOverlayNodeWithThemeScopeId001
+ * @tc.desc: Test CreateSelectOverlayNode sets themeScopeId from caller
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlaySevenTestNg, SelectOverlayNode_CreateSelectOverlayNodeWithThemeScopeId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create caller with specific themeScopeId
+     */
+    SelectOverlayInfo selectInfo;
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    caller->themeScopeId_ = 200;
+    selectInfo.callerFrameNode = caller;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+
+    /**
+     * @tc.steps: step2. Create SelectOverlayNode
+     * @tc.expected: Should inherit themeScopeId from caller
+     */
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify themeScopeId is set correctly
+     */
+    EXPECT_EQ(selectOverlayNode->GetThemeScopeId(), 200);
 }
 } // namespace OHOS::Ace::NG

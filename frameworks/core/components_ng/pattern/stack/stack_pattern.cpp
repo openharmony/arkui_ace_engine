@@ -32,6 +32,40 @@ RefPtr<VerticalOverflowHandler> StackPattern::GetOrCreateVerticalOverflowHandler
     return vOverflowHandler_;
 }
 
+void StackPattern::PostAsyncLoadTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAsyncLoadTask([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->prevMeasureBreak_) {
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    });
+}
+
+bool StackPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (config.skipMeasure && config.skipLayout) {
+        return false;
+    }
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto stackLayoutAlgorithm = DynamicCast<StackLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(stackLayoutAlgorithm, false);
+    prevMeasureBreak_ = stackLayoutAlgorithm->MeasureInNextFrame();
+    if (prevMeasureBreak_) {
+        ACE_SCOPED_TRACE("Stack MeasureInNextFrame");
+        PostAsyncLoadTask();
+    }
+    return true;
+}
+
 void StackPattern::DumpInfo()
 {
     if (vOverflowHandler_) {

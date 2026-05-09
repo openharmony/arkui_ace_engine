@@ -238,6 +238,12 @@ template("build_component_ng") {
           }
         }
       }
+
+      if (defined(config.gesture_debug_boundary_support) &&
+          config.gesture_debug_boundary_support &&
+          defined(invoker.gesture_debug_sources)) {
+        sources += invoker.gesture_debug_sources
+      }
     }
   }
 

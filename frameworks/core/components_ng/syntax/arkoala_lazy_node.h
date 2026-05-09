@@ -72,7 +72,7 @@ public:
         updateRange_ = std::move(update);
     }
 
-    void MoveData(int32_t from, int32_t to) final;
+    void MoveData(int32_t from, int32_t to, bool isNeedUpdate = false) final;
 
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
 

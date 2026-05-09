@@ -8,6 +8,7 @@
 #include "core/common/clipboard/clipboard.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_detector.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 DragDropManager::DragDropManager() = default;

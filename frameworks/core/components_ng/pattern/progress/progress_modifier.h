@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 struct RingProgressData {

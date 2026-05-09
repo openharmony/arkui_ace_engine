@@ -266,6 +266,7 @@ private:
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void InitSurfaceChangedCallback();
     void HandleSurfaceChanged();
     void UpdateToolBarWidth();

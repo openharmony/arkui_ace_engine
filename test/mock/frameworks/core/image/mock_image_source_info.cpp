@@ -118,8 +118,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "internal") {
         return SrcType::INTERNAL;
     } else if (head == "data") {
-        static constexpr char BASE64_PATTERN[] =
-            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP);base64$";
+        static constexpr char BASE64_PATTERN[] = "^data:image/[^;]+;base64$";
         if (IsValidBase64Head(uri, BASE64_PATTERN)) {
             return SrcType::BASE64;
         }
@@ -186,6 +185,9 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
     if (sourceWidth_ != info.sourceWidth_ || sourceHeight_ != info.sourceHeight_) {
         return false;
     }
+    if (reloadKey_ != info.reloadKey_) {
+        return false;
+    }
     return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) && src_ == info.src_ &&
            resourceId_ == info.resourceId_;
 }
@@ -193,6 +195,12 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
 bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
 {
     return !(operator==(info));
+}
+
+bool ImageSourceInfo::IsReloadKeyChanged(const ImageSourceInfo& other) const
+{
+    return src_ == other.src_ && resourceId_ == other.resourceId_ &&
+           reloadKey_ != other.reloadKey_;
 }
 
 void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillColor)
@@ -403,9 +411,38 @@ bool ImageSourceInfo::IsSupportSvg2() const
     return supportSvg2_;
 }
 
+void ImageSourceInfo::SetReloadKey(const std::optional<std::string>& reloadKey)
+{
+    reloadKey_ = reloadKey;
+}
+
+const std::optional<std::string>& ImageSourceInfo::GetReloadKey() const
+{
+    return reloadKey_;
+}
+
+void ImageSourceInfo::SetSkipCacheRead(bool skipCacheRead)
+{
+    skipCacheRead_ = skipCacheRead;
+}
+
+bool ImageSourceInfo::IsSkipCacheRead() const
+{
+    return skipCacheRead_;
+}
+
 ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host)
 {
     ImageSourceInfo imageSourceInfo;
     return imageSourceInfo;
+}
+
+void ImageSourceInfo::SetIsSvgByContent(bool isSvg)
+{
+    if (isSvg_ == isSvg) {
+        return;
+    }
+    isSvg_ = isSvg;
+    GenerateCacheKey();
 }
 } // namespace OHOS::Ace

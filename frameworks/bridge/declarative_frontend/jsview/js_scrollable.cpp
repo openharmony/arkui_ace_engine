@@ -108,16 +108,22 @@ std::string JSScrollable::ParseBarColor(const JSCallbackInfo& info, RefPtr<Resou
     return color.ColorToString();
 }
 
-std::string JSScrollable::ParseBarWidth(const JSCallbackInfo& info)
+std::string JSScrollable::ParseBarWidth(const JSCallbackInfo& info, RefPtr<ResourceObject>& resObj)
 {
     if (info.Length() < 1) {
         return "";
     }
 
     CalcDimension scrollBarWidth;
-    if (!JSViewAbstract::ParseJsDimensionVp(info[0], scrollBarWidth) || info[0]->IsNull() || info[0]->IsUndefined() ||
-        (info[0]->IsString() && info[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0) ||
-        scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
+    bool parsed = false;
+    if (info[0]->IsString() || info[0]->IsNumber()) {
+        parsed = JSViewAbstract::ParseJsDimensionVp(info[0], scrollBarWidth, resObj);
+    } else if (info[0]->IsObject()) {
+        parsed = JSViewAbstract::ParseJsDimensionVpNG(info[0], scrollBarWidth, resObj);
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsNull() || (info[0]->IsString() && info[0]->ToString().empty()) ||
+        !parsed || LessNotEqual(scrollBarWidth.Value(), 0.0) || scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, "");
         auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
@@ -167,6 +173,11 @@ void JSScrollable::ParseEditModeOptions(const JSCallbackInfo& info, NG::EditMode
         auto gatherAnimation = obj->GetProperty("enableGatherSelectedItemsAnimation");
         if (gatherAnimation->IsBoolean()) {
             options.enableGatherSelectedItemsAnimation = gatherAnimation->ToBoolean();
+        }
+
+        auto useDefaultMultiSelectStyle = obj->GetProperty("useDefaultMultiSelectStyle");
+        if (useDefaultMultiSelectStyle->IsBoolean()) {
+            options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle->ToBoolean();
         }
 
         auto getPreviewBadge = obj->GetProperty("onGetPreviewBadge");

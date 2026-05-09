@@ -28,6 +28,7 @@
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"

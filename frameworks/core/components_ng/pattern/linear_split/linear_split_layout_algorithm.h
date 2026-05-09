@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_LAYOUT_ALGORITHM_H
 
-#include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"

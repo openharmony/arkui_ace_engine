@@ -33,6 +33,10 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 
+namespace OHOS::Ace {
+class TextTheme;
+}
+
 namespace OHOS::Ace::NG {
 const std::string DETACHED_FREE_ROOT_PROXY_TAG = "DetachedFreeRootProxy";
 
@@ -48,8 +52,8 @@ class ACE_EXPORT MenuItemPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuItemPattern, Pattern);
 
 public:
-    MenuItemPattern(bool isOptionPattern = false, int index = -1) : index_(index), isOptionPattern_(isOptionPattern) {}
-    ~MenuItemPattern() override = default;
+    MenuItemPattern(bool isOptionPattern = false, int index = -1);
+    ~MenuItemPattern() override;
 
     bool HasHideTask()
     {

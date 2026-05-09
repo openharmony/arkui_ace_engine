@@ -18,6 +18,7 @@
 #include "core/common/builder_util.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,6 +22,11 @@ config("container_scope_config") {
     "$ace_root/frameworks",
     "$ace_root/interfaces/inner_api/ace_kit/include",
   ]
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    defines = [
+      "ENABLE_CONTAINER_SCOPE_TRACKING"
+    ]
+  }
 }
 
 ohos_shared_library("ace_container_scope") {
@@ -47,6 +52,11 @@ ohos_shared_library("ace_container_scope") {
       "-mno-fix-cortex-a53-843419" 
     ]
   }
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    external_deps = [
+      "bounds_checking_function:libsec_static"
+    ]
+  }
 }
 
 ohos_static_library("ace_container_scope_static") {
@@ -55,6 +65,12 @@ ohos_static_library("ace_container_scope_static") {
   configs = [ "$ace_root:ace_config" ]
 
   sources = [ "$ace_root/frameworks/core/common/container_scope.cpp" ]
+
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    external_deps = [
+      "bounds_checking_function:libsec_static"
+    ]
+  }
 }
 
 # build core sources
@@ -317,6 +333,9 @@ template("ace_core_source_set") {
         "components_ng/relaxed_interaction/utils/json_utils.cpp",
         "components_ng/relaxed_interaction/utils/relaxed_event_factory.cpp",
         "components_ng/relaxed_interaction/utils/workflow_dumper.cpp",
+        "components_ng/relaxed_interaction/executors/smart_gesture_executor.cpp",
+        "components_ng/relaxed_interaction/parsers/slide_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/tap_command_parser.cpp",
       ]
     }
 
@@ -876,6 +895,7 @@ template("ace_core_ng_source_set") {
       "components/common/properties/decoration.cpp",
       "components/common/properties/edge.cpp",
       "components/common/properties/motion_path_evaluator.cpp",
+      "components/common/properties/os_content.cpp",
       "components/common/properties/shadow.cpp",
       "components/common/properties/shadow_config.cpp",
       "components/common/properties/text_enums.cpp",
@@ -915,6 +935,10 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_manager_multi_thread.cpp",
       "components/theme/theme_utils.cpp",
       "components/theme/ui_material_theme.cpp",
+      "components/button/button_theme.cpp",
+      "components/rating/rating_theme.cpp",
+      "components/slider/slider_theme.cpp",
+      "components/toggle/toggle_theme.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",
@@ -971,6 +995,9 @@ template("ace_core_ng_source_set") {
         "components_ng/relaxed_interaction/utils/json_utils.cpp",
         "components_ng/relaxed_interaction/utils/relaxed_event_factory.cpp",
         "components_ng/relaxed_interaction/utils/workflow_dumper.cpp",
+        "components_ng/relaxed_interaction/executors/smart_gesture_executor.cpp",
+        "components_ng/relaxed_interaction/parsers/slide_command_parser.cpp",
+        "components_ng/relaxed_interaction/parsers/tap_command_parser.cpp",
       ]
     }
 

@@ -25,6 +25,7 @@
 #define private public
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"

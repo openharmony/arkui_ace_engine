@@ -14,6 +14,7 @@
  */
 
 #include "dynamic_component_renderer_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "accessibility_element_info.h"
 
@@ -29,6 +30,7 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
+#include "session/host/include/session.h"
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
 
@@ -305,8 +307,8 @@ void DynamicComponentRendererImpl::InitUiContent(
 
     DynamicInitialConfig dynamicInitialConfig;
     BuildDynamicInitialConfig(dynamicInitialConfig);
-    uiContent_->InitializeDynamic(dynamicInitialConfig);
-
+    auto connector = GetconnectToRender();
+    uiContent_->InitializeDynamic(dynamicInitialConfig, connector);
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
     if (runtimeContext) {
         auto uiContentImpl = std::static_pointer_cast<UIContentImpl>(uiContent_);
@@ -345,6 +347,21 @@ void DynamicComponentRendererImpl::InitUiContent(
     }
     InitializeDynamicAccessibility();
     rendererDumpInfo_.loadAbcTime = GetCurrentTimestamp();
+}
+
+sptr<IRemoteObject> DynamicComponentRendererImpl::GetconnectToRender()
+{
+    auto hostContainer = Container::GetContainer(hostInstanceId_);
+    CHECK_NULL_RETURN(hostContainer, nullptr);
+    auto pipeline = hostContainer->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    CHECK_NULL_RETURN(rsUIContext, nullptr);
+    return rsUIContext->GetConnectToRender();
 }
 
 void DynamicComponentRendererImpl::RegisterContainerHandler()

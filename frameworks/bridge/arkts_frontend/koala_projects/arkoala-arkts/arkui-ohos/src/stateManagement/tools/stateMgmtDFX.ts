@@ -15,14 +15,14 @@
 import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { DecoratedV1VariableBase, DecoratedV2VariableBase, DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
-import { AceTrace } from '../../base/AceTrace';
+import { AceTrace } from '@aceTrace';
 import { UIUtils } from '../utils';
-import { ExtendableComponent } from '../../component/extendableComponent';
+import { ExtendableComponent } from '@component/extendableComponent';
 import { MutableStateMeta } from '../base/mutableStateMeta';
 import { IObservedObject } from '../decorator';
 import { ElementInfo, DecoratorInfo, ObservedResult } from '../utils';
 import { IncrementalNode } from '@koalaui/runtime';
-import { PeerNode } from '../../PeerNode';
+import { PeerNode } from '@peerNode';
 import { transferTypeName } from '../storage/persistenceV2';
 import { InterfaceProxyHandler, StateMgmtTool } from './arkts';
 import { ObserveWrappedBase } from '../base/observeWrappedBase';
@@ -264,7 +264,9 @@ export class StateMgmtDFX {
     private static dumpObjectProperty(value: Object): DumpObjectType | string {
         const tempObj: DumpObjectType = new Array<[string, Any]>();
         try {
-            let properties: string[] = Object.getOwnPropertyNames(value);
+            let cls = Class.of(value);
+            let properties: string[] = [...reflect.getInstanceFieldsRecursive(cls).map<string>(field => field.getName()),
+                ...reflect.getInstanceGettersRecursive(cls).map<string>(getter => getter.getName().substring('%%get-'.length))];
             properties
                 .slice(0, StateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
                 .forEach((varName: string) => {
@@ -307,7 +309,7 @@ export class StateMgmtDFX {
             }
 
             // Get original object
-            rawValue = UIUtils.getTarget(rawValue);
+            rawValue = UIUtils.getTarget(rawValue as Object) as T;
 
             if (rawValue instanceof Map) {
                 return StateMgmtDFX.dumpMap(rawValue as Any as Map<Object, Object>) as Any;

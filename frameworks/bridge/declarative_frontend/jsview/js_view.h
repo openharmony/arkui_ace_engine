@@ -421,6 +421,10 @@ public:
 
     void RegisterOnInstanceIdUpdateCallback(const JSRef<JSFunc>& onInstanceIdUpdateFunc);
 
+    void RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>& onCustomEnvUpdateFunc);
+
+    void JSFindCustomValueByKey(const JSCallbackInfo& info);
+
     void SetLatestInstanceId(const int32_t instanceId);
 
     JSRef<JSVal> GetJsContext();
@@ -468,6 +472,7 @@ private:
     // Save two independent instance update callbacks
     std::function<void(int32_t)> updateInstanceForEnvCallback_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
+    std::function<void(const std::string&)> updateCustomEnvCallback_;
 
     int32_t latestInstanceId_ = -1;
 };

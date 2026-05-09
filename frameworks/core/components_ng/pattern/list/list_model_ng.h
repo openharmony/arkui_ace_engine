@@ -26,6 +26,7 @@ class ACE_FORCE_EXPORT ListModelNG : public ListModel {
 public:
     void Create(bool isCreateArc = false) override;
     void SetSpace(const Dimension& space) override;
+    void SetSpaceWidth(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
@@ -63,6 +64,7 @@ public:
     void SetStackFromEnd(bool enabled) override;
     void SetSyncLoad(bool enabled) override;
     void SetEditModeOptions(EditModeOptions& editModeOptions) override;
+    void SetEnableEditMode(bool enableEditMode) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -81,6 +83,8 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     void SetItemFillPolicy(PresetFillType fillType) override;
     void ResetItemFillPolicy() override;
+    void ResetListSpace() override;
+    void ResetListSpaceWidth() override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* node = nullptr) override;
     void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
@@ -93,6 +97,8 @@ public:
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
     void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) override;
     void SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch) override;
+    void CreateWithResourceObjSpace(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) override;
     void SetBackPressCloseSwipeAction(bool closeSwipeAction) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
@@ -161,6 +167,8 @@ public:
     static bool GetListSyncLoad(FrameNode* frameNode);
     static void SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions);
     static EditModeOptions GetEditModeOptions(FrameNode* frameNode);
+    static void SetEnableEditMode(FrameNode* frameNode, bool enableEditMode);
+    static bool GetEnableEditMode(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
@@ -219,6 +227,8 @@ public:
     static bool GetSupportEmptyBranchInLazyLoading(FrameNode* frameNode);
     static void SetBackPressCloseSwipeAction(FrameNode* frameNode, bool closeSwipeAction);
     static bool GetBackPressCloseSwipeAction(FrameNode* frameNode);
+    static void CreateWithResourceObjSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
 private:
     void AddDragFrameNodeToManager() const;

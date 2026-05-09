@@ -20,6 +20,7 @@
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
@@ -30,6 +31,7 @@
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
+#include "core/components_ng/render/animation_utils.h"
 #endif
 namespace OHOS::Ace::NG {
 class JSIndicatorControllerBase;

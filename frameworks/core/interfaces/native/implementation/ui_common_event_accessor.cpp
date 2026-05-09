@@ -252,9 +252,10 @@ void SetOnVisibleAreaApproximateChangeImpl(
     };
     std::vector<double> ratioList = Converter::Convert<std::vector<double>>(options->ratios);
     auto expectedUpdateIntervalValue = Converter::OptConvert<int32_t>(options->expectedUpdateInterval);
+    auto measureFromViewPort = Converter::OptConvert<bool>(options->measureFromViewport).value_or(false);
     if (expectedUpdateIntervalValue.has_value()) {
         ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(
-            rawPtr, std::move(onVisibleChange), ratioList, expectedUpdateIntervalValue.value());
+            rawPtr, std::move(onVisibleChange), ratioList, expectedUpdateIntervalValue.value(), measureFromViewPort);
     } else {
         ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(rawPtr, std::move(onVisibleChange), ratioList);
     }

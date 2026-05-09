@@ -650,7 +650,7 @@ HWTEST_F(TextFieldPatternTestEight, OnKeyEvent001, TestSize.Level0)
     pattern_->needToRequestKeyboardOnFocus_ = false;
     pattern_->needToRequestKeyboardInner_ = true;
     auto pipeline = pattern_->GetContext();
-    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(
         pipeline->GetTextFieldManager());
     textFieldManager->imeShow_ = true;
     auto ret = pattern_->OnKeyEvent(event);

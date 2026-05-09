@@ -15,6 +15,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/interfaces/native/implementation/navigation_transition_proxy_peer.h"
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"

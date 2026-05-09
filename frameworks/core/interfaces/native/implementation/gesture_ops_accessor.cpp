@@ -30,7 +30,7 @@
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/event_target_info_peer.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
-#include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
+#include "core/interfaces/native/implementation/pan_gesture_options_proxy_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -117,7 +117,7 @@ Ark_NativePointer CreatePanGestureImpl(
 }
 Ark_NativePointer CreatePanGestureWithPanGestureOptionsImpl(Ark_NativePointer panGestureOptions)
 {
-    Ark_PanGestureOptions peer = reinterpret_cast<Ark_PanGestureOptions>(panGestureOptions);
+    Ark_PanGestureOptionsProxy peer = reinterpret_cast<Ark_PanGestureOptionsProxy>(panGestureOptions);
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->handler, nullptr);
     auto direction = peer->handler->GetDirection();

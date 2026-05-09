@@ -357,10 +357,16 @@ HWTEST_F(RichEditorScrollControllerTest, StopAutoScroll001, TestSize.Level0)
  */
 HWTEST_F(RichEditorScrollControllerTest, GetAutoScrollOffsetDiff001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. GetAutoScrollOffsetDiff
+     */
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->prevAutoScrollOffset_ = OffsetF(1.0f, 0.0f);
     scrollController->isSingleLineMode_ = true;
@@ -378,14 +384,23 @@ HWTEST_F(RichEditorScrollControllerTest, GetAutoScrollOffsetDiff001, TestSize.Le
  */
 HWTEST_F(RichEditorScrollControllerTest, GetHotAreaOverflow001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. init frameRect and contentRect
+     */
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
 
+    /**
+     * @tc.steps: step3. GetHotAreaOverflow
+     */
     scrollController->isSingleLineMode_ = true;
     EXPECT_TRUE(scrollController->GetHotAreaOverflow(true, 100.0f));
     EXPECT_TRUE(scrollController->GetHotAreaOverflow(false, 100.0f));
@@ -596,10 +611,16 @@ HWTEST_F(RichEditorScrollControllerTest, AutoScrollByEdgeDetection004, TestSize.
  */
 HWTEST_F(RichEditorScrollControllerTest, GetOffset2d001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. get scroll controller and get offset
+     */
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
@@ -909,4 +930,286 @@ HWTEST_F(RichEditorScrollControllerTest, NeedScroll002, TestSize.Level0)
     EXPECT_FALSE(scrollController->NeedScroll());
 }
 
+/**
+ * @tc.name: ScrollToVisible001
+ * @tc.desc: test ScrollToVisible with basic scenario
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    auto& textRect_ = scrollController->textRect_;
+    auto& contentRect_ = scrollController->contentRect_;
+    textRect_.SetSize(SizeF(200.0f, 200.0f));
+    textRect_.SetOffset(OffsetF(50.0f, 0.0f));
+    contentRect_.SetSize(SizeF(100.0f, 100.0f));
+    contentRect_.SetOffset(OffsetF(50.0f, 50.0f));
+
+    EXPECT_FALSE(scrollController->IsSupportHorizontalScroll());
+    scrollController->ScrollToVisible(0, 0);
+    EXPECT_EQ(textRect_.GetOffset(), contentRect_.GetOffset());
+    textRect_.SetOffset(OffsetF(50.0f, 0.0f));
+    scrollController->ScrollToVisible(0, 1);
+    EXPECT_EQ(textRect_.GetOffset(), contentRect_.GetOffset());
+
+    textRect_.SetOffset(OffsetF(0.0f, 50.0f));
+    scrollController->isSingleLineMode_ = true;
+    EXPECT_TRUE(scrollController->IsSupportHorizontalScroll());
+    scrollController->ScrollToVisible(0, 0);
+    EXPECT_EQ(textRect_.GetOffset(), contentRect_.GetOffset());
+    textRect_.SetOffset(OffsetF(0.0f, 50.0f));
+    scrollController->ScrollToVisible(0, 1);
+    EXPECT_EQ(textRect_.GetOffset(), contentRect_.GetOffset());
+}
+
+/**
+ * @tc.name: ScrollToVisible002
+ * @tc.desc: test ScrollToVisible when end less than start, should not scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    auto& textRect_ = scrollController->textRect_;
+    auto& contentRect_ = scrollController->contentRect_;
+    
+    OffsetF initialOffset(50.0f, 100.0f);
+    textRect_.SetSize(SizeF(200.0f, 200.0f));
+    textRect_.SetOffset(initialOffset);
+    contentRect_.SetSize(SizeF(100.0f, 100.0f));
+    contentRect_.SetOffset(OffsetF(50.0f, 50.0f));
+
+    scrollController->ScrollToVisible(10, 5);
+    EXPECT_EQ(textRect_.GetOffset(), initialOffset);
+}
+
+/**
+ * @tc.name: ScrollToVisible003
+ * @tc.desc: test ScrollToVisible with cursor position (start equals end) to scroll textRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(INIT_VALUE_1);
+    
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { RectF(0.0f, 0.0f, 100.0f, 20.0f) } };
+    CaretMetricsF caretMetricsDown(OffsetF(50.0f, 20.0f), 20.0f);
+    CaretMetricsF caretMetricsUp(OffsetF(50.0f, 0.0f), 20.0f);
+    TestCursorItem cursorItem =
+        { .index = 3, .caretMetricsFDown = caretMetricsDown, .caretMetricsFUp = caretMetricsUp };
+    TestParagraphItem paragraphItem = {
+        .start = 0,
+        .end = 6,
+        .testParagraphRects = { paragraphRect },
+        .testCursorItems = { cursorItem }
+    };
+    AddParagraph(paragraphItem);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    auto& textRect_ = scrollController->textRect_;
+    auto& contentRect_ = scrollController->contentRect_;
+    
+    textRect_.SetSize(SizeF(300.0f, 200.0f));
+    textRect_.SetOffset(OffsetF(0.0f, 100.0f));
+    contentRect_.SetSize(SizeF(100.0f, 100.0f));
+    contentRect_.SetOffset(OffsetF(0.0f, 0.0f));
+
+    scrollController->isSingleLineMode_ = false;
+    scrollController->ScrollToVisible(3, 3);
+    
+    float scrollOffset = scrollController->GetScrollOffset();
+    EXPECT_NE(scrollOffset, 100.0f);
+}
+
+/**
+ * @tc.name: ScrollToVisible004
+ * @tc.desc: test ScrollToVisible with selection range (start not equals end) to scroll textRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(INIT_VALUE_1);
+    
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { RectF(10.0f, 10.0f, 80.0f, 20.0f) } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    auto& textRect_ = scrollController->textRect_;
+    auto& contentRect_ = scrollController->contentRect_;
+    
+    textRect_.SetSize(SizeF(300.0f, 200.0f));
+    textRect_.SetOffset(OffsetF(0.0f, 150.0f));
+    contentRect_.SetSize(SizeF(100.0f, 100.0f));
+    contentRect_.SetOffset(OffsetF(0.0f, 0.0f));
+
+    scrollController->isSingleLineMode_ = false;
+    scrollController->ScrollToVisible(0, 6);
+    
+    float scrollOffset = scrollController->GetScrollOffset();
+    EXPECT_NE(scrollOffset, 150.0f);
+}
+
+/**
+ * @tc.name: ScrollToVisible005
+ * @tc.desc: test ScrollToVisible in RTL mode calculates correct scroll distance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutProperty = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    AddSpan(INIT_VALUE_1);
+    
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { RectF(50.0f, 10.0f, 80.0f, 20.0f) } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    auto& textRect_ = scrollController->textRect_;
+    auto& contentRect_ = scrollController->contentRect_;
+    
+    textRect_.SetSize(SizeF(300.0f, 200.0f));
+    textRect_.SetOffset(OffsetF(0.0f, 100.0f));
+    contentRect_.SetSize(SizeF(100.0f, 100.0f));
+    contentRect_.SetOffset(OffsetF(0.0f, 0.0f));
+
+    scrollController->isSingleLineMode_ = false;
+    scrollController->ScrollToVisible(0, 6);
+    
+    float scrollOffset = scrollController->GetScrollOffset();
+    EXPECT_NE(scrollOffset, 100.0f);
+}
+
+/**
+ * @tc.name: ScrollToVisible006
+ * @tc.desc: test ScrollToVisible without paragraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible006, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    auto& textRect_ = scrollController->textRect_;
+    auto& contentRect_ = scrollController->contentRect_;
+    
+    OffsetF initialOffset(50.0f, 100.0f);
+    textRect_.SetSize(SizeF(200.0f, 200.0f));
+    textRect_.SetOffset(initialOffset);
+    contentRect_.SetSize(SizeF(100.0f, 100.0f));
+    contentRect_.SetOffset(OffsetF(50.0f, 50.0f));
+
+    scrollController->ScrollToVisible(0, 0);
+    EXPECT_EQ(textRect_.GetOffset(), contentRect_.GetOffset());
+}
+
+/**
+ * @tc.name: ScrollToVisible007
+ * @tc.desc: test ScrollToVisible in single line mode with horizontal scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, ScrollToVisible007, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(INIT_VALUE_1);
+    
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { RectF(50.0f, 0.0f, 100.0f, 20.0f) } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    auto& textRect_ = scrollController->textRect_;
+    auto& contentRect_ = scrollController->contentRect_;
+    
+    textRect_.SetSize(SizeF(300.0f, 50.0f));
+    textRect_.SetOffset(OffsetF(200.0f, 0.0f));
+    contentRect_.SetSize(SizeF(100.0f, 50.0f));
+    contentRect_.SetOffset(OffsetF(0.0f, 0.0f));
+
+    scrollController->isSingleLineMode_ = true;
+    EXPECT_TRUE(scrollController->IsSupportHorizontalScroll());
+    
+    scrollController->ScrollToVisible(0, 6);
+    float scrollOffset = scrollController->GetScrollOffset();
+    EXPECT_NE(scrollOffset, 200.0f);
+}
+
+/**
+ * @tc.name: CalculateDestination001
+ * @tc.desc: test CalculateDestination with cursor position
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, CalculateDestination001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(INIT_VALUE_1);
+    
+    CaretMetricsF caretMetricsDown(OffsetF(100.0f, 50.0f), 20.0f);
+    CaretMetricsF caretMetricsUp(OffsetF(100.0f, 30.0f), 20.0f);
+    TestCursorItem cursorItem =
+        { .index = 3, .caretMetricsFDown = caretMetricsDown, .caretMetricsFUp = caretMetricsUp };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testCursorItems = { cursorItem } };
+    AddParagraph(paragraphItem);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    scrollController->textRect_.SetOffset(OffsetF(50.0f, 50.0f));
+
+    auto dest = scrollController->CalculateDestination(3, 3, false);
+    EXPECT_NE(dest.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateDestination002
+ * @tc.desc: test CalculateDestination with selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, CalculateDestination002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(INIT_VALUE_1);
+    
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { RectF(20.0f, 10.0f, 80.0f, 20.0f) } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    auto& scrollController = richEditorPattern->scrollController_;
+    scrollController->textRect_.SetOffset(OffsetF(50.0f, 50.0f));
+
+    auto dest = scrollController->CalculateDestination(0, 6, false);
+    EXPECT_NE(dest.GetX(), 0.0f);
+}
 }

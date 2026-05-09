@@ -22,12 +22,14 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "core/components_ng/pattern/linear_split/linear_split_paint_method.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "base/mousestyle/mouse_style.h"
 
 namespace OHOS::Ace::NG {
 const char COLUMN_SPLIT_ETS_TAG[] = "ColumnSplit";

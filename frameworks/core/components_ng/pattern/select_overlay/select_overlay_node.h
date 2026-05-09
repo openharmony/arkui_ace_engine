@@ -115,6 +115,7 @@ public:
     void HideOrShowCirclesAndBackArrow(FrameNodeType type, float value);
 
     void SwitchToOverlayMode();
+    void UpdateMenuColors();
     void UpdateSelectMenuBg(const RefPtr<FrameNode>& caller);
     void AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info);
     void OnCustomSelectMenuAppear();
@@ -274,7 +275,7 @@ private:
 
     // Marks whether it is currently in the animated state.
     bool isDoingAnimation_ = false;
-    int32_t cachedThemeScopeId_ = 0;
+
     // Controls that only default menus can be converted to extended menus, and extended menus can be converted to
     // default menus.
     bool isExtensionMenu_ = false;

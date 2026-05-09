@@ -48,6 +48,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -1188,6 +1189,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("scrollToVisible", &JSRichEditorController::ScrollToVisible);
     JSClass<JSRichEditorController>::CustomMethod("deleteBackward", &JSRichEditorController::DeleteBackward);
     JSClass<JSRichEditorController>::CustomMethod("getLayoutManager", &JSRichEditorController::GetLayoutManager);
     JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
@@ -1481,6 +1483,33 @@ void JSRichEditorBaseControllerBinding::GetCaretOffset(const JSCallbackInfo& arg
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(caretOffset)));
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(caretOffset)));
+    }
+}
+
+void JSRichEditorBaseControllerBinding::ScrollToVisible(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    std::optional<int32_t> start;
+    std::optional<int32_t> end;
+    if (args.Length() == 1) {
+        const auto& optionVal = args[0];
+        if (optionVal->IsObject()) {
+            JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(optionVal);
+            JSRef<JSVal> startVal = optionObj->GetProperty("start");
+            if (startVal->IsNumber()) {
+                start = startVal->ToNumber<int32_t>();
+            }
+            JSRef<JSVal> endVal = optionObj->GetProperty("end");
+            if (endVal->IsNumber()) {
+                end = endVal->ToNumber<int32_t>();
+            }
+        }
+    }
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->ScrollToVisible(start, end);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "ScrollToVisible: The JSRichEditorBaseController is NULL");
     }
 }
 
@@ -2275,6 +2304,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "onContentChanged", &JSRichEditorStyledStringController::OnContentChanged);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getLayoutManager", &JSRichEditorStyledStringController::GetLayoutManager);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "scrollToVisible", &JSRichEditorStyledStringController::ScrollToVisible);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "deleteBackward", &JSRichEditorStyledStringController::DeleteBackward);
     JSClass<JSRichEditorStyledStringController>::Method(

@@ -33,11 +33,19 @@
 namespace OHOS::Ace::NG {
 ACE_FORCE_EXPORT std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
-ACE_FORCE_EXPORT std::optional<float> ConvertToPx(const std::optional<CalcLength>& value,
-    const ScaleProperty& scaleProperty, float percentReference = -1.0f,
+ACE_FORCE_EXPORT float ConvertToPxDefault(const CalcLength& value, const ScaleProperty& scaleProperty,
+    float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
+
+ACE_FORCE_EXPORT std::optional<float> ConvertToPx(
+    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float percentReference = -1.0f,
+    const std::vector<std::string>& rpnexp = std::vector<std::string>());
+ACE_FORCE_EXPORT float ConvertToPxDefault(
+    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float percentReference = -1.0f,
     const std::vector<std::string>& rpnexp = std::vector<std::string>());
 
 ACE_FORCE_EXPORT std::optional<float> ConvertToPx(
+    const Dimension& dimension, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+ACE_FORCE_EXPORT float ConvertToPxDefault(
     const Dimension& dimension, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 ACE_FORCE_EXPORT SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty,
@@ -59,6 +67,13 @@ PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty
 PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, bool roundPixel = true, bool nonNegative = false);
 
+PaddingPropertyF ConvertToPaddingPropertyFDefault(const std::unique_ptr<PaddingProperty>& padding,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true,
+    bool nonNegative = false);
+
+PaddingPropertyF ConvertToPaddingPropertyFDefault(const PaddingProperty& padding, const ScaleProperty& scaleProperty,
+    float percentReference = -1.0f, bool roundPixel = true, bool nonNegative = false);
+
 PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
     const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference = -1.0f,
     bool nonNegative = false);
@@ -77,6 +92,12 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(const std::unique_ptr<BorderW
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
 
 BorderWidthPropertyF ConvertToBorderWidthPropertyF(const BorderWidthProperty& borderWidth,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyFDefault(const std::unique_ptr<BorderWidthProperty>& borderWidth,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyFDefault(const BorderWidthProperty& borderWidth,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,
@@ -193,7 +214,17 @@ void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding);
 ACE_FORCE_EXPORT OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& frameSize,
     const std::unique_ptr<MeasureProperty>& calcLayoutConstraint, const SizeT<float> percentReference);
 
-WidthBreakpoint GetCommonWidthBreakpoint(double width, double density);
+ACE_FORCE_EXPORT WidthBreakpoint GetCalcWidthBreakpoint(const OHOS::Ace::WidthLayoutBreakPoint& finalBreakpoints,
+    double density, double width);
+ACE_FORCE_EXPORT WidthBreakpoint GetCalcWidthBreakpoint(const std::vector<double>& customBreakpoints,
+    double density, double width);
+ACE_FORCE_EXPORT WidthBreakpoint GetCommonWidthBreakpoint(double width, double density);
+
+ACE_FORCE_EXPORT HeightBreakpoint GetCalcHeightBreakpoint(const OHOS::Ace::HeightLayoutBreakPoint &finalBreakpoints,
+    double aspectRatio);
+ACE_FORCE_EXPORT HeightBreakpoint GetCalcHeightBreakpoint(const std::vector<double>& customBreakpoints,
+    double aspectRatio);
+ACE_FORCE_EXPORT HeightBreakpoint GetCommonHeightBreakpoint(double aspectRatio);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H

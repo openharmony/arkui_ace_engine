@@ -24,7 +24,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_theme.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
@@ -38,6 +37,10 @@
 #include "frameworks/core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class InspectorFilter;
 class TextLayoutProperty;
 
@@ -669,6 +672,8 @@ public:
     {
         shouldPlayMaskAnimation_ = shouldPlayMaskAnimation;
     }
+
+    int32_t GetChildrenSize() const;
 
 private:
     void OnModifyDone() override;

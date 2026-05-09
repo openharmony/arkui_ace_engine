@@ -16,8 +16,12 @@
 #include "accessibility_system_ability_client.h"
 
 #include "adapter/ohos/osal/accessibility/accessibility_hidumper_osal.h"
+#include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "base/log/dump_log.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/accessibility/hidumper/accessibility_hidumper.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -99,5 +103,129 @@ void AccessibilityElementInfoUtils::ToCommonInfo(
     DumpLog::GetInstance().AddDesc("long clickable: ", BoolToString(nodeInfo.IsLongClickable()));
     DumpLog::GetInstance().AddDesc("popup supported: ", BoolToString(nodeInfo.IsPopupSupported()));
     DumpLog::GetInstance().AddDesc("zindex: ", std::to_string(nodeInfo.GetZIndex()));
+}
+
+namespace {
+
+class MockDumpExecuteActionCallBack : public Accessibility::AccessibilityElementOperatorCallback {
+public:
+    ~MockDumpExecuteActionCallBack() = default;
+
+    void SetSearchElementInfoByAccessibilityIdResult(const std::list<Accessibility::AccessibilityElementInfo>& infos,
+        const int32_t requestId) override {}
+
+    void SetSearchElementInfoByTextResult(const std::list<Accessibility::AccessibilityElementInfo>& infos,
+        const int32_t requestId) override {}
+
+    void SetSearchDefaultFocusByWindowIdResult(const std::list<Accessibility::AccessibilityElementInfo>& infos,
+        const int32_t requestId) override {}
+
+    void SetFindFocusedElementInfoResult(const Accessibility::AccessibilityElementInfo& info,
+        const int32_t requestId) override {}
+
+    void SetFocusMoveSearchResult(const Accessibility::AccessibilityElementInfo& info,
+        const int32_t requestId) override {}
+
+    void SetExecuteActionResult(const bool succeeded, const int32_t requestId) override
+    {
+        if (succeeded) {
+            DumpLog::GetInstance().Print("Result: execute action succeeded");
+        } else {
+            DumpLog::GetInstance().Print("Result: execute action failed");
+        }
+    }
+
+    void SetCursorPositionResult(const int32_t cursorPosition, const int32_t requestId) override {}
+
+    void SetSearchElementInfoBySpecificPropertyResult(const std::list<Accessibility::AccessibilityElementInfo>& infos,
+        const std::list<Accessibility::AccessibilityElementInfo>& treeInfos, const int32_t requestId) override {}
+
+    void SetFocusMoveSearchWithConditionResult(const std::list<Accessibility::AccessibilityElementInfo>& info,
+        const Accessibility::FocusMoveResult& result, const int32_t requestId) override {}
+};
+
+} // namespace
+
+void JsAccessibilityManager::DumpExecuteActionTest(const std::vector<std::string>& params)
+{
+    ExecuteActionArgument actionArg;
+    if (!AccessibilityHidumper::DumpProcessExecuteActionParameters(params, actionArg)) {
+        return;
+    }
+
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+
+    ActionParam param;
+    param.action = static_cast<Accessibility::ActionType>(actionArg.actionType);
+    param.actionArguments = actionArg.actionArguments;
+    MockDumpExecuteActionCallBack callback;
+    ExecuteAction(actionArg.elementId, param, 0, callback, windowId_);
+}
+
+void AccessibilityManagerHidumper::DumpCustomActionTest(
+    const std::vector<std::string>& params,
+    const RefPtr<OHOS::Ace::NG::FrameNode>& frameNode)
+{
+    int64_t nodeId = 0;
+    std::string actionName;
+    bool listActions = false;
+
+    if (!AccessibilityHidumper::DumpProcessCustomActionParameters(params, nodeId, actionName, listActions)) {
+        return;
+    }
+
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+
+    auto customActions = accessibilityProperty->GetAccessibilityCustomActions();
+    if (customActions.empty()) {
+        DumpLog::GetInstance().Print(std::string("Result: no custom actions found"));
+        return;
+    }
+
+    DumpLog::GetInstance().Print(std::string("Custom Actions Count: ") + std::to_string(customActions.size()));
+
+    for (size_t i = 0; i < customActions.size(); ++i) {
+        auto& customAction = customActions[i];
+        DumpLog::GetInstance().AddDesc(std::string("Index: ") + std::to_string(i));
+        DumpLog::GetInstance().AddDesc(std::string("Action Name: ") + customAction.actionName);
+        DumpLog::GetInstance().AddDesc(std::string("Callback Valid: ") +
+            (customAction.customActionCallback ? "true" : "false"));
+        DumpLog::GetInstance().Print(0, "Custom Action", 0);
+    }
+
+    if (listActions) {
+        DumpLog::GetInstance().Print(std::string("Result: custom action list displayed"));
+        return;
+    }
+
+    if (actionName.empty()) {
+        DumpLog::GetInstance().Print(std::string("Error: action name is empty"));
+        DumpLog::GetInstance().Print(
+            std::string("Usage: --custom-action-test <nodeId> [--list] [--execute <actionName>]"));
+        return;
+    }
+
+    bool found = false;
+    for (auto& customAction : customActions) {
+        if (customAction.actionName == actionName) {
+            found = true;
+            if (customAction.customActionCallback) {
+                DumpLog::GetInstance().Print(std::string("Executing custom action: ") + customAction.actionName);
+                customAction.customActionCallback();
+                DumpLog::GetInstance().Print(std::string("Result: custom action executed successfully"));
+            } else {
+                DumpLog::GetInstance().Print(std::string("Error: custom action callback is null"));
+            }
+            break;
+        }
+    }
+
+    if (!found) {
+        DumpLog::GetInstance().Print(std::string("Error: custom action not found with name: ") + actionName);
+    }
+    DumpLog::GetInstance().Print(std::string("Result: custom action test done"));
 }
 } // namespace OHOS::Ace::Framework

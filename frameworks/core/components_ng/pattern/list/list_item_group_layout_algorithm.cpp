@@ -91,7 +91,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                         (axis_ == Axis::HORIZONTAL && layoutPolicy.value().IsHeightFix()));
 
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
-    auto space = layoutProperty->GetSpace().value_or(Dimension(0));
+    auto space = layoutProperty->GetSpaceWidth().value_or(layoutProperty->GetSpace().value_or(Dimension(0)));
 
     const auto& layoutConstraintOps = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraintOps);
@@ -1494,6 +1494,26 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
     listItem->SetIndexInList(listItemGroup->GetIndexInList());
 }
 
+bool ListItemGroupLayoutAlgorithm::NeedReserveEditModeCheckBoxSpace() const
+{
+    if (!defaultMultiSelectStyleEnabled_) {
+        return false;
+    }
+    CHECK_NULL_RETURN(listLayoutProperty_, true);
+    auto lanes = listLayoutProperty_->GetLanes();
+    return !lanes.has_value() || lanes.value() == 1;
+}
+
+void ListItemGroupLayoutAlgorithm::UpdateListItemEditModeCheckBoxSpace(const RefPtr<LayoutWrapper>& wrapper) const
+{
+    CHECK_NULL_VOID(wrapper);
+    auto host = wrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto listItemPattern = host->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    listItemPattern->SetNeedReserveEditModeCheckBoxSpace(NeedReserveEditModeCheckBoxSpace());
+}
+
 ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
 {
     ListItemGroupLayoutInfo info;
@@ -1785,6 +1805,7 @@ RefPtr<LayoutWrapper> ListItemGroupLayoutAlgorithm::GetListItem(
     if (!wrapper && listLayoutProperty_ && listLayoutProperty_->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         wrapper = CreateDummyListItemChild();
     }
+    UpdateListItemEditModeCheckBoxSpace(wrapper);
     return wrapper;
 }
 } // namespace OHOS::Ace::NG

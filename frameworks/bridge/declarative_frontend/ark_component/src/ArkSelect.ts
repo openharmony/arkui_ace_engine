@@ -206,6 +206,16 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, MenuSystemMaterialModifier.identity, MenuSystemMaterialModifier, menuSystemMaterial);
     return this;
   }
+  menuBackgroundBlurStyleOptions(menuBackgroundBlurStyleOptions: Optional<BackgroundBlurStyleOptions>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuBackgroundBlurStyleOptionsModifier.identity, MenuBackgroundBlurStyleOptionsModifier, menuBackgroundBlurStyleOptions);
+    return this;
+  }
+  menuBackgroundEffect(menuBackgroundEffect: Optional<BackgroundEffectOptions>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuBackgroundEffectModifier.identity, MenuBackgroundEffectModifier, menuBackgroundEffect);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey<SelectOption[]> {
@@ -847,6 +857,42 @@ class MenuSystemMaterialModifier extends ModifierWithKey<Optional<SystemUiMateri
       getUINativeModule().select.resetMenuSystemMaterial(node);
     } else {
       getUINativeModule().select.setMenuSystemMaterial(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class MenuBackgroundBlurStyleOptionsModifier extends ModifierWithKey<Optional<BackgroundBlurStyleOptions>> {
+  constructor(value: Optional<BackgroundBlurStyleOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menuBackgroundBlurStyleOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetMenuBackgroundBlurStyleOptions(node);
+    } else {
+      getUINativeModule().select.setMenuBackgroundBlurStyleOptions(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class MenuBackgroundEffectModifier extends ModifierWithKey<Optional<BackgroundEffectOptions>> {
+  constructor(value: Optional<BackgroundEffectOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menuBackgroundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetMenuBackgroundEffect(node);
+    } else {
+      getUINativeModule().select.setMenuBackgroundEffect(node, this.value);
     }
   }
 

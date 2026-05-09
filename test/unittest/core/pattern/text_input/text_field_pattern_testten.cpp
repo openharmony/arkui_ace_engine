@@ -917,7 +917,7 @@ HWTEST_F(TextFieldPatternTestten, HandleTouchUp001, TestSize.Level1)
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
     textFieldPattern->magnifierController_ =
-        AIWriteAdapter::MakeRefPtr<MagnifierController>(AIWriteAdapter::WeakClaim(AceType::RawPtr(textFieldPattern)));
+        AceType::MakeRefPtr<MagnifierController>(AceType::WeakClaim(AceType::RawPtr(textFieldPattern)));
     textFieldPattern->HandleTouchUp();
     EXPECT_EQ(textFieldPattern->magnifierController_->magnifierNodeExist_, false);
 }

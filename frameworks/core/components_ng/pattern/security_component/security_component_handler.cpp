@@ -16,12 +16,14 @@
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"
+#include "session/host/include/session.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/render/render_context.h"
@@ -818,11 +820,9 @@ bool SecurityComponentHandler::GetSizeWithScale(RefPtr<FrameNode>& node, double&
     return true;
 }
 
-bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+bool SecurityComponentHandler::InitButtonRect(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(node, false);
-    buttonInfo.nodeId_ = node->GetId();
     if (!GetPaddingInfo(buttonInfo, node)) {
         SC_LOG_WARN("InitBaseInfoWarning: Get padding info failed");
         return false;
@@ -841,6 +841,18 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         SC_LOG_WARN("InitBaseInfoWarning: Get width and height failed");
         return false;
     }
+    return true;
+}
+
+bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    buttonInfo.nodeId_ = node->GetId();
+    if (!InitButtonRect(buttonInfo, node)) {
+        return false;
+    }
+
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_RETURN(container, false);
     uint32_t windId = container->GetWindowId();

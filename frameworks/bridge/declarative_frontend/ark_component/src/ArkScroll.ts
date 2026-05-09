@@ -129,8 +129,8 @@ class ScrollScrollableModifier extends ModifierWithKey<ScrollDirection> {
   }
 }
 
-class ScrollScrollBarWidthModifier extends ModifierWithKey<string | number> {
-  constructor(value: string | number) {
+class ScrollScrollBarWidthModifier extends ModifierWithKey<string | number | Resource> {
+  constructor(value: string | number | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('scrollBarWidth');
@@ -140,10 +140,6 @@ class ScrollScrollBarWidthModifier extends ModifierWithKey<string | number> {
     } else {
       getUINativeModule().scroll.setScrollBarWidth(node, this.value);
     }
-  }
-
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
   }
 }
 
@@ -509,7 +505,7 @@ class ArkScrollComponent extends ArkScrollable<ScrollAttribute> implements Scrol
     modifierWithKey(this._modifiersWithKeys, ScrollScrollBarColorModifier.identity, ScrollScrollBarColorModifier, color);
     return this;
   }
-  scrollBarWidth(value: string | number): this {
+  scrollBarWidth(value: string | number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollBarWidthModifier.identity, ScrollScrollBarWidthModifier, value);
     return this;
   }

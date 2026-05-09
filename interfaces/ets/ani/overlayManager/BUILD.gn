@@ -17,13 +17,23 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 #构建ANI库
 ohos_shared_library("overlayManager_ani") {
-  deps = [ "$ace_root/build:libace_compatible" ]
-  include_dirs = [ "./include" ]
+  deps = [
+    "$ace_root/build:libace_compatible",
+    "//foundation/arkui/ace_engine/interfaces/ets/ani/utils:ani_utils",
+  ]
+  include_dirs = [
+    "./include",
+    "//foundation/arkui/ace_engine/interfaces/ets/ani/utils",
+  ]
   sources = [
     "${ace_root}/frameworks/core/common/container_scope.cpp",
     "./src/overlayManager.cpp",
+    "./src/overlay_params.cpp",
   ]
   external_deps = [ "runtime_core:ani" ]
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    external_deps += [ "bounds_checking_function:libsec_static" ]
+  }
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"
   subsystem_name = "arkui"

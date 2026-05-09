@@ -61,6 +61,7 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1154,5 +1155,170 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuKeyboardAvoidMode003, TestSize.Level1)
     layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
     expectRect = Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION - WRAPPER_RECT_HEIGHT_SMALL);
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, expectRect);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection001
+ * @tc.desc: Verify CalculateSafeAreaIntersection when targetInUIExtension_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection001, TestSize.Level1)
+{
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = false;
+    menuAlgorithm->left_ = 10.0f;
+    menuAlgorithm->top_ = 20.0f;
+    menuAlgorithm->right_ = 30.0f;
+    menuAlgorithm->bottom_ = 40.0f;
+    menuAlgorithm->width_ = 500.0f;
+    menuAlgorithm->height_ = 800.0f;
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 100;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 700;
+    bottomInset.end = 800;
+    safeAreaInsets.bottom_ = bottomInset;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    float expectedWidth = menuAlgorithm->width_ - menuAlgorithm->left_ - menuAlgorithm->right_;
+    float expectedHeight = menuAlgorithm->height_ - menuAlgorithm->top_ - menuAlgorithm->bottom_;
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), expectedWidth);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), expectedHeight);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Left(), menuAlgorithm->left_);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), menuAlgorithm->top_);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection002
+ * @tc.desc: Verify CalculateSafeAreaIntersection when targetInUIExtension_ is true and top safe area has intersection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection002, TestSize.Level1)
+{
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = true;
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, 500.0f, 800.0f);
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 100;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 900;
+    bottomInset.end = 1000;
+    safeAreaInsets.bottom_ = bottomInset;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 100.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 700.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Left(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection003
+ * @tc.desc: Verify CalculateSafeAreaIntersection when has intersection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection003, TestSize.Level1)
+{
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = true;
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 700.0f, 500.0f, 300.0f);
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 100;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 900;
+    bottomInset.end = 1000;
+    safeAreaInsets.bottom_ = bottomInset;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 0.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 200.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection004
+ * @tc.desc: Verify CalculateSafeAreaIntersection when have intersection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection004, TestSize.Level1)
+{
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = true;
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, 500.0f, 1000.0f);
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 50;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 950;
+    bottomInset.end = 1050;
+    safeAreaInsets.bottom_ = bottomInset;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 50.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 900.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection005
+ * @tc.desc: Verify CalculateSafeAreaIntersection when no safe area intersection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection005, TestSize.Level1)
+{
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = true;
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 200.0f, 500.0f, 400.0f);
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 100;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 700;
+    bottomInset.end = 800;
+    safeAreaInsets.bottom_ = bottomInset;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 0.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 400.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), 500.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Left(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateSafeAreaIntersection006
+ * @tc.desc: Verify CalculateSafeAreaIntersection when intersection height is zero or negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TwoTestNg, CalculateSafeAreaIntersection006, TestSize.Level1)
+{
+    auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(menuAlgorithm, nullptr);
+    menuAlgorithm->targetInUIExtension_ = true;
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 150.0f, 500.0f, 400.0f);
+    SafeAreaInsets safeAreaInsets;
+    SafeAreaInsets::Inset topInset;
+    topInset.start = 0;
+    topInset.end = 100;
+    safeAreaInsets.top_ = topInset;
+    SafeAreaInsets::Inset bottomInset;
+    bottomInset.start = 600;
+    bottomInset.end = 700;
+    safeAreaInsets.bottom_ = bottomInset;
+    menuAlgorithm->CalculateSafeAreaIntersection(safeAreaInsets);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Top(), 0.0f);
+    EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), 400.0f);
 }
 } // namespace OHOS::Ace::NG

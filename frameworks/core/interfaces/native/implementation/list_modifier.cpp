@@ -38,6 +38,7 @@ namespace OHOS::Ace::NG::Converter {
     struct ListOptions {
         std::optional<int> initialIndex;
         std::optional<Dimension> space;
+        std::optional<Dimension> spaceWidth;
         std::optional<Ark_Scroller> scroller;
     };
 
@@ -133,6 +134,7 @@ namespace OHOS::Ace::NG::Converter {
         return {
             .initialIndex = OptConvert<int>(src.initialIndex),
             .space = OptConvert<Dimension>(src.space),
+            .spaceWidth = OptConvert<Dimension>(src.spaceWidth),
             .scroller = OptConvert<Ark_Scroller>(src.scroller)
         };
     }
@@ -186,7 +188,9 @@ void SetListOptionsImpl(Ark_NativePointer node,
 
     auto initialIndex = optionsOpt.value().initialIndex;
     ListModelStatic::SetInitialIndex(frameNode, initialIndex);
+    auto spaceWidth = optionsOpt.value().spaceWidth;
     auto space = optionsOpt.value().space;
+    ListModelStatic::SetListSpaceWidth(frameNode, spaceWidth);
     ListModelStatic::SetListSpace(frameNode, space);
 
     auto abstPeerPtrOpt = optionsOpt.value().scroller;

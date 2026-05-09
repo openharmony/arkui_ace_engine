@@ -309,6 +309,13 @@ void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
     context->SetMode(mode);
 }
 
+std::optional<bool> NavDestinationGroupNode::GetUserSetFullScreenOverlay() const
+{
+    auto layoutProperty = GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetFullScreenOverlay();
+}
+
 void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     FrameNode::ToJsonValue(json, filter);
@@ -335,6 +342,7 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
     json->PutExtAttr("systemTransition", TransitionTypeToString(systemTransitionType_), filter);
+    json->PutExtAttr("fullScreenOverlay", isFullScreenOverlay_, filter);
 }
 
 void NavDestinationGroupNode::SystemTransitionPushStart(bool transitionIn)
@@ -956,6 +964,11 @@ int32_t NavDestinationGroupNode::DoTransition(NavigationOperation operation, boo
 int32_t NavDestinationGroupNode::DoSystemTransition(NavigationOperation operation, bool isEnter)
 {
     auto noneSystemTransition = NavigationSystemTransitionType::NONE;
+    // fullscreen-overlay standard pages reuse the page-style horizontal slide even when the
+    // destination keeps the DEFAULT transition type, matching Navigation's overlay UX spec.
+    if (isFullScreenOverlay_ && systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+        return DoSystemSlideTransition(operation, isEnter);
+    }
     if ((systemTransitionType_ & NavigationSystemTransitionType::FADE) != noneSystemTransition) {
         return DoSystemFadeTransition(isEnter);
     }
@@ -999,6 +1012,12 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
         // translate animation
         bool isRight = (systemTransitionType_ & NavigationSystemTransitionType::SLIDE_RIGHT)
             != NavigationSystemTransitionType::NONE;
+        // Overlay standard pages always use a horizontal slide so entering/leaving fullscreen
+        // coverage feels like page navigation rather than dialog presentation.
+        if (isFullScreenOverlay_ && mode_ == NavDestinationMode::STANDARD &&
+            systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+            isRight = true;
+        }
         std::function<void()> translateEvent = [weak = WeakClaim(this), isEnter, isRight, operation]() {
             auto navDestination = weak.Upgrade();
             CHECK_NULL_VOID(navDestination);
@@ -1268,6 +1287,10 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 navDestination->SetJSViewActive(false);
             }
+            auto navigation = AceType::DynamicCast<NavigationGroupNode>(destinationPattern->GetNavigationNode());
+            if (navigation) {
+                navigation->UpdateVisibilityAfterOverlayTransition(navDestination);
+            }
             navDestination->SetIsOnAnimation(false);
             if (needReport) {
                 navDestination->ContentChangeReport();
@@ -1312,11 +1335,11 @@ void NavDestinationGroupNode::SplitTransitionPushStart(ForceSplitTransitionType 
     } else if (type == ForceSplitTransitionType::TRANSITION_MOVE) {
         auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
         CHECK_NULL_VOID(navNode);
-        float offsetX = navNode->GetDividerWidth();
+        float offsetX = 0.0f;
         if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            offsetX += navNode->GetSecondaryPartitionWidth();
+            offsetX -= navNode->GetSecondaryPartitionWidth() + navNode->GetDividerWidth();
         } else {
-            offsetX += navNode->GetPrimaryPartitionWidth();
+            offsetX += navNode->GetPrimaryPartitionWidth() + navNode->GetDividerWidth();
         }
         renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_IN) {
@@ -1324,8 +1347,8 @@ void NavDestinationGroupNode::SplitTransitionPushStart(ForceSplitTransitionType 
         CHECK_NULL_VOID(geometryNode);
         auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
         float width = frameSizeWithSafeArea.Width();
-        float isRTL = GetLanguageDirection();
-        renderContext->UpdateTranslateInXY(OffsetF(width * isRTL, 0.0f));
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? -width : width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     }
 }
 
@@ -1338,8 +1361,8 @@ void NavDestinationGroupNode::SplitTransitionPushEnd(ForceSplitTransitionType ty
         CHECK_NULL_VOID(geometryNode);
         auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
         float width = frameSizeWithSafeArea.Width();
-        float isRTL = GetLanguageDirection();
-        renderContext->UpdateTranslateInXY(OffsetF(-width * isRTL, 0.0f));
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? width : -width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_IN || type == ForceSplitTransitionType::TRANSITION_MOVE) {
         renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
     }
@@ -1401,8 +1424,8 @@ void NavDestinationGroupNode::SplitTransitionPopStart(ForceSplitTransitionType t
         CHECK_NULL_VOID(geometryNode);
         auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
         float width = frameSizeWithSafeArea.Width();
-        float isRTL = GetLanguageDirection();
-        renderContext->UpdateTranslateInXY(OffsetF(-width * isRTL, 0.0f));
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? width : -width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_OUT) {
         auto eventHub = GetEventHub<EventHub>();
         if (eventHub) {
@@ -1432,8 +1455,8 @@ void NavDestinationGroupNode::SplitTransitionPopEnd(ForceSplitTransitionType typ
         CHECK_NULL_VOID(geometryNode);
         auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
         float width = frameSizeWithSafeArea.Width();
-        float isRTL = GetLanguageDirection();
-        renderContext->UpdateTranslateInXY(OffsetF(width * isRTL, 0.0f));
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? -width : width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_IN || type == ForceSplitTransitionType::TRANSITION_MOVE) {
         renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
     }

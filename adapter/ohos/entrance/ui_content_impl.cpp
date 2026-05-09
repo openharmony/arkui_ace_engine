@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <atomic>
@@ -57,6 +58,7 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/base/frame_node.h"
@@ -163,6 +165,9 @@
 #include "screen_session_manager_client.h"
 #include "parameters.h"
 #include "pointer_event.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -386,6 +391,35 @@ bool CreateGlobalModalUIExtension(const AAFwk::Want& want, int32_t &sessionId,
     }
     return true;
 }
+
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+void HilogCallback(ContainerScopeLogLevel level, const char* msg)
+{
+    switch (level) {
+        case ContainerScopeLogLevel::DEBUG:
+            LOGD("%{public}s", msg);
+            break;
+        case ContainerScopeLogLevel::INFO:
+            LOGI("%{public}s", msg);
+            break;
+        case ContainerScopeLogLevel::WARN:
+            LOGW("%{public}s", msg);
+            break;
+        case ContainerScopeLogLevel::ERROR:
+            LOGE("%{public}s", msg);
+            break;
+    }
+}
+
+struct ContainerScopeHilogRegistrar {
+    ContainerScopeHilogRegistrar()
+    {
+        ContainerScope::SetLogCallback(HilogCallback);
+    }
+};
+static ContainerScopeHilogRegistrar g_hilogRegistrar;
+#endif // ENABLE_CONTAINER_SCOPE_TRACKING
+
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -1174,14 +1208,15 @@ void UIContentImpl::UnSubscribeEventsPassThroughMode()
         TaskExecutor::TaskType::BACKGROUND, "ArkUIUnSubscribeEventsPassThroughAsync");
 }
 
-void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
+void UIContentImpl::PreInitializeForm(
+    OHOS::Rosen::Window* window, const std::string& url, napi_value storage, sptr<IRemoteObject> connectToRender)
 {
     StorageWrapper storageWrapper { .napiStorage_ = storage };
     // ArkTSCard need no window
     if (isFormRender_ && !window) {
         LOGI("[%{public}s][%{public}s][%{public}d]: InitializeForm: %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, url.c_str());
-        CommonInitializeForm(window, url, storageWrapper);
+        CommonInitializeForm(window, url, storageWrapper, connectToRender);
         AddWatchSystemParameter();
     }
 }
@@ -1265,7 +1300,7 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     return errorCode;
 }
 
-void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config)
+void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender)
 {
     isDynamicRender_ = true;
     hapPath_ = config.hapPath;
@@ -1278,7 +1313,7 @@ void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config)
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
     StorageWrapper storageWrapper { .napiStorage_ = nullptr };
-    CommonInitializeForm(nullptr, config.abcPath, storageWrapper);
+    CommonInitializeForm(nullptr, config.abcPath, storageWrapper, connectToRender);
     AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
@@ -1454,8 +1489,8 @@ std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 }
 
 // ArkTSCard start
-UIContentErrorCode UIContentImpl::CommonInitializeForm(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storageWrapper)
+UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo,
+    StorageWrapper storageWrapper, sptr<IRemoteObject> connectToRender)
 {
     ACE_FUNCTION_TRACE();
     window_ = window;
@@ -1814,7 +1849,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     if (isFormRender_) {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, round(formWidth_),
-            round(formHeight_), window_);
+            round(formHeight_), window_, connectToRender);
         CHECK_ERROR_CODE_RETURN(errorCode);
         auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
         CHECK_NULL_RETURN(frontend, UIContentErrorCode::NULL_POINTER);
@@ -2013,6 +2048,9 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
 {
     SetHwIcuDirectory();
     Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+    ContainerScope::EnableTracking(SystemProperties::GetDebugEnabled());
+#endif
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
     if (abilityContext) {
         int32_t missionId = -1;
@@ -3922,6 +3960,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     }
 
+    // Page rotation has most of the same logic as regular rotation,
+    // but page rotation does not trigger rotation animations.
+    auto originalReason = reason;
     if (reason == OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "save PAGE_ROTATION as ROTATION");
         reason = OHOS::Rosen::WindowSizeChangeReason::ROTATION;
@@ -4058,22 +4099,28 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
-        taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
-            pipelineContext, info, container, rsTransaction] {
-                if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
-                    context->AnimateOnSafeAreaUpdate();
-                }
-                AvoidAreasUpdateOnUIExtension(context, avoidAreas);
-                if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container, config,
-                        rsTransaction, avoidAreas);
-                }
+        taskExecutor->PostTask([context, config, avoidAreas] {
+            if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
+                context->AnimateOnSafeAreaUpdate();
+            }
+            AvoidAreasUpdateOnUIExtension(context, avoidAreas);
             }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
+            taskExecutor->PostSyncTask(
+                [reason, instanceId = instanceId_, pipelineContext, info, container,
+                    config, rsTransaction, avoidAreas]() {
+                    if (pipelineContext) {
+                        KeyboardAvoid(reason, instanceId, pipelineContext, info, container, config,
+                            rsTransaction, avoidAreas);
+                    }
+                },
+                TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAvoid");
+        }
         return;
     }
 
     auto taskId = viewportConfigMgr_->MakeTaskId();
-    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
+    auto task = [config = modifyConfig, container, reason, originalReason, rsTransaction, rsWindow = window_,
                     instanceId = instanceId_, info, isDynamicRender = isDynamicRender_, animationOpt, avoidAreas,
                     taskId, weak = WeakPtr(viewportConfigMgr_), beforeConfig = config]() {
         container->SetWindowPos(config.Left(), config.Top());
@@ -4100,8 +4147,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
                 reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                 pipelineContext->FlushBuild();
-                LOGI("StartWindowAnimation with reason: %{public}d", reason);
-                pipelineContext->StartWindowAnimation();
+                if (originalReason != OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
+                    // Page rotation has most of the same logic as regular rotation,
+                    // but page rotation does not trigger rotation animations.
+                    LOGI("StartWindowAnimation with reason: %{public}d", reason);
+                    pipelineContext->StartWindowAnimation();
+                }
                 // SCENE_WITH_ANIMATION does not require refreshing all nodes
                 if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT &&
                     reason != OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
@@ -4248,15 +4299,6 @@ void UIContentImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
     CHECK_NULL_VOID(taskExecutor);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipeline);
-    taskExecutor->PostSyncTask(
-        [weak = WeakPtr<NG::PipelineContext>(pipeline), window = window_]() {
-            auto pipeline = weak.Upgrade();
-            CHECK_NULL_VOID(pipeline);
-            if (window) {
-                pipeline->SetIsLayoutFullScreen(window->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
-            }
-        },
-        TaskExecutor::TaskType::UI, "ArkUINotifyLayoutFullScreen");
     taskExecutor->PostTask(
         [weak = WeakPtr<NG::PipelineContext>(pipeline), mode]() {
             auto pipeline = weak.Upgrade();
@@ -6719,6 +6761,27 @@ void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)
         pipelineContext->SetXComponentDisplayConstraintEnabled(isEnable);
     };
     ExecuteUITask(std::move(task), "ArkUISetXComponentDisplayConstraintEnabled");
+}
+
+void UIContentImpl::RegisterTouchTimingCallback(
+    const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>&&
+        callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RegisterTouchTimingCallback(std::move(callback));
+}
+
+void UIContentImpl::UnregisterTouchTimingCallback()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->UnregisterTouchTimingCallback();
 }
 
 void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)

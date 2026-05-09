@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::Framework {
 

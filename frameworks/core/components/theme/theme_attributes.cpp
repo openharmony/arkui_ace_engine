@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,7 @@ const char THEME_PATTERN_SELECT[] = "select_pattern";
 const char THEME_PATTERN_SLIDER[] = "slider_pattern";
 const char THEME_PATTERN_TEXT[] = "text_pattern";
 const char THEME_PATTERN_TEXTFIELD[] = "textfield_pattern";
-const char THEME_PATTERN_RICH_EDITOR[] = "rich_editor_pattern";
+ACE_FORCE_EXPORT const char THEME_PATTERN_RICH_EDITOR[] = "rich_editor_pattern";
 const char THEME_PATTERN_TEXT_OVERLAY[] = "text_overlay_pattern";
 const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
@@ -87,13 +87,14 @@ const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "ohos_shadow_pattern";
 const char THEME_PATTERN_CONTAINER_MODAL[] = "container_modal_pattern";
 const char THEME_PATTERN_SCROLLABLE[] = "scrollable_pattern";
+const char THEME_PATTERN_SELECTABLE[] = "selectable_pattern";
 const char THEME_PATTERN_APP[] = "app_theme_pattern";
 const char THEME_PATTERN_CONTAINER_PICKER[] = "container_picker_pattern";
 const char THEME_PATTERN_CORNER_MARK[] = "corner_mark_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
-const char PATTERN_BG_COLOR[] = "bg_color";
+ACE_FORCE_EXPORT const char PATTERN_BG_COLOR[] = "bg_color";
 const char PATTERN_UNDERLINE_ACTIVED_COLOR[] = "underline_actived_color";
 const char PATTERN_UNDERLINE_TYPING_COLOR[] = "underline_typing_color";
 const char PATTERN_BG_COLOR_HOVERED[] = "bg_color_hovered";

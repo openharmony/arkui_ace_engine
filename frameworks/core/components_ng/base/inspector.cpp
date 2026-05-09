@@ -26,6 +26,7 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline/base/element_register.h"
 #include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -855,20 +856,36 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
 
 RefPtr<UINode> Inspector::GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach)
 {
-    std::queue<RefPtr<UINode>> elements;
-    elements.push(root);
-    RefPtr<UINode> inspectorElement;
+    bool keyIsNull = key == "";
+    const auto& id = root->GetInspectorId();
+    if (id ? key == *id : keyIsNull) {
+        return root;
+    }
+
+    std::vector<RefPtr<UINode>> elements;
+    std::vector<RefPtr<UINode>> elementsNext;
+    const auto& children = root->GetChildren(notDetach);
+    elements.reserve(children.size());
+    for (const auto& child : children) {
+        elements.emplace_back(child);
+    }
     while (!elements.empty()) {
-        auto current = elements.front();
-        elements.pop();
-        if (key == current->GetInspectorId().value_or("")) {
-            return current;
+        for (auto& current: elements) {
+            const auto& id = current->GetInspectorId();
+            if (id ? key == *id : keyIsNull) {
+                return current;
+            }
         }
 
-        const auto& children = current->GetChildren(notDetach);
-        for (const auto& child : children) {
-            elements.push(child);
+        elementsNext.reserve(elements.size() * 2); // double size
+        for (auto& current: elements) {
+            const auto& children = current->GetChildren(notDetach);
+            for (const auto& child : children) {
+                elementsNext.emplace_back(child);
+            }
         }
+        elements.swap(elementsNext);
+        elementsNext.clear();
     }
     return nullptr;
 }

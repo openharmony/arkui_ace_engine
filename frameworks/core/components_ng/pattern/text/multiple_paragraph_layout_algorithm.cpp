@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
+#include "core/common/container.h"
 
 #include "text_layout_adapter.h"
 
@@ -55,7 +56,7 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
     auto size = geometryNode->GetFrameSize();
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto offsetY = padding.top.value_or(0);
-    auto align = Alignment::CENTER;
+    auto align = Alignment::CENTER_LEFT;
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
@@ -94,6 +95,20 @@ void UpdateSymbolHdrHeadRoomToRenderContext(const RefPtr<FrameNode>& frameNode, 
     }
 }
 } // namespace
+
+std::string MultipleParagraphLayoutAlgorithm::SpansToString()
+{
+    std::stringstream ss;
+    for (auto& list : spans_) {
+        ss << "[";
+        for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
+            ss << "[" << item->interval.first << "," << item->interval.second << ":"
+               << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
+        });
+        ss << "], ";
+    }
+    return ss.str();
+}
 
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
@@ -537,7 +552,7 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::CENTER;
+    auto align = Alignment::CENTER_LEFT;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }

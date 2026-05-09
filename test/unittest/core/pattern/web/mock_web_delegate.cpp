@@ -1204,6 +1204,10 @@ bool WebDelegate::OnNestedScrollV2(float& x, float& y)
 {
     return false;
 }
+bool WebDelegate::OnNestedFling(float& xVelocity, float& yVelocity)
+{
+    return false;
+}
 void WebDelegate::OnRootLayerChanged(int width, int height) {}
 bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
@@ -1272,6 +1276,10 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
     return nullptr;
+}
+bool WebDelegate::CheckAccessibilityNodeReady(const RefPtr<NG::FrameNode>&, int32_t)
+{
+    return GetAccessibilityNodeInfoByFocusMove(-1, 16) != nullptr;
 }
 OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() const
 {
@@ -1515,4 +1523,9 @@ void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
 void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
+
+std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> WebDelegate::GetNWebCommandActionManager()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

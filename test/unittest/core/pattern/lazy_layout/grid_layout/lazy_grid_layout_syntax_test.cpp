@@ -22,6 +22,7 @@
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"

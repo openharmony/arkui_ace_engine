@@ -246,11 +246,11 @@ class ObservableArray<T> extends Array<T> {
     }
 
     constructor(array: Array<T>, parent?: ObservableHandler, observed?: boolean) {
-        super(array.length)
+        super()
         const handler = new ObservableHandler(parent)
         for (let i = 0; i < array.length; i++) {
             if (observed === undefined) observed = ObservableHandler.contains(handler)
-            super.$_set(i, observableProxy(array[i], handler, observed))
+            super.push(observableProxy(array[i], handler, observed))
         }
         ObservableHandler.installOn(this, handler)
     }

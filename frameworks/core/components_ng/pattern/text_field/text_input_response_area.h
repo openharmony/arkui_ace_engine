@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class TextInputResponseArea : public virtual AceType {

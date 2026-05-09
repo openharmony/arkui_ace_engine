@@ -28,6 +28,8 @@
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
 const DimensionOffset DATEPICKER_OFFSET_DEFAULT_TOP = DimensionOffset(0.0_vp, 40.0_vp);

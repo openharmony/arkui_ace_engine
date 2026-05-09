@@ -33,53 +33,8 @@ public:
     {}
     ~DividerPaintMethod() override = default;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(dividerModifier_, nullptr);
-        return dividerModifier_;
-    }
-
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_VOID(dividerModifier_);
-        auto dividerRenderProperty = DynamicCast<DividerRenderProperty>(paintWrapper->GetPaintProperty());
-        CHECK_NULL_VOID(dividerRenderProperty);
-        auto host = paintWrapper->GetRenderContext()->GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<DividerTheme>(host->GetThemeScopeId());
-        CHECK_NULL_VOID(theme);
-        dividerColor_ = dividerRenderProperty->GetDividerColor().value_or(theme->GetColor());
-        lineCap_ = dividerRenderProperty->GetLineCap().value_or(LineCap::BUTT);
-        offset_ = paintWrapper->GetContentOffset();
-        if (lineCap_ == LineCap::SQUARE || lineCap_ == LineCap::ROUND) {
-            float boundsRectWidth = 0.0f;
-            float boundsRectHeight = 0.0f;
-            dividerLength_ += constrainStrokeWidth_;
-            if (vertical_) {
-                auto offsetY = offset_.GetY();
-                offset_.SetY(offsetY - constrainStrokeWidth_ / 2);
-                boundsRectWidth = constrainStrokeWidth_;
-                boundsRectHeight = dividerLength_;
-            } else {
-                auto offsetX = offset_.GetX();
-                offset_.SetX(offsetX - constrainStrokeWidth_ / 2);
-                boundsRectWidth = dividerLength_;
-                boundsRectHeight = constrainStrokeWidth_;
-            }
-            RectF boundsRect(offset_.GetX(), offset_.GetY(), boundsRectWidth, boundsRectHeight);
-            dividerModifier_->SetBoundsRect(boundsRect);
-            paintWrapper->FlushContentModifier();
-        }
-        dividerModifier_->SetStrokeWidth(constrainStrokeWidth_);
-        dividerModifier_->SetDividerLength(dividerLength_);
-        dividerModifier_->SetVertical(vertical_);
-        dividerModifier_->SetOffset(offset_);
-        dividerModifier_->SetColor(LinearColor(dividerColor_));
-        dividerModifier_->SetLineCap(lineCap_);
-        dividerModifier_->SetStrokeWidthLimitation(strokeWidthLimitation_);
-    }
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
     float constrainStrokeWidth_;

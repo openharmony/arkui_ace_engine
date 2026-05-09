@@ -23,6 +23,7 @@
 #endif
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {

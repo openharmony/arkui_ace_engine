@@ -132,6 +132,10 @@ public:
     {
         return isScrollable_;
     }
+    bool IsScrollAble(SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    void PerformScroll(const ScrollingConfig& config) override;
 
     void SetMaintainVisibleContentPosition(bool enabled)
     {
@@ -171,7 +175,7 @@ public:
     bool LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextIndexInGroup, int32_t curIndexInGroup,
         const ListItemGroupPara& listItemGroupPara, int32_t maxListItemIndex);
 
-    ScrollOffsetAbility GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
@@ -285,9 +289,9 @@ public:
 
     bool ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign scrollSnapAlign);
 
-    int32_t GetEndIndexExcludeEndOffset();
+    int32_t GetEndIndexExcludeEndOffset() const;
 
-    int32_t GetStartIndexExcludeStartOffset();
+    int32_t GetStartIndexExcludeStartOffset() const;
 
     void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
@@ -314,7 +318,7 @@ public:
         lastSnapTargetIndex_.reset();
     }
 
-    int32_t GetItemIndexByPosition(float xOffset, float yOffset);
+    int32_t GetItemIndexByPosition(float xOffset, float yOffset) const;
 
     void SetPredictLayoutParamV2(std::optional<ListPredictLayoutParamV2> param)
     {
@@ -348,6 +352,19 @@ public:
     }
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
+    bool NeedJudgeWithHotZone() override;
+    int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
+    bool IsInEditModeHotZone(const PointF& point) const override;
+    void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
+    SwipeSelectStateKey GetSwipeSelectStateKeyAtPosition(float offsetX, float offsetY) const override;
+    SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const override;
+    RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const override;
+    RefPtr<FrameNode> GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const override;
+    void MarkSwipeItemSelectedByStateKey(const SwipeSelectStateKey& stateKey, bool isSelected) override;
+    void BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& startKey, const SwipeSelectStateKey& endKey,
+        std::vector<SwipeSelectStateKey>& keys) const override;
+    void ApplyEditModeToVisibleItems() override;
+    void RemoveEditModeFromItems() override;
 
     void SetItemState(ItemState itemState, int32_t id)
     {
@@ -514,6 +531,9 @@ protected:
     void SetLayoutAlgorithmParams(
         const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
     bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
+    std::optional<ScrollingConfig> CreateScrollingConfig(
+        SmartGestureDirection direction, double distance) const;
+    bool CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const;
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -555,6 +575,9 @@ protected:
     bool isStackFromEnd_ = true;
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
+    std::optional<int32_t> GetDefaultScrollTargetIndex(
+        SmartGestureDirection direction, ScrollAlign align, int32_t anchorIndex) const;
+    double GetAverageScrollingDistance() const;
     float GetListCrossAxisSize() const;
     int32_t CalculateLaneNumber(int32_t index, const ListLayoutAlgorithm::PositionMap& itemPosition) const;
     void CalculateCrossAxisPosition(int32_t lane, float listCrossSize, float& crossPos, float& crossSize) const;
@@ -568,7 +591,7 @@ private:
     void FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent& onScrollIndex);
     void ChangeAxis(RefPtr<UINode> node);
     bool HandleTargetIndex(bool isJump);
-    float CalculateTargetPos(float startPos, float endPos);
+    float CalculateTargetPos(float startPos, float endPos) const;
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -597,14 +620,15 @@ private:
     void SetLayoutAlgorithmJumpAlign(
         const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
     void SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm);
+    void SetLayoutAlgorithmClipContent(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm);
     void SetChainAnimationCallback();
     bool NeedScrollSnapAlignEffect() const;
     ScrollAlign GetInitialScrollAlign() const;
-    bool GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos);
+    bool GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos) const;
     bool GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, float startPos, float endPos,
-        ScrollAlign align, float& targetPos);
+        ScrollAlign align, float& targetPos) const;
     bool GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
-        ScrollAlign align, float& targetPos);
+        ScrollAlign align, float& targetPos) const;
 
     // multiSelectable
     void ClearMultiSelect() override;
@@ -660,7 +684,6 @@ private:
     void ReportOnItemListEvent(const std::string& event);
     void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
-    void PostAfterCurrentLayoutTask();
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
@@ -716,6 +739,7 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
+    mutable std::optional<ListItemIndex> swipeResolvedItemIndex_;
     bool isNeedDividerAnimation_ = true;
     int32_t repeatDifference_ = 0;
 

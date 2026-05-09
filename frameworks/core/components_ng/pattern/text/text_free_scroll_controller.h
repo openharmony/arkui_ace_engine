@@ -15,13 +15,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FREE_SCROLL_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FREE_SCROLL_CONTROLLER_H
 
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class AxisAnimator;
 
 enum class State { IDLE, DRAG, FLING, WHEEL };
@@ -30,7 +33,7 @@ using TextFreeScrollCallback = std::function<void(float, int32_t, bool)>;
 using TextFreeEndScrollCallback = std::function<void(bool)>;
 using CheckCrashEdgeCallback = std::function<bool()>;
 
-class TextFreeScrollController final : public AceType {
+class ACE_FORCE_EXPORT TextFreeScrollController final : public AceType {
     DECLARE_ACE_TYPE(TextFreeScrollController, AceType);
     ACE_DISALLOW_COPY_AND_MOVE(TextFreeScrollController);
 
@@ -40,7 +43,7 @@ public:
 
     RefPtr<NGGestureRecognizer> GetGestureRecognizer() const
     {
-        return recognizer_;
+        return enabled_ ? recognizer_ : nullptr;
     }
 
     void SetOnScrollCallback(TextFreeScrollCallback&& callback)
@@ -60,6 +63,10 @@ public:
     void Fling(float velocity, bool isVertical);
     void StopScrollAnimation(bool isVertical);
     void StopAllScrollAnimation();
+    void SetScrollEnabled(bool enabled)
+    {
+        enabled_ = enabled;
+    }
 
 private:
     void InitializePanRecognizer();
@@ -107,6 +114,7 @@ private:
     float flingFinalPos_ = 0.0f;
     uint64_t lastVsyncTime_ = 0;
     float lastPosition_ = 0.0f;
+    bool enabled_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FREE_SCROLL_CONTROLLER_H

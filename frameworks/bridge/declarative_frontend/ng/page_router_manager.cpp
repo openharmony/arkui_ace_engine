@@ -21,6 +21,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
@@ -37,6 +38,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2809,5 +2811,12 @@ void PageRouterManager::NotifyPageTransitionEnd(const RefPtr<PipelineContext>& c
     auto mgr = context->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(page);
+}
+
+bool PageRouterManager::IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+{
+    return std::find_if(pageRouterStack_.begin(), pageRouterStack_.end(), [&page](const WeakPtr<FrameNode>& node) {
+        return node.Upgrade() == page;
+    }) != pageRouterStack_.end();
 }
 } // namespace OHOS::Ace::NG

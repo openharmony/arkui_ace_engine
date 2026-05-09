@@ -14,6 +14,7 @@
  */
 
 #include "core/components/image/image_element.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 

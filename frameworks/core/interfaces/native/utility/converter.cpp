@@ -43,6 +43,8 @@
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/ellipse_shape_peer.h"
+#include "core/interfaces/native/implementation/event_location_info_peer.h"
+#include "core/interfaces/native/implementation/finger_info_peer.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/level_order_peer.h"
@@ -53,6 +55,7 @@
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/text_modifier_peer.h"
+#include "core/interfaces/native/implementation/touch_object_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -1692,6 +1695,7 @@ ACE_FORCE_EXPORT TextDecorationOptions Convert(const Ark_TextDecorationOptions& 
     options.textDecoration = OptConvert<TextDecoration>(src.type);
     options.color = OptConvert<Color>(src.color);
     options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
+    options.lineThicknessScale = OptConvert<float>(src.thicknessScale);
     return options;
 }
 
@@ -2197,69 +2201,6 @@ void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
     }
 }
 
-void ParseDragPreviewMode(DragPreviewOption& previewOption, const Ark_DragPreviewOptions &src)
-{
-    auto previewModeHandler = [&previewOption](DragPreviewMode mode) -> bool {
-        switch (mode) {
-            case DragPreviewMode::AUTO: previewOption.ResetDragPreviewMode(); return true;
-            case DragPreviewMode::DISABLE_SCALE: previewOption.isScaleEnabled = false; break;
-            case DragPreviewMode::ENABLE_DEFAULT_SHADOW: previewOption.isDefaultShadowEnabled = true; break;
-            case DragPreviewMode::ENABLE_DEFAULT_RADIUS: previewOption.isDefaultRadiusEnabled = true; break;
-            case DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT:
-                previewOption.isDefaultDragItemGrayEffectEnabled = true; break;
-            case DragPreviewMode::ENABLE_MULTI_TILE_EFFECT: previewOption.isMultiTiled = true; break;
-            case DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW:
-                previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true; break;
-            default: break;
-        }
-        return false;
-    };
-    Converter::VisitUnion(src.mode,
-        [previewModeHandler](const Ark_DragPreviewMode& mode) {
-            auto previewMode = Converter::OptConvert<DragPreviewMode>(mode);
-            if (previewMode) {
-                previewModeHandler(previewMode.value());
-            }
-        },
-        [previewModeHandler](const Array_DragPreviewMode& modeArray) {
-            auto previewModeArray = Converter::Convert<std::vector<Ark_DragPreviewMode>>(modeArray);
-            for (auto mode : previewModeArray) {
-                auto previewMode = Converter::OptConvert<DragPreviewMode>(mode);
-                if (previewMode && previewModeHandler(previewMode.value())) {
-                    break;
-                }
-            }
-        },
-        []() {});
-}
-
-template<>
-DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
-{
-    DragPreviewOption previewOption;
-    ParseDragPreviewMode(previewOption, src);
-    Converter::VisitUnion(src.numberBadge,
-        [&previewOption](const Ark_Number& value) {
-            previewOption.isNumber = true;
-            previewOption.badgeNumber = Converter::Convert<int32_t>(value);
-        },
-        [&previewOption](const Ark_Boolean& value) {
-            previewOption.isNumber = false;
-            previewOption.isShowBadge = Converter::Convert<bool>(value);
-        },
-        [&previewOption]() {
-            previewOption.isNumber = false;
-            previewOption.isShowBadge = true;
-        });
-    if (src.sizeChangeEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto sizeChangeEffect = Converter::OptConvert<DraggingSizeChangeEffect>(src.sizeChangeEffect.value);
-        if (sizeChangeEffect) {
-            previewOption.sizeChangeEffect = sizeChangeEffect.value();
-        }
-    }
-    return previewOption;
-}
-
 template<>
 RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
 {
@@ -2754,19 +2695,31 @@ template<>
 FingerInfo Convert(const Ark_FingerInfo& src)
 {
     FingerInfo dst;
-    dst.fingerId_ = Converter::Convert<int32_t>(src.id);
-    dst.globalLocation_.SetX(Converter::Convert<float>(src.globalX));
-    dst.globalLocation_.SetY(Converter::Convert<float>(src.globalY));
-    dst.localLocation_.SetX(Converter::Convert<float>(src.localX));
-    dst.localLocation_.SetY(Converter::Convert<float>(src.localY));
-    dst.screenLocation_.SetX(Converter::Convert<float>(src.displayX));
-    dst.screenLocation_.SetY(Converter::Convert<float>(src.displayY));
-    // Handle globalDisplayX/Y
-    auto globalDisplayXOpt = Converter::OptConvert<float>(src.globalDisplayX);
-    auto globalDisplayYOpt = Converter::OptConvert<float>(src.globalDisplayY);
-    if (globalDisplayXOpt.has_value() && globalDisplayYOpt.has_value()) {
-        dst.globalDisplayLocation_.SetX(globalDisplayXOpt.value());
-        dst.globalDisplayLocation_.SetY(globalDisplayYOpt.value());
+    CHECK_NULL_RETURN(src, dst);
+    auto rawInfo = src->GetEventInfo();
+    CHECK_NULL_RETURN(rawInfo, dst);
+    dst.fingerId_ = rawInfo->fingerId_;
+    dst.operatingHand_ = rawInfo->operatingHand_;
+    dst.sourceType_ = rawInfo->sourceType_;
+    dst.sourceTool_ = rawInfo->sourceTool_;
+    dst.globalLocation_.SetX(rawInfo->globalLocation_.GetX());
+    dst.globalLocation_.SetY(rawInfo->globalLocation_.GetY());
+    dst.localLocation_.SetX(rawInfo->localLocation_.GetX());
+    dst.localLocation_.SetY(rawInfo->localLocation_.GetY());
+    dst.screenLocation_.SetX(rawInfo->screenLocation_.GetX());
+    dst.screenLocation_.SetY(rawInfo->screenLocation_.GetY());
+    dst.globalDisplayLocation_.SetX(rawInfo->globalDisplayLocation_.GetX());
+    dst.globalDisplayLocation_.SetY(rawInfo->globalDisplayLocation_.GetY());
+    if (rawInfo->currentLocalLocation_) {
+        const auto currentLocalLocation = rawInfo->currentLocalLocation_();
+        dst.currentLocalLocation_ = [currentLocalLocation]() {
+            return currentLocalLocation;
+        };
+    } else {
+        const auto localLocation = dst.localLocation_;
+        dst.currentLocalLocation_ = [localLocation]() {
+            return localLocation;
+        };
     }
     return dst;
 }
@@ -2775,14 +2728,17 @@ template<>
 EventLocationInfo Convert(const Ark_EventLocationInfo& src)
 {
     EventLocationInfo dst;
-    dst.localLocation_.SetX(Converter::Convert<double>(src.x));
-    dst.localLocation_.SetY(Converter::Convert<double>(src.y));
-    dst.windowLocation_.SetX(Converter::Convert<double>(src.windowX));
-    dst.windowLocation_.SetY(Converter::Convert<double>(src.windowY));
-    dst.displayLocation_.SetX(Converter::Convert<double>(src.displayX));
-    dst.displayLocation_.SetY(Converter::Convert<double>(src.displayY));
-    dst.globalDisplayLocation_.SetX(Converter::OptConvert<double>(src.globalDisplayX).value_or(0.0));
-    dst.globalDisplayLocation_.SetY(Converter::OptConvert<double>(src.globalDisplayY).value_or(0.0));
+    CHECK_NULL_RETURN(src, dst);
+    const auto* rawInfo = src->GetEventInfo();
+    CHECK_NULL_RETURN(rawInfo, dst);
+    dst.localLocation_.SetX(rawInfo->localLocation_.GetX());
+    dst.localLocation_.SetY(rawInfo->localLocation_.GetY());
+    dst.windowLocation_.SetX(rawInfo->globalLocation_.GetX());
+    dst.windowLocation_.SetY(rawInfo->globalLocation_.GetY());
+    dst.displayLocation_.SetX(rawInfo->screenLocation_.GetX());
+    dst.displayLocation_.SetY(rawInfo->screenLocation_.GetY());
+    dst.globalDisplayLocation_.SetX(rawInfo->globalDisplayLocation_.GetX());
+    dst.globalDisplayLocation_.SetY(rawInfo->globalDisplayLocation_.GetY());
     return dst;
 }
 
@@ -3921,38 +3877,26 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
 template<>
 TouchLocationInfo Convert(const Ark_TouchObject& src)
 {
-    TouchLocationInfo dst(src.id);
-    double windowX = Converter::Convert<double>(src.windowX);
-    double windowY = Converter::Convert<double>(src.windowY);
-    double x = Converter::Convert<double>(src.x);
-    double y = Converter::Convert<double>(src.y);
-    double displayX = Converter::Convert<double>(src.displayX);
-    double displayY = Converter::Convert<double>(src.displayY);
-
-    dst.SetGlobalLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(windowX),
-        PipelineBase::Vp2PxWithCurrentDensity(windowY)));
-    dst.SetLocalLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(x),
-        PipelineBase::Vp2PxWithCurrentDensity(y)));
-    dst.SetScreenLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(displayX),
-        PipelineBase::Vp2PxWithCurrentDensity(displayY)));
-    // Handle globalDisplayX/Y
-    auto globalDisplayXOpt = Converter::OptConvert<double>(src.globalDisplayX);
-    auto globalDisplayYOpt = Converter::OptConvert<double>(src.globalDisplayY);
-    if (globalDisplayXOpt.has_value() && globalDisplayYOpt.has_value()) {
-        dst.SetGlobalDisplayLocation(Offset(
-            PipelineBase::Vp2PxWithCurrentDensity(globalDisplayXOpt.value()),
-            PipelineBase::Vp2PxWithCurrentDensity(globalDisplayYOpt.value())
-        ));
-    }
-    auto pressedTimeOpt = Converter::OptConvert<int64_t>(src.pressedTime);
-    std::chrono::nanoseconds nanoseconds(pressedTimeOpt.value_or(0));
+    CHECK_NULL_RETURN(src, TouchLocationInfo(-1));
+    auto* rawInfo = src->GetEventInfo();
+    CHECK_NULL_RETURN(rawInfo, TouchLocationInfo(-1));
+    TouchLocationInfo dst(rawInfo->GetFingerId());
+    auto globalLoc = rawInfo->GetGlobalLocation();
+    auto localLoc = rawInfo->GetLocalLocation();
+    auto screenLoc = rawInfo->GetScreenLocation();
+    dst.SetGlobalLocation(Offset(globalLoc.GetX(), globalLoc.GetY()));
+    dst.SetLocalLocation(Offset(localLoc.GetX(), localLoc.GetY()));
+    dst.SetScreenLocation(Offset(screenLoc.GetX(), screenLoc.GetY()));
+    auto globalDisplayLoc = rawInfo->GetGlobalDisplayLocation();
+    dst.SetGlobalDisplayLocation(Offset(globalDisplayLoc.GetX(), globalDisplayLoc.GetY()));
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(rawInfo->GetPressedTime().time_since_epoch().count()));
     TimeStamp time(nanoseconds);
     dst.SetPressedTime(time);
-    dst.SetForce(Converter::OptConvert<float>(src.pressure).value_or(0.0f));
-    dst.SetWidth(Converter::OptConvert<int32_t>(src.width).value_or(0));
-    dst.SetHeight(Converter::OptConvert<int32_t>(src.height).value_or(0));
-    dst.SetOperatingHand(static_cast<int32_t>(src.hand.value));
-    dst.SetTouchType(Converter::Convert<std::optional<TouchType>>(src.type).value_or(TouchType::UNKNOWN));
+    dst.SetForce(rawInfo->GetForce());
+    dst.SetWidth(rawInfo->GetWidth());
+    dst.SetHeight(rawInfo->GetHeight());
+    dst.SetOperatingHand(rawInfo->GetOperatingHand());
+    dst.SetTouchType(rawInfo->GetTouchType());
     return dst;
 }
 
@@ -4012,21 +3956,6 @@ std::set<SourceTool> Convert(const Array_SourceTool& src)
     return dst;
 }
 
-template<>
-std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src)
-{
-    std::set<std::string> dst = {};
-    std::optional<std::string> convVal;
-    auto tmp = Converter::OptConvert<std::vector<Ark_uniformTypeDescriptor_UniformDataType>>(src);
-    if (!tmp.has_value()) return dst;
-    for (auto arkVal : tmp.value()) {
-        convVal = Converter::OptConvert<std::string>(arkVal);
-        if (convVal.has_value()) {
-            dst.insert(convVal.value());
-        }
-    }
-    return dst;
-}
 template<>
 std::string Convert(const Ark_CommandPath& src)
 {
@@ -4257,12 +4186,26 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
 template<>
 void AssignCast(std::optional<Color>& dst, const Ark_ColorMetricsExt& src)
 {
-    uint8_t red = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.red));
-    uint8_t green = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.green));
-    uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue));
-    uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha));
-    dst = Color::FromARGB(alpha, red, green, blue);
-    dst->SetColorSpace(static_cast<ColorSpace>(src.colorSpace));
+    bool isHDR = Converter::Convert<bool>(src.isHDR);
+    ColorSpace colorSpace = static_cast<ColorSpace>(src.colorSpace);
+    if (!isHDR && colorSpace != ColorSpace::BT2020) {
+        uint8_t red = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.red));
+        uint8_t green = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.green));
+        uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue));
+        uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha));
+        dst = Color::FromARGB(alpha, red, green, blue);
+        dst->SetColorSpace(colorSpace);
+        return;
+    } else {
+        double red = Converter::Convert<double>(src.redValue);
+        double green = Converter::Convert<double>(src.greenValue);
+        double blue = Converter::Convert<double>(src.blueValue);
+        double alpha = static_cast<double>(Converter::Convert<uint32_t>(src.alpha));
+        double headRoom = Converter::Convert<double>(src.headRoom);
+        dst = Color::FromFloat(red, green, blue, alpha, headRoom);
+        dst->SetColorSpace(colorSpace);
+        return;
+    }
 }
 
 template<>

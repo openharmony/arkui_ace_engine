@@ -387,6 +387,7 @@ public:
     };
     static void SetToolbarBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc);
     static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
+    static void SetInspectorLabelSta(UINode* node, const std::string& inspectorLabel);
 
 private:
     static bool CheckMenuIsShow(

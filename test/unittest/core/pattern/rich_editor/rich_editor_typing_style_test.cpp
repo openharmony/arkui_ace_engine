@@ -260,4 +260,148 @@ HWTEST_F(RichEditorTypingStyleTest, GetTypingStyle001, TestSize.Level0)
 
     richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
 }
+
+/**
+ * @tc.name: SetTypingStyle001
+ * @tc.desc: test SetTypingStyle when spans_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTypingStyleTest, SetTypingStyle001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->spans_.clear();
+    richEditorPattern->previewTextRecord_.previewContent.clear();
+
+    richEditorPattern->SetTypingStyle(TEST_TYPING_STYLE, std::nullopt);
+    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
+    EXPECT_TRUE(richEditorPattern->styleManager_->typingFontStyle_.has_value());
+
+    richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
+    EXPECT_FALSE(richEditorPattern->typingStyle_.has_value());
+}
+
+/**
+ * @tc.name: SetTypingParagraphStyle002
+ * @tc.desc: test SetTypingParagraphStyle when spans_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTypingStyleTest, SetTypingParagraphStyle002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->spans_.clear();
+    richEditorPattern->previewTextRecord_.previewContent.clear();
+
+    richEditorPattern->SetTypingParagraphStyle(TEST_TYPING_PARAGRAPH_STYLE);
+    EXPECT_TRUE(richEditorPattern->styleManager_->HasTypingParagraphStyle());
+
+    richEditorPattern->SetTypingParagraphStyle(std::nullopt);
+    EXPECT_FALSE(richEditorPattern->styleManager_->HasTypingParagraphStyle());
+}
+
+/**
+ * @tc.name: SetTypingParagraphStyle003
+ * @tc.desc: test SetTypingParagraphStyle when last span ends with newline
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTypingStyleTest, SetTypingParagraphStyle003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"test\n";
+    spanItem->position = static_cast<int32_t>(spanItem->content.length());
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->previewTextRecord_.previewContent.clear();
+
+    richEditorPattern->SetTypingParagraphStyle(TEST_TYPING_PARAGRAPH_STYLE);
+    EXPECT_TRUE(richEditorPattern->styleManager_->HasTypingParagraphStyle());
+
+    richEditorPattern->SetTypingParagraphStyle(std::nullopt);
+    EXPECT_FALSE(richEditorPattern->styleManager_->HasTypingParagraphStyle());
+    richEditorPattern->spans_.clear();
+}
+
+/**
+ * @tc.name: SetTypingStyle004
+ * @tc.desc: test SetTypingStyle when reset typing style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTypingStyleTest, SetTypingStyle004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"test";
+    spanItem->position = static_cast<int32_t>(spanItem->content.length());
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->previewTextRecord_.previewContent.clear();
+
+    richEditorPattern->SetTypingStyle(TEST_TYPING_STYLE, std::nullopt);
+    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
+
+    richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
+    EXPECT_FALSE(richEditorPattern->typingStyle_.has_value());
+    richEditorPattern->spans_.clear();
+}
+
+/**
+ * @tc.name: SetTypingParagraphStyle005
+ * @tc.desc: test SetTypingParagraphStyle when has previewContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTypingStyleTest, SetTypingParagraphStyle005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"test";
+    spanItem->position = static_cast<int32_t>(spanItem->content.length());
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->previewTextRecord_.previewContent = u"preview";
+
+    richEditorPattern->SetTypingParagraphStyle(TEST_TYPING_PARAGRAPH_STYLE);
+    EXPECT_TRUE(richEditorPattern->styleManager_->HasTypingParagraphStyle());
+
+    richEditorPattern->SetTypingParagraphStyle(std::nullopt);
+    EXPECT_FALSE(richEditorPattern->styleManager_->HasTypingParagraphStyle());
+    richEditorPattern->spans_.clear();
+    richEditorPattern->previewTextRecord_.previewContent.clear();
+}
+
+/**
+ * @tc.name: SetTypingParagraphStyle006
+ * @tc.desc: test SetTypingParagraphStyle when last span content is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTypingStyleTest, SetTypingParagraphStyle006, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"";
+    spanItem->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->previewTextRecord_.previewContent.clear();
+
+    richEditorPattern->SetTypingParagraphStyle(TEST_TYPING_PARAGRAPH_STYLE);
+    EXPECT_TRUE(richEditorPattern->styleManager_->HasTypingParagraphStyle());
+
+    richEditorPattern->SetTypingParagraphStyle(std::nullopt);
+    EXPECT_FALSE(richEditorPattern->styleManager_->HasTypingParagraphStyle());
+    richEditorPattern->spans_.clear();
+}
 }

@@ -20,7 +20,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/resource/resource_object.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/container_picker/container_picker_accessibility_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
@@ -34,6 +33,10 @@
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class ContainerPickerEventParam : public virtual AceType {
     DECLARE_ACE_TYPE(ContainerPickerEventParam, AceType);
 
@@ -52,7 +55,7 @@ class ACE_EXPORT ContainerPickerPattern : public NestableScrollContainer {
 
 public:
     ContainerPickerPattern() {};
-    ~ContainerPickerPattern() override = default;
+    ~ContainerPickerPattern() override;
 
     bool IsAtomicNode() const override
     {
@@ -86,6 +89,11 @@ public:
     float GetHeightFromAlgo()
     {
         return height_;
+    }
+
+    float GetPickerItemHeight() const
+    {
+        return pickerItemHeight_;
     }
 
     void SetContentMainSize(float contentMainSize)
@@ -300,6 +308,8 @@ private:
     void PlayHaptic(float offset);
     bool InnerHandleScroll(bool isDown);
 
+    void SyncPickerParamsFromLayout();
+
     void InitDefaultParams()
     {
         pickerItemHeight_ = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
@@ -354,7 +364,7 @@ private:
     bool isModified_ = false;
 
     int32_t containerPickerId_ = -1;
-    int32_t displayCount_ = 7;
+    int32_t displayCount_ = ContainerPickerUtils::DEFAULT_DISPLAYED_ITEM_COUNT;
     int32_t totalItemCount_ = 0;
     int32_t prevTotalItemCount_ = 0;
     int32_t selectedIndex_ = 0;

@@ -14,6 +14,7 @@
  */
 
 #include <optional>
+#include "core/accessibility/accessibility_manager.h"
 #include <string>
 #include <sys/time.h>
 
@@ -23,6 +24,7 @@
 
 #define private public
 #define protected public
+#include "core/common/container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -171,7 +173,8 @@ HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level0)
     errSetShadows.emplace_back(errShadow);
     textClockLayoutProperty->UpdateTextShadow(errSetShadows);
     EXPECT_EQ(textClockLayoutProperty->GetTextShadow(), errSetShadows);
-    EXPECT_EQ(errShadow.GetBlurRadius(), 0);
+    EXPECT_EQ(errShadow.GetBlurRadius(),
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0 : -0.1f);
 
     FONT_FEATURES_LIST fontFeatures;
     fontFeatures.emplace_back(std::make_pair("ss01", 1));
@@ -970,7 +973,8 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest001, TestSize.Level1)
     errSetShadows.emplace_back(errShadow);
     textClockLayoutProperty->UpdateTextShadow(errSetShadows);
     EXPECT_EQ(textClockLayoutProperty->GetTextShadow(), errSetShadows);
-    EXPECT_EQ(errShadow.GetBlurRadius(), 0);
+    EXPECT_EQ(errShadow.GetBlurRadius(),
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0 : -0.1f);
 
     FONT_FEATURES_LIST fontFeatures;
     fontFeatures.emplace_back(std::make_pair("ss01", 1));

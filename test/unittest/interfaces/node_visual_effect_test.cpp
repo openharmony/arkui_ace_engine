@@ -72,14 +72,14 @@ HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions001, TestSize.Level1)
 {
     ArkUI_Matrix4ScaleOptions* options = OH_ArkUI_Matrix4ScaleOptions_Create();
     ASSERT_NE(options, nullptr);
-    float value = 1.0f;
+    float valueOrigin = 1.0f;
     float valueCopy = 0.0f;
-    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_SetX(nullptr, value), ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_SetX(options, value), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_GetX(nullptr, &value), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_SetX(nullptr, valueOrigin), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_SetX(options, valueOrigin), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_GetX(nullptr, &valueOrigin), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_GetX(options, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_GetX(options, &valueCopy), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(valueCopy, value);
+    EXPECT_EQ(valueCopy, valueOrigin);
 }
 
 /**
@@ -91,14 +91,14 @@ HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions002, TestSize.Level1)
 {
     ArkUI_Matrix4ScaleOptions* options = OH_ArkUI_Matrix4ScaleOptions_Create();
     ASSERT_NE(options, nullptr);
-    float value = 1.0f;
+    float valueOrigin = 1.0f;
     float valueCopy = 0.0f;
-    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_SetY(nullptr, value), ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_SetY(options, value), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_GetY(nullptr, &value), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_SetY(nullptr, valueOrigin), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_SetY(options, valueOrigin), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_GetY(nullptr, &valueOrigin), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_GetY(options, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(OH_ArkUI_Matrix4ScaleOptions_GetY(options, &valueCopy), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(valueCopy, value);
+    EXPECT_EQ(valueCopy, valueOrigin);
 }
 
 /**

@@ -19,6 +19,7 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
@@ -28,7 +29,6 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -655,7 +655,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto longPressUpdateValue = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                     GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
-        InteractionInterface::GetInstance()->SetDraggableState(true);
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();

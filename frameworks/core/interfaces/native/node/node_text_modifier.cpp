@@ -32,6 +32,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
+#include "frameworks/core/components_ng/pattern/text/text_layout_property.h"
 #include "frameworks/core/common/ime/text_range.h"
 
 namespace OHOS::Ace::NG {

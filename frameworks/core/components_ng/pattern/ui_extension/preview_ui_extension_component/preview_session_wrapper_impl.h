@@ -20,7 +20,7 @@
  
 #include "session/host/include/extension_session.h"
 #include "want.h"
- 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
@@ -117,6 +117,7 @@ private:
         uint32_t customId, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data);
     void UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr);
+    void SetConnectTORenderInner(RefPtr<Platform::AceContainer> contaienr,  Rosen::SessionInfo& session);
     AceLogTag tag_ = AceLogTag::ACE_SECURITYUIEXTENSION;
     WeakPtr<PreviewUIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;

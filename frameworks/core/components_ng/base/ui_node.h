@@ -120,6 +120,11 @@ class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
 
+enum class UINodeType {
+    FRAME_NODE,
+    OTHER
+};
+
 // UINode is the base class of FrameNode and SyntaxNode.
 class ACE_FORCE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
@@ -621,6 +626,16 @@ public:
     std::string GetDebugLine() const
     {
         return debugLine_;
+    }
+
+    void SetInspectorLabel(const std::string& inspectorLabel)
+    {
+        inspectorLabel_ = inspectorLabel;
+    }
+
+    std::string GetInspectorLabel() const
+    {
+        return inspectorLabel_;
     }
 
     void SetViewId(const std::string& viewId)
@@ -1267,6 +1282,14 @@ public:
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);
 
+    UINodeType GetNodeType() const
+    {
+        return uiNodeType_;
+    }
+
+private:
+    bool uiNodeGcEnable_ = false;
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1320,6 +1343,7 @@ protected:
 
     virtual void OnOffscreenProcessResource() {}
 
+    UINodeType uiNodeType_ = UINodeType::OTHER;
     bool isRemoving_ = false;
 
     virtual bool RemoveImmediately() const;
@@ -1367,7 +1391,6 @@ protected:
     int32_t themeScopeId_ = 0;
     int32_t subtreeIgnoreCount_ = 0;
     std::list<RefPtr<FrameNode>> adoptedChildren_;
-
 private:
     void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
         ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker);
@@ -1480,8 +1503,8 @@ private:
     bool needSetInActiveAfterTransitionOut_ = false;
 
     bool isStaticNode_ = false;
-    bool uiNodeGcEnable_ = false;
     bool isAdopted_ = false;
+    std::string inspectorLabel_;
 };
 
 } // namespace OHOS::Ace::NG

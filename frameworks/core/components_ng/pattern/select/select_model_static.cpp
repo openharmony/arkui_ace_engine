@@ -15,9 +15,12 @@
 
 #include "core/components_ng/pattern/select/select_model_static.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text/text_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

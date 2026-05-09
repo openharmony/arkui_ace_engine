@@ -40,6 +40,7 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
         overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
         overlayMod->SetSingleLine(richEditorPattern->isSingleLineMode_);
+        overlayMod->SetHorizontalScrolling(richEditorPattern->isHorizontalScrolling_);
         overlayMod->ChangeOverlay();
         if (!richEditorPattern->HasFocus()) {
             overlayMod->UpdateScrollBar(paintWrapper);
@@ -68,17 +69,13 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
     overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
     overlayMod->SetSingleLine(richEditorPattern->isSingleLineMode_);
+    overlayMod->SetHorizontalScrolling(richEditorPattern->isHorizontalScrolling_);
     SetPreviewTextDecoration(paintWrapper);
+    const auto& selection = richEditorPattern->GetTextSelector();
+    auto selectedRects = richEditorPattern->CalculateSelectedRect(selection.GetTextStart(), selection.GetTextEnd());
     if (!richEditorPattern->HasFocus()) {
         overlayMod->SetCaretVisible(false);
         overlayMod->SetFloatingCaretVisible(false);
-        const auto& selection = richEditorPattern->GetTextSelector();
-        std::vector<RectF> selectedRects;
-        if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-            auto contentRect = richEditorPattern->GetTextContentRect();
-            auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
-            selectedRects = CalculateSelectedRect(rects, contentRect.Width());
-        }
         overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
         overlayMod->SetSelectedRects(selectedRects);
         return;
@@ -86,13 +83,7 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
     overlayMod->SetSelectedColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
     SetCaretState(paintWrapper);
-    std::vector<RectF> selectedRects;
-    const auto& selection = richEditorPattern->GetTextSelector();
     auto contentRect = richEditorPattern->GetTextContentRect();
-    if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-        auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
-        selectedRects = CalculateSelectedRect(rects, contentRect.Width());
-    }
     overlayMod->SetContentRect(contentRect);
     overlayMod->SetSelectedRects(selectedRects);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();

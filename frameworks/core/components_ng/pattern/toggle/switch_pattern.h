@@ -16,11 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_PATTERN_H
 
-#include "base/geometry/axis.h"
 #include "base/geometry/size.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_accessibility_property.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
@@ -214,18 +212,14 @@ private:
     void CreateDragFrameNode();
     void CreateDragPointNode();
     void CreateBlurCoverNode();
-    void UpdateMaterialNodePosition();
-    float CalculatePointCenterX(float pointRadius, float actualGap) const;
+    void UpdateMaterialNodePosition(float centerX, float centerY, float pointRadius);
+    void RegisterMaterialNodePositionCallback();
     void ShowMaterialNode();
     void HideMaterialNode();
-    bool PredictFinalToggleState() const;
-    void CalculateHideTargetPosition(float& targetFrameX, float& targetFrameY,
-        float& targetPointNodeX, float& targetPointNodeY);
     void ResetMaterialNodeAppearance(const RefPtr<RenderContext>& pointRC,
         const RefPtr<RenderContext>& blurRC);
     void AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
-        const RefPtr<RenderContext>& blurRC, const RefPtr<SwitchModifier>& switchModifier,
-        float targetFrameX, float targetFrameY, float targetPointNodeX, float targetPointNodeY);
+        const RefPtr<RenderContext>& blurRC, const RefPtr<SwitchModifier>& switchModifier);
     void AnimateToDragState();
     float GetPointRadius() const;
     float GetActualGap() const;
@@ -235,7 +229,7 @@ private:
 
     // Drag animation helpers
     AnimationOption CreateDragAnimationOption() const;
-    BlurStyleOption CreateDragBlurStyleOption() const;
+    BlurStyleOption CreateDragBlurStyleOption(float scale) const;
     AnimationOption CreateLowGradeSpringOption() const;
     void HideMaterialNodes();
 
@@ -287,9 +281,10 @@ private:
     RefPtr<FrameNode> dragFrameNode_;
     RefPtr<FrameNode> dragPointNode_;
     RefPtr<FrameNode> blurCoverNode_;
-    bool isDragActive_ = false;
     bool isFrameNodeVisible_ = false;
     CancelableCallback<void()> longPressTask_;
+
+    bool pendingHide_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     std::function<void(bool)> isFocusActiveUpdateEvent_;

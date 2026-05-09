@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
 #include "core/common/ace_engine.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

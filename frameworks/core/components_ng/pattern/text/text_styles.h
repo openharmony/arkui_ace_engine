@@ -16,15 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
 
+#include "base/geometry/calc_dimension.h"
 #include "base/image/drawing_color_filter.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "ui/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -252,13 +258,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColor, Color);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSizeScale, double);
 
@@ -305,6 +306,50 @@ struct FontStyle {
     struct resourceUpdater {
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, FontStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+};
+
+struct SymbolStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolSourceInfo, SymbolSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolShadow, SymbolShadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ShaderStyle, std::vector<SymbolGradient>);
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, SymbolStyle&)>&& updateFunc)
+    {
+        CHECK_NULL_VOID(resObj && updateFunc);
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    size_t RemoveResource(const std::string& key)
+    {
+        return resMap_.erase(key);
+    }
+
+    void CopyResource(const std::unique_ptr<SymbolStyle>& source)
+    {
+        CHECK_NULL_VOID(source);
+        resMap_ = source->resMap_;
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, SymbolStyle&)> updateFunc;
     };
     std::unordered_map<std::string, resourceUpdater> resMap_;
 };
@@ -378,7 +423,8 @@ void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const
     TextStyle& textStyle, bool isSymbol = false);
 
 ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false,
+    const std::unique_ptr<SymbolStyle>& symbolStyle = nullptr);
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme, bool isSymbol = false);

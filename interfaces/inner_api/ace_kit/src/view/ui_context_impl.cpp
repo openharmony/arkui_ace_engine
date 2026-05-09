@@ -27,6 +27,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container_scope.h"
 #include "core/common/display_info.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {

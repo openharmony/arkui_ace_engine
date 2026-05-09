@@ -21,6 +21,7 @@
 #include "base/image/image_defines.h"
 #include "base/image/image_source.h"
 #include "base/log/log.h"
+#include "modules/svg/include/SkSVGDOM.h"
 
 namespace OHOS::Ace {
 namespace {

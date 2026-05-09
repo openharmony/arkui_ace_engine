@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/test_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #define private public
 #define protected public

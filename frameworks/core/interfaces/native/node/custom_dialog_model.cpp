@@ -405,6 +405,8 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.offset = DimensionOffset(Dimension(controllerHandler->offsetX, DimensionUnit::VP),
         Dimension(controllerHandler->offsetY, DimensionUnit::VP));
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
+    dialogProperties.displayModeInSubWindow =
+        static_cast<DialogDisplayModeInSubWindow>(controllerHandler->displayModeInSubWindow);
     dialogProperties.isModal = controllerHandler->isModal;
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
     dialogProperties.hasInvertColor.hasBackgroundColor = controllerHandler->hasCustomBackgroundColor;
@@ -553,6 +555,7 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogPr
         .dialogLevelMode = dialogProps.dialogLevelMode,
         .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
+        .displayModeInSubWindow = dialogProps.displayModeInSubWindow,
         .customCNode = dialogProps.customCNode };
     ParsePartialDialogPropertiesFromProps(dialogProps, dialogAttr);
     return dialogAttr;
@@ -945,6 +948,13 @@ ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle controllerHandler, bool sho
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->showInSubWindow = showInSubWindow;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetDialogDisplayModeInSubWindow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 displayModeInSubWindow)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->displayModeInSubWindow = displayModeInSubWindow;
     return ERROR_CODE_NO_ERROR;
 }
 

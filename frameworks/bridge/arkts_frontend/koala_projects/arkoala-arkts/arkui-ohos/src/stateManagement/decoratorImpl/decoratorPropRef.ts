@@ -24,7 +24,7 @@ import { WatchFunc } from './decoratorWatch';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '@component/interop';
 import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 
 export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropRefDecoratedVariable<T> {
@@ -57,7 +57,6 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         const shouldAddRef = this.shouldAddRef();
         const value = this.localValue.get(shouldAddRef);
         if (shouldAddRef) {
-            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
             uiUtils.builtinContainersAddRefAnyKey(value);
             this.selfTrack();
             ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();
@@ -85,11 +84,10 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
 
         // Update ObservedObjectRegistry registration
         this.updateObservedObjectRegistration(oldValue, value);
-
+        this.execWatchFuncs();
         if (this.setProxyValue) {
             this.setProxyValue!(value);
         }
-        this.execWatchFuncs();
     }
 
     update(newValue: T): void {

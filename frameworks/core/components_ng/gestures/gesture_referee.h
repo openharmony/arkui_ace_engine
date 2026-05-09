@@ -91,6 +91,14 @@ public:
     {
         queryStateFunc_ = queryStateFunc;
     }
+
+    // Iterate over every recognizer currently registered in GestureScope.
+    // The callback may return false to stop iteration early. Used by Pan
+    // recognizers to find their peers (other Pan recognizers in the arena)
+    // without baking concrete-type knowledge into the referee.
+    bool ForEachRecognizer(
+        const std::function<bool(const RefPtr<NGGestureRecognizer>&)>& callback);
+
     bool QueryAllDone(size_t touchId);
     bool CheckRecognizerState();
 
@@ -153,6 +161,13 @@ public:
     bool IsScopesEmpty() const;
     void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus);
     void UpdateGestureReferee(size_t touchId);
+
+    // Iterate over every recognizer currently registered in any GestureScope.
+    // The callback may return false to stop iteration early. Used by Pan
+    // recognizers to find their peers (other Pan recognizers in the arena)
+    // without baking concrete-type knowledge into the referee.
+    void ForEachRecognizer(
+        const std::function<bool(const RefPtr<NGGestureRecognizer>&)>& callback);
 private:
     void RecallOnAcceptGesture();
     bool CheckRecognizerInInnerContainer(const RefPtr<NGGestureRecognizer>& recognizer);

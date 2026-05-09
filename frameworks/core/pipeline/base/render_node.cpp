@@ -14,6 +14,9 @@
  */
 
 #include "core/pipeline/base/render_node.h"
+#include "core/pipeline/container_window_manager.h"
+
+#include "core/accessibility/accessibility_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -24,6 +27,7 @@
 #include "core/pipeline/base/rs_node_adapter.h"
 #endif
 
+#include "base/utils/system_properties.h"
 #include "base/log/dump_log.h"
 #include "core/components/common/rotation/rotation_node.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -58,6 +62,11 @@ inline std::multiset<RefPtr<RenderNode>, ZIndexComparator> SortChildrenByZIndex(
 } // namespace
 
 constexpr Dimension FOCUS_BOUNDARY = 4.0_vp; // focus padding + effect boundary, VP
+
+bool IsRosenBackendEnabledForRenderNode()
+{
+    return SystemProperties::GetRosenBackendEnabled();
+}
 
 RenderNode::RenderNode(bool takeBoundary) : takeBoundary_(takeBoundary) {}
 
@@ -225,6 +234,37 @@ void RenderNode::ClearChildren()
     children_.clear();
 }
 
+int32_t RenderNode::GetAccessibilityNodeId() const
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        return accessibilityNode->GetNodeId();
+    }
+    return 0;
+}
+
+void RenderNode::ClearAccessibilityRect()
+{
+    auto node = accessibilityNode_.Upgrade();
+    if (node) {
+        node->ClearRect();
+    }
+    for (auto& child : children_) {
+        child->ClearAccessibilityRect();
+    }
+}
+
+void RenderNode::SetAccessibilityVisible(bool visible)
+{
+    auto node = accessibilityNode_.Upgrade();
+    if (node) {
+        node->SetVisible(visible);
+    }
+    for (auto& child : children_) {
+        child->SetAccessibilityVisible(visible);
+    }
+}
+
 void RenderNode::UpdateTouchRect()
 {
     if (!isResponseRegion_) {
@@ -348,7 +388,9 @@ void RenderNode::DumpTree(int32_t depth)
     }
     const auto& children = GetChildren();
     if (DumpLog::GetInstance().GetDumpFile()) {
-        auto dirtyRect = context_.Upgrade()->GetDirtyRect();
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto dirtyRect = context->GetDirtyRect();
         std::string touchRectList = "[";
         for (auto& rect : touchRectList_) {
             touchRectList.append("{").append(rect.ToString()).append("}");

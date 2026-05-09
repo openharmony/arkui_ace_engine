@@ -750,6 +750,7 @@ struct ArkUIAniDragControllerModifier {
     void (*aniDragActionCancelDataLoading)(const char* key);
     void (*aniDragActionNotifyDragStartReques)(int requestStatus);
     void (*aniDragActionEnableDropDisallowedBadge)(bool enabled);
+    bool (*aniDragActionInterruptFollowHandMorphDropAnimation)();
     int32_t (*aniSpringLoadingContextGetState)(ani_long ptr);
     int32_t (*aniSpringLoadingContextGetCurrentNotifySequence)(ani_long ptr);
     void (*aniSpringLoadingContextGetDragInfos)(ani_long ptr, ArkUIDragInfos& info);
@@ -902,6 +903,11 @@ struct ArkUIAniDetachedFreeRootModifier {
 struct ArkUIAniGestureEventUIObserverModifier {
     void (*removePanListenerCallback)(
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    std::pair<bool, int32_t> (*getNodeInfo)(
+        int32_t instanceId, int32_t nodeId, const std::string& nodeKey, bool isStr, bool isInt);
+    std::pair<bool, bool> (*isNodeRenderStateRegisterLimited)(int32_t instanceId, int32_t resourceId, int32_t nodeId);
+    void (*triggerNodeRenderStateForFirstRegister)(int32_t instanceId, int32_t resourceId, int32_t nodeId);
+    void (*removeNodeRenderStateCallback)(int32_t instanceId, int32_t resourceId, int32_t nodeId, bool isRemoveAll);
     void (*removeClickListenerCallback)(
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
     void (*removeTapListenerCallback)(

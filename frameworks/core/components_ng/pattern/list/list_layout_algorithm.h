@@ -21,13 +21,14 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
-#include "compatible/components/list_v2/list_component.h"
 #include "core/components_ng/pattern/list/list_properties.h"
+#include "core/common/window_size_breakpoint.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -523,6 +524,15 @@ public:
 
     float GetChildMainSize(const RefPtr<LayoutWrapper>& wrapper, int32_t index);
 
+    bool NeedReserveEditModeCheckBoxSpace() const;
+
+    void SetDefaultMultiSelectStyleEnabled(bool enabled)
+    {
+        defaultMultiSelectStyleEnabled_ = enabled;
+    }
+
+    void UpdateListItemEditModeCheckBoxSpace(const RefPtr<LayoutWrapper>& wrapper) const;
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -590,6 +600,7 @@ protected:
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListLayoutProperty> listLayoutProperty_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
+    bool defaultMultiSelectStyleEnabled_ = true;
 
     virtual void MeasureList(LayoutWrapper* layoutWrapper);
     LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);
@@ -646,6 +657,7 @@ protected:
     }
 
     void CalculateFixOffset(const ScaleProperty& scaleProperty);
+    void PostClipContentSafeAreaBundle(LayoutWrapper* layoutWrapper);
 
     void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
 
@@ -720,6 +732,7 @@ private:
         const RefPtr<ListPattern>& pattern,
         const ListPredictLayoutParamV2& param,
         const ListMainSizeValues& listMainSizeValues,
+        int64_t deadline,
         bool show);
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);

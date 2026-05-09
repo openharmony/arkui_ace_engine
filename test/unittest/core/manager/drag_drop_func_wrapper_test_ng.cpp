@@ -1984,4 +1984,113 @@ HWTEST_F(DragDropFuncWrapperTestNg, DragDropFuncWrapperTest055, TestSize.Level1)
     EXPECT_EQ(option.options.opacity, DEFAULT_OPACITY);
 }
 
+/**
+ * @tc.name: DragDropFuncWrapperTest056
+ * @tc.desc: Test ParseDragPreviewMaterialInfo with empty DragPreviewOption
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNg, DragDropFuncWrapperTest056, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragPreviewOption object without material
+     */
+    NG::DragPreviewOption option;
+
+    /**
+     * @tc.steps: step2. call ParseDragPreviewMaterialInfo
+     * @tc.expected: step2. materialId is -1 (no material set)
+     */
+    auto materialInfo = NG::DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option);
+    EXPECT_EQ(materialInfo.materialId, -1);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTest057
+ * @tc.desc: Test ParseDragPreviewMaterialInfo with dipScale and ColorMode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNg, DragDropFuncWrapperTest057, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragPreviewOption object without material
+     */
+    NG::DragPreviewOption option;
+
+    /**
+     * @tc.steps: step2. call ParseDragPreviewMaterialInfo with dipScale and ColorMode
+     * @tc.expected: step2. materialId is -1 (no material set)
+     */
+    constexpr float testDipScale = 1.5f;
+    auto materialInfo = NG::DragDropFuncWrapper::ParseDragPreviewMaterialInfo(
+        option, testDipScale, ColorMode::DARK);
+    EXPECT_EQ(materialInfo.materialId, -1);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTest058
+ * @tc.desc: Test ParseDragPreviewMaterialInfo with nullptr Pipeline
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNg, DragDropFuncWrapperTest058, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragPreviewOption object without material
+     */
+    NG::DragPreviewOption option;
+
+    /**
+     * @tc.steps: step2. call ParseDragPreviewMaterialInfo with nullptr pipeline
+     * @tc.expected: step2. materialId is -1 (no material set)
+     */
+    RefPtr<PipelineBase> nullPipeline = nullptr;
+    auto materialInfo = NG::DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, nullPipeline);
+    EXPECT_EQ(materialInfo.materialId, -1);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTest059
+ * @tc.desc: Test ParseDragPreviewMaterialInfo with nullptr FrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNg, DragDropFuncWrapperTest059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragPreviewOption object without material
+     */
+    NG::DragPreviewOption option;
+
+    /**
+     * @tc.steps: step2. call ParseDragPreviewMaterialInfo with nullptr frameNode
+     * @tc.expected: step2. materialId is -1 (no material set)
+     */
+    RefPtr<NG::FrameNode> nullFrameNode = nullptr;
+    auto materialInfo = NG::DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, nullFrameNode);
+    EXPECT_EQ(materialInfo.materialId, -1);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTest060
+ * @tc.desc: Test ParseUiMaterial returns materialId from DragPreviewMaterialInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNg, DragDropFuncWrapperTest060, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragPreviewOption object without material
+     */
+    NG::DragPreviewOption option;
+
+    /**
+     * @tc.steps: step2. call ParseUiMaterial
+     * @tc.expected: step2. returns -1 when no material is set
+     */
+    auto materialId = NG::DragDropFuncWrapper::ParseUiMaterial(option);
+    EXPECT_EQ(materialId, -1);
+}
+
 } // namespace OHOS::Ace::NG

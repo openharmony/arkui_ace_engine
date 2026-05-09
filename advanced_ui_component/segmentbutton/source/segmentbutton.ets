@@ -43,6 +43,7 @@ interface SegmentButtonThemeInterface {
   CAPSULE_SELECTED_FONT_COLOR: ResourceColor,
   FONT_SIZE: DimensionNoPercentage,
   SELECTED_FONT_SIZE: DimensionNoPercentage,
+  ADAPTIVE_ITEM_FONT_SIZE: DimensionNoPercentage,
   BACKGROUND_COLOR: ResourceColor,
   TAB_SELECTED_BACKGROUND_COLOR: ResourceColor,
   CAPSULE_SELECTED_BACKGROUND_COLOR: ResourceColor,
@@ -69,6 +70,7 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   CAPSULE_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
   FONT_SIZE: $r('sys.float.segment_button_unselected_text_size'),
   SELECTED_FONT_SIZE: $r('sys.float.segment_button_checked_text_size'),
+  ADAPTIVE_ITEM_FONT_SIZE: $r('sys.float.Caption_M'),
   BACKGROUND_COLOR: $r('sys.color.segment_button_backboard_color'),
   TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.segment_button_checked_foreground_color'),
   CAPSULE_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_emphasize'),
@@ -416,7 +418,7 @@ export class SegmentButtonOptions {
     } else {
       this.showText = true
     }
-    let themePadding = LengthMetrics.resource($r('sys.float.padding_level2')).value;
+    let themePadding = LengthMetrics.resource($r('sys.float.padding_level1')).value;
     this.componentPadding = this.multiply ? 0 : themePadding;
     let info = uiMaterial.getMaterialInfo();
     if (info.state === uiMaterial.MaterialState.ENABLE && !options.backgroundSystemMaterial) {
@@ -644,30 +646,9 @@ struct SegmentButtonItem {
   @Prop isSegmentFocusStyleCustomized: boolean;
   @State isTextInMarqueeCondition: boolean = false;
   @State isButtonTextFadeout?: boolean = false;
-  @State useAdaptiveLineHeight: boolean = false;
+  @Consume useAdaptiveLineHeight: boolean;
   private groupId: string = ''
   @Prop @Watch('onFocusIndex') hover: boolean;
-  private environmentCallbackID?: number = undefined;
-  private environmentCallback: EnvironmentCallback = {
-    onConfigurationUpdated: (configuration) => {
-      this.updateLanguageLineHeight();
-    },
-    onMemoryLevel() {
-    }
-  };
-
-  updateLanguageLineHeight(): void {
-    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-    if (!resourceManager) {
-      console.error(`[SegmentButton] failed to get resourceManager`);
-      return;
-    }
-    try {
-      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
-    } catch (e) {
-      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
-    }
-  }
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding) {
@@ -709,23 +690,6 @@ struct SegmentButtonItem {
 
   aboutToAppear(): void {
     this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
-    if (deviceInfo.sdkApiVersion >= 26) {
-      this.updateLanguageLineHeight();
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
-      }
-    }
-  }
-
-  aboutToDisappear(): void {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
-      }
-      this.environmentCallbackID = void 0;
-    }
   }
 
   isDefaultSelectedFontColor(): boolean {
@@ -1398,6 +1362,15 @@ export struct SegmentButton {
   private isCustomizedCache?: boolean;
   @Provide openSelectedItemSystemMaterial?: boolean = false;
   @Provide selectedItemScale?: ScaleOptions = undefined;
+  @Provide useAdaptiveLineHeight: boolean = false;
+  private environmentCallbackID?: number = undefined;
+  private environmentCallback: EnvironmentCallback = {
+    onConfigurationUpdated: (configuration) => {
+      this.updateLanguageLineHeight();
+    },
+    onMemoryLevel() {
+    }
+  };
 
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
@@ -1489,6 +1462,36 @@ export struct SegmentButton {
     this.updateSelectedIndexes()
     this.setItemsSelected()
     this.updateAnimatedProperty(null)
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
+      }
+      this.environmentCallbackID = void 0;
+    }
+  }
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
   }
 
   private isMouseWheelScroll(event: GestureEvent) {
@@ -1505,14 +1508,14 @@ export struct SegmentButton {
     }
     // 获取系统语言
     try {
-      let systemLanguage: string = I18n.System.getSystemLanguage();
-      if (I18n.isRTL(systemLanguage) && this.options.direction != Direction.Ltr) {
-        return true
+      let appPreferredLanguage: string = I18n.System.getAppPreferredLanguage();
+      if (I18n.isRTL(appPreferredLanguage) && this.options.direction != Direction.Ltr) {
+        return true;
       }
     } catch (error) {
       console.error(`Ace SegmentButton getSystemLanguage, error: ${error.toString()}`);
     }
-    return false
+    return false;
   }
 
   private isSegmentFocusStyleCustomized(): boolean {
@@ -1583,7 +1586,6 @@ export struct SegmentButton {
           this.options,
           this.componentSize.height as number / 2
         ))
-        .clip(true)
 
         SegmentButtonItemArrayComponent({
           pressArray: this.pressArray,
@@ -1829,11 +1831,15 @@ export struct SegmentButton {
           }
 
           if (this.isBackgroundSystemMaterialEnabled()) {
-            let nowX = fingerInfo.globalX - this.panGestureStartPoint.x +
-              (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
-            nowX = Math.max(this.buttonItemsPosition[0].start?.value as number, nowX);
+            const startX = this.buttonItemsPosition[0].start?.value as number;
             let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
-            nowX = Math.min(this.buttonItemsPosition[buttonLength - 1].start?.value as number, nowX);
+            const endX = this.buttonItemsPosition[buttonLength - 1].start?.value as number;
+
+            const offset = this.isShouldMirror() ? this.panGestureStartPoint.x - fingerInfo.globalX :
+              fingerInfo.globalX - this.panGestureStartPoint.x
+            let nowX =  offset + (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
+            nowX = Math.max(startX, nowX);
+            nowX = Math.min(endX, nowX);
 
             this.selectedItemPosition = {
               start: LengthMetrics.vp(nowX),
@@ -1957,7 +1963,7 @@ export struct SegmentButton {
       this.getUIContext().animateTo({
         curve: curves.interpolatingSpring(0, 1, 195, 14),
       }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
         this.openSelectedItemSystemMaterial = true;
       })
     }
@@ -1966,7 +1972,7 @@ export struct SegmentButton {
   finishSelectMaterialAnimation() {
     if (this.openSelectedItemSystemMaterial) {
       this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
       })
       this.getUIContext()
         .animateTo({
@@ -2038,8 +2044,13 @@ export struct SegmentButton {
       setAnimatedPropertyFunc();
     }
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ??
-        segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE
+      const selectedFontSize = this.options.selectedFontSize ?? 
+        (this.useAdaptiveLineHeight ? 
+          segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : 
+          segmentButtonTheme.SELECTED_FONT_SIZE);
+      const normalFontSize = this.options.fontSize ?? 
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
+      this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
         this.options.fontWeight ?? initFontWeight(FontWeight.Regular)
       this.buttonItemProperty[index].isSelected = selected

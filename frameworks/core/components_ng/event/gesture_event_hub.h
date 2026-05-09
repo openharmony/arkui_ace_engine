@@ -28,7 +28,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/drag_drop_event.h"
-#include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/event/gesture_event_hub_types.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
@@ -56,24 +56,12 @@ using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
 using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
+using ShouldRecognizerParallelWithFunc = ShouldBuiltInRecognizerParallelWithFunc;
 using TouchTestDoneCallback = std::function<void(
     const std::shared_ptr<BaseGestureEvent>&, const std::list<WeakPtr<NGGestureRecognizer>>&)>;
 using OnGestureCollectInterceptFunc = std::function<GestureCollectIntervention(
     const std::vector<RefPtr<NGGestureRecognizer>>&,
     const std::vector<RefPtr<TouchEventTarget>>&)>;
-
-struct TouchTestInfo {
-    PointF windowPoint;
-    PointF currentCmpPoint;
-    PointF subCmpPoint;
-    RectF subRect;
-    std::string id;
-};
-
-struct TouchResult {
-    TouchTestStrategy strategy;
-    std::string id;
-};
 
 struct GestureCollectInterventionContext {
     TouchTestResult& newComingTargets;
@@ -139,6 +127,7 @@ struct PreparedInfoForDrag {
     SourceType deviceType = SourceType::NONE;
     bool isMenuNotShow = false;
     bool isSceneBoardTouchDrag = false;
+    bool disableArkuiAnimation = false;
     PointF displayPoint = { 0.0f, 0.0f };
 };
 
@@ -160,19 +149,7 @@ struct DragframeNodeInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
-struct DragDropInfo {
-    RefPtr<UINode> customNode;
-    RefPtr<PixelMap> pixelMap;
-    std::string extraInfo;
-    // The inspectorId acts as a preview surrogate identifier which is used
-    // to retrieve a preview image for the item being dragged.
-    std::string inspectorId;
-    std::function<RefPtr<UINode>()> buildFunc;
-    bool onlyForLifting = false;
-    bool delayCreating = false;
-};
 
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
 using OnDragCallbackCore = std::function<void(const DragNotifyMsgCore&)>;
@@ -218,6 +195,9 @@ public:
     void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
+    void SetCommonClickEvent(GestureEventFunc&& clickEvent);
+    void ClearCommonClickEvent();
+    GestureEventFunc GetCommonClickEvent() const;
     bool IsClickable() const;
     bool IsComponentClickable() const;
     bool IsUserClickable() const;
@@ -238,7 +218,9 @@ public:
     TouchInterceptFunc GetOnTouchIntercept() const;
     void SetShouldBuildinRecognizerParallelWithFunc(ShouldBuiltInRecognizerParallelWithFunc&& parallelGestureToFunc);
     ShouldBuiltInRecognizerParallelWithFunc GetParallelInnerGestureToFunc() const;
-    void TriggerShouldParallelInnerWith(
+    void SetShouldRecognizerParallelWithFunc(ShouldRecognizerParallelWithFunc&& parallelGestureToFunc);
+    ShouldRecognizerParallelWithFunc GetShouldRecognizerParallelWithFunc() const;
+    void TriggerShouldParallelWith(
         const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
     void SetOnGestureCollectInterceptFunc(OnGestureCollectInterceptFunc&& func);
     OnGestureCollectInterceptFunc GetOnGestureCollectInterceptFunc() const;
@@ -290,6 +272,7 @@ public:
         const PanDistanceMapDimension& distanceMap, double angle = DEFAULT_PAN_ANGLE);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
+    void SetPanCanCoexistWithScroll(bool value);
     void SetLongPressEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
@@ -576,6 +559,7 @@ private:
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
     bool needRecollect_ = false;
+    bool panCanCoexistWithScroll_ = false;
     bool isResponseRegion_ = false;
     bool hasTouchResponseRegionConfig_ = false;
     std::vector<DimensionRect> responseRegion_;
@@ -605,6 +589,7 @@ private:
     TouchInterceptFunc touchInterceptFunc_;
 
     ShouldBuiltInRecognizerParallelWithFunc shouldBuildinRecognizerParallelWithFunc_;
+    ShouldRecognizerParallelWithFunc shouldRecognizerParallelWithFunc_;
     OnGestureCollectInterceptFunc onGestureCollectInterceptFunc_;
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
 
@@ -621,6 +606,8 @@ private:
     bool monopolizeEvents_ = false;
     float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
     bool isDragNewFwk_ = false;
+    // When the component has onClick or TapGesture, it will set a common click event.
+    GestureEventFunc commonClickEvent_;
 };
 
 #ifdef ENABLE_ROSEN_BACKEND

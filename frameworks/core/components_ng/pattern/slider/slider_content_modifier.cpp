@@ -214,6 +214,8 @@ void GetRSColorSpaceByGradientColors(
             matrixType = RSCMSMatrixType::REC2020;
             break;
         case ColorSpace::DISPLAY_P3:
+            matrixType = RSCMSMatrixType::DCIP3;
+            break;
         case ColorSpace::SRGB:
         default:
             matrixType = RSCMSMatrixType::SRGB;
@@ -224,19 +226,29 @@ void GetRSColorSpaceByGradientColors(
     rsColorSpace = RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType);
 }
 
-// return max hdr
-float GetUIColorsByGradientColors(
+float GetHDRMaxByGradientColors(const std::vector<GradientColor>& gradientColors)
+{
+    float hdrMax = COLOR_HEAD_ROOM_DEFAULT_VALUE;
+    for (size_t index = 0; index < gradientColors.size(); index++) {
+        Color color = gradientColors[index].GetColor();
+        if (color.GetHeadRoomColor().has_value()) {
+            auto colorWithHeadRoom = color.GetHeadRoomColor().value();
+            hdrMax = std::max(hdrMax, colorWithHeadRoom.headRoom);
+        }
+    }
+    return hdrMax;
+}
+
+void GetUIColorsByGradientColors(
     const std::vector<GradientColor>& gradientColors, std::vector<RSUIColor>& resultColors)
 {
     resultColors.clear();
-    float maxHdr = COLOR_HEAD_ROOM_DEFAULT_VALUE;
     for (size_t index = 0; index < gradientColors.size(); index++) {
         Color color = gradientColors[index].GetColor();
         RSUIColor rsUIColor;
         if (color.GetHeadRoomColor().has_value()) {
             auto colorWithHeadRoom = color.GetHeadRoomColor().value();
             rsUIColor = GetHDRUIColorByHeadRoom(colorWithHeadRoom);
-            maxHdr = std::max(maxHdr, colorWithHeadRoom.headRoom);
         } else {
             auto linearColor = gradientColors[index].GetLinearColor();
             rsUIColor = RSUIColor(
@@ -247,11 +259,32 @@ float GetUIColorsByGradientColors(
         }
         resultColors.emplace_back(rsUIColor);
     }
-    return maxHdr;
+}
+
+void GetColor4fsByGradientColors(
+    const std::vector<GradientColor>& gradientColors, std::vector<RSColor4f>& resultColors)
+{
+    resultColors.clear();
+    for (size_t index = 0; index < gradientColors.size(); index++) {
+        uint32_t colorValue = gradientColors[index].GetLinearColor().GetValue();
+        RSColor4f rsColor4f = RSColor(colorValue).GetColor4f();
+        resultColors.emplace_back(rsColor4f);
+    }
 }
 
 std::shared_ptr<RSShaderEffect> CreateLinearGradientShader(
     const RSPoint& start, const RSPoint& end, const std::vector<RSUIColor>& colors,
+    const std::shared_ptr<RSColorSpace>& colorSpace, const std::vector<float>& pos)
+{
+#ifndef USE_ROSEN_DRAWING
+    return RSShaderEffect::CreateLinearGradient(start, end, colors, colorSpace, pos, RSTileMode::CLAMP);
+#else
+    return RSRecordingShaderEffect::CreateLinearGradient(start, end, colors, colorSpace, pos, RSTileMode::CLAMP);
+#endif
+}
+
+std::shared_ptr<RSShaderEffect> CreateLinearGradientShader(
+    const RSPoint& start, const RSPoint& end, const std::vector<RSColor4f>& colors,
     const std::shared_ptr<RSColorSpace>& colorSpace, const std::vector<float>& pos)
 {
 #ifndef USE_ROSEN_DRAWING
@@ -305,16 +338,23 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     brush.SetAntiAlias(true);
     std::shared_ptr<RSColorSpace> rsColorSpace = nullptr;
     GetRSColorSpaceByGradientColors(gradientColors, rsColorSpace);
-    std::vector<RSUIColor> rsUIColors;
+    float hdrMax = GetHDRMaxByGradientColors(gradientColors);
+    if (GreatNotEqual(hdrMax, COLOR_HEAD_ROOM_DEFAULT_VALUE)) {
 #ifdef ENABLE_ROSEN_BACKEND
-    float hdrMax = GetUIColorsByGradientColors(gradientColors, rsUIColors);
-    ApplyHDRHeadRoom(host_, hdrMax);
-#else
-    GetUIColorsByGradientColors(gradientColors, rsUIColors);
+        ApplyHDRHeadRoom(host_, hdrMax);
 #endif
-    brush.SetShaderEffect(reverse_ ?
-        CreateLinearGradientShader(endPoint, startPoint, rsUIColors, rsColorSpace, pos) :
-        CreateLinearGradientShader(startPoint, endPoint, rsUIColors, rsColorSpace, pos));
+        std::vector<RSUIColor> rsUIColors;
+        GetUIColorsByGradientColors(gradientColors, rsUIColors);
+        brush.SetShaderEffect(reverse_ ?
+            CreateLinearGradientShader(endPoint, startPoint, rsUIColors, rsColorSpace, pos) :
+            CreateLinearGradientShader(startPoint, endPoint, rsUIColors, rsColorSpace, pos));
+    } else {
+        std::vector<RSColor4f> rsColor4fs;
+        GetColor4fsByGradientColors(gradientColors, rsColor4fs);
+        brush.SetShaderEffect(reverse_ ?
+            CreateLinearGradientShader(endPoint, startPoint, rsColor4fs, rsColorSpace, pos) :
+            CreateLinearGradientShader(startPoint, endPoint, rsColor4fs, rsColorSpace, pos));
+    }
     canvas.AttachBrush(brush);
     auto trackRadius = isEnlarge_ ? trackBorderRadius * scaleValue_ : trackBorderRadius;
     RSRoundRect roundRect(trackRect, trackRadius, trackRadius);

@@ -17,6 +17,7 @@
 #include "ui/base/ace_type.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"

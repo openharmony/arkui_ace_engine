@@ -16,6 +16,8 @@
 #define NAPI_VERSION 8 
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/pipeline/container_window_manager.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <chrono>
@@ -156,6 +158,7 @@ const std::string EDITOR_BLUR_EVENT = "blur";
 const std::string EDITOR_FOCUS_EVENT = "focus";
 const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 const auto URL_SPAN_FILTER = [](const RefPtr<SpanItem>& span){ return (span->urlOnRelease); };
+const auto LPX_UNIT_SPAN_FILTER = [](const RefPtr<SpanItem>& span) { return span && span->HasLpxUnitStyle(); };
 
 std::list<RefPtr<FrameNode>> GetDragImageChildren(const RefPtr<FrameNode>& contentHost)
 {
@@ -263,6 +266,7 @@ void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& s
 {
     SetSpanItemChildren(spanItems);
     ProcessStyledString();
+    UpdateLpxUnitFlag();
 }
 
 void RichEditorPattern::ProcessStyledString()
@@ -308,6 +312,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     auto host = GetContentHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(imageItem);
+    imageItem->SetImageSpanOptions(imageItem->options); // update LPX flag
     auto options = imageItem->options;
     auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -329,6 +334,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         HandleImageDrag(imageNode);
     }
     SetImageLayoutProperty(imageNode, options);
+    UpdateLpxUnitFlag();
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageItem->nodeId_ = imageNode->GetId();
@@ -784,7 +790,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
 {
-    CHECK_NULL_VOID(!IsHandleMoving());
+    CHECK_NULL_VOID(!IsHandleMoving()); // Magnifier opened by long press can be closed via this path.
     if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
         ResetTouchSelectState();
         ResetTouchAndMoveCaretState();
@@ -1120,6 +1126,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, TextCha
     ResetSelectionAfterAddSpan(isPaste);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+    UpdateLpxUnitFlag();
     IF_TRUE(!isUndoRedo, AfterContentChange(changeValue));
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "end");
     return spanIndex;
@@ -1252,6 +1259,8 @@ void RichEditorPattern::OnAttachToFrameNode()
 {
     ACE_SCOPED_TRACE("RichEditorPattern::OnAttachToFrameNode");
     TextPattern::OnAttachToFrameNode();
+    InitSurfaceChangedCallback();
+    InitSurfacePositionChangedCallback();
     richEditorInstanceId_ = Container::CurrentIdSafely();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -1267,6 +1276,12 @@ void RichEditorPattern::OnAttachToFrameNode()
     auto contentNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_CONTENT_ETS_TAG, nodeId, patternCreator);
     frameNode->AddChild(contentNode);
     SetContentPattern(contentNode->GetPattern<RichEditorContentPattern>());
+}
+
+void RichEditorPattern::OnAttachToMainTreeMultiThreadExtension()
+{
+    InitSurfaceChangedCallback();
+    InitSurfacePositionChangedCallback();
 }
 
 void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -1464,11 +1479,13 @@ void RichEditorPattern::ReportCommandExecution(int32_t nodeId, const std::string
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
-void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& str,
-    const std::string& value, int32_t start, int32_t end)
+void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, int32_t start, int32_t end)
 {
     auto eventObj = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(eventObj);
+    std::string value = selectOverlay_->GetSelectedText();
+    CHECK_NULL_VOID(lastReportSelectionText_ != value);
+    lastReportSelectionText_ = value;
     eventObj->Put("event", str.c_str());
     eventObj->Put("value", value.c_str());
     eventObj->Put("start", start);
@@ -1523,7 +1540,7 @@ bool RichEditorPattern::HandleSetCaretPositionCommand(int32_t position, int32_t 
     SetCaretPosition(position);
     MoveCaretToContentRect();
     ReportCaretPositionChangeEvent(hostId, position);
-    ReportSelectionChangeEvent(hostId, "selectionChange", "", position, position);
+    ReportSelectionChangeEvent(hostId, "selectionChange", position, position);
     return true;
 }
 
@@ -1675,6 +1692,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     }
     ResetSelectionAfterAddSpan(isPaste);
     SpanNodeFission(spanNode);
+    UpdateLpxUnitFlag();
     return spanIndex;
 }
 
@@ -1829,6 +1847,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     SetCaretPosition(insertIndex + spanItem->content.length());
     ResetSelectionAfterAddSpan(false);
     SpanNodeFission(spanNode);
+    UpdateLpxUnitFlag();
     return spanIndex;
 }
 
@@ -2022,6 +2041,7 @@ void RichEditorPattern::RemoveEmptySpans()
 {
     RemoveEmptySpanItems();
     RemoveEmptySpanNodes();
+    UpdateLpxUnitFlag();
 }
 
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
@@ -2523,6 +2543,23 @@ void RichEditorPattern::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyl
     updateSpanStyle_ = updateSpanStyle;
 }
 
+bool RichEditorPattern::HasLpxUnitStyle() const
+{
+    return hasLpxUnitStyle_;
+}
+
+void RichEditorPattern::UpdateLpxUnitFlag()
+{
+    bool placeholderWithLpx = isShowPlaceholder_ && hasPlaceholderLpxUnitStyle_;
+    bool hasLpx = placeholderWithLpx || std::any_of(spans_.begin(), spans_.end(), LPX_UNIT_SPAN_FILTER);
+    CHECK_NULL_VOID(hasLpxUnitStyle_ != hasLpx);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "hasLpx -> %{public}d", hasLpx);
+    hasLpxUnitStyle_ = hasLpx;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    hasLpx ? host->RegisterLpxAttribute(LpxAttribute::ALWAYS) : host->UnRegisterLpxAttribute(LpxAttribute::ALWAYS);
+}
+
 void RichEditorPattern::MarkAISpanStyleChanged()
 {
     std::for_each(spans_.begin(), spans_.end(), [](const auto& span) {
@@ -2547,7 +2584,8 @@ void RichEditorPattern::UpdateCaretStyleByTypingStyle(bool isReset)
 {
     bool empty = spans_.empty();
     bool hasPreviewContent = !previewTextRecord_.previewContent.empty();
-    bool lastNewLine = !empty && styleManager_->HasTypingParagraphStyle() && spans_.back()->content.back() == u'\n';
+    bool lastNewLine = !empty && styleManager_->HasTypingParagraphStyle()
+        && !spans_.back()->content.empty() && spans_.back()->content.back() == u'\n';
     CHECK_NULL_VOID(empty || hasPreviewContent || lastNewLine || isReset);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2796,6 +2834,7 @@ void RichEditorPattern::UpdateImageAttribute(RefPtr<FrameNode>& imageNode, const
     if (updateSpanStyle_.marginProp.has_value()) {
         imageAttribute->marginProp = imageStyle.marginProp;
     }
+    imageSpanItem->SetImageSpanOptions(imageSpanItem->options); // update LPX flag
     imageSpanItem->MarkDirty();
 }
 
@@ -2834,9 +2873,7 @@ void RichEditorPattern::UpdateSpanStyle(
         } else {
             spanNode->GetSpanItem()->GetIndex(spanStart, spanEnd);
         }
-        if (spanEnd < start) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(spanEnd >= start);
 
         if (spanStart >= start && spanEnd <= end) {
             if (spanNode) {
@@ -2859,6 +2896,7 @@ void RichEditorPattern::UpdateSpanStyle(
             break;
         }
     }
+    UpdateLpxUnitFlag();
     IF_TRUE(isExternal, undoManager_->RecordOperationAfterChange(start, end - start, styledRecord));
 }
 
@@ -3339,7 +3377,8 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
     auto paraStart = firstSpan->position - static_cast<int32_t>(firstSpan->content.length());
 
     for (auto it = spanNodes.begin(); it != spanNodes.end(); ++it) {
-        if (it == std::prev(spanNodes.end()) || (*it)->GetSpanItem()->content.back() == u'\n') {
+        if (it == std::prev(spanNodes.end()) || (!(*it)->GetSpanItem()->content.empty()
+            && (*it)->GetSpanItem()->content.back() == u'\n')) {
             ParagraphInfo info;
             auto lm = (*it)->GetLeadingMarginValue({});
             std::optional<double> spacingOpt;
@@ -3413,7 +3452,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
         if (spanNode) {
             auto&& info = spanNode->GetSpanItem();
             spanEnd = info->position;
-            isEnd = info->content.back() == u'\n';
+            isEnd = !info->content.empty() && info->content.back() == u'\n';
         } else {
             ++spanEnd;
             isEnd = false;
@@ -3439,7 +3478,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
             res.emplace_back(spanNode);
             auto&& info = spanNode->GetSpanItem();
             spanEnd = info->position;
-            isEnd = info->content.back() == u'\n';
+            isEnd = !info->content.empty() && info->content.back() == u'\n';
         } else {
             ++spanEnd;
             isEnd = false;
@@ -3475,6 +3514,7 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const s
     for (const auto& spanNode : spanNodes) {
         UpdateParagraphStyle(spanNode, style);
     }
+    UpdateLpxUnitFlag();
     undoManager_->RecordOperationAfterChange(changeStart, changeEnd - changeStart, styledRecord);
 }
 
@@ -3640,8 +3680,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleSingleClick");
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
-    CHECK_NULL_VOID(!IsClickEventOnlyForMenuToggle(info));
-    CHECK_NULL_VOID(!HandleUrlSpanClickEvent(info));
+    CHECK_NULL_VOID(!IsClickEventOnlyForMenuToggle(info) && !HandleUrlSpanClickEvent(info));
 
     bool isMouseClick = info.GetSourceDevice() == SourceType::MOUSE;
     auto localOffset = info.GetLocalLocation();
@@ -3649,7 +3688,6 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
  
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     IF_TRUE(!isMousePressed_, HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY())));
-
     if (dataDetectorAdapter_->hasClickedAISpan_ || dataDetectorAdapter_->pressedByLeftMouse_) {
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->HideMenu());
         return;
@@ -3680,6 +3718,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
             IF_TRUE(textSelector_.SelectNothing(), StartTwinkling());
             RequestKeyboard(false, true, true, info.GetSourceDevice());
         }
+        lastReportSelectionText_ = "";
     }
     UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(localOffset);
@@ -3825,7 +3864,7 @@ bool RichEditorPattern::HandleUserGestureEvent(
             paragraphOffset.SetY(selectedRects[0].GetOffset().GetY());
             isParagraphHead = false;
         }
-        if (!isParagraphHead && item->content.back() == '\n') {
+        if (!isParagraphHead && !item->content.empty() && item->content.back() == '\n') {
             isParagraphHead = true;
         }
         for (auto&& rect : selectedRects) {
@@ -4550,8 +4589,7 @@ void RichEditorPattern::HandleDoubleClickEditLogic(GestureEvent& info, int32_t s
     RequestKeyboard(false, true, true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto value = selectOverlay_->GetSelectedText();
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", value, selectStart, selectEnd);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
 }
 
 void RichEditorPattern::StartVibratorByLongPress()
@@ -4620,10 +4658,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
             }, TaskExecutor::TaskType::UI, "ArkUIRichEditorHandleMenuCallbackOnSelectAll", PriorityType::VIP);
     }
     MarkContentNodeForRender();
-    std::u16string selectTextContent;
-    GetContentBySpans(selectTextContent);
-    std::string selectData = StringUtils::Str16ToStr8(selectTextContent);
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, 0, textSize);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", 0, textSize);
 }
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -5581,10 +5616,7 @@ void RichEditorPattern::HandleAISpanHoverEvent(const MouseInfo& info)
     if (info.GetAction() != MouseAction::MOVE || !NeedShowAIDetect()) {
         return;
     }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && (scrollBar->IsHover() || scrollBar->IsPressed())) {
-        return;
-    }
+    CHECK_NULL_VOID(!IsMouseOverScrollBar(info));
     if (dataDetectorAdapter_->aiSpanRects_.empty()) {
         for (const auto& kv : dataDetectorAdapter_->aiSpanMap_) {
             auto& aiSpan = kv.second;
@@ -6464,6 +6496,9 @@ void RichEditorPattern::FinishTextPreview()
         RemoveEmptySpans();
         IF_TRUE(previewTextRecord_.isSpanSplit, MergeAdjacentSpans(caretPosition_));
         previewTextRecord_.Reset();
+        UndoRedoRecord styledRecord;
+        undoManager_->UpdateRecordAfterChange(caretPosition_, 0, styledRecord);
+        undoManager_->RecordPreviewInputtingEnd(styledRecord);
         return;
     }
     auto previewContent = previewTextRecord_.previewContent;
@@ -6904,6 +6939,7 @@ void RichEditorPattern::CreateTextSpanNode(
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
         auto spanItem = spanNode->GetSpanItem();
         spanItem->SetTextStyle(typingTextStyle_);
+        UpdateLpxUnitFlag();
     } else {
         spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
         SetDefaultColor(spanNode);
@@ -7717,6 +7753,9 @@ void RichEditorPattern::HandleOnSelectAll()
     MoveCaretToContentRect();
     IF_TRUE(IsSelected(), StopTwinkling());
     MarkContentNodeForRender();
+    auto host = GetHost();
+ 	CHECK_NULL_VOID(host);
+ 	ReportSelectionChangeEvent(host->GetId(), "selectionChange", 0, newPos);
 }
 
 int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
@@ -7830,9 +7869,17 @@ void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
     auto action = keyEvent.action;
     bool isShiftPressed = hasKeyShift &&
         (action == KeyAction::DOWN || action == KeyAction::UP || action == KeyAction::CANCEL);
+    bool shiftOldFlag = shiftFlag_;
     if (isShiftPressed != shiftFlag_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateShiftFlag:%{public}d by action:%{public}d", isShiftPressed, action);
         shiftFlag_ = isShiftPressed;
+        if (shiftOldFlag && !shiftFlag_) {
+            auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
+            auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
+        }
     }
 }
 
@@ -8218,6 +8265,7 @@ int32_t RichEditorPattern::ProcessDeleteNodes(std::list<RichEditorAbstractSpanRe
         }
     }
     RemoveEmptySpan(deleteNodes);
+    UpdateLpxUnitFlag();
     return eraseLength;
 }
 
@@ -8418,6 +8466,7 @@ void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
     auto acceptedTouchInfo = GetAcceptedTouchLocationInfo(info);
     CHECK_NULL_VOID(acceptedTouchInfo.has_value());
     auto touchInfo = acceptedTouchInfo.value();
+    UpdateMagnifierTouchInfo(info.GetTimeStamp(), touchInfo.GetTouchType());
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(touchInfo);
@@ -8433,9 +8482,11 @@ void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
     } else if (touchType == TouchType::MOVE) {
         HandleTouchMove(touchInfo);
     } else if (touchType == TouchType::CANCEL) {
+        IF_PRESENT(magnifierController_, ResetTouchInfo());
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
         HandleTouchCancelAfterLongPress();
         ResetTouchAndMoveCaretState();
+        ResetMagnifierTouchInfo();
     }
 }
 
@@ -8487,7 +8538,9 @@ void RichEditorPattern::HandleTouchUp()
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
     if (!isHandleMoving) {
+        IF_PRESENT(magnifierController_, ResetTouchInfo()); // Reset state of magnifier which opened by long press.
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
+        ResetMagnifierTouchInfo();
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (isLongPress_) {
@@ -8559,8 +8612,7 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::string selectData = selectOverlay_->GetSelectedText();
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
 }
 
 void RichEditorPattern::HandleTouchCancelAfterLongPress()
@@ -8672,7 +8724,20 @@ void RichEditorPattern::SetMagnifierLocalOffset(Offset offset)
     auto localOffset = OffsetF{ offset.GetX(), offset.GetY() };
     auto localOffsetWithTrans = localOffset;
     selectOverlay_->GetLocalPointWithTransform(localOffsetWithTrans);
-    magnifierController_->SetLocalOffset(localOffsetWithTrans, localOffset);
+    magnifierController_->SetLocalOffset(
+        localOffsetWithTrans, magnifierTouchTimeStamp_, magnifierTouchType_, localOffset);
+}
+
+void RichEditorPattern::UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType)
+{
+    magnifierTouchTimeStamp_ = time;
+    magnifierTouchType_ = touchType;
+}
+
+void RichEditorPattern::ResetMagnifierTouchInfo()
+{
+    magnifierTouchTimeStamp_ = TimeStamp();
+    magnifierTouchType_ = TouchType::UNKNOWN;
 }
 
 void RichEditorPattern::SetMagnifierOffsetWithAnimation(Offset offset)
@@ -8861,6 +8926,9 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     if (selectStart != selectEnd && isMousePressed_ && oldMouseStatus == MouseStatus::MOVE) {
         FireOnSelect(selectStart, selectEnd);
+        auto host = GetHost();
+ 	    CHECK_NULL_VOID(host);
+ 	    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
     }
     StopAutoScroll();
     if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && IsSelectedBindSelectionMenu() &&
@@ -9032,8 +9100,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close selectOverlay when handle is showing");
         CloseSelectOverlay();
     }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && (scrollBar->IsHover() || scrollBar->IsPressed())) {
+    if (IsMouseOverScrollBar(info)) {
         ChangeMouseStyle(MouseFormat::DEFAULT);
         HandleUrlSpanForegroundClear();
         return;
@@ -10066,10 +10133,10 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
 }
 
 void RichEditorPattern::HandleSurfaceChanged(
-    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type)
+    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
     if (newWidth != prevWidth || newHeight != prevHeight) {
-        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
         UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
@@ -10372,8 +10439,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        std::string selectData = selectOverlay_->GetSelectedText();
-        ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, start, end);
+        ReportSelectionChangeEvent(host->GetId(), "selectionChange", start, end);
     }
     SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
     MoveCaretToContentRect();
@@ -10447,6 +10513,9 @@ void RichEditorPattern::CreateRichEditorOverlayModifier()
     if (!hostOverlayMod_) {
         hostOverlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>(
             WeakClaim(this), GetScrollBarOverlayModifier(), GetScrollEdgeEffect());
+    }
+    if (IsFreeScrollEnabled()) {
+        scrollController_->AttachModifier(hostOverlayMod_);
     }
 }
 
@@ -10593,13 +10662,18 @@ void RichEditorPattern::InitScrollablePattern()
     CHECK_NULL_VOID(layoutProperty);
     auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
     bool singleLine = layoutProperty->GetSingleLineValue(false);
-    CHECK_NULL_VOID(!barDisplayMode_.has_value() || barDisplayMode_.value() != barState || singleLine != isSingleLineMode_);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setBarState=%{public}d", barState);
-    barDisplayMode_ = barState;
+    bool needInit =
+        !barDisplayMode_.has_value() || barDisplayMode_.value() != barState || singleLine != isSingleLineMode_;
+    if (needInit) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setBarState=%{public}d", barState);
+        barDisplayMode_ = barState;
+        isSingleLineMode_ = singleLine;
+    }
+    CHECK_NULL_VOID(!HandleHorizontalScroll(needInit) && (needInit || needResetScrollBar_));
+    needResetScrollBar_ = false;
     if (!GetScrollableEvent()) {
         AddScrollEvent();
     }
-    isSingleLineMode_ = singleLine;
     SetAxis(isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL);
     if (barState != DisplayMode::AUTO) {
         barState = DisplayMode::ON;
@@ -10615,22 +10689,28 @@ void RichEditorPattern::InitScrollablePattern()
     if (overlayMod_) {
         UpdateScrollBarOffset();
     }
-    auto& paddingProperty = layoutProperty->GetPaddingProperty();
-    if (paddingProperty) {
-        auto offsetY = paddingProperty->top.has_value() ? paddingProperty->top->GetDimension().ConvertToPx() : 0.0f;
-        auto offsetX = paddingProperty->left.has_value() ? paddingProperty->left->GetDimension().ConvertToPx() : 0.0f;
-        richTextRect_.SetOffset(OffsetF(offsetX, offsetY));
-    }
+    UpdateRichTextRectOffsetWithPadding();
 }
 
-void RichEditorPattern::ProcessInnerPadding()
+void RichEditorPattern::UpdateRichTextRectOffsetWithPadding()
+{
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_VOID(paddingProperty);
+    auto offsetY = paddingProperty->top.has_value() ? paddingProperty->top->GetDimension().ConvertToPx() : 0.0f;
+    auto offsetX = paddingProperty->left.has_value() ? paddingProperty->left->GetDimension().ConvertToPx() : 0.0f;
+    richTextRect_.SetOffset(OffsetF(offsetX, offsetY));
+}
+
+std::optional<PaddingProperty> RichEditorPattern::GetInnerPadding()
 {
     auto theme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_VOID(theme);
+    CHECK_NULL_RETURN(theme, std::nullopt);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, std::nullopt);
     auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto themePadding = theme->GetPadding();
     auto& paddingProp = layoutProperty->GetPaddingProperty();
     auto left = !paddingProp ? CalcLength(themePadding.Left()).GetDimension()
@@ -10646,49 +10726,82 @@ void RichEditorPattern::ProcessInnerPadding()
     paddings.bottom = NG::CalcLength(bottom);
     paddings.left = NG::CalcLength(left);
     paddings.right = NG::CalcLength(right);
-    layoutProperty->UpdatePadding(paddings);
+    return paddings;
+}
+
+void RichEditorPattern::ProcessInnerPadding()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (auto paddings = GetInnerPadding(); paddings) {
+        layoutProperty->UpdatePadding(paddings.value());
+    }
 }
 
 void RichEditorPattern::UpdateScrollStateAfterLayout(bool shouldDisappear)
 {
     bool hasTextOffsetChanged = false;
-    if (GreatNotEqual(richTextRect_.GetY(), contentRect_.GetY())) {
-        auto offset = richTextRect_.GetOffset();
-        offset.AddY(contentRect_.GetY() - richTextRect_.GetY());
-        richTextRect_.SetOffset(offset);
-        hasTextOffsetChanged = true;
-    }
-    if (GreatNotEqual(richTextRect_.Height(), contentRect_.Height()) &&
-        LessNotEqual(richTextRect_.Bottom(), contentRect_.Bottom())) {
-        auto offset = richTextRect_.GetOffset();
-        offset.AddY(contentRect_.Bottom() - richTextRect_.Bottom());
-        richTextRect_.SetOffset(offset);
-        hasTextOffsetChanged = true;
-    }
-    if (LessOrEqual(richTextRect_.Height(), contentRect_.Height()) &&
-        LessNotEqual(richTextRect_.GetY(), contentRect_.GetY())) {
-        richTextRect_.SetOffset(contentRect_.GetOffset());
-        hasTextOffsetChanged = true;
-    }
+    hasTextOffsetChanged = scrollController_->UpdateScrollState();
     if (hasTextOffsetChanged) {
         UpdateChildrenOffset();
     }
-    StopScrollable();
+    StopScrolling();
     CheckScrollable();
     if (overlayMod_) {
         UpdateScrollBarOffset();
     }
-    auto scrollBar = GetScrollBar();
-    CHECK_NULL_VOID(scrollBar);
-
     if (isFirstCallOnReady_) {
         isFirstCallOnReady_ = false;
-        scrollBar->ScheduleDisappearDelayTask();
+        ScheduleDisappearDelayTask();
         return;
     }
     if (shouldDisappear) {
-        scrollBar->ScheduleDisappearDelayTask();
+        ScheduleDisappearDelayTask();
     }
+}
+
+void RichEditorPattern::StopScrolling()
+{
+    if (IsFreeScrollEnabled()) {
+        scrollController_->StopScrolling();
+    }
+    StopScrollable();
+}
+
+std::vector<RectF> RichEditorPattern::CalculateSelectedRect(int32_t start, int32_t end)
+{
+    bool hasSelection = start != end && GetTextContentLength() > 0;
+    CHECK_NULL_RETURN(hasSelection, {});
+    auto contentWidth = isHorizontalScrolling_ ? richTextRect_.Width() : contentRect_.Width();
+    auto rects = paragraphs_.GetRichEditorBoxesForSelect(start, end);
+    return RichEditorPaintMethod::CalculateSelectedRect(rects, contentWidth);
+}
+
+void RichEditorPattern::ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end)
+{
+    auto maxLen = GetTextContentLength();
+    int32_t rangeStart = std::clamp(start.value_or(0), 0, maxLen);
+    int32_t rangeEnd = std::clamp(end.value_or(maxLen), 0, maxLen);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ScrollToVisible, start=%{public}d, end=%{public}d", rangeStart, rangeEnd);
+    scrollController_->ScrollToVisible(rangeStart, rangeEnd);
+}
+
+void RichEditorPattern::ClearAISpanRects()
+{
+    dataDetectorAdapter_->aiSpanRects_.clear();
+}
+
+void RichEditorPattern::HandleScrollStart()
+{
+    if (SelectOverlayIsOn()) {
+        selectOverlay_->HideMenu(true);
+    }
+    CloseAIMenu();
+    ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+        AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
 }
 
 bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
@@ -10697,13 +10810,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     auto scrollBar = GetScrollBar();
     if (source == SCROLL_FROM_START) {
         IF_PRESENT(scrollBar, PlayScrollBarAppearAnimation());
-        if (SelectOverlayIsOn()) {
-            selectOverlay_->HideMenu(true);
-        }
-        CloseAIMenu();
-        ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
-        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
-            AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
+        HandleScrollStart();
         return true;
     }
     if (scrollController_->IsReachAvoidBoundary(offset)) {
@@ -10715,8 +10822,100 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     }
     auto newOffset = MoveTextRect(offset);
     scrollController_->MoveHandleOnScroll(newOffset);
-    dataDetectorAdapter_->aiSpanRects_.clear();
+    ClearAISpanRects();
     return true;
+}
+
+void RichEditorPattern::SetHorizontalScrolling(bool isHorizontalScrolling)
+{
+    CHECK_NULL_VOID(isHorizontalScrolling_ != isHorizontalScrolling);
+    isHorizontalScrolling_ = isHorizontalScrolling;
+    // Reset scroll bar when horizontal scrolling is disabled
+    needResetScrollBar_ = !isHorizontalScrolling;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetHorizontalScrolling: [%{public}d]", isHorizontalScrolling_);
+}
+
+bool RichEditorPattern::IsFreeScrollEnabled() const
+{
+    return isHorizontalScrolling_ && scrollController_->IsFreeScrollEnabled();
+}
+
+RefPtr<RichEditorScrollController> RichEditorPattern::GetScrollController() const
+{
+    return scrollController_;
+}
+
+bool RichEditorPattern::HandleHorizontalScroll(bool needUpdateOffset)
+{
+    if (!isHorizontalScrolling_) {
+        if (scrollController_->IsFreeScrollEnabled() && scrollController_->IsAttachedModifier()) {
+            RemoveOverlayModifier();
+        }
+        scrollController_->ResetFreeScrollController();
+        return false;
+    }
+    auto barState = barDisplayMode_.value_or(DisplayMode::AUTO);
+    // Disable vertical scrollbar and setup horizontal scroll
+    SetAxis(Axis::NONE);
+    SetScrollBar(DisplayMode::OFF);
+    SetScrollEnabled(false);
+    // Remove existing scrollable event
+    if (auto scrollableEvent = GetScrollableEvent()) {
+        if (auto gestureHub = GetGestureHub()) {
+            gestureHub->RemoveScrollableEvent(scrollableEvent);
+        }
+    }
+    scrollController_->InitFreeScrollController();
+    scrollController_->SetScrollBar(barState);
+    UpdateScrollBarColor(GetScrollBarColor());
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, true);
+    scrollController_->SetMinHeight(richEditorTheme->GetScrollbarMinHeight());
+    if (!scrollController_->IsAttachedModifier()) {
+        RemoveOverlayModifier();
+    }
+    CHECK_NULL_RETURN(needUpdateOffset, true);
+    if (overlayMod_) {
+        UpdateScrollBarOffset();
+    }
+    UpdateRichTextRectOffsetWithPadding();
+    return true;
+}
+
+void RichEditorPattern::RemoveOverlayModifier()
+{
+    CHECK_NULL_VOID(hostOverlayMod_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->RemoveOverlayModifier(hostOverlayMod_);
+    SetScrollBarOverlayModifier(nullptr);
+    hostOverlayMod_.Reset();
+}
+
+void RichEditorPattern::ScheduleDisappearDelayTask()
+{
+    if (IsFreeScrollEnabled()) {
+        scrollController_->ScheduleDisappearDelayTask();
+        return;
+    }
+    auto scrollBar = GetScrollBar();
+    IF_PRESENT(scrollBar, ScheduleDisappearDelayTask());
+}
+
+bool RichEditorPattern::IsMouseOverScrollBar(const MouseInfo& info)
+{
+    if (IsFreeScrollEnabled()) {
+        return scrollController_->IsMouseOverScrollBar(info);
+    }
+    auto scrollBar = GetScrollBar();
+    CHECK_NULL_RETURN(scrollBar, false);
+    return (scrollBar->IsHover() || scrollBar->IsPressed());
 }
 
 float RichEditorPattern::GetCrossOverHeight() const
@@ -10796,6 +10995,14 @@ void RichEditorPattern::MoveCaretToContentRectVertical(const OffsetF& caretOffse
 
 void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight)
 {
+    if (IsFreeScrollEnabled()) {
+        auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+        CHECK_NULL_VOID(overlayModifier);
+        auto caretWidth = overlayModifier->GetCaretWidth();
+        auto caretRect = RectF(caretOffset, SizeF(caretWidth, caretHeight));
+        scrollController_->MoveCaretToContentRect(caretRect);
+        return;
+    }
     isSingleLineMode_ ? MoveCaretToContentRectHorizontal(caretOffset)
                       : MoveCaretToContentRectVertical(caretOffset, caretHeight);
 }
@@ -10822,6 +11029,10 @@ bool RichEditorPattern::IsCaretInContentArea()
 
 void RichEditorPattern::UpdateScrollBarOffset()
 {
+    if (IsFreeScrollEnabled()) {
+        scrollController_->UpdateScrollBarOffset();
+        return;
+    }
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -10878,6 +11089,9 @@ void RichEditorPattern::CheckScrollable()
     CHECK_NULL_VOID(gestureHub);
     scrollable_ = GetTextContentLength() > 0 && scrollController_->NeedScroll();
     SetScrollEnabled(scrollable_);
+    if (IsFreeScrollEnabled()) {
+        scrollController_->CheckScrollEnabled();
+    }
 }
 
 void RichEditorPattern::UpdateChildrenOffset()
@@ -10930,6 +11144,10 @@ void RichEditorPattern::UpdateChildrenOffset()
 
 void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy)
 {
+    if (IsFreeScrollEnabled()) {
+        scrollController_->HandleAutoScrollNearBoundary(param, offset);
+        return;
+    }
     scrollController_->AutoScrollByEdgeDetection(param, offset, strategy);
 }
 
@@ -11322,6 +11540,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("singleLine", isSingleLineMode_ ? "true" : "false", filter);
     json->PutExtAttr("selectedDragPreviewStyle", GetSelectedDragPreviewStyleColor().ColorToString().c_str(), filter);
     json->PutExtAttr("orphanCharOptimization", isOrphanCharOptimization_ ? "true" : "false", filter);
+    json->PutExtAttr("horizontalScrolling", isHorizontalScrolling_ ? "true" : "false", filter);
 }
 
 std::string RichEditorPattern::GetCustomKeyboardInJson() const
@@ -11555,10 +11774,15 @@ void RichEditorPattern::MountPlaceholderImageNode(const std::list<RefPtr<NG::Spa
 bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
 {
     if (!spans_.empty()) {
+        bool placeholderWithLpx = isShowPlaceholder_ && hasPlaceholderLpxUnitStyle_;
         isShowPlaceholder_ = false;
+        hasPlaceholderLpxUnitStyle_ = false;
+        IF_TRUE(placeholderWithLpx, UpdateLpxUnitFlag());
         return false;
     }
-    return styledPlaceholder_ ? SetStyledPlaceholder(spanItemList) : SetStringPlaceholder(spanItemList);
+    bool setSuccess = styledPlaceholder_ ? SetStyledPlaceholder(spanItemList) : SetStringPlaceholder(spanItemList);
+    IF_TRUE(setSuccess, UpdateLpxUnitFlag());
+    return setSuccess;
 }
 
 bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
@@ -11572,6 +11796,7 @@ bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanIt
         richTextRect_.SetOffset(contentRect_.GetOffset());
     }
     isShowPlaceholder_ = true;
+    hasPlaceholderLpxUnitStyle_ = std::any_of(spans.begin(), spans.end(), LPX_UNIT_SPAN_FILTER);
     return true;
 }
 
@@ -11583,6 +11808,7 @@ bool RichEditorPattern::SetStringPlaceholder(std::vector<std::list<RefPtr<SpanIt
     CHECK_NULL_RETURN(layoutProperty, false);
     if (!layoutProperty->HasPlaceholder() || layoutProperty->GetPlaceholder().value().empty()) {
         isShowPlaceholder_ = false;
+        hasPlaceholderLpxUnitStyle_ = false;
         return false;
     }
     auto placeholderValue = layoutProperty->GetPlaceholder().value();
@@ -11613,6 +11839,7 @@ bool RichEditorPattern::SetStringPlaceholder(std::vector<std::list<RefPtr<SpanIt
     spanItemList.clear();
     spanItemList.push_back({ { {spanItem} } });
     isShowPlaceholder_ = true;
+    hasPlaceholderLpxUnitStyle_ = spanItem->HasLpxUnitStyle();
     return true;
 }
 
@@ -13515,7 +13742,8 @@ void RichEditorPattern::HandlePageScroll(bool isPageUp)
         isPageUp, distance, height);
     CloseSelectOverlay();
     ResetSelection();
-    OnScrollCallback(distance, SCROLL_FROM_JUMP);
+    IsFreeScrollEnabled() ? scrollController_->OnScrollWithAxisCallback(distance, SCROLL_FROM_JUMP, Axis::VERTICAL)
+        : OnScrollCallback(distance, SCROLL_FROM_JUMP);
     auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
     float offsetY = isPageUp ? visibleRect.Top() : visibleRect.Bottom();
     auto localOffset = Offset(curCaretRect.GetX(), offsetY - paintOffset.GetY());
@@ -13687,7 +13915,7 @@ SymbolSpanOptions RichEditorPattern::GetSymbolSpanOptions(const RefPtr<SpanItem>
 {
     CHECK_NULL_RETURN(spanItem, {});
     TextStyle textStyle = GetDefaultTextStyle();
-    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle, true);
+    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle, true, spanItem->symbolStyle);
     SymbolSpanOptions options;
     options.style = textStyle;
     options.offset = caretPosition_;
@@ -13959,6 +14187,10 @@ void RichEditorPattern::UpdateScrollBarColor(std::optional<Color> color, bool is
 {
     auto property = GetLayoutProperty<RichEditorLayoutProperty>();
     IF_TRUE(isUpdateProperty && property, property->UpdateScrollBarColor(color));
+    if (IsFreeScrollEnabled()) {
+        scrollController_->UpdateScrollBarColor(color);
+        return;
+    }
     auto scrollBar = GetScrollBar();
     auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollBar && scrollbarTheme);
@@ -14830,4 +15062,11 @@ void RichEditorPattern::PostTaskToLayutSwap(std::function<void()>&& task)
 {
     tasks_.emplace(std::forward<std::function<void()>>(task));
 }
+
+void RichEditorPattern::ClearParagraphCache()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "paragraph cache cleared");
+    paragraphCache_.Clear();
+}
+
 } // namespace OHOS::Ace::NG

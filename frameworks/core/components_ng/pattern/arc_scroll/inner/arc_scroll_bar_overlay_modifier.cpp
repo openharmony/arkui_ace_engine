@@ -15,6 +15,8 @@
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/animation/animation_pub.h"
+#include "core/animation/curves.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"

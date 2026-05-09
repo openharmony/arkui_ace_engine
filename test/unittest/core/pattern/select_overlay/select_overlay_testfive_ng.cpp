@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/theme/icon_theme.h"
 #undef private
 #undef protected
 

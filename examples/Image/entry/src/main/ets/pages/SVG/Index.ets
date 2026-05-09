@@ -123,6 +123,9 @@ struct Index {
         this.NavigationButton('SVG Filter Effects', 'Demonstrates advanced SVG filter effects and transformations',
           'pages/SVG/svgExample011')
 
+        this.NavigationButton('SVG Advanced Effects', 'Demonstrates comprehensive SVG advanced effects including filters, masks, animations',
+          'pages/SVG/svgExample018')
+
         Button('Back')
           .margin({ top: 20, bottom: 20 })
           .onClick(() => {

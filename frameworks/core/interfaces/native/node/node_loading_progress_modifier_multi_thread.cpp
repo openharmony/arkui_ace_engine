@@ -19,6 +19,7 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier_multi_thread.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void ResetLoadingProgressColorMultiThread(ArkUINodeHandle node)
@@ -30,8 +31,8 @@ void ResetLoadingProgressColorMultiThread(ArkUINodeHandle node)
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
-        LoadingProgressModelNG::SetColorParseFailed(frameNode, true);
-        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingParseFailedColor());
+        LoadingProgressModelNG::SetColorByUser(frameNode, false);
+        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingColor());
     }
     if (SystemProperties::ConfigChangePerform()) {
         LoadingProgressModelNG::SetColorByUser(frameNode, false);

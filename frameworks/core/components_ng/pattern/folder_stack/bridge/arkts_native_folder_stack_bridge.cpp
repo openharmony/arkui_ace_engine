@@ -15,9 +15,10 @@
 #include "core/components_ng/pattern/folder_stack/bridge/arkts_native_folder_stack_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_4 = 4;

@@ -157,6 +157,9 @@ public:
 
     bool GetCanLoopFromLayoutPropertyWithStartEnd() const override;
 
+    std::string GetTimeUnitString(
+        const std::string& timeValue, TimeUnitStyle timeStyle, MeasureFormatStyle formatStyle) const;
+
 private:
     void OnModifyDone() override;
     void SetDividerHeight(uint32_t showOptionCount);

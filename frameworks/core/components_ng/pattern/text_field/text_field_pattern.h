@@ -32,7 +32,6 @@
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_application_info.h"
-#include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/common/clipboard/clipboard.h"
@@ -48,6 +47,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -91,6 +91,8 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace {
+class AIWriteAdapter;
+struct AIWriteInfo;
 class SpanString;
 }
 
@@ -124,6 +126,11 @@ enum class InputOperation {
 struct CaretSetInfo {
     int32_t pos;
     std::string text;
+};
+
+struct PendingSubmitActionInfo {
+    TextInputAction action = TextInputAction::UNSPECIFIED;
+    bool forceCloseKeyboard = false;
 };
 
 struct PasswordModeStyle {
@@ -607,6 +614,8 @@ public:
     }
 
     void SetMagnifierLocalOffsetToFloatingCaretPos();
+    void UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType);
+    void ResetMagnifierTouchInfo();
 
     bool GetShowOriginCursor() const
     {
@@ -737,6 +746,13 @@ public:
     {
         return selectOverlay_->IsUsingMouse();
     }
+
+    void UpdateSelectionMenu(int32_t themeScopeId)
+    {
+        if (selectOverlay_) {
+            selectOverlay_->UpdateMenuFromThemeChange(themeScopeId);
+        }
+    }
     int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove, bool skipNewLineChar = true);
     int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
@@ -800,9 +816,6 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeShown_ = keyboardShown;
-        if (keyboardShown && !voiceKbShown_) {
-            voiceButtonKeyboardOpened_ = false;
-        }
 #endif
     }
     void NotifyKeyboardClosedByUser() override;
@@ -1696,7 +1709,8 @@ public:
 
     bool IsShowPasswordSymbol() const
     {
-        return isPasswordSymbol_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
+        return isPasswordSymbol_ &&
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
     }
 
     bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
@@ -1915,6 +1929,10 @@ public:
         }
         placeholderColorInfo_.append("[" + info + "]");
     }
+
+    bool TryDelaySubmitAction(TextInputAction action, bool forceCloseKeyboard);
+    void ProcessPendingSubmitAction();
+    virtual void FireSubmitAction(TextInputAction action, bool forceCloseKeyboard);
 
     // tv function
     bool IsTV() const
@@ -2221,6 +2239,7 @@ private:
     void ProcessCancelButton();
     void ProcessVoiceButton();
     bool HasInputOperation();
+    bool HasPendingTextMutationForSubmit() const;
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill(bool ignoreFillType = false,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
@@ -2360,7 +2379,6 @@ private:
     InlineMeasureItem inlineMeasureItem_;
     bool voiceKbShown_ = false;
     bool voiceKbOpenedByButton_ = false;
-    bool voiceButtonKeyboardOpened_ = false;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -2495,6 +2513,7 @@ private:
     std::queue<InsertCommandInfo> insertCommands_;
     std::queue<InputCommandInfo> inputCommands_;
     std::queue<InputOperation> inputOperations_;
+    std::optional<PendingSubmitActionInfo> pendingSubmitActionInfo_;
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
     bool isEdit_ = false;
@@ -2560,6 +2579,8 @@ private:
     WeakPtr<AIWriteAdapter> aiWriteAdapter_;
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> lastCaretPos_ = std::nullopt;

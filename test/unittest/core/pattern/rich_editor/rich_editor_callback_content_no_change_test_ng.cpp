@@ -327,7 +327,7 @@ HWTEST_F(RichEditorCallbackContentNoChangeTestNg, HandleSurfaceChanged001, TestS
     std::vector<std::vector<int>> cases = { { 1, 1, 2, 2 }, { 1, 2, 2, 2 }, { 1, 1, 1, 2 }, { 1, 2, 1, 2 } };
     for (uint32_t i = 0; i < cases.size(); ++i) {
         richEditorPattern->HandleSurfaceChanged(
-            cases[i][0], cases[i][1], cases[i][2], cases[i][3], WindowSizeChangeReason::DRAG);
+            cases[i][0], cases[i][1], cases[i][2], cases[i][3]);
         EXPECT_NE(richEditorPattern, nullptr);
     }
 }
@@ -399,7 +399,7 @@ HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnWindowSizeChanged001, TestSi
 
     auto context = richEditorNode_->GetContextRefPtr();
     ASSERT_NE(context, nullptr);
-    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     EXPECT_EQ(textFieldManager->GetOptionalClickPosition(), std::nullopt);
 }

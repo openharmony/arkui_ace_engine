@@ -20,6 +20,8 @@
 #include "base/utils/utf_helper.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "compatible/components/text_field/text_field_utils.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 

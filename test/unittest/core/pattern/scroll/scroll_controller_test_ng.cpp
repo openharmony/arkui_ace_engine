@@ -16,6 +16,7 @@
 #include "scroll_test_ng.h"
 #include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"

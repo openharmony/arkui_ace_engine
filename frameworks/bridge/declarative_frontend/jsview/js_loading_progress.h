@@ -27,6 +27,7 @@ public:
     static void Create();
 
     static void SetColor(const JSCallbackInfo& info);
+    static void HandleParseFailure();
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetEnableLoading(const JSCallbackInfo& info);
 };

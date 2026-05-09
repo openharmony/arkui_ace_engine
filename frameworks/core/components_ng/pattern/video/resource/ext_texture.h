@@ -64,6 +64,10 @@ public:
     void GetTextureId(int32_t& textureId);
 
     void SetSizeSync(int64_t textureId, int32_t textureWidth, int32_t textureHeight, int32_t left, int32_t top);
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    bool SurfaceCapture(uintptr_t pointerVal, int32_t width, int32_t height);
+#endif
 private:
     void OnRefresh(const std::string& param);
     void OnSurfaceCreated();

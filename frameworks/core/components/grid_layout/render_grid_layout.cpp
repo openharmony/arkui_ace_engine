@@ -15,7 +15,10 @@
 
 #include "core/components/grid_layout/render_grid_layout.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include <numeric>
+#include <regex>
 
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"

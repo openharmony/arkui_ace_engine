@@ -80,8 +80,10 @@ public:
     static bool InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme = false);
 
     static bool IsWindowPattern(const RefPtr<FrameNode>& node);
+    static bool IsWindowPattern(uint32_t type);
 
     static bool HasWindowSession(const RefPtr<FrameNode>& node);
+    static bool HasWindowSession(uint32_t type);
 
     static bool IsTransformScene(uint32_t type);
 

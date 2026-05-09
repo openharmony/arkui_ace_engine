@@ -20,47 +20,42 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <set>
 #include <shared_mutex>
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
-#include "interfaces/inner_api/ui_session/param_config.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
-#include "core/accessibility/accessibility_manager.h"
-#include "core/animation/schedule_task.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
-#include "core/common/resource/resource_configuration.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
-#include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -69,8 +64,12 @@ enum class AvoidAreaType : uint32_t;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+class ScheduleTask;
+struct RotationEvent;
 namespace NG {
 class FrameNode;
+struct UIExtCallbackEvent;
+enum class UIExtCallbackEventId : uint32_t;
 } // namespace NG
 
 struct KeyboardAnimationCurve {
@@ -102,13 +101,18 @@ class Frontend;
 class ImageCache;
 class OffscreenCanvas;
 class Window;
+class WindowManager;
 class FontManager;
 class ManagerInterface;
 class NavigationController;
 class StatisticEventReporter;
 class EventManager;
+class AccessibilityManager;
 enum class FrontendType;
 enum class PlatformVersion;
+enum class AccessibilityCallbackEventId : uint32_t;
+struct AccessibilityEvent;
+using NodeId = int32_t;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
 
@@ -293,12 +297,7 @@ public:
         }
     }
 
-    void SendUpdateVirtualNodeFocusEvent()
-    {
-        auto accessibilityManager = GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-        accessibilityManager->UpdateVirtualNodeFocus();
-    }
+    void SendUpdateVirtualNodeFocusEvent();
 
     void RegisterWindowDensityCallback(std::function<double()>&& callback)
     {
@@ -1915,7 +1914,7 @@ private:
     std::function<void(uint32_t)> uiExtensionEventCallback_;
     std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
-    std::set<AccessibilityCallbackEvent> accessibilityEvents_;
+    std::set<std::pair<uint32_t, int64_t>> accessibilityEvents_;
     std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
     ConfigurationChange configurationChange_;
     std::shared_ptr<StatisticEventReporter> statisticEventReporter_;

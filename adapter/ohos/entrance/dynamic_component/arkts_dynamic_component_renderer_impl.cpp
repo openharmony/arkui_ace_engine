@@ -14,6 +14,7 @@
  */
 
 #include "arkts_dynamic_component_renderer_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <iterator>
 #include <memory>
@@ -42,6 +43,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
+#include "session/host/include/session.h"
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
 

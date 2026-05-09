@@ -23,6 +23,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "frameworks/core/common/ace_engine.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components/navigator/navigator_type.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -1051,6 +1052,37 @@ void FrontendDelegateDeclarativeNG::ShowActionMenu(const std::string& title, con
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
 }
 
+void FrontendDelegateDeclarativeNG::ShowActionMenu(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter with attr");
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .autoCancel = true,
+        .isMenu = true,
+        .buttons = buttons,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+        .maskRect = dialogAttr.maskRect,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial,
+    };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+    ShowActionMenuInner(dialogProperties, buttons, std::move(callback));
+}
+
 void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
@@ -1430,7 +1462,7 @@ void FrontendDelegateDeclarativeNG::CreateSnapshotFromComponent(const RefPtr<NG:
     NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector, const NG::SnapshotParam& param)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    ViewStackModel::GetInstance()->NewScope();
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     NG::ComponentSnapshot::Create(nodeWk, std::move(callback), enableInspector, param);
 #endif
 }
@@ -1493,6 +1525,26 @@ void FrontendDelegateDeclarativeNG::AddFrameNodeWithOrder(
     overlayManager->AddFrameNodeWithOrder(node, levelOrder);
 }
 
+void FrontendDelegateDeclarativeNG::OpenOrderOverlay(const RefPtr<NG::FrameNode>& node,
+    const NG::OrderOverlayOptions& options, std::function<void(int32_t)>&& callback)
+{
+    CHECK_NULL_VOID(node);
+    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(node)),
+        options, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenOrderOverlay calling OpenOrderOverlay.");
+        overlayManager->OpenOrderOverlay(node, options, std::move(callback));
+    };
+
+    if (options.levelMode == LevelMode::EMBEDDED) {
+        NG::DialogManager::ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowOrder", options.levelUniqueId);
+    } else {
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowOrder", nullptr);
+    }
+}
+
 void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
     auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
@@ -1500,7 +1552,9 @@ void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::Fr
         ContainerScope scope(containerId);
         overlayManager->RemoveFrameNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", nullptr);
+    CHECK_NULL_VOID(node);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(node->GetParentFrameNode());
+    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", currentOverlay);
 }
 
 void FrontendDelegateDeclarativeNG::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"

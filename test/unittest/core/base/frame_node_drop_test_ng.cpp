@@ -933,7 +933,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg020, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
@@ -1305,7 +1305,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg027, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
@@ -1355,7 +1355,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg028, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
@@ -1405,7 +1405,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg029, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
@@ -1455,7 +1455,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg030, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
@@ -1559,7 +1559,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg032, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_TRUE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.

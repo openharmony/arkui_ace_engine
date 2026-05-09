@@ -374,6 +374,18 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
     extensionSessionInfo.parentWindowType_ = parentWindowType;
     extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
     extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
+    auto setConnectToRender = [container, &extensionSessionInfo]() {
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto window = pipeline->GetWindow();
+        CHECK_NULL_VOID(window);
+        auto rsUIDirector = window->GetRSUIDirector();
+        CHECK_NULL_VOID(rsUIDirector);
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        extensionSessionInfo.connectToRenderToken_  = rsUIContext->GetConnectToRender();
+    };
+    setConnectToRender();
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     lifecycleListener_ = std::make_shared<SecurityUIExtensionLifecycleListener>(

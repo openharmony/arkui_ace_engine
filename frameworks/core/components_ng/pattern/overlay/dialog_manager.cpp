@@ -23,6 +23,7 @@
 #include "core/common/ace_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace {
 SINGLETON_INSTANCE_IMPL(NG::DialogManager);

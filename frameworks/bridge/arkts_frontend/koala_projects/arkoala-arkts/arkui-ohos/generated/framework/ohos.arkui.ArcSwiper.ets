@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { extractors } from '#handwritten'
@@ -20,7 +21,7 @@ import { ArcSwiperContentTransitionProxy, ArcSwiperContentAnimatedTransition } f
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { CallbackTransformer } from './../CallbackTransformer'
-import { Callback as ohos_base_Callback } from '@ohos.base'
+import { Callback as arkui_component_common_Callback } from './../component/common'
 export class ArcSwiperContentTransitionProxy_serializer {
     public static write(buffer: SerializerBase, value: ArcSwiperContentTransitionProxy): void {
         let valueSerializer: SerializerBase = buffer
@@ -63,12 +64,12 @@ export class ArcSwiperContentAnimatedTransition_serializer {
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCallSync);
             ArcSwiperContentTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, data);
-            InteropNativeModule._CallCallbackSync(10, -1938076268, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -1948250113, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
             transitionTmpBufBufArgsSerializer.release();
             return;
         }
         resourceFinalizerRegister(transitionTmpBufClosure, transitionTmpBufBufResource)
-        const transitionTmpResult: ohos_base_Callback<ArcSwiperContentTransitionProxy> = transitionTmpBufClosure
+        const transitionTmpResult: arkui_component_common_Callback<ArcSwiperContentTransitionProxy, void> = transitionTmpBufClosure
         let value: ArcSwiperContentAnimatedTransition = ({timeout: timeoutTmpResult, transition: transitionTmpResult} as ArcSwiperContentAnimatedTransition)
         return value
     }

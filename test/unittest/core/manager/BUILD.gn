@@ -136,6 +136,12 @@ ace_unittest("shared_overlay_manager_test_ng") {
   sources = [ "shared_overlay_manager_test_ng.cpp" ]
 }
 
+ace_unittest("smart_gesture_decider_test_ng") {
+  module_name = "SmartGesture-Decider"
+  type = "new"
+  sources = [ "smart_gesture_decider_test_ng.cpp" ]
+}
+
 ace_unittest("display_sync_manager_test_ng") {
   module_name = "DrawingSet-Line"
   type = "new"
@@ -158,6 +164,7 @@ ace_unittest("gesture_debug_boundary_manager_test_ng") {
   module_name = "Gesture-DebugBoundaryManager"
   type = "new"
   sources = [ "gesture_debug_boundary_manager_test_ng.cpp" ]
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
 }
 
 ace_unittest("focus_manager_test_ng") {
@@ -213,6 +220,7 @@ ace_unittest("theme_manager_test_ng") {
     "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
     "theme_manager_test_ng.cpp",
+    "theme_test.cpp",
   ]
 }
 
@@ -257,6 +265,7 @@ group("core_manager_unittest") {
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",
+    ":smart_gesture_decider_test_ng",
     ":theme_manager_test_ng",
   ]
 }

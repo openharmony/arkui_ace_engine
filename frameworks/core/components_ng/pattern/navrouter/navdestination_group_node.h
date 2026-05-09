@@ -76,6 +76,18 @@ public:
 
     NavDestinationMode GetNavDestinationMode() const;
 
+    std::optional<bool> GetUserSetFullScreenOverlay() const;
+
+    void SetIsFullScreenOverlay(bool fullScreenOverlay)
+    {
+        isFullScreenOverlay_ = fullScreenOverlay;
+    }
+
+    bool IsFullScreenOverlay() const
+    {
+        return isFullScreenOverlay_;
+    }
+
     void SetIndex(int32_t index, bool updatePrimary = true);
 
     int32_t GetIndex() const
@@ -333,6 +345,9 @@ private:
     NavigationSystemTransitionType systemTransitionType_ = NavigationSystemTransitionType::DEFAULT;
     bool needForceMeasure_ = false;
     float userSetOpacity_ = 1.0f;
+    // This is the effective overlay state after Navigation applies inheritance rules, not just
+    // the raw request coming from the destination's own property/path info.
+    bool isFullScreenOverlay_ = false;
 
     NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
     bool isTitleConsumedElapsedTime_ = false;

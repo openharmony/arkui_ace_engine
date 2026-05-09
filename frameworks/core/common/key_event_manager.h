@@ -19,10 +19,11 @@
 #include <list>
 
 #include "core/components/common/layout/constants.h"
-#include "core/event/key_event.h"
+#include "core/event/key_code.h"
 #include "core/event/crown_event.h"
 
 namespace OHOS::Ace {
+struct KeyEvent;
 namespace NG {
 class FrameNode;
 class FocusView;

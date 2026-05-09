@@ -28,7 +28,6 @@ import { ResourceColor, Resource as arkui_component_units_Resource } from './uni
 import { Color as arkui_component_enums_Color, LineCapStyle } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { AttributeModifier, hookDividerAttributeModifier, AttributeUpdater } from '#handwritten'
-import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'

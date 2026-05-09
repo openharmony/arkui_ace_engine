@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
 class SwiperIndicatorPattern : public Pattern {

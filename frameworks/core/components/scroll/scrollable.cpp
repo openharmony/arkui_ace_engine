@@ -15,6 +15,8 @@
 
 #include "core/components/scroll/scrollable.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/jank_frame_report.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/layout_inspector.h"

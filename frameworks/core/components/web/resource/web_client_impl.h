@@ -362,6 +362,8 @@ public:
 
     bool OnNestedScrollV2(float& x, float& y) override;
 
+    bool OnNestedFling(float& xVelocity, float& yVelocity) override;
+
     void OnLoadStarted(const std::string& url) override;
 
     void OnLoadFinished(const std::string& url) override;

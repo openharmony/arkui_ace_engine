@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/form/form_node.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/utils/utils.h"
 #include "core/components/form/sub_container.h"

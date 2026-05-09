@@ -18,6 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
@@ -281,6 +282,15 @@ void ListModelStatic::SetListSpace(FrameNode* frameNode, const std::optional<Dim
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, frameNode);
+    }
+}
+
+void ListModelStatic::SetListSpaceWidth(FrameNode* frameNode, const std::optional<Dimension>& spaceWidth)
+{
+    if (spaceWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SpaceWidth, spaceWidth.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

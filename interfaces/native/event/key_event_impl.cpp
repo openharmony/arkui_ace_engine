@@ -18,6 +18,7 @@
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,12 +28,14 @@ ArkUI_KeyEventType OH_ArkUI_KeyEvent_GetType(const ArkUI_UIInputEvent *event)
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_GetType", "event is null");
         RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeyEventType>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_GetType", "keyEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeyEventType>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             auto result = static_cast<ArkUI_KeyEventType>(keyEvent->type);
@@ -71,12 +74,14 @@ const char* OH_ArkUI_KeyEvent_GetKeyText(const ArkUI_UIInputEvent *event)
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_GetKeyText", "event is null");
         RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_GetKeyText", "keyEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(nullptr, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             RETURN_RET_WITH_STATUS_CHECK(keyEvent->keyText, ARKUI_ERROR_CODE_NO_ERROR);
@@ -92,12 +97,14 @@ ArkUI_KeySourceType OH_ArkUI_KeyEvent_GetKeySource(const ArkUI_UIInputEvent *eve
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_GetKeySource", "event is null");
         RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeySourceType>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_GetKeySource", "keyEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeySourceType>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             auto result = static_cast<ArkUI_KeySourceType>(keyEvent->keySource);
@@ -114,12 +121,15 @@ void OH_ArkUI_KeyEvent_StopPropagation(const ArkUI_UIInputEvent *event, bool sto
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_StopPropagation", "event is null");
         RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+                    "OH_ArkUI_KeyEvent_StopPropagation", "keyEvent is null");
                 RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             keyEvent->stopPropagation = stopPropagation;
@@ -136,12 +146,15 @@ ArkUI_KeyIntension OH_ArkUI_KeyEvent_GetKeyIntensionCode(const ArkUI_UIInputEven
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_GetKeyIntensionCode", "event is null");
         RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeyIntension>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+                    "OH_ArkUI_KeyEvent_GetKeyIntensionCode", "keyEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(static_cast<ArkUI_KeyIntension>(-1), ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             auto result = static_cast<ArkUI_KeyIntension>(keyEvent->intentionCode);
@@ -180,12 +193,14 @@ void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent *event, bool isConsu
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_KEY_EVENT, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_SetConsumed", "event is null");
         RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_SetConsumed", "keyEvent is null");
                 RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             keyEvent->isConsumed = isConsumed;
@@ -201,13 +216,19 @@ void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent *event, bool isConsu
 void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event)
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
-    if (!node || !event) {
+    if (!node) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_Dispatch", "node is null");
+        RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_Dispatch", "event is null");
         RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_Dispatch", "keyEvent is null");
                 RETURN_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -224,13 +245,19 @@ void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent*
 ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsNumLockOn(const ArkUI_UIInputEvent* event, bool* state)
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
-    if (!event || !state) {
+    if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_IsNumLockOn", "event is null");
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    if (!state) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_IsNumLockOn", "state is null");
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_IsNumLockOn", "keyEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             *state = keyEvent->isNumLockOn;
@@ -246,13 +273,19 @@ ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsNumLockOn(const ArkUI_UIInputEvent* event, b
 ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsCapsLockOn(const ArkUI_UIInputEvent* event, bool* state)
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
-    if (!event || !state) {
+    if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_IsCapsLockOn", "event is null");
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    if (!state) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_IsCapsLockOn", "state is null");
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_IsCapsLockOn", "keyEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             *state = keyEvent->isCapsLockOn;
@@ -268,13 +301,20 @@ ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsCapsLockOn(const ArkUI_UIInputEvent* event, 
 ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsScrollLockOn(const ArkUI_UIInputEvent* event, bool* state)
 {
     CheckSupportedScenarioAndResetEventStatus(S_ALL_C_KEY_EVENT, event);
-    if (!event || !state) {
+    if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_IsScrollLockOn", "event is null");
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    if (!state) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_KeyEvent_IsScrollLockOn", "state is null");
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
         case C_KEY_EVENT_ID: {
             const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
             if (!keyEvent) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+                    "OH_ArkUI_KeyEvent_IsScrollLockOn", "keyEvent is null");
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             *state = keyEvent->isScrollLockOn;

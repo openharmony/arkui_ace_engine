@@ -28,7 +28,7 @@ UiSessionManager* UiSessionManager::GetInstance()
 void UiSessionManagerOhos::ReportClickEvent(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->ReportClickEvent(data);
@@ -41,7 +41,7 @@ void UiSessionManagerOhos::ReportClickEvent(const std::string& data)
 void UiSessionManagerOhos::ReportSearchEvent(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->ReportSearchEvent(data);
@@ -54,7 +54,7 @@ void UiSessionManagerOhos::ReportSearchEvent(const std::string& data)
 void UiSessionManagerOhos::ReportTextChangeEvent(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->ReportTextChangeEvent(data);
@@ -67,7 +67,7 @@ void UiSessionManagerOhos::ReportTextChangeEvent(const std::string& data)
 void UiSessionManagerOhos::ReportRouterChangeEvent(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->ReportRouterChangeEvent(data);
@@ -81,7 +81,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
     const std::string& key, const std::string& value, uint32_t eventType)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr && GetComponentChangeEventRegistered() &&
             NeedComponentChangeTypeReporting(eventType)) {
@@ -98,7 +98,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
     int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr && GetComponentChangeEventRegistered() &&
             NeedComponentChangeTypeReporting(eventType)) {
@@ -121,7 +121,7 @@ void UiSessionManagerOhos::ReportWebInputEvent(
     jsonValue->Put("text", data.c_str());
     jsonValue->Put("eventType", type.c_str());
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->ReportWebUnfocusEvent(accessibilityId, jsonValue->ToString());
@@ -134,7 +134,7 @@ void UiSessionManagerOhos::ReportWebInputEvent(
 void UiSessionManagerOhos::ReportScrollEvent(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr && GetScrollEventRegistered()) {
             reportService->ReportScrollEvent(data);
@@ -147,7 +147,7 @@ void UiSessionManagerOhos::ReportScrollEvent(const std::string& data)
 void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr && GetLifeCycleEventRegistered()) {
             reportService->ReportLifeCycleEvent(data);
@@ -160,7 +160,7 @@ void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
 void UiSessionManagerOhos::ReportSelectTextEvent(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr && GetSelectTextEventRegistered()) {
             reportService->ReportSelectTextEvent(data);
@@ -177,8 +177,9 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
         std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
         std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
         LOGW("agent process dead,processId:%{public}d", processId);
-        if (processMap_.count("translate") && processMap_["translate"].size() == 1 &&
-            *processMap_["translate"].begin() == processId) {
+        auto translateIter = processMap_.find("translate");
+        if (translateIter != processMap_.end() && translateIter->second.size() == 1 &&
+            *translateIter->second.begin() == processId) {
             ResetTranslate(-1);
         }
         // reportMap remove this processId
@@ -321,29 +322,46 @@ void UiSessionManagerOhos::GetInspectorTree(ParamConfig config)
 {
     webTaskNums_.store(0);
     WebTaskNumsChange(1);
-    std::unique_lock<std::mutex> lock(mutex_);
-    jsonValue_ = InspectorJsonUtil::Create(true);
-    if (inspectorFunction_) {
-        inspectorFunction_(false, config);
+    {
+        std::lock_guard<std::mutex> lock(jsonValueMutex_);
+        jsonValue_ = InspectorJsonUtil::Create(true);
+    }
+
+    InspectorFunction inspectorFunction;
+    {
+        std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
+        inspectorFunction = inspectorFunction_;
+    }
+    if (inspectorFunction) {
+        inspectorFunction(false, config);
     }
 }
 
 void UiSessionManagerOhos::GetVisibleInspectorTree(ParamConfig config)
 {
-    if (inspectorFunction_) {
-        inspectorFunction_(true, config);
+    InspectorFunction inspectorFunction;
+    {
+        std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
+        inspectorFunction = inspectorFunction_;
+    }
+    if (inspectorFunction) {
+        inspectorFunction(true, config);
     }
 }
 
 void UiSessionManagerOhos::SaveInspectorTreeFunction(InspectorFunction&& function)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(inspectorFunctionMutex_);
     inspectorFunction_ = std::move(function);
 }
 
 void UiSessionManagerOhos::AddValueForTree(int32_t id, const std::string& value)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(jsonValueMutex_);
+    if (!jsonValue_) {
+        LOGW("AddValueForTree jsonValue is nullptr");
+        return;
+    }
     std::string key = std::to_string(id);
     if (jsonValue_->Contains(key)) {
         jsonValue_->Replace(key.c_str(), value.c_str());
@@ -356,9 +374,15 @@ void UiSessionManagerOhos::WebTaskNumsChange(int32_t num)
 {
     webTaskNums_.fetch_add(num);
     if (webTaskNums_.load() == 0) {
-        std::unique_lock<std::mutex> lock(mutex_);
-        std::string data = jsonValue_->ToString();
-        lock.unlock();
+        std::string data;
+        {
+            std::lock_guard<std::mutex> lock(jsonValueMutex_);
+            if (!jsonValue_) {
+                LOGW("WebTaskNumsChange jsonValue is nullptr");
+                return;
+            }
+            data = jsonValue_->ToString();
+        }
         ReportInspectorTreeValue(data);
     }
 }
@@ -368,12 +392,15 @@ void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
     UI_SESSION_SCOPED_TRACE("[UiSessionManagerOhos] ReportInspectorTreeValue");
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count("getInspectorTree") || processMap_["getInspectorTree"].empty()) {
+    auto processIter = processMap_.find("getInspectorTree");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("ReportInspectorTreeValue no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["getInspectorTree"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             int32_t index = 1;
             reportService->ReportInspectorTreeValue(data, index, true);
@@ -381,50 +408,79 @@ void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
             LOGW("report inspector tree value failed, process id:%{public}d", pid);
         }
     }
-    processMap_["getInspectorTree"].clear();
+    processIter->second.clear();
 }
 
 void UiSessionManagerOhos::NotifyAllWebPattern(bool isRegister)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    webFocusEventRegistered = isRegister;
-    notifyWebFunction_(isRegister);
+    {
+        std::lock_guard<std::mutex> lock(webFocusEventRegisteredMutex_);
+        webFocusEventRegistered = isRegister;
+    }
+
+    NotifyAllWebFunction notifyWebFunction;
+    {
+        std::lock_guard<std::mutex> lock(notifyWebFunctionMutex_);
+        notifyWebFunction = notifyWebFunction_;
+    }
+    if (notifyWebFunction) {
+        notifyWebFunction(isRegister);
+    }
 }
 
 void UiSessionManagerOhos::NotifySendCommandPattern(int32_t id, const std::string& command)
 {
-    notifySendCommandFunction_(id, command);
+    NotifySendCommandFunction notifySendCommandFunction;
+    {
+        std::lock_guard<std::mutex> lock(notifySendCommandFunctionMutex_);
+        notifySendCommandFunction = notifySendCommandFunction_;
+    }
+    if (notifySendCommandFunction) {
+        notifySendCommandFunction(id, command);
+    }
 }
 
 int32_t UiSessionManagerOhos::NotifySendCommandAsyncPattern(int32_t id, const std::string& command)
 {
-    return notifySendCommandAsyncFunction_(id, command);
+    NotifySendCommandAsyncFunction notifySendCommandAsyncFunction;
+    {
+        std::lock_guard<std::mutex> lock(notifySendCommandAsyncFunctionMutex_);
+        notifySendCommandAsyncFunction = notifySendCommandAsyncFunction_;
+    }
+    if (!notifySendCommandAsyncFunction) {
+        return 11; // 11 is the error code for no callback
+    }
+    return notifySendCommandAsyncFunction(id, command);
 }
 
 void UiSessionManagerOhos::SaveRegisterForWebFunction(NotifyAllWebFunction&& function)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(notifyWebFunctionMutex_);
     notifyWebFunction_ = std::move(function);
 }
 
 void UiSessionManagerOhos::SaveGetHitTestInfoCallback(GetHitTestInfoFunction&& function)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(getHitTestInfoFunctionMutex_);
     getHitTestInfoFunction_ = std::move(function);
 }
 
 void UiSessionManagerOhos::GetLatestHitTestNodeInfosForTouch(InteractionParamConfig config)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (getHitTestInfoFunction_) {
-        getHitTestInfoFunction_(config);
+    GetHitTestInfoFunction getHitTestInfoFunction;
+    {
+        std::lock_guard<std::mutex> lock(getHitTestInfoFunctionMutex_);
+        getHitTestInfoFunction = getHitTestInfoFunction_;
+    }
+    if (getHitTestInfoFunction) {
+        getHitTestInfoFunction(config);
     }
 }
 
 void UiSessionManagerOhos::ReportHitTestNodeInfos(const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService == nullptr) {
             LOGW("report hitTestNodeInfos failed, process id:%{public}d", pair.first);
@@ -446,17 +502,19 @@ void UiSessionManagerOhos::ReportHitTestNodeInfos(const std::string& data)
 
 void UiSessionManagerOhos::SaveForSendCommandFunction(NotifySendCommandFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(notifySendCommandFunctionMutex_);
     notifySendCommandFunction_ = std::move(function);
 }
 
 void UiSessionManagerOhos::SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(notifySendCommandAsyncFunctionMutex_);
     notifySendCommandAsyncFunction_ = std::move(function);
 }
 
 bool UiSessionManagerOhos::GetWebFocusRegistered()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(webFocusEventRegisteredMutex_);
     return webFocusEventRegistered;
 }
 
@@ -472,28 +530,41 @@ void UiSessionManagerOhos::OnRouterChange(const std::string& path, const std::st
 
 void UiSessionManagerOhos::SaveBaseInfo(const std::string& info)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(baseInfoMutex_);
     baseInfo_ = info;
 }
 
 void UiSessionManagerOhos::SendBaseInfo(int32_t processId)
 {
-    std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processId]);
-    reportLock.unlock();
+    sptr<IRemoteObject> reportObject;
+    {
+        std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+        auto reportIter = reportObjectMap_.find(processId);
+        if (reportIter != reportObjectMap_.end()) {
+            reportObject = reportIter->second;
+        }
+    }
+
+    auto reportService = iface_cast<ReportService>(reportObject);
     if (reportService != nullptr) {
-        std::unique_lock<std::mutex> lock(mutex_);
-        reportService->SendBaseInfo(baseInfo_);
+        std::string baseInfo;
+        {
+            std::lock_guard<std::mutex> lock(baseInfoMutex_);
+            baseInfo = baseInfo_;
+        }
+        reportService->SendBaseInfo(baseInfo);
     }
 }
 
 void UiSessionManagerOhos::SaveGetPixelMapFunction(GetPixelMapFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(getPixelMapFunctionMutex_);
     getPixelMapFunction_ = std::move(function);
 }
 
 void UiSessionManagerOhos::SaveGetImagesByIdFunction(GetImagesByIdFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(getImagesByIdFunctionMutex_);
     getImagesByIdFunction_ = std::move(function);
 }
 
@@ -518,20 +589,27 @@ void UiSessionManagerOhos::RemoveSaveGetCurrentInstanceId(int32_t instanceId)
 
 std::shared_ptr<UiTranslateManager> UiSessionManagerOhos::GetCurrentTranslateManager()
 {
-    std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
-    std::shared_lock<std::shared_mutex> lock(getInstanceIdCallbackMutex_);
-    if (getInstanceIdCallback_) {
-        int32_t instanceId = getInstanceIdCallback_();
-        std::shared_lock<std::shared_mutex> lock(translateManagerMutex_);
-        auto iter = translateManagerMap_.find(instanceId);
-        if (iter != translateManagerMap_.end()) {
-            auto translateManager = iter->second;
-            if (translateManager) {
-                currentTranslateManager = translateManager;
-            }
-        }
+    std::function<int32_t()> getInstanceIdCallback;
+    {
+        std::shared_lock<std::shared_mutex> lock(getInstanceIdCallbackMutex_);
+        getInstanceIdCallback = getInstanceIdCallback_;
     }
-    return  currentTranslateManager;
+    if (!getInstanceIdCallback) {
+        return nullptr;
+    }
+
+    int32_t instanceId = getInstanceIdCallback();
+    std::shared_lock<std::shared_mutex> lock(translateManagerMutex_);
+    auto iter = translateManagerMap_.find(instanceId);
+    if (iter == translateManagerMap_.end()) {
+        return nullptr;
+    }
+
+    auto translateManager = iter->second;
+    if (translateManager) {
+        return translateManager;
+    }
+    return nullptr;
 }
 
 void UiSessionManagerOhos::GetWebViewLanguage()
@@ -548,15 +626,19 @@ void UiSessionManagerOhos::GetWebViewLanguage()
 
 void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(pipelineContextPageNameCallbackMutex_);
     pipelineContextPageNameCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::GetCurrentPageName()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (pipelineContextPageNameCallback_) {
-        auto result = pipelineContextPageNameCallback_();
+    std::function<std::string()> pipelineContextPageNameCallback;
+    {
+        std::lock_guard<std::mutex> lock(pipelineContextPageNameCallbackMutex_);
+        pipelineContextPageNameCallback = pipelineContextPageNameCallback_;
+    }
+    if (pipelineContextPageNameCallback) {
+        auto result = pipelineContextPageNameCallback();
         SendCurrentPageName(result);
     }
 }
@@ -564,7 +646,7 @@ void UiSessionManagerOhos::GetCurrentPageName()
 void UiSessionManagerOhos::SendCurrentPageName(const std::string& result)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto& pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->SendCurrentPageName(result);
@@ -577,49 +659,66 @@ void UiSessionManagerOhos::SendCurrentPageName(const std::string& result)
 void UiSessionManagerOhos::SaveGetSpecifiedContentOffsetsFunction(
     std::function<std::vector<std::pair<float, float>>(int32_t id, const std::string& content)>&& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(getSpecifiedContentOffsetsCallbackMutex_);
     getSpecifiedContentOffsetsCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::SaveHighlightSpecifiedContentFunction(std::function<void(int32_t id,
     const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)>&& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(highlightSpecifiedContentCallbackMutex_);
     highlightSpecifiedContentCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::SaveSelectTextFunction(std::function<void()>&& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(selectTextCallbackMutex_);
     selectTextCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::GetSpecifiedContentOffsets(int32_t id, const std::string& content)
 {
-    if (getSpecifiedContentOffsetsCallback_) {
-        getSpecifiedContentOffsetsCallback_(id, content);
+    std::function<std::vector<std::pair<float, float>>(int32_t id, const std::string& content)>
+        getSpecifiedContentOffsetsCallback;
+    {
+        std::lock_guard<std::mutex> lock(getSpecifiedContentOffsetsCallbackMutex_);
+        getSpecifiedContentOffsetsCallback = getSpecifiedContentOffsetsCallback_;
+    }
+    if (getSpecifiedContentOffsetsCallback) {
+        getSpecifiedContentOffsetsCallback(id, content);
     }
 }
 
 void UiSessionManagerOhos::HighlightSpecifiedContent(
     int32_t id, const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)
 {
-    if (highlightSpecifiedContentCallback_) {
-        highlightSpecifiedContentCallback_(id, content, nodeIds, configs);
+    std::function<void(int32_t id, const std::string& content, const std::vector<std::string>& nodeIds,
+        const std::string& configs)> highlightSpecifiedContentCallback;
+    {
+        std::lock_guard<std::mutex> lock(highlightSpecifiedContentCallbackMutex_);
+        highlightSpecifiedContentCallback = highlightSpecifiedContentCallback_;
+    }
+    if (highlightSpecifiedContentCallback) {
+        highlightSpecifiedContentCallback(id, content, nodeIds, configs);
     }
 }
 
 void UiSessionManagerOhos::ReportSelectText()
 {
-    if (selectTextCallback_) {
-        selectTextCallback_();
+    std::function<void()> selectTextCallback;
+    {
+        std::lock_guard<std::mutex> lock(selectTextCallbackMutex_);
+        selectTextCallback = selectTextCallback_;
+    }
+    if (selectTextCallback) {
+        selectTextCallback();
     }
 }
 
 void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto& pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->SendSpecifiedContentOffsets(offsets);
@@ -638,22 +737,26 @@ void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
 void UiSessionManagerOhos::EraseProcessId(const std::string& key, int32_t targetPid)
 {
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count(key)) {
+    auto processIter = processMap_.find(key);
+    if (processIter == processMap_.end()) {
         return;
     }
-    processMap_[key].erase(targetPid);
+    processIter->second.erase(targetPid);
 }
 
 void UiSessionManagerOhos::SendCurrentLanguage(std::string result)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count("translate") || processMap_["translate"].empty()) {
+    auto processIter = processMap_.find("translate");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("SendCurrentLanguage no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["translate"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             reportService->SendCurrentLanguage(result);
         } else {
@@ -661,10 +764,9 @@ void UiSessionManagerOhos::SendCurrentLanguage(std::string result)
         }
     }
 }
+
 void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isContinued)
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
-
     auto currentTranslateManager = GetCurrentTranslateManager();
     if (currentTranslateManager) {
         currentTranslateManager->PostToUI([currentTranslateManager, extraData, isContinued]() {
@@ -679,12 +781,15 @@ void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count("translate") || processMap_["translate"].empty()) {
+    auto processIter = processMap_.find("translate");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("SendWebTextToAI no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["translate"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             reportService->SendWebText(nodeId, res);
         } else {
@@ -708,8 +813,6 @@ void UiSessionManagerOhos::SendTranslateResult(
 
 void UiSessionManagerOhos::SendTranslateResult(int32_t nodeId, std::string res)
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
-
     auto currentTranslateManager = GetCurrentTranslateManager();
     if (currentTranslateManager) {
         currentTranslateManager->PostToUI([currentTranslateManager, nodeId, res]() {
@@ -722,7 +825,6 @@ void UiSessionManagerOhos::SendTranslateResult(int32_t nodeId, std::string res)
 
 void UiSessionManagerOhos::ResetTranslate(int32_t nodeId)
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
     auto currentTranslateManager = GetCurrentTranslateManager();
     if (currentTranslateManager) {
         currentTranslateManager->PostToUI([currentTranslateManager, nodeId]() {
@@ -735,8 +837,13 @@ void UiSessionManagerOhos::ResetTranslate(int32_t nodeId)
 
 void UiSessionManagerOhos::GetPixelMap()
 {
-    if (getPixelMapFunction_) {
-        getPixelMapFunction_();
+    GetPixelMapFunction getPixelMapFunction;
+    {
+        std::lock_guard<std::mutex> lock(getPixelMapFunctionMutex_);
+        getPixelMapFunction = getPixelMapFunction_;
+    }
+    if (getPixelMapFunction) {
+        getPixelMapFunction();
     } else {
         LOGW("get pixelMap func is nullptr");
     }
@@ -745,8 +852,13 @@ void UiSessionManagerOhos::GetPixelMap()
 void UiSessionManagerOhos::GetMultiImagesById(const std::vector<int32_t>& arkUIIds,
     const std::map<int32_t, std::vector<int32_t>>& arkWebs)
 {
-    if (getImagesByIdFunction_) {
-        getImagesByIdFunction_(arkUIIds, arkWebs);
+    GetImagesByIdFunction getImagesByIdFunction;
+    {
+        std::lock_guard<std::mutex> lock(getImagesByIdFunctionMutex_);
+        getImagesByIdFunction = getImagesByIdFunction_;
+    }
+    if (getImagesByIdFunction) {
+        getImagesByIdFunction(arkUIIds, arkWebs);
     } else {
         LOGW("get images by id function is nullptr");
     }
@@ -758,19 +870,22 @@ void UiSessionManagerOhos::SendArkUIImagesById(int32_t windowId,
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count("getArkUIImages") || processMap_["getArkUIImages"].empty()) {
+    auto processIter = processMap_.find("getArkUIImages");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("SendArkUIImagesById no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["getArkUIImages"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             reportService->SendArkUIImagesById(windowId, componentImages, arkUIErrorCode);
         } else {
             LOGW("Send ArkUI Images By Id failed, process id:%{public}d", pid);
         }
     }
-    processMap_["getArkUIImages"].clear();
+    processIter->second.clear();
 }
 
 void UiSessionManagerOhos::SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
@@ -778,19 +893,22 @@ void UiSessionManagerOhos::SendArkWebImagesById(int32_t windowId, const std::map
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count("getArkWebImages") || processMap_["getArkWebImages"].empty()) {
+    auto processIter = processMap_.find("getArkWebImages");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("SendArkWebImagesById no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["getArkWebImages"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             reportService->SendArkWebImagesById(windowId, webImages, arkWebErrorCode);
         } else {
             LOGW("Send ArkWeb Images By Id failed, process id:%{public}d", pid);
         }
     }
-    processMap_["getArkWebImages"].clear();
+    processIter->second.clear();
 }
 
 void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps)
@@ -801,12 +919,15 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
     if (!currentTranslateManager) {
         LOGW("send pixelMap failed, translateManager is nullptr");
     }
-    if (!processMap_.count("pixel") || processMap_["pixel"].empty()) {
+    auto processIter = processMap_.find("pixel");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("SendPixelMap no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["pixel"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             reportService->SendShowingImage(maps);
         } else {
@@ -818,7 +939,7 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
             currentTranslateManager->ClearMap();
         });
     }
-    processMap_["pixel"].clear();
+    processIter->second.clear();
 }
 
 void UiSessionManagerOhos::SendCommand(const std::string& command)
@@ -842,6 +963,7 @@ void UiSessionManagerOhos::SendCommand(const std::string& command)
 
 void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& function)
 {
+    std::lock_guard<std::mutex> lock(sendCommandFunctionMutex_);
     sendCommandFunction_ = std::move(function);
 }
 
@@ -853,15 +975,19 @@ void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& f
 void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(
     std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(pipelineExeAppAIFunctionCallbackMutex_);
     pipelineExeAppAIFunctionCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const std::string& params)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (pipelineExeAppAIFunctionCallback_) {
-        auto result = pipelineExeAppAIFunctionCallback_(funcName, params);
+    std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback;
+    {
+        std::lock_guard<std::mutex> lock(pipelineExeAppAIFunctionCallbackMutex_);
+        pipelineExeAppAIFunctionCallback = pipelineExeAppAIFunctionCallback_;
+    }
+    if (pipelineExeAppAIFunctionCallback) {
+        auto result = pipelineExeAppAIFunctionCallback(funcName, params);
         SendExeAppAIFunctionResult(result);
     }
 }
@@ -869,7 +995,7 @@ void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const s
 void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto& pair : reportObjectMap_) {
+    for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->SendExeAppAIFunctionResult(result);
@@ -881,17 +1007,25 @@ void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
 
 void UiSessionManagerOhos::RegisterContentChangeCallback(const ContentChangeConfig& config)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (startContentChangeDetectCallback_) {
-        startContentChangeDetectCallback_(config);
+    std::function<void(ContentChangeConfig)> startContentChangeDetectCallback;
+    {
+        std::lock_guard<std::mutex> lock(startContentChangeDetectCallbackMutex_);
+        startContentChangeDetectCallback = startContentChangeDetectCallback_;
+    }
+    if (startContentChangeDetectCallback) {
+        startContentChangeDetectCallback(config);
     }
 }
 
 void UiSessionManagerOhos::UnregisterContentChangeCallback()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (stopContentChangeDetectCallback_) {
-        stopContentChangeDetectCallback_();
+    std::function<void()> stopContentChangeDetectCallback;
+    {
+        std::lock_guard<std::mutex> lock(stopContentChangeDetectCallbackMutex_);
+        stopContentChangeDetectCallback = stopContentChangeDetectCallback_;
+    }
+    if (stopContentChangeDetectCallback) {
+        stopContentChangeDetectCallback();
     }
 }
 
@@ -899,12 +1033,15 @@ void UiSessionManagerOhos::ReportContentChangeEvent(ChangeType type, const std::
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count("contentChange") || processMap_["contentChange"].empty()) {
+    auto processIter = processMap_.find("contentChange");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("ReportContentChangeEvent no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["contentChange"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             reportService->SendContentChange(type, simpleTree);
         } else {
@@ -915,34 +1052,38 @@ void UiSessionManagerOhos::ReportContentChangeEvent(ChangeType type, const std::
 
 void UiSessionManagerOhos::SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&& startCallback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(startContentChangeDetectCallbackMutex_);
     if (startContentChangeDetectCallback_) {
         return;
     }
-    startContentChangeDetectCallback_ = startCallback;
+    startContentChangeDetectCallback_ = std::move(startCallback);
 }
 
 void UiSessionManagerOhos::SetStopContentChangeDetectCallback(std::function<void()>&& stopCallback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(stopContentChangeDetectCallbackMutex_);
     if (stopContentChangeDetectCallback_) {
         return;
     }
-    stopContentChangeDetectCallback_ = stopCallback;
+    stopContentChangeDetectCallback_ = std::move(stopCallback);
 }
 
 void UiSessionManagerOhos::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
     const std::string& jsonPath, bool onlyVisible)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (getStateMgmtInfoFunction_) {
-        getStateMgmtInfoFunction_(componentName, propertyName, jsonPath, onlyVisible);
+    GetStateMgmtInfoFunction getStateMgmtInfoFunction;
+    {
+        std::lock_guard<std::mutex> lock(getStateMgmtInfoFunctionMutex_);
+        getStateMgmtInfoFunction = getStateMgmtInfoFunction_;
+    }
+    if (getStateMgmtInfoFunction) {
+        getStateMgmtInfoFunction(componentName, propertyName, jsonPath, onlyVisible);
     }
 }
 
 void UiSessionManagerOhos::SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(getStateMgmtInfoFunctionMutex_);
     getStateMgmtInfoFunction_ = std::move(callback);
 }
 
@@ -950,32 +1091,39 @@ void UiSessionManagerOhos::ReportGetStateMgmtInfo(std::vector<std::string> resul
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count("GetStateMgmtInfo") || processMap_["GetStateMgmtInfo"].empty()) {
+    auto processIter = processMap_.find("GetStateMgmtInfo");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("ReportGetStateMgmtInfo no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["GetStateMgmtInfo"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             reportService->ReportGetStateMgmtInfo(results);
         } else {
             LOGW("Report GetStateMgmtInfo failed, process id:%{public}d", pid);
         }
     }
-    processMap_["GetStateMgmtInfo"].clear();
+    processIter->second.clear();
 }
 
 void UiSessionManagerOhos::SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(getWebInfoByRequestCallbackMutex_);
     getWebInfoByRequestCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::GetWebInfoByRequest(int32_t webId, const std::string& request)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    if (getWebInfoByRequestCallback_) {
-        getWebInfoByRequestCallback_(webId, request);
+    GetWebInfoByRequestFunction getWebInfoByRequestCallback;
+    {
+        std::lock_guard<std::mutex> lock(getWebInfoByRequestCallbackMutex_);
+        getWebInfoByRequestCallback = getWebInfoByRequestCallback_;
+    }
+    if (getWebInfoByRequestCallback) {
+        getWebInfoByRequestCallback(webId, request);
     }
 }
 
@@ -984,18 +1132,21 @@ void UiSessionManagerOhos::SendWebInfoByRequest(uint32_t windowId, int32_t webId
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    if (!processMap_.count("GetWebInfoByRequest") || processMap_["GetWebInfoByRequest"].empty()) {
+    auto processIter = processMap_.find("GetWebInfoByRequest");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("SendWebInfoByRequest no report proxy");
         return;
     }
-    for (const auto& pid : processMap_["GetWebInfoByRequest"]) {
-        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
             reportService->SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
         } else {
             LOGW("Send WebInfo By Request failed, process id:%{public}d", pid);
         }
     }
-    processMap_["GetWebInfoByRequest"].clear();
+    processIter->second.clear();
 }
 } // namespace OHOS::Ace

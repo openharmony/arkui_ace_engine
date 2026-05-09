@@ -158,6 +158,75 @@ const std::string INVALID_MODE_EMPTY_STRING_JSON = R"({
         }
     }
 })";
+
+const std::string VALID_CLICK_WITH_FRACTIONAL_COORDS_JSON = R"({
+    "type": "click",
+    "mode": "auto",
+    "action_info": {
+        "coordinates": {
+            "x1": 123.456,
+            "y1": 789.012
+        }
+    }
+})";
+
+const std::string VALID_CLICK_WITH_NEGATIVE_COORDS_JSON = R"({
+    "type": "click",
+    "mode": "auto",
+    "action_info": {
+        "coordinates": {
+            "x1": -50.5,
+            "y1": -100.25
+        }
+    }
+})";
+
+const std::string VALID_CLICK_WITH_LARGE_COORDS_JSON = R"({
+    "type": "click",
+    "mode": "auto",
+    "action_info": {
+        "coordinates": {
+            "x1": 999999.99,
+            "y1": 888888.88
+        }
+    }
+})";
+
+const std::string VALID_CLICK_WITH_ZERO_COORDS_JSON = R"({
+    "type": "click",
+    "mode": "auto",
+    "action_info": {
+        "coordinates": {
+            "x1": 0.0,
+            "y1": 0.0
+        }
+    }
+})";
+
+const std::string ACTION_INFO_NOT_OBJECT_JSON = R"({
+    "type": "click",
+    "mode": "auto",
+    "action_info": "not_an_object"
+})";
+
+const std::string COORDINATES_NOT_OBJECT_JSON = R"({
+    "type": "click",
+    "mode": "auto",
+    "action_info": {
+        "coordinates": "not_an_object"
+    }
+})";
+
+const std::string MODE_IS_NUMBER_JSON = R"({
+    "type": "click",
+    "mode": 123,
+    "action_info": {
+        "coordinates": {
+            "x1": 100.0,
+            "y1": 200.0
+        }
+    }
+})";
 }
 
 class ClickCommandParserTest : public testing::Test {
@@ -188,6 +257,13 @@ HWTEST_F(ClickCommandParserConstructorTest, ClickCommandParser_Constructor, Test
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
     ClickCommandParser parser(context);
     EXPECT_EQ(parser.context_, context);
+}
+
+HWTEST_F(ClickCommandParserConstructorTest, ClickCommandParser_Constructor_WithNullContext, TestSize.Level1)
+{
+    WeakPtr<PipelineContext> nullContext;
+    ClickCommandParser parser(nullContext);
+    EXPECT_EQ(parser.context_.Upgrade(), nullptr);
 }
 
 HWTEST_F(ClickCommandParserParseTest, Parse_ValidAutoMode_ReturnsTwoExecutors, TestSize.Level1)
@@ -353,6 +429,91 @@ HWTEST_F(ClickCommandParserParseTest, Parse_Y1NotNumber_ReturnsEmpty, TestSize.L
     EXPECT_TRUE(executors.empty());
 }
 
+HWTEST_F(ClickCommandParserParseTest, Parse_WithFractionalCoordinates_ReturnsExecutors, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_CLICK_WITH_FRACTIONAL_COORDS_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 2);
+    EXPECT_NE(executors[0], nullptr);
+    EXPECT_NE(executors[1], nullptr);
+}
+
+HWTEST_F(ClickCommandParserParseTest, Parse_WithNegativeCoordinates_ReturnsExecutors, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_CLICK_WITH_NEGATIVE_COORDS_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 2);
+    EXPECT_NE(executors[0], nullptr);
+    EXPECT_NE(executors[1], nullptr);
+}
+
+HWTEST_F(ClickCommandParserParseTest, Parse_WithLargeCoordinates_ReturnsExecutors, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_CLICK_WITH_LARGE_COORDS_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 2);
+    EXPECT_NE(executors[0], nullptr);
+    EXPECT_NE(executors[1], nullptr);
+}
+
+HWTEST_F(ClickCommandParserParseTest, Parse_WithZeroCoordinates_ReturnsExecutors, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_CLICK_WITH_ZERO_COORDS_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 2);
+    EXPECT_NE(executors[0], nullptr);
+    EXPECT_NE(executors[1], nullptr);
+}
+
+HWTEST_F(ClickCommandParserParseTest, Parse_ActionInfoNotObject_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(ACTION_INFO_NOT_OBJECT_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(ClickCommandParserParseTest, Parse_CoordinatesNotObject_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(COORDINATES_NOT_OBJECT_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(ClickCommandParserParseTest, Parse_ModeIsNumber_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(MODE_IS_NUMBER_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
 HWTEST_F(ClickCommandParserParseModeTest, ParseMode_WithAutoMode_ReturnsTrue, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
@@ -421,6 +582,18 @@ HWTEST_F(ClickCommandParserParseModeTest, ParseMode_EmptyMode_ReturnsFalse, Test
 
     ExecuteMode mode;
     EXPECT_FALSE(parser.ParseMode(json.get(), mode));
+}
+
+HWTEST_F(ClickCommandParserParseModeTest, ParseMode_CaseSensitive_SimulatingLowerCase, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_CLICK_SIMULATING_JSON);
+    ASSERT_NE(json, nullptr);
+
+    ExecuteMode mode;
+    EXPECT_TRUE(parser.ParseMode(json.get(), mode));
+    EXPECT_EQ(mode, ExecuteMode::SIMULATING);
 }
 
 HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_ValidCoordinates_ReturnsTrue, TestSize.Level1)
@@ -497,6 +670,58 @@ HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_Y1NotNumber_Re
     EXPECT_FALSE(result);
 }
 
+HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_FractionalValues_ParsesCorrectly, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_CLICK_WITH_FRACTIONAL_COORDS_JSON);
+    ASSERT_NE(json, nullptr);
+
+    PointF coordinates(0.0f, 0.0f);
+    auto result = parser.ParseCoordinates(json.get(), coordinates);
+    EXPECT_TRUE(result);
+    EXPECT_FLOAT_EQ(coordinates.GetX(), 123.456f);
+    EXPECT_FLOAT_EQ(coordinates.GetY(), 789.012f);
+}
+
+HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_NegativeValues_ParsesCorrectly, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_CLICK_WITH_NEGATIVE_COORDS_JSON);
+    ASSERT_NE(json, nullptr);
+
+    PointF coordinates(0.0f, 0.0f);
+    auto result = parser.ParseCoordinates(json.get(), coordinates);
+    EXPECT_TRUE(result);
+    EXPECT_FLOAT_EQ(coordinates.GetX(), -50.5f);
+    EXPECT_FLOAT_EQ(coordinates.GetY(), -100.25f);
+}
+
+HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_ActionInfoNotObject_ReturnsFalse, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(ACTION_INFO_NOT_OBJECT_JSON);
+    ASSERT_NE(json, nullptr);
+
+    PointF coordinates(0.0f, 0.0f);
+    auto result = parser.ParseCoordinates(json.get(), coordinates);
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_CoordinatesNotObject_ReturnsFalse, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(COORDINATES_NOT_OBJECT_JSON);
+    ASSERT_NE(json, nullptr);
+
+    PointF coordinates(0.0f, 0.0f);
+    auto result = parser.ParseCoordinates(json.get(), coordinates);
+    EXPECT_FALSE(result);
+}
+
 HWTEST_F(ClickCommandParserCreateExecutorTest, CreateExecutor_AutoMode_ReturnsTwoExecutors, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
@@ -529,6 +754,56 @@ HWTEST_F(ClickCommandParserCreateExecutorTest, CreateExecutor_TargetMode_Returns
     auto executors = parser.CreateExecutor(ExecuteMode::TARGET, coordinates);
     EXPECT_EQ(executors.size(), 1);
     EXPECT_EQ(executors[0]->GetType(), "strict_click");
+}
+
+HWTEST_F(ClickCommandParserCreateExecutorTest, CreateExecutor_ZeroCoordinates_Works, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    PointF coordinates(0.0f, 0.0f);
+
+    auto executors = parser.CreateExecutor(ExecuteMode::AUTO, coordinates);
+    EXPECT_EQ(executors.size(), 2);
+}
+
+HWTEST_F(ClickCommandParserCreateExecutorTest, CreateExecutor_NegativeCoordinates_Works, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    PointF coordinates(-100.0f, -200.0f);
+
+    auto executors = parser.CreateExecutor(ExecuteMode::SIMULATING, coordinates);
+    EXPECT_EQ(executors.size(), 1);
+}
+
+HWTEST_F(ClickCommandParserCreateExecutorTest, CreateExecutor_LargeCoordinates_Works, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    PointF coordinates(999999.99f, 888888.88f);
+
+    auto executors = parser.CreateExecutor(ExecuteMode::TARGET, coordinates);
+    EXPECT_EQ(executors.size(), 1);
+}
+
+HWTEST_F(ClickCommandParserCreateExecutorTest, CreateExecutor_DiffModes_ReturnCorrectExecutorTypes, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ClickCommandParser parser(context);
+    PointF coordinates(100.0f, 200.0f);
+
+    auto autoExecutors = parser.CreateExecutor(ExecuteMode::AUTO, coordinates);
+    auto simulatingExecutors = parser.CreateExecutor(ExecuteMode::SIMULATING, coordinates);
+    auto targetExecutors = parser.CreateExecutor(ExecuteMode::TARGET, coordinates);
+
+    EXPECT_EQ(autoExecutors.size(), 2);
+    EXPECT_EQ(simulatingExecutors.size(), 1);
+    EXPECT_EQ(targetExecutors.size(), 1);
+
+    EXPECT_EQ(autoExecutors[0]->GetType(), "strict_click");
+    EXPECT_EQ(autoExecutors[1]->GetType(), "simulate_touch");
+    EXPECT_EQ(simulatingExecutors[0]->GetType(), "simulate_touch");
+    EXPECT_EQ(targetExecutors[0]->GetType(), "strict_click");
 }
 
 } // namespace OHOS::Ace::NG

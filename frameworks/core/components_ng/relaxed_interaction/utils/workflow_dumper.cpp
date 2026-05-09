@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
-
+#include "frameworks/base/utils/time_util.h"
 #include <sstream>
 
 namespace OHOS::Ace::NG {
@@ -31,12 +31,14 @@ void WorkflowDumper::AddLog(const std::string& log)
         logs_.pop_front();
     }
 
-    logs_.push_back(log);
+    int64_t createTime_ = GetCurrentTimestamp();
+    logs_.push_back(ConvertTimestampToStr(createTime_) + " " + log);
 }
 
 std::string WorkflowDumper::Dump() const
 {
-    std::ostringstream buffer("\n");
+    std::ostringstream buffer;
+    buffer << "\n";
     for (const auto& log : logs_) {
         buffer << log << "\n";
     }

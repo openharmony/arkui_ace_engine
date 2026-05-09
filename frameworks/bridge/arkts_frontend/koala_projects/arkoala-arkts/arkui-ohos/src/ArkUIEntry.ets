@@ -184,7 +184,7 @@ function dumpTree(node: IncrementalNode, indent: int32 = 0) {
 
 function errorInfo(crash: Object): string {
     let msg = crash.toString() + "\n"
-    if (Object.hasOwn(crash, "stack")) msg += (crash as Error).stack
+    if (crash instanceof Error) msg += (crash as Error).stack
     return msg
 }
 
@@ -400,7 +400,9 @@ export class Application {
         // Here we request to draw a frame and call custom components callbacks.
 
         // Here we request to draw a frame and call custom components callbacks.
-        rootState!.value;
+        if (rootState) {
+            rootState!.value;
+        }
         if (preState) {
             preState!.value;
         }

@@ -92,4 +92,7 @@ interface RenderNodeExtender {
   static void removeChild(RenderNode peer, RenderNode node);
   static void clearChildren(RenderNode peer);
   static void invalidate(RenderNode peer);
+  static void setBackgroundBlur(RenderNode peer, f64 radius, i32 grayscale1, i32 grayscale2);
+  static void setContentBlur(RenderNode peer, f64 radius, i32 grayscale1, i32 grayscale2);
+  static void setForegroundBlur(RenderNode peer, f64 radius);
 };

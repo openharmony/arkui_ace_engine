@@ -138,6 +138,7 @@ void AssignCast(std::optional<SideBarContainerType>& dst, const Ark_SideBarConta
         case ARK_SIDE_BAR_CONTAINER_TYPE_EMBED: dst = SideBarContainerType::EMBED; break;
         case ARK_SIDE_BAR_CONTAINER_TYPE_OVERLAY: dst = SideBarContainerType::OVERLAY; break;
         case ARK_SIDE_BAR_CONTAINER_TYPE_AUTO: dst = SideBarContainerType::AUTO; break;
+        case ARK_SIDE_BAR_CONTAINER_TYPE_DISPLACE: dst = SideBarContainerType::DISPLACE; break;
         default: LOGE("SideBarContainerInterfaceModifier::Unexpected enum value in "
             "Ark_SideBarContainerType: %{public}d", src);
     }
@@ -272,6 +273,13 @@ void SetShowControlButtonImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SideBarContainerModelStatic::SetShowControlButton(frameNode, Converter::OptConvertPtr<bool>(value).value_or(true));
 }
+void SetShowSideBarWithGestureImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelStatic::SetShowSideBarWithGesture(
+        frameNode, Converter::OptConvertPtr<bool>(value).value_or(false));
+}
 void SetOnChangeImpl(Ark_NativePointer node, const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -403,6 +411,7 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerStaticModifier
         SideBarContainerAttributeModifier::SetSideBarPositionImpl,
         SideBarContainerAttributeModifier::SetDividerImpl,
         SideBarContainerAttributeModifier::SetMinContentWidthImpl,
+        SideBarContainerAttributeModifier::SetShowSideBarWithGestureImpl,
     };
     return &ArkUISideBarContainerModifierImpl;
 }

@@ -15,6 +15,7 @@
 
 #include "text_input_base.h"
 
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
@@ -1126,6 +1127,51 @@ HWTEST_F(TextFieldTestNgTwo, TextFadeoutStateTest002, TestSize.Level1)
     paintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_FALSE(pattern_->GetParagraph()->GetTextWidth() > paintWrapper->GetContentSize().Width());
     EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+}
+
+/**
+ * @tc.name: UpdateOverlayModifier001
+ * @tc.desc: Test the UpdateOverlayModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTestNgTwo, UpdateOverlayModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the node has the ability to support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
+    EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+
+    /**
+     * @tc.steps: step2. Set paintWrapper and overlayModifier.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    auto paintMethod = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+    auto overlayModifier = paintMethod->textFieldOverlayModifier_;
+    ASSERT_NE(overlayModifier, nullptr);
+
+    /**
+     * @tc.steps: step3. set cursor color and call UpdateContentModifier
+     * @tc.expected: step3. previewTextDecorationColor equals cursor color.
+     */
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    paintProperty->ResetCaretColorFlagByUser();
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    paintProperty->UpdateCursorColor(Color::BLUE);
+    paintMethod->UpdateOverlayModifier(paintWrapper);
+    EXPECT_TRUE(overlayModifier->previewTextDecorationColor_->Get() == Color::BLUE);
 }
 
 /**

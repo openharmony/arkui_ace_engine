@@ -1149,15 +1149,10 @@ void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, dou
     Dimension dOffsetX(offsetX, DimensionUnit::VP);
     Dimension dOffsetY(offsetY, DimensionUnit::VP);
     double radiusVal = radius;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
-        if (LessNotEqual(radius, 0.0)) {
-            radiusVal = 0.0;
-        }
-    } else {
-        if (LessOrEqual(radius, 0.0)) {
-            LOGE("Shadow Parse radius failed, radius = %{public}lf", radius);
-            return;
-        }
+    if (LessOrEqual(radius, 0.0) &&
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        LOGE("Shadow Parse radius failed, radius = %{public}lf", radius);
+        return;
     }
     std::vector<Shadow> shadows(1);
     shadows.begin()->SetBlurRadius(radiusVal);
@@ -2673,9 +2668,6 @@ void ParseShadow(NativeShadow nativeShadow, NG::SheetStyle& sheetStyle)
     }
     Shadow shadow;
     NativeShadowOptions shadowOptions = nativeShadow.value;
-    if (LessNotEqual(shadowOptions.radius, 0.0)) {
-        shadowOptions.radius = 0.0;
-    }
     shadow.SetBlurRadius(shadowOptions.radius);
     Color shadowColor = Color(ColorAlphaAdapt(shadowOptions.color));
     shadow.SetColor(shadowColor);

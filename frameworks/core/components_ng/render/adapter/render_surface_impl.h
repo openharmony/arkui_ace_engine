@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,8 @@ public:
     void SetSurfaceRotation(bool isLock);
 
     void SetSurfaceRect(float positionX, float positionY, float width, float height);
+
+    std::shared_ptr<Media::PixelMap> SurfaceCapture() override;
 #endif
 private:
     WeakPtr<NG::RenderContext> renderContext_;
@@ -80,6 +82,8 @@ private:
     void* nativeWindow_ = nullptr;
     bool isSetConfigSurface_ = false;
     Rect lastRect_;
+    int32_t surfaceWidth_ = 0;
+    int32_t surfaceHeight_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurfaceImpl);
 };

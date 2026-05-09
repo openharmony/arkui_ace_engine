@@ -61,6 +61,9 @@ WeakPtr<PixelMap> ImageDecoder::GetFromPixelMapCache(const ImageSourceInfo& imag
     if (!imageSourceInfo.IsSurportCachePixelmap()) {
         return nullptr;
     }
+    if (imageSourceInfo.IsSkipCacheRead()) {
+        return nullptr;
+    }
     std::shared_lock<std::shared_mutex> lock(pixelMapMtx_);
     auto key = ImageUtils::GenerateImageKey(imageSourceInfo, size);
     // key exists -> task is running

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, WatchIdType } from '../decorator';
+import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, OBSERVE, RenderIdType, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
@@ -81,7 +81,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
 
     // helper
     public shouldAddRef(): boolean {
-        return this.allowDeep_ || ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return OBSERVE.renderingComponent > 0;
     }
 
     public override toString(): String {

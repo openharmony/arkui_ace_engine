@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/pattern/grid_row/grid_row_base_test_ng.h"
+#include "core/common/container.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {

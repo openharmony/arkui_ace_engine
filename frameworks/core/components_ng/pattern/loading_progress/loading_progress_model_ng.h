@@ -53,7 +53,6 @@ public:
     static void ResetColor(FrameNode* frameNode);
     static void ResetForegroundColor(FrameNode* frameNode);
     static void SetForegroundColorParseFailed(FrameNode* frameNode, bool isParseFailed);
-    static void SetColorParseFailed(FrameNode* frameNode, bool isParseFailed);
     static void CreateWithResourceObj(FrameNode* frameNode, LoadingProgressResourceType LoadingProgressResourceType,
         const RefPtr<ResourceObject>& resObj);
 };

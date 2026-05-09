@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
+#include <cinttypes>
+
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
@@ -24,6 +26,7 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -179,6 +182,43 @@ void NavDestinationPattern::OnModifyDone()
     CheckIfOrientationChanged();
     CheckIfStatusBarConfigChanged();
     CheckIfNavigationIndicatorConfigChagned();
+}
+
+void NavDestinationPattern::NotifyFullScreenOverlayRequestChange(
+    std::optional<bool> previousRequest, std::optional<bool> currentRequest)
+{
+    if (previousRequest == currentRequest) {
+        return;
+    }
+    // A request toggle can move this destination between the content and overlay containers and
+    // can also upgrade pages above it. Force Navigation to recompute ordering, visibility, and
+    // render-tree ownership in one refresh pass.
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    if (!navigationNode) {
+        return;
+    }
+    navigationNode->UpdateNavDestinationNodeWithoutMarkDirty(nullptr);
+    auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(navigationNode->GetTopDestination());
+    auto isCurFullscreenOverlay = curTopNavDestination ? curTopNavDestination->IsFullScreenOverlay() : false;
+    navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    auto overlayNode = navigationNode->GetOverlayNode();
+    if (overlayNode) {
+        overlayNode->MarkNeedSyncRenderTree(true);
+        overlayNode->RebuildRenderContextTree();
+        if (isCurFullscreenOverlay) {
+            navigationNode->UpdateContainerVisibility(
+                AceType::DynamicCast<FrameNode>(overlayNode), VisibleType::VISIBLE);
+        }
+    }
+    auto navigationContentNode = navigationNode->GetContentNode();
+    if (navigationContentNode) {
+        navigationContentNode->MarkNeedSyncRenderTree(true);
+        navigationContentNode->RebuildRenderContextTree();
+        if (!isCurFullscreenOverlay) {
+            navigationNode->UpdateContainerVisibility(
+                AceType::DynamicCast<FrameNode>(navigationContentNode), VisibleType::VISIBLE);
+        }
+    }
 }
 
 void NavDestinationPattern::OnLanguageConfigurationUpdate()

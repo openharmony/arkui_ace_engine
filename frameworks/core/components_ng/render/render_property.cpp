@@ -444,6 +444,51 @@ void OuterBorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     json->PutExtAttr("outline", jsonOutline->ToString().c_str(), filter);
 }
 
+void MaterialPreProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto jsonPreBorderWidth = JsonUtil::Create(true);
+    propPreBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonPreBorderWidth, filter, true);
+    json->PutExtAttr("preBorderWidth", jsonPreBorderWidth->ToString().c_str(), filter);
+    auto jsonPreBorderColor = JsonUtil::Create(true);
+    propPreBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonPreBorderColor, filter, true);
+    json->PutExtAttr("preBorderColor", jsonPreBorderColor->ToString().c_str(), filter);
+    auto jsonShadow = JsonUtil::Create(true);
+    auto shadow = propPreBackShadow.value_or(Shadow());
+    if (shadow.GetStyle() == ShadowStyle::OuterDefaultXS) {
+        json->PutExtAttr("shadow", "ShadowStyle.OuterDefaultXS", filter);
+    } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultSM) {
+        json->PutExtAttr("shadow", "ShadowStyle.OuterDefaultSM", filter);
+    } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultMD) {
+        json->PutExtAttr("shadow", "ShadowStyle.OuterDefaultMD", filter);
+    } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultLG) {
+        json->PutExtAttr("shadow", "ShadowStyle.OuterDefaultLG", filter);
+    } else if (shadow.GetStyle() == ShadowStyle::OuterFloatingSM) {
+        json->PutExtAttr("shadow", "ShadowStyle.OuterFloatingSM", filter);
+    } else if (shadow.GetStyle() == ShadowStyle::OuterFloatingMD) {
+        json->PutExtAttr("shadow", "ShadowStyle.OuterFloatingMD", filter);
+    } else {
+        jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+        if (shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE) {
+            jsonShadow->Put("color", "ColoringStrategy.AVERAGE");
+        } else if (shadow.GetShadowColorStrategy() == ShadowColorStrategy::PRIMARY) {
+            jsonShadow->Put("color", "ColoringStrategy.PRIMARY");
+        } else {
+            jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+        }
+        jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+        jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+        jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
+        jsonShadow->Put("fill", std::to_string(shadow.GetIsFilled()).c_str());
+        json->PutExtAttr("shadow", jsonShadow, filter);
+    }
+    json->PutExtAttr("preBackgroundColor",
+        propPreBackgroundColor.has_value() ? propPreBackgroundColor->ColorToString().c_str() : "", filter);
+}
+
 void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     /* no fixed attr below, just return */
@@ -533,5 +578,36 @@ void BorderImageProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     jsonBorderImage->Put("fill", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
         ->GetNeedFillCenter() ? "true" : "false");
     json->PutExtAttr("borderImage", jsonBorderImage->ToString().c_str(), filter);
+}
+
+void UnionEffectProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("useUnionEffect", propUseUnionEffect.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("unionMode", static_cast<int32_t>(propUnionMode.value_or(UnionMode::SMOOTH_UNION)), filter);
+    if (propCenterGravityOptions.has_value()) {
+        auto jsonCenterGravity = JsonUtil::Create(true);
+        jsonCenterGravity->Put("gravityCenter", propCenterGravityOptions->gravityCenter ? "true" : "false");
+        jsonCenterGravity->Put("gravityIntensity", propCenterGravityOptions->gravityIntensity);
+        json->PutExtAttr("centerGravityOptions", jsonCenterGravity, filter);
+    }
+}
+
+void EdgeLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (propEdgeLightParam.has_value()) {
+        auto jsonEdgeLight = JsonUtil::Create(true);
+        jsonEdgeLight->Put("edgeLightPosition", static_cast<int32_t>(propEdgeLightParam->edgeLightPosition));
+        jsonEdgeLight->Put("length", propEdgeLightParam->length.ToString().c_str());
+        jsonEdgeLight->Put("intensity", propEdgeLightParam->intensity);
+        jsonEdgeLight->Put("thickness", propEdgeLightParam->thickness.ToString().c_str());
+        jsonEdgeLight->Put("color", propEdgeLightParam->color.ColorToString().c_str());
+        json->PutExtAttr("edgeLightParam", jsonEdgeLight, filter);
+    }
 }
 } // namespace OHOS::Ace::NG

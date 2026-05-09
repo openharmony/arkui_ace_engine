@@ -16,6 +16,7 @@
 #include "core/components_ng/event/pan_event.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
@@ -155,6 +156,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     panRecognizer_->SetOnActionCancel(actionCancel);
     panRecognizer_->SetIsSystemGesture(true);
     panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    panRecognizer_->SetCanCoexistWithScroll(canCoexistWithScroll_);
 
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);

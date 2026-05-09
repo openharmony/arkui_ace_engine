@@ -1250,7 +1250,7 @@ export struct ComposeListItem {
     }
     const iconStyle = this.contentItem?.iconStyle;
     if (iconStyle !== undefined) {
-      const iconSize = ICON_SIZE_MAP.get(iconStyle as number);
+      const iconSize = ICON_SIZE_MAP.get(iconStyle);
       if (iconSize !== undefined && iconSize >= this.itemHeight) {
         this.itemHeight = iconSize + SAFE_LIST_PADDING;
       }
@@ -1399,9 +1399,12 @@ export struct ComposeListItem {
     if (this.containerDirection === FlexDirection.Row) {
       return LengthMetrics.vp(0);
     }
-    let iconSize: number = ICON_SIZE_MAP.get(this.contentItem?.iconStyle! as number) as number;
-    if (this.contentItem?.icon && iconSize && (iconSize as number) <= HEADSCULPTURE_SIZE) {
-      return LengthMetrics.vp(iconSize + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+    const iconStyle = this.contentItem?.iconStyle;
+    if (iconStyle !== undefined) {
+      const iconSize = ICON_SIZE_MAP.get(iconStyle);
+      if (this.contentItem?.icon && iconSize && (iconSize as number) <= HEADSCULPTURE_SIZE) {
+        return LengthMetrics.vp((iconSize as number) + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+      }
     }
     return LengthMetrics.vp(LISTITEM_PADDING - this.textArrowLeftSafeOffset);
   }

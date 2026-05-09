@@ -25,6 +25,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_static.h"
 #include "base/log/log_wrapper.h"
@@ -964,13 +965,22 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
     } else {
         convMenuParam = NG::SelectMenuParam();
     }
-
+    std::optional<SelectionMenuType> menuType;
+    CHECK_NULL_VOID(options);
+    if (!options) {
+        Converter::AssignCast(menuType, options->value.menuType.value);
+    }
     CallbackHelper(*optContent).BuildAsync([frameNode, spanType = optSpanType.value(), convResponseType,
-        menuParam = convMenuParam.value()](const RefPtr<UINode>& uiNode) mutable {
+        menuParam = convMenuParam.value(), menuType](const RefPtr<UINode>& uiNode) mutable {
         auto builder = [uiNode]() {
             NG::ViewStackProcessor::GetInstance()->Push(uiNode);
         };
-        TextModelStatic::BindSelectionMenu(frameNode, spanType, *convResponseType, std::move(builder), menuParam);
+        if (menuType.has_value() && menuType.value() == SelectionMenuType::PREVIEW_MENU) {
+            TextModelStatic::BindPreviewMenu(frameNode, spanType, std::move(builder), menuParam);
+        } else {
+            TextModelStatic::UnBindPreviewMenu(frameNode);
+            TextModelStatic::BindSelectionMenu(frameNode, spanType, *convResponseType, std::move(builder), menuParam);
+        }
         }, node);
 }
 void SetFontVariationsImpl(Ark_NativePointer node, const Opt_Array_text_FontVariation* value)

@@ -41,6 +41,14 @@ struct InnerModalUIExtensionConfig {
     bool isModalFixFocus = false;
 };
 
+struct EmbeddedUIExtensionConfig {
+    RefPtr<OHOS::Ace::WantWrap> wantWrap = nullptr;
+    NG::SessionType sessionType = NG::SessionType::EMBEDDED_UI_EXTENSION;
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
+    bool densityDpi = false;
+    bool isWindowModeFollowHost = false;
+};
+
 struct UIExtensionConfig {
     RefPtr<OHOS::Ace::WantWrap> wantWrap = nullptr;
     RefPtr<NG::FrameNode> placeholderNode = nullptr;
@@ -62,7 +70,7 @@ public:
         const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
         bool transferringCaller = false, bool densityDpi = false, bool isWindowModeFollowHost = false);
     // for Embedded Component
-    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
+    virtual void Create(const NG::EmbeddedUIExtensionConfig& config);
     virtual void Create(const NG::UIExtensionConfig& config) {}
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime);

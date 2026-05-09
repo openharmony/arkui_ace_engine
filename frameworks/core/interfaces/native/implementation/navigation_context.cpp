@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "navigation_context.h"
 #include "nav_path_info_peer_impl.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -1344,5 +1345,13 @@ void NavigationStack::SetRecoveryFromReplaceDestination(int32_t index, bool valu
     auto* info = PathStack::GetPathInfo(index);
     CHECK_NULL_VOID(info);
     info->recoveryFromReplaceDestination_ = value;
+}
+
+void NavigationStack::PushIntentNavDestination(
+    const std::string& name, const std::string& params, bool needTransition)
+{
+    if (pushDestinationInnerCallback_) {
+        pushDestinationInnerCallback_(name, params, needTransition);
+    }
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext

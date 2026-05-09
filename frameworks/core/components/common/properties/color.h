@@ -23,7 +23,6 @@
 #include "base/utils/string_utils.h"
 
 #include "ui/properties/color.h"
-#include "ui/properties/linear_color.h"
 
 namespace OHOS::Ace {
 

@@ -26,6 +26,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t ESCAPE_FINGER_ID_0 = 0;
+constexpr int32_t ESCAPE_FINGER_ID_1 = 1;
+constexpr int32_t ESCAPE_FINGER_ID_2 = 2;
+} // namespace
 
 struct InputInfos {
     PointF startPoint;
@@ -596,5 +601,376 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest005, TestSize.Level1)
     panRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
     panRecognizer->lastTouchEvent_ = touchEvent;
     EXPECT_EQ(panRecognizer->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: PanRecognizerCanCoexistWithScrollTest001
+ * @tc.desc: SetCanCoexistWithScroll / CanCoexistWithScroll round-trip
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerCanCoexistWithScrollTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    EXPECT_FALSE(pan->CanCoexistWithScroll());
+    pan->SetCanCoexistWithScroll(true);
+    EXPECT_TRUE(pan->CanCoexistWithScroll());
+    pan->SetCanCoexistWithScroll(false);
+    EXPECT_FALSE(pan->CanCoexistWithScroll());
+}
+
+/**
+ * @tc.name: PanRecognizerGetCurrentFingerIdsTest001
+ * @tc.desc: GetCurrentFingerIds returns ids matching touchPoints_
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerGetCurrentFingerIdsTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    EXPECT_TRUE(pan->GetCurrentFingerIds().empty());
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    touch.id = ESCAPE_FINGER_ID_1;
+    pan->touchPoints_[ESCAPE_FINGER_ID_1] = touch;
+
+    auto ids = pan->GetCurrentFingerIds();
+    EXPECT_EQ(ids.size(), 2u);
+    EXPECT_NE(ids.find(ESCAPE_FINGER_ID_0), ids.end());
+    EXPECT_NE(ids.find(ESCAPE_FINGER_ID_1), ids.end());
+}
+
+/**
+ * @tc.name: PanRecognizerOnFingerEscapedTest001
+ * @tc.desc: OnFingerEscaped removes all per-finger state for the given id
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerOnFingerEscapedTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    pan->touchPointsDistance_[ESCAPE_FINGER_ID_0] = Offset();
+    pan->fingersId_.insert(ESCAPE_FINGER_ID_0);
+    pan->activeFingers_.push_back(ESCAPE_FINGER_ID_0);
+    pan->currentFingers_ = 1;
+
+    pan->OnFingerEscaped(ESCAPE_FINGER_ID_0);
+
+    EXPECT_TRUE(pan->touchPoints_.find(ESCAPE_FINGER_ID_0) == pan->touchPoints_.end());
+    EXPECT_TRUE(pan->touchPointsDistance_.find(ESCAPE_FINGER_ID_0) == pan->touchPointsDistance_.end());
+    EXPECT_TRUE(pan->fingersId_.find(ESCAPE_FINGER_ID_0) == pan->fingersId_.end());
+    EXPECT_EQ(pan->currentFingers_, 0);
+}
+
+/**
+ * @tc.name: PanRecognizerOnFingerEscapedTest002
+ * @tc.desc: OnFingerEscaped does not underflow currentFingers_ when already zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerOnFingerEscapedTest002, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->currentFingers_ = 0;
+
+    pan->OnFingerEscaped(ESCAPE_FINGER_ID_0);
+
+    EXPECT_EQ(pan->currentFingers_, 0);
+}
+
+/**
+ * @tc.name: PanRecognizerSetEscapeModeForPanTest001
+ * @tc.desc: SetEscapeModeForPan marks escape + cleans up tracked fingers + resets aggregated state
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetEscapeModeForPanTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    pan->fingersId_.insert(ESCAPE_FINGER_ID_0);
+    pan->currentFingers_ = 1;
+    pan->averageDistance_ = Offset(10.0, 10.0);
+    pan->refereeState_ = RefereeState::DETECTING;
+
+    std::unordered_set<int32_t> escaping = { ESCAPE_FINGER_ID_0 };
+    pan->SetEscapeModeForPan(escaping);
+
+    EXPECT_TRUE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_TRUE(pan->touchPoints_.empty());
+    EXPECT_TRUE(pan->fingersId_.empty());
+    EXPECT_EQ(pan->averageDistance_, Offset());
+    EXPECT_EQ(pan->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: PanRecognizerSetEscapeModeForPanTest002
+ * @tc.desc: SetEscapeModeForPan does not reset aggregated state when untracked fingers remain
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetEscapeModeForPanTest002, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_1;
+    pan->touchPoints_[ESCAPE_FINGER_ID_1] = touch;
+    pan->fingersId_.insert(ESCAPE_FINGER_ID_1);
+    pan->currentFingers_ = 1;
+    pan->refereeState_ = RefereeState::DETECTING;
+
+    // Escape finger 0 only — finger 1 is still tracked.
+    std::unordered_set<int32_t> escaping = { ESCAPE_FINGER_ID_0 };
+    pan->SetEscapeModeForPan(escaping);
+
+    EXPECT_EQ(pan->refereeState_, RefereeState::DETECTING);
+    EXPECT_FALSE(pan->touchPoints_.empty());
+}
+
+/**
+ * @tc.name: PanRecognizerEscapeModeResetOnResetStatusTest001
+ * @tc.desc: OnResetStatus clears escape state and escapeRequested_
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerEscapeModeResetOnResetStatusTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    pan->escapedFingerIds_.insert(ESCAPE_FINGER_ID_0);
+    pan->escapeRequested_ = true;
+
+    pan->ResetStatus();
+
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_FALSE(pan->escapeRequested_);
+}
+
+/**
+ * @tc.name: PanRecognizerEscapeModeUpEventResetsTest001
+ * @tc.desc: escapeRequested_ is cleared once all fingers are lifted
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerEscapeModeUpEventResetsTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->SetCanCoexistWithScroll(true);
+    pan->escapeRequested_ = true;
+    pan->fingersId_.insert(ESCAPE_FINGER_ID_0);
+
+    TouchEvent upEvent;
+    upEvent.id = ESCAPE_FINGER_ID_0;
+    upEvent.type = TouchType::UP;
+    pan->HandleTouchUpEvent(upEvent);
+
+    EXPECT_FALSE(pan->escapeRequested_);
+}
+
+/**
+ * @tc.name: PanRecognizerFilterCoexistingGestureFingers001
+ * @tc.desc: FilterCoexistingGestureFingers is a no-op when referee_ is null and no pipeline context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerFilterCoexistingGestureFingers001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->SetCanCoexistWithScroll(true);
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    pan->fingersId_.insert(ESCAPE_FINGER_ID_0);
+
+    // With no referee_ and no pipeline, should not crash.
+    pan->FilterCoexistingGestureFingers();
+
+    EXPECT_FALSE(pan->escapeRequested_);
+}
+
+/**
+ * @tc.name: PanRecognizerFilterCoexistingGestureFingers002
+ * @tc.desc: FilterCoexistingGestureFingers is a no-op when escape was already requested
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerFilterCoexistingGestureFingers002, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->SetCanCoexistWithScroll(true);
+    pan->escapeRequested_ = true;
+
+    // Should return early without touching anything.
+    pan->FilterCoexistingGestureFingers();
+
+    EXPECT_TRUE(pan->escapeRequested_);
+}
+
+/**
+ * @tc.name: PanRecognizerFilterCoexistingGestureFingers003
+ * @tc.desc: FilterCoexistingGestureFingers calls SetEscapeModeForPan on peer with opposite coexist flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerFilterCoexistingGestureFingers003, TestSize.Level1)
+{
+    // coexist Pan (multi-select) ─── peer inside scope
+    RefPtr<PanGestureOption> optCoexist = AceType::MakeRefPtr<PanGestureOption>();
+    auto coexistPan = AceType::MakeRefPtr<PanRecognizer>(optCoexist);
+    coexistPan->SetCanCoexistWithScroll(true);
+
+    // peer Pan (e.g. system scroll pan, canCoexistWithScroll=false)
+    RefPtr<PanGestureOption> optPeer = AceType::MakeRefPtr<PanGestureOption>();
+    auto peerPan = AceType::MakeRefPtr<PanRecognizer>(optPeer);
+    // canCoexistWithScroll stays false by default
+
+    // Set up a GestureScope with both recognizers and wire it to the referee.
+    RefPtr<GestureReferee> gestureReferee = AceType::MakeRefPtr<GestureReferee>();
+    RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(0);
+    scope->recognizers_.push_back(coexistPan);
+    scope->recognizers_.push_back(peerPan);
+    gestureReferee->gestureScopes_[0] = scope;
+
+    // Give coexistPan a tracked finger so GetCurrentFingerIds() is non-empty.
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_2;
+    coexistPan->touchPoints_[ESCAPE_FINGER_ID_2] = touch;
+    coexistPan->fingersId_.insert(ESCAPE_FINGER_ID_2);
+    coexistPan->currentFingers_ = 1;
+
+    // Also give peerPan the same finger so SetEscapeModeForPan cleans it up.
+    peerPan->touchPoints_[ESCAPE_FINGER_ID_2] = touch;
+    peerPan->fingersId_.insert(ESCAPE_FINGER_ID_2);
+    peerPan->currentFingers_ = 1;
+    peerPan->refereeState_ = RefereeState::DETECTING;
+
+    coexistPan->referee_ = gestureReferee;
+
+    coexistPan->FilterCoexistingGestureFingers();
+
+    EXPECT_TRUE(peerPan->IsFingerEscaped(ESCAPE_FINGER_ID_2));
+    EXPECT_TRUE(coexistPan->escapeRequested_);
+}
+
+/**
+ * @tc.name: GestureRecognizerEscapeAPITest001
+ * @tc.desc: SetEscapeMode / IsFingerEscaped / ResetEscapeMode basic round-trip
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GestureRecognizerEscapeAPITest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+
+    std::unordered_set<int32_t> fingers = { ESCAPE_FINGER_ID_0, ESCAPE_FINGER_ID_1 };
+    pan->SetEscapeMode(fingers);
+
+    EXPECT_TRUE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_TRUE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_1));
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_2));
+
+    pan->ResetEscapeMode();
+
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_1));
+}
+
+/**
+ * @tc.name: GestureRecognizerEscapeAPITest002
+ * @tc.desc: ResetStatus clears escaped finger ids
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GestureRecognizerEscapeAPITest002, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    pan->escapedFingerIds_.insert(ESCAPE_FINGER_ID_0);
+    EXPECT_TRUE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+
+    pan->ResetStatus();
+
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+}
+
+/**
+ * @tc.name: GestureRecognizerEscapeAPITest003
+ * @tc.desc: ResetStatusOnFinish clears escaped finger ids
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GestureRecognizerEscapeAPITest003, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    pan->escapedFingerIds_.insert(ESCAPE_FINGER_ID_1);
+    EXPECT_TRUE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_1));
+
+    pan->ResetStatusOnFinish();
+
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_1));
+}
+
+/**
+ * @tc.name: GestureRecognizerProcessTouchEventEscapeTest001
+ * @tc.desc: ProcessTouchEvent returns true without updating state for an escaped finger
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GestureRecognizerProcessTouchEventEscapeTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    // Mark finger 0 as escaped.
+    pan->escapedFingerIds_.insert(ESCAPE_FINGER_ID_0);
+
+    TouchEvent moveEvent;
+    moveEvent.id = ESCAPE_FINGER_ID_0;
+    moveEvent.type = TouchType::MOVE;
+    moveEvent.x = 100.0f;
+    moveEvent.y = 100.0f;
+
+    bool handled = pan->ProcessTouchEvent(moveEvent);
+
+    EXPECT_TRUE(handled);
+    EXPECT_EQ(pan->lastTouchEvent_.x, 0.0f);
+}
+
+/**
+ * @tc.name: GestureRecognizerProcessTouchEventEscapeTest002
+ * @tc.desc: ProcessTouchEvent processes normally for a non-escaped finger
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GestureRecognizerProcessTouchEventEscapeTest002, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    // Finger 1 is escaped; finger 0 is not — it should be processed.
+    pan->escapedFingerIds_.insert(ESCAPE_FINGER_ID_1);
+
+    TouchEvent downEvent;
+    downEvent.id = ESCAPE_FINGER_ID_0;
+    downEvent.type = TouchType::DOWN;
+    downEvent.x = 50.0f;
+    downEvent.y = 60.0f;
+
+    pan->ProcessTouchEvent(downEvent);
+
+    EXPECT_EQ(pan->lastTouchEvent_.id, ESCAPE_FINGER_ID_0);
 }
 } // namespace OHOS::Ace::NG

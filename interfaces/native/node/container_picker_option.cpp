@@ -16,6 +16,7 @@
 #include "ui/base/utils/utils.h"
 
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/native_error_message_macros.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,12 +62,18 @@ ArkUI_ErrorCode OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(
 ArkUI_ErrorCode OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(
     ArkUI_PickerIndicatorStyle* style, ArkUI_PickerIndicatorDivider* divider)
 {
-    CHECK_NULL_RETURN(style, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(divider, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(style, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "The style input parameter is nullptr");
+    CHECK_NULL_RETURN_WITH_MESSAGE(divider, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "The divider input parameter is nullptr");
     if (style->type != static_cast<ArkUI_Uint32>(ARKUI_PICKER_INDICATOR_DIVIDER)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "The member type of style parameter is incorrect");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (divider->strokeWidth < 0 || divider->startMargin < 0 || divider->endMargin < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "The member strokeWidth, startMargin or endMargin of divider parameter is incorrect");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     style->strokeWidth = divider->strokeWidth;

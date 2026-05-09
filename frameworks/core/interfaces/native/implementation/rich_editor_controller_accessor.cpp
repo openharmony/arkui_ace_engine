@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
@@ -23,6 +24,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "pixel_map_peer.h"
 #include "rich_editor_controller_peer_impl.h"
 #include "styled_string_peer.h"

@@ -14,6 +14,7 @@
  */
 
 #include "text_base.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -664,6 +665,7 @@ HWTEST_F(TextTestNgNine, HandleDoubleClickEvent002, TestSize.Level1)
     EXPECT_TRUE(pattern->isDoubleClick_);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::NONE);
     EXPECT_TRUE(pattern->textSelector_.IsValid());
+    pattern->GetSelectOverlay();
     EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
     pattern->pManager_->Reset();
 }
@@ -1017,6 +1019,7 @@ HWTEST_F(TextTestNgNine, CloseSelectionMenu001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     pattern->ShowSelectOverlay();
 
+    pattern->GetSelectOverlay();
     auto isClosed = !pattern->selectOverlay_->SelectOverlayIsOn();
     EXPECT_FALSE(isClosed);
     textController = pattern->GetTextController();
@@ -1134,7 +1137,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange003, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
@@ -1192,7 +1195,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange004, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
@@ -1250,7 +1253,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange005, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
@@ -1406,6 +1409,43 @@ HWTEST_F(TextTestNgNine, HandleClickAISpanEvent, TestSize.Level1)
     pattern->HandleClickAISpanEvent(textOffset);
     EXPECT_TRUE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
     pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: BindPreviewMenu001
+ * @tc.desc: test BindPreviewMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    auto textController = pattern->GetTextController();
+    textController->CloseSelectionMenu();
+    
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+    SelectMenuParam menuParam;
+    pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    EXPECT_TRUE(static_cast<bool>(pattern->oneStepDragController_));
 }
 
 /**

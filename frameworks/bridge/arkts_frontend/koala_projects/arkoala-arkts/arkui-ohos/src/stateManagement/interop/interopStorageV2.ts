@@ -34,13 +34,13 @@ export class InteropAppStorageV2 {
     }
 
     // get value from Storage in ArkTS1.1
-    protected getDynamicValue_: (value: string) => object | undefined = (value: string) => {
+    protected getDynamicValue_: (value: string) => Any = (value: string) => {
         throw new Error('not implement');
     };
     protected removeDynamicValue_: (value: string | undefined) => boolean = (value: string | undefined) => {
         throw new Error('not implement');
     };
-    protected getDynamicKeys_: () => Array<string> = () => {
+    protected getDynamicKeys_: () => Any = () => {
         throw new Error('not implement');
     };
 
@@ -67,15 +67,15 @@ export class InteropAppStorageV2 {
         const getKeys = (): Array<string> => {
             return AppStorageV2Impl.instance().keys();
         };
-        
+
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => object | undefined): void => {
+        const setGetValueFunc = (event: (value: string) => Any): void => {
             this.getDynamicValue_ = event;
         };
         const setRemoveValueFunc = (event: (value: string | undefined) => boolean): void => {
             this.removeDynamicValue_ = event;
         };
-        const setGetKeysFunc = (event: () => Array<string>): void => {
+        const setGetKeysFunc = (event: () => Any): void => {
             this.getDynamicKeys_ = event;
         };
 
@@ -141,9 +141,10 @@ export class InteropAppStorageV2 {
         AppStorageV2Impl.instance().keys().forEach((key: string) => {
             totalKeys.add(key);
         });
-        this.getDynamicKeys_().forEach((key: string) => {
-            totalKeys.add(key);
-        });
+        const dynamicKeys = ESValue.wrap(this.getDynamicKeys_());
+        for (const key of dynamicKeys) {
+            totalKeys.add(key.toString());
+        }
         return Array.from(totalKeys.keys());
     }
 }

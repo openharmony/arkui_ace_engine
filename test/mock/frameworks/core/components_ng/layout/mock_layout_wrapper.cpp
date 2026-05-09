@@ -23,6 +23,14 @@ OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, boo
     return OffsetF();
 }
 
+OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeAreaInner(
+    RefPtr<FrameNode>& host, RefPtr<FrameNode>& parentNode) const
+{
+    (void)host;
+    (void)parentNode;
+    return OffsetF();
+}
+
 bool LayoutWrapper::SkipMeasureContent() const
 {
     return false;

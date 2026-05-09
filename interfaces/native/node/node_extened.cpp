@@ -19,9 +19,13 @@
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/ui_node.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 namespace OHOS::Ace::NodeModel {
+
+namespace {
+constexpr ArkUI_Uint32 ALL_EXPAND = 0;
+}
 
 struct InnerCustomExtraParam  {
     int32_t targetId;
@@ -385,7 +389,7 @@ uint32_t GetTotalChildCount(ArkUI_NodeHandle node)
         return 0;
     }
     const auto* impl = GetFullImpl();
-    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle, true);
+    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle, ALL_EXPAND);
 }
 
 ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)

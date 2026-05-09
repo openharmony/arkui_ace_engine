@@ -24,6 +24,7 @@
 #include "core/interfaces/native/node/column_modifier.h"
 #include "core/interfaces/native/node/column_split_modifier.h"
 #include "core/interfaces/native/node/common_shape_modifier.h"
+#include "core/interfaces/native/node/node_container_reader_modifier.h"
 #include "core/interfaces/native/node/counter_modifier.h"
 #include "core/interfaces/native/node/data_panel_modifier.h"
 #include "core/interfaces/native/node/divider_modifier.h"
@@ -38,7 +39,9 @@
 #include "core/interfaces/native/node/grid_row_modifier.h"
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
+#include "core/interfaces/native/node/lazy_column_layout_modifier.h"
 #include "core/interfaces/native/node/lazy_grid_layout_modifier.h"
+#include "core/interfaces/native/node/lazy_water_flow_layout_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
@@ -157,6 +160,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .version = ARKUI_NODE_MODIFIERS_API_VERSION,
         .getCommonModifier = NodeModifier::GetCommonModifier,
         .getCheckboxGroupModifier = NodeModifier::GetCheckboxGroupModifier,
+        .getContainerReaderModifier = NodeModifier::GetContainerReaderModifier,
         .getCounterModifier = NodeModifier::GetCounterModifier,
         .getRowModifier = NodeModifier::GetRowModifier,
         .getRowSplitModifier = NodeModifier::GetRowSplitModifier,
@@ -314,6 +318,8 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getAtomicServiceModifier = NodeModifier::GetAtomicServiceModifier,
         .getMatrix4Modifier = NodeModifier::GetMatrix4Modifier,
         .getDynamicLayoutModifier = NodeModifier::GetDynamicLayoutModifier,
+        .getLazyColumnLayoutModifier = NodeModifier::GetLazyColumnLayoutModifier,
+        .getLazyWaterFlowLayoutModifier = NodeModifier::GetLazyWaterFlowLayoutModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

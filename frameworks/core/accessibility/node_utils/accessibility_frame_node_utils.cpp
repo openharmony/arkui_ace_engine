@@ -14,9 +14,13 @@
  */
 #include "accessibility_frame_node_utils.h"
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/property/accessibility_property.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -71,24 +75,15 @@ RefPtr<NG::UINode> GetInitialParent(const RefPtr<NG::UINode>& uiNode)
     return nullptr;
 }
 
-bool FindFrameNodeByAccessibilityId(int64_t id, const std::list<RefPtr<NG::UINode>>& children,
-    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>& result)
+bool FindFrameNodeByAccessibilityId(int64_t id, NG::FrameNode* frameNode)
 {
-    for (const auto& child : children) {
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
-        if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
-            if (frameNode->GetAccessibilityId() == id) {
-                result = AceType::DynamicCast<NG::FrameNode>(child);
-                return true;
-            }
-        }
-        nodes.push(child);
-    }
-    return false;
+    return frameNode != nullptr &&
+        !frameNode->CheckAccessibilityLevelNo() &&
+        frameNode->GetAccessibilityId() == id;
 }
 
 bool FindFrameNodeByCondition(const std::list<RefPtr<NG::UINode>>& children,
-    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>&result, FindCondition condition)
+    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>& result, FindCondition condition)
 {
     for (const auto& child : children) {
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
@@ -220,6 +215,60 @@ bool GetTransformRectRelativeToParent(
     }
     return find;
 }
+
+bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const RefPtr<NG::FrameNode>& parentFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    auto parentPattern = parentFrameNode->GetPattern<NG::ScrollablePattern>();
+    CHECK_NULL_RETURN(parentPattern, false);
+
+    auto scrollAbility = parentPattern->GetScrollOffsetAbility(true);
+    auto scrollFunc = scrollAbility.scrollFunc;
+    auto scrollAxis = scrollAbility.axis;
+    if (!scrollFunc || scrollAxis == Axis::NONE) {
+        return false;
+    }
+
+    NG::MoveOffsetParam param {
+        .isVertical = scrollAxis == Axis::VERTICAL,
+        .contentStartOffset = scrollAbility.contentStartOffset,
+        .contentEndOffset = scrollAbility.contentEndOffset,
+        .noNeedMargin = true,
+        .isFromAccessibility = true
+    };
+    auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
+    if (!NearZero(moveOffset)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
+            moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
+        auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+        return ret;
+    }
+    return false;
+}
+
+bool ScrollByOffset(const RefPtr<NG::FrameNode>& curFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    bool ret = false;
+    auto parentFrameNode = curFrameNode->GetParentFrameNode();
+
+    while (parentFrameNode) {
+        auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty && !accessibilityProperty->IsUserScrollTriggerable()) {
+            return false;
+        }
+        if (ScrollByOffsetToParent(curFrameNode, parentFrameNode)) {
+            ret = true;
+        }
+        parentFrameNode = parentFrameNode->GetParentFrameNode();
+    }
+    return ret;
+}
 } // namespace
 
 void AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(const RefPtr<NG::UINode>& uiNode)
@@ -281,41 +330,54 @@ RefPtr<NG::FrameNode> AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId
     if (root->GetAccessibilityId() == id) {
         return root;
     }
-    std::queue<RefPtr<NG::UINode>> nodes;
-    nodes.push(root);
-    RefPtr<NG::FrameNode> frameNodeResult = nullptr;
+    std::vector<RefPtr<NG::UINode>> nodes;
+    std::vector<RefPtr<NG::UINode>> nodesNext;
+    nodes.emplace_back(root);
 
     while (!nodes.empty()) {
-        auto current = nodes.front();
-        nodes.pop();
-        if (current->HasVirtualNodeAccessibilityProperty()) {
-            auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+        nodesNext.reserve(nodes.size() * 2); // double size
+        for (auto& current: nodes) {
+            CHECK_NULL_CONTINUE(current);
+
+            auto hasVirtualNodeAccessibilityProperty = current->HasVirtualNodeAccessibilityProperty();
+            if (!hasVirtualNodeAccessibilityProperty) {
+                const auto& children = current->GetChildren(true);
+                for (auto& child: children) {
+                    auto frameNode = AceType::DynamicCast<NG::FrameNode>(child.GetRawPtr());
+                    if (FindFrameNodeByAccessibilityId(id, frameNode)) {
+                        return AceType::Claim(frameNode);
+                    }
+                }
+                for (auto& child: children) {
+                    nodesNext.emplace_back(child);
+                }
+            }
+
+            auto fnode = AceType::DynamicCast<NG::FrameNode>(current.GetRawPtr());
             CHECK_NULL_CONTINUE(fnode);
-            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-            const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
-            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
-                CHECK_NULL_RETURN(frameNodeResult, nullptr);
-                frameNodeResult->SetAccessibilityNodeVirtual();
-                frameNodeResult->SetAccessibilityVirtualNodeParent(current);
-                return frameNodeResult;
+
+            if (hasVirtualNodeAccessibilityProperty) {
+                auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+                const auto& child = property->GetAccessibilityVirtualNode();
+                auto frameNode = AceType::DynamicCast<NG::FrameNode>(child.GetRawPtr());
+                if (FindFrameNodeByAccessibilityId(id, frameNode)) {
+                    frameNode->SetAccessibilityNodeVirtual();
+                    frameNode->SetAccessibilityVirtualNodeParent(current);
+                    return AceType::Claim(frameNode);
+                }
+                nodesNext.emplace_back(child);
             }
-        } else {
-            const auto& children = current->GetChildren(true);
-            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
-                return frameNodeResult;
-            }
-        }
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(current);
-        if (!frameNode) {
-            continue;
-        }
-        auto overlayNode = frameNode->GetOverlayNode();
-        if (overlayNode) {
-            const auto& children = std::list<RefPtr<NG::UINode>> { overlayNode };
-            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
-                return frameNodeResult;
+
+            auto overlayNode = fnode->GetOverlayNode();
+            if (overlayNode) {
+                if (FindFrameNodeByAccessibilityId(id, overlayNode.GetRawPtr())) {
+                    return overlayNode;
+                }
+                nodesNext.emplace_back(overlayNode);
             }
         }
+        nodes.swap(nodesNext);
+        nodesNext.clear();
     }
     return nullptr;
 }
@@ -436,7 +498,9 @@ void AccessibilityFrameNodeUtils::IsCoveredByBrother(
     auto parentFrameNode = frameNode;
     do {
         parentFrameNode = GetParentFrameNodeWithVirtualNode(parentFrameNode);
-        CHECK_NULL_BREAK(parentFrameNode);
+        if (!parentFrameNode) {
+            break;
+        }
 
         auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_CONTINUE(accessibilityProperty);
@@ -473,5 +537,22 @@ bool AccessibilityFrameNodeUtils::IsNodeEnabled(const RefPtr<FrameNode>& node)
         enable = !accessibilityProperty->IsUserDisabled();
     }
     return enable;
+}
+
+void AccessibilityFrameNodeUtils::ProcessFocusScroll(const RefPtr<FrameNode>& curFrameNode,
+    RefPtr<PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [node = AceType::WeakClaim(AceType::RawPtr(curFrameNode))] {
+            auto focusNode = node.Upgrade();
+            CHECK_NULL_VOID(focusNode);
+            auto accessibilityProperty = focusNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (accessibilityProperty->GetAccessibilityFocusState()) {
+                ScrollByOffset(focusNode);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityProcessFocusScroll");
 }
 } // namespace OHOS::Ace::NG

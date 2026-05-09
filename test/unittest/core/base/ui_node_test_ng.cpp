@@ -44,6 +44,8 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/unittest/core/base/ui_node_test_ng.h"
 
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -55,6 +57,8 @@ constexpr int32_t TEST_ID_FIVE = 25;
 constexpr int32_t INITIAL_THEME_SCOPE_ID = 100;
 constexpr int32_t NEW_THEME_SCOPE_ID = 200;
 constexpr int32_t NON_EXISTENT_ID = 99999;
+const std::string INSPECTOR_LABEL_VALUE = "test_inspector_label";
+const std::string EMPTY_INSPECTOR_LABEL = "";
 }
 
 class UINodeTestNg : public testing::Test {
@@ -2147,5 +2151,23 @@ HWTEST_F(UINodeTestNg, UINodeTestGetParentCustomNode, TestSize.Level1)
      * @tc.expected: should return customNode (first CustomNode ancestor)
      */
     EXPECT_EQ(parentCustom, customNode);
+}
+
+/**
+ * @tc.name: UINodeTestInspectorLabel
+ * @tc.desc: Test SetInspectorLabel and GetInspectorLabel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestInspectorLabel, TestSize.Level1)
+{
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ASSERT_NE(testNode, nullptr);
+    EXPECT_TRUE(testNode->GetInspectorLabel().empty());
+
+    testNode->SetInspectorLabel(INSPECTOR_LABEL_VALUE);
+    EXPECT_EQ(testNode->GetInspectorLabel(), INSPECTOR_LABEL_VALUE);
+
+    testNode->SetInspectorLabel(EMPTY_INSPECTOR_LABEL);
+    EXPECT_EQ(testNode->GetInspectorLabel(), EMPTY_INSPECTOR_LABEL);
 }
 } // namespace OHOS::Ace::NG

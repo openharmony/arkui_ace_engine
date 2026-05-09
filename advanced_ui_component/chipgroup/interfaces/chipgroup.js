@@ -163,7 +163,7 @@ export class IconGroupSuffix extends ViewPU {
     if (typeof paramsLambda === 'function') {
       this.paramsGenerator_ = paramsLambda;
     }
-    this.__chipSize = this.initializeConsume('chipSize', 'chipSize');
+    this.__chipSize = this.initializeConsume('chipSize', 'chipSize', ChipSize.NORMAL);
     this.__items = new SynchedPropertyObjectOneWayPU(params.items, this, 'items');
     this.__iconBackgroundSystemMaterial = new SynchedPropertyObjectOneWayPU(
       params.iconBackgroundSystemMaterial,
@@ -260,7 +260,7 @@ export class IconGroupSuffix extends ViewPU {
       Image.focusable(true);
     }, Image);
   }
-  IconButtonsBuilder(useEffect, parent = null) {
+  IconButtonsBuilder(material, parent = null) {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create({ space: 8 });
     }, Row);
@@ -276,6 +276,7 @@ export class IconGroupSuffix extends ViewPU {
           });
           Button.backgroundColor(iconGroupSuffixTheme.backgroundColor);
           Button.borderRadius(iconGroupSuffixTheme.borderRadius);
+          Button.systemMaterial(material);
           Button.accessibilityText(this.getAccessibilityText(suffixItem));
           Button.accessibilityDescription(this.getAccessibilityDescription(suffixItem));
           Button.accessibilityLevel(this.getAccessibilityLevel(suffixItem));
@@ -284,8 +285,6 @@ export class IconGroupSuffix extends ViewPU {
               suffixItem.action();
             }
           });
-          Button.borderRadius(iconGroupSuffixTheme.borderRadius);
-          Button.useEffect(useEffect);
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
           If.create();
@@ -327,11 +326,23 @@ export class IconGroupSuffix extends ViewPU {
       if (deviceInfo.sdkApiVersion >= 26) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            EffectComponent.create();
-            EffectComponent.systemMaterial(ObservedObject.GetRawObject(this.iconBackgroundSystemMaterial));
-          }, EffectComponent);
-          this.IconButtonsBuilder.bind(this)(true);
-          EffectComponent.pop();
+            If.create();
+            if (enableEffectComponent(this.iconBackgroundSystemMaterial)) {
+              this.ifElseBranchUpdateFunction(0, () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  EffectComponent.create();
+                  EffectComponent.systemMaterial(createECMaterial(this.iconBackgroundSystemMaterial));
+                }, EffectComponent);
+                this.IconButtonsBuilder.bind(this)(createSubECMaterial(this.iconBackgroundSystemMaterial));
+                EffectComponent.pop();
+              });
+            } else {
+              this.ifElseBranchUpdateFunction(1, () => {
+                this.IconButtonsBuilder.bind(this)(ObservedObject.GetRawObject(this.iconBackgroundSystemMaterial));
+              });
+            }
+          }, If);
+          If.pop();
         });
       } else {
         this.ifElseBranchUpdateFunction(1, () => {
@@ -747,7 +758,10 @@ export class ChipGroup extends ViewPU {
       return ChipGroupHeight.NORMAL;
     }
   }
-  ChipRowBuilder(parent = null) {
+  ChipItemsBuilder(material, parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Row.create({ space: this.getChipGroupItemSpace() });
+    }, Row);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       ForEach.create();
       const forEachItemGenFunction = (_item, index) => {
@@ -773,6 +787,7 @@ export class ChipGroup extends ViewPU {
                   enabled: () => true,
                   activated: () => this.isSelected(index),
                   backgroundColor: () => this.getBackgroundColor(),
+                  backgroundSystemMaterial: () => createSubECMaterial(this.backgroundSystemMaterial),
                   size: () => this.getChipSize(),
                   activatedBackgroundColor: () => this.getSelectedBackgroundColor(),
                   accessibilitySelectedType: () =>
@@ -818,8 +833,22 @@ export class ChipGroup extends ViewPU {
       );
     }, ForEach);
     ForEach.pop();
+    Row.pop();
   }
-  ChipListBuilder(parent = null) {
+  initialRender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Row.create();
+      Row.align(Alignment.End);
+      Row.width('100%');
+    }, Row);
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Stack.create();
+      Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
+      Stack.layoutWeight(1);
+      Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
+      Stack.alignContent(Alignment.End);
+    }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Scroll.create(this.scroller);
       Scroll.padding({
@@ -841,61 +870,36 @@ export class ChipGroup extends ViewPU {
       if (deviceInfo.sdkApiVersion >= 26) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            EffectComponent.create();
-            EffectComponent.systemMaterial(ObservedObject.GetRawObject(this.backgroundSystemMaterial));
-          }, EffectComponent);
-          this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create({ space: this.getChipGroupItemSpace() });
-          }, Row);
-          this.ChipRowBuilder.bind(this)();
-          Row.pop();
-          EffectComponent.pop();
+            If.create();
+            if (enableEffectComponent(this.backgroundSystemMaterial)) {
+              this.ifElseBranchUpdateFunction(0, () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  EffectComponent.create();
+                  EffectComponent.systemMaterial(createECMaterial(this.backgroundSystemMaterial));
+                }, EffectComponent);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  Row.create({ space: this.getChipGroupItemSpace() });
+                }, Row);
+                this.ChipItemsBuilder.bind(this)(createSubECMaterial(this.backgroundSystemMaterial));
+                Row.pop();
+                EffectComponent.pop();
+              });
+            } else {
+              this.ifElseBranchUpdateFunction(1, () => {
+                this.ChipItemsBuilder.bind(this)(ObservedObject.GetRawObject(this.backgroundSystemMaterial));
+              });
+            }
+          }, If);
+          If.pop();
         });
       } else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create({ space: this.getChipGroupItemSpace() });
-          }, Row);
-          this.ChipRowBuilder.bind(this)();
-          Row.pop();
+          this.ChipItemsBuilder.bind(this)(undefined);
         });
       }
     }, If);
     If.pop();
     Scroll.pop();
-  }
-  initialRender() {
-    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-    this.observeComponentCreation2((elmtId, isInitialRender) => {
-      Row.create();
-      Row.align(Alignment.End);
-      Row.width('100%');
-    }, Row);
-    this.observeComponentCreation2((elmtId, isInitialRender) => {
-      Stack.create();
-      Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
-      Stack.layoutWeight(1);
-      Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
-      Stack.alignContent(Alignment.End);
-    }, Stack);
-    this.observeComponentCreation2((elmtId, isInitialRender) => {
-      If.create();
-      if (deviceInfo.sdkApiVersion >= 26) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((elmtId, isInitialRender) => {
-            EffectComponent.create();
-            EffectComponent.systemMaterial(ObservedObject.GetRawObject(this.backgroundSystemMaterial));
-          }, EffectComponent);
-          this.ChipListBuilder.bind(this)();
-          EffectComponent.pop();
-        });
-      } else {
-        this.ifElseBranchUpdateFunction(1, () => {
-          this.ChipListBuilder.bind(this)();
-        });
-      }
-    }, If);
-    If.pop();
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (this.suffix && !this.isReachEnd) {
@@ -971,6 +975,15 @@ export class ChipGroup extends ViewPU {
     this.updateDirtyElements();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
+}
+function enableEffectComponent(material) {
+  return false;
+}
+function createECMaterial(material) {
+  return undefined;
+}
+function createSubECMaterial(material) {
+  return material;
 }
 
 export default {

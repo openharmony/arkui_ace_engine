@@ -46,7 +46,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/core/pipeline/base/element_register.h"
 #include "frameworks/base/thread/cancelable_callback.h"
@@ -372,7 +371,6 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuItemGroupNode(
     menuItemGroupModifier->menuItemGroupUpdateStrokeWidth(
         menuItemGroupNode, Dimension(static_cast<float>(0), DimensionUnit::VP));
 
-    TAG_LOGI(AceLogTag::ACE_MENU, "DEVICE NAME IS %{public}s", deviceName.c_str());
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(row, nullptr);

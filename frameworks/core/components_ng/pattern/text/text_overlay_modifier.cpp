@@ -65,7 +65,8 @@ void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
     auto paintOffset = paintOffset_->Get();
     for (const auto& selectedRect : selectedRects_) {
         auto rect = selectedRect;
-        if (contentRect_.has_value() && !isSingleLineMode_) {
+        bool isContentWidthUnlimited = isSingleLineMode_ || isHorizontalScrolling_;
+        if (contentRect_.has_value() && !isContentWidthUnlimited) {
             if (rect.Right() > contentRect_.value().Right()) {
                 rect.SetWidth(std::max(contentRect_.value().Right() - rect.Left(), 0.0f));
             }
@@ -187,6 +188,11 @@ void TextOverlayModifier::SetShowSelect(bool value)
 void TextOverlayModifier::SetSingleLine(bool value)
 {
     isSingleLineMode_ = value;
+}
+
+void TextOverlayModifier::SetHorizontalScrolling(bool value)
+{
+    isHorizontalScrolling_ = value;
 }
 
 std::vector<RectF> TextOverlayModifier::GetSelectedRects() const

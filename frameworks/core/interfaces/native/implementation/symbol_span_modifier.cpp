@@ -78,8 +78,8 @@ void SetFontColorImpl(Ark_NativePointer node,
     }
     SymbolSpanModelNG::SetFontColor(frameNode, colorVec);
 }
-void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_I32_FontWeight_String* value)
+void SetFontWeight0Impl(Ark_NativePointer node,
+                        const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -122,6 +122,43 @@ void SetIdImpl(Ark_NativePointer node,
     auto id = Converter::OptConvertPtr<std::string>(value);
     ViewAbstract::SetInspectorId(frameNode, *id);
 }
+void SetFontWeight1Impl(Ark_NativePointer node,
+                        const Opt_Union_I32_FontWeight_ResourceStr* value,
+                        const Opt_FontWeightConfigs* fontWeightConfigs)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Converter::FontWeightInt defaultWeight = {};
+    auto convertedWeightInt = Converter::OptConvertPtr<Converter::FontWeightInt>(value).value_or(defaultWeight);
+    if (!convertedWeightInt.fixed.has_value()) {
+        convertedWeightInt.fixed = Ace::FontWeight::NORMAL;
+    }
+    SymbolSpanModelStatic::SetFontWeight(frameNode, convertedWeightInt.fixed);
+    if (!fontWeightConfigs || fontWeightConfigs->tag == INTEROP_TAG_UNDEFINED) {
+        SymbolSpanModelNG::ResetVariableFontWeight(frameNode);
+        SymbolSpanModelNG::ResetEnableVariableFontWeight(frameNode);
+        SymbolSpanModelNG::ResetEnableDeviceFontWeightCategory(frameNode);
+        return;
+    }
+    if (fontWeightConfigs->value.enableVariableFontWeight.tag != INTEROP_TAG_UNDEFINED) {
+        if (convertedWeightInt.variable.has_value()) {
+            SymbolSpanModelNG::SetVariableFontWeight(frameNode, convertedWeightInt.variable.value());
+        } else {
+            SymbolSpanModelNG::ResetVariableFontWeight(frameNode);
+        }
+        SymbolSpanModelNG::SetEnableVariableFontWeight(
+            frameNode, fontWeightConfigs->value.enableVariableFontWeight.value);
+    } else {
+        SymbolSpanModelNG::ResetVariableFontWeight(frameNode);
+        SymbolSpanModelNG::SetEnableVariableFontWeight(frameNode, false);
+    }
+    if (fontWeightConfigs->value.enableDeviceFontWeightCategory.tag != INTEROP_TAG_UNDEFINED) {
+        SymbolSpanModelNG::SetEnableDeviceFontWeightCategory(frameNode,
+            fontWeightConfigs->value.enableDeviceFontWeightCategory.value);
+    } else {
+        SymbolSpanModelNG::SetEnableDeviceFontWeightCategory(frameNode, true);
+    }
+}
 void SetDebugLineImpl(Ark_NativePointer node,
                       const Ark_String* sourceLine,
                       const Opt_String* moduleName)
@@ -140,11 +177,12 @@ const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
         SymbolSpanInterfaceModifier::SetSymbolSpanOptionsImpl,
         SymbolSpanAttributeModifier::SetFontSizeImpl,
         SymbolSpanAttributeModifier::SetFontColorImpl,
-        SymbolSpanAttributeModifier::SetFontWeightImpl,
+        SymbolSpanAttributeModifier::SetFontWeight0Impl,
         SymbolSpanAttributeModifier::SetEffectStrategyImpl,
         SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
         SymbolSpanAttributeModifier::SetKeyImpl,
         SymbolSpanAttributeModifier::SetIdImpl,
+        SymbolSpanAttributeModifier::SetFontWeight1Impl,
         SymbolSpanAttributeModifier::SetDebugLineImpl,
     };
     return &ArkUISymbolSpanModifierImpl;

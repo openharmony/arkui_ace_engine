@@ -79,7 +79,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     }
 
     public shouldAddRef(): boolean {
-        return (OBSERVE.renderingComponent > 0) && (this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId));
+        return OBSERVE.renderingComponent > 0;
     }
 
     override get length(): int {
@@ -92,15 +92,13 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     override set length(newLen: int) {
         const len = this.store_.length;
         if (len !== newLen) {
-            this.store_.length;
-            if (this.store_.length !== len) {
-                // the Array implementation actually changed the length!
-                this.meta_.fireChange(CONSTANT.OB_LENGTH);
-                this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+            this.store_.length = newLen;
+            // the Array implementation actually changed the length!
+            this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
-                // exec all subscribing @Watch
-                this.executeOnSubscribingWatches('length');
-            }
+            // exec all subscribing @Watch
+            this.executeOnSubscribingWatches('length');
         }
     }
 
@@ -139,8 +137,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param initialValue initial value of elements.
      */
     public static create<T>(arrayLength: number, initialValue: T): WrappedArray<T> {
-        let other = new Array<T>(arrayLength.toInt());
-        other.fill(initialValue);
+        let other = Array.create<T>(arrayLength.toInt(), initialValue);
         return new WrappedArray<T>(other);
     }
 
@@ -175,12 +172,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength The length of the array to be created (optional).
      * @returns A new Array instance with the specified length
      */
-    public static $_invoke<T>(arrayLength?: int): WrappedArray<T> {
-        if (arrayLength) {
-            return new WrappedArray<T>(new Array<T>(arrayLength));
-        } else {
-            return new WrappedArray<T>(new Array<T>());
-        }
+    public static $_invoke<T>(): WrappedArray<T> {
+        return new WrappedArray<T>(new Array<T>());
     }
 
     /**
@@ -228,7 +221,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public sort(comparator?: (a: T, b: T) => int): this {
         this.store_.sort(comparator);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        // We do not need to fire length change
+        // the length does not change here, closing fireChange on CONSTANT.OB_LENGTH
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch

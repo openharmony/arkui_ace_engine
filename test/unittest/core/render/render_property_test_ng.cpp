@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #define protected public
 #define private public
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -168,7 +169,8 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level0)
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(json->GetString("colorBlend"), "#FFFFFFFF");
-    EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("radius"), "0.000000");
+    EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("radius"),
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? "0.000000" : "-1.000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "#FF000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetX"), "0.000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetY"), "0.000000");

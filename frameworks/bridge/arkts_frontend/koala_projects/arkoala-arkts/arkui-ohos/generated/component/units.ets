@@ -157,7 +157,6 @@ export interface LengthConstrain {
     maxLength: Length;
 }
 export type VoidCallback = () => void;
-export type ArrayIntCallback = (arr: int[]) => void;
 export type LengthMetricsUnit = arkui_Graphics_LengthMetricsUnit;
 export type LengthMetrics = arkui_Graphics_LengthMetrics;
 export type ColorMetrics = arkui_Graphics_ColorMetrics;
@@ -268,6 +267,10 @@ export interface ItemFillPolicy {
 export interface CacheCountInfo {
     minCount: int32;
     maxCount: int32;
+}
+export interface Coordinate2D {
+    x: double;
+    y: double;
 }
 export class ColorFilter_serializer {
     public static write(buffer: SerializerBase, value: ColorFilter): void {
@@ -473,6 +476,22 @@ export class ChainWeightOptions_serializer {
         }
         const verticalTmpResult: double | undefined = verticalTmpBuf
         let value: ChainWeightOptions = ({horizontal: horizontalTmpResult, vertical: verticalTmpResult} as ChainWeightOptions)
+        return value
+    }
+}
+export class Coordinate2D_serializer {
+    public static write(buffer: SerializerBase, value: Coordinate2D): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForX = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): Coordinate2D {
+        let valueDeserializer: DeserializerBase = buffer
+        const xTmpResult: double = valueDeserializer.readFloat64()
+        const yTmpResult: double = valueDeserializer.readFloat64()
+        let value: Coordinate2D = ({x: xTmpResult, y: yTmpResult} as Coordinate2D)
         return value
     }
 }

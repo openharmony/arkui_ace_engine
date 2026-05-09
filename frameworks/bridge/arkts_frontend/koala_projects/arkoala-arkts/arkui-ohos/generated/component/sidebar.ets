@@ -258,11 +258,24 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setShowSideBarWithGestureAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setShowSideBarWithGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SideBarContainerType {
     Embed = 0,
     Overlay = 1,
-    AUTO = 2
+    AUTO = 2,
+    DISPLACE = 3
 }
 export enum SideBarPosition {
     Start = 0,
@@ -316,6 +329,9 @@ export interface SideBarContainerAttribute extends CommonMethod {
     }
     minContentWidth(value: Dimension | undefined): this {
         throw new Error('Unimplemented method minContentWidth')
+    }
+    showSideBarWithGesture(value: boolean | undefined): this {
+        throw new Error('Unimplemented method showSideBarWithGesture')
     }
     attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -385,6 +401,11 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     public minContentWidth(value: Dimension | undefined): this {
         const value_casted = value as (Dimension | undefined)
         this.getPeer()?.setMinContentWidthAttribute(value_casted)
+        return this
+    }
+    public showSideBarWithGesture(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setShowSideBarWithGestureAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -22,6 +22,10 @@
 
 namespace OHOS::Ace::NG {
 
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class FrameNode;
 class OverlayManager;
 class DragEventActuator;

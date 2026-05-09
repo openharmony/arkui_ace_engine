@@ -83,6 +83,8 @@ public:
         auto layoutAlgorithm = MakeRefPtr<SideBarContainerLayoutAlgorithm>();
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetSideBarStatus(sideBarStatus_);
+        layoutAlgorithm->SetSideBarInDragGesture(sideBarInDragGesture_);
+        layoutAlgorithm->SetCurrentContentDragOffset(currentContentDragOffset_);
         layoutAlgorithm->SetNeedInitRealSideBarWidth(needInitRealSideBarWidth_);
         layoutAlgorithm->SetRealSideBarWidth(realSideBarWidth_);
         layoutAlgorithm->SetPreSideBarWidth(preSidebarWidth_);
@@ -200,6 +202,21 @@ public:
         return toolbarManager_;
     }
 
+    void CleanInterpolatingSpringAnimation()
+    {
+        interpolatingSpringAnimation_.reset();
+    }
+
+    void SetSideBarInDragGesture(bool SetSideBarInDragGesture)
+    {
+        sideBarInDragGesture_ = SetSideBarInDragGesture;
+    }
+
+    void SetCurrentContentDragOffset(float currentContentDragOffset)
+    {
+        currentContentDragOffset_ = currentContentDragOffset;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -224,7 +241,7 @@ private:
     RefPtr<FrameNode> CreateControlImage(const RefPtr<SideBarTheme>& sideBarTheme,
         const RefPtr<FrameNode>& parentNode);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart();
+    void HandleDragStart(bool isDragInDivider);
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void FireSideBarWidthChangeEvent();
@@ -260,6 +277,15 @@ private:
     void SetSideBarWidthToolBarManager(bool isShow, float sideBarWidth, float dividerWidth);
     void SideBarModifyDoneToolBarManager();
     void UpdateSideBarColorToToolbarManager();
+    void SetContentClickEvent(bool showSideBar);
+    bool IsInContentRegion(const Offset& globalLocation);
+    void SetClickEvent(bool showSideBar);
+    Color GetMaskColor() const;
+    void InitShowAndCloseSidebarPanEvent(bool showSideBarWithGesture);
+    void HandleDragEndForContent(float xOffset, SideBarPosition position);
+    void DoSpringAnimation();
+    PropertyCallback GetSpringAnimationPropertyCallback();
+    GestureEventFunc GetShowAndCloseSidebarPanEventUpdateTask();
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
@@ -314,6 +340,11 @@ private:
     void HandleLongPressActionEnd();
     void ShowDialogWithNode();
     bool isDialogShow_ = false;
+    RefPtr<ClickEvent> contentClickEvent_;
+    std::shared_ptr<AnimationUtils::Animation> interpolatingSpringAnimation_;
+    RefPtr<PanEvent> dragEventForCloseSideBar_;
+    float currentContentDragOffset_ = 0.0f;
+    bool sideBarInDragGesture_ = false;
 };
 
 } // namespace OHOS::Ace::NG

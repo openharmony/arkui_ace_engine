@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"

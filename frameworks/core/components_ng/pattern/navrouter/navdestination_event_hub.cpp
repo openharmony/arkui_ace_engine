@@ -14,9 +14,11 @@
  */
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 void NavDestinationEventHub::FireOnDisappear()
@@ -96,6 +98,10 @@ void NavDestinationEventHub::FireOnShownEvent(
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    if (navigationManager) {
+        navigationManager->HandleSequentialRestoreOnShown(navDestination, name);
+    }
     pipelineContext->GetMemoryManager()->RebuildImageByPage(AceType::DynamicCast<FrameNode>(navDestination));
 }
 

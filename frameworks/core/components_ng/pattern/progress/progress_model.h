@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
@@ -89,6 +88,7 @@ public:
     virtual void SetCapsuleStyle(bool value) = 0;
     virtual void SetGradientColorByUser(bool value) = 0;
     virtual void SetBorderColorSetByUser(bool value) = 0;
+    virtual void ResetBorderColor() = 0;
 
 private:
     static std::unique_ptr<ProgressModel> instance_;

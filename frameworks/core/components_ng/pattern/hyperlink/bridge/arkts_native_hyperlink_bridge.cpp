@@ -24,6 +24,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

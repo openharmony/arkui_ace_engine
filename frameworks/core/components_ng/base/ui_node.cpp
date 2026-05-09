@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/pipeline_ng/environment_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace::NG {
@@ -583,26 +585,26 @@ void UINode::ResetParent()
 }
 
 namespace {
-std::ostream& operator<<(std::ostream& ss, const RefPtr<UINode>& node)
+std::ostream& operator<<(std::ostream& ss, UINode& node)
 {
-    return ss << node->GetId() << "(" << node->GetTag() << "," << node->GetDepth() << "," << node->GetChildren().size()
-              << ")";
+    return ss << node.GetId() << "(" << node.GetTag() << "," << node.GetDepth()
+        << "," << node.GetChildren().size() << ")";
 }
 
-std::string ToString(const RefPtr<UINode>& node)
+std::string ToString(UINode& node)
 {
     std::stringstream ss;
     ss << node;
-    for (auto parent = node->GetParent(); parent; parent = parent->GetParent()) {
-        ss << "->" << parent;
+    for (auto parent = node.GetParent(); parent; parent = parent->GetParent()) {
+        ss << "->" << *parent;
     }
     return ss.str();
 }
 
-void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
+void LoopDetected(const RefPtr<UINode>& child, UINode* current)
 {
-    auto childNode = ToString(child);
-    auto currentNode = ToString(current);
+    auto childNode = ToString(*child);
+    auto currentNode = ToString(*current);
 
     constexpr size_t totalLengthLimit = 900; // hilog oneline length limit is 1024
     constexpr size_t childLengthLimit = 100;
@@ -635,10 +637,14 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     }
 }
 
-bool DetectLoop(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
+bool DetectLoop(const RefPtr<UINode>& child, UINode* current)
 {
-    if ((child->GetDepth() > 0 && child->GetDepth() < INT32_MAX) || child == current) {
-        for (auto parent = current; parent; parent = parent->GetParent()) {
+    if (child == current) {
+        LoopDetected(child, current);
+        return true;
+    }
+    if (child->GetDepth() > 0 && child->GetDepth() < INT32_MAX) {
+        for (auto parent = current->GetParent(); parent; parent = parent->GetParent()) {
             if (parent == child) {
                 LoopDetected(child, current);
                 return true;
@@ -739,7 +745,7 @@ void UINode::UpdateBuilderNodeColorMode(const RefPtr<UINode>& child)
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
-    if (DetectLoop(child, Claim(this))) {
+    if (DetectLoop(child, this)) {
         return;
     }
     children_.insert(it, child);
@@ -980,6 +986,12 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
         // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
     }
+    if (!recursive && context) {
+        auto envManager = context->GetEnvironmentManager();
+        if (envManager) {
+            envManager->OnNodeAttached(Claim(this));
+        }
+    }
 }
 
 [[deprecated]] void UINode::AttachToMainTree(bool recursive)
@@ -1014,6 +1026,12 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     }
     isRemoving_ = true;
     auto context = context_;
+    if (!recursive && context) {
+        auto envManager = context->GetEnvironmentManager();
+        if (envManager) {
+            envManager->OnNodeDetached(Claim(this));
+        }
+    }
     DetachContext(false);
     if (isNodeAdapter_) {
         std::list<RefPtr<UINode>> nodes;
@@ -1025,12 +1043,22 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
-    std::list<RefPtr<UINode>> children = GetChildren();
-    std::list<RefPtr<FrameNode>> adoptedChildren = GetAdoptedChildren();
+    std::vector<RefPtr<UINode>> childrenVec;
+    auto& children = GetChildren();
+    childrenVec.reserve(children.size());
     for (const auto& child : children) {
+        childrenVec.emplace_back(child);
+    }
+    std::vector<RefPtr<UINode>> adoptedChildrenVec;
+    auto& adoptedChildren = GetAdoptedChildren();
+    adoptedChildrenVec.reserve(adoptedChildren.size());
+    for (const auto& child : adoptedChildren) {
+        adoptedChildrenVec.emplace_back(child);
+    }
+    for (const auto& child : childrenVec) {
         child->DetachFromMainTree(isRecursive);
     }
-    for (const auto& adoptChild : adoptedChildren) {
+    for (const auto& adoptChild : adoptedChildrenVec) {
         adoptChild->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
@@ -2037,7 +2065,7 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index, i
         // mark child as disappearing before adding to disappearingChildren_
         child->isDisappearing_ = true;
     }
-    if (DetectLoop(child, Claim(this))) {
+    if (DetectLoop(child, this)) {
         return;
     }
     disappearingChildren_.emplace_back(child, index, branchId);
@@ -2464,7 +2492,7 @@ void UINode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
 {
     auto current = parent.Upgrade();
     CHECK_NULL_VOID(current);
-    if (needDetect && DetectLoop(Claim(this), current)) {
+    if (needDetect && DetectLoop(Claim(this), current.GetRawPtr())) {
         return;
     }
     parent_ = parent;
@@ -2758,6 +2786,10 @@ void UINode::FindTopNavDestination(std::list<RefPtr<FrameNode>>& result)
             auto lastStandardIndex = navigationGroupNode->GetLastStandardIndex();
             int32_t startIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
             int32_t endIndex = navigationStack->Size();
+            auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
+            if (navBarNode) {
+                result.emplace_back(navBarNode);
+            }
             for (int32_t i = startIndex; i < endIndex; ++i) {
                 result.emplace_back(AceType::DynamicCast<FrameNode>(
                     NavigationGroupNode::GetNavDestinationNode(navigationStack->Get(i))));

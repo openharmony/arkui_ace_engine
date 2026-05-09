@@ -30,7 +30,7 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { DecorationStyleInterface_serializer, DecorationStyleInterface } from './styledString'
 import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
-import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Length, Font as arkui_component_units_Font, ResourceStr, Dimension, BorderRadiuses, BorderRadiuses_serializer } from './units'
+import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Length, Font as arkui_component_units_Font, ResourceStr, Coordinate2D, Dimension, BorderRadiuses, BorderRadiuses_serializer } from './units'
 import { FontConfigs_serializer, FontWeightConfigs_serializer, FontVariation, FontConfigs, FontWeightConfigs } from './textCommon'
 import { Color as arkui_component_enums_Color, FontStyle, TextCase, FontWeight, InteractionHand } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -456,15 +456,15 @@ export class ArkSpanPeer extends PeerNode {
         thisSerializer.release()
     }
     setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (moduleName !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const moduleNameTmpValue  = moduleName!
+            const moduleNameTmpValue = moduleName!
             thisSerializer.writeString(moduleNameTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SpanAttribute_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -544,11 +544,11 @@ export interface SpanAttribute {
     onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
         throw new Error('Unimplemented method onClick')
     }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        throw new Error('Unimplemented method debugLine')
+    }
     attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
-    }
-    debugLine(sourceLine: string, moduleName?: string): this {
-        throw new Error("Unimplemented method debugLine")
     }
 }
 
@@ -688,6 +688,12 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
         this.getPeer()?.setOnClick1Attribute(event_casted, distanceThreshold_casted)
         return this
     }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        const sourceLine_casted = sourceLine as (string)
+        const moduleName_casted = moduleName as (string | undefined)
+        this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
+        return this
+    }
     public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookSpanAttributeModifier(this, value);
@@ -700,15 +706,6 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
-    }
-    public debugLine(sourceLine: string, moduleName?: string): this {
-        if (this.checkPriority("debugLine")) {
-            const sourceLine_casted = sourceLine as (string)
-            const moduleName_casted = moduleName as (string | undefined)
-            this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
-            return this
-        }
-        return this
     }
 }
 

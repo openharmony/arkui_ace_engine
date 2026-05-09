@@ -51,6 +51,7 @@
 #include "ui/base/geometry/ng/offset_t.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1602,9 +1603,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
     DragSummaryInfo dragSummaryInfo;
     int32_t dataSize = 1;
 
-    RefPtr mockInteractionInterface = AceType::MakeRefPtr();
-    ASSERT_NE(mockInteractionInterface, nullptr);
-    EXPECT_CALL(mockInteractionInterface, GetAppDragSwitchState(_)).WillRepeatedly(testing::Return(1));
     RefPtr unifiedData = AceType::MakeRefPtr();
     ASSERT_NE(unifiedData, nullptr);
     dragAction->unifiedData = unifiedData;
@@ -1746,7 +1744,8 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage045
 
     DragPreviewOption option;
     DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
-    EXPECT_EQ(option.options.material, nullptr);
+    ASSERT_NE(option.options.material, nullptr);
+    EXPECT_EQ(AceType::TypeId(AceType::RawPtr(option.options.material)), UiMaterial::TypeId());
 }
 
 /**
@@ -1768,6 +1767,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage046
     DragPreviewOption option;
     option.options.material = AceType::MakeRefPtr<UiMaterial>();
     DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
-    EXPECT_EQ(option.options.material, nullptr);
+    ASSERT_NE(option.options.material, nullptr);
+    EXPECT_EQ(AceType::TypeId(AceType::RawPtr(option.options.material)), UiMaterial::TypeId());
 }
 } // namespace OHOS::Ace::NG

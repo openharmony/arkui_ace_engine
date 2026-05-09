@@ -22,6 +22,7 @@
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/common/extension_companion_node.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"

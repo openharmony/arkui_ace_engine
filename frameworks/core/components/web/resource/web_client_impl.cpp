@@ -1524,6 +1524,14 @@ bool WebClientImpl::OnNestedScrollV2(float& x, float& y)
     return delegate->OnNestedScrollV2(x, y);
 }
 
+bool WebClientImpl::OnNestedFling(float& xVelocity, float& yVelocity)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->OnNestedFling(xVelocity, yVelocity);
+}
+
 void WebClientImpl::OnLoadStarted(const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();

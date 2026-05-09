@@ -33,6 +33,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/recorder/event_recorder.h"
@@ -61,6 +62,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/common/ace_engine.h"
+
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

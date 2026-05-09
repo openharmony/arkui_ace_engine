@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#include "core/common/container.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/base/geometry/point.h"
 

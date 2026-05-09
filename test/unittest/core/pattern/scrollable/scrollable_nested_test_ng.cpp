@@ -822,6 +822,7 @@ HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SheetTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SheetTheme>()));
     int32_t apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     int32_t minPlatformVersion = MockPipelineContext::GetCurrentContext()->GetMinPlatformVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWELVE);

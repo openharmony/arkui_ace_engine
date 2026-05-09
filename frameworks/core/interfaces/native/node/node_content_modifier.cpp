@@ -16,30 +16,29 @@
 
 #include "base/error/error_code.h"
 #include "core/components_ng/syntax/node_content.h"
-#include "interfaces/native/error_message_macros.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 
-ArkUI_Int32 AddChild(ArkUINodeContentHandle content, ArkUINodeHandle child, void* errorInfoPtr)
+ArkUI_Int32 AddChild(ArkUINodeContentHandle content, ArkUINodeHandle child)
 {
     if (!content) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node content is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!child) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
     auto* uiNode = reinterpret_cast<UINode*>(child);
     if (!uiNode) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child UI node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child UI node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (uiNode->IsAdopted()) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node has already been adopted");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node has already been adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     nodeContent->AddNode(uiNode);
@@ -47,39 +46,38 @@ ArkUI_Int32 AddChild(ArkUINodeContentHandle content, ArkUINodeHandle child, void
 }
 
 ArkUI_Int32 InsertChild(
-    ArkUINodeContentHandle content, ArkUINodeHandle child, ArkUI_Int32 position, void* errorInfoPtr)
+    ArkUINodeContentHandle content, ArkUINodeHandle child, ArkUI_Int32 position)
 {
     if (!content) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node content is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!child) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
     auto* uiNode = reinterpret_cast<UINode*>(child);
     if (!uiNode) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child UI node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child UI node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (uiNode->IsAdopted()) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NODE_IS_ADOPTED, errorInfoPtr, "Child node has already been adopted");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NODE_IS_ADOPTED, "Child node has already been adopted");
         return ERROR_CODE_NODE_IS_ADOPTED;
     }
     nodeContent->AddNode(uiNode, position);
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 RemoveChild(ArkUINodeContentHandle content, ArkUINodeHandle child, void* errorInfoPtr)
+ArkUI_Int32 RemoveChild(ArkUINodeContentHandle content, ArkUINodeHandle child)
 {
     if (!content) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node content is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!child) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Child node is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Child node is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
@@ -89,15 +87,14 @@ ArkUI_Int32 RemoveChild(ArkUINodeContentHandle content, ArkUINodeHandle child, v
 }
 
 ArkUI_Int32 RegisterEvent(
-    ArkUINodeContentHandle content, void* userData, void (*receiver)(ArkUINodeContentEvent* event),
-    void* errorInfoPtr)
+    ArkUINodeContentHandle content, void* userData, void (*receiver)(ArkUINodeContentEvent* event))
 {
     if (!content) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node content is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!receiver) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Event receiver is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Event receiver is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto onAttach = [receiver, userData, content]() {
@@ -114,10 +111,10 @@ ArkUI_Int32 RegisterEvent(
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetUserData(ArkUINodeContentHandle content, void* userData, void* errorInfoPtr)
+ArkUI_Int32 SetUserData(ArkUINodeContentHandle content, void* userData)
 {
     if (!content) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node content is null");
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Node content is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);

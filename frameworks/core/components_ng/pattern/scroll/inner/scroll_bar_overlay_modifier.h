@@ -18,7 +18,9 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 enum class OpacityAnimationType {

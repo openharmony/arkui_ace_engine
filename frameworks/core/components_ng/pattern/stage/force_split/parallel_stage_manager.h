@@ -260,6 +260,8 @@ private:
     ForceSplitPageColumnType GetPageColumnType(const RefPtr<FrameNode>& page) const;
     void SetPageColumnType(const RefPtr<FrameNode>& page, ForceSplitPageColumnType columnType);
     void ClearRouterPageState(const RefPtr<FrameNode>& page);
+    bool IsSecondaryPushToPrimaryScene(const RefPtr<FrameNode>& prePrimaryTopPage,
+        const RefPtr<FrameNode>& fromPage, const RefPtr<FrameNode>& toPage) const;
     bool ShouldMovePageToPrimaryForTransition(
         const RefPtr<FrameNode>& fromPage, const RefPtr<FrameNode>& toPage, bool onlyWhenSplit = true) const;
     bool FinalizeRouterStackChange(

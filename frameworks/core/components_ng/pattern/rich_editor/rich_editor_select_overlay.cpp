@@ -151,7 +151,12 @@ void RichEditorSelectOverlay::CloseMagnifier()
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->magnifierController_->RemoveMagnifierFrameNode();
+    if (pattern->magnifierController_) {
+        pattern->magnifierController_->ResetTouchInfo();
+        pattern->magnifierController_->RemoveMagnifierFrameNode();
+    }
+    pattern->ResetMagnifierTouchInfo();
+    ResetMagnifierTouchInfo();
 }
 
 void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
@@ -193,6 +198,7 @@ void RichEditorSelectOverlay::SetMagnifierOffset(const OffsetF& localOffset, con
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->UpdateMagnifierTouchInfo(magnifierTouchTimeStamp_, magnifierTouchType_);
     if (IsSingleHandle()) {
         auto [caretOffset, caretHeight] = pattern->CalculateCaretOffsetAndHeight();
         auto floatingCaretCenter = Offset(localOffset.GetX(), caretOffset.GetY() + caretHeight / 2);
@@ -201,6 +207,18 @@ void RichEditorSelectOverlay::SetMagnifierOffset(const OffsetF& localOffset, con
         auto handleCenter = Offset(localOffset.GetX(), localOffset.GetY() + handleRect.Height() / 2);
         pattern->SetMagnifierLocalOffset(handleCenter);
     }
+}
+
+void RichEditorSelectOverlay::UpdateMagnifierTouchInfo(const GestureEvent& event, TouchType touchType)
+{
+    magnifierTouchTimeStamp_ = event.GetTimeStamp();
+    magnifierTouchType_ = touchType;
+}
+
+void RichEditorSelectOverlay::ResetMagnifierTouchInfo()
+{
+    magnifierTouchTimeStamp_ = TimeStamp();
+    magnifierTouchType_ = TouchType::UNKNOWN;
 }
 
 void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirst)
@@ -248,7 +266,12 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
         pattern->StartFloatingCaretLand();
     }
     pattern->StopAutoScroll();
-    pattern->magnifierController_->RemoveMagnifierFrameNode();
+    if (pattern->magnifierController_) {
+        pattern->magnifierController_->ResetTouchInfo();
+        pattern->magnifierController_->RemoveMagnifierFrameNode();
+    }
+    pattern->ResetMagnifierTouchInfo();
+    ResetMagnifierTouchInfo();
     if (!IsSingleHandle() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
@@ -270,8 +293,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     contentHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    std::string selectData = GetSelectedText();
-    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectData, selectStart, selectEnd);
+    pattern->ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
 }
 
 std::string RichEditorSelectOverlay::GetSelectedText()
@@ -347,10 +369,23 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(selectInfo, requestCode);
+    FillSelectOverlayBaseInfo(selectInfo, pattern);
+    auto responseType = UpdateSelectOverlayHandleInfo(selectInfo, pattern);
+    FillSelectOverlayExtraInfo(selectInfo, pattern, responseType, requestCode);
+}
+
+void RichEditorSelectOverlay::FillSelectOverlayBaseInfo(
+    SelectOverlayInfo& selectInfo, const RefPtr<RichEditorPattern>& pattern)
+{
     selectInfo.pattern = AceType::WeakClaim(AceType::RawPtr(pattern));
     selectInfo.handlerColor = pattern->GetCaretColor();
     selectInfo.handleReverse = IsHandleReverse();
     OnUpdateOnCreateMenuCallback(selectInfo);
+}
+
+TextResponseType RichEditorSelectOverlay::UpdateSelectOverlayHandleInfo(
+    SelectOverlayInfo& selectInfo, const RefPtr<RichEditorPattern>& pattern)
+{
     bool usingMouse = pattern->IsUsingMouse();
     auto responseType = pattern->textResponseType_.value_or(TextResponseType::NONE);
     auto& firstHandle = pattern->textSelector_.firstHandle;
@@ -367,6 +402,13 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         selectInfo.firstHandle.paintRect = firstHandle;
         selectInfo.secondHandle.paintRect = secondHandle;
     }
+    return responseType;
+}
+
+void RichEditorSelectOverlay::FillSelectOverlayExtraInfo(
+    SelectOverlayInfo& selectInfo, const RefPtr<RichEditorPattern>& pattern,
+    TextResponseType responseType, int32_t requestCode)
+{
     selectInfo.menuInfo.responseType = static_cast<int32_t>(responseType);
     selectInfo.menuInfo.editorType = static_cast<int32_t>(pattern->GetEditorType());
     selectInfo.menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
@@ -374,11 +416,11 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     selectInfo.isNewAvoid = true;
     selectInfo.selectArea = GetSelectArea();
     selectInfo.checkIsTouchInHostArea =
-    [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const PointF& touchPoint) -> bool {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->IsTouchInFrameArea(touchPoint);
-    };
+        [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const PointF& touchPoint) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            return pattern->IsTouchInFrameArea(touchPoint);
+        };
     selectInfo.isSingleHandle = IsSingleHandle();
     selectInfo.recreateOverlay = requestCode == REQUEST_RECREATE;
     CheckMenuParamChange(selectInfo, pattern->GetEditorType(), responseType);
@@ -391,6 +433,11 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     }
     // menu need to avoid selected area in single line mode
     selectInfo.isSingleLine = pattern->isSingleLineMode_;
+    selectInfo.onHandlePanMove = [weak = WeakClaim(this)](const GestureEvent& event, bool isFirst) {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->UpdateMagnifierTouchInfo(event, TouchType::MOVE);
+    };
 }
 
 void RichEditorSelectOverlay::OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
@@ -565,6 +612,14 @@ void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, To
         ResumeTwinkling();
     } else {
         HideMenu();
+    }
+    if (!IsSingleHandle() && IsTouchUp(sourceType, touchType) &&
+        GetClearPolicy() == TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH) {
+        auto pattern = GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetSelection();
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        ResumeTwinkling();
     }
 }
 

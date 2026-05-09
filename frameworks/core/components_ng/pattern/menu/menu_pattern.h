@@ -24,6 +24,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/symbol_modifier.h"
+#include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -34,6 +36,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
@@ -43,6 +46,7 @@ constexpr double MENU_ANIMATION_MAX_OPACITY = 1.0f;
 
 namespace OHOS::Ace {
 class SelectTheme;
+class UiMaterial;
 }
 
 namespace OHOS::Ace::NG {
@@ -562,6 +566,11 @@ public:
 
     void UpdateSelectIndex(int32_t index);
 
+    bool TextMenuOnThemeScopeUpdate(int32_t themeScopeId)
+    {
+        return OnThemeScopeUpdate(themeScopeId);
+    }
+
     void SetSelectProperties(const std::vector<SelectParam>& params)
     {
         auto list = selectProperties_;
@@ -693,6 +702,7 @@ public:
     std::pair<float, float> GetPreviewPositionY();
     bool UpdateMenuBackBlurStyle(bool userSetBgColor);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    bool IsUseDistortionAnimation() const;
 
     float GetTranslateYForStack()
     {
@@ -812,9 +822,16 @@ private:
     Offset GetTransformCenter() const;
     OffsetF GetPreviewMenuAnimationOffset(const OffsetF& previewCenter, const SizeF& previewSize, float scale) const;
     void ShowPreviewMenuAnimation();
+    void ShowPreviewMenuMaterialAnimation();
     void ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay);
     void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
+    OffsetF GetDistortionMenuOffset(Placement placement) const;
+    MenuParam GetMenuParam() const;
+    bool IsUseEdgeLightAnimation() const;
+    void PlayDistortAnimation(const OffsetF& menuPosition);
+    void PlayLightAnimation();
     void ShowMenuAppearAnimation();
+    void ShowMenuAppearMaterialAnimation();
     void ShowStackMenuAppearAnimation();
     std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& mainMenu,
         const RefPtr<FrameNode>& subMenu, bool isNeedRestoreNodeId = false) const;

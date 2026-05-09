@@ -39,6 +39,7 @@ public:
     SmartLayoutAlign mainAxisAlign = SmartLayoutAlign::FLEX_START;
     SmartLayoutAlign crossAxisAlign = SmartLayoutAlign::CENTER;
     SmartLayoutSize size = SmartLayoutSize(0.0, 0.0);
+    bool avoidSafeArea = false;
 };
 
 } // namespace OHOS::Ace::NG

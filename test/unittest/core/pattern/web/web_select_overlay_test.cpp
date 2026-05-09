@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"
 #include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -33,6 +34,7 @@
 #include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #include "arkweb_utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -1084,7 +1086,7 @@ public:
         return false;
     }
 
-    ScrollOffsetAbility GetScrollOffsetAbility() override
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override
     {
         return { nullptr, Axis::NONE };
     }
@@ -1111,17 +1113,6 @@ protected:
 
 private:
     void OnScrollEndCallback() override {};
-
-    void MultiSelectWithoutKeyboard(const RectF& selectedZone) override {}
-    void ClearMultiSelect() override {}
-    bool IsItemSelected(float xOffset, float yOffset)
-    {
-        return false;
-    }
-    float GetOffsetWithLimit(float offset) const override
-    {
-        return 0.0f;
-    }
 };
 
 class NWebQuickMenuParamsNeMockFirst : public OHOS::NWeb::NWebQuickMenuParams {

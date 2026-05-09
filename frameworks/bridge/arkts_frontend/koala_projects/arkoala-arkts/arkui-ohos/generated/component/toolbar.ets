@@ -32,9 +32,7 @@ import { hookToolBarItemAttributeModifier, AttributeModifier, AttributeUpdater }
 import { CommonMethod } from './common'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from "./common"
-
-export class ArkToolBarItemPeer extends ArkCommonMethodPeer {
+export class ArkToolBarItemPeer extends PeerNode {
     toolBarItemAttributeSet?: ToolBarItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -60,7 +58,16 @@ export class ArkToolBarItemPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
-        return;
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (moduleName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleNameTmpValue = moduleName!
+            thisSerializer.writeString(moduleNameTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ToolBarItemAttribute_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export enum ToolBarItemPlacement {
@@ -75,14 +82,14 @@ export interface ToolBarItemAttribute {
         throw new Error('Unimplemented method setToolBarItemOptions')
     }
     debugLine(sourceLine: string, moduleName?: string): this {
-        throw new Error("Unimplemented method debugLine")
+        throw new Error('Unimplemented method debugLine')
     }
     attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }
 }
 
-export class ArkToolBarItemComponent extends ArkCommonMethodComponent implements ToolBarItemAttribute {
+export class ArkToolBarItemComponent extends ComponentBase implements ToolBarItemAttribute {
     getPeer(): ArkToolBarItemPeer {
         return (this.peer as ArkToolBarItemPeer)
     }
@@ -93,6 +100,9 @@ export class ArkToolBarItemComponent extends ArkCommonMethodComponent implements
         return this
     }
     public debugLine(sourceLine: string, moduleName?: string): this {
+        const sourceLine_casted = sourceLine as (string)
+        const moduleName_casted = moduleName as (string | undefined)
+        this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {

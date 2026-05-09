@@ -14,12 +14,14 @@
  */
 
 #include "accessibility_property.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/json/json_util.h"
 #include "base/utils/multi_thread.h"
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/native/native_type.h"
 
@@ -1506,6 +1508,37 @@ AccessibilityActionOptions AccessibilityProperty::GetAccessibilityActionOptions(
 void AccessibilityProperty::ResetAccessibilityActionOptions()
 {
     accessibilityActionOptions_.reset();
+}
+
+void AccessibilityProperty::SetAccessibilityCustomActions(
+    const std::vector<AccessibilityCustomAction>& accessibilityCustomActions)
+{
+    accessibilityCustomActions_ = accessibilityCustomActions;
+}
+
+std::vector<AccessibilityCustomAction> AccessibilityProperty::GetAccessibilityCustomActions()
+{
+    return accessibilityCustomActions_.value_or(std::vector<AccessibilityCustomAction> {});
+}
+
+void AccessibilityProperty::ResetAccessibilityCustomActions()
+{
+    accessibilityCustomActions_.reset();
+}
+
+bool AccessibilityProperty::ActActionCustom(const std::string& actionName)
+{
+    auto customActions = GetAccessibilityCustomActions();
+    for (auto& customAction : customActions) {
+        if (customAction.actionName == actionName) {
+            if (customAction.customActionCallback) {
+                customAction.customActionCallback();
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
 }
 
 void AccessibilityProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

@@ -142,7 +142,7 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
                     thisSerializer.writeInt32(0)
                 } else {
                     const valueTmpValueElem = valueTmpValue[0]
-                    if (valueTmpValueElem instanceof RadiusItem) {
+                    if ((valueTmpValueElem instanceof RadiusItem) && ((valueTmpValueElem.length) == (2))) {
                         thisSerializer.writeInt8((1).toByte())
                         const valueTmpValueForIdx1 = valueTmpValue as Array<RadiusItem>
                         thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
@@ -342,7 +342,7 @@ export class RectOptions_serializer {
                     valueSerializer.writeInt32(0)
                 } else {
                     const valueHolderForRadiusTmpValueElem = valueHolderForRadiusTmpValue[0]
-                    if (valueHolderForRadiusTmpValueElem instanceof RadiusItem) {
+                    if ((valueHolderForRadiusTmpValueElem instanceof RadiusItem) && ((valueHolderForRadiusTmpValueElem.length) == (2))) {
                         valueSerializer.writeInt8((1).toByte())
                         const valueHolderForRadiusTmpValueForIdx1 = valueHolderForRadiusTmpValue as Array<RadiusItem>
                         valueSerializer.writeInt32((valueHolderForRadiusTmpValueForIdx1.length).toInt())

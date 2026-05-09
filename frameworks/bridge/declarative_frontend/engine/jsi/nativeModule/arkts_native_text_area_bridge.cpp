@@ -61,6 +61,7 @@ constexpr double DEFAULT_OPACITY = 0.2;
 constexpr uint32_t DEFAULT_OVERFLOW = 4;
 const std::string DEFAULT_FONT_WEIGHT = "400";
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr double DEFAULT_LINE_THICKNESS_SCALE = 1.0;
 
 bool ParseLocalizedPadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
     ArkUISizeType& result)
@@ -922,6 +923,7 @@ ArkUINativeModuleValue TextAreaBridge::SetDecoration(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto container = Container::Current();
@@ -944,8 +946,14 @@ ArkUINativeModuleValue TextAreaBridge::SetDecoration(ArkUIRuntimeCallInfo* runti
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
+    double lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    if (!ArkTSUtils::ParseJsDouble(vm, fifthArg, lineThicknessScale)) {
+        lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : lineThicknessScale;
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaDecoration(
-        nativeNode, textAreaDecoration, color.GetValue(), textDecorationStyle, AceType::RawPtr(resourceObject));
+        nativeNode, textAreaDecoration, color.GetValue(), textDecorationStyle, static_cast<float>(lineThicknessScale),
+        AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
  
@@ -3253,12 +3261,21 @@ ArkUINativeModuleValue TextAreaBridge::SetController(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    SetControllerInternal(frameNode, controllerVal, vm);
+
+    auto controller = TextFieldModelNG::GetOrCreateController(frameNode);
+    auto node = AceType::Claim(reinterpret_cast<TextFieldController*>(OHOS::Ace::AceType::RawPtr(controller)));
+
+    OHOS::Ace::Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    OHOS::Ace::Framework::JSTextEditableController* jsController =
+        OHOS::Ace::Framework::JSRef<OHOS::Ace::Framework::JSObject>::Cast(info[NUM_1])->Unwrap<OHOS::Ace::Framework::
+        JSTextEditableController>();
+    if (jsController) {
+        jsController->SetController(node);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -103,6 +103,7 @@ public:
     void MarkAndCheckNewOpIncNode(const RefPtr<LayoutWrapper>& layoutWrapper, Axis axis);
 
 private:
+    void EstimateInitialOffset(LayoutWrapper* layoutWrapper, Axis axis, SizeF selfSize, double& estimateCurrentOffset);
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
@@ -110,7 +111,9 @@ private:
     OffsetF GetAlignmentPosition(const RefPtr<ScrollLayoutProperty>& layoutProperty, Axis axis,
         TextDirection layoutDirection, const SizeF& size, const SizeF& viewPortExtent);
     SizeF MeasureLazyChild(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childWrapper,
-        LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& contentSize);
+        LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& contentSize, bool isMainFix);
+    void MeasureLazyChildAgain(const RefPtr<LayoutWrapper>& childWrapper,
+        LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& selfSize, bool hasLazyLayoutChild);
 
     float crossOffset_;
     double currentOffset_ = 0.0f;

@@ -51,6 +51,17 @@ std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& s
     return static_cast<float>(result);
 }
 
+float ConvertToPxDefault(const CalcLength& value, const ScaleProperty& scaleProperty, float percentReference,
+    const std::vector<std::string>& rpnexp)
+{
+    double result = -1.0;
+    if (!value.NormalizeToPx(
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
+        return 0.0f;
+    }
+    return static_cast<float>(result);
+}
+
 std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
     float percentReference, const std::vector<std::string>& rpnexp)
 {
@@ -59,8 +70,22 @@ std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const S
     }
     double result = -1.0;
     if (!value.value().NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
         return std::nullopt;
+    }
+    return static_cast<float>(result);
+}
+
+float ConvertToPxDefault(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
+    float percentReference, const std::vector<std::string>& rpnexp)
+{
+    if (!value) {
+        return 0.0f;
+    }
+    double result = -1.0;
+    if (!value.value().NormalizeToPx(
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
+        return 0.0f;
     }
     return static_cast<float>(result);
 }
@@ -69,8 +94,18 @@ std::optional<float> ConvertToPx(const Dimension& dimension, const ScaleProperty
 {
     double result = -1.0;
     if (!dimension.NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
         return std::nullopt;
+    }
+    return static_cast<float>(result);
+}
+
+float ConvertToPxDefault(const Dimension& dimension, const ScaleProperty& scaleProperty, float percentReference)
+{
+    double result = -1.0;
+    if (!dimension.NormalizeToPx(
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+        return 0.0f;
     }
     return static_cast<float>(result);
 }
@@ -83,8 +118,22 @@ std::optional<float> ConvertToPx(
     }
     double result = -1.0;
     if (!dimension.value().NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
         return std::nullopt;
+    }
+    return static_cast<float>(result);
+}
+
+float ConvertToPxDefault(const std::optional<Dimension>& dimension,
+    const ScaleProperty& scaleProperty, float percentReference)
+{
+    if (!dimension) {
+        return 0.0f;
+    }
+    double result = -1.0;
+    if (!dimension.value().NormalizeToPx(
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+        return 0.0f;
     }
     return static_cast<float>(result);
 }
@@ -146,6 +195,38 @@ PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const
         if (bottom.has_value()) {
             bottom = std::max(bottom.value(), 0.0f);
         }
+    }
+    return PaddingPropertyF { left, right, top, bottom };
+}
+
+PaddingPropertyF ConvertToPaddingPropertyFDefault(const std::unique_ptr<PaddingProperty>& padding,
+    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel, bool nonNegative)
+{
+    if (!padding) {
+        return {0.0f, 0.0f, 0.0f, 0.0f};
+    }
+    return ConvertToPaddingPropertyFDefault(*padding, scaleProperty, percentReference, roundPixel, nonNegative);
+}
+
+PaddingPropertyF ConvertToPaddingPropertyFDefault(const PaddingProperty& padding, const ScaleProperty& scaleProperty,
+    float percentReference, bool roundPixel, bool nonNegative)
+{
+    auto left = ConvertToPxDefault(padding.left, scaleProperty, percentReference);
+    auto right = ConvertToPxDefault(padding.right, scaleProperty, percentReference);
+    auto top = ConvertToPxDefault(padding.top, scaleProperty, percentReference);
+    auto bottom = ConvertToPxDefault(padding.bottom, scaleProperty, percentReference);
+    bool versionSatisfy = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    if (roundPixel && versionSatisfy) {
+        left = floor(left);
+        right = floor(right);
+        top = floor(top);
+        bottom = floor(bottom);
+    }
+    if (nonNegative && versionSatisfy) {
+        left = std::max(left, 0.0f);
+        right = std::max(right, 0.0f);
+        top = std::max(top, 0.0f);
+        bottom = std::max(bottom, 0.0f);
     }
     return PaddingPropertyF { left, right, top, bottom };
 }
@@ -243,6 +324,37 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
                          ? floor(bottom.value())
                          : 1.0f;
         }
+    }
+    return BorderWidthPropertyF { left, top, right, bottom };
+}
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyFDefault(const std::unique_ptr<BorderWidthProperty>& borderWidth,
+    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
+{
+    if (!borderWidth) {
+        return {0.0f, 0.0f, 0.0f, 0.0f};
+    }
+    return ConvertToBorderWidthPropertyFDefault(*borderWidth, scaleProperty, percentReference, roundPixel);
+}
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyFDefault(
+    const BorderWidthProperty& borderWidth, const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
+{
+    auto left = ConvertToPxDefault(borderWidth.leftDimen, scaleProperty, percentReference);
+    auto right = ConvertToPxDefault(borderWidth.rightDimen, scaleProperty, percentReference);
+    auto top = ConvertToPxDefault(borderWidth.topDimen, scaleProperty, percentReference);
+    auto bottom = ConvertToPxDefault(borderWidth.bottomDimen, scaleProperty, percentReference);
+    if (roundPixel && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        left = (GreatNotEqualCustomPrecision(left, 1.0f) || NearEqual(left, 0.0f))
+            ? floor(left)
+            : 1.0f;
+        right = (GreatNotEqualCustomPrecision(right, 1.0f) || NearEqual(right, 0.0f))
+            ? floor(right)
+            : 1.0f;
+        top = (GreatNotEqualCustomPrecision(top, 1.0f) || NearEqual(top, 0.0f)) ? floor(top) : 1.0f;
+        bottom = (GreatNotEqualCustomPrecision(bottom, 1.0f) || NearEqual(bottom, 0.0f))
+            ? floor(bottom)
+            : 1.0f;
     }
     return BorderWidthPropertyF { left, top, right, bottom };
 }
@@ -773,9 +885,44 @@ WidthBreakpoint GetCalcWidthBreakpoint(const OHOS::Ace::WidthLayoutBreakPoint &f
     return breakpoint;
 }
 
+WidthBreakpoint GetCalcWidthBreakpoint(const std::vector<double>& customBreakpoints,
+    double density, double width)
+{
+    WidthLayoutBreakPoint finalBreakpoints(customBreakpoints);
+    return GetCalcWidthBreakpoint(finalBreakpoints, density, width);
+}
+
 WidthBreakpoint GetCommonWidthBreakpoint(double width, double density)
 {
     WidthLayoutBreakPoint finalBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
     return GetCalcWidthBreakpoint(finalBreakpoints, density, width);
+}
+
+HeightBreakpoint GetCalcHeightBreakpoint(const OHOS::Ace::HeightLayoutBreakPoint &finalBreakpoints,
+    double aspectRatio)
+{
+    HeightBreakpoint breakpoint;
+    if (finalBreakpoints.heightVPRATIOSM_ < 0 || aspectRatio < finalBreakpoints.heightVPRATIOSM_) {
+        breakpoint = HeightBreakpoint::HEIGHT_SM;
+    } else if (finalBreakpoints.heightVPRATIOMD_ < 0 || aspectRatio < finalBreakpoints.heightVPRATIOMD_) {
+        breakpoint = HeightBreakpoint::HEIGHT_MD;
+    } else {
+        breakpoint = HeightBreakpoint::HEIGHT_LG;
+    }
+    return breakpoint;
+}
+
+HeightBreakpoint GetCalcHeightBreakpoint(const std::vector<double>& customBreakpoints,
+    double aspectRatio)
+{
+    HeightLayoutBreakPoint finalBreakpoints(customBreakpoints.size() > 0 ? customBreakpoints[0] : -1.0,
+                                            customBreakpoints.size() > 1 ? customBreakpoints[1] : -1.0);
+    return GetCalcHeightBreakpoint(finalBreakpoints, aspectRatio);
+}
+
+HeightBreakpoint GetCommonHeightBreakpoint(double aspectRatio)
+{
+    HeightLayoutBreakPoint finalBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
+    return GetCalcHeightBreakpoint(finalBreakpoints, aspectRatio);
 }
 } // namespace OHOS::Ace::NG

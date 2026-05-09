@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_utils.h"
 #include "core/components/slider/slider_theme.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

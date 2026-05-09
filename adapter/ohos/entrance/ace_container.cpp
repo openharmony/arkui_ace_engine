@@ -14,6 +14,9 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/container_handler.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <chrono>
@@ -69,7 +72,9 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/common/transform/input_compatible_manager.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -90,6 +95,8 @@
 #include "base/ressched/ressched_report.h"
 
 #include "accessibility_config.h"
+#include "core/components/common/properties/placement.h"
+#include "base/log/frame_report.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -928,7 +935,12 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
                 return true;
             }
-            instanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+            auto parentInstanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+            if (RemoveOverlayBySubwindowManager(parentInstanceId)) {
+                TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
+                return true;
+            }
+            return false;
         } else {
             SubwindowManager::GetInstance()->CloseMenu();
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "Menu consumed backpressed event");
@@ -1670,8 +1682,8 @@ void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t 
     container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
-UIContentErrorCode AceContainer::SetViewNew(
-    const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
+UIContentErrorCode AceContainer::SetViewNew(const RefPtr<AceView>& view, double density, float width, float height,
+    sptr<OHOS::Rosen::Window> rsWindow, sptr<IRemoteObject> connectToRender)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_RETURN(view, UIContentErrorCode::NULL_POINTER);
@@ -1682,7 +1694,7 @@ UIContentErrorCode AceContainer::SetViewNew(
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     if (container->isFormRender_) {
-        auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId(), connectToRender);
         if (!window->GetRSSurfaceNode()) {
             TAG_LOGW(AceLogTag::ACE_FORM,
                 "SurfaceNode is null, try to create form render window again, instanceId_:%{public}d.",
@@ -3588,6 +3600,7 @@ void AceContainer::BuildResConfig(
         resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
+        CHECK_NULL_VOID(pipelineContext_);
         auto fontManager = pipelineContext_->GetFontManager();
         CHECK_NULL_VOID(fontManager);
         configurationChange.fontUpdate = true;
@@ -4569,6 +4582,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 
 bool AceContainer::NeedFullUpdate(uint32_t limitKey)
 {
+    CHECK_NULL_RETURN(pipelineContext_, false);
     auto themeManager = pipelineContext_->GetThemeManager();
     if (!themeManager || (themeManager->GetResourceLimitKeys() & limitKey) == 0) {
         return false;
@@ -4578,6 +4592,7 @@ bool AceContainer::NeedFullUpdate(uint32_t limitKey)
 
 void AceContainer::NotifyDensityUpdate(double density)
 {
+    CHECK_NULL_VOID(pipelineContext_);
     bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
@@ -4593,6 +4608,7 @@ void AceContainer::NotifyDensityUpdate(double density)
 
 void AceContainer::NotifyDirectionUpdate()
 {
+    CHECK_NULL_VOID(pipelineContext_);
     bool fullUpdate = NeedFullUpdate(DIRECTION_KEY);
     if (fullUpdate) {
         ConfigurationChange configurationChange { .directionUpdate = true };

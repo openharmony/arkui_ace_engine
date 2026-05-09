@@ -16,14 +16,20 @@
 #include <ani.h>
 #include <string>
 
+#include "ani_utils.h"
+#include "overlay_params.h"
+
 #include "base/log/log_wrapper.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "ui/base/referenced.h"
 
 using namespace OHOS::Ace;
+using OHOS::Ace::AniUtils::IsUndefinedObject;
 
 static void PostOverlayTask(
     std::function<void(RefPtr<NG::OverlayManager>)>&& task, int32_t containerId, const std::string& name)
@@ -40,15 +46,6 @@ static void PostOverlayTask(
             task(overlayManager);
         },
         TaskExecutor::TaskType::UI, name);
-}
-
-static bool IsUndefinedObject(ani_env *env, ani_ref object_ref)
-{
-    ani_boolean isUndefined = ANI_TRUE;
-    if (ANI_OK != env->Reference_IsUndefined(object_ref, &isUndefined)) {
-        return false;
-    }
-    return (bool)isUndefined;
 }
 
 static bool IsOverlayManagerOptionsObject(ani_env *env, ani_object object)
@@ -340,6 +337,41 @@ static void HideAllComponentContents(ani_env* env)
     PostOverlayTask(std::move(task), instanceId, "ani HideAllComponentContents");
 }
 
+static ani_object OpenOrderOverlay(ani_env* env, ani_long aniNode, ani_object options, ani_object optionsInternal)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani OpenOrderOverlay enter");
+    auto asyncContext = std::make_shared<OverlayAsyncContext>();
+    ani_status status = env->GetVM(&asyncContext->vm);
+    if (status != ANI_OK || asyncContext->vm == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "[ANI] GetVM fail. status: %{public}d", status);
+        return nullptr;
+    }
+    asyncContext->instanceId = Container::CurrentIdSafely();
+    ani_object result = {};
+    status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "[ANI] Promise_New fail. status: %{public}d", status);
+        return nullptr;
+    }
+
+    FrameNodePeer* peerNode = (FrameNodePeer*)aniNode;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto contentNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    NG::OrderOverlayOptions overlayOptions;
+    if (!GetOrderOverlayOptions(env, options, overlayOptions)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Failed to parse OrderOverlayOptions.");
+        return nullptr;
+    }
+    GetOrderOverlayOptionsInternal(env, optionsInternal, overlayOptions);
+
+    std::function<void(int32_t)> finishCallback = GetOpenOrderOverlayPromise(asyncContext);
+    NG::DialogManagerStatic::OpenOrderOverlayStatic(
+        contentNode, overlayOptions, INSTANCE_ID_UNDEFINED, std::move(finishCallback));
+    return result;
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "ani OverlayManager ANI_Constructor start");
@@ -363,6 +395,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"hideComponentContent", nullptr, reinterpret_cast<void *>(HideComponentContent)},
         ani_native_function {"showAllComponentContents", nullptr, reinterpret_cast<void *>(ShowAllComponentContents)},
         ani_native_function {"hideAllComponentContents", nullptr, reinterpret_cast<void *>(HideAllComponentContents)},
+        ani_native_function {"openOrderOverlay", nullptr, reinterpret_cast<void *>(OpenOrderOverlay)},
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         return ANI_ERROR;

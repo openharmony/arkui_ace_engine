@@ -39,6 +39,8 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -646,7 +648,8 @@ HWTEST_F(NavigationPatternTestThreeNg, isNodeVisible, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    navigationNode->UpdateLastStandardIndex();
+    bool hasFullScreenOverlay = false;
+    navigationNode->UpdateLastStandardIndex(hasFullScreenOverlay);
     
     auto navBarNode2 = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     EXPECT_NE(navBarNode2, nullptr);

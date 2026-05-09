@@ -22,9 +22,12 @@
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/base/utils/macros.h"
 #include "frameworks/core/components/common/properties/color.h"
-#include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
-
+#include "frameworks/core/components/common/properties/text_style.h"
 #include "core/common/resource/resource_object.h"
+
+namespace OHOS::Ace::NG {
+class UINode;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 
@@ -67,6 +70,9 @@ public:
     virtual void SetPullUpToCancelRefresh(bool isPullUpToCancelRefresh) = 0;
     virtual void SetIsCustomBuilderExist(bool isCustomBuilderExist) {}
     virtual void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjRefreshOffset(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjMaxPullDownDistance(const RefPtr<ResourceObject>& resObj) {};
+
 private:
     static std::unique_ptr<RefreshModel> instance_;
     static std::mutex mutex_;

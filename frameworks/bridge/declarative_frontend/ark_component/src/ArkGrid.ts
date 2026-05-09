@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridRowsGapModifier.identity, GridRowsGapModifier, value);
     return this;
   }
-  scrollBarWidth(value: string | number): this {
+  scrollBarWidth(value: string | number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, GridScrollBarWidthModifier.identity, GridScrollBarWidthModifier, value);
     return this;
   }
@@ -78,6 +78,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
   }
   editMode(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, GridEditModeModifier.identity, GridEditModeModifier, value);
+    return this;
+  }
+  enableEditMode(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, GridEnableEditModeModifier.identity, GridEnableEditModeModifier, value);
     return this;
   }
   multiSelectable(value: boolean): this {
@@ -306,8 +310,8 @@ class GridRowsGapModifier extends ModifierWithKey<Length> {
   }
 }
 
-class GridScrollBarWidthModifier extends ModifierWithKey<string | number> {
-  constructor(value: string | number) {
+class GridScrollBarWidthModifier extends ModifierWithKey<string | number | Resource> {
+  constructor(value: string | number | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('gridScrollBarWidth');
@@ -358,6 +362,20 @@ class GridEditModeModifier extends ModifierWithKey<boolean> {
       getUINativeModule().grid.resetEditMode(node);
     } else {
       getUINativeModule().grid.setEditMode(node, this.value);
+    }
+  }
+}
+
+class GridEnableEditModeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridEnableEditMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetGridEnableEditMode(node);
+    } else {
+      getUINativeModule().grid.setGridEnableEditMode(node, this.value);
     }
   }
 }

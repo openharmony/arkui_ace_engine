@@ -94,7 +94,7 @@ bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::recycleImageEnabled_ = false;
-bool SystemProperties::imageReleaseManageObjectEnabled_ = false;
+bool SystemProperties::imageReleaseManageObjectEnabled_ = true;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
@@ -118,6 +118,7 @@ bool SystemProperties::gridIrregularLayoutEnable_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
+bool SystemProperties::smartGestureEnabled_ = false;
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
@@ -506,7 +507,7 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 
 bool SystemProperties::GetMultiInstanceEnabled()
 {
-    return false;
+    return true;
 }
 
 int32_t SystemProperties::getFormSharedImageCacheThreshold()

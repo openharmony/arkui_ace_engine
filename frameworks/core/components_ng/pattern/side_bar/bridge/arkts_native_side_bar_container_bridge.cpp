@@ -20,7 +20,9 @@
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -935,6 +937,35 @@ ArkUINativeModuleValue SideBarContainerBridge::ResetSideBarOnChange(ArkUIRuntime
     return panda::JSValueRef::Undefined(vm);
 }
 
+
+ArkUINativeModuleValue SideBarContainerBridge::SetShowSideBarWithGesture(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> showSideBarWithGestureArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isShow = false;
+    if (showSideBarWithGestureArg->IsBoolean()) {
+        isShow = showSideBarWithGestureArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getSideBarContainerModifier()->setShowSideBarWithGesture(nativeNode, isShow);
+    } else {
+        GetArkUINodeModifiers()->getSideBarContainerModifier()->resetShowSideBarWithGesture(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SideBarContainerBridge::ResetShowSideBarWithGesture(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSideBarContainerModifier()->resetShowSideBarWithGesture(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SideBarContainerBridge::CreateSideBarContainer(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -969,7 +1000,8 @@ void SideBarContainerBridge::RegisterSideBarContainerAttributes(
         "resetMinSideBarWidth", "setControlButton", "resetControlButton", "setShowControlButton",
         "resetShowControlButton", "setAutoHide", "resetAutoHide", "setMaxSideBarWidth", "resetMaxSideBarWidth",
         "setMinContentWidth", "resetMinContentWidth", "setSideBarPosition", "resetSideBarPosition", "setShowSideBar",
-        "resetShowSideBar", "setDivider", "resetDivider", "setSideBarOnChange", "resetSideBarOnChange" };
+        "resetShowSideBar", "setDivider", "resetDivider", "setSideBarOnChange", "resetSideBarOnChange",
+        "setShowSideBarWithGesture", "resetShowSideBarWithGesture" };
 
     Local<panda::JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::CreateSideBarContainer),
@@ -994,7 +1026,9 @@ void SideBarContainerBridge::RegisterSideBarContainerAttributes(
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetDivider),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetDivider),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetSideBarOnChange),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetSideBarOnChange) };
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetSideBarOnChange),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::SetShowSideBarWithGesture),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetShowSideBarWithGesture) };
     auto sideBarContainer = panda::ObjectRef::NewWithNamedProperties(
         vm, sizeof(functionNames) / sizeof(functionNames[0]), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "sideBarContainer"), sideBarContainer);

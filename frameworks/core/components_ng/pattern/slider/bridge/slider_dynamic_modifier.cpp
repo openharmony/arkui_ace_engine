@@ -14,6 +14,7 @@
  */
 
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/container.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/pattern/slider/bridge/slider_model_impl.h"
 #include "core/components_ng/pattern/slider/slider_custom_content_options.h"

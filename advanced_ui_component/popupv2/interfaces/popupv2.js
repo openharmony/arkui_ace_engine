@@ -45,7 +45,7 @@ export const defaultTheme = {
             start: LengthMetrics.vp(12),
             end: LengthMetrics.vp(12)
         },
-        fillColor: '',
+        fillColor: ColorContent.ORIGIN,
         borderRadius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_s'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
     title: {
@@ -79,7 +79,8 @@ export const defaultTheme = {
         minFontSize: 9,
         fontWeight: FontWeight.Medium,
         hoverColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        responseRegion: { "id": -1, "type": 10002, params: ['sys.float.popup_button_response_region'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
     message: {
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -93,7 +94,7 @@ export const defaultTheme = {
             bottom: LengthMetrics.vp(12),
             start: LengthMetrics.vp(12),
             end: LengthMetrics.vp(12)
-        }
+        },
     },
     closeButton: {
         size: { width: 22, height: 22 },
@@ -114,12 +115,14 @@ export const defaultTheme = {
         hoverColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         symbolSize: '18vp',
-        accessibilityMessage: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
-    }
+        accessibilityMessage: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        responseRegion: { "id": -1, "type": 10002, params: ['sys.float.popup_close_button_response_region'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+    },
 };
 const noop = () => {
 };
 const POPUP_DEFAULT_MAXWIDTH = 400;
+const MAX_FONT_SCALE = 2;
 export function PopupV2(options, parent = null) {
     const __options__ = options;
     {
@@ -137,7 +140,7 @@ export function PopupV2(options, parent = null) {
                     onClose: options.onClose,
                     buttons: options.buttons,
                     maxWidth: options.maxWidth
-                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/common/utils/popupv2.ets", line: 200, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/common/utils/popupv2.ets", line: 202, col: 3 });
                 ViewV2.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -216,13 +219,13 @@ export class PopupV2ComponentV2 extends ViewV2 {
         this.initParam("theme", (params && "theme" in params) ? params.theme : defaultTheme);
         this.applycontentKey = 'applyContent' + SystemDateTime.getTime(false);
         this.initParam("icon", (params && "icon" in params) ? params.icon : '');
-        this.initParam("iconModifier", (params && "iconModifier" in params) ? params.iconModifier : undefined);
-        this.initParam("titleModifier", (params && "titleModifier" in params) ? params.titleModifier : undefined);
-        this.initParam("messageModifier", (params && "messageModifier" in params) ? params.messageModifier : undefined);
         this.initParam("maxWidth", (params && "maxWidth" in params) ? params.maxWidth : undefined);
         this.messageMaxWidth = 0;
         this.initParam("title", (params && "title" in params) ? params.title : '');
         this.initParam("message", (params && "message" in params) ? params.message : '');
+        this.initParam("iconModifier", (params && "iconModifier" in params) ? params.iconModifier : undefined);
+        this.initParam("titleModifier", (params && "titleModifier" in params) ? params.titleModifier : undefined);
+        this.initParam("messageModifier", (params && "messageModifier" in params) ? params.messageModifier : undefined);
         this.initParam("popupDirection", (params && "popupDirection" in params) ? params.popupDirection : Direction.Auto);
         this.initParam("showClose", (params && "showClose" in params) ? params.showClose : true);
         this.initParam("buttons", (params && "buttons" in params) ? params.buttons : [{ text: '' }, { text: '' }]);
@@ -239,6 +242,9 @@ export class PopupV2ComponentV2 extends ViewV2 {
         this.secondButtonBackgroundColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
         this.closeButtonFillColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
         this.scrollMaxHeight = undefined;
+        this.firstButtonHeight = 0;
+        this.secondButtonHeight = 0;
+        this.appMaxFontScale = MAX_FONT_SCALE;
         this.listener = mediaquery.matchMediaSync('(orientation: landscape)');
         this.finalizeConstruction();
     }
@@ -246,17 +252,16 @@ export class PopupV2ComponentV2 extends ViewV2 {
         this.resetParam("onClose", (params && "onClose" in params) ? params.onClose : noop);
         this.resetParam("theme", (params && "theme" in params) ? params.theme : defaultTheme);
         this.resetParam("icon", (params && "icon" in params) ? params.icon : '');
-        this.resetParam("iconModifier", (params && "iconModifier" in params) ? params.iconModifier : undefined);
-        this.resetParam("titleModifier", (params && "titleModifier" in params) ? params.titleModifier : undefined);
-        this.resetParam("messageModifier", (params && "messageModifier" in params) ? params.messageModifier : undefined);
         this.resetParam("maxWidth", (params && "maxWidth" in params) ? params.maxWidth : undefined);
         this.messageMaxWidth = 0;
         this.resetParam("title", (params && "title" in params) ? params.title : '');
         this.resetParam("message", (params && "message" in params) ? params.message : '');
+        this.resetParam("iconModifier", (params && "iconModifier" in params) ? params.iconModifier : undefined);
+        this.resetParam("titleModifier", (params && "titleModifier" in params) ? params.titleModifier : undefined);
+        this.resetParam("messageModifier", (params && "messageModifier" in params) ? params.messageModifier : undefined);
         this.resetParam("popupDirection", (params && "popupDirection" in params) ? params.popupDirection : Direction.Auto);
         this.resetParam("showClose", (params && "showClose" in params) ? params.showClose : true);
         this.resetParam("buttons", (params && "buttons" in params) ? params.buttons : [{ text: '' }, { text: '' }]);
-        this.textHeight = 0;
         this.titleHeight = 0;
         this.applyHeight = 0;
         this.buttonHeight = 0;
@@ -269,6 +274,9 @@ export class PopupV2ComponentV2 extends ViewV2 {
         this.secondButtonBackgroundColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
         this.closeButtonFillColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
         this.scrollMaxHeight = undefined;
+        this.firstButtonHeight = 0;
+        this.secondButtonHeight = 0;
+        this.appMaxFontScale = MAX_FONT_SCALE;
     }
     getIconWidth() {
         return this.theme.icon.size.width;
@@ -337,7 +345,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
         return this.theme.closeButton.symbolSize;
     }
     getMessageText() {
-        return this.message || '';
+        return this.message;
     }
     getMessageFontSize() {
         return this.theme.message.fontSize;
@@ -442,6 +450,34 @@ export class PopupV2ComponentV2 extends ViewV2 {
     getButtonFontWeight() {
         return this.theme.button.fontWeight;
     }
+    getBtnResponseRegion(actualWidth, actualHeight, minSizeVp) {
+        if (actualWidth === 0 || actualHeight === 0 || minSizeVp <= 0) {
+            return undefined;
+        }
+        let needExpandWidth = actualWidth === -1 ? false : (actualWidth < minSizeVp);
+        let needExpandHeight = actualHeight < minSizeVp;
+        if (!needExpandWidth && !needExpandHeight) {
+            return undefined;
+        }
+        let regionWidth = needExpandWidth ? minSizeVp : '100%';
+        let regionHeight = needExpandHeight ? minSizeVp : '100%';
+        let offsetX = needExpandWidth ? (minSizeVp - actualWidth) / 2 : 0;
+        let offsetY = needExpandHeight ? (minSizeVp - actualHeight) / 2 : 0;
+        return {
+            x: -offsetX,
+            y: -offsetY,
+            width: regionWidth,
+            height: regionHeight
+        };
+    }
+    getCloseBtnResponseRegion() {
+        let responseRegionValue = this.toVp(this.theme.closeButton.responseRegion);
+        return this.getBtnResponseRegion(this.theme.closeButton.size.width, this.theme.closeButton.size.height, responseRegionValue);
+    }
+    getNormalBtnResponseRegion(height) {
+        let responseRegionValue = this.toVp(this.theme.button.responseRegion);
+        return this.getBtnResponseRegion(-1, height, responseRegionValue);
+    }
     getWindowsPadding() {
         let top = this.theme.windows.padding.top;
         let bottom = LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
@@ -467,6 +503,8 @@ export class PopupV2ComponentV2 extends ViewV2 {
         this.closeButtonFillColorWithTheme = theme.colors.iconSecondary;
     }
     aboutToAppear() {
+        let uiContext = this.getUIContext();
+        this.appMaxFontScale = uiContext.getMaxFontScale();
         this.listener.on('change', (mediaQueryResult) => {
             setTimeout(() => {
                 this.currentScreenStatus = mediaQueryResult.matches;
@@ -718,6 +756,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
                         Text.textAlign(this.getTitleTextAlign());
                         Text.attributeModifier.bind(this)(this.titleModifier);
+                        Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -733,6 +772,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                     Button.backgroundColor(this.closeButtonBackgroundColor);
                                     Button.flexShrink(0);
                                     Button.accessibilityText(this.theme.closeButton.accessibilityMessage);
+                                    Button.responseRegion(this.getCloseBtnResponseRegion());
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -786,6 +826,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
                         Text.textAlign(this.getTitleTextAlign());
                         Text.attributeModifier.bind(this)(this.messageModifier);
+                        Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                         Text.onAreaChange((_, rect) => {
                             this.textHeight = rect.height;
                             this.setScrollMaxHeight(undefined);
@@ -814,25 +855,13 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Button.createWithLabel(this.getFirstButtonText());
-                                    Button.labelStyle({
-                                        maxLines: 2,
-                                        minFontSize: this.getButtonMinFontSize(),
-                                        overflow: TextOverflow.Ellipsis
-                                    });
-                                    Button.fontSize(this.getFirstButtonFontSize());
-                                    Button.fontColor(this.getFirstButtonFontColor());
-                                    Button.fontWeight(this.getButtonFontWeight());
-                                    Button.focusable(true);
-                                    Button.buttonStyle(ButtonStyleMode.TEXTUAL);
-                                    Button.controlSize(ControlSize.SMALL);
+                                    Button.createWithChild();
                                     Button.type(ButtonType.Normal);
                                     Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.popup_button_border_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
                                     Button.backgroundColor(this.firstButtonBackgroundColor);
-                                    Button.attributeModifier.bind(this)(this.buttons?.[0]?.buttonModifier);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.firstButtonBackgroundColor = this.getButtonHoverColor();
@@ -846,7 +875,25 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                             this.buttons?.[0]?.action();
                                         }
                                     });
+                                    Button.onAreaChange((_, rect) => {
+                                        this.firstButtonHeight = rect.height;
+                                    });
+                                    Button.responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight));
                                 }, Button);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Text.create(this.getFirstButtonText());
+                                    Text.direction(this.popupDirection);
+                                    Text.maxLines(2);
+                                    Text.focusable(true);
+                                    Text.fontSize(this.getFirstButtonFontSize());
+                                    Text.fontColor(this.getFirstButtonFontColor());
+                                    Text.fontWeight(this.getButtonFontWeight());
+                                    Text.minFontSize(this.getButtonMinFontSize());
+                                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                                    Text.attributeModifier.bind(this)(this.buttons?.[0]?.buttonTextModifier);
+                                    Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
+                                }, Text);
+                                Text.pop();
                                 Button.pop();
                             });
                         }
@@ -861,25 +908,13 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Button.createWithLabel(this.getSecondButtonText());
-                                    Button.labelStyle({
-                                        maxLines: 2,
-                                        minFontSize: this.getButtonMinFontSize(),
-                                        overflow: TextOverflow.Ellipsis
-                                    });
-                                    Button.fontSize(this.getSecondButtonFontSize());
-                                    Button.fontColor(this.getSecondButtonFontColor());
-                                    Button.fontWeight(this.getButtonFontWeight());
-                                    Button.focusable(true);
-                                    Button.buttonStyle(ButtonStyleMode.TEXTUAL);
-                                    Button.controlSize(ControlSize.SMALL);
+                                    Button.createWithChild();
                                     Button.type(ButtonType.Normal);
                                     Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.popup_button_border_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
                                     Button.backgroundColor(this.secondButtonBackgroundColor);
-                                    Button.attributeModifier.bind(this)(this.buttons?.[1]?.buttonModifier);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.secondButtonBackgroundColor = this.getButtonHoverColor();
@@ -893,7 +928,25 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                             this.buttons?.[1]?.action();
                                         }
                                     });
+                                    Button.onAreaChange((_, rect) => {
+                                        this.secondButtonHeight = rect.height;
+                                    });
+                                    Button.responseRegion(this.getNormalBtnResponseRegion(this.secondButtonHeight));
                                 }, Button);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Text.create(this.getSecondButtonText());
+                                    Text.direction(this.popupDirection);
+                                    Text.maxLines(2);
+                                    Text.focusable(true);
+                                    Text.fontSize(this.getSecondButtonFontSize());
+                                    Text.fontColor(this.getSecondButtonFontColor());
+                                    Text.fontWeight(this.getButtonFontWeight());
+                                    Text.minFontSize(this.getButtonMinFontSize());
+                                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                                    Text.attributeModifier.bind(this)(this.buttons?.[1]?.buttonTextModifier);
+                                    Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
+                                }, Text);
+                                Text.pop();
                                 Button.pop();
                             });
                         }
@@ -948,6 +1001,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         Text.constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() });
                         Text.textAlign(this.getTitleTextAlign());
                         Text.attributeModifier.bind(this)(this.messageModifier);
+                        Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                         Text.onAreaChange((_, rect) => {
                             this.textHeight = rect.height;
                             this.setScrollMaxHeight(undefined);
@@ -968,6 +1022,7 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                     Button.backgroundColor(this.closeButtonBackgroundColor);
                                     Button.flexShrink(0);
                                     Button.accessibilityText(this.theme.closeButton.accessibilityMessage);
+                                    Button.responseRegion(this.getCloseBtnResponseRegion());
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1022,25 +1077,13 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Button.createWithLabel(this.getFirstButtonText());
-                                    Button.labelStyle({
-                                        maxLines: 2,
-                                        minFontSize: this.getButtonMinFontSize(),
-                                        overflow: TextOverflow.Ellipsis
-                                    });
-                                    Button.fontSize(this.getFirstButtonFontSize());
-                                    Button.fontColor(this.getFirstButtonFontColor());
-                                    Button.fontWeight(this.getButtonFontWeight());
-                                    Button.focusable(true);
-                                    Button.buttonStyle(ButtonStyleMode.TEXTUAL);
-                                    Button.controlSize(ControlSize.SMALL);
+                                    Button.createWithChild();
                                     Button.type(ButtonType.Normal);
                                     Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.popup_button_border_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
                                     Button.backgroundColor(this.firstButtonBackgroundColor);
-                                    Button.attributeModifier.bind(this)(this.buttons?.[0]?.buttonModifier);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.firstButtonBackgroundColor = this.getButtonHoverColor();
@@ -1054,7 +1097,25 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                             this.buttons?.[0]?.action();
                                         }
                                     });
+                                    Button.onAreaChange((_, rect) => {
+                                        this.firstButtonHeight = Number(rect.height);
+                                    });
+                                    Button.responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight));
                                 }, Button);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Text.create(this.getFirstButtonText());
+                                    Text.direction(this.popupDirection);
+                                    Text.maxLines(2);
+                                    Text.focusable(true);
+                                    Text.fontSize(this.getFirstButtonFontSize());
+                                    Text.fontColor(this.getFirstButtonFontColor());
+                                    Text.fontWeight(this.getButtonFontWeight());
+                                    Text.minFontSize(this.getButtonMinFontSize());
+                                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                                    Text.attributeModifier.bind(this)(this.buttons?.[0]?.buttonTextModifier);
+                                    Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
+                                }, Text);
+                                Text.pop();
                                 Button.pop();
                             });
                         }
@@ -1069,25 +1130,13 @@ export class PopupV2ComponentV2 extends ViewV2 {
                         if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Button.createWithLabel(this.getSecondButtonText());
-                                    Button.labelStyle({
-                                        maxLines: 2,
-                                        minFontSize: this.getButtonMinFontSize(),
-                                        overflow: TextOverflow.Ellipsis
-                                    });
-                                    Button.fontSize(this.getSecondButtonFontSize());
-                                    Button.fontColor(this.getSecondButtonFontColor());
-                                    Button.fontWeight(this.getButtonFontWeight());
-                                    Button.focusable(true);
-                                    Button.buttonStyle(ButtonStyleMode.TEXTUAL);
-                                    Button.controlSize(ControlSize.SMALL);
+                                    Button.createWithChild();
                                     Button.type(ButtonType.Normal);
                                     Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.popup_button_border_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
                                     Button.backgroundColor(this.secondButtonBackgroundColor);
-                                    Button.attributeModifier.bind(this)(this.buttons?.[1]?.buttonModifier);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.secondButtonBackgroundColor = this.getButtonHoverColor();
@@ -1101,7 +1150,25 @@ export class PopupV2ComponentV2 extends ViewV2 {
                                             this.buttons?.[1]?.action();
                                         }
                                     });
+                                    Button.onAreaChange((_, rect) => {
+                                        this.secondButtonHeight = rect.height;
+                                    });
+                                    Button.responseRegion(this.getNormalBtnResponseRegion(this.secondButtonHeight));
                                 }, Button);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Text.create(this.getSecondButtonText());
+                                    Text.direction(this.popupDirection);
+                                    Text.maxLines(2);
+                                    Text.focusable(true);
+                                    Text.fontSize(this.getSecondButtonFontSize());
+                                    Text.fontColor(this.getSecondButtonFontColor());
+                                    Text.fontWeight(this.getButtonFontWeight());
+                                    Text.minFontSize(this.getButtonMinFontSize());
+                                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                                    Text.attributeModifier.bind(this)(this.buttons?.[1]?.buttonTextModifier);
+                                    Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
+                                }, Text);
+                                Text.pop();
                                 Button.pop();
                             });
                         }
@@ -1132,15 +1199,6 @@ export class PopupV2ComponentV2 extends ViewV2 {
         if ("icon" in params) {
             this.updateParam("icon", params.icon);
         }
-        if ("iconModifier" in params) {
-            this.updateParam("iconModifier", params.iconModifier);
-        }
-        if ("titleModifier" in params) {
-            this.updateParam("titleModifier", params.titleModifier);
-        }
-        if ("messageModifier" in params) {
-            this.updateParam("messageModifier", params.messageModifier);
-        }
         if ("maxWidth" in params) {
             this.updateParam("maxWidth", params.maxWidth);
         }
@@ -1149,6 +1207,15 @@ export class PopupV2ComponentV2 extends ViewV2 {
         }
         if ("message" in params) {
             this.updateParam("message", params.message);
+        }
+        if ("iconModifier" in params) {
+            this.updateParam("iconModifier", params.iconModifier);
+        }
+        if ("titleModifier" in params) {
+            this.updateParam("titleModifier", params.titleModifier);
+        }
+        if ("messageModifier" in params) {
+            this.updateParam("messageModifier", params.messageModifier);
         }
         if ("popupDirection" in params) {
             this.updateParam("popupDirection", params.popupDirection);
@@ -1175,15 +1242,6 @@ __decorate([
 ], PopupV2ComponentV2.prototype, "icon", void 0);
 __decorate([
     Param
-], PopupV2ComponentV2.prototype, "iconModifier", void 0);
-__decorate([
-    Param
-], PopupV2ComponentV2.prototype, "titleModifier", void 0);
-__decorate([
-    Param
-], PopupV2ComponentV2.prototype, "messageModifier", void 0);
-__decorate([
-    Param
 ], PopupV2ComponentV2.prototype, "maxWidth", void 0);
 __decorate([
     Local
@@ -1196,6 +1254,15 @@ __decorate([
 ], PopupV2ComponentV2.prototype, "message", void 0);
 __decorate([
     Param
+], PopupV2ComponentV2.prototype, "iconModifier", void 0);
+__decorate([
+    Param
+], PopupV2ComponentV2.prototype, "titleModifier", void 0);
+__decorate([
+    Param
+], PopupV2ComponentV2.prototype, "messageModifier", void 0);
+__decorate([
+    Param
 ], PopupV2ComponentV2.prototype, "popupDirection", void 0);
 __decorate([
     Param
@@ -1203,9 +1270,6 @@ __decorate([
 __decorate([
     Param
 ], PopupV2ComponentV2.prototype, "buttons", void 0);
-__decorate([
-    Local
-], PopupV2ComponentV2.prototype, "textHeight", void 0);
 __decorate([
     Local
 ], PopupV2ComponentV2.prototype, "titleHeight", void 0);
@@ -1242,5 +1306,13 @@ __decorate([
 __decorate([
     Local
 ], PopupV2ComponentV2.prototype, "scrollMaxHeight", void 0);
-
+__decorate([
+    Local
+], PopupV2ComponentV2.prototype, "firstButtonHeight", void 0);
+__decorate([
+    Local
+], PopupV2ComponentV2.prototype, "secondButtonHeight", void 0);
+__decorate([
+    Local
+], PopupV2ComponentV2.prototype, "appMaxFontScale", void 0);
 export default { PopupV2 };

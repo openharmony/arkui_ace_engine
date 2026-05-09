@@ -19,7 +19,7 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, GestureType, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, SpatialEffectParams, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, GestureCollectInterceptCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, AreaChangeCallback, AreaChangeOptions, CommonMethod } from './component/common'
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, SpatialEffectParams, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, GestureCollectInterceptCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, AreaChangeCallback, AreaChangeOptions, CommonMethod } from './component/common'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { Length, Resource as arkui_component_units_Resource, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions } from './component/units'
@@ -312,6 +312,9 @@ export class CommonMethodModifier implements CommonMethod {
     public _bindSheet_0_2value?: SheetOptions | undefined
     public _onVisibleAreaChange_0_0value?: Array<double> | undefined
     public _onVisibleAreaChange_0_1value?: VisibleAreaChangeCallback | undefined
+    public _onVisibleAreaChange_1_0value?: Array<double> | undefined
+    public _onVisibleAreaChange_1_1value?: VisibleAreaChangeCallback | undefined
+    public _onVisibleAreaChange_1_2value?: boolean | undefined
     public _onVisibleAreaApproximateChange_0_0value?: VisibleAreaEventOptions | undefined
     public _onVisibleAreaApproximateChange_0_1value?: VisibleAreaChangeCallback | undefined
     public _keyboardShortcut_0_0value?: string | FunctionKey | undefined
@@ -327,6 +330,8 @@ export class CommonMethodModifier implements CommonMethod {
     public _onAreaChange_1_1value?: AreaChangeOptions | undefined
     public _toolbar_0_0value?: CustomBuilder | undefined
     public _onGestureCollectIntercept_0_0value?: GestureCollectInterceptCallback
+    public _shouldRecognizerParallelWith_0_0value?: ShouldRecognizerParallelWithCallback
+    public _inspectorLabel_0_0value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
@@ -3897,7 +3902,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[207] != 0) {
             switch (flagArray[207]) {
                 case 1: {
-                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChange0Attribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
                     flagArray[207] = 2;
                     break;
                 }
@@ -3907,7 +3912,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[207] = 0;
-                    peer.setOnVisibleAreaChangeAttribute(undefined, undefined);
+                    peer.setOnVisibleAreaChange0Attribute(undefined, undefined);
                 }
             }
         }
@@ -4024,6 +4029,56 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
+                }
+            }
+        }
+        if (flagArray[216] != 0) {
+            switch (flagArray[216]) {
+                case 1: {
+                    peer.setShouldRecognizerParallelWithAttribute((this._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback));
+                    flagArray[216] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[216] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[216] = 0;
+                }
+            }
+        }
+        if (flagArray[217] != 0) {
+            switch (flagArray[217]) {
+                case 1: {
+                    peer.setInspectorLabelAttribute((this._inspectorLabel_0_0value as string | undefined));
+                    flagArray[217] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[217] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[217] = 0;
+                    peer.setInspectorLabelAttribute(undefined);
+                }
+            }
+        }
+        if (flagArray[218] != 0) {
+            switch (flagArray[218]) {
+                case 1: {
+                    peer.setOnVisibleAreaChange1Attribute((this._onVisibleAreaChange_1_0value as Array<double> | undefined), (this._onVisibleAreaChange_1_1value as VisibleAreaChangeCallback | undefined), (this._onVisibleAreaChange_1_2value as boolean | undefined));
+                    flagArray[218] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[218] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[218] = 0;
+                    peer.setOnVisibleAreaChange1Attribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -6655,6 +6710,41 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[216] != 0) {
+            switch (flagArray[216]) {
+                case 1:
+                case 3: {
+                    this.shouldRecognizerParallelWith((modifier._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
+        if (flagArray[217] != 0) {
+            switch (flagArray[217]) {
+                case 1:
+                case 3: {
+                    this.inspectorLabel((modifier._inspectorLabel_0_0value as string | undefined));
+                    break;
+                }
+                default: {
+                    this.inspectorLabel(undefined);
+                }
+            }
+        }
+        if (flagArray[218] != 0) {
+            switch (flagArray[218]) {
+                case 1:
+                case 3: {
+                    this.onVisibleAreaChange((modifier._onVisibleAreaChange_1_0value as Array<double> | undefined), (modifier._onVisibleAreaChange_1_1value as VisibleAreaChangeCallback | undefined), (modifier._onVisibleAreaChange_1_2value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -8877,6 +8967,38 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[215] = 3
+        }
+        return this
+    }
+    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
+        if (((this._flagArray[216]) == (0)) || (true)) {
+            this._flagArray[216] = 1
+            this._shouldRecognizerParallelWith_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[216] = 3
+        }
+        return this
+    }
+    inspectorLabel(label: string | undefined): this {
+        if (((this._flagArray[217]) == (0)) || ((this._inspectorLabel_0_0value) !== (label))) {
+            this._flagArray[217] = 1
+            this._inspectorLabel_0_0value = label
+            this._state.fireChange()
+        } else {
+            this._flagArray[217] = 3
+        }
+        return this
+    }
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined, measureFromViewport: boolean | undefined): this {
+        if (((this._flagArray[218]) == (0)) || ((this._onVisibleAreaChange_1_0value) !== (ratios)) || (true) || ((this._onVisibleAreaChange_1_2value) !== (measureFromViewport))) {
+            this._flagArray[218] = 1
+            this._onVisibleAreaChange_1_0value = ratios
+            this._onVisibleAreaChange_1_1value = event
+            this._onVisibleAreaChange_1_2value = measureFromViewport
+            this._state.fireChange()
+        } else {
+            this._flagArray[218] = 3
         }
         return this
     }

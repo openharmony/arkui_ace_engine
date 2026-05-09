@@ -21,7 +21,7 @@
 #define private public
 #define protected public
 
-#include "test/mock/frameworks/base/mock_foldable_window.h"
+#include "test/mock/frameworks/base/window/mock_foldable_window.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -73,6 +73,13 @@ void SheetPresentationTestSixNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme_;
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -108,6 +115,14 @@ void SheetPresentationTestSixNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
         [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme.Upgrade();
+        } else {
+            return nullptr;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type, int32_t) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
             return sheetTheme.Upgrade();
         } else {

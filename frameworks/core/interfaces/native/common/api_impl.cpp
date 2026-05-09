@@ -21,6 +21,7 @@
 // SORTED_SECTION
 #include "base/error/error_code.h"
 #include "core/common/card_scope.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"

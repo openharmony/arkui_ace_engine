@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
@@ -39,6 +40,8 @@
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#include "core/components/common/properties/placement.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -876,7 +879,7 @@ void ViewAbstractModelStatic::SetBloom(FrameNode *frameNode, const std::optional
     double bloomRadius = themeConstants->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
     Color bloomColor = themeConstants->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
     Shadow shadow;
-    shadow.SetBlurRadius(value.value_or(0.0f) * bloomRadius);
+    shadow.SetBlurRadius(value.value_or(-1.0f) * bloomRadius);
     shadow.SetColor(bloomColor);
     std::vector<Shadow> shadows { shadow };
     ViewAbstractModelStatic::SetBackShadow(frameNode, shadows);
@@ -1961,5 +1964,10 @@ void ViewAbstractModelStatic::ResetOverlay(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OverlayText, frameNode);
     frameNode->SetOverlayNode(nullptr);
     frameNode->MarkDirtyNode();
+}
+void ViewAbstractModelStatic::SetInspectorLabelSta(UINode* node, const std::string& inspectorLabel)
+{
+    CHECK_NULL_VOID(node);
+    node->SetInspectorLabel(inspectorLabel);
 }
 } // namespace OHOS::Ace::NG

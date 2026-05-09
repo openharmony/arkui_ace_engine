@@ -1663,11 +1663,11 @@ HWTEST_F(WebPatternWebTest, OnForceEnableZoomUpdate, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnScrollbarLayoutPolicyUpdate
- * @tc.desc: OnScrollbarLayoutPolicyUpdate.
+ * @tc.name: OnScrollbarLayoutPolicyUpdate001
+ * @tc.desc: Test OnScrollbarLayoutPolicyUpdate with same policy (no change branch).
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternWebTest, OnScrollbarLayoutPolicyUpdate, TestSize.Level1)
+HWTEST_F(WebPatternWebTest, OnScrollbarLayoutPolicyUpdate001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1682,11 +1682,247 @@ HWTEST_F(WebPatternWebTest, OnScrollbarLayoutPolicyUpdate, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
 
+    // Default policy is CONTENT, set changed to false explicitly
+    webPattern->scrollbarLayoutPolicyChanged_ = false;
+    // Update with same policy -> should NOT set changed flag
     webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::CONTENT);
     EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_FALSE(webPattern->scrollbarLayoutPolicyChanged_);
+#endif
+}
 
+/**
+ * @tc.name: OnScrollbarLayoutPolicyUpdate002
+ * @tc.desc: Test OnScrollbarLayoutPolicyUpdate with different policy (change branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnScrollbarLayoutPolicyUpdate002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // Default policy is CONTENT, update to SYSTEM -> should set changed flag
+    webPattern->scrollbarLayoutPolicyChanged_ = false;
     webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::SYSTEM);
     EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_TRUE(webPattern->scrollbarLayoutPolicyChanged_);
+
+    // Update with same policy again -> should NOT change changed flag (it stays true)
+    webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_TRUE(webPattern->scrollbarLayoutPolicyChanged_);
+
+    // Update back to CONTENT -> different policy, changed stays true
+    webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_TRUE(webPattern->scrollbarLayoutPolicyChanged_);
+#endif
+}
+
+/**
+ * @tc.name: UpdateScrollbarLayout001
+ * @tc.desc: Test UpdateScrollbarLayout with null delegate (early return).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateScrollbarLayout001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // Save delegate and set to null
+    auto savedDelegate = webPattern->delegate_;
+    webPattern->delegate_ = nullptr;
+    webPattern->scrollbarLayoutPolicyChanged_ = true;
+    webPattern->isLanguageRtl_ = false;
+    // Should early return without crash, state unchanged
+    webPattern->UpdateScrollbarLayout();
+    EXPECT_TRUE(webPattern->scrollbarLayoutPolicyChanged_);
+    EXPECT_FALSE(webPattern->isLanguageRtl_);
+    // Restore delegate
+    webPattern->delegate_ = savedDelegate;
+#endif
+}
+
+/**
+ * @tc.name: UpdateScrollbarLayout002
+ * @tc.desc: Test UpdateScrollbarLayout with CONTENT policy and RTL already synced (both branches skip).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateScrollbarLayout002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // After OnModifyDone, isLanguageRtl_ = true (mock IsRightToLeft returns true)
+    // Set up state: CONTENT policy, no pending change, RTL already synced
+    webPattern->scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
+    webPattern->scrollbarLayoutPolicyChanged_ = false;
+    webPattern->isLanguageRtl_ = true;
+    // Both conditions should skip: B (false||false), C (true==true||false)
+    webPattern->UpdateScrollbarLayout();
+    EXPECT_FALSE(webPattern->scrollbarLayoutPolicyChanged_);
+    EXPECT_FALSE(webPattern->isLanguageRtl_);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::CONTENT);
+#endif
+}
+
+/**
+ * @tc.name: UpdateScrollbarLayout003
+ * @tc.desc: Test UpdateScrollbarLayout with scrollbarLayoutPolicyChanged_ = true (B1 branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateScrollbarLayout003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // Set changed flag manually with CONTENT policy, RTL already synced
+    webPattern->scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
+    webPattern->scrollbarLayoutPolicyChanged_ = true;
+    webPattern->isLanguageRtl_ = true;
+    // B: true||false = true -> enters, resets changed to false
+    // C: true!=true||false = false -> skips
+    webPattern->UpdateScrollbarLayout();
+    EXPECT_FALSE(webPattern->scrollbarLayoutPolicyChanged_);
+    EXPECT_FALSE(webPattern->isLanguageRtl_);
+#endif
+}
+
+/**
+ * @tc.name: UpdateScrollbarLayout004
+ * @tc.desc: Test UpdateScrollbarLayout with isLanguageRtl_ mismatch (C1 branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateScrollbarLayout004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // Simulate RTL mismatch: isLanguageRtl_ = false but mock returns true
+    webPattern->scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
+    webPattern->scrollbarLayoutPolicyChanged_ = false;
+    webPattern->isLanguageRtl_ = false;
+    // B: false||false = false -> skips
+    // C: false!=true||false = true -> enters, sets isLanguageRtl_ = true
+    webPattern->UpdateScrollbarLayout();
+    EXPECT_FALSE(webPattern->scrollbarLayoutPolicyChanged_);
+    EXPECT_FALSE(webPattern->isLanguageRtl_);
+#endif
+}
+
+/**
+ * @tc.name: UpdateScrollbarLayout005
+ * @tc.desc: Test UpdateScrollbarLayout with non-CONTENT policy via OnScrollbarLayoutPolicyUpdate (B1 + C2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateScrollbarLayout005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // Change policy to SYSTEM -> sets changed=true, policy=SYSTEM
+    webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_TRUE(webPattern->scrollbarLayoutPolicyChanged_);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::SYSTEM);
+    // B: true||true = true -> enters (B1), resets changed to false
+    // C: true!=true||SYSTEM!=CONTENT = false||true = true -> enters (C2)
+    webPattern->UpdateScrollbarLayout();
+    EXPECT_FALSE(webPattern->scrollbarLayoutPolicyChanged_);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_FALSE(webPattern->isLanguageRtl_);
+#endif
+}
+
+/**
+ * @tc.name: UpdateScrollbarLayout006
+ * @tc.desc: Test UpdateScrollbarLayout with non-CONTENT policy after flag consumed (B2 + C2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateScrollbarLayout006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    // Set up: policy=SYSTEM, changed flag already consumed (false), RTL synced
+    webPattern->scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::SYSTEM;
+    webPattern->scrollbarLayoutPolicyChanged_ = false;
+    webPattern->isLanguageRtl_ = true;
+    // B: false||CONTENT!=SYSTEM = false||true = true -> enters (B2)
+    // C: true!=true||CONTENT!=SYSTEM = false||true = true -> enters (C2)
+    webPattern->UpdateScrollbarLayout();
+    EXPECT_FALSE(webPattern->scrollbarLayoutPolicyChanged_);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_FALSE(webPattern->isLanguageRtl_);
 #endif
 }
 

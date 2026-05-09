@@ -17,13 +17,14 @@ import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
     BorderRadiuses } from 'arkui.component.units'
 import { AsyncCallback, Callback } from '@ohos.base'
 import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, TransitionEffect, KeyboardAvoidMode,
-    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui.component.common'
+    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions, DistortionMode, EdgeLightMode } from 'arkui.component.common'
 import { CustomBuilder } from 'arkui.component.builder'
 import { DialogAlignment } from 'arkui.component.alertDialog'
 import { DismissDialogAction } from 'arkui.component.actionSheet'
-import { BorderStyle, Alignment } from 'arkui.component.enums'
+import { BorderStyle, Alignment, DialogDisplayMode } from 'arkui.component.enums'
 import { Resource } from 'global.resource'
 import { LengthMetrics } from 'arkui.Graphics'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial';
 
 export enum LevelMode {
     OVERLAY = 0,
@@ -91,6 +92,7 @@ export default namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;
+        systemMaterial?: uiMaterial.Material;
     }
 
     export interface ShowToastOptionsInternal {
@@ -127,6 +129,9 @@ export default namespace promptAction {
         levelUniqueId?: int;
         immersiveMode?: ImmersiveMode;
         levelOrder?: LevelOrder;
+        systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface ShowDialogOptionsInternal {
@@ -164,6 +169,9 @@ export default namespace promptAction {
         onDidDisappear?: (() => void);
         onWillAppear?: (() => void);
         onWillDisappear?: (() => void);
+        systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface ActionMenuOptionsInternal {
@@ -183,6 +191,7 @@ export default namespace promptAction {
         alignment?: DialogAlignment;
         offset?: Offset;
         showInSubWindow?: boolean;
+        displayModeInSubWindow?: DialogDisplayMode;
         isModal?: boolean;
         autoCancel?: boolean;
         transition?: TransitionEffect;
@@ -205,6 +214,9 @@ export default namespace promptAction {
         immersiveMode?: ImmersiveMode;
         levelOrder?: LevelOrder;
         focusable?: boolean;
+        systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface DialogOptionsInternal {

@@ -19,6 +19,7 @@
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/view_stack/view_stack_processor.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
@@ -56,6 +57,8 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, MenuType t
     aceMenuParam.isShowInSubWindow = menuParam.isShowInSubWindow;
     aceMenuParam.placement = static_cast<Placement>(menuParam.placement);
     aceMenuParam.systemMaterial = menuParam.systemMaterial;
+    aceMenuParam.distortionMode = menuParam.distortionMode.value_or(DistortionMode::DISTORTION_DISABLED);
+    aceMenuParam.edgeLightMode = menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED);
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     CHECK_NULL_RETURN(menuViewModifier, nullptr);
     auto aceNode = menuViewModifier->createWithOptionParams(
@@ -78,6 +81,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> MenuView::NavigationCreateMenu(
     aceMenuParam.isShowInSubWindow = menuParam.isShowInSubWindow;
     aceMenuParam.placement = static_cast<Placement>(menuParam.placement);
     aceMenuParam.systemMaterial = menuParam.systemMaterial;
+    aceMenuParam.distortionMode = menuParam.distortionMode.value_or(DistortionMode::DISTORTION_DISABLED);
+    aceMenuParam.edgeLightMode = menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED);
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     CHECK_NULL_RETURN(menuViewModifier, NULL_MENU_PAIR);
     auto menuWrapperAceNode = menuViewModifier->createWithCustomNode(

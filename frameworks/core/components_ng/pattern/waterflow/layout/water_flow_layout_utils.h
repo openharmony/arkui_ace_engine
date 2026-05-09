@@ -17,11 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H
 #include <string>
 #include <tuple>
-#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_offset.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 namespace OHOS::Ace::NG {
+class LayoutWrapper;
+
 class WaterFlowLayoutUtils {
 public:
     static std::string PreParseArgs(const std::string& args);
@@ -65,6 +67,8 @@ public:
     static AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
     static RefPtr<LayoutWrapper> GetWaterFlowItem(LayoutWrapper* layoutWrapper, int32_t index,
         bool addToRenderTree = true, bool isCache = false);
+    static RefPtr<LayoutWrapper> GetWaterFlowItemByIndex(
+        LayoutWrapper* layoutWrapper, int32_t index, bool isCache = false);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H

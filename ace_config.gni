@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -98,6 +98,12 @@ declare_args() {
 
   #Enable default click sound
   ace_engine_feature_enable_default_click_sound = false
+
+  #Enable back to top
+  ace_engine_feature_enable_back_to_top = false
+
+  #Enable container_scope tracking
+  ace_engine_feature_enable_container_scope_tracking = false
 }
 
 enable_dump_drawcmd = false
@@ -388,4 +394,12 @@ if (ace_engine_feature_enable_static_instructive_code) {
 
 if (ace_engine_feature_enable_default_click_sound) {
     ace_common_defines += [ "ENABLE_DEFAULT_CLICK_SOUND" ]
+}
+
+if (ace_engine_feature_enable_back_to_top) {
+    ace_common_defines += [ "ENABLE_BACK_TO_TOP" ]
+}
+
+if (ace_engine_feature_enable_container_scope_tracking) {
+    ace_common_defines += [ "ENABLE_CONTAINER_SCOPE_TRACKING" ]
 }

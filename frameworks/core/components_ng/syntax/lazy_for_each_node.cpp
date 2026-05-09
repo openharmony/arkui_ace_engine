@@ -15,6 +15,8 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
+#include "core/common/container.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
@@ -611,7 +613,7 @@ void LazyForEachNode::SetItemDragHandler(std::function<void(int32_t)>&& onLongPr
     }
 }
 
-void LazyForEachNode::MoveData(int32_t from, int32_t to)
+void LazyForEachNode::MoveData(int32_t from, int32_t to, bool isNeedUpdate)
 {
     if (builder_) {
         builder_->OnDataMoveToNewPlace(from, to);
@@ -623,6 +625,11 @@ void LazyForEachNode::MoveData(int32_t from, int32_t to)
     }
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    if (isNeedUpdate) {
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(std::min(from, to));
+        }
+    }
 }
 
 void LazyForEachNode::FireOnMove(int32_t from, int32_t to)
@@ -655,19 +662,25 @@ void LazyForEachNode::InitDragManager(const RefPtr<FrameNode>& childNode)
     CHECK_NULL_VOID(childNode);
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
-    auto pattern = childNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->InitDragManager(AceType::Claim(this));
+    if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+        auto pattern = childNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+        auto pattern = childNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    }
 }
 
 void LazyForEachNode::InitAllChilrenDragManager(bool init)
 {
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
     const auto& children = GetChildren();
@@ -676,19 +689,30 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
             continue;
         }
         auto childNode = child->GetFrameChildByIndex(0, false);
-        auto listItem = AceType::DynamicCast<FrameNode>(childNode);
-        if (!listItem) {
+        auto item = AceType::DynamicCast<FrameNode>(childNode);
+        if (!item) {
             continue;
         }
-
-        auto pattern = listItem->GetPattern<ListItemPattern>();
-        if (!pattern) {
-            continue;
-        }
-        if (init) {
-            pattern->InitDragManager(AceType::Claim(this));
-        } else {
-            pattern->DeInitDragManager();
+        if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+            auto pattern = item->GetPattern<ListItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
+        } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+            auto pattern = item->GetPattern<GridItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
         }
     }
 }
@@ -751,6 +775,13 @@ void LazyForEachNode::DumpInfo()
 {
     if (builder_) {
         builder_->DumpInfo();
+    }
+}
+
+void LazyForEachNode::UpdateThemeScopeUpdate(int32_t themeScopeId)
+{
+    if (builder_) {
+        builder_->UpdateThemeScopeUpdate(themeScopeId);
     }
 }
 } // namespace OHOS::Ace::NG

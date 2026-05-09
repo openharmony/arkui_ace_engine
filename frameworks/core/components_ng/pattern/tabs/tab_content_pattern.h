@@ -19,7 +19,6 @@
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
@@ -28,6 +27,7 @@
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -91,6 +91,11 @@ public:
             }
         }
 
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
     }
 
     void CheckTabAnimateMode()

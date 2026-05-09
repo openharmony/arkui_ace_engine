@@ -462,6 +462,9 @@ void JSListItem::ParseBuilderComponentContent(const JSRef<JSVal>& contentParam, 
         return ;
     }
     const auto* vm = nodeptr->GetEcmaVM();
+    if (!nodeptr->GetLocalHandle()->IsNativePointer(vm)) {
+        return ;
+    }
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

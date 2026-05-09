@@ -47,6 +47,7 @@
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
+class AccessibilityChildTreeCallback;
 enum class StatisticEventType;
 }
 namespace OHOS::Ace::NG {

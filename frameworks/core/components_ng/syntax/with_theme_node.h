@@ -48,6 +48,8 @@ public:
     {
         return true;
     }
+    void PushOnThemeScopeUpdateWithId(std::function<void()>&& callback, int32_t nodeId);
+    void RemoveOnThemeScopeUpdateWithId(int32_t nodeId);
 
     void UpdateThemeScopeId(int32_t themeScopeId) override;
     void UpdateThemeScopeUpdate(int32_t themeScopeId) override;
@@ -59,6 +61,7 @@ public:
 
 private:
     ThemeScopeDestroyCallback themeScopeDestroyCallback_;
+    std::unordered_map<int32_t, std::function<void()>> themeScopeUpdateCallbacksMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WithThemeNode);
 };

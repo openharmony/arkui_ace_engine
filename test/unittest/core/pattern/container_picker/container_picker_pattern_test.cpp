@@ -27,6 +27,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
@@ -41,6 +42,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float EPSILON = 0.001f;
+} // namespace
 
 class ContainerPickerPatternTest : public TestNG {
 public:
@@ -2606,6 +2610,324 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_GetDragDeltaLess
     offsetY = 300.0f; // Out of boundary
     result = pattern->GetDragDeltaLessThanJumpInterval(offsetY, originalDragDelta, useRebound, shiftDistance);
     EXPECT_EQ(result, 10.0f); // originalDragDelta + yOffset_
+}
+
+/**
+ * @tc.name: ContainerPickerUtilsTest_NormalizeDisplayedItemCount001
+ * @tc.desc: Test NormalizeDisplayedItemCount function with boundary and even number input
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_NormalizeDisplayedItemCount001, TestSize.Level1)
+{
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(1), 7);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(2), 3);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(8), 9);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(9), 9);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(10), 7);
+}
+
+/**
+ * @tc.name: ContainerPickerUtilsTest_ClampPickerItemHeight001
+ * @tc.desc: Test ClampPickerItemHeight function with lower and upper boundary input
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_ClampPickerItemHeight001, TestSize.Level1)
+{
+    auto defaultVp = static_cast<float>(Dimension(40.0, DimensionUnit::VP).ConvertToVp());
+
+    auto lower = ContainerPickerUtils::ClampPickerItemHeight(Dimension(39.0, DimensionUnit::VP));
+    auto min = ContainerPickerUtils::ClampPickerItemHeight(Dimension(40.0, DimensionUnit::VP));
+    auto max = ContainerPickerUtils::ClampPickerItemHeight(Dimension(64.0, DimensionUnit::VP));
+    auto higher = ContainerPickerUtils::ClampPickerItemHeight(Dimension(65.0, DimensionUnit::VP));
+
+    EXPECT_NEAR(lower.ConvertToVp(), defaultVp, EPSILON);
+    EXPECT_NEAR(min.ConvertToVp(), 40.0f, EPSILON);
+    EXPECT_NEAR(max.ConvertToVp(), 64.0f, EPSILON);
+    EXPECT_NEAR(higher.ConvertToVp(), defaultVp, EPSILON);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SyncPickerParamsFromLayout001
+ * @tc.desc: Test SyncPickerParamsFromLayout applies normalized count and clamped item height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SyncPickerParamsFromLayout001, TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateDisplayedItemCount(8);
+    layoutProperty->UpdateItemHeight(Dimension(50.0, DimensionUnit::VP));
+    pattern->SyncPickerParamsFromLayout();
+
+    auto expectedItemPx = static_cast<float>(Dimension(50.0, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(pattern->displayCount_, 9);
+    EXPECT_NEAR(pattern->GetPickerItemHeight(), expectedItemPx, EPSILON);
+    EXPECT_NEAR(pattern->pickerHeightBeforeRotate_, expectedItemPx * 9.0f, EPSILON);
+
+    layoutProperty->UpdateDisplayedItemCount(1);
+    layoutProperty->UpdateItemHeight(Dimension(100.0, DimensionUnit::VP));
+    pattern->SyncPickerParamsFromLayout();
+
+    auto defaultItemPx = static_cast<float>(Dimension(40.0, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(pattern->displayCount_, 7);
+    EXPECT_NEAR(pattern->GetPickerItemHeight(), defaultItemPx, EPSILON);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate004
+ * @tc.desc: Test OnThemeScopeUpdate calls SyncSelectionIndicatorWithTheme for backgroundColor
+ *           when indicatorType is BACKGROUND and isDefaultBackgroundColor is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate004, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->ResetIndicatorDividerColor();
+    layoutProperty->ResetIndicatorBackgroundColor();
+    pattern->isUseDefaultFontColor_ = false;
+
+    auto theme = frameNode->GetTheme<ContainerPickerTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    Color expectedBgColor = theme->GetIndicatorBackgroundColor();
+
+    layoutProperty->UpdateIndicatorDividerColor(Color::RED);
+    layoutProperty->UpdateIndicatorBackgroundColor(Color::BLUE);
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(updateResult);
+
+    auto dividerColor = layoutProperty->GetIndicatorDividerColor();
+    auto bgColor = layoutProperty->GetIndicatorBackgroundColor();
+    ASSERT_TRUE(dividerColor.has_value());
+    ASSERT_TRUE(bgColor.has_value());
+    EXPECT_EQ(dividerColor.value(), Color::RED);
+    EXPECT_EQ(bgColor.value(), expectedBgColor);
+    EXPECT_TRUE(frameNode->needCallChildrenUpdate_);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate005
+ * @tc.desc: Test OnThemeScopeUpdate skips SyncSelectionIndicatorWithTheme
+ *           when needThemeResync is false but isUseDefaultFontColor is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate005, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateIndicatorDividerColor(Color::RED);
+    layoutProperty->UpdateIndicatorBackgroundColor(Color::BLUE);
+    PickerIndicatorStyle indicatorStyle = pattern->GetIndicatorStyleVal();
+    indicatorStyle.isDefaultDividerColor = false;
+    indicatorStyle.isDefaultBackgroundColor = false;
+    pattern->SetIndicatorStyleVal(indicatorStyle);
+
+    pattern->isUseDefaultFontColor_ = true;
+
+    auto dividerColorBefore = layoutProperty->GetIndicatorDividerColor();
+    auto bgColorBefore = layoutProperty->GetIndicatorBackgroundColor();
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(updateResult);
+
+    auto dividerColorAfter = layoutProperty->GetIndicatorDividerColor();
+    auto bgColorAfter = layoutProperty->GetIndicatorBackgroundColor();
+    ASSERT_TRUE(dividerColorBefore.has_value());
+    ASSERT_TRUE(bgColorBefore.has_value());
+    ASSERT_TRUE(dividerColorAfter.has_value());
+    ASSERT_TRUE(bgColorAfter.has_value());
+    EXPECT_EQ(dividerColorAfter.value(), dividerColorBefore.value());
+    EXPECT_EQ(bgColorAfter.value(), bgColorBefore.value());
+    EXPECT_TRUE(frameNode->needCallChildrenUpdate_);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate006
+ * @tc.desc: Test OnThemeScopeUpdate sets needThemeResync true when indicatorType is DIVIDER
+ *           and isDefaultDividerColor is true with HasIndicatorDividerColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate006, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
+    layoutProperty->UpdateIndicatorDividerColor(Color::RED);
+    layoutProperty->UpdateIndicatorBackgroundColor(Color::BLUE);
+    PickerIndicatorStyle indicatorStyle = pattern->GetIndicatorStyleVal();
+    indicatorStyle.isDefaultDividerColor = true;
+    indicatorStyle.isDefaultBackgroundColor = false;
+    pattern->SetIndicatorStyleVal(indicatorStyle);
+
+    pattern->isUseDefaultFontColor_ = false;
+
+    auto theme = frameNode->GetTheme<ContainerPickerTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    Color expectedDividerColor = theme->GetIndicatorDividerColor();
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(updateResult);
+
+    auto dividerColor = layoutProperty->GetIndicatorDividerColor();
+    ASSERT_TRUE(dividerColor.has_value());
+    EXPECT_EQ(dividerColor.value(), expectedDividerColor);
+    EXPECT_TRUE(frameNode->needCallChildrenUpdate_);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate007
+ * @tc.desc: Test OnThemeScopeUpdate sets needThemeResync true when indicatorType is BACKGROUND
+ *           and isDefaultBackgroundColor is true with HasIndicatorBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate007, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+    layoutProperty->UpdateIndicatorDividerColor(Color::RED);
+    layoutProperty->UpdateIndicatorBackgroundColor(Color::BLUE);
+    PickerIndicatorStyle indicatorStyle = pattern->GetIndicatorStyleVal();
+    indicatorStyle.isDefaultDividerColor = false;
+    indicatorStyle.isDefaultBackgroundColor = true;
+    pattern->SetIndicatorStyleVal(indicatorStyle);
+
+    pattern->isUseDefaultFontColor_ = false;
+
+    auto theme = frameNode->GetTheme<ContainerPickerTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    Color expectedBgColor = theme->GetIndicatorBackgroundColor();
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(updateResult);
+
+    auto bgColor = layoutProperty->GetIndicatorBackgroundColor();
+    ASSERT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), expectedBgColor);
+    EXPECT_TRUE(frameNode->needCallChildrenUpdate_);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate008
+ * @tc.desc: Test OnThemeScopeUpdate calls MarkDirtyNode with correct property flags.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate008, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->ResetIndicatorDividerColor();
+    layoutProperty->ResetIndicatorBackgroundColor();
+    pattern->isUseDefaultFontColor_ = false;
+
+    frameNode->SetLayoutDirtyMarked(false);
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_TRUE(updateResult);
+
+    EXPECT_TRUE(frameNode->needCallChildrenUpdate_);
+    EXPECT_TRUE(frameNode->IsLayoutDirtyMarked());
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnThemeScopeUpdate009
+ * @tc.desc: Test OnThemeScopeUpdate handles all conditions false correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate009, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateIndicatorDividerColor(Color::RED);
+    layoutProperty->UpdateIndicatorBackgroundColor(Color::BLUE);
+    PickerIndicatorStyle indicatorStyle = pattern->GetIndicatorStyleVal();
+    indicatorStyle.isDefaultDividerColor = false;
+    indicatorStyle.isDefaultBackgroundColor = false;
+    pattern->SetIndicatorStyleVal(indicatorStyle);
+
+    pattern->isUseDefaultFontColor_ = false;
+
+    bool updateResult = pattern->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(updateResult);
+    EXPECT_FALSE(frameNode->needCallChildrenUpdate_);
+
+    container->SetApiTargetVersion(backupApiVersion);
 }
 
 } // namespace OHOS::Ace::NG

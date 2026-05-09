@@ -14,6 +14,7 @@
  */
 
 #include "text_base.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -750,6 +751,7 @@ HWTEST_F(TextTestNgFive, ShowSelectOverlay004, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textForDisplay_ = u"test";
     pattern->textSelector_.Update(0, 20);
+    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
     OnPrepareMenuCallback onPrepareMenuCallback;

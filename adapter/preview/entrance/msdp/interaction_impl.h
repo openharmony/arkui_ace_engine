@@ -43,7 +43,8 @@ public:
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle& previewStyle,
         const PreviewAnimation& animation) override;
 
-    int32_t StopDrag(DragDropRet result) override;
+    int32_t StopDrag(DragDropRet result,
+        std::function<void()> callback = nullptr) override;
 
     int32_t GetUdKey(std::string& udKey) override;
 
@@ -57,6 +58,8 @@ public:
 
     int32_t GetDragExtraInfo(std::string& extraInfo) override;
 
+    int32_t GetDragAnimationType(int32_t& dragAnimationType) override;
+
     int32_t EnterTextEditorArea(bool enable) override;
 
     int32_t AddPrivilege(const std::string& signature, const DragEventData& dragEventData) override;
@@ -64,12 +67,6 @@ public:
     int32_t RegisterCoordinationListener(std::function<void()> dragOutCallback) override;
 
     int32_t UnRegisterCoordinationListener() override;
-
-    int32_t SetDraggableState(bool state) override;
-
-    int32_t GetAppDragSwitchState(bool& state) override;
-
-    void SetDraggableStateAsync(bool state, int64_t downTime) override;
 
     int32_t EnableInternalDropAnimation(const std::string& animationInfo) override;
 

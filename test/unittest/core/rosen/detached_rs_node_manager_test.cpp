@@ -52,8 +52,7 @@ HWTEST_F(DetachedRsNodeManagerTest, DetachedRsNodeManagerTest001, TestSize.Level
     EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
     EXPECT_NE(DetachedRsNodeManager::GetInstance().taskExecutor_, nullptr);
 
-    auto rsUIDirector = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector->Init(true, true,  std::make_shared<Rosen::RSUIContext>());
+    auto rsUIDirector = OHOS::Rosen::RSUIDirector::Create(nullptr);
     auto rsContext = rsUIDirector->GetRSUIContext();
     EXPECT_NE(rsContext, nullptr);
     auto rsNode = Rosen::RSCanvasNode::Create(false, false, rsContext);

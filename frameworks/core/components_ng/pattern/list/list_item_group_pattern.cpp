@@ -30,17 +30,6 @@
 
 namespace OHOS::Ace::NG {
 
-void ListItemGroupPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    // call OnAttachToFrameNodeMultiThread by multi thread
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    CHECK_NULL_VOID(host);
-    if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
-        SetListItemGroupDefaultAttributes(host);
-    }
-}
-
 void ListItemGroupPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
@@ -63,7 +52,7 @@ void ListItemGroupPattern::OnColorConfigurationUpdate()
     renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
 }
 
-void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
+void ListItemGroupPattern::ApplyListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
 {
     auto renderContext = itemGroupNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -88,6 +77,29 @@ void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameN
     layoutProperty->UpdatePadding(itemGroupPadding);
 
     renderContext->UpdateBorderRadius(listItemGroupTheme->GetItemGroupDefaultBorderRadius());
+}
+
+bool ListItemGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (listItemGroupStyle_ != V2::ListItemGroupStyle::CARD ||
+        host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto layoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto listItemGroupTheme = host->GetTheme<ListItemTheme>(true);
+    CHECK_NULL_RETURN(listItemGroupTheme, false);
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (!layoutProperty->GetIsUserSetBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
+    }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return false;
 }
 
 void ListItemGroupPattern::DumpAdvanceInfo()
@@ -799,7 +811,7 @@ void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
     CHECK_NULL_VOID(host);
     if (listItemGroupStyle_ == V2::ListItemGroupStyle::NONE && style == V2::ListItemGroupStyle::CARD) {
         listItemGroupStyle_ = style;
-        SetListItemGroupDefaultAttributes(host);
+        ApplyListItemGroupDefaultAttributes(host);
     }
 }
 

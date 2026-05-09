@@ -351,6 +351,7 @@ protected:
 
 private:
     void AddPressedListener();
+    void AddHoverListener();
 
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;

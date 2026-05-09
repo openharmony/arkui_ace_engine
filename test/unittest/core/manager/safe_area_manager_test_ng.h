@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 #include "frameworks/core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"

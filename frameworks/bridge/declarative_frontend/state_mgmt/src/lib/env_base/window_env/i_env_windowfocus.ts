@@ -32,6 +32,7 @@ interface UIEnvHighlight {
 // Provided by Platform Environment Provider.
 declare class WindowFocusedEnv implements IEnvironmentValue<UIEnvFocus> {
   constructor(context: UIContext);
+  isFocused: boolean;
   value: UIEnvFocus;
   update(): void;
   destroy(): void;
@@ -41,6 +42,7 @@ declare class WindowFocusedEnv implements IEnvironmentValue<UIEnvFocus> {
 // Provided by Platform Environment Provider.
 declare class WindowHighlightedEnv implements IEnvironmentValue<UIEnvHighlight> {
   constructor(context: UIContext);
+  isHighlighted: boolean;
   value: UIEnvHighlight;
   update(): void;
   destroy(): void;
