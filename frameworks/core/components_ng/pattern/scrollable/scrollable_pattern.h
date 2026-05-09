@@ -1001,6 +1001,11 @@ public:
 
     void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
+    bool EnableCachePredictNodes() const override
+    {
+        return true;
+    }
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
