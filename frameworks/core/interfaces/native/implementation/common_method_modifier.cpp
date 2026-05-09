@@ -6636,12 +6636,7 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
             CHECK_NULL_VOID(frameNode);
             PipelineContext::SetCallBackNode(weak);
             auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-            auto finalNode = CreateProxyNode(builderNode);
-#else
-            auto finalNode = builderNode;
-#endif
-            ViewStackProcessor::GetInstance()->Push(finalNode);
+            ViewStackProcessor::GetInstance()->Push(builderNode);
         };
         ContentCoverParam contentCoverParam;
         ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc), modalStyle,
@@ -6693,12 +6688,7 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
             CHECK_NULL_VOID(frameNode);
             PipelineContext::SetCallBackNode(weak);
             auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-            auto finalNode = CreateProxyNode(builderNode);
-#else
-            auto finalNode = builderNode;
-#endif
-            ViewStackProcessor::GetInstance()->Push(finalNode);
+            ViewStackProcessor::GetInstance()->Push(builderNode);
         };
         ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
             modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
@@ -6761,12 +6751,7 @@ void SetBindSheetImpl(Ark_NativePointer node,
         CHECK_NULL_VOID(frameNode);
         PipelineContext::SetCallBackNode(weak);
         auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-        auto finalNode = CreateProxyNode(builderNode);
-#else
-        auto finalNode = builderNode;
-#endif
-        ViewStackProcessor::GetInstance()->Push(finalNode);
+        ViewStackProcessor::GetInstance()->Push(builderNode);
     };
     ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
         std::move(cbs.titleBuilder), sheetStyle, std::move(cbs.onAppear), std::move(cbs.onDisappear),
