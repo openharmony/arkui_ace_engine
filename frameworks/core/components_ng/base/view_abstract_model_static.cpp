@@ -1965,4 +1965,9 @@ void ViewAbstractModelStatic::ResetOverlay(FrameNode* frameNode)
     frameNode->SetOverlayNode(nullptr);
     frameNode->MarkDirtyNode();
 }
+void ViewAbstractModelStatic::SetInspectorLabelSta(UINode* node, const std::string& inspectorLabel)
+{
+    CHECK_NULL_VOID(node);
+    node->SetInspectorLabel(inspectorLabel);
+}
 } // namespace OHOS::Ace::NG

@@ -366,7 +366,7 @@ void NavigationModelStatic::SetUseHomeDestination(FrameNode* frameNode, bool use
     if (useHomeDest.has_value()) {
         return;
     }
-    navigationGroupNode->SetUseHomeDestinatoin(useHomeDestination);
+    navigationGroupNode->SetUseHomeDestination(useHomeDestination);
     if (!useHomeDestination) {
         return;
     }

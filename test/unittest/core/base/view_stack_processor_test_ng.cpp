@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -185,7 +186,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg005, TestSize.Level1)
     instance->SetVisualState(VisualState::NORMAL);
     EXPECT_EQ(instance->GetVisualState(), 0);
     instance->SetVisualState(VisualState::HOVER);
-    EXPECT_EQ(instance->GetVisualState(), 0);
+    EXPECT_EQ(instance->GetVisualState(), 16);
     /**
      * @tc.steps: step2. clear visual state
      * @tc.expected: IsCurrentVisualStateProcess meeting expectations.

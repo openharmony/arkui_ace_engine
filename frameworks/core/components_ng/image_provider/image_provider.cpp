@@ -184,15 +184,18 @@ void ImageProvider::SuccessCallback(
     }
 }
 
-void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync, bool isSceneBoardWindow)
+void ImageProvider::CreateImageObjHelper(ImageSourceInfo& src, bool sync, bool isSceneBoardWindow)
 {
+    // Save task key before BuildImageObject may modify src via SetIsSvgByContent
+    auto taskKey = src.GetTaskKey();
+    auto containerId = src.GetContainerId();
     const ImageDfxConfig& imageDfxConfig = src.GetImageDfxConfig();
     ACE_SCOPED_TRACE("CreateImageObj %s", imageDfxConfig.ToStringWithSrc().c_str());
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        FailCallback(src.GetTaskKey(), "Failed to create image loader.",
-            { ImageErrorCode::CREATE_IMAGE_UNKNOWN_SOURCE_TYPE, "unknown source type." }, sync, src.GetContainerId());
+        FailCallback(taskKey, "Failed to create image loader.",
+            { ImageErrorCode::CREATE_IMAGE_UNKNOWN_SOURCE_TYPE, "unknown source type." }, sync, containerId);
         return;
     }
     ImageLoadResultInfo loadResultInfo;
@@ -200,15 +203,15 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync, 
     RefPtr<ImageData> data = imageLoader->GetImageData(src, loadResultInfo, WeakClaim(RawPtr(pipeline)));
     if (!data) {
         FailCallback(
-            src.GetTaskKey(), "Failed to load image data", loadResultInfo.errorInfo, sync, src.GetContainerId());
+            taskKey, "Failed to load image data", loadResultInfo.errorInfo, sync, containerId);
         return;
     }
 
-    // build ImageObject
+    // build ImageObject (may modify src via SetIsSvgByContent)
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, loadResultInfo.errorInfo, data);
     if (!imageObj) {
         FailCallback(
-            src.GetTaskKey(), "Failed to build image object", loadResultInfo.errorInfo, sync, src.GetContainerId());
+            taskKey, "Failed to build image object", loadResultInfo.errorInfo, sync, containerId);
         return;
     }
 
@@ -224,7 +227,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync, 
         CacheImageObject(cloneImageObj);
     }
 
-    auto ctxs = EndTask(src.GetTaskKey());
+    auto ctxs = EndTask(taskKey);
 
     // callback to LoadingContext
     auto notifyDataReadyTask = [ctxs, imageObj, src] {
@@ -240,7 +243,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync, 
     if (sync) {
         notifyDataReadyTask();
     } else {
-        ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", src.GetContainerId());
+        ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", containerId);
     }
 }
 
@@ -372,7 +375,7 @@ RefPtr<ImageData> ImageProvider::QueryDataFromCache(const ImageSourceInfo& src)
     return nullptr;
 }
 
-void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
+void ImageProvider::DownLoadImage(UriDownLoadConfig& downLoadConfig)
 {
     ACE_SCOPED_TRACE("PerformDownload %s", downLoadConfig.imageDfxConfig.ToStringWithSrc().c_str());
     auto queryData = QueryDataFromCache(downLoadConfig.src);
@@ -399,7 +402,8 @@ void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
             return;
         }
         auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
-        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, errorInfo, data);
+        auto mutableSrc = downLoadConfig.src;
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(mutableSrc, errorInfo, data);
         if (!imageObj) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "Download data invalid, parse failed. src[%{private}s], config[%{public}s], dataSize=%{public}zu",
@@ -463,7 +467,8 @@ void ImageProvider::CreateImageObject(
         return;
     }
     if (sync) {
-        CreateImageObjHelper(src, true, isSceneBoardWindow);
+        auto mutableSrc = src;
+        CreateImageObjHelper(mutableSrc, true, isSceneBoardWindow);
     } else {
         if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in createObj.");
@@ -474,7 +479,10 @@ void ImageProvider::CreateImageObject(
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
         task.Reset(
-            [src, isSceneBoardWindow] { ImageProvider::CreateImageObjHelper(src, false, isSceneBoardWindow); });
+            [src, isSceneBoardWindow]() {
+                auto mutableSrc = src;
+                ImageProvider::CreateImageObjHelper(mutableSrc, false, isSceneBoardWindow);
+            });
         tasks_[src.GetTaskKey()].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
@@ -483,7 +491,7 @@ void ImageProvider::CreateImageObject(
 }
 
 RefPtr<ImageObject> ImageProvider::BuildImageObject(
-    const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const RefPtr<ImageData>& data)
+    ImageSourceInfo& src, ImageErrorInfo& errorInfo, const RefPtr<ImageData>& data)
 {
     auto imageDfxConfig = src.GetImageDfxConfig();
     if (!data) {
@@ -491,10 +499,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(
             imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
-    if (src.IsSvg()) {
-        // SVG object needs to make SVG dom during creation
-        return SvgImageObject::Create(src, errorInfo, data);
-    }
+
     if (src.IsPixmap()) {
         return PixelMapImageObject::Create(src, data);
     }
@@ -507,6 +512,12 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(
     }
     rosenImageData->SetDfxConfig(imageDfxConfig.GetNodeId(), imageDfxConfig.GetAccessibilityId());
     auto codec = rosenImageData->Parse();
+    // Content-based SVG detection via ImageSource::IsSvg()
+    if (codec.isSvg) {
+        src.SetIsSvgByContent(true);
+        return SvgImageObject::Create(src, errorInfo, data);
+    }
+
     if (!codec.imageSize.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "%{private}s - %{public}s dataSize is invalid : %{public}d-%{public}s-%{public}d.", src.ToString().c_str(),

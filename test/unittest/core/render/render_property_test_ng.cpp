@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #define protected public
 #define private public
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"

@@ -41,7 +41,9 @@ RefPtr<ShapeColorModifierPayload> GetShapeColorPayload(uint32_t colorValue, void
     if (!payload) {
         return nullptr;
     }
-    if (!payload->GetColor().GetHeadRoomColor().has_value() && payload->GetColor().GetValue() != colorValue) {
+    const auto& payloadColor = payload->GetColor();
+    if (!payloadColor.GetHeadRoomColor().has_value() && payloadColor.GetColorSpace() != ColorSpace::BT2020 &&
+        payloadColor.GetValue() != colorValue) {
         return nullptr;
     }
     return payload;
@@ -215,14 +217,19 @@ void SetFill(ArkUINodeHandle node, uint32_t fill, void* resObjPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fillColor = Color(fill);
+    auto payload = GetShapeColorPayload(fill, resObjPtr);
+    auto fillColor = payload ? payload->GetColor() : Color(fill);
     ShapeModelNG::SetFill(frameNode, fillColor);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeFill")
                                            : pattern->UnRegisterResource("ShapeAbstractFill");
-    if (SystemProperties::ConfigChangePerform() && resObjPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resObj = payload ?
+            payload->GetResourceObject() : AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
+        if (!resObj) {
+            return;
+        }
         pattern->IsEnableChildrenMatchParent() ? ShapeModelNG::SetFill(frameNode, resObj)
                                                : ShapeAbstractModelNG::SetFill(frameNode, resObj);
     }

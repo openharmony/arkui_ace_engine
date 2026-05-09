@@ -13,8 +13,8 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("advanced_ui_component.gni")
 import("//foundation/arkui/ace_engine/build/ace_controller.gni")
+import("advanced_ui_component.gni")
 
 config("ace_napi_config") {
   include_dirs = [
@@ -78,6 +78,7 @@ group("advanced_ui_component") {
     "downloadfilebutton/interfaces:downloadfilebutton",
     "foldsplitcontainer/interfaces:foldsplitcontainer",
     "formmenu/interfaces:formmenu",
+
     # "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
     "multinavigation/interfaces:multinavigation",
     "navpushpathhelper:navpushpathhelper",
@@ -86,12 +87,16 @@ group("advanced_ui_component") {
     deps += advanced_ui_component_targets
     deps += [
       "chipgroup/interfaces:chipgroup",
+      "chipgroupv2:chipgroupv2",
+      "chipv2:chipv2",
       "composelistitem/interfaces:composelistitem",
       "composetitlebar/interfaces:composetitlebar",
+      "counterv2:counterv2",
       "editabletitlebar/interfaces:editabletitlebar",
       "exceptionprompt/interfaces:exceptionprompt",
       "filter/interfaces:filter",
       "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
+      "imageGeneratorDialog/interfaces:imageGeneratorDialog",
       "popup/interfaces:popup",
       "popupv2/interfaces:popupv2",
       "progressbutton/interfaces:progressbutton",
@@ -107,7 +112,6 @@ group("advanced_ui_component") {
       "toolbar/interfaces:toolbar",
       "toolbarv2/interfaces:toolbarv2",
       "treeview/interfaces:treeview",
-      "imageGeneratorDialog/interfaces:imageGeneratorDialog",
     ]
   }
 }

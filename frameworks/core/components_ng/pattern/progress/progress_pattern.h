@@ -160,16 +160,6 @@ public:
         isUserInitiatedBgColor_ = value;
     }
 
-    void IsModifierInitiatedColor(bool value)
-    {
-        isModifierInitiatedColor_ = value;
-    }
-
-    void IsModifierInitiatedBgColor(bool value)
-    {
-        isModifierInitiatedBgColor_ = value;
-    }
-
     bool IsEnableMatchParent() override
     {
         return true;
@@ -228,6 +218,7 @@ private:
     void ReportProgressEvent();
     void OnColorConfigurationUpdate() override;
     void ProcessColorOnColorConfigurationUpdate();
+    void OnThemeScopeUpdateGradientColor();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -256,8 +247,6 @@ private:
     bool isRightToLeft_ = false;
     bool isUserInitiatedColor_ = false;
     bool isUserInitiatedBgColor_ = false;
-    bool isModifierInitiatedColor_ = false;
-    bool isModifierInitiatedBgColor_ = false;
     double reportLastValue_ = 0.0f;
     bool hasVisibleChangeRegistered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);

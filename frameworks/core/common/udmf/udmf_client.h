@@ -17,14 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_UDMF_CLIENT_H
 
 #include <map>
+#include <set>
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/common/frontend.h"
 #include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/form/resource/form_request_data.h"
+
+typedef struct napi_env__* napi_env;
+typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
 const std::string DROP_TYPE_PLAIN_TEXT = "general.plain-text";

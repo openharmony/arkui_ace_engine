@@ -26,13 +26,13 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
@@ -53,6 +53,10 @@
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+namespace NG {
+class DrawModifier;
+class CustomAnimatableArithmetic;
+} // namespace NG
 
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
@@ -453,6 +457,7 @@ public:
     virtual void SetAutoEventParam(const std::string& param) {}
     virtual void SetRestoreId(int32_t restoreId) = 0;
     virtual void SetDebugLine(const std::string& line) = 0;
+    virtual void SetInspectorLabel(const std::string& inspectorLabel) {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest) = 0;
@@ -544,6 +549,8 @@ public:
     virtual void SetAccessibilityFocusDrawLevel(int32_t drawLevel) = 0;
     virtual void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) = 0;
     virtual void ResetAccessibilityActionOptions() = 0;
+    virtual void SetAccessibilityCustomActions(const std::vector<NG::AccessibilityCustomAction>& actions) = 0;
+    virtual void ResetAccessibilityCustomActions() = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

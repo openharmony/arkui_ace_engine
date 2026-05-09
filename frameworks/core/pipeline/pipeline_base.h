@@ -25,28 +25,26 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
-#include "interfaces/inner_api/ui_session/param_config.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
-#include "core/animation/schedule_task.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
-#include "core/common/resource/resource_configuration.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
@@ -56,10 +54,8 @@
 #include "core/event/mouse_event.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -68,6 +64,8 @@ enum class AvoidAreaType : uint32_t;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+class ScheduleTask;
+struct RotationEvent;
 namespace NG {
 class FrameNode;
 struct UIExtCallbackEvent;
@@ -103,6 +101,7 @@ class Frontend;
 class ImageCache;
 class OffscreenCanvas;
 class Window;
+class WindowManager;
 class FontManager;
 class ManagerInterface;
 class NavigationController;

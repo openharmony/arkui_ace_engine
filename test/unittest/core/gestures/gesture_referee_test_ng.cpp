@@ -2262,4 +2262,203 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeForceCleanGestureRefereeStateTest00
     gestureReferee.ForceCleanGestureRefereeState();
     EXPECT_EQ(gestureReferee.gestureScopes_.size(), 2);
 }
+
+/**
+ * @tc.name: GestureScopeForEachRecognizerTest001
+ * @tc.desc: ForEachRecognizer visits every flat recognizer in the scope
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeForEachRecognizerTest001, TestSize.Level1)
+{
+    GestureScope gestureScope(0);
+    RefPtr<ClickRecognizer> r1 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<ClickRecognizer> r2 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    gestureScope.recognizers_.push_back(r1);
+    gestureScope.recognizers_.push_back(r2);
+
+    std::vector<RefPtr<NGGestureRecognizer>> visited;
+    gestureScope.ForEachRecognizer([&visited](const RefPtr<NGGestureRecognizer>& r) {
+        visited.push_back(r);
+        return true;
+    });
+
+    EXPECT_EQ(visited.size(), 2u);
+}
+
+/**
+ * @tc.name: GestureScopeForEachRecognizerTest002
+ * @tc.desc: ForEachRecognizer stops early when callback returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeForEachRecognizerTest002, TestSize.Level1)
+{
+    GestureScope gestureScope(0);
+    RefPtr<ClickRecognizer> r1 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<ClickRecognizer> r2 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    gestureScope.recognizers_.push_back(r1);
+    gestureScope.recognizers_.push_back(r2);
+
+    std::vector<RefPtr<NGGestureRecognizer>> visited;
+    bool stopped = !gestureScope.ForEachRecognizer([&visited](const RefPtr<NGGestureRecognizer>& r) {
+        visited.push_back(r);
+        return false; // stop after first
+    });
+
+    EXPECT_TRUE(stopped);
+    EXPECT_EQ(visited.size(), 1u);
+}
+
+/**
+ * @tc.name: GestureScopeForEachRecognizerTest003
+ * @tc.desc: ForEachRecognizer descends into RecognizerGroup children
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeForEachRecognizerTest003, TestSize.Level1)
+{
+    GestureScope gestureScope(0);
+
+    // Build an ExclusiveRecognizer (which is a RecognizerGroup) containing two click recognizers.
+    RefPtr<ClickRecognizer> child1 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<ClickRecognizer> child2 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    std::vector<RefPtr<NGGestureRecognizer>> children = { child1, child2 };
+    RefPtr<ExclusiveRecognizer> group = AceType::MakeRefPtr<ExclusiveRecognizer>(children);
+
+    gestureScope.recognizers_.push_back(group);
+
+    std::vector<RefPtr<NGGestureRecognizer>> visited;
+    gestureScope.ForEachRecognizer([&visited](const RefPtr<NGGestureRecognizer>& r) {
+        visited.push_back(r);
+        return true;
+    });
+
+    // Callback is invoked for both children AND the group itself.
+    EXPECT_GE(visited.size(), 2u);
+    bool sawChild1 = std::find(visited.begin(), visited.end(), child1) != visited.end();
+    bool sawChild2 = std::find(visited.begin(), visited.end(), child2) != visited.end();
+    EXPECT_TRUE(sawChild1);
+    EXPECT_TRUE(sawChild2);
+}
+
+/**
+ * @tc.name: GestureScopeForEachRecognizerTest004
+ * @tc.desc: ForEachRecognizer silently skips null recognizers
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeForEachRecognizerTest004, TestSize.Level1)
+{
+    GestureScope gestureScope(0);
+    gestureScope.recognizers_.push_back(nullptr); // null weak pointer
+    RefPtr<ClickRecognizer> r1 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    gestureScope.recognizers_.push_back(r1);
+
+    std::vector<RefPtr<NGGestureRecognizer>> visited;
+    gestureScope.ForEachRecognizer([&visited](const RefPtr<NGGestureRecognizer>& r) {
+        visited.push_back(r);
+        return true;
+    });
+
+    EXPECT_EQ(visited.size(), 1u);
+    EXPECT_EQ(visited[0], r1);
+}
+
+/**
+ * @tc.name: GestureRefereeForEachRecognizerTest001
+ * @tc.desc: ForEachRecognizer visits recognizers across multiple scopes
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeForEachRecognizerTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+
+    RefPtr<ClickRecognizer> r1 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<GestureScope> scope0 = AceType::MakeRefPtr<GestureScope>(0);
+    scope0->recognizers_.push_back(r1);
+
+    RefPtr<ClickRecognizer> r2 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<GestureScope> scope1 = AceType::MakeRefPtr<GestureScope>(1);
+    scope1->recognizers_.push_back(r2);
+
+    gestureReferee.gestureScopes_[0] = scope0;
+    gestureReferee.gestureScopes_[1] = scope1;
+
+    std::vector<RefPtr<NGGestureRecognizer>> visited;
+    gestureReferee.ForEachRecognizer([&visited](const RefPtr<NGGestureRecognizer>& r) {
+        visited.push_back(r);
+        return true;
+    });
+
+    EXPECT_EQ(visited.size(), 2u);
+}
+
+/**
+ * @tc.name: GestureRefereeForEachRecognizerTest002
+ * @tc.desc: ForEachRecognizer stops early across scopes when callback returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeForEachRecognizerTest002, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+
+    RefPtr<ClickRecognizer> r1 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<GestureScope> scope0 = AceType::MakeRefPtr<GestureScope>(0);
+    scope0->recognizers_.push_back(r1);
+
+    RefPtr<ClickRecognizer> r2 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<GestureScope> scope1 = AceType::MakeRefPtr<GestureScope>(1);
+    scope1->recognizers_.push_back(r2);
+
+    gestureReferee.gestureScopes_[0] = scope0;
+    gestureReferee.gestureScopes_[1] = scope1;
+
+    std::vector<RefPtr<NGGestureRecognizer>> visited;
+    gestureReferee.ForEachRecognizer([&visited](const RefPtr<NGGestureRecognizer>& r) {
+        visited.push_back(r);
+        return false; // stop after first recognizer
+    });
+
+    EXPECT_EQ(visited.size(), 1u);
+}
+
+/**
+ * @tc.name: GestureRefereeForEachRecognizerTest003
+ * @tc.desc: ForEachRecognizer silently skips null scopes
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeForEachRecognizerTest003, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.gestureScopes_[0] = nullptr;
+
+    RefPtr<ClickRecognizer> r1 = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<GestureScope> scope1 = AceType::MakeRefPtr<GestureScope>(1);
+    scope1->recognizers_.push_back(r1);
+    gestureReferee.gestureScopes_[1] = scope1;
+
+    std::vector<RefPtr<NGGestureRecognizer>> visited;
+    gestureReferee.ForEachRecognizer([&visited](const RefPtr<NGGestureRecognizer>& r) {
+        visited.push_back(r);
+        return true;
+    });
+
+    EXPECT_EQ(visited.size(), 1u);
+    EXPECT_EQ(visited[0], r1);
+}
+
+/**
+ * @tc.name: GestureRefereeForEachRecognizerTest004
+ * @tc.desc: ForEachRecognizer on empty referee visits nothing and does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeForEachRecognizerTest004, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+
+    int32_t callCount = 0;
+    gestureReferee.ForEachRecognizer([&callCount](const RefPtr<NGGestureRecognizer>&) {
+        ++callCount;
+        return true;
+    });
+
+    EXPECT_EQ(callCount, 0);
+}
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/cppview/canvas_renderer.h"
 
+#include <inttypes.h>
 #include <cstdint>
 #include <string>
 #include <vector>

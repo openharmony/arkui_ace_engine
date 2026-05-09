@@ -60,7 +60,16 @@ export class ArkWithThemePeer extends PeerNode {
         thisSerializer.release()
     }
     setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
-        return;
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (moduleName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleNameTmpValue = moduleName!
+            thisSerializer.writeString(moduleNameTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WithThemeAttribute_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export interface WithThemeOptions {
@@ -71,11 +80,11 @@ export interface WithThemeAttribute {
     setWithThemeOptions(options: WithThemeOptions | undefined): this {
         throw new Error('Unimplemented method setWithThemeOptions')
     }
-    attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
-        throw new Error('Unimplemented method attributeModifier')
-    }
     debugLine(sourceLine: string, moduleName?: string): this {
         throw new Error('Unimplemented method debugLine')
+    }
+    attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
@@ -85,6 +94,12 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     }
     public setWithThemeOptions(options: WithThemeOptions | undefined): this {
         hookWithThemeOptions(this, options)
+        return this
+    }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        const sourceLine_casted = sourceLine as (string)
+        const moduleName_casted = moduleName as (string | undefined)
+        this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
@@ -102,9 +117,6 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
-    }
-    public debugLine(sourceLine: string, moduleName?: string): this {
-        return this
     }
 }
 export class WithThemeOptions_serializer {

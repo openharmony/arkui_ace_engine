@@ -863,6 +863,9 @@ HWTEST_F(MarqueeTestNg, MarqueeTest0010, TestSize.Level1)
 HWTEST_F(MarqueeTestNg, MarqueeTest0011, TestSize.Level1)
 {
     MarqueeModelNG marqueeModel;
+    /*
+     * @tc.steps: step1. create and get marquee frameNode.
+     */
     marqueeModel.Create();
     marqueeModel.SetValue(MARQUEE_SRC);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -891,6 +894,9 @@ HWTEST_F(MarqueeTestNg, MarqueeTest0011, TestSize.Level1)
     pattern->StoreProperties();
     EXPECT_EQ(pattern->direction_, MarqueeDirection::LEFT);
     pattern->OnModifyDone();
+    /*
+     * @tc.steps: step2. check result.
+     */
     EXPECT_TRUE(CheckMeasureFlag(marqueeLayoutProperty->GetPropertyChangeFlag()));
     EXPECT_TRUE(CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()));
 }

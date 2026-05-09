@@ -14,7 +14,14 @@
  */
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/syntax/with_theme_node.h"
+#include "core/components_ng/pattern/overlay/content_cover_param.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include <string>
 #include <utility>
@@ -48,6 +55,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components/theme/ui_material_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -65,6 +73,8 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
@@ -377,6 +387,31 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
     bool isReadFirstNode)
 {
+    CHECK_NULL_VOID(node);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
+    auto isTopOrder = IsTopOrder(levelOrder);
+    bool isNeedFocus = isTopOrder && dialogProps.focusable;
+    
+    if (dialogPattern->NeedDistortion()) {
+        auto onFinishEvent = [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), isNeedFocus] {
+            auto overlayManager = weak.Upgrade();
+            auto node = nodeWK.Upgrade();
+            CHECK_NULL_VOID(overlayManager && node);
+            if (isNeedFocus) {
+                overlayManager->FocusOverlayNode(node);
+            }
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            dialogPattern->CallDialogDidAppearCallback();
+            overlayManager->ContentChangeReport(node, true);
+        };
+        dialogPattern->RegisterOnFinishEvent(onFinishEvent);
+        if (isTopOrder && isReadFirstNode) {
+            SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
+        }
+        return;
+    }
     auto pipeline = GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
@@ -387,15 +422,10 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
     option.SetCurve(Curves::SHARP);
     option.SetDuration(theme->GetOpacityAnimationDurIn());
     option.SetFillMode(FillMode::FORWARDS);
-    auto dialogPattern = node->GetPattern<DialogPattern>();
-    CHECK_NULL_VOID(dialogPattern);
     option = dialogPattern->GetOpenAnimation().value_or(option);
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
     auto onFinish = option.GetOnFinishEvent();
-    auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
-    auto isTopOrder = IsTopOrder(levelOrder);
-    bool isNeedFocus = isTopOrder && dialogProps.focusable;
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), onFinish, isNeedFocus] {
             if (onFinish) {
@@ -4462,7 +4492,7 @@ void OverlayManager::InitSheetMask(
     CHECK_NULL_VOID(maskRenderContext);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(sheetLayoutProps);
@@ -4863,14 +4893,16 @@ void OverlayManager::UpdateSheetRender(
     CHECK_NULL_VOID(sheetRenderContext);
     auto pipeline = sheetPageNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetPageNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+
+    sheetNodePattern->ClearSheetRenderMaterial();
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
     }
-    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetNodePattern);
     sheetNodePattern->SetSheetBorderWidth();
     if (sheetStyle.borderStyle.has_value()) {
         sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
@@ -4890,17 +4922,7 @@ void OverlayManager::UpdateSheetRender(
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 
-    if (sheetStyle.systemMaterial) {
-        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
-        if (!MaterialUtils::CallSetMaterial(
-            AceType::RawPtr(sheetPageNode), AceType::RawPtr(sheetStyle.systemMaterial))) {
-            ViewAbstract::SetSystemMaterialImmediate(
-                AceType::RawPtr(sheetPageNode), AceType::RawPtr(sheetStyle.systemMaterial));
-        }
-    } else {
-        sheetRenderContext->SetSystemMaterial(nullptr);
-        sheetNodePattern->RemoveResObj("sheet.uiMaterial");
-    }
+    sheetNodePattern->SetSheetRenderMaterial();
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -5069,6 +5091,23 @@ void OverlayManager::OpenImageGenerator(BindSheetCreateParam&& param, int32_t in
     }
 }
 
+void OverlayManager::RegisterOnThemeScopeUpdate(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& sheetNode)
+{
+    auto updator = [targetNodeWk = AceType::WeakClaim(AceType::RawPtr(targetNode)),
+                       sheetNodeWk = AceType::WeakClaim(AceType::RawPtr(sheetNode))]() {
+        auto targetNode = targetNodeWk.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        auto sheetNode = sheetNodeWk.Upgrade();
+        CHECK_NULL_VOID(sheetNode);
+        auto themeScopeId = targetNode->GetThemeScopeId();
+        sheetNode->UpdateThemeScopeUpdate(themeScopeId);
+    };
+    auto themeScopeId = targetNode->GetThemeScopeId();
+    auto withThemeNode = WithThemeNode::GetWithThemeNode(themeScopeId);
+    CHECK_NULL_VOID(withThemeNode);
+    withThemeNode->PushOnThemeScopeUpdateWithId(updator, sheetNode->GetId());
+}
+
 void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& callback,
     const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -5091,6 +5130,9 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     auto sheetNode = SheetView::CreateSheetPage(
         targetNode->GetId(), targetNode->GetTag(), sheetContentNode, titleBuilder, std::move(callback), sheetStyle);
     CHECK_NULL_VOID(sheetNode);
+    if (sheetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        RegisterOnThemeScopeUpdate(targetNode, sheetNode);
+    }
     SetSheetProperty(sheetNode, sheetStyle, std::move(onAppear), std::move(onDisappear),
         std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
@@ -5144,7 +5186,10 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
         AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
     CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
     ACE_UINODE_TRACE(sheetWrapperNode);
-
+    if (sheetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        sheetWrapperNode->SetThemeScopeId(targetNode->GetThemeScopeId());
+        sheetWrapperNode->AllowUseParentTheme(false);
+    }
     if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet wrapper");
         sheetWrapperNode->MountToParent(rootNode);
@@ -5266,7 +5311,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
     CHECK_NULL_VOID(maskRenderContext);
     auto pipeline = maskNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(sheetLayoutProps);
@@ -5517,7 +5562,7 @@ void OverlayManager::ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetSty
     if (sheetStyle.sheetHeight.sheetMode.has_value()) {
         auto context = sheetNode->GetContext();
         CHECK_NULL_VOID(context);
-        auto sheetTheme = context->GetTheme<SheetTheme>();
+        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::MEDIUM) {
             sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * sheetTheme->GetMediumPercent());
@@ -5561,7 +5606,7 @@ void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle,
     if (selection.sheetMode.has_value()) {
         auto context = sheetNode->GetContext();
         CHECK_NULL_VOID(context);
-        auto sheetTheme = context->GetTheme<SheetTheme>();
+        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         if (selection.sheetMode == SheetMode::MEDIUM) {
             sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * sheetTheme->GetMediumPercent());

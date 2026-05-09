@@ -29,17 +29,21 @@ import { ResponseType } from "./component/enums"
 import { ArkCustomComponentRootPeer } from './component/staticComponents';
 import { ElementInfo } from './stateManagement/utils';
 
+let _undefinedInstanceId : int32 = -1000
+
 // Improve: need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
 export type UIDetachedRootCreator = (
     peerFactory: () => PeerNode,
     @memo
-    builder: () => void
+    builder: () => void,
+    instanceId: int32 = _undefinedInstanceId
 ) => PeerNode
 
 function createUiDetachedRootStub(
     factory: () => PeerNode,
     @memo
-    builder: () => void
+    builder: () => void,
+    instanceId: int32 = _undefinedInstanceId
 ): PeerNode {
     throw new Error("Not implemented")
 }

@@ -17,6 +17,7 @@
 #include "accessibility_element_operator.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/property/accessibility_property.h"
+#include <cinttypes>
 
 namespace OHOS::Ace::Framework {
 

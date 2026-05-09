@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ void SetLoadingProgressColor(ArkUINodeHandle node, uint32_t colorValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetColorParseFailed(frameNode, false);
+    LoadingProgressModelNG::SetColorByUser(frameNode, true);
     LoadingProgressModelNG::SetColor(frameNode, Color(colorValue));
 }
 
@@ -43,7 +43,7 @@ void SetLoadingProgressColorPtr(ArkUINodeHandle node, uint32_t colorValue, void*
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetColorParseFailed(frameNode, false);
+    LoadingProgressModelNG::SetColorByUser(frameNode, true);
     Color setColor = Color(colorValue);
 
     if (SystemProperties::ConfigChangePerform()) {
@@ -67,12 +67,7 @@ void ResetLoadingProgressColor(ArkUINodeHandle node)
     FREE_NODE_CHECK(frameNode, ResetLoadingProgressColor, node);
     CHECK_NULL_VOID(frameNode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto pipelineContext = frameNode->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<ProgressTheme>();
-        CHECK_NULL_VOID(theme);
-        LoadingProgressModelNG::SetColorParseFailed(frameNode, true);
-        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingParseFailedColor());
+        LoadingProgressModelNG::ResetColor(frameNode);
     }
     if (SystemProperties::ConfigChangePerform()) {
         LoadingProgressModelNG::SetColorByUser(frameNode, false);

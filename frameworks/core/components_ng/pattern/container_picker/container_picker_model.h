@@ -18,7 +18,9 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 
+#include "base/geometry/dimension.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -36,12 +38,16 @@ public:
     static void SetOnChange(ContainerPickerChangeEvent&& onChange);
     static void SetOnScrollStop(ContainerPickerChangeEvent&& onScrollStop);
     static void SetIndicatorStyle(const PickerIndicatorStyle& style);
+    static void SetDisplayedItemCount(std::optional<int32_t> count);
+    static void SetItemHeight(std::optional<Dimension> height);
     static void SetSelectedIndex(int32_t index);
     static void SetCanLoop(FrameNode* frameNode, bool isLoop);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
     static void SetOnChange(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, ContainerPickerChangeEvent&& onScrollStop);
     static void SetIndicatorStyle(FrameNode* frameNode, const PickerIndicatorStyle& style);
+    static void SetDisplayedItemCount(FrameNode* frameNode, std::optional<int32_t> count);
+    static void SetItemHeight(FrameNode* frameNode, std::optional<Dimension> height);
     static void SetSelectedIndex(FrameNode* frameNode, int32_t index);
     static int32_t GetSelectedIndex(FrameNode* frameNode);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);

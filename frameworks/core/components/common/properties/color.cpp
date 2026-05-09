@@ -14,6 +14,7 @@
  */
 
 #include "core/components/common/properties/color.h"
+#include "ui/properties/linear_color.h"
 
 #include <cstdlib>
 #include <regex>

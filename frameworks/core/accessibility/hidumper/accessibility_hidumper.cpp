@@ -51,6 +51,52 @@ bool AccessibilityHidumper::DumpProcessInjectActionParameters(
         }  else if (*arg == "--SecurityClickAction") {
             actionType = InjectActionType::SECURITY_CLICK_ACTION;
             return true;
+        } else if (*arg == "--CustomActionTest") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with action name"));
+                return false;
+            }
+            ++arg;
+            result = StringUtils::StringToInt(*arg, 0);
+            actionType = InjectActionType::CUSTOM_ACTION_TEST;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AccessibilityHidumper::DumpProcessCustomActionParameters(
+    const std::vector<std::string>& params,
+    int64_t& nodeId,
+    std::string& actionName,
+    bool& listActions)
+{
+    constexpr int32_t NUM_PARAMETERS_DIMENSION = 1;
+    if (params.size() < 1) {
+        return false;
+    }
+
+    listActions = false;
+    actionName.clear();
+    bool result = false;
+    for (auto arg = params.begin(); arg != params.end(); ++arg) {
+        if (*arg == "--custom-action-test") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with node id"));
+                return false;
+            }
+            ++arg;
+            nodeId = StringUtils::StringToLongInt(*arg, -1);
+            result = true;
+        } else if (*arg == "--execute") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with action name"));
+                return false;
+            }
+            ++arg;
+            actionName = *arg;
+        } else if (*arg == "--list") {
+            listActions = true;
         }
     }
     return false;

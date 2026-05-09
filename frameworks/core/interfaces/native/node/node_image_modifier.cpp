@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/common/container.h"
 
 #include "effect/color_filter.h"
 

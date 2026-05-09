@@ -40,4 +40,19 @@ HWTEST_F(WaterFlowLayoutUtilsTest, LazyEmptyBranchTest001, TestSize.Level1)
     auto wrapper1 = WaterFlowLayoutUtils::GetWaterFlowItem(AceType::RawPtr(frameNode_), 0);
     EXPECT_NE(wrapper1, nullptr);
 }
+
+HWTEST_F(WaterFlowLayoutUtilsTest, LazyEmptyBranchTest002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    auto wrapper0 = WaterFlowLayoutUtils::GetWaterFlowItemByIndex(AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(wrapper0, nullptr);
+
+    model.SetSupportLazyLoadingEmptyBranch(true);
+    auto layoutProperty = frameNode_->GetLayoutProperty<WaterFlowLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
+
+    auto wrapper1 = WaterFlowLayoutUtils::GetWaterFlowItemByIndex(AceType::RawPtr(frameNode_), 0);
+    EXPECT_NE(wrapper1, nullptr);
+}
 } // namespace OHOS::Ace::NG

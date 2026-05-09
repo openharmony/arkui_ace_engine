@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "core/common/event_manager.h"
+#include "core/pipeline/container_window_manager.h"
 #include <cstdio>
 #include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

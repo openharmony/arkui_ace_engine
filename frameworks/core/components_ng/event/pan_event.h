@@ -136,12 +136,21 @@ public:
         panRecognizer_->SetAngle(angle);
     }
 
+    void SetCanCoexistWithScroll(bool value)
+    {
+        canCoexistWithScroll_ = value;
+        if (panRecognizer_) {
+            panRecognizer_->SetCanCoexistWithScroll(value);
+        }
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;
     RefPtr<PanEvent> userCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
     bool isExcludedAxis_ = false;
+    bool canCoexistWithScroll_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

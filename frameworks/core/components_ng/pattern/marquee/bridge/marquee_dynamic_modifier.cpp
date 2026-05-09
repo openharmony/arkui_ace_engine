@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/marquee_modifier.h"
+#include "core/common/container.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"

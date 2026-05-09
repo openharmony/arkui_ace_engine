@@ -366,15 +366,16 @@ HWTEST_F(TextTestNgSeven, UseSelfStyle001, TestSize.Level1)
     std::vector<Color> colorList;
     colorList.emplace_back(Color::WHITE);
     colorList.emplace_back(Color::BLACK);
-    fontStyle->UpdateSymbolColorList(colorList);
-    fontStyle->UpdateSymbolRenderingStrategy(2);
-    fontStyle->UpdateSymbolEffectStrategy(0);
-    fontStyle->UpdateSymbolEffectOptions(SymbolEffectOptions(SymbolEffectType::BOUNCE));
+    auto symbolStyle = std::make_unique<SymbolStyle>();
+    symbolStyle->UpdateSymbolColorList(colorList);
+    symbolStyle->UpdateSymbolRenderingStrategy(2);
+    symbolStyle->UpdateSymbolEffectStrategy(0);
+    symbolStyle->UpdateSymbolEffectOptions(SymbolEffectOptions(SymbolEffectType::BOUNCE));
     fontStyle->UpdateMinFontScale(1.0);
     fontStyle->UpdateMaxFontScale(2.0);
 
     EXPECT_EQ(textStyle.GetSymbolEffectOptions().has_value(), false);
-    UseSelfStyle(fontStyle, nullptr, textStyle, true);
+    UseSelfStyle(fontStyle, nullptr, textStyle, true, symbolStyle);
     EXPECT_EQ(textStyle.GetSymbolEffectOptions().has_value(), true);
 }
 

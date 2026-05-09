@@ -18,14 +18,19 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
+bool NeedUseShapeColorModifierPayload(FrameNode* frameNode, const Color& color)
+{
+    if (!frameNode || frameNode->GetTag() != V2::CIRCLE_ETS_TAG) {
+        return false;
+    }
+    return color.GetHeadRoomColor().has_value() || color.GetColorSpace() == ColorSpace::BT2020;
+}
+
 namespace {
 RefPtr<NodeModifier::ShapeColorModifierPayload> CreateShapeColorModifierPayload(
     FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj)
 {
-    if (!frameNode || frameNode->GetTag() != V2::CIRCLE_ETS_TAG) {
-        return nullptr;
-    }
-    if (!color.GetHeadRoomColor().has_value()) {
+    if (!NeedUseShapeColorModifierPayload(frameNode, color)) {
         return nullptr;
     }
     return AceType::MakeRefPtr<NodeModifier::ShapeColorModifierPayload>(color, resObj);
@@ -107,6 +112,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetStroke(ArkUIRuntimeCallInfo* runtim
         GetArkUINodeModifiers()->getCommonShapeModifier()->resetStroke(nativeNode);
     } else {
         auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
         auto payload = CreateShapeColorModifierPayload(frameNode, color, resObj);
         if (payload) {
             GetArkUINodeModifiers()->getCommonShapeModifier()->setStroke(
@@ -145,8 +151,16 @@ ArkUINativeModuleValue CommonShapeBridge::SetFill(ArkUIRuntimeCallInfo* runtimeC
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, ArkTSUtils::MakeNativeNodeInfo(nativeNode))) {
         GetArkUINodeModifiers()->getCommonShapeModifier()->resetFill(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getCommonShapeModifier()->setFill(
-            nativeNode, color.GetValue(), AceType::RawPtr(resObj));
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        auto payload = CreateShapeColorModifierPayload(frameNode, color, resObj);
+        if (payload) {
+            GetArkUINodeModifiers()->getCommonShapeModifier()->setFill(
+                nativeNode, color.GetValue(), static_cast<void*>(AceType::RawPtr(payload)));
+        } else {
+            GetArkUINodeModifiers()->getCommonShapeModifier()->setFill(
+                nativeNode, color.GetValue(), static_cast<void*>(AceType::RawPtr(resObj)));
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }

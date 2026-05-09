@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"

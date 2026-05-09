@@ -118,8 +118,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "internal") {
         return SrcType::INTERNAL;
     } else if (head == "data") {
-        static constexpr char BASE64_PATTERN[] =
-            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP);base64$";
+        static constexpr char BASE64_PATTERN[] = "^data:image/[^;]+;base64$";
         if (IsValidBase64Head(uri, BASE64_PATTERN)) {
             return SrcType::BASE64;
         }
@@ -436,5 +435,14 @@ ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::
 {
     ImageSourceInfo imageSourceInfo;
     return imageSourceInfo;
+}
+
+void ImageSourceInfo::SetIsSvgByContent(bool isSvg)
+{
+    if (isSvg_ == isSvg) {
+        return;
+    }
+    isSvg_ = isSvg;
+    GenerateCacheKey();
 }
 } // namespace OHOS::Ace

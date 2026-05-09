@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 
+#include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/components/scroll/scroll_controller_base.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS {
 namespace Media {

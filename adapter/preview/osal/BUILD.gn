@@ -70,7 +70,6 @@ ohos_source_set("preview_osal_source") {
       "device_config.cpp",
       "display_info_utils.cpp",
       "download_manager_preview.cpp",
-      "drawing_color_filter_preview.cpp",
       "dynamic_module_helper.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
@@ -87,6 +86,7 @@ ohos_source_set("preview_osal_source") {
       "layout_inspector.cpp",
       "modal_ui_extension_impl.cpp",
       "mouse_style_ohos.cpp",
+      "navigation_route_preview.cpp",
       "package_event_proxy_preview.cpp",
       "perf_interfaces.cpp",
       "pixel_map_preview.cpp",
@@ -135,10 +135,7 @@ ohos_source_set("preview_osal_source") {
     ]
 
     if (ace_use_rosen_drawing) {
-      external_deps += [
-        "graphic_2d:2d_graphics",
-        "graphic_2d:drawing_napi_impl",
-      ]
+      external_deps += [ "graphic_2d:2d_graphics" ]
     }
     include_dirs = [ ability_runtime_path ]
     configs = [ "$ace_root:ace_config" ]

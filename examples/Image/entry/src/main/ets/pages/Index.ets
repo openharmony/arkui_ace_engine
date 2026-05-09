@@ -279,6 +279,16 @@ struct Index {
             router.pushUrl({ url: 'pages/testcase/ImageReloadKeyTestCase' })
           })
 
+          Button('router ImageBase64SvgExample').onClick(() => {
+            console.log('router ImageBase64SvgExample');
+            router.pushUrl({ url: 'pages/example/ImageBase64SvgExample' })
+          })
+
+          Button('router ImageContentDetectionExample').onClick(() => {
+            console.log('router ImageContentDetectionExample');
+            router.pushUrl({ url: 'pages/example/ImageContentDetectionExample' })
+          })
+
         }
       }
     }

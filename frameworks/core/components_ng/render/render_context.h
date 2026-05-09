@@ -27,14 +27,11 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
@@ -45,10 +42,14 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/opinc_type.h"
 #include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/render/canvas_draw_function.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 
+
+struct ParticleOptionArrayStorage;
 namespace OHOS::Rosen {
 class DrawCmdList;
 class VisualEffect;
@@ -73,19 +74,17 @@ class Modifier;
 }
 
 namespace OHOS::Ace::NG {
-typedef enum {
-    OPINC_INVALID,
-    OPINC_NODE,
-    OPINC_SUGGESTED_OR_EXCLUDED,
-    OPINC_PARENT_POSSIBLE,
-    OPINC_NODE_POSSIBLE,
-} OPINC_TYPE_E;
+
+struct ShapeMaskProperty;
 
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
 class InspectorFilter;
 class Modifier;
+class OverlayModifier;
+class ContentModifier;
+class NodeAnimatablePropertyBase;
 class PipelineContext;
 struct DistortionParam;
 struct GestureDebugBoundaryInfo;
@@ -100,7 +99,6 @@ struct PaintFocusExtraInfo final {
     bool isFocusBoxGlow { false };
 };
 
-using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 using TransitionFinishCallback = std::function<void(bool)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
@@ -171,14 +169,14 @@ public:
 
     virtual void SetExtraOffset(const std::optional<OffsetF>& offset) {};
 
+    virtual void IncrementGeometryTransitionCounter() {}
+    virtual void DecrementGeometryTransitionCounter() {}
+    virtual void ClearGeometryTransitionCounter() {}
+    virtual bool IsGeometryTransitionAnimating() const { return false; }
+
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
-    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
-
-    virtual bool HasSandBox() const
-    {
-        return false;
-    }
+    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {}
 
     virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
 
@@ -324,6 +322,7 @@ public:
     virtual void SetHDRBrightness(float hdrBrightness, uint32_t type) {}
     virtual void SetImageHDRBrightness(float hdrBrightness) {}
     virtual void SetImageHDRPresent(bool hdrPresent) {}
+    virtual void SetHDRColorHeadRoom(float headRoom) {}
     virtual void SetTransparentLayer(bool isTransparentLayer) {}
     virtual void SetSurfaceBufferOpaque(bool isOpaque) {}
     virtual void SetScreenId(uint64_t screenId) {}
@@ -550,7 +549,7 @@ public:
         return GetForeground() ? GetForeground()->propBlurRadius : std::nullopt;
     }
 
-    virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
+    virtual void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
     virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
@@ -571,6 +570,7 @@ public:
     virtual void OnPositionEdgesUpdate(const EdgesParam& value) {}
     virtual void RecalculatePosition() {}
     virtual void OnZIndexUpdate(int32_t value) {}
+    virtual void SortChildrenByZIndex() {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnPreBackgroundColorUpdate(const Color& value) {}
@@ -662,7 +662,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderSourceFromImage, bool);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ExcludeFromRenderGroup, bool);
@@ -702,8 +701,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBackShadow, Shadow);
-
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
@@ -713,8 +710,12 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashGap, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashWidth, BorderWidthProperty);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBorderWidth, BorderWidthProperty);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBorderColor, BorderColorProperty);
+    // Material
+    ACE_DEFINE_PROPERTY_GROUP(MaterialPreParams, MaterialPreProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(MaterialPreParams, PreBackgroundColor, Color);
 
     // Outer Border
     ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
@@ -926,6 +927,8 @@ public:
     {}
 
     virtual void ResetEdgeLightFilter() {}
+
+    virtual void UpdateSubmenuDistortionParam() {}
 
     void SetIsFree(bool isFree)
     {

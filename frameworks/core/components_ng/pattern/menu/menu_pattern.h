@@ -46,6 +46,7 @@ constexpr double MENU_ANIMATION_MAX_OPACITY = 1.0f;
 
 namespace OHOS::Ace {
 class SelectTheme;
+class UiMaterial;
 }
 
 namespace OHOS::Ace::NG {
@@ -701,6 +702,7 @@ public:
     std::pair<float, float> GetPreviewPositionY();
     bool UpdateMenuBackBlurStyle(bool userSetBgColor);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    bool IsUseDistortionAnimation() const;
 
     float GetTranslateYForStack()
     {
@@ -820,9 +822,16 @@ private:
     Offset GetTransformCenter() const;
     OffsetF GetPreviewMenuAnimationOffset(const OffsetF& previewCenter, const SizeF& previewSize, float scale) const;
     void ShowPreviewMenuAnimation();
+    void ShowPreviewMenuMaterialAnimation();
     void ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay);
     void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
+    OffsetF GetDistortionMenuOffset(Placement placement) const;
+    MenuParam GetMenuParam() const;
+    bool IsUseEdgeLightAnimation() const;
+    void PlayDistortAnimation(const OffsetF& menuPosition);
+    void PlayLightAnimation();
     void ShowMenuAppearAnimation();
+    void ShowMenuAppearMaterialAnimation();
     void ShowStackMenuAppearAnimation();
     std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& mainMenu,
         const RefPtr<FrameNode>& subMenu, bool isNeedRestoreNodeId = false) const;

@@ -118,6 +118,11 @@ bool MultiThreadBuildManager::IsParallelScope()
     return isThreadSafeNodeScope_ && isParallelizeUI_;
 }
 
+void MultiThreadBuildManager::SetIsParallelizeUI(bool isParallelizeUI)
+{
+    isParallelizeUI_ = isParallelizeUI;
+}
+
 bool MultiThreadBuildManager::PostAsyncUITask(
     int32_t contextId, std::function<void()>&& asyncUITask, std::function<void()>&& onFinishTask)
 {

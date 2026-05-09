@@ -136,7 +136,7 @@ bool IsRecycleImageEnabled()
 
 bool IsImageReleaseManageObjectEnabled()
 {
-    return system::GetBoolParameter(ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY, false);
+    return system::GetBoolParameter(ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY, true);
 }
 
 bool IsSvgTraceEnabled()

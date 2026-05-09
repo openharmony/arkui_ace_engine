@@ -31,8 +31,8 @@ void ResetLoadingProgressColorMultiThread(ArkUINodeHandle node)
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
-        LoadingProgressModelNG::SetColorParseFailed(frameNode, true);
-        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingParseFailedColor());
+        LoadingProgressModelNG::SetColorByUser(frameNode, false);
+        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingColor());
     }
     if (SystemProperties::ConfigChangePerform()) {
         LoadingProgressModelNG::SetColorByUser(frameNode, false);

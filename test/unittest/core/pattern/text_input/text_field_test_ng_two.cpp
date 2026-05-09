@@ -1136,10 +1136,17 @@ HWTEST_F(TextFieldTestNgTwo, TextFadeoutStateTest002, TestSize.Level1)
  */
 HWTEST_F(TextFieldTestNgTwo, UpdateOverlayModifier001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the node has the ability to support fadeout.
+     */
     CreateTextField(DEFAULT_TEXT);
     EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
     EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
 
+    /**
+     * @tc.steps: step2. Set paintWrapper and overlayModifier.
+     */
     WeakPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1153,6 +1160,10 @@ HWTEST_F(TextFieldTestNgTwo, UpdateOverlayModifier001, TestSize.Level1)
     auto overlayModifier = paintMethod->textFieldOverlayModifier_;
     ASSERT_NE(overlayModifier, nullptr);
 
+    /**
+     * @tc.steps: step3. set cursor color and call UpdateContentModifier
+     * @tc.expected: step3. previewTextDecorationColor equals cursor color.
+     */
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
     paintProperty->ResetCaretColorFlagByUser();

@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/node/node_adapter_impl.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
@@ -176,10 +177,14 @@ UINodeAdapter::UINodeAdapter(ArkUINodeAdapterHandle handle) : handle_(handle)
 
 UINodeAdapter::~UINodeAdapter()
 {
-    if (handle_ != nullptr) {
-        delete handle_;
-        handle_ = nullptr;
+    CHECK_NULL_VOID(handle_);
+    // Clear user data and receiver to prevent callbacks after destruction
+    if (handle_->builder) {
+        handle_->builder->SetUserData(nullptr);
+        handle_->builder->SetReceiver(nullptr);
     }
+    delete handle_;
+    handle_ = nullptr;
 }
 
 void UINodeAdapter::OnEventReceived(ArkUINodeAdapterEvent* event)

@@ -37,6 +37,10 @@
 #include "frameworks/core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class InspectorFilter;
 class TextLayoutProperty;
 
@@ -668,6 +672,8 @@ public:
     {
         shouldPlayMaskAnimation_ = shouldPlayMaskAnimation;
     }
+
+    int32_t GetChildrenSize() const;
 
 private:
     void OnModifyDone() override;

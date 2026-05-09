@@ -16,7 +16,9 @@
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
@@ -970,6 +972,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     parentGlobalOffset_ = GetPaintRectGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     auto isEditorValueChanged = FireOnTextChangeEvent();
+    ProcessPendingSubmitAction();
     UpdateCancelNode();
     UpdateSelectController();
     AdjustTextInReasonableArea();
@@ -2799,6 +2802,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto touchInfo = GetAcceptedTouchLocationInfo(info);
     CHECK_NULL_VOID(touchInfo);
+    UpdateMagnifierTouchInfo(info.GetTimeStamp(), touchInfo->GetTouchType());
     DoGestureSelection(info);
     ResetOriginCaretPosition();
     auto touchType = touchInfo->GetTouchType();
@@ -2828,9 +2832,11 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     } else if (touchType == TouchType::CANCEL) {
         StopContentScroll();
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
+            magnifierController_->ResetTouchInfo();
             magnifierController_->RemoveMagnifierFrameNode();
         }
         ResetTouchAndMoveCaretState();
+        ResetMagnifierTouchInfo();
     }
 }
 
@@ -2860,8 +2866,10 @@ void TextFieldPattern::HandleTouchUp()
         isMousePressed_ = false;
     }
     if (magnifierController_) {
+        magnifierController_->ResetTouchInfo();
         magnifierController_->RemoveMagnifierFrameNode();
     }
+    ResetMagnifierTouchInfo();
     if (IsFreeScrollEnabled()) {
         freeScroller_->ScheduleScrollingDisappearDelayTask();
     } else {
@@ -2990,12 +2998,25 @@ void TextFieldPattern::SetMagnifierLocalOffsetToFloatingCaretPos()
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->GetMagnifierController()->SetLocalOffset({ floatCaretRectCenter.GetX(),
-                    floatCaretRectCenter.GetY() });
+                    floatCaretRectCenter.GetY() }, pattern->magnifierTouchTimeStamp_, pattern->magnifierTouchType_);
             });
     } else {
-        magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
+        magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() },
+            magnifierTouchTimeStamp_, magnifierTouchType_);
     }
     floatCaretState_.lastFloatingCursorY = floatCaretRectCenter.GetY();
+}
+
+void TextFieldPattern::UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType)
+{
+    magnifierTouchTimeStamp_ = time;
+    magnifierTouchType_ = touchType;
+}
+
+void TextFieldPattern::ResetMagnifierTouchInfo()
+{
+    magnifierTouchTimeStamp_ = TimeStamp();
+    magnifierTouchType_ = TouchType::UNKNOWN;
 }
 
 void TextFieldPattern::UpdateMagnifierWithFloatingCaretPos()
@@ -4702,7 +4723,6 @@ void TextFieldPattern::AddTextFireOnChange()
         TextChangeEventInfo info(inspectorId, uniqueId, UtfUtils::Str16DebugToStr8(changeValueInfo.value));
         UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
         eventHub->FireOnChange(changeValueInfo);
-
         pattern->RecordTextInputEvent();
         auto callback = [weakPattern = weak](const std::string& type, const std::string& content) {
             auto strongPattern = weakPattern.Upgrade();
@@ -4965,7 +4985,9 @@ void TextFieldPattern::HandleLongPressSelectionAndReport(
     CloseSelectOverlay();
     longPressFingerNum_ = info.GetFingerList().size();
     if (magnifierController_ && HasText() && (longPressFingerNum_ == 1)) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        UpdateMagnifierTouchInfo(info.GetTimeStamp(), TouchType::DOWN);
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() },
+            magnifierTouchTimeStamp_, magnifierTouchType_);
     }
     StartGestureSelection(start, end, localOffset);
     TriggerAvoidOnCaretChange();
@@ -6286,7 +6308,8 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     }
 
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        if (selectOverlay_) {
+        if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+            selectOverlay_->UpdateMenuFromThemeChange(themeScopeId);
             selectOverlay_->UpdateHandleColor();
         }
     }
@@ -7209,11 +7232,33 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         return;
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction %{public}d", static_cast<int32_t>(action));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    // If the parent node is a Search, the Search callback is executed.
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    if (IsTextArea() && action == TextInputAction::NEW_LINE) {
+        if (!textAreaBlurOnSubmit_) {
+            if (GetInputFilter() != "\n") {
+                InsertValue(u"\n", true);
+            }
+        } else {
+            CloseKeyboard(forceCloseKeyboard, false);
+            TextFieldLostFocusToViewRoot();
+        }
+        return;
+    }
+    if (TryDelaySubmitAction(action, forceCloseKeyboard)) {
+        return;
+    }
+    FireSubmitAction(action, forceCloseKeyboard);
+}
+
+void TextFieldPattern::FireSubmitAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    if (!HasFocus() || !ProcessFocusIndexAction()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger SubmitAction");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextFieldCommonEvent event;
@@ -7224,17 +7269,6 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         OnReportSubmitEvent(host);
         CHECK_NULL_VOID(!event.IsKeepEditable());
         TextFieldLostFocusToViewRoot();
-        return;
-    }
-    if (IsTextArea() && action == TextInputAction::NEW_LINE) {
-        if (!textAreaBlurOnSubmit_) {
-            if (GetInputFilter() != "\n") {
-                InsertValue(u"\n", true);
-            }
-        } else {
-            CloseKeyboard(forceCloseKeyboard, false);
-            TextFieldLostFocusToViewRoot();
-        }
         return;
     }
     eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
@@ -10453,6 +10487,48 @@ bool TextFieldPattern::HasInputOperation()
     return !deleteBackwardOperations_.empty() || !deleteForwardOperations_.empty() || !insertCommands_.empty();
 }
 
+bool TextFieldPattern::TryDelaySubmitAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    if (!HasPendingTextMutationForSubmit()) {
+        return false;
+    }
+    if (pendingSubmitActionInfo_.has_value()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Overwriting pending submit action %{public}d with %{public}d",
+            static_cast<int32_t>(pendingSubmitActionInfo_->action), static_cast<int32_t>(action));
+    }
+    pendingSubmitActionInfo_ = PendingSubmitActionInfo { action, forceCloseKeyboard };
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Delay submit action %{public}d until onChange completes",
+        static_cast<int32_t>(action));
+    return true;
+}
+
+void TextFieldPattern::ProcessPendingSubmitAction()
+{
+    if (!pendingSubmitActionInfo_.has_value()) {
+        return;
+    }
+    auto pendingActionInfo = pendingSubmitActionInfo_.value();
+    pendingSubmitActionInfo_.reset();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask(
+        [weak = WeakClaim(this), pendingActionInfo] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireSubmitAction(pendingActionInfo.action, pendingActionInfo.forceCloseKeyboard);
+        });
+}
+
+bool TextFieldPattern::HasPendingTextMutationForSubmit() const
+{
+    // Submit delay should only depend on operations that can still change the text value,
+    // and it needs to cover both insert/delete queues and InputCommand-based mutations.
+    return !deleteBackwardOperations_.empty() || !deleteForwardOperations_.empty() || !insertCommands_.empty() ||
+           !inputCommands_.empty();
+}
+
 void TextFieldPattern::FocusForwardStopTwinkling()
 {
     auto host = GetHost();
@@ -11662,7 +11738,8 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset)
 {
     if (magnifierController_ && HasText() && (longPressFingerNum_ == 1)) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() },
+            magnifierTouchTimeStamp_, magnifierTouchType_);
     }
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();
@@ -12328,7 +12405,9 @@ std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(
 void TextFieldPattern::DoTextSelectionTouchCancel()
 {
     CHECK_NULL_VOID(magnifierController_);
+    magnifierController_->ResetTouchInfo();
     magnifierController_->RemoveMagnifierFrameNode();
+    ResetMagnifierTouchInfo();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     StopContentScroll();
     StartTwinkling();

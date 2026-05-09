@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "core/interfaces/native/implementation/nav_destination_context_peer.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"

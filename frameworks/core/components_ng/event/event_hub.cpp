@@ -96,6 +96,7 @@ bool EventHub::AddSupportedUIStateWithCallback(
     }
     auto result = stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
     AddPressedListener();
+    AddHoverListener();
     return result;
 }
 
@@ -194,11 +195,19 @@ void EventHub::AddPressedListener()
     }
 }
 
+void EventHub::AddHoverListener()
+{
+    if (stateStyleMgr_ && stateStyleMgr_->HasStateStyle(UI_STATE_HOVERED)) {
+        GetOrCreateInputEventHub()->AddOnHoverEvent(stateStyleMgr_->GetHoverListener());
+    }
+}
+
 void EventHub::MarkModifyDone()
 {
     if (stateStyleMgr_) {
         // focused style is managered in focus event hub.
         AddPressedListener();
+        AddHoverListener();
         if (stateStyleMgr_->HasStateStyle(UI_STATE_DISABLED)) {
             if (enabled_) {
                 stateStyleMgr_->ResetCurrentUIState(UI_STATE_DISABLED);

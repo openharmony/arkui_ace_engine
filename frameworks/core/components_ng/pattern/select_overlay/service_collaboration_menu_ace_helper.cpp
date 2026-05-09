@@ -371,7 +371,6 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuItemGroupNode(
     menuItemGroupModifier->menuItemGroupUpdateStrokeWidth(
         menuItemGroupNode, Dimension(static_cast<float>(0), DimensionUnit::VP));
 
-    TAG_LOGI(AceLogTag::ACE_MENU, "DEVICE NAME IS %{public}s", deviceName.c_str());
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(row, nullptr);

@@ -244,6 +244,135 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithSafeAreaPadding002, TestS
 }
 
 /**
+ * @tc.name: ContentClipSafeAreaWithIgnoreLayoutSafeArea001
+ * @tc.desc: Test List with ContentClip SAFE_AREA mode and ListItem with ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithIgnoreLayoutSafeArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SAFE_AREA content clip and bottom safeAreaPadding
+     */
+    int32_t startIndex = -1;
+    int32_t endIndex = -1;
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    model.SetSpace(Dimension(5));
+    PaddingProperty paddingProperty;
+    paddingProperty.bottom = std::make_optional<CalcLength>(150);
+    layoutProperty_->UpdateSafeAreaPadding(paddingProperty);
+    model.SetOnScrollIndex([&startIndex, &endIndex](int32_t start, int32_t end, int32_t center) {
+        startIndex = start;
+        endIndex = end;
+    });
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step2. Set ignoreLayoutSafeArea for item3 and check layout
+     */
+    auto item3 = GetChildFrameNode(frameNode_, 3);
+    ASSERT_NE(item3, nullptr);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM };
+    item3->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step3. check item layout with ignoreLayoutSafeArea
+     * @tc.expected: item3 with ignoreLayoutSafeArea should extend into safeAreaPadding area
+     */
+    EXPECT_TRUE(item3->IsActive());
+    auto item3GeometryNode = item3->GetGeometryNode();
+    ASSERT_NE(item3GeometryNode, nullptr);
+    EXPECT_EQ(item3GeometryNode->GetFrameSize().Height(), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step4. check item4 is not layout
+     * @tc.expected: item4 is not active
+     */
+    auto item4 = GetChildFrameNode(frameNode_, 4);
+    ASSERT_NE(item4, nullptr);
+    EXPECT_FALSE(item4->IsActive());
+
+    /**
+     * @tc.steps: step5. check onScrollIndex
+     * @tc.expected: index range is 0-3 (item3 visible due to ignoreLayoutSafeArea)
+     */
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_GE(endIndex, 2);
+}
+
+/**
+ * @tc.name: ContentClipSafeAreaWithIgnoreLayoutSafeArea002
+ * @tc.desc: Test List with ContentClip SAFE_AREA mode and multiple ListItem with ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithIgnoreLayoutSafeArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SAFE_AREA content clip and bottom safeAreaPadding
+     */
+    int32_t startIndex = -1;
+    int32_t endIndex = -1;
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    model.SetSpace(Dimension(5));
+    PaddingProperty paddingProperty;
+    paddingProperty.bottom = std::make_optional<CalcLength>(150);
+    layoutProperty_->UpdateSafeAreaPadding(paddingProperty);
+    model.SetOnScrollIndex([&startIndex, &endIndex](int32_t start, int32_t end, int32_t center) {
+        startIndex = start;
+        endIndex = end;
+    });
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step2. Set ignoreLayoutSafeArea for item2 and item3 with different edges
+     */
+    auto item2 = GetChildFrameNode(frameNode_, 2);
+    ASSERT_NE(item2, nullptr);
+    IgnoreLayoutSafeAreaOpts opts2 = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    item2->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts2);
+
+    auto item3 = GetChildFrameNode(frameNode_, 3);
+    ASSERT_NE(item3, nullptr);
+    IgnoreLayoutSafeAreaOpts opts3 = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM };
+    item3->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts3);
+
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step3. check item layout with ignoreLayoutSafeArea
+     * @tc.expected: items with ignoreLayoutSafeArea should be active
+     */
+    EXPECT_TRUE(item2->IsActive());
+    EXPECT_TRUE(item3->IsActive());
+    EXPECT_EQ(GetChildHeight(frameNode_, 2), ITEM_MAIN_SIZE);
+    EXPECT_EQ(GetChildHeight(frameNode_, 3), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step4. check item4 and item5 are not layout
+     * @tc.expected: items beyond safeAreaPadding are not active
+     */
+    auto item4 = GetChildFrameNode(frameNode_, 4);
+    ASSERT_NE(item4, nullptr);
+    EXPECT_FALSE(item4->IsActive());
+
+    /**
+     * @tc.steps: step5. check onScrollIndex
+     * @tc.expected: index range should include items with ignoreLayoutSafeArea
+     */
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_GE(endIndex, 2);
+}
+
+/**
  * @tc.name: ContentClipCustomWithPadding001
  * @tc.desc: Test List with ContentClip CUSTOM mode and bottom padding
  * @tc.type: FUNC

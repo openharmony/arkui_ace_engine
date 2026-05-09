@@ -204,6 +204,25 @@ void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback&& 
     jsStateProfilerStatusCallback_ = callback;
 }
 
+bool LayoutInspector::HasJsStateProfilerStatusCallback()
+{
+    return static_cast<bool>(jsStateProfilerStatusCallback_);
+}
+
+void LayoutInspector::AppendJsStateProfilerStatusCallback(ProfilerStatusCallback&& tail)
+{
+    if (!tail) {
+        return;
+    }
+    auto head = std::move(jsStateProfilerStatusCallback_);
+    jsStateProfilerStatusCallback_ = [head = std::move(head), tail = std::move(tail)](bool enable) {
+        if (head) {
+            head(enable);
+        }
+        tail(enable);
+    };
+}
+
 bool LayoutInspector::GetStateProfilerStatus()
 {
     return stateProfilerStatus_;

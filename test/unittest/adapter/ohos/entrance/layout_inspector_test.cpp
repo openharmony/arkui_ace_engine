@@ -147,4 +147,45 @@ HWTEST_F(LayoutInspectorTest, EnableInteractionEventReport, TestSize.Level1)
     res = LayoutInspector::GetInteractionEventStatus();
     EXPECT_EQ(res, false);
 }
+
+/**
+ * @tc.name: HasJsStateProfilerStatusCallback001
+ * @tc.desc: Test HasJsStateProfilerStatusCallback returns false initially and true after Set
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutInspectorTest, HasJsStateProfilerStatusCallback001, TestSize.Level1)
+{
+    LayoutInspector::SetJsStateProfilerStatusCallback(nullptr);
+    EXPECT_FALSE(LayoutInspector::HasJsStateProfilerStatusCallback());
+
+    LayoutInspector::SetJsStateProfilerStatusCallback([](bool) {});
+    EXPECT_TRUE(LayoutInspector::HasJsStateProfilerStatusCallback());
+
+    LayoutInspector::SetJsStateProfilerStatusCallback(nullptr);
+    EXPECT_FALSE(LayoutInspector::HasJsStateProfilerStatusCallback());
+}
+
+/**
+ * @tc.name: AppendJsStateProfilerStatusCallback001
+ * @tc.desc: Test Append chains callback correctly with existing callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutInspectorTest, AppendJsStateProfilerStatusCallback001, TestSize.Level1)
+{
+    int callCount1 = 0;
+    int callCount2 = 0;
+
+    LayoutInspector::SetJsStateProfilerStatusCallback(
+        [&callCount1](bool) { callCount1++; });
+    LayoutInspector::AppendJsStateProfilerStatusCallback(
+        [&callCount2](bool) { callCount2++; });
+
+    EXPECT_TRUE(LayoutInspector::HasJsStateProfilerStatusCallback());
+
+    LayoutInspector::TriggerJsStateProfilerStatusCallback(true);
+    EXPECT_EQ(callCount1, 1);
+    EXPECT_EQ(callCount2, 1);
+
+    LayoutInspector::SetJsStateProfilerStatusCallback(nullptr);
+}
 } // namespace OHOS::Ace::NG

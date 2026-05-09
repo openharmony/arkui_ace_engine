@@ -16,6 +16,7 @@
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {

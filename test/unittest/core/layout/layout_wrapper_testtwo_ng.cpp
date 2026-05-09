@@ -46,6 +46,7 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #undef private
 #undef protected

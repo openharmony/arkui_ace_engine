@@ -34,6 +34,8 @@
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -200,20 +202,6 @@ void NavigationGroupNode::UpdateVisibilityAfterOverlayTransition(
         curNode = AceType::DynamicCast<FrameNode>(GetNavBarOrHomeDestinationNode());
     }
     UpdateVisibilityInOverlayPop(curNode);
-}
-
-void NavigationGroupNode::SetUseHomeDestinatoin(bool use)
-{
-    useHomeDestination_ = use;
-    if (!use) {
-        return;
-    }
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    auto reporter = context->GetStatisticEventReporter();
-    CHECK_NULL_VOID(reporter);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Send homeDestination statistic event");
-    reporter->SendEvent(StatisticEventType::NAVIGATION_HOME_DESTINATION);
 }
 
 RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(

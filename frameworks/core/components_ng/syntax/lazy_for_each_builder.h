@@ -279,6 +279,8 @@ public:
         return LazyForEachReleaseStrategy::BATCH;
     }
 
+    void UpdateThemeScopeUpdate(int32_t themeScopeId);
+
     /*
      * Removing nodes that should be released, and adopt an optimized release strategy.
      * During each frame's idle time, determine whether to continue releasing based on the average

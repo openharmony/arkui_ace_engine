@@ -15,12 +15,36 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_native_view_ffi.h"
 
+#include <mutex>
+#include <shared_mutex>
+#include <unordered_map>
+
 #include "cj_lambda.h"
 
 #include "bridge/cj_frontend/cppview/native_view.h"
 
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::FFI;
+
+namespace {
+std::shared_mutex g_nativeViewIdMutex;
+std::unordered_map<int64_t, int32_t> g_nativeViewIdToElementId_;
+}
+
+namespace OHOS::Ace::Framework {
+void CjProfilerRegisterViewToElementId(int64_t nativeViewId, int32_t elementId)
+{
+    std::unique_lock<std::shared_mutex> lock(g_nativeViewIdMutex);
+    g_nativeViewIdToElementId_[nativeViewId] = elementId;
+}
+
+void CjProfilerUnregisterViewToElementId(int64_t nativeViewId)
+{
+    std::unique_lock<std::shared_mutex> lock(g_nativeViewIdMutex);
+    g_nativeViewIdToElementId_.erase(nativeViewId);
+}
+
+} // namespace OHOS::Ace::Framework
 
 extern "C" {
 void FfiOHOSAceFrameworkThrowNativeError(const char* msg)
@@ -58,6 +82,18 @@ void FfiOHOSAceFrameworkNativeViewCreate(int64_t nativeViewID)
         return;
     }
     NativeView::Create(nativeView);
+}
+
+void FfiOHOSAceFrameworkNativeViewSetJsViewName(int64_t nativeViewID, const char* utf8)
+{
+    if (utf8 == nullptr || utf8[0] == '\0') {
+        return;
+    }
+    auto nativeView = FFIData::GetData<NativeView>(nativeViewID);
+    if (!nativeView) {
+        return;
+    }
+    nativeView->SetCjProfilerViewName(utf8);
 }
 
 int64_t FfiOHOSAceFrameworkNativeViewCtor(int64_t remoteId)
@@ -162,6 +198,11 @@ void FfiOHOSAceFrameworkNativeViewFinishUpdateFunc(int64_t nativeViewId, int64_t
 
 int32_t FfiOHOSAceFrameworkNativeViewGetUINodeId(int64_t nativeViewId)
 {
+    std::shared_lock<std::shared_mutex> lock(g_nativeViewIdMutex);
+    auto it = g_nativeViewIdToElementId_.find(nativeViewId);
+    if (it != g_nativeViewIdToElementId_.end()) {
+        return it->second;
+    }
     auto view = FFIData::GetData<NativeView>(nativeViewId);
     if (!view) {
         LOGE("FfiOHOSAceFrameworkNativeViewGetUINodeId fail, no NativeView of %{public}" PRId64, nativeViewId);

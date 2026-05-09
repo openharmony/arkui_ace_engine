@@ -1864,6 +1864,8 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     std::string style = V2::ConvertWrapTextDecorationStyleToString(
         textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
     jsonDecoration->Put("style", style.c_str());
+    jsonDecoration->Put(
+        "thicknessScale", std::to_string(textFieldLayoutProperty->GetLineThicknessScale().value_or(1.0f)).c_str());
     json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
     json->PutExtAttr(
         "minFontSize", textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
@@ -2289,6 +2291,7 @@ void SearchPattern::UpdateTextFieldColor()
             auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(buttonLayoutProperty);
             buttonLayoutProperty->UpdateFontColor(searchTheme->GetSearchButtonTextColor());
+            buttonLayoutProperty->UpdateFontColorFlagByUser(true);
         }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2349,6 +2352,12 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     TextNodeOnThemeScopeUpdate(searchTheme, textFieldTheme);
     PaintSearchFocusState();
     UpdateTextFieldColor();
+
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, result);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, result);
+    textFieldPattern->UpdateSelectionMenu(themeScopeId);
 
     return result;
 }

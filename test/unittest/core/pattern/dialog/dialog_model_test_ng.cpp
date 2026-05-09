@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

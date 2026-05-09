@@ -34,6 +34,8 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {

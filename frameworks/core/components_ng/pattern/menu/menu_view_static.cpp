@@ -14,10 +14,11 @@
  */
  
 #include "core/components_ng/pattern/menu/menu_view_static.h"
- 
+
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"

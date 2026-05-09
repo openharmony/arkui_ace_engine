@@ -46,4 +46,5 @@ export class AttributeUpdater<T> implements AttributeModifier<T> {
     applyFocusedAttribute(instance: T): void {}
     applyDisabledAttribute(instance: T): void {}
     applySelectedAttribute(instance: T): void {}
+    applyHoveredAttribute(instance: T): void {}
 }

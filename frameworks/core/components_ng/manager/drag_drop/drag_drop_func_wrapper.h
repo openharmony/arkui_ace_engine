@@ -25,6 +25,10 @@
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
 
+namespace OHOS::Ace {
+enum class ColorMode;
+}
+
 namespace OHOS::Ace::NG {
 using PixelMapFinishCallback = std::function<void(RefPtr<PixelMap>, bool)>;
 /* DragDropFuncWrapper as a utility class, all function calls must use containerId. */
@@ -39,6 +43,11 @@ struct PixelMapInfo {
 
 class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
+    struct DragPreviewMaterialInfo {
+        int32_t materialId { -1 };
+        std::shared_ptr<OHOS::Rosen::Filter> materialFilter { nullptr };
+    };
+
     static void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
         const OHOS::Ace::DragNotifyMsg& dragNotifyMsg, const DragAdapterStatus& dragStatus);
     static int32_t StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
@@ -59,7 +68,18 @@ public:
     static void PrepareShadowParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
         DragPreviewOption& option);
     static void ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValue>& arkExtraInfoJson);
+    static DragPreviewMaterialInfo ParseDragPreviewMaterialInfo(const DragPreviewOption& option);
+    static DragPreviewMaterialInfo ParseDragPreviewMaterialInfo(
+        const DragPreviewOption& option, float dipScale, OHOS::Ace::ColorMode colorMode);
+    static DragPreviewMaterialInfo ParseDragPreviewMaterialInfo(
+        const DragPreviewOption& option, const RefPtr<PipelineBase>& pipeline);
+    static DragPreviewMaterialInfo ParseDragPreviewMaterialInfo(
+        const DragPreviewOption& option, const RefPtr<FrameNode>& frameNode);
     static int32_t ParseUiMaterial(const DragPreviewOption& option);
+    static std::shared_ptr<OHOS::Rosen::Filter> CreateMaterialFilter(
+        const DragPreviewOption& option, float dipScale, OHOS::Ace::ColorMode colorMode);
+    static std::shared_ptr<OHOS::Rosen::Filter> CreateMaterialFilter(
+        const DragPreviewOption& option, const RefPtr<FrameNode>& frameNode);
     static std::optional<Shadow> GetDefaultShadow();
     static std::optional<BorderRadiusProperty> GetDefaultBorderRadius();
     static float RadiusToSigma(float radius);

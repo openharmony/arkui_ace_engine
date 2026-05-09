@@ -77,6 +77,8 @@ const char JS_REPEAT_ETS_TAG[] = "Repeat";
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
 // js with theme node
 const char JS_WITH_THEME_ETS_TAG[] = "WithTheme";
+// js with env node
+const char JS_WITH_ENV_ETS_TAG[] = "WithEnv";
 // js node slot
 const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
 
@@ -123,6 +125,7 @@ const char INDICATOR_ETS_TAG[] = "IndicatorComponent";
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
 const char TABS_ETS_TAG[] = "Tabs";
+const char TABS_BACKGROUND_MASK_ETS_TAG[] = "BackgroundMask";
 
 // tab content item
 const char TAB_CONTENT_ITEM_COMPONENT_TAG[] = "TabContentItemComponent";
@@ -452,6 +455,9 @@ const char GRID_COL_ETS_TAG[] = "GridCol";
 const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
 const char GRID_ROW_ETS_TAG[] = "GridRow";
 
+// containerReader
+const char CONTAINER_READER_COMPONENT_TAG[] = "ContainerReaderComponent";
+const char CONTAINER_READER_ETS_TAG[] = "ContainerReader";
 // relativeContainer
 const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
 const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
@@ -693,4 +699,10 @@ const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
 
 // Custom
 const char CUSTOM_ETS_TAG[] = "Custom";
+
+// LazyColumnLayout
+const char LAZY_COLUMN_LAYOUT_ETS_TAG[] = "LazyColumnLayout";
+
+// LazyVWaterFlowLayout
+const char LAZY_V_WATERFLOW_LAYOUT_ETS_TAG[] = "LazyVWaterFlowLayout";
 } // namespace OHOS::Ace::V2

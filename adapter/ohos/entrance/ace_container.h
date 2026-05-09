@@ -58,6 +58,8 @@ class AccessibilityElementInfo;
 
 namespace OHOS::Ace {
 class FontManager;
+class PageViewportConfig;
+struct PageViewportConfigParams;
 class UIEventTracker;
 }
 

@@ -1695,6 +1695,7 @@ ACE_FORCE_EXPORT TextDecorationOptions Convert(const Ark_TextDecorationOptions& 
     options.textDecoration = OptConvert<TextDecoration>(src.type);
     options.color = OptConvert<Color>(src.color);
     options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
+    options.lineThicknessScale = OptConvert<float>(src.thicknessScale);
     return options;
 }
 
@@ -2198,69 +2199,6 @@ void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
     } else {
         dst = std::nullopt;
     }
-}
-
-void ParseDragPreviewMode(DragPreviewOption& previewOption, const Ark_DragPreviewOptions &src)
-{
-    auto previewModeHandler = [&previewOption](DragPreviewMode mode) -> bool {
-        switch (mode) {
-            case DragPreviewMode::AUTO: previewOption.ResetDragPreviewMode(); return true;
-            case DragPreviewMode::DISABLE_SCALE: previewOption.isScaleEnabled = false; break;
-            case DragPreviewMode::ENABLE_DEFAULT_SHADOW: previewOption.isDefaultShadowEnabled = true; break;
-            case DragPreviewMode::ENABLE_DEFAULT_RADIUS: previewOption.isDefaultRadiusEnabled = true; break;
-            case DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT:
-                previewOption.isDefaultDragItemGrayEffectEnabled = true; break;
-            case DragPreviewMode::ENABLE_MULTI_TILE_EFFECT: previewOption.isMultiTiled = true; break;
-            case DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW:
-                previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true; break;
-            default: break;
-        }
-        return false;
-    };
-    Converter::VisitUnion(src.mode,
-        [previewModeHandler](const Ark_DragPreviewMode& mode) {
-            auto previewMode = Converter::OptConvert<DragPreviewMode>(mode);
-            if (previewMode) {
-                previewModeHandler(previewMode.value());
-            }
-        },
-        [previewModeHandler](const Array_DragPreviewMode& modeArray) {
-            auto previewModeArray = Converter::Convert<std::vector<Ark_DragPreviewMode>>(modeArray);
-            for (auto mode : previewModeArray) {
-                auto previewMode = Converter::OptConvert<DragPreviewMode>(mode);
-                if (previewMode && previewModeHandler(previewMode.value())) {
-                    break;
-                }
-            }
-        },
-        []() {});
-}
-
-template<>
-DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
-{
-    DragPreviewOption previewOption;
-    ParseDragPreviewMode(previewOption, src);
-    Converter::VisitUnion(src.numberBadge,
-        [&previewOption](const Ark_Number& value) {
-            previewOption.isNumber = true;
-            previewOption.badgeNumber = Converter::Convert<int32_t>(value);
-        },
-        [&previewOption](const Ark_Boolean& value) {
-            previewOption.isNumber = false;
-            previewOption.isShowBadge = Converter::Convert<bool>(value);
-        },
-        [&previewOption]() {
-            previewOption.isNumber = false;
-            previewOption.isShowBadge = true;
-        });
-    if (src.sizeChangeEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto sizeChangeEffect = Converter::OptConvert<DraggingSizeChangeEffect>(src.sizeChangeEffect.value);
-        if (sizeChangeEffect) {
-            previewOption.sizeChangeEffect = sizeChangeEffect.value();
-        }
-    }
-    return previewOption;
 }
 
 template<>
@@ -4018,21 +3956,6 @@ std::set<SourceTool> Convert(const Array_SourceTool& src)
     return dst;
 }
 
-template<>
-std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src)
-{
-    std::set<std::string> dst = {};
-    std::optional<std::string> convVal;
-    auto tmp = Converter::OptConvert<std::vector<Ark_uniformTypeDescriptor_UniformDataType>>(src);
-    if (!tmp.has_value()) return dst;
-    for (auto arkVal : tmp.value()) {
-        convVal = Converter::OptConvert<std::string>(arkVal);
-        if (convVal.has_value()) {
-            dst.insert(convVal.value());
-        }
-    }
-    return dst;
-}
 template<>
 std::string Convert(const Ark_CommandPath& src)
 {

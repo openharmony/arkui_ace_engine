@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/common/container.h"
 
 #include <cstdint>
 #include <optional>
@@ -161,6 +162,7 @@ std::string SpanItem::GetFontWeightConfigs() const
 void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter,
     const RefPtr<TextPattern>& textPattern) const
 {
+    const auto& symbolStyle = this->symbolStyle;
     json->PutExtAttr("font", GetFont().c_str(), filter);
     json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
     json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
@@ -171,7 +173,8 @@ void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const Inspec
     json->PutExtAttr("textCase",
         V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
     if (spanItemType == SpanItemType::SYMBOL) {
-        const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
+        const std::optional<std::vector<Color>>& colorListOptional =
+            symbolStyle ? symbolStyle->GetSymbolColorList() : std::nullopt;
         auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
         json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
     } else {
@@ -186,12 +189,13 @@ void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const Inspec
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
     json->PutExtAttr("fontVariations", ConvertFontVariationsToJson(
         fontStyle->GetFontVariations().value_or(FONT_VARIATIONS_LIST {})), filter);
-    json->PutExtAttr("renderingStrategy",
-        GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
-    json->PutExtAttr(
-        "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
-    json->Put("symbolEffect",
-        GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
+    json->PutExtAttr("renderingStrategy", GetSymbolRenderingStrategyInJson(
+        symbolStyle ? symbolStyle->GetSymbolRenderingStrategy() : std::nullopt).c_str(), filter);
+    json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(
+        symbolStyle ? symbolStyle->GetSymbolEffectStrategy() : std::nullopt).c_str(), filter);
+    json->Put("symbolEffect", GetSymbolEffectOptionsInJson(
+        symbolStyle ? symbolStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions()) : SymbolEffectOptions())
+        .c_str());
     auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
     auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
     json->PutExtAttr("textShadow", jsonShadow, filter);
@@ -334,8 +338,11 @@ void SpanNode::DumpInfo()
         dumpLog.AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
         dumpLog.AddDesc(std::string("RenderStrategy: ").append(std::to_string(textStyle->GetRenderStrategy())));
         dumpLog.AddDesc(std::string("EffectStrategy: ").append(std::to_string(textStyle->GetEffectStrategy())));
-        dumpLog.AddDesc(std::string("SymbolEffect:").append(
-            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString()));
+        dumpLog.AddDesc(std::string("SymbolEffect:")
+            .append(spanItem_->symbolStyle ? spanItem_->symbolStyle->GetSymbolEffectOptions()
+                                                    .value_or(NG::SymbolEffectOptions())
+                                                    .ToString()
+                                            : NG::SymbolEffectOptions().ToString()));
     }
 }
 
@@ -871,8 +878,8 @@ bool SpanItem::UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<Fram
         UpdateSymbolSpanColor(frameNode, textStyle_.value());
         if (!symbolEffectSwitch_ || pattern->IsDragging()) {
             textStyle_.value().SetEffectStrategy(0);
-        } else if (fontStyle) {
-            textStyle_.value().SetEffectStrategy(fontStyle->propSymbolEffectStrategy.value_or(0));
+        } else if (symbolStyle) {
+            textStyle_.value().SetEffectStrategy(symbolStyle->propSymbolEffectStrategy.value_or(0));
         }
     }
     FontRegisterCallback(frameNode, textStyle_.value());
@@ -885,8 +892,8 @@ bool SpanItem::CheckSpanNeedReCreate(int32_t index)
     needReCreateParagraph_ |= (index != itemIndex_);
     itemIndex_ = index;
     CHECK_NULL_RETURN(unicode != 0, needReCreateParagraph_);
-    if (fontStyle && fontStyle->HasSymbolType()) {
-        return (fontStyle->GetSymbolType().value() == SymbolType::CUSTOM) | needReCreateParagraph_;
+    if (symbolStyle && symbolStyle->HasSymbolType()) {
+        return (symbolStyle->GetSymbolType().value() == SymbolType::CUSTOM) | needReCreateParagraph_;
     }
     return needReCreateParagraph_;
 }
@@ -933,11 +940,11 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeWidth, StrokeWidth);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeColor, StrokeColor);
 
-    if (isSymbol) {
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolColorList, SymbolColorList);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, RenderStrategy);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolType, SymbolType);
+    if (isSymbol && symbolStyle) {
+        UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolColorList, SymbolColorList);
+        UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolRenderingStrategy, RenderStrategy);
+        UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolEffectOptions, SymbolEffectOptions);
+        UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolType, SymbolType);
     } else {
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFamily, FontFamilies);
     }
@@ -1010,8 +1017,8 @@ void SpanItem::UpdateSymbolSpanParagraph(
     auto symbolUnicode = GetSymbolUnicode();
     symbolSpanStyle.SetTextStyleUid(nodeId_);
     symbolSpanStyle.SetSymbolUid(nodeId_);
-    if (fontStyle || textLineStyle) {
-        UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true);
+    if (fontStyle || textLineStyle || symbolStyle) {
+        UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true, symbolStyle);
         if (fontStyle && fontStyle->HasFontWeight()) {
             symbolSpanStyle.SetEnableVariableFontWeight(fontStyle->GetEnableVariableFontWeight().value_or(false));
         }
@@ -1036,7 +1043,7 @@ void SpanItem::UpdateSymbolSpanParagraph(
         builder->AddSymbol(symbolUnicode);
     }
 
-    if (fontStyle || textLineStyle) {
+    if (fontStyle || textLineStyle || symbolStyle) {
         builder->PopStyle();
     }
 }
@@ -1120,6 +1127,7 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(pattern);
+        pattern->ClearParagraphCache();
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);
@@ -1618,7 +1626,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
 
 std::string SpanItem::SymbolColorToString()
 {
-    auto colors = fontStyle->GetSymbolColorList();
+    auto colors = symbolStyle ? symbolStyle->GetSymbolColorList() : std::nullopt;
     auto colorStr = std::string("[");
     if (colors.has_value()) {
         for (const auto& color : colors.value()) {
@@ -2131,7 +2139,10 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("RenderStrategy", std::to_string(textStyle->GetRenderStrategy()).c_str());
         json->Put("EffectStrategy", std::to_string(textStyle->GetEffectStrategy()).c_str());
         json->Put("SymbolEffect",
-            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
+            (spanItem_->symbolStyle
+                    ? spanItem_->symbolStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString()
+                    : NG::SymbolEffectOptions().ToString())
+                .c_str());
     }
     json->Put("LineThicknessScale", std::to_string(textStyle->GetLineThicknessScale()).c_str());
     json->Put("TextDirection", StringUtils::ToString(textStyle->GetTextDirection()).c_str());

@@ -445,7 +445,7 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
         textColor = theme->GetTextStyle().GetTextColor();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontColor(
-        nativeNode, textColor.GetValue(), AceType::RawPtr(colorResObj));
+        nativeNode, textColor.GetValue(), AceType::RawPtr(colorResObj), false);
     return panda::JSValueRef::Undefined(vm);
 }
 

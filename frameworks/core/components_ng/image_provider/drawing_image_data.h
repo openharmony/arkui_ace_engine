@@ -27,6 +27,7 @@ struct ImageCodec {
     SizeF imageSize = { -1, -1 };
     int32_t frameCount = 1;
     ImageRotateOrientation orientation = ImageRotateOrientation::UP;
+    bool isSvg = false;
 };
 
 class DrawingImageData : public ImageData {

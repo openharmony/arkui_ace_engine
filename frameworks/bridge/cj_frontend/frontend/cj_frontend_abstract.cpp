@@ -17,13 +17,18 @@
 
 #include "securec.h"
 
+#include <mutex>
+
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_loader.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "bridge/common/accessibility/accessibility_node_manager.h"
 #include "core/common/font_manager.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_layout_inspector_ffi.h"
+#include "core/common/layout_inspector.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/navigator/navigator_type.h"
 
 using namespace OHOS::Ace::NG;
 using namespace OHOS::Ace;
@@ -77,6 +82,13 @@ bool CJFrontendAbstract::Initialize(FrontendType type, const RefPtr<OHOS::Ace::T
 
     type_ = type;
     InternalInitialize();
+    static std::once_flag profilerCallbackRegistered;
+    std::call_once(profilerCallbackRegistered, []() {
+        LayoutInspector::AppendJsStateProfilerStatusCallback([](bool enable) {
+            LOGI("CjLayoutInspector: JsStateProfilerStatusCallback enable=%{public}d", static_cast<int>(enable));
+            Framework::CjNotifyProfilerStatusToCangjie(enable);
+        });
+    });
     if (!pageRouterManager_) {
         LOGE("InternalInitialize must initialize pageRouterManager_");
         return false;

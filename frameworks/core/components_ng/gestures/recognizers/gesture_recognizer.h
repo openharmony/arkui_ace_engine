@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <unordered_set>
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/target_component.h"
@@ -267,6 +268,7 @@ public:
         responseLinkRecognizer_.clear();
         enabled_ = true;
         OnResetStatus();
+        ResetEscapeMode();
     }
 
     // called to reset status manually without rejected callback.
@@ -279,6 +281,7 @@ public:
         ClearBridgeObjList();
         responseLinkRecognizer_.clear();
         enabled_ = true;
+        ResetEscapeMode();
     }
     virtual bool CheckTouchId(int32_t touchId) = 0;
 
@@ -332,7 +335,7 @@ public:
 
     bool IsInAttachedNode(const TouchEvent& event, bool isRealTime = true);
 
-    
+
     void SetUserData(void* userData);
 
     virtual bool IsReady()
@@ -420,6 +423,35 @@ public:
     virtual void CheckCurrentFingers() const = 0;
 
     virtual void UpdateGestureReferee(const WeakPtr<NG::GestureReferee>& gestureReferee);
+
+    // ===================== Pan-gesture-escape API ============================
+    // The "escape" mechanism lets a recognizer that has just won the arena
+    // for a finger (typically a multi-selection PanRecognizer) push that
+    // finger out of every parallel recognizer (typically a system scroll Pan)
+    // *without* rejecting them. Newly-arriving fingers are still routed to
+    // those parallel recognizers normally, so the user can scroll with a
+    // second finger while the first one keeps driving multi-selection.
+    //
+    // Subclasses that hold per-finger state (touchPoints_, velocity, ...)
+    // should override OnFingerEscaped() to drop that state.
+    void SetEscapeMode(const std::unordered_set<int32_t>& existingFingers)
+    {
+        escapedFingerIds_.insert(existingFingers.begin(), existingFingers.end());
+    }
+
+    bool IsFingerEscaped(int32_t fingerId) const
+    {
+        return escapedFingerIds_.find(fingerId) != escapedFingerIds_.end();
+    }
+
+    void ResetEscapeMode()
+    {
+        escapedFingerIds_.clear();
+    }
+
+    // Hook: subclasses with per-finger state must override and clean it up.
+    virtual void OnFingerEscaped(int32_t /*fingerId*/) {}
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -451,7 +483,7 @@ protected:
 
     void HandleWillAccept();
     void HandleDidAccept();
-    
+
     void ReconcileGestureInfoFrom(const RefPtr<NGGestureRecognizer>& recognizer);
     bool ProcessTouchEvent(const TouchEvent& point);
     void HandleTouchDown(const TouchEvent& point);
@@ -459,6 +491,7 @@ protected:
     void HandleTouchCancel(const TouchEvent& point);
     void HandleGestureAccept(const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType);
     void ReportToGestureDebugManager(GestureCallbackType type, GestureListenerType listenerType);
+    void SetGestureEventCurrentLocalLocation(GestureEvent& info, const TouchEvent& touchPoint);
     virtual bool CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer)
     {
         return false;
@@ -511,6 +544,8 @@ protected:
     std::vector<Matrix4> localMatrix_ = {};
     bool preventBegin_ = false;
     WeakPtr<NG::GestureReferee> referee_;
+
+    std::unordered_set<int32_t> escapedFingerIds_;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

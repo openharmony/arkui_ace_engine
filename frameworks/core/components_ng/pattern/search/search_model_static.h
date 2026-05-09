@@ -53,6 +53,7 @@ public:
     static void SetTextDecoration(FrameNode* frameNode, const std::optional<Ace::TextDecoration>& valueOpt);
     static void SetTextDecorationColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);
     static void SetTextDecorationStyle(FrameNode* frameNode, const std::optional<Ace::TextDecorationStyle>& valueOpt);
+    static void SetLineThicknessScale(FrameNode* frameNode, const std::optional<float>& valueOpt);
     static void SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& value);

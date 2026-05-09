@@ -82,6 +82,8 @@ ACE_EXPORT extern const char JS_REPEAT_ETS_TAG[];
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
 // js with theme node
 ACE_EXPORT extern const char JS_WITH_THEME_ETS_TAG[];
+// js with env node
+ACE_EXPORT extern const char JS_WITH_ENV_ETS_TAG[];
 // js node slot node
 ACE_EXPORT extern const char JS_NODE_SLOT_ETS_TAG[];
 // js toast node
@@ -133,6 +135,7 @@ ACE_EXPORT extern const char INDICATOR_ETS_TAG[];
 // tabs
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];
 ACE_EXPORT extern const char TABS_ETS_TAG[];
+ACE_EXPORT extern const char TABS_BACKGROUND_MASK_ETS_TAG[];
 
 // tab content item
 ACE_EXPORT extern const char TAB_CONTENT_ITEM_COMPONENT_TAG[];
@@ -461,6 +464,10 @@ ACE_EXPORT extern const char GRID_COL_ETS_TAG[];
 ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[];
 ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
 
+// containerReader
+ACE_EXPORT extern const char CONTAINER_READER_COMPONENT_TAG[];
+ACE_EXPORT extern const char CONTAINER_READER_ETS_TAG[];
+
 // relativeContainer
 ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[];
 ACE_FORCE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
@@ -702,5 +709,11 @@ ACE_EXPORT extern const char UNION_EFFECT_CONTAINER_ETS_TAG[];
 
 // Custom
 ACE_EXPORT extern const char CUSTOM_ETS_TAG[];
+
+// LazyColumnLayout
+ACE_EXPORT extern const char LAZY_COLUMN_LAYOUT_ETS_TAG[];
+
+// LazyVWaterFlowLayout
+ACE_EXPORT extern const char LAZY_V_WATERFLOW_LAYOUT_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

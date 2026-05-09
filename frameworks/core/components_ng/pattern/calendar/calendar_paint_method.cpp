@@ -31,6 +31,8 @@
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

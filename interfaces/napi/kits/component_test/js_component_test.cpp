@@ -260,7 +260,7 @@ napi_value JSAssertContain(napi_env env, napi_callback_info info)
 
 napi_value ResourceToNapiString(napi_env env, napi_value resource)
 {
-    CompleteResourceParam(env, resource);
+    CompleteResourceParam(env, resource, false);
     ResourceInfo resourceInfo;
     std::string resourceStr;
     if (ParseResourceParam(env, resource, resourceInfo)) {

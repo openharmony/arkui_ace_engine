@@ -17,7 +17,9 @@
 
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {

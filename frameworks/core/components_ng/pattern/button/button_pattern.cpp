@@ -657,12 +657,6 @@ void ButtonPattern::UpdateTextStyle(
         ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
         Color fontColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
         textLayoutProperty->UpdateTextColor(fontColor);
-
-        auto textNode = textLayoutProperty->GetHost();
-        CHECK_NULL_VOID(textNode);
-        auto textRenderContext = textNode->GetRenderContext();
-        CHECK_NULL_VOID(textRenderContext);
-        textRenderContext->UpdateForegroundColor(fontColor);
     }
     if (!textLayoutProperty->HasFontSize()) {
         ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
@@ -1441,9 +1435,7 @@ void ButtonPattern::OnColorConfigurationUpdate()
     if (buttonLayoutProperty->GetCreateWithLabelValue(true)) {
         node->SetNeedCallChildrenUpdate(false);
     }
-    auto pipeline = node->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto buttonTheme = node->GetTheme<ButtonTheme>(true);
     ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
     auto renderContext = node->GetRenderContext();
@@ -1473,7 +1465,7 @@ bool ButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, result);
     if ((!layoutProperty->GetFontColorFlagByUser().value_or(false)) ||
-        (!layoutProperty->GetBackgroundColorFlagByUser().value_or(false))) {
+        (!layoutProperty->GetIsUserSetBackgroundColor())) {
         result = true;
     }
     auto host = GetHost();
@@ -1482,22 +1474,28 @@ bool ButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(buttonTheme, result);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    auto backgroundColor = buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    auto fontColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, result);
     if (layoutProperty->GetLabel().has_value() && !layoutProperty->GetFontColorFlagByUser().value_or(false)) {
         auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
         CHECK_NULL_RETURN(textNode, result);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, result);
-        Color fontColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
         textLayoutProperty->UpdateTextColor(fontColor);
 
-        auto textRenderContext = textNode->GetRenderContext();
-        CHECK_NULL_RETURN(textRenderContext, result);
-        textRenderContext->UpdateForegroundColor(fontColor);
+        if (SystemProperties::ConfigChangePerform()) {
+            if (renderContext->HasForegroundColor() && renderContext->GetForegroundColorValue() == themeTextColor_) {
+                renderContext->UpdateForegroundColor(fontColor);
+                PropagateForegroundColorToChildren();
+            }
+        }
+        themeTextColor_ = fontColor;
     }
-    if (!layoutProperty->GetBackgroundColorFlagByUser().value_or(false)) {
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, result);
-        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
+    if (!layoutProperty->GetIsUserSetBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(backgroundColor);
+        themeBgColor_ = backgroundColor;
     }
     return result;
 }

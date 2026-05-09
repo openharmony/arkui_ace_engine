@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/web/web_context_menu_overlay.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include <algorithm>
 #include <optional>
@@ -22,6 +23,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

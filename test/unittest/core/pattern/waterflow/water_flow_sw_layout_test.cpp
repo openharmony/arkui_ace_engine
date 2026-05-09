@@ -17,6 +17,8 @@
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
+#include "core/common/container.h"
+
 #define private public
 #define protected public
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"

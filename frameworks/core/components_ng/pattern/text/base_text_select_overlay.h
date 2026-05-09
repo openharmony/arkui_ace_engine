@@ -275,6 +275,7 @@ public:
     void MarkOverlayDirty();
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void UpdateHandleColor();
+    ACE_FORCE_EXPORT void UpdateMenuFromThemeChange(int32_t themeScopeId);
     void UpdateAIMenu();
     virtual std::optional<Color> GetHandleColor()
     {

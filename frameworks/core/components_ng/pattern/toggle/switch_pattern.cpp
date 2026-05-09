@@ -28,7 +28,9 @@
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/adapter/rosen_effect_converter.h"
 #include "core/components/common/properties/blur_style_option.h"
+#include "ui/properties/ui_material_structs.h"
 #include "core/animation/curve.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -59,7 +61,6 @@ constexpr float LOW_GRADE_SPRING_MASS = 1.0f;
 constexpr float LOW_GRADE_SPRING_STIFFNESS = 224.0f;
 constexpr float LOW_GRADE_SPRING_DAMPING = 12.0f;
 
-constexpr float BLUR_SCALE_DRAG_FRAME = 0.03f;
 constexpr int32_t LONG_PRESS_DELAY_MS = 400;
 
 constexpr int32_t  HOTZONE_SPACE = 2;
@@ -488,6 +489,7 @@ void SwitchPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
+    pendingHide_ = false;
     ShowMaterialNode();
     StartLongPressTimer();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -510,7 +512,11 @@ void SwitchPattern::OnTouchUp()
     if (longPressTask_) {
         longPressTask_.Cancel();
     }
-    HideMaterialNode();
+    if (IsHighGradeMaterial() && HasSystemMaterial() && (dragPointNode_ || dragFrameNode_)) {
+        pendingHide_ = true;
+    } else {
+        HideMaterialNode();
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     FireBuilder();
 }
@@ -587,6 +593,11 @@ void SwitchPattern::HandleLongPress()
 {
     if (!HasSystemMaterial()) { return; }
     if (IsHighGradeMaterial()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetAlphaOffscreen(false);
         HandleHighGradeLongPress();
     } else {
         HandleLowGradeLongPress();
@@ -994,6 +1005,9 @@ void SwitchPattern::HideMaterialNodes()
     if (blurCoverNode_) {
         host->RemoveChild(blurCoverNode_);
     }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
 }
 
 void SwitchPattern::CreateDragFrameNode()
@@ -1022,7 +1036,6 @@ void SwitchPattern::CreateDragFrameNode()
     borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
     renderContext->UpdateBorderRadius(borderRadius);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    renderContext->UpdateFrontBlurStyle(CreateDragBlurStyleOption(BLUR_SCALE_DRAG_FRAME));
 
     dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
@@ -1056,19 +1069,23 @@ void SwitchPattern::CreateDragPointNode()
     auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    auto pointRadius = GetPointRadius();
-    auto pointDiameter = pointRadius * NUMBER_TWO;
-
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(Dimension(pointDiameter / NUMBER_TWO, DimensionUnit::PX));
-    renderContext->UpdateBorderRadius(borderRadius);
+    auto trackWidth = size_.Width();
+    auto trackHeight = size_.Height();
+    float halfHeight = trackHeight / NUMBER_TWO;
 
     dragPointNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pointDiameter), CalcLength(pointDiameter)));
+        CalcSize(CalcLength(trackWidth), CalcLength(trackHeight)));
 
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(halfHeight, DimensionUnit::PX));
+    renderContext->UpdateBorderRadius(borderRadius);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+    auto pointRadius = GetPointRadius();
+    float initialLightX = isOn_.value_or(false) ? (trackWidth - halfHeight) : halfHeight;
     if (paintProperty->HasSwitchPointColor()) {
         ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
-            CalcDimension(pointRadius, DimensionUnit::PX), CalcDimension(pointRadius, DimensionUnit::PX),
+            CalcDimension(initialLightX, DimensionUnit::PX), CalcDimension(halfHeight, DimensionUnit::PX),
             CalcDimension(pointRadius, DimensionUnit::PX));
         ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), paintProperty->GetSwitchPointColor().value());
         ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 6.0f);
@@ -1096,7 +1113,6 @@ void SwitchPattern::CreateBlurCoverNode()
     CHECK_NULL_VOID(paintProperty);
 
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    renderContext->UpdateFrontBlurStyle(CreateDragBlurStyleOption(BLUR_SCALE_DRAG_FRAME));
 
     auto pointRadius = GetPointRadius();
     auto pointDiameter = pointRadius * NUMBER_TWO;
@@ -1144,13 +1160,16 @@ void SwitchPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
         }
     }
     if (dragPointNode_) {
-        float pointNodeX = centerX - pointDiameter / NUMBER_TWO;
-        float pointNodeY = centerY - pointDiameter / NUMBER_TWO;
-        dragPointNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(pointDiameter), CalcLength(pointDiameter)));
         auto pointRC = dragPointNode_->GetRenderContext();
         if (pointRC) {
-            pointRC->UpdatePosition(OffsetT<Dimension>(Dimension(pointNodeX), Dimension(pointNodeY)));
+            auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+            if (paintProperty && paintProperty->HasSwitchPointColor()) {
+                float lightX = centerX - offset_.GetX();
+                float lightY = centerY - offset_.GetY();
+                ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
+                    CalcDimension(lightX, DimensionUnit::PX), CalcDimension(lightY, DimensionUnit::PX),
+                    CalcDimension(pointRadius, DimensionUnit::PX));
+            }
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -1166,6 +1185,14 @@ void SwitchPattern::RegisterMaterialNodePositionCallback()
             CHECK_NULL_VOID(pattern);
             pattern->UpdateMaterialNodePosition(centerX, centerY, pointRadius);
         });
+    paintMethod_->SetSlideFinishedCallback(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            if (pattern && pattern->pendingHide_) {
+                pattern->pendingHide_ = false;
+                pattern->HideMaterialNode();
+            }
+        });
 }
 
 void SwitchPattern::ShowMaterialNode()
@@ -1179,10 +1206,16 @@ void SwitchPattern::ShowMaterialNode()
     CHECK_NULL_VOID(host);
     auto pointRC = dragPointNode_ ? dragPointNode_->GetRenderContext() : nullptr;
     auto blurRC = blurCoverNode_ ? blurCoverNode_->GetRenderContext() : nullptr;
-    if (dragPointNode_) { host->AddChild(dragPointNode_); }
+    if (dragPointNode_) {
+        auto pointRCNonNull = dragPointNode_->GetRenderContext();
+        if (pointRCNonNull) {
+            pointRCNonNull->UpdatePosition(
+                OffsetT<Dimension>(Dimension(offset_.GetX()), Dimension(offset_.GetY())));
+        }
+        host->AddChild(dragPointNode_);
+    }
     if (blurCoverNode_) {
         host->AddChild(blurCoverNode_);
-        blurCoverNode_->GetRenderContext()->UpdateFrontBlurStyle(CreateDragBlurStyleOption(BLUR_SCALE_DRAG_FRAME));
     }
     RegisterMaterialNodePositionCallback();
     AnimationUtils::ExecuteWithoutAnimation(
@@ -1268,23 +1301,21 @@ void SwitchPattern::AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
         if (frameRC) {
             frameRC->UpdateOpacity(0.0);
             frameRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
-            frameRC->UpdateFrontBlurStyle(CreateDragBlurStyleOption(0.0f));
         }
     }
     if (pointRC) {
         pointRC->UpdateOpacity(0.0);
-        pointRC->UpdateFrontBlurStyle(CreateDragBlurStyleOption(0.0f));
     }
     if (blurRC) {
         blurRC->UpdateOpacity(0.0);
         blurRC->UpdateTransformScale({ DRAG_FRAME_PRESS_START_SCALE, DRAG_FRAME_PRESS_START_SCALE });
-        blurRC->UpdateFrontBlurStyle(CreateDragBlurStyleOption(0.0f));
     }
     if (switchModifier) { switchModifier->SetPointAlpha(1.0f); }
 }
 
 void SwitchPattern::HideMaterialNode()
 {
+    pendingHide_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!IsHighGradeMaterial()) {
@@ -1319,17 +1350,44 @@ void SwitchPattern::ApplyDragFrameNodeSystemMaterial()
     CHECK_NULL_VOID(dragFrameNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hostRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(hostRenderContext);
-    auto material = hostRenderContext->GetSystemMaterial();
-    if (material &&
-        material->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
-        material->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+
+    static const FrostedGlassParam dragFrameMaterialParam {
+        .blurParams = { 2.0f, 1.0f },
+        .weightsEmboss = { 0.8f, 0.8f },
+        .weightsEdl = { 1.0f, 0.7f },
+        .bgRates = { 0.1789f, -0.6972f },
+        .bgKBS = { 1.4384f, 0.0718f, 1.2f },
+        .bgPos = { 0.3f, 0.5f, 1.0f },
+        .bgNeg = { 0.5f, 0.5f, 1.0f },
+        .refractParams = { -0.06f, 0.16f, 0.22f },
+        .edLightParams = { 0.62f, 0.92f },
+        .edLightAngles = { 75.0f, 120.0f },
+        .edLightDir = { 0.0f, -1.0f },
+        .edLightRates = {},
+        .edLightKBS = { 1.0f, 0.1568f, 1.2f },
+        .edLightPos = { 1.0f, 1.5f, 2.0f },
+        .edLightNeg = { 1.7f, 3.0f, 1.0f },
+        .darkModeBlurParams = { 5.0f, 20.0f },
+        .darkModeWeightsEmboss = { 0.8f, 0.8f },
+        .darkModeBgRates = { 0.0023f, -0.0176f },
+        .darkModeBgKBS = { 0.8414f, 0.0765f, 1.2f },
+        .darkModeBgPos = { 0.3f, 1.0f, 1.0f },
+        .darkModeBgNeg = { 1.2f, 2.5f, 1.0f },
+        .darkModeEdLightAngles = { 75.0f, 120.0f },
+        .darkModeEdLightKBS = { 1.0f, 0.2268f, 1.2f },
+    };
+
+    float dipScale = static_cast<float>(pipeline->GetDipScale());
+    auto filter = RosenEffectConverter::ConvertToFrostedGlassFilter(dragFrameMaterialParam, dipScale);
+    if (filter) {
         auto renderContext = dragFrameNode_->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(dragFrameNode_), AceType::RawPtr(material));
-        ResetHostMaterialEffects();
+        if (renderContext) {
+            renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
+        }
     }
+    ResetHostMaterialEffects();
 }
 
 // Set the default hot zone for the component.

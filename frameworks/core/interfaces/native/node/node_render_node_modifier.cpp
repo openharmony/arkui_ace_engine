@@ -18,10 +18,12 @@
 #include "render_service_base/include/render/rs_mask.h"
 #include "render_service_client/core/modifier_ng/rs_modifier_ng.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_node_ext/custom_node_ext_modifier.h"
 #include "core/pipeline/base/render_node.h"
@@ -2046,6 +2048,110 @@ void DeleteInnerRenderNodeStruct(ArkUIRenderNodeHandle node)
     delete nodeStruct;
 }
 
+int32_t SetBackgroundBlurOption(ArkUIRenderNodeHandle handle, float blurRadius)
+{
+    ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
+    auto rsNode = GetRsNodeFromStruct(handle);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto filter = std::make_shared<Rosen::RSNGBlurFilter>();
+    filter->Setter<Rosen::BlurRadiusXTag>(blurRadius);
+    filter->Setter<Rosen::BlurRadiusYTag>(blurRadius);
+    rsNode->SetBackgroundNGFilter(filter);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t ResetBackgroundBlurOption(ArkUIRenderNodeHandle handle)
+{
+    ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
+    auto rsNode = GetRsNodeFromStruct(handle);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    rsNode->SetBackgroundNGFilter(nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetForegroundBlurOption(ArkUIRenderNodeHandle handle, float blurRadius)
+{
+    ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
+    auto rsNode = GetRsNodeFromStruct(handle);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto filter = std::make_shared<Rosen::RSNGBlurFilter>();
+    filter->Setter<Rosen::BlurRadiusXTag>(blurRadius);
+    filter->Setter<Rosen::BlurRadiusYTag>(blurRadius);
+    rsNode->SetForegroundNGFilter(filter);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t ResetForegroundBlurOption(ArkUIRenderNodeHandle handle)
+{
+    ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
+    auto rsNode = GetRsNodeFromStruct(handle);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    rsNode->SetForegroundNGFilter(nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetContentBlurOption(ArkUIRenderNodeHandle handle, float blurRadius)
+{
+    ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
+    auto rsNode = GetRsNodeFromStruct(handle);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto filter = std::make_shared<Rosen::RSNGBlurFilter>();
+    filter->Setter<Rosen::BlurRadiusXTag>(blurRadius);
+    filter->Setter<Rosen::BlurRadiusYTag>(blurRadius);
+    rsNode->SetCompositingNGFilter(filter);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t ResetContentBlurOption(ArkUIRenderNodeHandle handle)
+{
+    ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        SetRenderNodeFromAdoptedFrameError();
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
+    auto rsNode = GetRsNodeFromStruct(handle);
+    if (!rsNode) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "Render node is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    rsNode->SetCompositingNGFilter(nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
 } // namespace
 namespace NodeModifier {
 const ArkUINDKRenderNodeModifier* GetNDKRenderNodeModifier()
@@ -2148,6 +2254,12 @@ const ArkUINDKRenderNodeModifier* GetNDKRenderNodeModifier()
         .getRenderNode = GetRenderNode,
         .removeAdoptedChild = RemoveAdoptedChild,
         .deleteInnerRenderNodeStruct = DeleteInnerRenderNodeStruct,
+        .setBackgroundBlurOption = SetBackgroundBlurOption,
+        .resetBackgroundBlurOption = ResetBackgroundBlurOption,
+        .setForegroundBlurOption = SetForegroundBlurOption,
+        .resetForegroundBlurOption = ResetForegroundBlurOption,
+        .setContentBlurOption = SetContentBlurOption,
+        .resetContentBlurOption = ResetContentBlurOption,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

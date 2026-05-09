@@ -40,6 +40,7 @@ public:
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void ResetTextColor() {};
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetVariableFontWeight(int32_t value) = 0;

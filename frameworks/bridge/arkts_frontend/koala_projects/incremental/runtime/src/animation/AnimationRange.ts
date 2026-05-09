@@ -33,7 +33,7 @@ export function ArrayAnimationRange<Value>(from: ReadonlyArray<float64>, to: Rea
     if (to.length !== length) {
         throw new Error('sizes of input arrays do not match')
     }
-    const array = new Array<float64>(length)
+    const array = Array.create<float64>(length, 0)
     return (weight: float64) => {
         if (from.length !== length) {
             throw new Error('size of the first input array is changed unexpectedly')

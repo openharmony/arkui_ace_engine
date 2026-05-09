@@ -23,6 +23,17 @@
 namespace OHOS::Ace::NG {
 
 /**
+ * @brief Statistics for child nodes (calculated in single pass)
+ */
+struct ChildStatistics {
+    double sumOfAllChildHeight = 0.0;
+    double sumOfAllChildWidth = 0.0;
+    double maxChildWidth = 0.0;
+    double maxChildHeight = 0.0;
+    size_t childCount = 0;
+};
+
+/**
  * @brief Constraint builder for smart layout algorithm
  *
  * This class handles the creation and addition of constraints to the SMT solver
@@ -52,32 +63,11 @@ public:
     void AddDefaultConstraints(SmartLayoutNode& parent);
 
     /**
-     * @brief Get sum of all child heights
+     * @brief Calculate all child statistics in a single pass
      * @param parent Parent node containing children
-     * @return Sum of child heights
+     * @return ChildStatistics with all aggregated values
      */
-    static double GetSumOfAllChildHeight(const SmartLayoutNode& parent);
-
-    /**
-     * @brief Get sum of all child widths
-     * @param parent Parent node containing children
-     * @return Sum of child widths
-     */
-    static double GetSumOfAllChildWidth(const SmartLayoutNode& parent);
-
-    /**
-     * @brief Get maximum width of all child nodes
-     * @param parent Parent node containing children
-     * @return Maximum child width
-     */
-    static double GetMaxWidthOfAllChild(const SmartLayoutNode& parent);
-
-    /**
-     * @brief Get maximum height of all child nodes
-     * @param parent Parent node containing children
-     * @return Maximum child height
-     */
-    static double GetMaxHeightOfAllChild(const SmartLayoutNode& parent);
+    static ChildStatistics CalculateChildStatistics(const SmartLayoutNode& parent);
 
 private:
     /**

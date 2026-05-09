@@ -533,6 +533,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setSmartGestureShortcut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setInspectorLabel(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setExpandSafeArea(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setIgnoreLayoutSafeArea(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -609,7 +611,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setBindSheet(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setOnVisibleAreaChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _CommonMethod_setOnVisibleAreaChange0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _CommonMethod_setOnVisibleAreaChange1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setOnVisibleAreaApproximateChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -1008,7 +1012,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Image_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _ImageInterface_setImageOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _ImageInterface_setImageOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ImageInterface_setImageOptions1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ImageInterface_setImageOptions2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ImageAttribute_setAlt(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2070,6 +2078,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SelectAttribute_setMenuSystemMaterial(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SelectAttribute_setMenuBackgroundBlurStyleOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectAttribute_setMenuBackgroundEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _SelectAttribute_setMenuAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _Shape_construct(id: KInt, flags: KInt): KPointer
@@ -2127,6 +2139,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SideBarContainerAttribute_setDivider(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SideBarContainerAttribute_setMinContentWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SideBarContainerAttribute_setShowSideBarWithGesture(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _Slider_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -2316,7 +2330,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SymbolSpanAttribute_setFontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _SymbolSpanAttribute_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _SymbolSpanAttribute_setFontWeight0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolSpanAttribute_setEffectStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2325,6 +2339,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SymbolSpanAttribute_setKey(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolSpanAttribute_setId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setFontWeight1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
     native static _SymbolSpanAttribute_setDebugLine(ptr: KPointer, sourceLine: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2338,7 +2354,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _SymbolGlyphAttribute_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _SymbolGlyphAttribute_setFontWeight0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setEffectStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2353,6 +2369,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SymbolGlyphAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SymbolGlyphAttribute_setFontWeight1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -3051,6 +3069,10 @@ export class ArkUIGeneratedNativeModule {
     native static _UIPickerComponentAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _UIPickerComponentAttribute_setSelectionIndicator(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _UIPickerComponentAttribute_setItemHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _UIPickerComponentAttribute_setDisplayedItemCount(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _UnionEffectContainer_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -4503,6 +4525,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DragEvent_executeDropAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _DragEvent_executeFollowHandMorphDropAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _DragEvent_getDisplayId(ptr: KPointer): KInt
     @ani.unsafe.Quick
     native static _DragEvent_getDragSource(ptr: KPointer): KInteropReturnBuffer
@@ -4524,6 +4548,10 @@ export class ArkUIGeneratedNativeModule {
     native static _DragEvent_getAutoHideComponentUniqueIds(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _DragEvent_setAutoHideComponentUniqueIds(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _DragEvent_getDragAnimationType(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _DragEvent_setDragAnimationType(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _DragEvent_setGetModifierKeyState(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -4727,7 +4755,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getParent(peer: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getChildrenCount(peer: KPointer): KInt
+    native static _FrameNodeExtender_getChildrenCount(peer: KPointer, childrenCountMode: number): KInt
     @ani.unsafe.Direct
     native static _FrameNodeExtender_dispose(peer: KPointer): void
     @ani.unsafe.Quick
@@ -5869,25 +5897,25 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PanGestureEvent_setVelocity(ptr: KPointer, velocity: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    native static _PanGestureOptionsProxy_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct
-    native static _PanGestureOptions_getFinalizer(): KPointer
+    native static _PanGestureOptionsProxy_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _PanGestureOptions_setDirection(ptr: KPointer, value: KInt): void
+    native static _PanGestureOptionsProxy_setDirection(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_setDistance(ptr: KPointer, value: KDouble): void
+    native static _PanGestureOptionsProxy_setDistance(ptr: KPointer, value: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_setFingers(ptr: KPointer, value: KInt): void
+    native static _PanGestureOptionsProxy_setFingers(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_getDirection(ptr: KPointer): KInt
+    native static _PanGestureOptionsProxy_getDirection(ptr: KPointer): KInt
     @ani.unsafe.Direct
-    native static _PanGestureOptions_getDistance(ptr: KPointer): KDouble
+    native static _PanGestureOptionsProxy_getDistance(ptr: KPointer): KDouble
     @ani.unsafe.Direct
     native static _PanRecognizer_construct(): KPointer
     @ani.unsafe.Direct
     native static _PanRecognizer_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _PanRecognizer_getPanGestureOptions(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _PanRecognizer_getPanGestureOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _PanRecognizer_getDirection(ptr: KPointer): KInt
     @ani.unsafe.Direct
@@ -6142,6 +6170,12 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNodeExtender_clearChildren(peer: KPointer): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_invalidate(peer: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setBackgroundBlur(peer: KPointer, radius: KDouble, grayscale1: KInt, grayscale2: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setContentBlur(peer: KPointer, radius: KDouble, grayscale1: KInt, grayscale2: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setForegroundBlur(peer: KPointer, radius: KDouble): void
     @ani.unsafe.Quick
     native static _RenderServiceNode_getNodeId(nodeId: KStringPtr): KInt
     @ani.unsafe.Direct

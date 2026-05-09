@@ -236,19 +236,15 @@ template("declarative_js_engine") {
       "ark_mock:mock",
       "ark_prefetcher:prefetcher",
       ":shape",
+      ":withenv",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
       "ark_theme/theme_manager:ark_theme",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
       "ark_component/components:module_group",
+      ":uicontext"
     ]
-
-    if (!is_arkui_x) {
-      deps += [ ":uicontext" ]
-    } else {
-      deps += [ ":gen_obj_src_js_uicontext" ]
-    }
 
     configs = [ "$ace_root:ace_config" ]
     if (ace_engine_feature_enable_point_light) {
@@ -360,6 +356,7 @@ template("declarative_js_engine") {
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_lazy_grid.cpp",
       "jsview/js_line.cpp",
+      "jsview/js_with_env.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
       "jsview/js_linear_indicator_controller.cpp",
@@ -778,19 +775,15 @@ template("declarative_js_engine_ng") {
       "ark_mock:mock",
       "ark_prefetcher:prefetcher",
       ":shape",
+      ":withenv",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
       "ark_theme/theme_manager:ark_theme",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
       "ark_component/components:module_group",
+      ":uicontext"
     ]
-
-    if (!is_arkui_x) {
-      deps += [ ":uicontext" ]
-    } else {
-      deps += [ ":gen_obj_src_js_uicontext" ]
-    }
 
     configs = [ "$ace_root:ace_config" ]
 
@@ -907,6 +900,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_lazy_grid.cpp",
       "jsview/js_line.cpp",
+      "jsview/js_with_env.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
       "jsview/js_linear_indicator_controller.cpp",
@@ -1157,10 +1151,12 @@ template("declarative_js_engine_ng") {
     if (is_arkui_x) {
       sources -= [
         "interfaces/profiler/js_profiler.cpp",
+        "jsview/js_depth_component.cpp",
         "jsview/js_location_button.cpp",
         "jsview/js_paste_button.cpp",
         "jsview/js_save_button.cpp",
         "jsview/js_sec_button_base.cpp",
+        "jsview/js_with_env.cpp",
         "jsview/text_menu/js_text_menu.cpp",
       ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
@@ -1290,6 +1286,15 @@ ohos_abc("uicontext") {
 ohos_abc("ark_theme_control") {
   sources = [ "engine/arkThemeControl.js" ]
   output_name = "theme"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("withenv") {
+  sources = [ "engine/jsWithEnv.js" ]
+  output_name = "withenv"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

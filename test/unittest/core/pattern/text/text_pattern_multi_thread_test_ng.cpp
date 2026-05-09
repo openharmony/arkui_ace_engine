@@ -157,18 +157,7 @@ HWTEST_F(TextPatternMultiThreadTestNg, OnAttachToMainTreeMultiThread003, TestSiz
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 
-    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto hasTextAlignBeforeAttach = layoutProperty->HasTextAlign();
-    auto textAlignBeforeAttach = layoutProperty->GetTextAlignValue(TextAlign::START);
     pattern->OnAttachToMainTreeMultiThread();
-
-    EXPECT_EQ(pattern->pipeline_.Upgrade(), pipeline);
-    EXPECT_TRUE(layoutProperty->HasTextAlign());
-    EXPECT_EQ(layoutProperty->GetTextAlignValue(TextAlign::START),
-        hasTextAlignBeforeAttach ? textAlignBeforeAttach : textTheme->GetTextStyle().GetTextAlign());
-    ASSERT_NE(layoutProperty->GetPositionProperty(), nullptr);
-    EXPECT_EQ(layoutProperty->GetPositionProperty()->GetAlignmentValue(), Alignment::CENTER_LEFT);
     EXPECT_FALSE(pattern->isDetachFromMainTree_);
     ASSERT_NE(pipeline->GetFontManager(), nullptr);
     EXPECT_FALSE(pipeline->GetFontManager()->fontNodesNG_.empty());

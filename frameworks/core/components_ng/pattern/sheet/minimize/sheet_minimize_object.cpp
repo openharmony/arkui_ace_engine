@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/sheet/minimize/sheet_minimize_object.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/sheet/minimize/sheet_presentation_minimize_layout_algorithm.h"
 
 

@@ -32,6 +32,7 @@ public:
     void SetFontSize(const Dimension& value) override;
     void ResetFontSize();
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void ResetItalicFontStyle();
     void SetFontWeight(FontWeight value) override;

@@ -53,12 +53,16 @@ struct AsyncContext {
     int32_t status = -1;
 };
 
-std::unordered_map<int32_t, std::string> ASYNC_ERROR_MAP = {
-    { ERROR_CODE_FROM_HTML_CONVERT_ERROR, "Convert error." },
-    { ERROR_CODE_STYLED_STRING_CONVERT_ERROR, "Styled string decode error."},
-    { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
-        "2. Incorrect parameter types; 3. Parameter verification failed." }
-};
+const std::unordered_map<int32_t, std::string>& GetAsyncErrorMap()
+{
+    static const std::unordered_map<int32_t, std::string> ASYNC_ERROR_MAP = {
+        { ERROR_CODE_FROM_HTML_CONVERT_ERROR, "Convert error." },
+        { ERROR_CODE_STYLED_STRING_CONVERT_ERROR, "Styled string decode error."},
+        { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
+            "2. Incorrect parameter types; 3. Parameter verification failed." }
+    };
+    return ASYNC_ERROR_MAP;
+}
 
 napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")
 {
@@ -87,7 +91,8 @@ void ProcessPromiseCallback(std::shared_ptr<HtmlConverterAsyncCtx> asyncContext,
     if (callbackCode == ERROR_CODE_NO_ERROR) {
         napi_resolve_deferred(asyncContext->env, asyncContext->deferred, spanStr);
     } else {
-        napi_value error = CreateErrorValue(asyncContext->env, callbackCode, ASYNC_ERROR_MAP[callbackCode]);
+        auto& asyncErrorMap = GetAsyncErrorMap();
+        napi_value error = CreateErrorValue(asyncContext->env, callbackCode, asyncErrorMap.at(callbackCode));
         napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
     }
     napi_close_handle_scope(asyncContext->env, scope);
@@ -104,7 +109,8 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
     napi_create_promise(env, &deferred, &promise);
 
     if (errCode != ERROR_CODE_NO_ERROR) {
-        napi_value result = CreateErrorValue(env, errCode, ASYNC_ERROR_MAP[errCode]);
+        auto& asyncErrorMap = GetAsyncErrorMap();
+        napi_value result = CreateErrorValue(env, errCode, asyncErrorMap.at(errCode));
         napi_reject_deferred(env, deferred, result);
     } else {
         napi_value result = nullptr;
@@ -126,24 +132,33 @@ static std::atomic<int32_t> customSpanStoreIndex_;
 const std::string CUSTOM_STORE_KEY = "STYLED_STRING_CUSTOM_STORE_";
 };
 
-const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
-    SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
-    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor, SpanType::Url,
-    SpanType::LineSpacing };
+const std::unordered_set<SpanType>& GetSpanTypeMap()
+{
+    static const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
+        SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
+        SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor, SpanType::Url,
+        SpanType::LineSpacing };
+    return types;
+}
 
-const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>> spanCreators = {
-    { SpanType::Font, JSSpanString::CreateJsFontSpan }, { SpanType::Decoration, JSSpanString::CreateJsDecorationSpan },
-    { SpanType::BaselineOffset, JSSpanString::CreateJsBaselineOffsetSpan },
-    { SpanType::LetterSpacing, JSSpanString::CreateJsLetterSpacingSpan },
-    { SpanType::Gesture, JSSpanString::CreateJsGestureSpan },
-    { SpanType::TextShadow, JSSpanString::CreateJsTextShadowSpan },
-    { SpanType::BackgroundColor, JSSpanString::CreateJSBackgroundColorSpan },
-    { SpanType::LineHeight, JSSpanString::CreateJsLineHeightSpan },
-    { SpanType::Image, JSSpanString::CreateJsImageSpan },
-    { SpanType::ParagraphStyle, JSSpanString::CreateJsParagraphStyleSpan },
-    { SpanType::Url, JSSpanString::CreateJsUrlSpan },
-    { SpanType::LineSpacing, JSSpanString::CreateJsLineSpacingSpan },
-};
+const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>>& GetSpanCreatorsMap()
+{
+    static const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>> spanCreators = {
+        { SpanType::Font, JSSpanString::CreateJsFontSpan },
+        { SpanType::Decoration, JSSpanString::CreateJsDecorationSpan },
+        { SpanType::BaselineOffset, JSSpanString::CreateJsBaselineOffsetSpan },
+        { SpanType::LetterSpacing, JSSpanString::CreateJsLetterSpacingSpan },
+        { SpanType::Gesture, JSSpanString::CreateJsGestureSpan },
+        { SpanType::TextShadow, JSSpanString::CreateJsTextShadowSpan },
+        { SpanType::BackgroundColor, JSSpanString::CreateJSBackgroundColorSpan },
+        { SpanType::LineHeight, JSSpanString::CreateJsLineHeightSpan },
+        { SpanType::Image, JSSpanString::CreateJsImageSpan },
+        { SpanType::ParagraphStyle, JSSpanString::CreateJsParagraphStyleSpan },
+        { SpanType::Url, JSSpanString::CreateJsUrlSpan },
+        { SpanType::LineSpacing, JSSpanString::CreateJsLineSpacingSpan },
+    };
+    return spanCreators;
+}
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
@@ -322,6 +337,7 @@ JSRef<JSObject> JSSpanString::CreateJsSpanObject(const RefPtr<SpanBase>& spanObj
 {
     JSRef<JSObject> obj;
     auto type = spanObject->GetSpanType();
+    auto& spanCreators = GetSpanCreatorsMap();
     auto it = spanCreators.find(type);
     if (it != spanCreators.end()) {
         obj = it->second(spanObject);
@@ -691,6 +707,7 @@ RefPtr<SpanBase> JSSpanString::ParseJsUrlSpan(int32_t start, int32_t length, con
 
 bool JSSpanString::CheckSpanType(int32_t spanType)
 {
+    auto& types = GetSpanTypeMap();
     if (types.find(static_cast<SpanType>(spanType)) == types.end()) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "CheckSpanType failed: Ilegal span type");
         return false;
@@ -984,8 +1001,9 @@ void JSSpanString::UnmarshallingComplete(napi_env env, napi_status status, void 
     if (status == napi_ok && asyncContext->status == napi_ok) {
         napi_resolve_deferred(env, asyncContext->deferred, spanStrNapi);
     } else {
+        auto& asyncErrorMap = GetAsyncErrorMap();
         napi_value error = CreateErrorValue(asyncContext->env, ERROR_CODE_STYLED_STRING_CONVERT_ERROR,
-            ASYNC_ERROR_MAP[ERROR_CODE_STYLED_STRING_CONVERT_ERROR]);
+            asyncErrorMap.at(ERROR_CODE_STYLED_STRING_CONVERT_ERROR));
         napi_reject_deferred(env, asyncContext->deferred, error);
     }
     delete asyncContext;

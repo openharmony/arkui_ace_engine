@@ -160,7 +160,8 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         Color endColor;
         Color beginColor;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
-            ProcessColor(colorVal);
+            colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
+                                                                 : theme->GetTrackSelectedColor();
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
                 endColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
                     ? theme->GetRingProgressEndSideColor() : colorVal;
@@ -371,10 +372,11 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     if (!state) {
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-            colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedBgColor()
-                : (g_progressType == ProgressType::RING) ? theme->GetRingProgressParseFailedBgColor()
-                                                        : theme->GetTrackParseFailedBgColor();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            SystemProperties::ConfigChangePerform()) {
+            ProgressModel::GetInstance()->ResetBackgroundColor();
+            ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::BackgroundColor, nullptr);
+            return;
         } else {
             colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
                 : (g_progressType == ProgressType::RING) ? theme->GetRingProgressBgColor()
@@ -781,7 +783,13 @@ void JSProgress::ProcessCapsuleBorderColor(const JSRef<JSObject>& paramObject)
     }
     if (state) {
         ProgressModel::GetInstance()->SetBorderColor(colorVal);
+        ProgressModel::GetInstance()->SetBorderColorSetByUser(true);
     } else {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            ProgressModel::GetInstance()->ResetBorderColor();
+            ProgressModel::GetInstance()->SetBorderColorSetByUser(false);
+            return;
+        }
         colorVal = theme->GetBorderColor();
         ProgressModel::GetInstance()->SetBorderColor(colorVal);
         borderColorByUser = false;
@@ -808,18 +816,6 @@ void JSProgress::ProcessCapsuleContent(const JSRef<JSObject>& paramObject)
         } else {
             ProgressModel::GetInstance()->SetText(std::nullopt);
         }
-    }
-}
-
-void JSProgress::ProcessColor(Color& colorVal)
-{
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        colorVal = (g_progressType == ProgressType::CAPSULE)
-            ? theme->GetCapsuleParseFailedSelectColor() : theme->GetTrackParseFailedSelectedColor();
-    } else {
-        colorVal = (g_progressType == ProgressType::CAPSULE)
-            ? theme->GetCapsuleSelectColor() : theme->GetTrackSelectedColor();
     }
 }
 } // namespace OHOS::Ace::Framework

@@ -1390,14 +1390,20 @@ void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event)
 int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value)
 {
     if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "event is null or event category is not NODE_EVENT_CATEGORY_MIXED_EVENT");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
     if (!originNodeEvent) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "originNodeEvent is null");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     auto mixedData = reinterpret_cast<const ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
     if (index > mixedData->numberDataLength || index < 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE, __FUNCTION__,
+            "index is out of range");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE;
     }
     if (index > 1) {
@@ -1412,32 +1418,46 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(
     ArkUI_NodeEvent* event, int32_t index, char** string, int32_t* stringSize)
 {
     if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "event is null or event category is not NODE_EVENT_CATEGORY_MIXED_EVENT");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
     if (!originNodeEvent) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "originNodeEvent is null");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     auto mixedData = reinterpret_cast<const ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
     if (index > mixedData->stringPtrDataLength) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE, __FUNCTION__,
+            "index is out of range");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE;
     }
     const char* str = reinterpret_cast<char*>(mixedData->stringPtrData[index]);
     if (!str) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "string data at index is null");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     int32_t strLen = static_cast<int32_t>(strlen(str));
     int32_t size = stringSize[index];
     if (size <= 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "stringSize at index is invalid (<= 0)");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     if (strLen >= size) {
         if (!strncpy_s(string[index], size, str, size - 1)) {
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+                "failed to copy string with strncpy_s");
             return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
         }
         string[index][size - 1] = '\0';
     } else {
         if (!strcpy_s(string[index], size, str)) {
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+                "failed to copy string with strcpy_s");
             return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
         }
     }
@@ -1472,10 +1492,14 @@ bool IsTextPreventKind(ArkUI_Int32 kind)
 int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size)
 {
     if (!IsSatisfiedSetReturnValue(event)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "event is null or event category/kind is not supported for setting return value");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
     if (!originNodeEvent) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID, __FUNCTION__,
+            "originNodeEvent is null");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     if (event->category == static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {

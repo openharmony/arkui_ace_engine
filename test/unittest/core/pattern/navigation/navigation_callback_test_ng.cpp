@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "test/mock/frameworks/base/system_bar/mock_system_bar_style.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"

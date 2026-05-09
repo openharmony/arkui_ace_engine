@@ -79,8 +79,8 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
     dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
     dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
-    dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag, dragData.materialId };
-    msdpDragData.dragAnimationType = dragData.dragAnimationType;
+    dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag, dragData.materialId,
+    dragData.isSetMaterialFilter, dragData.materialFilter, dragData.dragAnimationType };
     for (auto& shadowInfo: dragData.shadowInfos) {
         auto pixelSharedPtr = shadowInfo.GetPixelMapSharedPtr();
         msdpDragData.shadowInfos.push_back({ pixelSharedPtr, shadowInfo.x, shadowInfo.y });

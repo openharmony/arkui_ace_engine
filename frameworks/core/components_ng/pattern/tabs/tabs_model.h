@@ -18,7 +18,6 @@
 
 #include <mutex>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -113,6 +112,33 @@ struct BarGridColumnOptions final {
     }
 };
 
+struct BarFloatingStyleParameters {
+    std::optional<Dimension> smallBarWidth;
+    std::optional<Dimension> mediumBarWidth;
+    std::optional<Dimension> largeBarWidth;
+    std::optional<Dimension> barSideMargin;
+    std::optional<Dimension> barBottomMargin;
+    std::optional<Color> maskColor;
+    std::optional<Dimension> maskHeight;
+    std::optional<bool> adaptToHandedness;
+
+    RefPtr<ResourceObject> smallBarWidthObject;
+    RefPtr<ResourceObject> mediumBarWidthObject;
+    RefPtr<ResourceObject> largeBarWidthObject;
+    RefPtr<ResourceObject> barSideMarginObject;
+    RefPtr<ResourceObject> barBottomMarginObject;
+    RefPtr<ResourceObject> maskColorObject;
+    RefPtr<ResourceObject> maskHeightObject;
+
+    bool operator==(const BarFloatingStyleParameters& parameters) const
+    {
+        return (smallBarWidth == parameters.smallBarWidth) && (mediumBarWidth == parameters.mediumBarWidth) &&
+               (largeBarWidth == parameters.largeBarWidth) && (barSideMargin == parameters.barSideMargin) &&
+               (barBottomMargin == parameters.barBottomMargin) && (maskColor == parameters.maskColor) &&
+               (maskHeight == parameters.maskHeight) && (adaptToHandedness == parameters.adaptToHandedness);
+    }
+};
+
 using TabsCustomAnimationEvent = std::function<TabContentAnimatedTransition(int32_t from, int32_t to)>;
 
 class ACE_FORCE_EXPORT TabsModel {
@@ -167,6 +193,8 @@ public:
     virtual void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) {}
     virtual void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) {}
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
+    virtual void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) {}
+    virtual void ResetBarFloatingStyle() {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

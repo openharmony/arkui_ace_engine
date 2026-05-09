@@ -356,6 +356,102 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest009, TestSize.Level
 }
 
 /**
+ * @tc.name: ExecuteTouchTestDoneCallbackTest010
+ * @tc.desc: Test touch onTouchTestDone finger current local getter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest010, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    TouchEvent touchEvent;
+    TouchPoint point;
+    point.x = 10.0f;
+    point.y = 20.0f;
+    point.screenX = 30.0f;
+    point.screenY = 40.0f;
+    point.globalDisplayX = 50.0f;
+    point.globalDisplayY = 60.0f;
+    point.originalId = 1;
+    touchEvent.pointers.push_back(point);
+
+    ResponseLinkResult responseLinkRecognizers;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 0, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    bool hasCurrentLocalGetter = false;
+    Offset currentLocal;
+    Offset local;
+    auto touchTestDoneFunc = [&hasCurrentLocalGetter, &currentLocal, &local](
+                                 const std::shared_ptr<BaseGestureEvent>& event,
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) {
+        if (!event || event->GetFingerList().empty()) {
+            return;
+        }
+        const auto& fingerInfo = event->GetFingerList().front();
+        hasCurrentLocalGetter = static_cast<bool>(fingerInfo.currentLocalLocation_);
+        local = fingerInfo.localLocation_;
+        if (fingerInfo.currentLocalLocation_) {
+            currentLocal = fingerInfo.currentLocalLocation_();
+        }
+    };
+    eventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
+    eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
+    eventManager->ExecuteTouchTestDoneCallback(touchEvent, responseLinkRecognizers);
+    EXPECT_TRUE(hasCurrentLocalGetter);
+    EXPECT_DOUBLE_EQ(currentLocal.GetX(), local.GetX());
+    EXPECT_DOUBLE_EQ(currentLocal.GetY(), local.GetY());
+}
+
+/**
+ * @tc.name: ExecuteTouchTestDoneCallbackTest011
+ * @tc.desc: Test axis onTouchTestDone finger current local getter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest011, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AxisEvent axisEvent;
+    axisEvent.x = 11.0f;
+    axisEvent.y = 21.0f;
+    axisEvent.screenX = 31.0f;
+    axisEvent.screenY = 41.0f;
+    axisEvent.globalDisplayX = 51.0f;
+    axisEvent.globalDisplayY = 61.0f;
+    axisEvent.originalId = 2;
+
+    ResponseLinkResult responseLinkRecognizers;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 0, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+    bool hasCurrentLocalGetter = false;
+    Offset currentLocal;
+    Offset local;
+    auto touchTestDoneFunc = [&hasCurrentLocalGetter, &currentLocal, &local](
+                                 const std::shared_ptr<BaseGestureEvent>& event,
+                                 const std::list<WeakPtr<NGGestureRecognizer>>& recognizer) {
+        if (!event || event->GetFingerList().empty()) {
+            return;
+        }
+        const auto& fingerInfo = event->GetFingerList().front();
+        hasCurrentLocalGetter = static_cast<bool>(fingerInfo.currentLocalLocation_);
+        local = fingerInfo.localLocation_;
+        if (fingerInfo.currentLocalLocation_) {
+            currentLocal = fingerInfo.currentLocalLocation_();
+        }
+    };
+    eventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
+    eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
+    eventManager->ExecuteTouchTestDoneCallback(axisEvent, responseLinkRecognizers);
+    EXPECT_TRUE(hasCurrentLocalGetter);
+    EXPECT_DOUBLE_EQ(currentLocal.GetX(), local.GetX());
+    EXPECT_DOUBLE_EQ(currentLocal.GetY(), local.GetY());
+}
+
+/**
  * @tc.name: EventManagerTestAxisEvent001
  * @tc.desc: Test TouchTest with FrameNode AxisEvent
  * @tc.type: FUNC

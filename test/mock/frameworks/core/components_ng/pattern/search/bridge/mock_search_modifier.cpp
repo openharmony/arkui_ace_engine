@@ -17,6 +17,8 @@
 #include "core/components_ng/pattern/search/bridge/search_custom_modifier.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
 namespace OHOS::Ace::NG {
 SearchModel* GetInstance()

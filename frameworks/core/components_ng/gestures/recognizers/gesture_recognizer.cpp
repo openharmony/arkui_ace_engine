@@ -136,6 +136,13 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 
 bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
 {
+    // Pan-gesture-escape: a finger that has been pushed out of this recognizer
+    // must not feed it further events of any kind. We filter at the very top
+    // of ProcessTouchEvent so neither MOVE updates nor DOWN/UP transitions
+    // can resurrect tracking state for an escaped finger.
+    if (IsFingerEscaped(point.id)) {
+        return true;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
@@ -242,6 +249,9 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 
 void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
 {
+    if (IsFingerEscaped(point.id)) {
+        return;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
@@ -622,6 +632,22 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
             responseInfo.c_str()));
     }
     return result;
+}
+
+void NGGestureRecognizer::SetGestureEventCurrentLocalLocation(GestureEvent& info, const TouchEvent& touchPoint)
+{
+    PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = touchPoint.GetOffset();
+    Offset localOffset(localPoint.GetX(), localPoint.GetY());
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = touchPoint.postEventNodeId,
+                                           globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
 }
 
 void NGGestureRecognizer::UpdateGestureReferee(const WeakPtr<GestureReferee>& gestureReferee)

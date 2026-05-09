@@ -19,10 +19,12 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,6 +39,27 @@ namespace {
     constexpr Dimension TEST_START_MARGIN = 4.0_vp;
     constexpr Dimension TEST_END_MARGIN = 6.0_vp;
     constexpr double TEST_SCROLL_LARGE_INDEX = 88888;
+    constexpr int32_t DEFAULT_DISPLAYED_ITEM_COUNT = 7;
+    constexpr float DEFAULT_ITEM_HEIGHT_VP = 40.0f;
+    constexpr float FLOAT_COMPARE_EPSILON = 0.001f;
+    
+    // Test constants for NormalizeDisplayedItemCount
+    constexpr int32_t DISPLAYED_COUNT_MIN = 2;
+    constexpr int32_t DISPLAYED_COUNT_MAX = 9;
+    constexpr int32_t DISPLAYED_COUNT_UNDER_MIN = 1;
+    constexpr int32_t DISPLAYED_COUNT_OVER_MAX = 10;
+    constexpr int32_t DISPLAYED_COUNT_EVEN_4 = 4;
+    constexpr int32_t DISPLAYED_COUNT_EVEN_6 = 6;
+    constexpr int32_t DISPLAYED_COUNT_EVEN_8 = 8;
+    constexpr int32_t DISPLAYED_COUNT_ODD_3 = 3;
+    constexpr int32_t DISPLAYED_COUNT_ODD_5 = 5;
+    
+    // Test constants for ClampPickerItemHeight
+    constexpr float ITEM_HEIGHT_MIN_VP = 40.0f;
+    constexpr float ITEM_HEIGHT_MAX_VP = 64.0f;
+    constexpr float ITEM_HEIGHT_UNDER_MIN_VP = 10.0f;
+    constexpr float ITEM_HEIGHT_OVER_MAX_VP = 100.0f;
+    constexpr float ITEM_HEIGHT_IN_RANGE_VP = 50.0f;
 }
 
 class ContainerPickerModelTest : public TestNG {
@@ -475,6 +498,226 @@ HWTEST_F(ContainerPickerModelTest, SetSelectedIndex015, TestSize.Level1)
     ContainerPickerModel::SetSelectedIndex(AceType::RawPtr(frameNode_), maxIndex);
 
     EXPECT_EQ(layoutProperty_->GetSelectedIndex().value_or(-1), maxIndex);
+}
+
+/**
+ * @tc.name: SetDisplayedItemCount001
+ * @tc.desc: Test SetDisplayedItemCount normalization with ViewStackProcessor API
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetDisplayedItemCount001, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+
+    ContainerPickerModel::SetDisplayedItemCount(8);
+    ASSERT_TRUE(layoutProperty_->HasDisplayedItemCount());
+    EXPECT_EQ(layoutProperty_->GetDisplayedItemCount().value_or(-1), 9);
+
+    ContainerPickerModel::SetDisplayedItemCount(1);
+    EXPECT_EQ(layoutProperty_->GetDisplayedItemCount().value_or(-1), DEFAULT_DISPLAYED_ITEM_COUNT);
+
+    ContainerPickerModel::SetDisplayedItemCount(std::nullopt);
+    EXPECT_FALSE(layoutProperty_->HasDisplayedItemCount());
+}
+
+/**
+ * @tc.name: SetDisplayedItemCount002
+ * @tc.desc: Test SetDisplayedItemCount with FrameNode API and reset behavior
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetDisplayedItemCount002, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetDisplayedItemCount(AceType::RawPtr(frameNode_), 2);
+    ASSERT_TRUE(layoutProperty_->HasDisplayedItemCount());
+    EXPECT_EQ(layoutProperty_->GetDisplayedItemCount().value_or(-1), 3);
+
+    ContainerPickerModel::SetDisplayedItemCount(AceType::RawPtr(frameNode_), std::nullopt);
+    EXPECT_FALSE(layoutProperty_->HasDisplayedItemCount());
+}
+
+/**
+ * @tc.name: SetItemHeight001
+ * @tc.desc: Test SetItemHeight clamp with ViewStackProcessor API
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeight001, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+
+    ContainerPickerModel::SetItemHeight(50.0_vp);
+    ASSERT_TRUE(layoutProperty_->HasItemHeight());
+    EXPECT_NEAR(layoutProperty_->GetItemHeight().value().ConvertToVp(), 50.0f, FLOAT_COMPARE_EPSILON);
+
+    ContainerPickerModel::SetItemHeight(10.0_vp);
+    EXPECT_NEAR(layoutProperty_->GetItemHeight().value().ConvertToVp(), DEFAULT_ITEM_HEIGHT_VP, FLOAT_COMPARE_EPSILON);
+
+    ContainerPickerModel::SetItemHeight(std::nullopt);
+    EXPECT_FALSE(layoutProperty_->HasItemHeight());
+}
+
+/**
+ * @tc.name: SetItemHeight002
+ * @tc.desc: Test SetItemHeight with FrameNode API and upper bound clamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeight002, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), 64.0_vp);
+    ASSERT_TRUE(layoutProperty_->HasItemHeight());
+    EXPECT_NEAR(layoutProperty_->GetItemHeight().value().ConvertToVp(), 64.0f, FLOAT_COMPARE_EPSILON);
+
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), 100.0_vp);
+    EXPECT_NEAR(layoutProperty_->GetItemHeight().value().ConvertToVp(), DEFAULT_ITEM_HEIGHT_VP, FLOAT_COMPARE_EPSILON);
+
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), std::nullopt);
+    EXPECT_FALSE(layoutProperty_->HasItemHeight());
+}
+
+/**
+ * @tc.name: NormalizeDisplayedItemCount001
+ * @tc.desc: Test NormalizeDisplayedItemCount with under min value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, NormalizeDisplayedItemCount001, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_UNDER_MIN);
+    EXPECT_EQ(result, DEFAULT_DISPLAYED_ITEM_COUNT);
+}
+
+/**
+ * @tc.name: NormalizeDisplayedItemCount002
+ * @tc.desc: Test NormalizeDisplayedItemCount with over max value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, NormalizeDisplayedItemCount002, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_OVER_MAX);
+    EXPECT_EQ(result, DEFAULT_DISPLAYED_ITEM_COUNT);
+}
+
+/**
+ * @tc.name: NormalizeDisplayedItemCount003
+ * @tc.desc: Test NormalizeDisplayedItemCount with min boundary (even number)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, NormalizeDisplayedItemCount003, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_MIN);
+    EXPECT_EQ(result, DISPLAYED_COUNT_MIN + 1);
+}
+
+/**
+ * @tc.name: NormalizeDisplayedItemCount004
+ * @tc.desc: Test NormalizeDisplayedItemCount with max boundary (odd number)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, NormalizeDisplayedItemCount004, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_MAX);
+    EXPECT_EQ(result, DISPLAYED_COUNT_MAX);
+}
+
+/**
+ * @tc.name: NormalizeDisplayedItemCount005
+ * @tc.desc: Test NormalizeDisplayedItemCount with even numbers in range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, NormalizeDisplayedItemCount005, TestSize.Level1)
+{
+    auto result4 = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_EVEN_4);
+    EXPECT_EQ(result4, DISPLAYED_COUNT_EVEN_4 + 1);
+    
+    auto result6 = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_EVEN_6);
+    EXPECT_EQ(result6, DISPLAYED_COUNT_EVEN_6 + 1);
+    
+    auto result8 = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_EVEN_8);
+    EXPECT_EQ(result8, DISPLAYED_COUNT_EVEN_8 + 1);
+}
+
+/**
+ * @tc.name: NormalizeDisplayedItemCount006
+ * @tc.desc: Test NormalizeDisplayedItemCount with odd numbers in range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, NormalizeDisplayedItemCount006, TestSize.Level1)
+{
+    auto result3 = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_ODD_3);
+    EXPECT_EQ(result3, DISPLAYED_COUNT_ODD_3);
+    
+    auto result5 = ContainerPickerUtils::NormalizeDisplayedItemCount(DISPLAYED_COUNT_ODD_5);
+    EXPECT_EQ(result5, DISPLAYED_COUNT_ODD_5);
+    
+    auto result7 = ContainerPickerUtils::NormalizeDisplayedItemCount(DEFAULT_DISPLAYED_ITEM_COUNT);
+    EXPECT_EQ(result7, DEFAULT_DISPLAYED_ITEM_COUNT);
+}
+
+/**
+ * @tc.name: ClampPickerItemHeight001
+ * @tc.desc: Test ClampPickerItemHeight with value under min
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight001, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+        Dimension(ITEM_HEIGHT_UNDER_MIN_VP, DimensionUnit::VP));
+    auto expectedDefault = Dimension(DEFAULT_ITEM_HEIGHT_VP, DimensionUnit::PX);
+    EXPECT_NEAR(result.ConvertToPx(), expectedDefault.ConvertToPx(), FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: ClampPickerItemHeight002
+ * @tc.desc: Test ClampPickerItemHeight with value over max
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight002, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+        Dimension(ITEM_HEIGHT_OVER_MAX_VP, DimensionUnit::VP));
+    auto expectedDefault = Dimension(DEFAULT_ITEM_HEIGHT_VP, DimensionUnit::PX);
+    EXPECT_NEAR(result.ConvertToPx(), expectedDefault.ConvertToPx(), FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: ClampPickerItemHeight003
+ * @tc.desc: Test ClampPickerItemHeight with min boundary value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight003, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+        Dimension(ITEM_HEIGHT_MIN_VP, DimensionUnit::VP));
+    auto expectedMin = Dimension(ITEM_HEIGHT_MIN_VP, DimensionUnit::VP);
+    EXPECT_NEAR(result.ConvertToVp(), expectedMin.ConvertToVp(), FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: ClampPickerItemHeight004
+ * @tc.desc: Test ClampPickerItemHeight with max boundary value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight004, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+        Dimension(ITEM_HEIGHT_MAX_VP, DimensionUnit::VP));
+    auto expectedMax = Dimension(ITEM_HEIGHT_MAX_VP, DimensionUnit::VP);
+    EXPECT_NEAR(result.ConvertToVp(), expectedMax.ConvertToVp(), FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: ClampPickerItemHeight005
+ * @tc.desc: Test ClampPickerItemHeight with value in range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight005, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+        Dimension(ITEM_HEIGHT_IN_RANGE_VP, DimensionUnit::VP));
+    auto expected = Dimension(ITEM_HEIGHT_IN_RANGE_VP, DimensionUnit::VP);
+    EXPECT_NEAR(result.ConvertToVp(), expected.ConvertToVp(), FLOAT_COMPARE_EPSILON);
 }
 
 /**
@@ -2246,6 +2489,220 @@ HWTEST_F(ContainerPickerModelTest, SetOnScrollStop025, TestSize.Level1)
     EXPECT_EQ(scrollStopValues.size(), 2UL);
     EXPECT_EQ(scrollStopValues[0], 10);
     EXPECT_EQ(scrollStopValues[1], 20);
+}
+
+/**
+ * @tc.name: CreateChildConstraint001
+ * @tc.desc: Test CreateChildConstraint with custom maxItemHeightPx parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, CreateChildConstraint001, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+
+    ContainerPickerModel::SetItemHeight(50.0_vp);
+
+    auto geometryNode = frameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    OptionalSizeF idealSize;
+    idealSize.SetWidth(200.0f);
+
+    auto layoutProperty = frameNode_->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    float customItemHeightPx = static_cast<float>(Dimension(50.0_vp).ConvertToPx());
+    auto constraint = ContainerPickerUtils::CreateChildConstraint(layoutProperty, idealSize, customItemHeightPx);
+
+    EXPECT_FLOAT_EQ(constraint.maxSize.Height(), customItemHeightPx);
+    EXPECT_FLOAT_EQ(constraint.selfIdealSize.Height().value_or(0.0f), customItemHeightPx);
+}
+
+/**
+ * @tc.name: CreateChildConstraint002
+ * @tc.desc: Test CreateChildConstraint with default maxItemHeightPx parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, CreateChildConstraint002, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+
+    auto geometryNode = frameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    OptionalSizeF idealSize;
+    idealSize.SetWidth(200.0f);
+
+    auto layoutProperty = frameNode_->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    float defaultItemHeightPx = static_cast<float>(Dimension(DEFAULT_ITEM_HEIGHT_VP).ConvertToPx());
+    auto constraint = ContainerPickerUtils::CreateChildConstraint(layoutProperty, idealSize, defaultItemHeightPx);
+
+    EXPECT_FLOAT_EQ(constraint.maxSize.Height(), defaultItemHeightPx);
+    EXPECT_FLOAT_EQ(constraint.selfIdealSize.Height().value_or(0.0f), defaultItemHeightPx);
+}
+
+/**
+ * @tc.name: SyncPickerParamsFromLayout001
+ * @tc.desc: Test SyncPickerParamsFromLayout updates displayCount and itemHeight from properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SyncPickerParamsFromLayout001, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetDisplayedItemCount(AceType::RawPtr(frameNode_), 5);
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), 50.0_vp);
+
+    pickerPattern_->OnModifyDone();
+
+    auto patternItemHeight = pickerPattern_->GetPickerItemHeight();
+    auto expectedItemHeightPx = static_cast<float>(Dimension(50.0_vp).ConvertToPx());
+    EXPECT_NEAR(patternItemHeight, expectedItemHeightPx, FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: SyncPickerParamsFromLayout002
+ * @tc.desc: Test SyncPickerParamsFromLayout with default values when properties not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SyncPickerParamsFromLayout002, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    pickerPattern_->OnModifyDone();
+
+    auto patternItemHeight = pickerPattern_->GetPickerItemHeight();
+    auto defaultItemHeightPx = static_cast<float>(Dimension(DEFAULT_ITEM_HEIGHT_VP).ConvertToPx());
+    EXPECT_NEAR(patternItemHeight, defaultItemHeightPx, FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: LayoutAlgorithmDisplayedItemCount001
+ * @tc.desc: Test LayoutAlgorithm uses displayedItemCount_ parameter correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, LayoutAlgorithmDisplayedItemCount001, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetDisplayedItemCount(AceType::RawPtr(frameNode_), 5);
+
+    auto layoutAlgorithm = pickerPattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    auto containerPickerAlgorithm = AceType::DynamicCast<ContainerPickerLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(containerPickerAlgorithm, nullptr);
+}
+
+/**
+ * @tc.name: LayoutAlgorithmDisplayedItemCount002
+ * @tc.desc: Test LayoutAlgorithm CalcMainAndMiddlePos with different displayedItemCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, LayoutAlgorithmDisplayedItemCount002, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetDisplayedItemCount(AceType::RawPtr(frameNode_), 9);
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), 64.0_vp);
+
+    pickerPattern_->OnModifyDone();
+
+    auto layoutAlgorithm = pickerPattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+}
+
+/**
+ * @tc.name: SetDisplayedItemCount003
+ * @tc.desc: Test SetDisplayedItemCount with negative value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetDisplayedItemCount003, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetDisplayedItemCount(AceType::RawPtr(frameNode_), -1);
+
+    ASSERT_TRUE(layoutProperty_->HasDisplayedItemCount());
+    EXPECT_EQ(layoutProperty_->GetDisplayedItemCount().value_or(-1), DEFAULT_DISPLAYED_ITEM_COUNT);
+}
+
+/**
+ * @tc.name: SetItemHeight003
+ * @tc.desc: Test SetItemHeight with negative value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeight003, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), -10.0_vp);
+
+    ASSERT_TRUE(layoutProperty_->HasItemHeight());
+    auto resultHeight = layoutProperty_->GetItemHeight().value().ConvertToVp();
+    EXPECT_NEAR(resultHeight, DEFAULT_ITEM_HEIGHT_VP, FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: SetDisplayedItemCount004
+ * @tc.desc: Test SetDisplayedItemCount with zero value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetDisplayedItemCount004, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetDisplayedItemCount(AceType::RawPtr(frameNode_), 0);
+
+    ASSERT_TRUE(layoutProperty_->HasDisplayedItemCount());
+    EXPECT_EQ(layoutProperty_->GetDisplayedItemCount().value_or(-1), DEFAULT_DISPLAYED_ITEM_COUNT);
+}
+
+/**
+ * @tc.name: SetItemHeight004
+ * @tc.desc: Test SetItemHeight with zero value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeight004, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), 0.0_vp);
+
+    ASSERT_TRUE(layoutProperty_->HasItemHeight());
+    auto resultHeight = layoutProperty_->GetItemHeight().value().ConvertToVp();
+    EXPECT_NEAR(resultHeight, DEFAULT_ITEM_HEIGHT_VP, FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: SetDisplayedItemCount005
+ * @tc.desc: Test SetDisplayedItemCount with very large value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetDisplayedItemCount005, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetDisplayedItemCount(AceType::RawPtr(frameNode_), 1000);
+
+    ASSERT_TRUE(layoutProperty_->HasDisplayedItemCount());
+    EXPECT_EQ(layoutProperty_->GetDisplayedItemCount().value_or(-1), DEFAULT_DISPLAYED_ITEM_COUNT);
+}
+
+/**
+ * @tc.name: SetItemHeight005
+ * @tc.desc: Test SetItemHeight with very large value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeight005, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), 1000.0_vp);
+
+    ASSERT_TRUE(layoutProperty_->HasItemHeight());
+    auto resultHeight = layoutProperty_->GetItemHeight().value().ConvertToVp();
+    EXPECT_NEAR(resultHeight, DEFAULT_ITEM_HEIGHT_VP, FLOAT_COMPARE_EPSILON);
 }
 
 } // namespace OHOS::Ace::NG

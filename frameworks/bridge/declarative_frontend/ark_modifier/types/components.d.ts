@@ -134,6 +134,14 @@ declare class ArkLazyVGridLayoutComponent extends ArkComponent implements Common
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
+declare class ArkLazyColumnLayoutComponent extends ArkComponent implements CommonMethod<LazyColumnLayoutAttribute> {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+}
+
+declare class ArkLazyVWaterFlowLayoutComponent extends ArkComponent implements CommonMethod<LazyVWaterFlowLayoutAttribute> {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+}
+
 declare class ArkWaterFlowComponent extends ArkScrollable implements CommonMethod<WaterFlowAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }

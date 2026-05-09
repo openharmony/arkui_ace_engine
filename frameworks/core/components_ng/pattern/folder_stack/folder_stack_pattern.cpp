@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
+#include "core/common/container.h"
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/folder_stack/control_parts_stack_node.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
 #include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

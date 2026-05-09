@@ -594,9 +594,11 @@ enum class DragAction {
 };
 
 namespace NG {
+class FrameNode;
 class WebPattern;
 }; // namespace NG
 
+class AccessibilityManager;
 class RenderWeb;
 
 class NWebDragEventImpl : public OHOS::NWeb::NWebDragEvent {
@@ -971,6 +973,7 @@ enum class WebCommandResult : int32_t {
     JSON_VALUE_ERROR_ALIGN = 120,
     JSON_MISSING_OFFSET = 121,
     JSON_INVALID_OFFSET = 122,
+    JSON_INVALID_PARAM = 125,
     // runtime error
     WEB_EXECUTE_TIMEOUT = 130,
     ELEMENT_NOT_FOUND = 131,
@@ -978,12 +981,17 @@ enum class WebCommandResult : int32_t {
     // common execution error (160-199)
     PAGE_NOT_READY = 160,
     ELEMENT_TYPE_MISMATCH = 161,
-    // input command error (200-249)
+    // input command error (200-229)
     JSON_INVALID_INPUT_XPATH = 200,
     JSON_INVALID_INPUT_VALUE = 201,
     INPUT_TYPE_INVALID = 202,
     INPUT_VALUE_FORMAT_INVALID = 203,
     INPUT_EVENT_TYPE_MISMATCH = 204,
+    // json inputmethod error (230-249)
+    JSON_INVALID_CONTENT = 230,
+    JSON_INVALID_INDEX = 231,
+    JSON_INVALID_INDEX_DURATION = 232,
+    JSON_INVALID_NO_NEED_KEYBOARD = 233,
     // select command error (250-299)
     JSON_INVALID_SELECT_XPATH = 250,
     JSON_INVALID_SELECT_OPTIONS = 251,
@@ -992,6 +1000,15 @@ enum class WebCommandResult : int32_t {
     SELECT_NOT_MULTIPLE = 254,
     SELECT_OPTION_DISABLED = 255,
     SELECT_EMPTY_OPTIONS = 256,
+    // gesture command error (300-349)
+    JSON_INVALID_GESTURE_X = 300,
+    JSON_INVALID_GESTURE_Y = 301,
+    JSON_INVALID_GESTURE_DISTANCE = 302,
+    JSON_INVALID_GESTURE_SCALE = 303,
+    JSON_INVALID_GESTURE_DURATION = 304,
+    JSON_INVALID_GESTURE_TAP_COUNT = 305,
+    JSON_INVALID_GESTURE_SPEED = 306,
+    JSON_INVALID_GESTURE_COORDINATES = 307,
 };
 class NWebCommandActionImpl : public OHOS::NWeb::NWebCommandAction {
 public:
@@ -1054,6 +1071,16 @@ public:
             new NWebCommandActionInfoImpl(event_type, values, xpath, indexes));
     }
 
+    static std::shared_ptr<NWebCommandActionInfoImpl> CreateGestureInfo(
+        const std::string& event_type,
+        double x, double y,
+        double distanceX, double distanceY,
+        float scale, int32_t duration, int32_t tapCount, int32_t speed)
+    {
+        return std::shared_ptr<NWebCommandActionInfoImpl>(
+            new NWebCommandActionInfoImpl(event_type, x, y, distanceX, distanceY, scale, duration, tapCount, speed));
+    }
+
     ~NWebCommandActionInfoImpl() override = default;
 
     std::string GetEventType() const override { return event_type_; }
@@ -1061,7 +1088,14 @@ public:
     std::string GetInputValue() const override { return input_value_; }
     std::vector<std::string> GetOptionValues() const override { return option_values_; }
     std::vector<int32_t> GetOptionIndexes() const override { return indexes_; }
-
+    double GetX() const override { return x_; }
+    double GetY() const override { return y_; }
+    double GetDistanceX() const override { return distanceX_; }
+    double GetDistanceY() const override { return distanceY_; }
+    float GetScale() const override { return scale_; }
+    int32_t GetDuration() const override { return duration_; }
+    int32_t GetTapCount() const override { return tapCount_; }
+    int32_t GetSpeed() const override { return speed_; }
 private:
     NWebCommandActionInfoImpl(const std::string& event_type,
                               const std::string& value,
@@ -1075,11 +1109,25 @@ private:
         : event_type_(event_type), xpath_(xpath),
           option_values_(values), indexes_(indexes) {}
 
+    NWebCommandActionInfoImpl(const std::string& event_type,
+        double x, double y, double distanceX, double distanceY,
+        float scale, int32_t duration, int32_t tapCount, int32_t speed)
+        : event_type_(event_type), x_(x), y_(y), distanceX_(distanceX), distanceY_(distanceY),
+          scale_(scale), duration_(duration), tapCount_(tapCount), speed_(speed) {}
+
     std::string event_type_ = "";
     std::string input_value_ = "";
     std::string xpath_ = "";
     std::vector<std::string> option_values_;
     std::vector<int32_t> indexes_;
+    double x_ = 0.0;
+    double y_ = 0.0;
+    double distanceX_ = 0.0;
+    double distanceY_ = 0.0;
+    float scale_ = 1.0f;
+    int32_t duration_ = 0;
+    int32_t tapCount_ = 1;
+    int32_t speed_ = 0;
 };
 
 class WebDelegate : public WebResource {
@@ -1709,6 +1757,14 @@ private:
     void WebComponentClickReport(int64_t accessibilityId);
     void AccessibilityReleasePageEvent();
     void AccessibilitySendPageChange();
+    void AccessibilitySendPageChange(int32_t retryCount);
+    void HandleAccessibilitySendPageChange(int32_t retryCount);
+    bool CheckAccessibilityPageChangeState(const RefPtr<NG::WebPattern>& webPattern,
+        const RefPtr<NG::FrameNode>& webNode, const RefPtr<NG::PipelineContext>& context,
+        const RefPtr<AccessibilityManager>& accessibilityManager);
+    bool CheckAccessibilityNodeReady(const RefPtr<NG::FrameNode>& webNode, int32_t retryCount);
+    void SendAccessibilityPageChangeEvent(const RefPtr<NG::FrameNode>& webNode,
+        const RefPtr<AccessibilityManager>& accessibilityManager);
     void HandleNativeEmbedLifecycle(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
 
 #ifdef OHOS_STANDARD_SYSTEM

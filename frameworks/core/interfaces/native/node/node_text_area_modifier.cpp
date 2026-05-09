@@ -55,6 +55,7 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 const float ERROR_FLOAT_CODE = -1.0f;
@@ -973,13 +974,14 @@ ArkUI_Uint32 GetTextAreaMinLines(ArkUINodeHandle node)
 }
 
 void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
-    ArkUI_Int32 style, void* resRawPtr)
+    ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE, void* resRawPtr = nullptr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     TextFieldModelNG::SetTextDecorationColor(frameNode, Color(color));
     TextFieldModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+    TextFieldModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -992,6 +994,23 @@ void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_U
     }
 }
 
+void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+    ArkUI_Int32 style, void* resRawPtr)
+{
+    SetTextAreaDecoration(node, decoration, color, style, DEFAULT_LINE_THICKNESS_SCALE, resRawPtr);
+}
+
+void GetTextAreaDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)
+{
+    CHECK_NULL_VOID(decoration);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    decoration->decorationType = static_cast<int32_t>(TextFieldModelNG::GetDecoration(frameNode));
+    decoration->color = TextFieldModelNG::GetTextDecorationColor(frameNode).GetValue();
+    decoration->style = static_cast<int32_t>(TextFieldModelNG::GetTextDecorationStyle(frameNode));
+    decoration->lineThicknessScale = TextFieldModelNG::GetLineThicknessScale(frameNode);
+}
+
 void ResetTextAreaDecoration(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -999,6 +1018,7 @@ void ResetTextAreaDecoration(ArkUINodeHandle node)
     TextFieldModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     TextFieldModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     TextFieldModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    TextFieldModelNG::SetLineThicknessScale(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -2961,6 +2981,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaShowCounterOptions = GetTextAreaShowCounterOptions,
         .setTextAreaDecoration = SetTextAreaDecoration,
         .resetTextAreaDecoration = ResetTextAreaDecoration,
+        .getTextAreaDecoration = GetTextAreaDecoration,
         .setTextAreaLetterSpacing = SetTextAreaLetterSpacing,
         .resetTextAreaLetterSpacing = ResetTextAreaLetterSpacing,
         .setTextAreaLineHeight = SetTextAreaLineHeight,
@@ -3187,6 +3208,7 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .getTextAreaShowCounterOptions = GetTextAreaShowCounterOptions,
         .setTextAreaDecoration = SetTextAreaDecoration,
         .resetTextAreaDecoration = ResetTextAreaDecoration,
+        .getTextAreaDecoration = GetTextAreaDecoration,
         .setTextAreaLetterSpacing = SetTextAreaLetterSpacing,
         .resetTextAreaLetterSpacing = ResetTextAreaLetterSpacing,
         .setTextAreaLineHeight = SetTextAreaLineHeight,

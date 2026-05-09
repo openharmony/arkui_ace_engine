@@ -172,7 +172,7 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest003, TestSize.Level1)
      * @tc.expected: Create success and check equal success
      */
     napi_value baseStruct = CreateBaseResourceObject(napi_env(engine), Napi::ResourceType::STRING);
-    auto resStruct1 = Napi::CheckResourceStruct(napi_env(engine), baseStruct);
+    auto resStruct1 = Napi::CheckResourceStruct(napi_env(engine), baseStruct, false);
     EXPECT_EQ(resStruct1, Napi::ResourceStruct::CONSTANT);
 
     /**
@@ -180,15 +180,17 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest003, TestSize.Level1)
      * @tc.expected: Create success and check equal success
      */
     napi_value v1Struct = CreateDynamicV1ResourceObject(napi_env(engine));
-    auto resStruct2 = Napi::CheckResourceStruct(napi_env(engine), v1Struct);
+    auto resStruct2 = Napi::CheckResourceStruct(napi_env(engine), v1Struct, false);
     EXPECT_EQ(resStruct2, Napi::ResourceStruct::DYNAMIC_V1);
+    auto resStruct4 = Napi::CheckResourceStruct(napi_env(engine), v1Struct, true);
+    EXPECT_EQ(resStruct4, Napi::ResourceStruct::DYNAMIC_V2);
 
     /**
      * @tc.steps: step3. Create dynamic v2 resource struct and check
      * @tc.expected: Create success and check equal success
      */
     napi_value v2Struct = CreateDynamicV2ResourceObject(napi_env(engine));
-    auto resStruct3 = Napi::CheckResourceStruct(napi_env(engine), v2Struct);
+    auto resStruct3 = Napi::CheckResourceStruct(napi_env(engine), v2Struct, false);
     EXPECT_EQ(resStruct3, Napi::ResourceStruct::DYNAMIC_V2);
 }
 
@@ -284,7 +286,7 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest005, TestSize.Level1)
      * @tc.expected: Create success and check equal success
      */
     napi_value v1Struct = CreateDynamicV1ResourceObject(napi_env(engine));
-    auto resStruct = Napi::CheckResourceStruct(napi_env(engine), v1Struct);
+    auto resStruct = Napi::CheckResourceStruct(napi_env(engine), v1Struct, false);
     EXPECT_EQ(resStruct, Napi::ResourceStruct::DYNAMIC_V1);
 
     /**

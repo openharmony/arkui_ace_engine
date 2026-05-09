@@ -1432,6 +1432,38 @@ void JSViewPopups::ParseMenuSystemMaterial(const JSRef<JSObject>& menuOptions, N
     }
 }
 
+void JSViewPopups::ParseMenuDistortionMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto distortionValue = menuOptions->GetProperty("distortionMode");
+    if (!distortionValue->IsNumber()) {
+        return;
+    }
+    auto distortionMode = distortionValue->ToNumber<int32_t>();
+    if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_AUTO)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_AUTO;
+    } else if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_ENABLED)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_ENABLED;
+    } else if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_DISABLED)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_DISABLED;
+    }
+}
+
+void JSViewPopups::ParseMenuEdgeLightMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto edgeLightValue = menuOptions->GetProperty("edgeLightMode");
+    if (!edgeLightValue->IsNumber()) {
+        return;
+    }
+    auto edgeLightMode = edgeLightValue->ToNumber<int32_t>();
+    if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_AUTO)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_AUTO;
+    } else if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_ENABLED)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_ENABLED;
+    } else if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_DISABLED)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_DISABLED;
+    }
+}
+
 void JSViewPopups::ParseMenuAboutToAppearLifeCycleParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1736,6 +1768,8 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
     JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
     JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
+    JSViewPopups::ParseMenuDistortionMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuEdgeLightMode(menuOptions, menuParam);
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuScrollBar(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);

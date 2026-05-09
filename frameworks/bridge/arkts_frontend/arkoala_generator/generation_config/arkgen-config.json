@@ -26,7 +26,8 @@
         "LengthMetrics",
         "ColorMetrics",
         "CustomSpan",
-        "TouchEvent"
+        "TouchEvent",
+        "PanGestureOptions"
     ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
@@ -69,6 +70,10 @@
         {
             "from": "arkui.component.common.TouchEvent",
             "to": "arkui.component.idlize.TouchEventProxy"
+        },
+        {
+            "from": "arkui.component.gesture.PanGestureOptions",
+            "to": "arkui.component.idlize.PanGestureOptionsProxy"
         }
     ],
     "forceMaterialized": [
@@ -514,7 +519,9 @@
         "PinchGestureHandler",
         "TapGestureHandler",
         "RotationGestureHandler",
-        "SwipeGestureHandler"
+        "SwipeGestureHandler",
+        "CustomColors",
+        "CustomDarkColors"
     ],
     "boundProperties": {
         "Checkbox": [
@@ -701,7 +708,11 @@
             "SaveButton",
             "PasteButton",
             "CustomSpan",
-            "TouchEvent"
+            "TouchEvent",
+            "ContentSlot",
+            "ContentSlotAttribute",
+            "ContentSlotInterface",
+            "PanGestureOptions"
         ],
         "ignoreEntry": [
             "Optional",

@@ -14,6 +14,7 @@
  */
 
 #include "core/image/image_source_info.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -123,9 +124,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "internal") {
         return SrcType::INTERNAL;
     } else if (head == "data") {
-        static constexpr char BASE64_PATTERN[] =
-            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP|heic|heif|HEIF"
-            "|sut|astc);base64$";
+        static constexpr char BASE64_PATTERN[] = "^data:image/[^;]+;base64$";
         if (IsValidBase64Head(uri, BASE64_PATTERN)) {
             return SrcType::BASE64;
         }
@@ -614,5 +613,14 @@ void ImageSourceInfo::SetReloadKey(const std::optional<std::string>& reloadKey)
 const std::optional<std::string>& ImageSourceInfo::GetReloadKey() const
 {
     return reloadKey_;
+}
+
+void ImageSourceInfo::SetIsSvgByContent(bool isSvg)
+{
+    if (isSvg_ == isSvg) {
+        return;
+    }
+    isSvg_ = isSvg;
+    GenerateCacheKey();
 }
 } // namespace OHOS::Ace

@@ -22,16 +22,12 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/image/pixel_map.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_constants.h"
 #include "ui/base/referenced.h"
 
-namespace OHOS::Ace {
-class PixelMap;
-}
-
 namespace OHOS::Ace::NG {
-
-class UINode;
 
 // Touch test information for child touch test callback
 struct TouchTestInfo {

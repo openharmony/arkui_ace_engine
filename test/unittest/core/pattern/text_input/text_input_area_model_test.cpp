@@ -2013,21 +2013,40 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic033, TestSize.Level1)
  */
 HWTEST_F(TextInputAreaTest, testFieldModelStatic034, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Initialize frameNode and get layoutProperty.
+     */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test decoration.
+     */
     TextFieldModelStatic::SetTextDecoration(frameNode, std::make_optional(TextDecoration::UNDERLINE));
     EXPECT_EQ(layoutProperty->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
 
     TextFieldModelStatic::SetTextDecoration(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetTextDecoration().has_value());
 
+    TextFieldModelStatic::SetLineThicknessScale(frameNode, std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetLineThicknessScale().has_value());
+
+    TextFieldModelStatic::SetLineThicknessScale(frameNode, 5.0f);
+    EXPECT_TRUE(layoutProperty->GetLineThicknessScale().has_value());
+
+    /**
+     * @tc.steps: step3. test ellipsisMode.
+     */
     TextFieldModelStatic::SetEllipsisMode(frameNode, std::make_optional(EllipsisMode::MIDDLE));
     EXPECT_EQ(layoutProperty->GetEllipsisMode().value(), EllipsisMode::MIDDLE);
     TextFieldModelStatic::SetEllipsisMode(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetEllipsisMode().has_value());
 
+    /**
+     * @tc.steps: step4. test halfLeading.
+     */
     TextFieldModelStatic::SetHalfLeading(frameNode, std::make_optional(false));
     EXPECT_EQ(layoutProperty->GetHalfLeading().value(), false);
     TextFieldModelStatic::SetHalfLeading(frameNode, std::nullopt);

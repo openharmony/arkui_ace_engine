@@ -166,6 +166,16 @@ public:
         indexInListItemGroup_ = index;
     }
 
+    void SetNeedReserveEditModeCheckBoxSpace(bool needReserveEditModeCheckBoxSpace)
+    {
+        needReserveEditModeCheckBoxSpace_ = needReserveEditModeCheckBoxSpace;
+    }
+
+    bool GetNeedReserveEditModeCheckBoxSpace() const
+    {
+        return needReserveEditModeCheckBoxSpace_;
+    }
+
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
     V2::ListItemStyle GetListItemStyle()
@@ -237,6 +247,8 @@ public:
 
 protected:
     void OnModifyDone() override;
+    void MarkIsSelectedWithoutCheckbox(bool isSelected) override;
+    void UpdateEditModeCheckBoxPosition() override;
     virtual Color GetBlendGgColor();
     virtual void HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode);
     virtual void HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode);
@@ -308,6 +320,7 @@ private:
     bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
     bool isCardStyleInitialized_ = false;
+    bool needReserveEditModeCheckBoxSpace_ = false;
     std::optional<ListItemSwipeIndex> expandSwipeAction_;
     
     PendingSwipeFunc pendingSwipeFunc_ = nullptr;

@@ -36,6 +36,7 @@
 #endif
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace {
 class BezierVariableVelocityMotion;
@@ -924,6 +925,11 @@ public:
         useDefaultBackToTop_ = useDefaultBackToTop;
     }
 
+    // Check if all parent components are active and visible
+    bool CheckParentsActive() const;
+    // Start back to top animation with performance optimization
+    void StartBackToTopAnimation();
+
     void OnStatusBarClick() override;
 
     void SetIsAllowMouse(bool enableScrollWithMouse)
@@ -1141,6 +1147,9 @@ private:
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void InitOption(AnimationOption& option, float duration, const RefPtr<Curve>& curve);
     float GetScrollDelta(float offset, bool& stopAnimation);
+    // Process spring offset animation callback
+    void ProcessSpringOffsetCallback(float offset);
+    float CalcSpringAdjustOffset(float offset) const;
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterTouchpadInteractionCallback();
@@ -1205,6 +1214,7 @@ private:
     void SetRemainVelocityCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragEndCallback(const RefPtr<Scrollable>& scrollable);
     void SetStartSnapAnimationCallback(const RefPtr<Scrollable>& scrollable);
+    void SetBackToTopCallback(const RefPtr<Scrollable>& scrollable);
     void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
@@ -1332,6 +1342,11 @@ private:
     bool isNeedCollectOffset_ = false;
     bool needFullSafeArea_ = false;
     ScrollToDirection scrollToDirection_ = ScrollToDirection::NONE;
+
+    // Back to top performance optimization
+    // Record the distance to skip during back to top animation
+    // Mark whether the skip distance has been applied
+    std::optional<float> backToTopSkipDistance_;
 };
 } // namespace OHOS::Ace::NG
 

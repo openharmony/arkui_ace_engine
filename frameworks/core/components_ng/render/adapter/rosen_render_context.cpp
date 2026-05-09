@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 
 #include <memory>
 
@@ -581,13 +583,13 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         });
         return;
     }
-
-    std::shared_ptr<Rosen::RSUIContext> rsContext;
-    if (SystemProperties::GetMultiInstanceEnabled()) {
-        auto pipeline = GetPipelineContext();
-        rsContext = GetRSUIContext(pipeline);
+    auto pipeline = GetPipelineContext();
+    std::shared_ptr<Rosen::RSUIContext> rsContext = GetRSUIContext(pipeline);
+    if (rsContext == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+        rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create(nullptr);
+        rsContext = rsUIDirector_->GetRSUIContext();
     }
-
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
 
     if (isRoot) {
@@ -738,30 +740,40 @@ void RosenRenderContext::SetSurfaceCaptureCallback(std::function<std::shared_ptr
 }
 #endif
 
-void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
+void RosenRenderContext::IncrementGeometryTransitionCounter()
 {
-    FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition, force);
+    animatingGeometryTransitionCount_++;
+}
+
+void RosenRenderContext::DecrementGeometryTransitionCounter()
+{
+    animatingGeometryTransitionCount_--;
+}
+
+void RosenRenderContext::ClearGeometryTransitionCounter()
+{
+    animatingGeometryTransitionCount_ = 0;
+}
+
+bool RosenRenderContext::IsGeometryTransitionAnimating() const
+{
+    return animatingGeometryTransitionCount_ > 0;
+}
+
+void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition)
+{
+    FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition);
     CHECK_NULL_VOID(rsNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetHost());
+
     if (parentPosition.has_value()) {
-        if (!force) {
-            sandBoxCount_++;
-        }
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox",
-            std::to_string(rsNode_->GetId()).c_str());
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox [%{public}f, %{public}f]",
+            std::to_string(rsNode_->GetId()).c_str(), value.x_, value.y_);
         rsNode_->SetSandBox(value);
     } else {
-        if (!force) {
-            sandBoxCount_--;
-            if (sandBoxCount_ > 0) {
-                return;
-            }
-        }
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
-        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
@@ -1796,6 +1808,12 @@ void RosenRenderContext::SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShap
 {
     FREE_RS_CONTEXT_CHECK(SetSDFShape, shape);
     CHECK_NULL_VOID(rsNode_ && shape);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::MENU_ETS_TAG) {
+        sdfShape_ = shape;
+        return;
+    }
     rsNode_->SetSDFShape(shape);
 }
 
@@ -4505,6 +4523,13 @@ void RosenRenderContext::RecalculatePosition()
     SetPositionToRSNode();
 }
 
+void RosenRenderContext::SortChildrenByZIndex()
+{
+    FREE_RS_CONTEXT_CHECK(SortChildrenByZIndex);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->ReSortChildrenByZIndex();
+}
+
 void RosenRenderContext::OnZIndexUpdate(int32_t value)
 {
     FREE_RS_CONTEXT_CHECK(OnZIndexUpdate, value);
@@ -6137,32 +6162,25 @@ void RosenRenderContext::PaintOverlayText()
 {
     CHECK_NULL_VOID(rsNode_);
     auto& overlay = GetOrCreateOverlay();
-    if (overlay->HasOverlayText()) {
-        auto overlayText = overlay->GetOverlayTextValue();
-        auto paintRect = GetPaintRectWithTransform();
-        std::shared_ptr<Rosen::RectF> overlayRect;
-        if (overlayTextModifier_) {
-            overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
-            auto overlayOffset = overlayTextModifier_->GetOverlayOffset();
-            auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
-            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
-                std::max(paragraphSize.Width(), paintRect.Width()),
-                std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
-            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
-        } else {
-            overlayTextModifier_ = std::make_shared<OverlayTextModifier>();
-            rsNode_->AddModifier(overlayTextModifier_);
-            overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
-            auto overlayOffset = overlayTextModifier_->GetOverlayOffset();
-            auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
-            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
-                std::max(paragraphSize.Width(), paintRect.Width()),
-                std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
-            UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
-        }
+    if (!overlay->HasOverlayText()) {
+        return;
     }
+    auto overlayText = overlay->GetOverlayTextValue();
+    auto paintRect = GetPaintRectWithTransform();
+
+    if (!overlayTextModifier_) {
+        overlayTextModifier_ = std::make_shared<OverlayTextModifier>();
+        rsNode_->AddModifier(overlayTextModifier_);
+    }
+    overlayTextModifier_->SetCustomData(NG::OverlayTextData(overlayText));
+    auto paragraphSize = overlayTextModifier_->GetParagraphSize(paintRect.Width());
+    auto overlayOffset = overlayTextModifier_->GetOverlayOffsetWithDirection(
+        SizeF(paintRect.Width(), paintRect.Height()), paragraphSize);
+    auto overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
+        std::max(paragraphSize.Width(), paintRect.Width()),
+        std::max(paragraphSize.Height(), paintRect.Height()));
+    rsNode_->SetIsCustomTextType(overlayTextModifier_->IsCustomFont());
+    UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
 }
 
 void RosenRenderContext::OnOverlayTextUpdate(const OverlayOptions& overlay)
@@ -7180,7 +7198,7 @@ void RosenRenderContext::SetActualForegroundColor(const Color& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property)
+void RosenRenderContext::AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property)
 {
     FREE_RS_CONTEXT_CHECK(AttachNodeAnimatableProperty, property);
     CHECK_NULL_VOID(rsNode_);
@@ -8719,10 +8737,23 @@ void RosenRenderContext::SetUnionSpacing(float spacing)
     unionNode->SetUnionSpacing(spacing);
 }
 
+void RosenRenderContext::UpdateSubmenuDistortionParam()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (sdfShape_) {
+        rsNode_->SetSDFShape(sdfShape_);
+    }
+}
+
 void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
 {
 #ifndef PREVIEW
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isMenuNode = host->GetTag() == V2::MENU_ETS_TAG;
     if (!paintRect_.IsValid()) {
         ACE_SCOPED_TRACE("paintRect is not valid, updating DistortionParam is failed");
         return;
@@ -8750,8 +8781,7 @@ void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
     rootShape->Setter<Rosen::SDFDistortOpShapeLBCornerTag>(convertFunc2(param.lbCorner));
     rootShape->Setter<Rosen::SDFDistortOpShapeBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
     auto baseSdfShape = std::static_pointer_cast<RSNGShapeBase>(sdfShape);
-    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(baseSdfShape);
-    auto host = GetHost();
+    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(isMenuNode ? sdfShape_ : baseSdfShape);
     if (host) {
         ACE_SCOPED_TRACE("node setSDF-DistortionParam id:(%d) tag:(%s) rect:(%f,%f,%f,%f), radius:(%f) luCorner:(%f,%f)"
             " ruCorner:(%f,%f) lbCorner:(%f,%f) rbCorner:(%f,%f) barrelDistortion:(%f,%f,%f,%f)",

@@ -19,26 +19,21 @@
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<CommonViewModel> CommonViewModel::instance_ = nullptr;
-std::mutex CommonViewModel::mutex_;
 
 CommonViewModel* CommonViewModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::CommonViewModelNG());
+    static NG::CommonViewModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::CommonViewModelNG());
-            } else {
-                instance_.reset(new Framework::CommonViewModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::CommonViewModelNG instance;
+        return &instance;
+    } else {
+        static Framework::CommonViewModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 

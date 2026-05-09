@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"

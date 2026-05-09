@@ -1912,6 +1912,15 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     return true;
 }
 
+void FocusHub::ParentSortChildrenByZIndex(const RefPtr<FrameNode>& frameNode)
+{
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
+    CHECK_NULL_VOID(parent);
+    auto renderContext = parent->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SortChildrenByZIndex();
+}
+
 void FocusHub::ClearFocusState(bool isNeedStateStyles, bool isNeedClearCallBack)
 {
     if (isNeedStateStyles) {
@@ -1930,6 +1939,7 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles, bool isNeedClearCallBack)
             renderContext->ResetZIndex();
             renderContext->OnZIndexUpdate(0);
             isRaisedZIndex_ = false;
+            ParentSortChildrenByZIndex(frameNode);
         }
         renderContext->ClearFocusState();
         OnPaintFocusState(false);

@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

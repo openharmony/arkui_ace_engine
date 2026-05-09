@@ -22,6 +22,7 @@
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/utils.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/templates_parser.h"
@@ -249,34 +250,11 @@ void LazyGridLayoutAlgorithm::UpdateGridItemConstraint(const OptionalSizeF& self
     childLayoutConstraints_ = std::move(layoutConstraints);
 }
 
-std::optional<ViewPosReference> LazyGridLayoutAlgorithm::GetReferencePos(RefPtr<FrameNode> frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
-    if (frameNode->GetTag() != V2::COMMON_VIEW_ETS_TAG && frameNode->GetTag() != V2::NODE_CONTAINER_ETS_TAG &&
-        frameNode->GetTag() != "BuilderProxyNode" && frameNode->GetTag() != V2::FLOW_ITEM_ETS_TAG &&
-        frameNode->GetTag() != V2::LAZY_V_GRID_LAYOUT_ETS_TAG && frameNode->GetTag() != V2::LIST_ETS_TAG) {
-        return std::nullopt;
-    }
-    auto geometry = frameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometry, std::nullopt);
-    auto constraintOpt = geometry->GetParentLayoutConstraint();
-    CHECK_NULL_RETURN(constraintOpt, std::nullopt);
-    auto& constraint = constraintOpt.value();
-    if (constraint.viewPosRef.has_value()) {
-        auto viewPosRef = constraint.viewPosRef.value();
-        frameNode->GetLayoutProperty()->ConstraintViewPosRef(viewPosRef);
-        return viewPosRef;
-    }
-    auto viewPosRefOpt = GetReferencePos(frameNode->GetAncestorNodeOfFrame(true));
-    CHECK_NULL_RETURN(viewPosRefOpt, std::nullopt);
-    frameNode->GetLayoutProperty()->ConstraintViewPosRef(viewPosRefOpt.value());
-    return viewPosRefOpt;
-}
-
 void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef)
 {
     if (!posRef.has_value()) {
-        posRef = GetReferencePos(layoutWrapper->GetHostNode());
+        posRef = LazyLayoutUtils::GetViewPosReference(layoutWrapper->GetHostNode(),
+            { V2::LAZY_V_GRID_LAYOUT_ETS_TAG });
     }
     if (!posRef.has_value() || posRef.value().axis != axis_) {
         needAllLayout_ = true;
@@ -364,7 +342,7 @@ void LazyGridLayoutAlgorithm::MeasureGridItemLazy(LayoutWrapper* layoutWrapper)
     }
     CheckRecycle();
     layoutInfo_->UpdatePosMap();
-    float delta = forwardLayout_ ? layoutInfo_->adjustOffset_.start : layoutInfo_->adjustOffset_.end;
+    float delta = layoutInfo_->adjustOffset_.start;
     referencePos_ += delta;
     startPos_ += delta;
     endPos_ += delta;
@@ -426,7 +404,7 @@ void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
         return;
     } else if (GreatOrEqual(endPos_, totalMainSize_) || layoutInfo_->endIndex_ >= layoutInfo_->totalItemCount_) {
         pos = totalMainSize_;
-        index = LanesCeil(layoutInfo_->totalItemCount_ - 1);
+        index = LanesCeil(totalItemCount_ - 1);
         return;
     }
     auto it = layoutInfo_->posMap_.find(layoutInfo_->endIndex_);

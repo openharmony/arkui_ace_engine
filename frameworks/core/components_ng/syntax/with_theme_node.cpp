@@ -67,9 +67,24 @@ RefPtr<WithThemeNode> WithThemeNode::GetOrCreateWithThemeNode(int32_t nodeId)
     return node;
 }
 
+void WithThemeNode::PushOnThemeScopeUpdateWithId(std::function<void()>&& callback, int32_t nodeId)
+{
+    themeScopeUpdateCallbacksMap_[nodeId] = callback;
+}
+
+void WithThemeNode::RemoveOnThemeScopeUpdateWithId(int32_t nodeId)
+{
+    themeScopeUpdateCallbacksMap_.erase(nodeId);
+}
+
 void WithThemeNode::NotifyThemeScopeUpdate()
 {
     UINode::UpdateThemeScopeUpdate(GetThemeScopeId());
+    for (const auto& themeScopeUpdateCallback : themeScopeUpdateCallbacksMap_) {
+        if (themeScopeUpdateCallback.second) {
+            themeScopeUpdateCallback.second();
+        }
+    }
 }
 
 void WithThemeNode::UpdateThemeScopeId(int32_t themeScopeId)

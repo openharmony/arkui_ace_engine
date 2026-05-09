@@ -14,6 +14,7 @@
 */
 
 #include "base/utils/utf_helper.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/render/paragraph.h"
 

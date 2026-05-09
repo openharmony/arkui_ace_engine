@@ -14,17 +14,28 @@
  */
 
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "text_input_base.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr float TEST_PREFERRED_HEIGHT = 20.0f;
+constexpr float TEST_CONTENT_HEIGHT_SMALL = 10.0f;
+constexpr float TEST_CONTENT_HEIGHT_LARGE = 100.0f;
+constexpr int32_t TEST_MIN_LINES = 3;
+constexpr int32_t TEST_NORMAL_MAX_VIEW_LINES = 2;
+constexpr float TEST_EXPECTED_MIN_HEIGHT = TEST_PREFERRED_HEIGHT * TEST_MIN_LINES;
+constexpr float TEST_CLAMPED_HEIGHT = TEST_PREFERRED_HEIGHT * TEST_NORMAL_MAX_VIEW_LINES;
+} // namespace
 
 constexpr float INLINE_MIN_WIDTH_PX = 16.0f;
 
@@ -192,6 +203,22 @@ private:
 
     RefPtr<LayoutWrapper> layoutWrapper_;
     RefPtr<TextFieldLayoutAlgorithm> layoutAlgorithm_;
+};
+
+class TextAreaLayoutAlgorithmTestHelper : public TextAreaLayoutAlgorithm {
+public:
+    static void CallStyledPlaceHolderConstraintWithMinLines(TextAreaLayoutAlgorithm* algorithm,
+        LayoutWrapper* layoutWrapper, const RefPtr<TextFieldPattern>& pattern, float& contentHeight)
+    {
+        auto* helper = reinterpret_cast<TextAreaLayoutAlgorithmTestHelper*>(algorithm);
+        helper->StyledPlaceHolderConstraintWithMinLines(layoutWrapper, pattern, contentHeight);
+    }
+
+    static void SetPreferredHeight(TextAreaLayoutAlgorithm* algorithm, float preferredHeight)
+    {
+        auto* helper = reinterpret_cast<TextAreaLayoutAlgorithmTestHelper*>(algorithm);
+        helper->preferredHeight_ = preferredHeight;
+    }
 };
 
 /**
@@ -1747,6 +1774,49 @@ HWTEST_F(TextFieldLayoutAlgorithmTestTwo, UpdatePlaceholderTextStyleMore015, Tes
         frameNode_, layoutProperty, theme, placeholderTextStyle, false);
 
     EXPECT_TRUE(placeholderTextStyle.HasHeightOverride());
+}
+
+/**
+ * @tc.name: StyledPlaceHolderConstraintWithMinLines001
+ * @tc.desc: Test StyledPlaceHolderConstraintWithMinLines covers branches: minLines enlarges contentHeight,
+ *           contentHeight already large remains unchanged, NormalMaxViewLines caps minLines,
+ *           and no minLines leaves contentHeight unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldLayoutAlgorithmTestTwo, StyledPlaceHolderConstraintWithMinLines001, TestSize.Level1)
+{
+    SetupTextAreaTest("", [](TextFieldModelNG& model) { model.SetMinLines(TEST_MIN_LINES); });
+    ASSERT_NE(pattern_, nullptr);
+    auto* rawWrapper = CreateLayoutWrapper(frameNode_);
+    auto textAreaLayoutAlgorithm = AceType::DynamicCast<TextAreaLayoutAlgorithm>(GetTextFieldLayoutAlgorithm());
+    ASSERT_NE(textAreaLayoutAlgorithm, nullptr);
+    TextAreaLayoutAlgorithmTestHelper::SetPreferredHeight(textAreaLayoutAlgorithm, TEST_PREFERRED_HEIGHT);
+
+    float contentHeight = TEST_CONTENT_HEIGHT_SMALL;
+    TextAreaLayoutAlgorithmTestHelper::CallStyledPlaceHolderConstraintWithMinLines(
+        textAreaLayoutAlgorithm, rawWrapper, pattern_, contentHeight);
+    EXPECT_EQ(contentHeight, TEST_EXPECTED_MIN_HEIGHT);
+
+    contentHeight = TEST_CONTENT_HEIGHT_LARGE;
+    TextAreaLayoutAlgorithmTestHelper::CallStyledPlaceHolderConstraintWithMinLines(
+        textAreaLayoutAlgorithm, rawWrapper, pattern_, contentHeight);
+    EXPECT_EQ(contentHeight, TEST_CONTENT_HEIGHT_LARGE);
+
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdateNormalMaxViewLines(TEST_NORMAL_MAX_VIEW_LINES);
+
+    contentHeight = TEST_CONTENT_HEIGHT_SMALL;
+    TextAreaLayoutAlgorithmTestHelper::CallStyledPlaceHolderConstraintWithMinLines(
+        textAreaLayoutAlgorithm, rawWrapper, pattern_, contentHeight);
+    EXPECT_EQ(contentHeight, TEST_CLAMPED_HEIGHT);
+
+    SetupTextAreaTest("");
+    ASSERT_NE(pattern_, nullptr);
+    rawWrapper = CreateLayoutWrapper(frameNode_);
+    textAreaLayoutAlgorithm = AceType::DynamicCast<TextAreaLayoutAlgorithm>(GetTextFieldLayoutAlgorithm());
+    ASSERT_NE(textAreaLayoutAlgorithm, nullptr);
+    TextAreaLayoutAlgorithmTestHelper::SetPreferredHeight(textAreaLayoutAlgorithm, TEST_PREFERRED_HEIGHT);
 }
 
 } // namespace OHOS::Ace::NG

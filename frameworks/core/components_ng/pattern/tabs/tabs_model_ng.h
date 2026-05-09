@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_MODEL_NG_H
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "ui/properties/tabs_effect_node_option.h"
 #include "base/memory/referenced.h"
@@ -81,6 +80,13 @@ public:
     void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) override;
     void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) override;
     void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) override;
+    void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) override;
+    void ResetBarFloatingStyle() override;
+    void ProcessDimensionWithResourceObj(
+        FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj);
+    void ProcessColorWithResourceObj(
+        FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj);
+
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

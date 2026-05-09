@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "overlay_manager.h"
+#include "core/components_ng/syntax/with_theme_node.h"
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
@@ -30,12 +31,14 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
@@ -58,10 +61,13 @@
 #include "core/components_ng/property/property.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/render/sheet_popup_shape.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #endif
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -93,6 +99,23 @@ constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension SUBWINDOW_SHEET_TRANSLATION = 80.0_vp;
 } // namespace
 
+SheetPresentationPattern::SheetPresentationPattern(
+    int32_t targetId, const std::string& targetTag, std::function<void(const std::string&)>&& callback)
+    : LinearLayoutPattern(true), targetId_(targetId), targetTag_(targetTag), callback_(std::move(callback))
+{}
+
+SheetPresentationPattern::~SheetPresentationPattern() = default;
+
+RefPtr<NodeAnimatablePropertyFloat> SheetPresentationPattern::GetProperty()
+{
+    return property_;
+}
+
+void SheetPresentationPattern::SetProperty(const RefPtr<NodeAnimatablePropertyFloat>& property)
+{
+    property_ = property;
+}
+
 // MarkModifyDone must be called after UpdateSheetObject. InitSheetMode depends on SheetObject.
 void SheetPresentationPattern::OnModifyDone()
 {
@@ -104,7 +127,7 @@ void SheetPresentationPattern::OnModifyDone()
     if (renderContext) {
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        auto sheetTheme = host->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -154,7 +177,7 @@ bool SheetPresentationPattern::IsPhoneInLandScape()
     auto containerId = Container::CurrentId();
     auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
     CHECK_NULL_RETURN(foldWindow, false);
-    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, false);
     auto sheetThemeType = sheetTheme->GetSheetType();
     if (sheetThemeType == "auto" && !foldWindow->IsFoldExpand() &&
@@ -303,6 +326,31 @@ void SheetPresentationPattern::CheckBuilderChange()
     eventHub->AddInnerOnAreaChangedCallback(builderNode->GetId(), std::move(onBuilderAreaChangedFunc));
 }
 
+bool SheetPresentationPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (!sheetStyle.backgroundColor.has_value()) {
+        UpdateSheetBackgroundColor();
+    }
+    if (!sheetStyle.maskColor.has_value()) {
+        UpdateMaskBackgroundColor();
+    }
+    if (sheetStyle.sheetTitle.has_value() || sheetStyle.sheetSubtitle.has_value()) {
+        UpdateTitleTextColor();
+    }
+    if (sheetStyle.showCloseIcon.has_value() && sheetStyle.showCloseIcon) {
+        UpdateSheetCloseIcon();
+    }
+    return true;
+}
+
 void SheetPresentationPattern::AvoidAiBar()
 {
     CHECK_NULL_VOID(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
@@ -337,6 +385,33 @@ bool SheetPresentationPattern::IsScrollable() const
     return Positive(scrollPattern->GetScrollableDistance());
 }
 
+void SheetPresentationPattern::InitFoldState()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->InitIsFoldable();
+    if (container->IsFoldable()) {
+        currentFoldStatus_ = container->GetCurrentFoldStatus();
+    }
+}
+
+bool SheetPresentationPattern::IsFoldStatusChanged()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (!container->IsFoldable()) {
+        return false;
+    }
+    auto foldStatus = container->GetCurrentFoldStatus();
+    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+        static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
+    if (foldStatus != currentFoldStatus_) {
+        currentFoldStatus_ = foldStatus;
+        return true;
+    }
+    return false;
+}
+
 void SheetPresentationPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
@@ -367,7 +442,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto targetNodeContext = targetNode->GetContext();
     CHECK_NULL_VOID(targetNodeContext);
-    auto sheetTheme = targetNodeContext->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scale_ = targetNodeContext->GetFontScale();
@@ -417,6 +492,10 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
+    auto themeScopeId = targetNode->GetThemeScopeId();
+    auto withThemeNode = WithThemeNode::GetWithThemeNode(themeScopeId);
+    CHECK_NULL_VOID(withThemeNode);
+    withThemeNode->RemoveOnThemeScopeUpdateWithId(sheetNode->GetId());
 }
 
 void SheetPresentationPattern::RegisterHoverModeChangeCallback()
@@ -463,7 +542,7 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -487,6 +566,43 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     }
 
     SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
+}
+
+void SheetPresentationPattern::SetSheetRenderMaterial()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.systemMaterial) {
+        auto sheetRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(sheetRenderContext);
+        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
+        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial))) {
+            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
+        }
+    }
+}
+
+void SheetPresentationPattern::ClearSheetRenderMaterial()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (!sheetStyle.systemMaterial) {
+        auto sheetRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(sheetRenderContext);
+        sheetRenderContext->SetSystemMaterial(nullptr);
+        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), nullptr)) {
+            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), nullptr);
+        }
+        RemoveResObj("sheet.uiMaterial"); // check
+    }
 }
 
 // initial drag gesture event
@@ -556,6 +672,26 @@ void SheetPresentationPattern::RemovePanEvent()
     panEvent_.Reset();
 }
 
+void SheetPresentationPattern::RemoveSDFShape()
+{
+    // RemoveSDFShape from SHEET_POPUP with newMaterial to other status
+    CHECK_NULL_VOID(sheetObject_);
+    RefPtr<SheetObject> sheetObject = sheetObject_;
+    if (sheetObject->GetSheetType() == SheetType::SHEET_POPUP) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+        if (sheetStyle.systemMaterial) {
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->SetSDFShape(nullptr);
+            renderContext->ResetShadowPath();
+        }
+    }
+}
+
 void SheetPresentationPattern::InitOnkeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     CHECK_NULL_VOID(focusHub);
@@ -588,7 +724,7 @@ void SheetPresentationPattern::SetShadowStyle(bool isFocused)
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
     if (!isFocused) {
@@ -882,7 +1018,7 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     if (sheetStyle.sheetHeight.sheetMode.has_value()) {
         auto pipelineContext = sheetNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, sheetHeight);
-        auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         CHECK_NULL_RETURN(sheetTheme, sheetHeight);
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::MEDIUM) {
             sheetHeight = pageHeight_ * sheetTheme->GetMediumPercent();
@@ -1300,7 +1436,7 @@ void SheetPresentationPattern::UpdateTitleColumnSize()
     auto operationColumn = GetTitleBuilderNode();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
 
     bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(pipeline);
@@ -1353,7 +1489,7 @@ void SheetPresentationPattern::UpdateTitleTextColor()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto firstChild = GetTitleBuilderNode();
     CHECK_NULL_VOID(firstChild);
@@ -1399,7 +1535,7 @@ void SheetPresentationPattern::UpdateTitlePadding()
     CHECK_NULL_VOID(titleLayoutProperty);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto showCloseIcon = true;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -1531,7 +1667,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         CHECK_NULL_VOID(layoutProps);
         auto titleLayoutProps = titleColumnNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(titleLayoutProps);
-        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        auto sheetTheme = host->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         bool isSheetHasNoTitle = !sheetStyle.isTitleBuilder.has_value();
         // the value is true when the title is a character string and in age-friendly or minority language scenario.
@@ -1542,7 +1678,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
         } else if (sheetStyle.isTitleBuilder.has_value()) {
-            auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+            auto sheetTheme = host->GetTheme<SheetTheme>(true);
             CHECK_NULL_VOID(sheetTheme);
             auto operationAreaHeight = sheetTheme->GetOperationAreaHeight();
             layoutProps->UpdateUserDefinedIdealSize(
@@ -1573,7 +1709,7 @@ void SheetPresentationPattern::UpdateSheetCloseIcon()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto sheetCloseIcon = GetSheetCloseIcon();
     CHECK_NULL_VOID(sheetCloseIcon);
@@ -1609,7 +1745,7 @@ void SheetPresentationPattern::UpdateSheetBackgroundColor()
     }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1699,7 +1835,7 @@ void SheetPresentationPattern::UpdateMaskBackgroundColor()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1768,6 +1904,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 MarkSheetPageNeedRender();
             }
             SetSheetBorderWidth();
+            SetSheetRenderMaterial();
         }
         if (sheetType_ == SheetType::SHEET_POPUP) {
             PopupSheetChanged();
@@ -1834,7 +1971,7 @@ void SheetPresentationPattern::InitSheetDetents()
     CHECK_NULL_VOID(geometryNode);
     auto pipelineContext = sheetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto sheetType = GetSheetTypeNoProcess();
@@ -2151,7 +2288,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType) const
         rootWidth = pipeline->GetRootWidth();
         rootHeight = pipeline->GetRootHeight();
     }
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
 #ifdef PREVIEW
     auto container = Container::Current();
@@ -3419,6 +3556,7 @@ void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
         UpdateSheetObject(sheetType_);
         typeChanged_ = true;
         SetSheetBorderWidth();
+        SetSheetRenderMaterial();
     }
 }
 
@@ -3454,7 +3592,7 @@ bool SheetPresentationPattern::IsCurSheetNeedHalfFoldHover()
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, false);
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -3481,7 +3619,7 @@ bool SheetPresentationPattern::IsShowInSubWindowTwoInOne()
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, false);
     return sheetTheme->IsOuterBorderEnable();
 }
@@ -3530,7 +3668,7 @@ Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, Shadow());
     auto colorMode = pipelineContext->GetColorMode();
-    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    auto shadowTheme = host->GetTheme<ShadowTheme>(true);
     CHECK_NULL_RETURN(shadowTheme, Shadow());
     auto shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return shadow;
@@ -3643,6 +3781,15 @@ std::string SheetPresentationPattern::GetPopupStyleSheetClipPathNew(
     }
     return drawPath;
 }
+
+#ifdef ENABLE_ROSEN_BACKEND
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> SheetPresentationPattern::GetPopupStyleSheetClipPathSDF(
+    const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius)
+{
+    return SheetPopupShape::GetPopupStyleSheetClipPathSDF(
+        sheetSize, sheetRadius, finalPlacement_, arrowPosition_, arrowOffset_);
+}
+#endif
 
 std::string SheetPresentationPattern::DrawClipPathBottom(const SizeF& sheetSize,
     const BorderRadiusProperty& sheetRadius)
@@ -4195,6 +4342,7 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
     if (sheetObject->GetSheetType() == newType) {
         return;
     }
+    RemoveSDFShape();
     if (!sheetObject->CheckIfUpdateObject(newType)) {
         sheetObject->UpdateSheetType(newType);
         // need delete after popup object
@@ -4247,9 +4395,7 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
     Color backgroundColor;
     bool result = ResourceParseUtils::ParseResColor(resObj, backgroundColor);
     if (!result) {
-        auto pipelineContext = sheetNode->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         backgroundColor = (sheetTheme != nullptr) ? sheetTheme->GetSheetBackgoundColor() : backgroundColor;
     }
 
@@ -4520,7 +4666,7 @@ void SheetPresentationPattern::RegisterDetentSelectionRes(const RefPtr<FrameNode
                 // Use the default detentSelection in sheetTheme for parse failed.
                 auto pipelineContext = sheetNode->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
-                auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<OHOS::Ace::NG::SheetTheme>(true);
                 CHECK_NULL_VOID(sheetTheme);
                 currSheetStyle.detentSelection->sheetMode =
                     static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode());
@@ -4554,7 +4700,7 @@ void SheetPresentationPattern::RegisterShowCloseRes(const RefPtr<FrameNode>& she
                 // Use the default showCloseIcon in sheetTheme for parse failed.
                 auto pipelineContext = sheetNode->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
-                auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<OHOS::Ace::NG::SheetTheme>(true);
                 showCloseIcon = (sheetTheme != nullptr) ? sheetTheme->GetShowCloseIcon() : showCloseIcon;
             }
 
@@ -4610,7 +4756,7 @@ void SheetPresentationPattern::RegisterHeightRes(const RefPtr<FrameNode>& sheetN
                 // Use the default sheetMode in sheetTheme for parse failed.
                 auto pipelineContext = sheetNode->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
-                auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<OHOS::Ace::NG::SheetTheme>(true);
                 CHECK_NULL_VOID(sheetTheme);
                 currSheetStyle.sheetHeight.sheetMode =
                     static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode());
@@ -4653,7 +4799,7 @@ void SheetPresentationPattern::RegisterWidthRes(const RefPtr<FrameNode>& sheetNo
                 // when sheet type is SHEET_CENTER.
                 auto pipeline = sheetNode->GetContext();
                 CHECK_NULL_VOID(pipeline);
-                auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 currSheetStyle.width = ((sheetTheme != nullptr) && pattern->GetSheetTypeNoProcess() == SHEET_CENTER)
@@ -4697,7 +4843,7 @@ void SheetPresentationPattern::UpdateSheetDetents(const RefPtr<ResourceObject>& 
             // Use the default sheetMode in sheetTheme for parse failed.
             auto pipelineContext = sheetNode->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto sheetTheme = pipelineContext->GetTheme<OHOS::Ace::NG::SheetTheme>();
+            auto sheetTheme = sheetNode->GetTheme<OHOS::Ace::NG::SheetTheme>(true);
             CHECK_NULL_VOID(sheetTheme);
             sheetDetent.sheetMode = static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode());
         }

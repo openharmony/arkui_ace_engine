@@ -897,7 +897,7 @@ void WindowSceneLayoutManager::DumpRSNodeType(Rosen::RSUINodeType nodeType, std:
     }
 }
 
-void WindowSceneLayoutManager::GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& rsNode, int32_t depth,
+void WindowSceneLayoutManager::GetRSNodeTreeInfo(const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t depth,
     std::ostringstream& oss)
 {
     CHECK_NULL_VOID(rsNode);
@@ -914,7 +914,7 @@ void WindowSceneLayoutManager::GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& 
     }
 }
 
-void WindowSceneLayoutManager::GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
+void WindowSceneLayoutManager::GetRSNodeInfo(const std::shared_ptr<Rosen::RSNode>& rsNode,
     std::ostringstream& oss)
 {
     CHECK_NULL_VOID(rsNode);

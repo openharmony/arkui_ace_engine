@@ -42,6 +42,7 @@ Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControlle
     peer->SetOpenAnimation(value->openAnimation);
     peer->SetCloseAnimation(value->closeAnimation);
     peer->SetShowInSubWindow(value->showInSubWindow);
+    peer->SetDisplayModeInSubWindow(value->displayModeInSubWindow);
     peer->SetBackgroundColor(value->backgroundColor);
     peer->SetCornerRadius(value->cornerRadius);
     peer->SetIsModal(value->isModal);
@@ -69,6 +70,8 @@ Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControlle
     peer->SetLevelOrderExtender(value->levelOrderExtender);
     peer->SetFocusable(value->focusable);
     peer->SetSystemMaterial(value->systemMaterial);
+    peer->SetDistortionMode(value->distortionMode);
+    peer->SetEdgeLightMode(value->edgeLightMode);
 
     return AceType::RawPtr(peer);
 }

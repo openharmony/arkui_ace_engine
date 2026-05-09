@@ -127,6 +127,8 @@ public:
     void SetKeyboardAvoidMode(const std::optional<MenuKeyboardAvoidMode>& mode) override;
     void SetMinKeyboardAvoidDistance(const std::optional<Dimension>& distance) override;
     void SetMenuSystemMaterial(const RefPtr<UiMaterial>& menuSystemMaterial) override;
+    void SetMenuBackgroundBlurStyleOptions(const std::optional<BlurStyleOption>& blurStyleOption) override;
+    void SetMenuBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
@@ -188,6 +190,9 @@ public:
     static void SetKeyboardAvoidMode(FrameNode* frameNode, const std::optional<MenuKeyboardAvoidMode>& mode);
     static void SetMinKeyboardAvoidDistance(FrameNode* frameNode, const std::optional<Dimension>& distance);
     static void SetMenuSystemMaterial(FrameNode* frameNode, const RefPtr<UiMaterial>& menuSystemMaterial);
+    static void SetMenuBackgroundBlurStyleOptions(
+        FrameNode* frameNode, const std::optional<BlurStyleOption>& blurStyleOption);
+    static void SetMenuBackgroundEffect(FrameNode* frameNode, const std::optional<EffectOption>& effectOption);
     static void SetDividerPropertiesSetByUser(FrameNode* frameNode,
         bool strokeWidth = true, bool color = true, bool startMargin = true, bool endMargin = true);
 private:

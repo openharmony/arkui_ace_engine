@@ -72,7 +72,9 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/common/transform/input_compatible_manager.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -94,6 +96,7 @@
 
 #include "accessibility_config.h"
 #include "core/components/common/properties/placement.h"
+#include "base/log/frame_report.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -3597,6 +3600,7 @@ void AceContainer::BuildResConfig(
         resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
+        CHECK_NULL_VOID(pipelineContext_);
         auto fontManager = pipelineContext_->GetFontManager();
         CHECK_NULL_VOID(fontManager);
         configurationChange.fontUpdate = true;
@@ -4578,6 +4582,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 
 bool AceContainer::NeedFullUpdate(uint32_t limitKey)
 {
+    CHECK_NULL_RETURN(pipelineContext_, false);
     auto themeManager = pipelineContext_->GetThemeManager();
     if (!themeManager || (themeManager->GetResourceLimitKeys() & limitKey) == 0) {
         return false;
@@ -4587,6 +4592,7 @@ bool AceContainer::NeedFullUpdate(uint32_t limitKey)
 
 void AceContainer::NotifyDensityUpdate(double density)
 {
+    CHECK_NULL_VOID(pipelineContext_);
     bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
@@ -4602,6 +4608,7 @@ void AceContainer::NotifyDensityUpdate(double density)
 
 void AceContainer::NotifyDirectionUpdate()
 {
+    CHECK_NULL_VOID(pipelineContext_);
     bool fullUpdate = NeedFullUpdate(DIRECTION_KEY);
     if (fullUpdate) {
         ConfigurationChange configurationChange { .directionUpdate = true };

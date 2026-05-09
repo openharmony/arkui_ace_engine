@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/base/modifier.h"
 
 #include <optional>
 
@@ -1430,6 +1431,12 @@ bool TabBarPattern::CustomizeExpandSafeArea()
     CHECK_NULL_RETURN(host, false);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_RETURN(tabsNode, false);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, false);
+    if (tabsPattern->IsFloatingBar()) {
+        return true;
+    }
+
     auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_RETURN(tabLayoutProperty, false);
     return tabLayoutProperty->GetSafeAreaPaddingProperty() ? true : false;
@@ -3892,5 +3899,10 @@ void TabBarPattern::UpdateSubTabBarImageIndicator()
     indicatorNode->MarkModifyDone();
 }
 
-
+int32_t TabBarPattern::GetChildrenSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    return static_cast<int32_t>(host->GetChildren().size() - MASK_COUNT - IMAGE_INDICATOR_COUNT);
+}
 } // namespace OHOS::Ace::NG

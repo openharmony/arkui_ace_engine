@@ -1807,6 +1807,28 @@ HWTEST_F(GestureRecognizerTestNg, IsInAttachedNodeTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGestureEventCurrentLocalLocationTest001
+ * @tc.desc: Test SetGestureEventCurrentLocalLocation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, SetGestureEventCurrentLocalLocationTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->AttachFrameNode(frameNode);
+    TouchEvent event;
+    event.x = 1.0;
+    event.y = 1.0;
+    event.passThrough = true;
+    event.postEventNodeId = 0;
+    GestureEvent info;
+    clickRecognizer->SetGestureEventCurrentLocalLocation(info, event);
+    auto offset = info.GetCurrentLocalLocation();
+    EXPECT_DOUBLE_EQ(offset.GetX(), 1.0);
+    EXPECT_DOUBLE_EQ(offset.GetY(), 1.0);
+}
+
+/**
  * @tc.name: ShouldResponseTest001
  * @tc.desc: Test ShouldResponse with RecognizerGroup
  * @tc.type: FUNC

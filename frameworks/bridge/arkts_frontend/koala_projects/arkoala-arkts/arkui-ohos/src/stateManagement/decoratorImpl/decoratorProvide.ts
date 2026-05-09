@@ -76,7 +76,6 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         const shouldAddRef = this.shouldAddRef();
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
-            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
             uiUtils.builtinContainersAddRefAnyKey(value);
             this.selfTrack();
             ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();

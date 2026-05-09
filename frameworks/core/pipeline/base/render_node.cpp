@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline/base/render_node.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include "core/accessibility/accessibility_manager.h"
 
@@ -26,6 +27,7 @@
 #include "core/pipeline/base/rs_node_adapter.h"
 #endif
 
+#include "base/utils/system_properties.h"
 #include "base/log/dump_log.h"
 #include "core/components/common/rotation/rotation_node.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -60,6 +62,11 @@ inline std::multiset<RefPtr<RenderNode>, ZIndexComparator> SortChildrenByZIndex(
 } // namespace
 
 constexpr Dimension FOCUS_BOUNDARY = 4.0_vp; // focus padding + effect boundary, VP
+
+bool IsRosenBackendEnabledForRenderNode()
+{
+    return SystemProperties::GetRosenBackendEnabled();
+}
 
 RenderNode::RenderNode(bool takeBoundary) : takeBoundary_(takeBoundary) {}
 

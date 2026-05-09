@@ -410,38 +410,34 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> colors = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+
+    if (colors.IsEmpty() || !colors->IsArray(vm)) {
+        nodeModifiers->getDataPanelModifier()->resetValueColors(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
 
     std::vector<OHOS::Ace::NG::Gradient> valueColors;
     std::vector<RefPtr<ResourceObject>> colorVectorResObj;
-    bool isSetByUser = true;
     bool isJsView = IsJsView(firstArg, vm);
-    if (!colors.IsEmpty() && colors->IsArray(vm)) {
-        auto colorsArray = panda::Local<panda::ArrayRef>(colors);
-        if (!isJsView) {
-            if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
-                return panda::JSValueRef::Undefined(vm);
-            }
-        }
-        for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, colorsArray); ++i) {
-            auto item = colorsArray->GetValueAt(vm, colors, i);
-            OHOS::Ace::NG::Gradient gradient;
-            auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj, nodeInfo)) {
-                isSetByUser = false;
-                valueColors.clear();
-                ConvertThemeColor(valueColors);
-                break;
-            }
-            valueColors.emplace_back(gradient);
-        }
-    } else {
-        ConvertThemeColor(valueColors);
-        isSetByUser = false;
+    auto colorsArray = panda::Local<panda::ArrayRef>(colors);
+    if (!isJsView && (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull())) {
+        nodeModifiers->getDataPanelModifier()->resetValueColors(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, colorsArray); ++i) {
+        auto item = colorsArray->GetValueAt(vm, colors, i);
+        OHOS::Ace::NG::Gradient gradient;
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj, nodeInfo)) {
+            nodeModifiers->getDataPanelModifier()->resetValueColors(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        valueColors.emplace_back(gradient);
+    }
     nodeModifiers->getDataPanelModifier()->setValueColorsNew(
-        nativeNode, static_cast<void*>(&valueColors), valueColors.size(), isSetByUser);
+        nativeNode, static_cast<void*>(&valueColors), valueColors.size(), true);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -613,16 +609,14 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelTrackBackgroundColor(ArkUIRu
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    bool isSetByUser = true;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
-        RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
-        color = theme->GetBackgroundColor();
-        isSetByUser = false;
+        nodeModifiers->getDataPanelModifier()->resetDataPanelTrackBackgroundColor(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
 
     auto colorRawPtr = AceType::RawPtr(colorResObj);
     nodeModifiers->getDataPanelModifier()->setDataPanelTrackBackgroundColorNew(
-        nativeNode, color.GetValue(), colorRawPtr, isSetByUser);
+        nativeNode, color.GetValue(), colorRawPtr, true);
     return panda::JSValueRef::Undefined(vm);
 }
 

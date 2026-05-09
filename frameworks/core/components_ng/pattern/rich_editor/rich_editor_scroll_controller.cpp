@@ -612,31 +612,32 @@ void RichEditorScrollController::UpdateScrollBar()
 
 void RichEditorScrollController::UpdateScrollBarOffset()
 {
-    if (scrollingAxis_ != Axis::NONE) {
-        UpdateScrollBarOffsetWithAxis(scrollingAxis_);
-        return;
-    }
-    UpdateScrollBarOffsetWithAxis(Axis::VERTICAL);
-    UpdateScrollBarOffsetWithAxis(Axis::HORIZONTAL);
+    UpdateScrollBarOffsetWithAxis(Axis::VERTICAL, (scrollingAxis_ != Axis::HORIZONTAL));
+    UpdateScrollBarOffsetWithAxis(Axis::HORIZONTAL, (scrollingAxis_ != Axis::VERTICAL));
 }
 
-void RichEditorScrollController::UpdateScrollBarOffsetWithAxis(Axis axis)
+void RichEditorScrollController::PlayScrollBarUpdateAnimation(Axis axis)
+{
+    CHECK_NULL_VOID(scrollBar_);
+    bool isVertical = (axis == Axis::VERTICAL);
+    scrollBar_->PlayAppearAnimation(isVertical);
+    scrollBar_->ScheduleDisappearDelayTask(isVertical);
+}
+
+void RichEditorScrollController::UpdateScrollBarOffsetWithAxis(Axis axis, bool needAnimation)
 {
     CHECK_NULL_VOID(scrollBar_);
     auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     bool hasText = (pattern->GetTextContentLength() > 0);
+    IF_TRUE(needAnimation, PlayScrollBarUpdateAnimation(axis));
     if (axis == Axis::VERTICAL) {
-        scrollBar_->PlayAppearAnimation(true);
-        scrollBar_->ScheduleDisappearDelayTask(true);
         auto verticalGap = frameRect_.Height() - contentRect_.Height();
         Size size(frameRect_.Width(), frameRect_.Height());
         scrollBar_->UpdateVerticalBar(
             contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + verticalGap, size, Offset(0.0, 0.0));
         scrollBar_->SetVerticalScrollable(scrollBar_->IsVerticalScrollable() && hasText);
     } else if (axis == Axis::HORIZONTAL) {
-        scrollBar_->PlayAppearAnimation(false);
-        scrollBar_->ScheduleDisappearDelayTask(false);
         auto horizontalGap = frameRect_.Width() - contentRect_.Width();
         Size size(frameRect_.Width(), frameRect_.Height());
         scrollBar_->UpdateHorizontalBar(

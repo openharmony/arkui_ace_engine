@@ -20,6 +20,7 @@
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/property/accessibility_property.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -497,7 +498,9 @@ void AccessibilityFrameNodeUtils::IsCoveredByBrother(
     auto parentFrameNode = frameNode;
     do {
         parentFrameNode = GetParentFrameNodeWithVirtualNode(parentFrameNode);
-        CHECK_NULL_BREAK(parentFrameNode);
+        if (!parentFrameNode) {
+            break;
+        }
 
         auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_CONTINUE(accessibilityProperty);

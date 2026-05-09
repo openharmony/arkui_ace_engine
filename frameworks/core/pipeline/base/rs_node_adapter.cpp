@@ -15,6 +15,7 @@
 
 #include "core/pipeline/base/rs_node_adapter.h"
 
+#include "core/common/container.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"

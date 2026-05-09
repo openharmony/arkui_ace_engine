@@ -706,7 +706,8 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_DrawRectCircle_NoSystemMater
     // No system material - hasSystemMaterial_ is false by default
     EXPECT_FALSE(switchModifier->hasSystemMaterial_);
     // pointAlpha should be default 1.0
-    EXPECT_FLOAT_EQ(switchModifier->pointAlpha_, INITIAL_POINT_ALPHA);
+    ASSERT_NE(switchModifier->pointAlpha_, nullptr);
+    EXPECT_FLOAT_EQ(switchModifier->pointAlpha_->Get(), INITIAL_POINT_ALPHA);
 }
 
 /**
@@ -1418,5 +1419,349 @@ HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_ApplyDragFrameNodeSystemMate
     EXPECT_EQ(pattern->dragFrameNode_, nullptr);
     pattern->ApplyDragFrameNodeSystemMaterial();
     // Should not crash
+}
+
+// ============================================================
+// ApplyDragFrameNodeSystemMaterial with fixed material params
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_ApplyDragFrameNodeSystemMaterial_WithNode
+ * @tc.desc: Test ApplyDragFrameNodeSystemMaterial applies fixed material to dragFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_ApplyDragFrameNodeSystemMaterial_WithNode, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+
+    pattern->CreateDragFrameNode();
+    ASSERT_NE(pattern->dragFrameNode_, nullptr);
+
+    // Set system material on host so ResetHostMaterialEffects proceeds
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    pattern->ApplyDragFrameNodeSystemMaterial();
+    // Should not crash; dragFrameNode_ still exists
+    EXPECT_NE(pattern->dragFrameNode_, nullptr);
+}
+
+// ============================================================
+// ClipEdge behavior in OnModifyDone
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_ClipEdge_NoSystemMaterial
+ * @tc.desc: Test ClipEdge is true (default) when no system material
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_ClipEdge_NoSystemMaterial, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // No system material - clip edge should remain default (true)
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_FALSE(pattern->HasSystemMaterial());
+}
+
+/**
+ * @tc.name: SwitchMaterial_ClipEdge_WithSystemMaterial
+ * @tc.desc: Test ClipEdge is set to false when system material is present
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_ClipEdge_WithSystemMaterial, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+
+    // Set system material
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+    EXPECT_TRUE(pattern->HasSystemMaterial());
+
+    // Trigger OnModifyDone which sets ClipEdge
+    switchNode->MarkModifyDone();
+}
+
+// ============================================================
+// pendingHide_ deferred hide mechanism tests
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_PendingHide_DefaultFalse
+ * @tc.desc: Test pendingHide_ is false by default
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_PendingHide_DefaultFalse, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_FALSE(pattern->pendingHide_);
+}
+
+/**
+ * @tc.name: SwitchMaterial_OnTouchDown_ResetsPendingHide
+ * @tc.desc: Test OnTouchDown resets pendingHide_ to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchDown_ResetsPendingHide, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    // Simulate pending state
+    pattern->pendingHide_ = true;
+    EXPECT_TRUE(pattern->pendingHide_);
+
+    pattern->OnTouchDown();
+    EXPECT_FALSE(pattern->pendingHide_);
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+/**
+ * @tc.name: SwitchMaterial_OnTouchUp_HighGrade_SetsPendingHide
+ * @tc.desc: Test OnTouchUp sets pendingHide_ for high grade with material nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchUp_HighGrade_SetsPendingHide, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    pattern->paintMethod_->GetContentModifier(paintWrapper);
+
+    // Create nodes so the high-grade pending hide path is taken
+    pattern->CreateDragPointNode();
+    ASSERT_NE(pattern->dragPointNode_, nullptr);
+
+    pattern->isTouch_ = true;
+    pattern->OnTouchUp();
+    EXPECT_FALSE(pattern->isTouch_);
+    EXPECT_TRUE(pattern->pendingHide_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+/**
+ * @tc.name: SwitchMaterial_OnTouchUp_LowGrade_NoPendingHide
+ * @tc.desc: Test OnTouchUp does not set pendingHide_ for low grade
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_OnTouchUp_LowGrade_NoPendingHide, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto renderContext = switchNode->GetRenderContext();
+    auto geometryNode = switchNode->GetGeometryNode();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    pattern->paintMethod_->GetContentModifier(paintWrapper);
+
+    pattern->isTouch_ = true;
+    pattern->OnTouchUp();
+    EXPECT_FALSE(pattern->isTouch_);
+    // Low grade: HideMaterialNode called directly, not deferred
+    EXPECT_FALSE(pattern->pendingHide_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+// ============================================================
+// HandleDragStart with AnimateToDragState
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_HandleDragStart_SetsDragEvent
+ * @tc.desc: Test HandleDragStart sets isDragEvent_ to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HandleDragStart_SetsDragEvent, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_FALSE(pattern->isDragEvent_);
+    pattern->HandleDragStart();
+    EXPECT_TRUE(pattern->isDragEvent_);
+}
+
+// ============================================================
+// HandleDragEnd with new midPoint calculation
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_HandleDragEnd_NewMidPoint
+ * @tc.desc: Test HandleDragEnd uses (mainSize + height) / 2 as midpoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HandleDragEnd_NewMidPoint, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+
+    // Set up for drag end: start from unchecked position, drag past midpoint
+    pattern->isOn_ = false;
+    // midpoint = (mainSize + height) / 2
+    // mainSize = width - height = 100 - 50 = 50
+    // midpoint = (50 + 50) / 2 = 50
+    pattern->dragOffsetX_ = 60.0f;
+
+    pattern->HandleDragEnd();
+    // After dragging past midpoint from unchecked, should toggle on
+    EXPECT_TRUE(pattern->isOn_.value_or(false));
+}
+
+// ============================================================
+// StartLongPressTimer cancellation
+// ============================================================
+
+/**
+ * @tc.name: SwitchMaterial_LongPressTimer_CancelOnTouchUp
+ * @tc.desc: Test that long press timer is cancelled on touch up
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_LongPressTimer_CancelOnTouchUp, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    renderContext->SetSystemMaterial(material);
+
+    auto geometryNode = switchNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL));
+    geometryNode->SetContentOffset(OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y));
+    pattern->size_ = SizeF(CONTENT_WIDTH_NORMAL, CONTENT_HEIGHT_NORMAL);
+    pattern->offset_ = OffsetF(CONTENT_OFFSET_X, CONTENT_OFFSET_Y);
+    pattern->width_ = CONTENT_WIDTH_NORMAL;
+    pattern->height_ = CONTENT_HEIGHT_NORMAL;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    pattern->paintMethod_->GetContentModifier(paintWrapper);
+
+    // Touch down starts the timer
+    pattern->OnTouchDown();
+
+    // Touch up should cancel the timer
+    pattern->OnTouchUp();
+    // Timer is cancelled, so HandleLongPress should not fire
+    // No dragFrameNode_ created because long press didn't fire
+    EXPECT_FALSE(pattern->isFrameNodeVisible_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
+}
+
+/**
+ * @tc.name: SwitchMaterial_HideMaterialNode_ResetsPendingHide
+ * @tc.desc: Test HideMaterialNode resets pendingHide_ to false at start
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchMaterialTestNg, SwitchMaterial_HideMaterialNode_ResetsPendingHide, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    auto renderContext = switchNode->GetRenderContext();
+    auto geometryNode = switchNode->GetGeometryNode();
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    pattern->paintMethod_->GetContentModifier(paintWrapper);
+
+    pattern->pendingHide_ = true;
+    pattern->HideMaterialNode();
+    EXPECT_FALSE(pattern->pendingHide_);
+
+    g_uiMaterialLevel = savedMaterialLevel_;
 }
 } // namespace OHOS::Ace::NG

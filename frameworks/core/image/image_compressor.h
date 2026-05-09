@@ -57,18 +57,18 @@ private:
     static std::shared_ptr<ImageCompressor> instance_;
     static std::mutex instanceMutex_;
 
-    bool clOk_;
-    bool switch_;
+    bool clOk_ = false;
+    bool switch_ = false;
     void Init();
 #ifdef ENABLE_OPENCL
     static const int32_t maxSize_ = 100000;
-    int32_t maxErr_;
-    int32_t psnr_;
+    int32_t maxErr_ = 0;
+    int32_t psnr_ = 0;
     const std::string shader_path_ = "/system/bin/astc.bin";
-    std::atomic<int32_t> refCount_;
-    cl_context context_;
-    cl_command_queue queue_;
-    cl_kernel kernel_;
+    std::atomic<int32_t> refCount_ = 0;
+    cl_context context_ = nullptr;
+    cl_command_queue queue_ = nullptr;
+    cl_kernel kernel_ = nullptr;
 
     cl_program LoadShaderBin(cl_context context, cl_device_id device_id);
     bool CreateKernel();

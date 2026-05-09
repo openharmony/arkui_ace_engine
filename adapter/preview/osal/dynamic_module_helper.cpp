@@ -81,6 +81,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
     }
     static const std::unordered_map<std::string, std::string> soMap = {
         {"DynamicLayout", "dynamiclayout"},
+        { "ContainerReader", "containerreader" },
         {"Counter", "counter"},
         { "DataPanel", "datapanel" },
         {"Checkbox", "checkbox"},
@@ -93,6 +94,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
+        { "LazyVWaterFlowLayout", "lazywaterflowlayout" },
         { "ColumnSplit", "linearsplit" },
         { "RowSplit", "linearsplit" },
         {"Marquee", "marquee"},
@@ -113,6 +115,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Menu", "menu" },
         { "MenuItem", "menu" },
         { "MenuItemGroup", "menu" },
+        { "LazyColumnLayout", "lazycolumnlayout" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

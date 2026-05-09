@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
@@ -228,6 +229,8 @@ HWTEST_F(EventRecorderTestTwo, ApplyExposureCfgInner001, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
     KeyEvent touchPoint;
     auto container = Container::GetContainer(eventManager->instanceId_);
+    (void)container;
+    EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(touchPoint));
 }
 
 /**

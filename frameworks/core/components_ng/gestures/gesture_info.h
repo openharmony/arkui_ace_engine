@@ -20,7 +20,6 @@
 #include <string>
 
 #include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
 #include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/gestures/gesture_event.h"
@@ -255,6 +254,11 @@ public:
     void SetUserData(void* userData)
     {
         userData_ = userData;
+    }
+
+    void* GetUserData() const
+    {
+        return userData_;
     }
 
     virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;

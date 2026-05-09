@@ -6,6 +6,7 @@ import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
 import { GestureOps } from "./idlize"
 import { ArkUIAniModule } from "arkui.ani"
 import { Bindable, Callback } from "#generated"
+import { hookTouchEventGetModifierKeyState } from "../"
 
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}
@@ -13,6 +14,7 @@ export interface AttributeModifier<T> {
     applyFocusedAttribute(instance: T): void {}
     applyDisabledAttribute(instance: T): void {}
     applySelectedAttribute(instance: T): void {}
+    applyHoveredAttribute(instance: T): void {}
     monitoredStates(): int32 { return 0; }
 }
 

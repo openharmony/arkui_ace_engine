@@ -1230,6 +1230,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving0029, TestSize.Level1)
      */
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     FRAME_NODE2->AddChild(FRAME_NODE3);
+    auto context = PipelineContext::GetCurrentContext();
+    context->onShow_ = true;
     FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
     auto mark = FRAME_NODE2->MarkRemoving();
     FRAME_NODE2->Clean();

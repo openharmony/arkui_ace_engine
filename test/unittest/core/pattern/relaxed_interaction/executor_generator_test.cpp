@@ -17,6 +17,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/json/json_util.h"
+#include "core/components_ng/relaxed_interaction/base_command_parser.h"
 #include "core/components_ng/relaxed_interaction/base_executor.h"
 #include "core/components_ng/relaxed_interaction/executor_generator.h"
 #include "core/components_ng/relaxed_interaction/relaxed_interaction_types.h"
@@ -355,6 +356,164 @@ HWTEST_F(ExecutorGeneratorParseFallbackCmdTest, ParseFallbackCmd_MissingFallback
     // No fallback_cmd key, falls through to ParseRegularCmd
     auto result = generator.ParseCommand(json);
     EXPECT_FALSE(result.empty());
+}
+
+// ============ Additional Tests for 100% Branch Coverage ============
+
+HWTEST_F(ExecutorGeneratorParseCommandTest, ParseCommand_EmptyJson, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json = JsonUtil::ParseJsonString("{}");
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorParseFallbackCmdTest, ParseFallbackCmd_NotRegistered_ReturnsEmpty, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    generator.parserRegistry_.erase(FALLBACK);
+    auto json = JsonUtil::ParseJsonString(VALID_FALLBACK_JSON);
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorParseFallbackCmdTest, ParseFallbackCmd_JsonCmdNull_ReturnsEmpty, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "fallback_cmd": null
+    })");
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorParseFallbackCmdTest, ParseFallbackCmd_JsonCmdInvalid_ReturnsEmpty, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "fallback_cmd": []
+    })");
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorParseRegularCmdTest, ParseRegularCmd_JsonCmdNull_ReturnsEmpty, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "cmd": null
+    })");
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorParseRegularCmdTest, ParseRegularCmd_JsonCmdInvalid_ReturnsEmpty, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "cmd": []
+    })");
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorParseRegularCmdTest, ParseRegularCmd_JsonCmdNotObject_ReturnsEmpty, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "cmd": 123
+    })");
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorParseRegularCmdTest, ParseRegularCmd_TypeStringEmpty_ReturnsEmpty, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "cmd": {
+            "type": ""
+        }
+    })");
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorParseRegularCmdTest, ParseRegularCmd_TypeNotString_ReturnsEmpty, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "cmd": {
+            "type": 123
+        }
+    })");
+    auto result = generator.ParseCommand(json);
+    EXPECT_TRUE(result.empty());
+}
+
+HWTEST_F(ExecutorGeneratorConstructorTest, Constructor_RegisterDefaultParsers_AllRegistered, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    EXPECT_EQ(generator.parserRegistry_.size(), 7u);
+    EXPECT_NE(generator.parserRegistry_.find(BACKPRESS), generator.parserRegistry_.end());
+    EXPECT_NE(generator.parserRegistry_.find(FALLBACK), generator.parserRegistry_.end());
+    EXPECT_NE(generator.parserRegistry_.find(CLICK), generator.parserRegistry_.end());
+    EXPECT_NE(generator.parserRegistry_.find(CONTENT_SWITCH), generator.parserRegistry_.end());
+    EXPECT_NE(generator.parserRegistry_.find(SCROLL), generator.parserRegistry_.end());
+    EXPECT_NE(generator.parserRegistry_.find(TAP), generator.parserRegistry_.end());
+    EXPECT_NE(generator.parserRegistry_.find(SLIDE), generator.parserRegistry_.end());
+}
+
+HWTEST_F(ExecutorGeneratorConstructorTest, Destructor_Cleanup_Success, TestSize.Level1)
+{
+    auto* generator = new ExecutorGenerator(mockPipelineContext_);
+    EXPECT_NE(generator, nullptr);
+    delete generator;
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(ExecutorGeneratorParseCommandTest, ParseCommand_MultipleCalls_Success, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+    auto json1 = JsonUtil::ParseJsonString(VALID_BACKPRESS_JSON);
+    auto json2 = JsonUtil::ParseJsonString(VALID_CLICK_JSON);
+    auto json3 = JsonUtil::ParseJsonString(VALID_SCROLL_JSON);
+
+    auto result1 = generator.ParseCommand(json1);
+    auto result2 = generator.ParseCommand(json2);
+    auto result3 = generator.ParseCommand(json3);
+
+    EXPECT_EQ(result1.size(), EXPECTED_SINGLE_EXECUTOR_COUNT);
+    EXPECT_EQ(result2.size(), CLICK_AUTO_EXECUTOR_COUNT);
+    EXPECT_EQ(result3.size(), SCROLL_AUTO_EXECUTOR_COUNT);
+}
+
+HWTEST_F(ExecutorGeneratorParseRegularCmdTest, ParseRegularCmd_AllTypes_CoverageCheck, TestSize.Level1)
+{
+    ExecutorGenerator generator(mockPipelineContext_);
+
+    auto backpressResult = generator.ParseCommand(JsonUtil::ParseJsonString(VALID_BACKPRESS_JSON));
+    EXPECT_EQ(backpressResult.size(), EXPECTED_SINGLE_EXECUTOR_COUNT);
+    EXPECT_EQ(backpressResult[0]->GetType(), BACKPRESS);
+
+    auto clickResult = generator.ParseCommand(JsonUtil::ParseJsonString(VALID_CLICK_JSON));
+    EXPECT_EQ(clickResult.size(), CLICK_AUTO_EXECUTOR_COUNT);
+
+    auto scrollResult = generator.ParseCommand(JsonUtil::ParseJsonString(VALID_SCROLL_JSON));
+    EXPECT_EQ(scrollResult.size(), SCROLL_AUTO_EXECUTOR_COUNT);
+
+    auto tapResult = generator.ParseCommand(JsonUtil::ParseJsonString(VALID_TAP_JSON));
+    EXPECT_GE(tapResult.size(), EXPECTED_SINGLE_EXECUTOR_COUNT);
+
+    auto slideResult = generator.ParseCommand(JsonUtil::ParseJsonString(VALID_SLIDE_JSON));
+    EXPECT_GE(slideResult.size(), EXPECTED_SINGLE_EXECUTOR_COUNT);
+
+    auto contentSwitchResult = generator.ParseCommand(JsonUtil::ParseJsonString(VALID_CONTENT_SWITCH_JSON));
+    EXPECT_EQ(contentSwitchResult.size(), EXPECTED_SINGLE_EXECUTOR_COUNT);
+
+    auto fallbackResult = generator.ParseCommand(JsonUtil::ParseJsonString(VALID_FALLBACK_JSON));
+    EXPECT_EQ(fallbackResult.size(), EXPECTED_SINGLE_EXECUTOR_COUNT);
+    EXPECT_EQ(fallbackResult[0]->GetType(), FALLBACK);
 }
 
 } // namespace OHOS::Ace::NG

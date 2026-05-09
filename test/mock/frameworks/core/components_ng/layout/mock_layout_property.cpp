@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/grid_property.h"

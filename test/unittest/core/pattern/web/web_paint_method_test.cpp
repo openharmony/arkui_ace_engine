@@ -31,6 +31,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 #include "core/components_ng/pattern/web/web_paint_method.h"
 #include "core/components_ng/pattern/web/web_pattern.h"

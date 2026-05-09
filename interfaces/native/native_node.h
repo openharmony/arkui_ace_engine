@@ -2302,6 +2302,37 @@ typedef enum {
      */
     NODE_BORDER_RADIUS_TYPE = 123,
     /**
+     * @brief Defines the accessibility next focus node ID attribute, which can be set and reset through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component ID used by accessibility for next focus navigation.\n
+     *
+     * @since 26
+     */
+    NODE_ACCESSIBILITY_NEXT_FOCUS_ID = 124,
+    /**
+     * @brief Defines the accessibility default focus attribute, which can be set and reset through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the current component is accessibility default focus.
+     * The parameter type is {@link ArkUI_AccessibilityDefaultFocus}.\n
+     *
+     * @since 26
+     */
+    NODE_ACCESSIBILITY_DEFAULT_FOCUS = 125,
+    /**
+     * @brief Defines the inspector label attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: inspector label.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: inspector label.\n
+     * \n
+     * @since 26.0.0
+     */
+    NODE_INSPECTOR_LABEL = 126,
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -4234,6 +4265,19 @@ typedef enum {
     NODE_TEXT_INPUT_TEXT_OVERFLOW = 7049,
 
     /**
+     * @brief Defines the text decoration style and color for single-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * ?.object: Optional. The decoration style options. The parameter type is {@link OH_ArkUI_DecorationStyleOptions}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The decoration style options. The parameter type is {@link OH_ArkUI_DecorationStyleOptions}.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_DECORATION = 7050,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4840,6 +4884,19 @@ typedef enum {
      *  @since 24
      */
     NODE_TEXT_AREA_TEXT_OVERFLOW = 8046,
+
+    /**
+     * @brief Defines the text decoration style and color for multi-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * ?.object: Optional. The decoration style options. The parameter type is {@link OH_ArkUI_DecorationStyleOptions}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The decoration style options. The parameter type is {@link OH_ArkUI_DecorationStyleOptions}.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_DECORATION = 8047,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -8495,6 +8552,43 @@ typedef enum {
     NODE_GRID_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1013015,
 
     /**
+     * @brief Defines whether the <b>Grid</b> component enables edit mode. After entering edit mode,
+     * checkboxes are displayed by default, and finger sliding multi-selection is supported.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether the <b>Grid</b> component enables edit mode.
+     * <b>0</b>: Not editable. <b>1</b>: Editable. Default value: <b>0</b>.\n
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether the <b>Grid</b> component enables edit mode.
+     * <b>0</b>: Not editable. <b>1</b>: Editable.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_GRID_ENABLE_EDIT_MODE = 1013016,
+
+    /**
+     * @brief Defines the edit mode options for the <b>Grid</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether the <b>Grid</b> component uses the default multi-selection style.
+     * <b>0</b>: Do not use the default style. <b>1</b>: Use the default style. Default value: <b>1</b>.\n
+     * .value[1].i32: Whether the <b>Grid</b> component enables two-finger sliding multi-selection.
+     * <b>0</b>: Disabled. <b>1</b>: Enabled. Default value: <b>1</b>.\n
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether the <b>Grid</b> component uses the default multi-selection style.
+     * <b>0</b>: Do not use the default style. <b>1</b>: Use the default style.\n
+     * .value[1].i32: Whether the <b>Grid</b> component enables two-finger sliding multi-selection.
+     * <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_GRID_EDIT_MODE_OPTIONS = 1013017,
+
+    /**
      * @brief Sets the style of the <b>GridItem</b> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -8855,6 +8949,34 @@ typedef enum {
      * @since 23
      */
     NODE_PICKER_SELECTION_INDICATOR = 1018003,
+
+    /**
+     * @brief Sets the total number of visible items.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: number of visible items. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of visible items. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_PICKER_DISPLAYED_ITEM_COUNT = 1018004,
+
+    /**
+     * @brief Sets the height of each item.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the height of each item, in vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the height of each item, in vp. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_PICKER_ITEM_HEIGHT = 1018005,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12

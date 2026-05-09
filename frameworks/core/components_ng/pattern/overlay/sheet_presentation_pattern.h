@@ -40,7 +40,15 @@
 #include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Rosen {
+class RSNGShapeBase;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 
 enum class BindSheetDismissReason {
     BACK_PRESSED = 0,
@@ -66,15 +74,9 @@ class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern,
 
 public:
     SheetPresentationPattern(
-        int32_t targetId, const std::string& targetTag, std::function<void(const std::string&)>&& callback)
-        : LinearLayoutPattern(true)
-    {
-        targetId_ = targetId;
-        targetTag_ = targetTag;
-        callback_ = std::move(callback);
-    }
+        int32_t targetId, const std::string& targetTag, std::function<void(const std::string&)>&& callback);
 
-    ~SheetPresentationPattern() override = default;
+    ~SheetPresentationPattern() override;
 
     bool IsMeasureBoundary() const override
     {
@@ -334,6 +336,8 @@ public:
     void HandleFocusEvent();
     void HandleBlurEvent();
 
+    void RemoveSDFShape();
+
     void HandleDragStart();
 
     void HandleDragUpdate(const GestureEvent& info);
@@ -357,6 +361,9 @@ public:
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
     void SetSheetBorderWidth(bool isPartialUpdate = false);
+
+    void ClearSheetRenderMaterial();
+    void SetSheetRenderMaterial();
 
     void SetCurrentOffset(float currentOffset)
     {
@@ -703,15 +710,9 @@ public:
         return unSortedSheetDentents_;
     }
 
-    RefPtr<NodeAnimatablePropertyFloat> GetProperty()
-    {
-        return property_;
-    }
+    RefPtr<NodeAnimatablePropertyFloat> GetProperty();
 
-    void SetProperty(const RefPtr<NodeAnimatablePropertyFloat>& property)
-    {
-        property_ = property;
-    }
+    void SetProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
 
     float GetPreDidHeight() const
     {
@@ -824,32 +825,9 @@ public:
         return sheetMaskColor_;
     }
 
-    void InitFoldState()
-    {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        container->InitIsFoldable();
-        if (container->IsFoldable()) {
-            currentFoldStatus_ = container->GetCurrentFoldStatus();
-        }
-    }
+    void InitFoldState();
 
-    bool IsFoldStatusChanged()
-    {
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        if (!container->IsFoldable()) {
-            return false;
-        }
-        auto foldStatus = container->GetCurrentFoldStatus();
-        TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
-            static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
-        if (foldStatus != currentFoldStatus_) {
-            currentFoldStatus_ = foldStatus;
-            return true;
-        }
-        return false;
-    }
+    bool IsFoldStatusChanged();
 
     void UpdateHoverModeChangedCallbackId(const std::optional<int32_t>& id)
     {
@@ -1085,6 +1063,10 @@ public:
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ResetClipShape();
     std::string GetPopupStyleSheetClipPath(const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
+#ifdef ENABLE_ROSEN_BACKEND
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetPopupStyleSheetClipPathSDF(
+        const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
+#endif
     void SheetTransitionForOverlay(bool isTransitionIn, bool isFirstTransition);
     void OnLanguageConfigurationUpdate() override;
     bool AvoidKeyboardBeforeTranslate();
@@ -1154,6 +1136,7 @@ public:
     }
 
     int32_t OnInjectionEvent(const std::string& command) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;

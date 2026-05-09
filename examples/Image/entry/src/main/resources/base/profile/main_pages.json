@@ -41,6 +41,8 @@
     "pages/ImageDfxExamples/ImageDfxExamples009",
     "pages/example/ImageReloadKeyExample",
     "pages/example/ImageReloadKeyScenarioExample",
-    "pages/testcase/ImageReloadKeyTestCase"
+    "pages/testcase/ImageReloadKeyTestCase",
+    "pages/example/ImageBase64SvgExample",
+    "pages/example/ImageContentDetectionExample"
   ]
 }

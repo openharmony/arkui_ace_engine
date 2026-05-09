@@ -3202,4 +3202,118 @@ HWTEST_F(GestureEventHubTestNg, UpdateDragWindowVisibility_003, TestSize.Level1)
     guestureEventHub->PrepareDragStartData(ctx);
     EXPECT_FALSE(guestureEventHub->HandleResolvedDragPreview(ctx));
 }
+
+/**
+ * @tc.name: UpdateDragWindowVisibility_005
+ * @tc.desc: Test UpdateDragWindowVisibility - disableArkuiAnimation branch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateDragWindowVisibility_005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. Setup context with disableArkuiAnimation = true.
+     * @tc.expected: TransferTouchDragWindowToFramework is called.
+     */
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::TOUCH_SCREEN;
+    DragDropInfo dragDropInfo;
+    RefPtr<OHOS::Ace::DragEvent> event1 = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    DragDropInfo dragPreviewInfo;
+    DragStartContext ctx;
+    ctx.info = info;
+    ctx.frameNode = frameNode;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.event = event1;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.pipeline = pipeline;
+    ctx.dragDropManager = pipeline->GetDragDropManager();
+    ctx.overlayManager = pipeline->GetOverlayManager();
+    ctx.preparedInfo.isSceneBoardTouchDrag = false;
+    ctx.preparedInfo.disableArkuiAnimation = true;
+    ctx.isSwitchedToSubWindow = false;
+    ctx.info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    ctx.needChangeFwkForLeaveWindow = false;
+
+    /**
+     * @tc.steps: step4. call UpdateDragWindowVisibility with disableArkuiAnimation = true.
+     * @tc.expected: Function executes without crashing and transfers to framework.
+     */
+    guestureEventHub->UpdateDragWindowVisibility(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: UpdateDragWindowVisibility_006
+ * @tc.desc: Test UpdateDragWindowVisibility - disableArkuiAnimation with MOUSE_BUTTON
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateDragWindowVisibility_006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. Setup context with disableArkuiAnimation = true and MOUSE_BUTTON input.
+     * @tc.expected: TransferTouchDragWindowToFramework is called regardless of device type.
+     */
+    GestureEvent info;
+    info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    DragDropInfo dragDropInfo;
+    RefPtr<OHOS::Ace::DragEvent> event1 = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    DragDropInfo dragPreviewInfo;
+    DragStartContext ctx;
+    ctx.info = info;
+    ctx.frameNode = frameNode;
+    ctx.dragDropInfo = dragDropInfo;
+    ctx.event = event1;
+    ctx.dragPreviewInfo = dragPreviewInfo;
+    ctx.pipeline = pipeline;
+    ctx.dragDropManager = pipeline->GetDragDropManager();
+    ctx.overlayManager = pipeline->GetOverlayManager();
+    ctx.preparedInfo.isSceneBoardTouchDrag = false;
+    ctx.preparedInfo.disableArkuiAnimation = true;
+    ctx.isSwitchedToSubWindow = false;
+    ctx.info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    ctx.needChangeFwkForLeaveWindow = false;
+
+    /**
+     * @tc.steps: step4. call UpdateDragWindowVisibility with disableArkuiAnimation = true.
+     * @tc.expected: Function executes without crashing and transfers to framework.
+     */
+    guestureEventHub->UpdateDragWindowVisibility(ctx);
+    EXPECT_EQ(ctx.dragDropInfo.pixelMap, nullptr);
+}
 } // namespace OHOS::Ace::NG

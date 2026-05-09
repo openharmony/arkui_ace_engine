@@ -21,6 +21,8 @@
 #include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ShapePaintMethod : public NodePaintMethod {

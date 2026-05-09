@@ -70,6 +70,8 @@ void SpanModelNG::Create(const std::u16string& content, RefPtr<ResourceObject>& 
             spanNode->UpdateSpanResource<std::u16string>("value", resObj);
         };
         spanNode->AddResObj("value", resObj, std::move(updateFunc));
+    } else {
+        spanNode->UnregisterResource("value");
     }
 }
 
@@ -135,6 +137,11 @@ void SpanModelNG::SetTextColor(const Color& value)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateSpanTextColor(value);
+}
+
+void SpanModelNG::ResetTextColor()
+{
+    ACE_RESET_SPAN_PROPERTY(TextColor);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)

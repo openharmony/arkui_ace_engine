@@ -412,9 +412,9 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest007, TestSize.Level0)
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(pattern, nullptr);
     modelNg.SetColor(COLOR_DEFAULT);
-    pattern->SetColorLock(true);
+    modelNg.SetColorByUser(true);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
-    pattern->SetColorLock(false);
+    modelNg.SetColorByUser(false);
     frameNode->SetThemeScopeId(334455);
     EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
@@ -499,12 +499,17 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest001, TestSize.Level0)
 {
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->loadingColor_ = COLOR_DEFAULT;
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressThemeWrapper>()));
     LoadingProgressModifier loadingProgressModifier;
+    loadingProgressModifier.pattern_ = loadingProgressPattern;
     Testing::MockCanvas rsCanvas;
     DrawingContext context = { rsCanvas, 10.0f, 10.0f };
     RingParam ringParam;
@@ -577,7 +582,12 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest002, TestSize.Level0)
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest003, TestSize.Level0)
 {
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
     LoadingProgressModifier loadingProgressModifier;
+    loadingProgressModifier.pattern_ = loadingProgressPattern;
     LinearColor color;
     loadingProgressModifier.SetColor(color);
     EXPECT_EQ(loadingProgressModifier.color_->Get(), color);
@@ -634,7 +644,12 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest003, TestSize.Level0)
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest004, TestSize.Level0)
 {
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
     LoadingProgressModifier loadingProgressModifier;
+    loadingProgressModifier.pattern_ = loadingProgressPattern;
     LinearColor color;
     loadingProgressModifier.SetColor(color);
     EXPECT_EQ(loadingProgressModifier.color_->Get(), color);
@@ -662,7 +677,12 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest004, TestSize.Level0)
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest005, TestSize.Level0)
 {
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
     LoadingProgressModifier loadingProgressModifier;
+    loadingProgressModifier.pattern_ = loadingProgressPattern;
     LinearColor color;
     loadingProgressModifier.SetColor(color);
     EXPECT_EQ(loadingProgressModifier.color_->Get(), color);
@@ -697,7 +717,12 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest006, TestSize.Level0)
     /**
      * @tc.step: step1. create LoadingProgressModifier instance.
      */
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
     LoadingProgressModifier loadingProgressModifier;
+    loadingProgressModifier.pattern_ = loadingProgressPattern;
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 100.0f, 100.0f };
 
@@ -729,7 +754,12 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest007, TestSize.Level0)
     /**
      * @tc.step: step1. create LoadingProgressModifier instance.
      */
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
     LoadingProgressModifier loadingProgressModifier;
+    loadingProgressModifier.pattern_ = loadingProgressPattern;
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 100.0f, 100.0f };
 
@@ -816,6 +846,10 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest009, TestSize.Level0)
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level0)
 {
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
     MockContainer::SetMockColorMode(ColorMode::DARK);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -823,6 +857,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level0)
     progressTheme->loadingColor_ = COLOR_DEFAULT;
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressThemeWrapper>()));
     LoadingProgressModifier loadingProgressModifier;
+    loadingProgressModifier.pattern_ = loadingProgressPattern;
     Testing::MockCanvas rsCanvas;
     DrawingContext context = { rsCanvas, 10.0f, 10.0f };
     RingParam ringParam;

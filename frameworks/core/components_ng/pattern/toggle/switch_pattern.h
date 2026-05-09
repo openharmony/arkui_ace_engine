@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_PATTERN_H
 
-#include "base/geometry/axis.h"
 #include "base/geometry/size.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -284,6 +283,8 @@ private:
     RefPtr<FrameNode> blurCoverNode_;
     bool isFrameNodeVisible_ = false;
     CancelableCallback<void()> longPressTask_;
+
+    bool pendingHide_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     std::function<void(bool)> isFocusActiveUpdateEvent_;

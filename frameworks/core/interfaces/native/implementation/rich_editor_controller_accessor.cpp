@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"

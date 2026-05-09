@@ -44,6 +44,9 @@
 namespace OHOS::Ace {
 class CalcDimensionRect;
 struct TextDetectConfig;
+namespace NG {
+struct DrawingContext;
+} // namespace NG
 }
 
 namespace OHOS::Ace::Framework {
@@ -619,6 +622,7 @@ public:
     static void JsDefaultFocus(const JSCallbackInfo& info);
     static void JsGroupDefaultFocus(const JSCallbackInfo& info);
     static void JsDebugLine(const JSCallbackInfo& info);
+    static void JsInspectorLabel(const JSCallbackInfo& info);
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
@@ -651,6 +655,7 @@ public:
     static void JsDragPreview(const JSCallbackInfo& info);
     static void JsAccessibilityVirtualNode(const JSCallbackInfo& info);
     static void JsAccessibilityActionOptions(const JSCallbackInfo& info);
+    static void JsAccessibilityCustomActions(const JSCallbackInfo& info);
     static void ParseAccessibilityDescriptionJson(const std::string& description,
         std::pair<bool, std::string>& autoEventPair, std::pair<bool, std::string>& descriptionPair);
 

@@ -21,6 +21,7 @@
 #define private public
 #define protected public
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include "base/utils/system_properties.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
@@ -29,6 +30,8 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/force_split/force_split_utils.h"
+
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

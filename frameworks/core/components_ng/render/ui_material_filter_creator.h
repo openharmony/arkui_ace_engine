@@ -19,6 +19,7 @@
 #include <memory>
 
 namespace OHOS::Rosen {
+class Filter;
 class RSNGFilterBase;
 }
 
@@ -36,6 +37,7 @@ namespace OHOS::Ace::NG {
 class UiMaterialFilterCreator {
 public:
     static std::shared_ptr<Rosen::RSNGFilterBase> ConvertToUiMaterialFilter(const ImmersiveMaterialConfig& params);
+    static std::shared_ptr<OHOS::Rosen::Filter> CreateRosenFilter(const ImmersiveMaterialConfig& params);
 };
 } // namespace OHOS::Ace::NG
 

@@ -68,13 +68,9 @@ export class ArkDynamicComponentPeer extends ArkCommonMethodPeer {
                 InteropNativeModule._NativeLog("[AceDynamicComponent] eaWorker is not alive, will start");
                 this.eaWorker_?.start();
             }
-            let p1 = this.eaWorker_?.run<int32>(():int32 => {
-                let runId = CoroutineExtras.getWorkerId();
-                InteropNativeModule._NativeLog("[AceDynamicComponent] running in eaWorker, runId: " + runId);
-                return runId;
-            });
-            let runId = p1?.Await();
-            if (runId != null) {
+            let runId: int | undefined = undefined;
+            runId = this.eaWorker_?.getWorkerId();
+            if (runId !== undefined) {
                 innerOption.workerId = runId;
             }
         }

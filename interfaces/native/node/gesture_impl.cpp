@@ -995,6 +995,7 @@ void HandleGestureEvent(ArkUINodeEvent* event)
         ArkUI_GestureRecognizer* recognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(extraData->gesture);
         gestureEvent->attachNode = recognizer->attachNode;
     }
+    uiEvent->usePXUnit = true;
     LOG_CALLBACK(extraData->targetReceiver);
     extraData->targetReceiver(gestureEvent, extraData->extraParam);
     delete uiEvent;
