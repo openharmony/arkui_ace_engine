@@ -2527,6 +2527,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto content = isLabel ? itemProperty->GetLabel().value_or("") : itemProperty->GetContent().value_or("");
     auto& node = isLabel ? label_ : content_;
     if (content.empty()) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "MenuItem content or label is empty!");
         (void)row->RemoveChild(node); // it's safe even if node is nullptr
         node = nullptr;
         row->MarkModifyDone();
