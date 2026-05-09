@@ -111,6 +111,7 @@ ace_unittest("grid_test_custom") {
     "custom/grid_custom_algorithm_test_ng.cpp",
     "custom/grid_custom_layout_algorithm_test.cpp",
     "custom/grid_custom_layout_test_ng.cpp",
+    "custom/grid_custom_over_scroll_test_ng.cpp",
     "custom/grid_custom_scroller_test_ng.cpp",
     "grid_test_ng.cpp",
   ]
