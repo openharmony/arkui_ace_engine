@@ -116,6 +116,29 @@ void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType ev
     }
 }
 
+void AccessibilityProperty::SetAccessibilityNextFocusParams(const AccessibilityNextFocusParams& params)
+{
+    accessibilityNextFocusParams_ = params;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityNextFocusParams, params);
+    UpdateAccessibilityNextFocusIdMap(params.nextFocusInspectorKey);
+}
+
+AccessibilityNextFocusParams AccessibilityProperty::GetAccessibilityNextFocusParams() const
+{
+    return accessibilityNextFocusParams_.value_or(AccessibilityNextFocusParams{});
+}
+
+bool AccessibilityProperty::HasAccessibilityNextFocusParams() const
+{
+    return accessibilityNextFocusParams_.has_value();
+}
+
+void AccessibilityProperty::ResetAccessibilityNextFocusParams()
+{
+    accessibilityNextFocusParams_.reset();
+}
+
 void AccessibilityProperty::UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey)
 {
     auto frameNode = host_.Upgrade();
@@ -124,10 +147,13 @@ void AccessibilityProperty::UpdateAccessibilityNextFocusIdMap(const std::string&
     CHECK_NULL_VOID(pipeline);
     auto containerId = pipeline->GetInstanceId();
 
+    bool descendantMode = accessibilityNextFocusParams_.has_value()
+        ? accessibilityNextFocusParams_->descendantMode : false;
+
     auto jsAccessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(jsAccessibilityManager);
     jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(containerId, nextFocusInspectorKey,
-                                                              frameNode->GetAccessibilityId());
+                                                              frameNode->GetAccessibilityId(), descendantMode);
 }
 
 std::string AccessibilityProperty::GetText() const
@@ -1126,10 +1152,15 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
 
 void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey)
 {
-    if (accessibilityNextFocusInspectorKey == accessibilityNextFocusInspectorKey_.value_or("")) {
+    std::string oldKey = accessibilityNextFocusParams_.has_value()
+        ? accessibilityNextFocusParams_->nextFocusInspectorKey : "";
+    if (accessibilityNextFocusInspectorKey == oldKey) {
         return;
     }
-    accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    if (!accessibilityNextFocusParams_.has_value()) {
+        accessibilityNextFocusParams_ = AccessibilityNextFocusParams{};
+    }
+    accessibilityNextFocusParams_->nextFocusInspectorKey = accessibilityNextFocusInspectorKey;
     auto frameNode = host_.Upgrade();
     FREE_NODE_CHECK(frameNode, SetAccessibilityNextFocusInspectorKey, accessibilityNextFocusInspectorKey);
     UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);

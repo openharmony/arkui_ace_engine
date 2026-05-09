@@ -5066,7 +5066,6 @@ void SetAccessibilityNextFocusIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
         return;
     }
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);

@@ -92,6 +92,17 @@ void JSViewAbstract::JsAccessibilityNextFocusId(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetAccessibilityNextFocusId(nextFocusId);
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+        NG::AccessibilityNextFocusParams params;
+        auto descendantModeVal = obj->GetProperty("isConsiderDescendants");
+        if (descendantModeVal->IsBoolean()) {
+            params.nextFocusInspectorKey = nextFocusId;
+            params.descendantMode = descendantModeVal->ToBoolean();
+        }
+        ViewAbstractModel::GetInstance()->SetAccessibilityNextFocusParams(params);
+    }
 }
 
 void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
