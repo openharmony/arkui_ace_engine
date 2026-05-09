@@ -104,6 +104,9 @@ public:
     void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     bool OnHandleBeforeMenuVisibiltyChanged(bool isVisible) override;
+    enum class RequestCode: uint32_t {
+        RIGHT_CLICK = 1 << 3
+    };
 
 protected:
     bool AllowTranslate() override;
