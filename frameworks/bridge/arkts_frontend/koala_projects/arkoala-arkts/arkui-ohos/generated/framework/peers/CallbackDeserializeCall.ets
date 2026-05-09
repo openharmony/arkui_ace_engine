@@ -55,6 +55,8 @@ import { ImageCompleteCallback, ImageLoadResult_serializer, ImageLoadResult } fr
 import { ImageErrorCallback, ImageError_serializer, ImageOnCompleteCallback, ImageCompleteEvent_serializer, ImageError, ImageCompleteEvent } from './../../component/image'
 import { LoadingProgressConfiguration_serializer, LoadingProgressConfiguration } from './../../component/loadingProgress'
 import { MenuItemConfiguration_serializer, OnSelectCallback, MenuItemConfiguration } from './../../component/select'
+import { NodeRenderStateChangeCallback, NodeRenderState } from '@ohos.arkui.UIContext'
+import { FrameNode_serializer } from './../FrameNode'
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback } from './../../component/alphabetIndexer'
 import { OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, SubmitEvent_serializer, OnTextSelectionChangeCallback, EnterKeyType, SubmitEvent } from './../../component/textInput'
 import { OnFoldStatusChangeCallback, OnFoldStatusChangeInfo_serializer, OnHoverStatusChangeCallback, HoverEventParam_serializer, OnFoldStatusChangeInfo, HoverEventParam } from './../../component/folderStack'
@@ -76,7 +78,6 @@ import { TextClockConfiguration_serializer, TextClockConfiguration } from './../
 import { TextFieldValueCallback } from './../textFieldOps'
 import { TextTimerConfiguration_serializer, TimerCallback, TextTimerConfiguration } from './../../component/textTimer'
 import { ToggleConfiguration_serializer, ToggleConfiguration } from './../../component/toggle'
-import { FrameNode_serializer } from './../FrameNode'
 import { UIStatesChangeHandler, FrameNode } from 'arkui.FrameNode'
 import { int32, float32, int64 } from '@koalaui/common'
 import { CallbackTransformer } from './../../CallbackTransformer'
@@ -2633,6 +2634,18 @@ export function deserializeAndCallNavExtender_PushDestinationInner(thisDeseriali
     let needTransition: boolean = thisDeserializer.readBoolean()
     call(pathStack, name, params, needTransition)
 }
+export function deserializeAndCallNodeRenderStateChangeCallback(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as NodeRenderStateChangeCallback)
+    let state: NodeRenderState = NodeRenderState.fromValue(thisDeserializer.readInt32())
+    const nodeTmpBuf_runtimeType = thisDeserializer.readInt8()!.toInt()
+    let nodeTmpBuf: FrameNode | undefined = undefined
+    if ((nodeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        nodeTmpBuf = (FrameNode_serializer.read(thisDeserializer) as FrameNode)
+    }
+    let node: FrameNode | undefined = nodeTmpBuf
+    call(state, node)
+}
 export function deserializeAndCallOnAdsBlockedCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as OnAdsBlockedCallback)
@@ -4531,6 +4544,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_NAVEXTENDER_ONUPDATESTACK: return deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer);
         case CallbackKind.KIND_NAVEXTENDER_PAGEMAPNODEBUILDER: return deserializeAndCallNavExtender_PageMapNodeBuilder(thisDeserializer);
         case CallbackKind.KIND_NAVEXTENDER_PUSHDESTINATIONINNER: return deserializeAndCallNavExtender_PushDestinationInner(thisDeserializer);
+        case CallbackKind.KIND_NODERENDERSTATECHANGECALLBACK: return deserializeAndCallNodeRenderStateChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ONADSBLOCKEDCALLBACK: return deserializeAndCallOnAdsBlockedCallback(thisDeserializer);
         case CallbackKind.KIND_ONAISESSIONCALLBACK: return deserializeAndCallOnAISessionCallback(thisDeserializer);
         case CallbackKind.KIND_ONALPHABETINDEXERPOPUPSELECTCALLBACK: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer);

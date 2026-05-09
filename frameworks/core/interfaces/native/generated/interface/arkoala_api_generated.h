@@ -1853,6 +1853,8 @@ typedef struct NavExtender_PageMapNodeBuilder NavExtender_PageMapNodeBuilder;
 typedef struct Opt_NavExtender_PageMapNodeBuilder Opt_NavExtender_PageMapNodeBuilder;
 typedef struct NavExtender_PushDestinationInner NavExtender_PushDestinationInner;
 typedef struct Opt_NavExtender_PushDestinationInner Opt_NavExtender_PushDestinationInner;
+typedef struct NodeRenderStateChangeCallback NodeRenderStateChangeCallback;
+typedef struct Opt_NodeRenderStateChangeCallback Opt_NodeRenderStateChangeCallback;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
 typedef struct Opt_OnAdsBlockedCallback Opt_OnAdsBlockedCallback;
 typedef struct OnAISessionCallback OnAISessionCallback;
@@ -6081,6 +6083,14 @@ typedef struct Opt_NestedScrollMode {
     Ark_Tag tag;
     Ark_NestedScrollMode value;
 } Opt_NestedScrollMode;
+typedef enum Ark_NodeRenderState {
+    ARK_NODE_RENDER_STATE_ABOUT_TO_RENDER_IN = 0,
+    ARK_NODE_RENDER_STATE_ABOUT_TO_RENDER_OUT = 1,
+} Ark_NodeRenderState;
+typedef struct Opt_NodeRenderState {
+    Ark_Tag tag;
+    Ark_NodeRenderState value;
+} Opt_NodeRenderState;
 typedef enum Ark_ObscuredReasons {
     ARK_OBSCURED_REASONS_PLACEHOLDER = 0,
 } Ark_ObscuredReasons;
@@ -13361,6 +13371,16 @@ typedef struct Opt_NavExtender_PushDestinationInner {
     Ark_Tag tag;
     NavExtender_PushDestinationInner value;
 } Opt_NavExtender_PushDestinationInner;
+typedef struct NodeRenderStateChangeCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_NodeRenderState state, const Opt_FrameNode node);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_NodeRenderState state, const Opt_FrameNode node);
+} NodeRenderStateChangeCallback;
+typedef struct Opt_NodeRenderStateChangeCallback {
+    Ark_Tag tag;
+    NodeRenderStateChangeCallback value;
+} Opt_NodeRenderStateChangeCallback;
 typedef struct OnAdsBlockedCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -31710,6 +31730,9 @@ typedef struct GENERATED_ArkUIUIObserverGestureEventOpsAccessor {
                                     const UIObserver_PanListenerCallback* callback);
     Ark_Int32 (*setOnAfterPanEnd)(Ark_Int32 instanceId,
                                   const UIObserver_PanListenerCallback* callback);
+    Ark_Int32 (*setOnNodeRenderState)(Ark_Int32 instanceId,
+                                      const Ark_Union_String_I32* nodeIdentity,
+                                      const NodeRenderStateChangeCallback* callback);
     Ark_Int32 (*setOnWillClick)(Ark_Int32 instanceId,
                                 const UIObserver_ClickEventListenerCallback* callback);
     Ark_Int32 (*setOnDidClick)(Ark_Int32 instanceId,

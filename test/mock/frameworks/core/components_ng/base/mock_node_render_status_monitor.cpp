@@ -7,11 +7,12 @@
 
 namespace OHOS::Ace::NG {
 MonitorRegisterResult NodeRenderStatusMonitor::RegisterNodeRenderStatusListener(
-    FrameNode* frameNode, NodeRenderStatusHandleFunc&& func, MonitorSourceType type)
+    FrameNode* frameNode, NodeRenderStatusHandleFunc&& func, MonitorSourceType type, int32_t resourceId)
 {
     (void)frameNode;
     (void)func;
     (void)type;
+    (void)resourceId;
     return {};
 }
 
