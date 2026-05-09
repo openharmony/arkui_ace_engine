@@ -337,6 +337,9 @@ export function hookStateStyleImpl(peer: ArkCommonMethodPeer, value: StateStyles
     if (currentState.value === UI_STATE_NORMAL) {
         value?.normal?.(cm)
     }
+    if (currentState.value & UI_STATE_HOVERED) {
+        value?.hovered?.(cm)
+    }
     if (currentState.value & UI_STATE_PRESSED) {
         value?.clicked?.(cm)
         value?.pressed?.(cm)
@@ -349,9 +352,6 @@ export function hookStateStyleImpl(peer: ArkCommonMethodPeer, value: StateStyles
     }
     if (currentState.value & UI_STATE_SELECTED) {
         value?.selected?.(cm)
-    }
-    if (currentState.value & UI_STATE_HOVERED) {
-        value?.hovered?.(cm)
     }
 
     cm.applyModifierPatch(peer)

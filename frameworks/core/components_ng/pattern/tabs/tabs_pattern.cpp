@@ -1217,6 +1217,7 @@ void TabsPattern::InitFloatingBar()
         UpdateBgMaskNode();
 
         InitTouchEvent();
+        ApplySystemMaterial();
     } else {
         if (tabsNode->HasBackgroundMaskNode()) {
             auto backgroundMaskNode = AceType::DynamicCast<FrameNode>(tabsNode->GetBackgroundMask());
@@ -1227,6 +1228,7 @@ void TabsPattern::InitFloatingBar()
         if (floatingBarPosition_ != FloatingBarPosition::CENTER) {
             ResetTabBarFollowHandPosition();
         }
+        ResetSystemMaterial();
     }
     if (isFloatingBar_ != lastFloatingBar_) {
         tabsNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1508,5 +1510,44 @@ void TabsPattern::FollowHandAnimation()
     auto step2Animation = AnimationUtils::StartAnimation(
         optionsNext, CreateTouchAnimationNext, optionsNext.GetOnFinishEvent(), nullptr, context);
     floatTabBarFollowHandAnimations_.push_back(step2Animation);
+}
+
+void TabsPattern::ApplySystemMaterial()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto style = property->GetBarFloatingStyle();
+    if (!style.has_value()) {
+        return;
+    }
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto renderContext = tabBar->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto uiMaterial = style->systemMaterial;
+    if (uiMaterial) {
+        tabBarPattern->SetUseNewMaterial(true);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), uiMaterial.GetRawPtr());
+    } else {
+        tabBarPattern->SetUseNewMaterial(false);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), nullptr);
+    }
+}
+
+void TabsPattern::ResetSystemMaterial()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetUseNewMaterial(false);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), nullptr);
 }
 } // namespace OHOS::Ace::NG

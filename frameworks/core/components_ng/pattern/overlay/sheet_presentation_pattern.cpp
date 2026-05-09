@@ -61,9 +61,11 @@
 #include "core/components_ng/property/property.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/pattern/sheet/sheet_edge_light.h"
 #include "core/components_ng/render/sheet_popup_shape.h"
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #endif
+
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -71,6 +73,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 #include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
@@ -1295,6 +1298,20 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
         option.GetOnFinishEvent(), nullptr, pipeline);
     SetBottomStyleHotAreaInSubwindow();
+
+#ifdef ENABLE_ROSEN_BACKEND
+    // edge light animation
+    auto sheetType = GetSheetTypeNoProcess();
+    auto sheetEdgeLightMode = GetSheetEdgeLightMode();
+    if (SheetEdgeLightBase::CheckIfNeedShowEdgeLight(sheetEdgeLightMode, sheetType) && isTransitionIn &&
+        isFirstTransition) {
+        SheetEdgeLightBase::SetSheetEdgeLightTransitionPreShow(host);
+        AnimationOption optionEdgeLight = SheetEdgeLightBase::GetSheetEdgeLightAnimatePreShowOption();
+        const std::function<void()> event = SheetEdgeLightBase::GetSheetEdgeLightAnimateEvent(host);
+        const std::function<void()> finishEvent = SheetEdgeLightBase::GetSheetEdgeLightAnimateFinishEvent(host);
+        AnimationUtils::Animate(optionEdgeLight, event, finishEvent, nullptr, pipeline);
+    }
+#endif
 }
 
 void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity)

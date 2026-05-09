@@ -176,6 +176,9 @@ public:
 
     std::shared_ptr<FocusRulesCheckNode> GetUserPrevFocusNode() override
     {
+        if (mockPrevNode_) {
+            return mockPrevNode_;
+        }
         return nullptr;
     }
     bool IsAccessibiltyVisible() override
@@ -192,11 +195,19 @@ public:
     {
         return mockIsEmbededTarget_;
     }
+
+    bool IsDescendantMode() override
+    {
+        return mockIsDescendantMode_;
+    }
+
     std::set<std::string> mockValueArray_;
     std::shared_ptr<FocusRulesCheckNode> mockNextNode_;
+    std::shared_ptr<FocusRulesCheckNode> mockPrevNode_;
     std::shared_ptr<FocusRulesCheckNode> mockParentNode_;
     bool mockChildTreeContainer = false;
     bool mockIsEmbededTarget_ = false;
+    bool mockIsDescendantMode_ = false;
 private:
 };
 } // namespace
@@ -1200,6 +1211,220 @@ HWTEST_F(AccessibilityFocusStrategyTest, CanScroll002, TestSize.Level1)
     parentNode->AddChild(currentNode2);
     std::shared_ptr<FocusRulesCheckNode> targetNode;
     auto result = focusStrategy.IsFindNextReadableNode(current1, parent, targetNode);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryJumpToNextFocusTarget_NullCurrentNode
+ * @tc.desc: Test TryJumpToNextFocusTarget with nullptr currentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryJumpToNextFocusTarget_NullCurrentNode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedNextFocusNodes;
+    auto result = focusStrategy.TryJumpToNextFocusTarget(nullptr, targetNode, visitedNextFocusNodes, "test");
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryJumpToNextFocusTarget_NoNextFocusNode
+ * @tc.desc: Test TryJumpToNextFocusTarget when node has no nextFocus target
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryJumpToNextFocusTarget_NoNextFocusNode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedNextFocusNodes;
+    auto result = focusStrategy.TryJumpToNextFocusTarget(currentNode, targetNode, visitedNextFocusNodes, "test");
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryJumpToNextFocusTarget_NeitherNodeInDescendantMode
+ * @tc.desc: Test TryJumpToNextFocusTarget when neither node is in descendantMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryJumpToNextFocusTarget_NeitherNodeInDescendantMode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    currentNode->mockIsDescendantMode_ = false;
+    auto nextFocusTarget = std::make_shared<MockFocusRulesCheckNode>(2);
+    nextFocusTarget->mockIsDescendantMode_ = false;
+    currentNode->mockNextNode_ = nextFocusTarget;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedNextFocusNodes;
+    auto result = focusStrategy.TryJumpToNextFocusTarget(currentNode, targetNode, visitedNextFocusNodes, "test");
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryJumpToNextFocusTarget_CurrentNodeInDescendantMode
+ * @tc.desc: Test TryJumpToNextFocusTarget when current node is in descendantMode with focusable target
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryJumpToNextFocusTarget_CurrentNodeInDescendantMode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    focusStrategy.mockCanFocus_ = true;
+    auto nextFocusTarget = std::make_shared<MockFocusRulesCheckNode>(2);
+    nextFocusTarget->mockIsDescendantMode_ = false;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    currentNode->mockIsDescendantMode_ = true;
+    currentNode->mockNextNode_ = nextFocusTarget;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedNextFocusNodes;
+    auto result = focusStrategy.TryJumpToNextFocusTarget(currentNode, targetNode, visitedNextFocusNodes, "test");
+    EXPECT_NE(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryJumpToNextFocusTarget_CycleDetected
+ * @tc.desc: Test TryJumpToNextFocusTarget detects cycle when target already visited
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryJumpToNextFocusTarget_CycleDetected, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto nextFocusTarget = std::make_shared<MockFocusRulesCheckNode>(2);
+    nextFocusTarget->mockIsDescendantMode_ = true;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    currentNode->mockIsDescendantMode_ = true;
+    currentNode->mockNextNode_ = nextFocusTarget;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedNextFocusNodes;
+    visitedNextFocusNodes.insert(2); // mark target as already visited
+    auto result = focusStrategy.TryJumpToNextFocusTarget(currentNode, targetNode, visitedNextFocusNodes, "test");
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryJumpToPrevFocusSource_NullCurrentNode
+ * @tc.desc: Test TryJumpToPrevFocusSource with nullptr currentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryJumpToPrevFocusSource_NullCurrentNode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedPrevFocusNodes;
+    auto result = focusStrategy.TryJumpToPrevFocusSource(nullptr, targetNode, visitedPrevFocusNodes, "test");
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryJumpToPrevFocusSource_NoPrevFocusNode
+ * @tc.desc: Test TryJumpToPrevFocusSource when node has no prev focus node
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryJumpToPrevFocusSource_NoPrevFocusNode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedPrevFocusNodes;
+    auto result = focusStrategy.TryJumpToPrevFocusSource(currentNode, targetNode, visitedPrevFocusNodes, "test");
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryJumpToPrevFocusSource_NotInDescendantMode
+ * @tc.desc: Test TryJumpToPrevFocusSource when node has prev node but is not in descendantMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryJumpToPrevFocusSource_NotInDescendantMode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    currentNode->mockIsDescendantMode_ = false;
+    auto prevFocusNode = std::make_shared<MockFocusRulesCheckNode>(2);
+    currentNode->mockPrevNode_ = prevFocusNode;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedPrevFocusNodes;
+    auto result = focusStrategy.TryJumpToPrevFocusSource(currentNode, targetNode, visitedPrevFocusNodes, "test");
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryFindByNextFocusForCheckSelf_BypassSelfTrue
+ * @tc.desc: Test TryFindByNextFocusForCheckSelf with bypassSelf=true and focusable next target
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryFindByNextFocusForCheckSelf_BypassSelfTrue, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    focusStrategy.mockCanFocus_ = true;
+    auto nextFocusTarget = std::make_shared<MockFocusRulesCheckNode>(2);
+    nextFocusTarget->mockIsDescendantMode_ = false;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    currentNode->mockNextNode_ = nextFocusTarget;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedNextFocusNodes;
+    auto result = focusStrategy.TryFindByNextFocusForCheckSelf(
+        condition, currentNode, targetNode, visitedNextFocusNodes);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_SUCCESS);
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_EQ(targetNode->GetAccessibilityId(), 2);
+}
+
+/**
+ * @tc.name: TryFindByNextFocusForCheckSelf_NextTargetDescendantMode
+ * @tc.desc: Test TryFindByNextFocusForCheckSelf when next target is in descendantMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryFindByNextFocusForCheckSelf_NextTargetDescendantMode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto nextFocusTarget = std::make_shared<MockFocusRulesCheckNode>(2);
+    nextFocusTarget->mockIsDescendantMode_ = true;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    currentNode->mockNextNode_ = nextFocusTarget;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedNextFocusNodes;
+    auto result = focusStrategy.TryFindByNextFocusForCheckSelf(
+        condition, currentNode, targetNode, visitedNextFocusNodes);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryFindByPrevFocusForMain_NeedTryPrevStartFalse
+ * @tc.desc: Test TryFindByPrevFocusForMain when bypassSelf=false and node is focusable
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryFindByPrevFocusForMain_NeedTryPrevStartFalse, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    focusStrategy.mockCanFocus_ = true;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    AceFocusMoveDetailCondition condition = {.bypassSelf = false, .bypassDescendants = false};
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedPrevFocusNodes;
+    auto result = focusStrategy.TryFindByPrevFocusForMain(condition, currentNode, targetNode, visitedPrevFocusNodes);
+    EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
+/**
+ * @tc.name: TryFindByPrevFocusForMain_PrevTargetDescendantMode
+ * @tc.desc: Test TryFindByPrevFocusForMain when prev target is in descendantMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, TryFindByPrevFocusForMain_PrevTargetDescendantMode, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    auto prevFocusNode = std::make_shared<MockFocusRulesCheckNode>(2);
+    prevFocusNode->mockIsDescendantMode_ = true;
+    auto currentNode = std::make_shared<MockFocusRulesCheckNode>(1);
+    currentNode->mockPrevNode_ = prevFocusNode;
+    AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    std::unordered_set<int64_t> visitedPrevFocusNodes;
+    auto result = focusStrategy.TryFindByPrevFocusForMain(condition, currentNode, targetNode, visitedPrevFocusNodes);
     EXPECT_EQ(result, AceFocusMoveResult::FIND_FAIL);
 }
 

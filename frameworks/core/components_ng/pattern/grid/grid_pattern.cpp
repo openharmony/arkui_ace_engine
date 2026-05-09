@@ -1203,7 +1203,7 @@ float GridPattern::GetEndOffset()
     const float totalHeight = GetTotalHeight();
     if (GetAlwaysEnabled() && LessNotEqual(totalHeight, contentHeight)) {
         // overScroll with contentHeight < viewport
-        if (irregular) {
+        if (userDefined_ || irregular) {
             return info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap) + info_.contentStartOffset_;
         }
         return totalHeight - heightInView - info_.contentEndOffset_;
@@ -1312,7 +1312,7 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
             offset.start = newStartPos;
         }
     }
-    if (UseIrregularLayout()) {
+    if (userDefined_ || UseIrregularLayout()) {
         if (info_.repeatDifference_ == 0) {
             GetEndOverScrollIrregular(offset, static_cast<float>(delta));
         }

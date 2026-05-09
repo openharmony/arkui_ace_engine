@@ -391,6 +391,35 @@ bool CreateGlobalModalUIExtension(const AAFwk::Want& want, int32_t &sessionId,
     }
     return true;
 }
+
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+void HilogCallback(ContainerScopeLogLevel level, const char* msg)
+{
+    switch (level) {
+        case ContainerScopeLogLevel::DEBUG:
+            LOGD("%{public}s", msg);
+            break;
+        case ContainerScopeLogLevel::INFO:
+            LOGI("%{public}s", msg);
+            break;
+        case ContainerScopeLogLevel::WARN:
+            LOGW("%{public}s", msg);
+            break;
+        case ContainerScopeLogLevel::ERROR:
+            LOGE("%{public}s", msg);
+            break;
+    }
+}
+
+struct ContainerScopeHilogRegistrar {
+    ContainerScopeHilogRegistrar()
+    {
+        ContainerScope::SetLogCallback(HilogCallback);
+    }
+};
+static ContainerScopeHilogRegistrar g_hilogRegistrar;
+#endif // ENABLE_CONTAINER_SCOPE_TRACKING
+
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -2019,6 +2048,9 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
 {
     SetHwIcuDirectory();
     Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+    ContainerScope::EnableTracking(SystemProperties::GetDebugEnabled());
+#endif
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
     if (abilityContext) {
         int32_t missionId = -1;
@@ -6680,6 +6712,11 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
     UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]
         (ContentChangeConfig config) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (!taskExecutor) {
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            taskExecutor = pipeline->GetTaskExecutor();
+        }
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [config]() {
@@ -6697,6 +6734,11 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
     });
     UiSessionManager::GetInstance()->SetStopContentChangeDetectCallback([weakTaskExecutor = taskExecutor]() {
         auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (!taskExecutor) {
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            taskExecutor = pipeline->GetTaskExecutor();
+        }
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             []() {

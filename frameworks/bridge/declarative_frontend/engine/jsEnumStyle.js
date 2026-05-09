@@ -2078,6 +2078,13 @@ let SheetSize;
   SheetSize.FIT_CONTENT = 'FIT_CONTENT';
 })(SheetSize || (SheetSize = {}));
 
+let EdgeLightMode;
+(function (EdgeLightMode) {
+  EdgeLightMode[EdgeLightMode.EDGELIGHT_AUTO = 0] = 'EDGELIGHT_AUTO';
+  EdgeLightMode[EdgeLightMode.EDGELIGHT_ENABLED = 1] = 'EDGELIGHT_ENABLED';
+  EdgeLightMode[EdgeLightMode.EDGELIGHT_DISABLED = 2] = 'EDGELIGHT_DISABLED';
+})(EdgeLightMode || (EdgeLightMode = {}));
+
 let SheetType;
 (function (SheetType) {
   SheetType[SheetType.BOTTOM = 0] = 'BOTTOM';

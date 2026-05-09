@@ -3348,6 +3348,8 @@ struct ArkUICommonModifier {
     void (*resetAccessibilityGroup)(ArkUINodeHandle node);
     void (*setAccessibilityNextFocusId)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetAccessibilityNextFocusId)(ArkUINodeHandle node);
+    void (*setAccessibilityNextFocusParams)(ArkUINodeHandle node, ArkUI_Bool descendantMode);
+    void (*resetAccessibilityNextFocusParams)(ArkUINodeHandle node);
     void (*setAccessibilityDefaultFocus)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAccessibilityDefaultFocus)(ArkUINodeHandle node);
     void (*setAccessibilityUseSamePage)(ArkUINodeHandle node, ArkUI_Bool isFullSilent);

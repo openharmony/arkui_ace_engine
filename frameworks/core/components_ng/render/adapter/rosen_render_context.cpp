@@ -38,6 +38,7 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_union_node.h"
 #include "rosen_render_context.h"
+#include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
@@ -1808,6 +1809,12 @@ void RosenRenderContext::SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShap
 {
     FREE_RS_CONTEXT_CHECK(SetSDFShape, shape);
     CHECK_NULL_VOID(rsNode_ && shape);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::MENU_ETS_TAG) {
+        sdfShape_ = shape;
+        return;
+    }
     rsNode_->SetSDFShape(shape);
 }
 
@@ -1821,6 +1828,17 @@ void RosenRenderContext::ResetShadowPath()
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetShadowPath(nullptr);
+}
+
+void RosenRenderContext::SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter)
+{
+    FREE_RS_CONTEXT_CHECK(SetForegroundShader, edgeLightFilter);
+    CHECK_NULL_VOID(rsNode_);
+    if (!edgeLightFilter) {
+        rsNode_->SetForegroundShader(nullptr);
+        return;
+    }
+    rsNode_->SetForegroundShader(edgeLightFilter->GetEdgeLightEffect());
 }
 
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
@@ -8731,10 +8749,23 @@ void RosenRenderContext::SetUnionSpacing(float spacing)
     unionNode->SetUnionSpacing(spacing);
 }
 
+void RosenRenderContext::UpdateSubmenuDistortionParam()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (sdfShape_) {
+        rsNode_->SetSDFShape(sdfShape_);
+    }
+}
+
 void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
 {
 #ifndef PREVIEW
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isMenuNode = host->GetTag() == V2::MENU_ETS_TAG;
     if (!paintRect_.IsValid()) {
         ACE_SCOPED_TRACE("paintRect is not valid, updating DistortionParam is failed");
         return;
@@ -8762,8 +8793,7 @@ void RosenRenderContext::UpdateDistortionParam(const DistortionParam& param)
     rootShape->Setter<Rosen::SDFDistortOpShapeLBCornerTag>(convertFunc2(param.lbCorner));
     rootShape->Setter<Rosen::SDFDistortOpShapeBarrelDistortionTag>(convertFunc4(param.barrelDistortion));
     auto baseSdfShape = std::static_pointer_cast<RSNGShapeBase>(sdfShape);
-    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(baseSdfShape);
-    auto host = GetHost();
+    rootShape->Setter<Rosen::SDFDistortOpShapeShapeTag>(isMenuNode ? sdfShape_ : baseSdfShape);
     if (host) {
         ACE_SCOPED_TRACE("node setSDF-DistortionParam id:(%d) tag:(%s) rect:(%f,%f,%f,%f), radius:(%f) luCorner:(%f,%f)"
             " ruCorner:(%f,%f) lbCorner:(%f,%f) rbCorner:(%f,%f) barrelDistortion:(%f,%f,%f,%f)",

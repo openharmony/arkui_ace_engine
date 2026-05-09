@@ -5860,6 +5860,24 @@ void ResetAccessibilityNextFocusId(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
 }
 
+void SetAccessibilityNextFocusParams(ArkUINodeHandle node, ArkUI_Bool descendantMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::AccessibilityNextFocusParams params;
+    params.descendantMode = descendantMode;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode, params);
+}
+
+void ResetAccessibilityNextFocusParams(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityNextFocusParams();
+}
+
 void SetAccessibilityDefaultFocus(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11557,6 +11575,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityGroup = ResetAccessibilityGroup,
         .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
         .resetAccessibilityNextFocusId = ResetAccessibilityNextFocusId,
+        .setAccessibilityNextFocusParams = SetAccessibilityNextFocusParams,
+        .resetAccessibilityNextFocusParams = ResetAccessibilityNextFocusParams,
         .setAccessibilityDefaultFocus = SetAccessibilityDefaultFocus,
         .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
         .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,

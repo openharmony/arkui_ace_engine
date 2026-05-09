@@ -903,6 +903,11 @@ struct ArkUIAniDetachedFreeRootModifier {
 struct ArkUIAniGestureEventUIObserverModifier {
     void (*removePanListenerCallback)(
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    std::pair<bool, int32_t> (*getNodeInfo)(
+        int32_t instanceId, int32_t nodeId, const std::string& nodeKey, bool isStr, bool isInt);
+    std::pair<bool, bool> (*isNodeRenderStateRegisterLimited)(int32_t instanceId, int32_t resourceId, int32_t nodeId);
+    void (*triggerNodeRenderStateForFirstRegister)(int32_t instanceId, int32_t resourceId, int32_t nodeId);
+    void (*removeNodeRenderStateCallback)(int32_t instanceId, int32_t resourceId, int32_t nodeId, bool isRemoveAll);
     void (*removeClickListenerCallback)(
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
     void (*removeTapListenerCallback)(

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_PICKER_HAPTIC_IMPL_H
 #define FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_PICKER_HAPTIC_IMPL_H
 
+#include <cstdint>
+
 #include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +44,7 @@ public:
 
     void Stop() override
     {
+        ++stopCallCount_;
     }
 
     void HandleDelta(double dy) override
@@ -50,6 +53,7 @@ public:
     }
 
     ThreadStatus playThreadStatus_ = ThreadStatus::NONE;
+    int32_t stopCallCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_PICKER_HAPTIC_IMPL_H

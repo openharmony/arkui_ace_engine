@@ -27,6 +27,7 @@
 #include "base/log/dump_log.h"
 #include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 
 using namespace OHOS::Ace::NG;
 using namespace testing;
@@ -313,4 +314,95 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
     EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
+/**
+ * @tc.name: JsAccessibilityFocusFrameNodeUtilsTest009
+ * @tc.desc: test IsDescendantMode when node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUtilsTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNodeRulesCheckNode with nullptr
+     */
+    NG::FrameNodeHandleParam frameNodeHandleParam;
+    auto frameNodeRulesCheckNode = FrameNodeRulesCheckNode(nullptr, 123);
+
+    /**
+     * @tc.steps: step2. test IsDescendantMode returns false for nullptr node
+     */
+    EXPECT_FALSE(frameNodeRulesCheckNode.IsDescendantMode());
+}
+
+/**
+ * @tc.name: JsAccessibilityFocusFrameNodeUtilsTest010
+ * @tc.desc: test IsDescendantMode for Web node with NO_STR accessibility level
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUtilsTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode with WEB_ETS_TAG and NO_STR accessibility level
+     */
+    auto frameNode = NG::FrameNode::CreateFrameNode(V2::WEB_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetActive(true, false);
+    auto accessibilityProperty = frameNode->GetOrCreateAccessibilityProperty();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityLevel(NG::AccessibilityProperty::Level::NO_STR);
+
+    /**
+     * @tc.steps: step2. construct FrameNodeRulesCheckNode and test IsDescendantMode
+     */
+    auto frameNodeRulesCheckNode =
+        std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    EXPECT_TRUE(frameNodeRulesCheckNode->IsDescendantMode());
+}
+
+/**
+ * @tc.name: JsAccessibilityFocusFrameNodeUtilsTest011
+ * @tc.desc: test IsDescendantMode for Web node without NO_STR accessibility level
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUtilsTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode with WEB_ETS_TAG and default accessibility level
+     */
+    auto frameNode = NG::FrameNode::CreateFrameNode(V2::WEB_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetActive(true, false);
+
+    /**
+     * @tc.steps: step2. construct FrameNodeRulesCheckNode and test IsDescendantMode
+     */
+    auto frameNodeRulesCheckNode =
+        std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    EXPECT_FALSE(frameNodeRulesCheckNode->IsDescendantMode());
+}
+
+/**
+ * @tc.name: JsAccessibilityFocusFrameNodeUtilsTest012
+ * @tc.desc: test IsDescendantMode for non-Web node
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUtilsTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode with non-WEB tag
+     */
+    auto frameNode = NG::FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NG::Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetActive(true, false);
+
+    /**
+     * @tc.steps: step2. construct FrameNodeRulesCheckNode and test IsDescendantMode
+     */
+    auto frameNodeRulesCheckNode =
+        std::make_shared<FrameNodeRulesCheckNode>(frameNode, frameNode->GetAccessibilityId());
+    EXPECT_FALSE(frameNodeRulesCheckNode->IsDescendantMode());
+}
+
 } // namespace OHOS::Ace::Framework

@@ -136,6 +136,9 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite002, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level2)
 {
+    /**
+ 	 * @tc.steps: step1. get controller
+ 	 */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -149,6 +152,9 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level2)
     richEditorPattern->copyOption_ = CopyOptions::Local;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
+    /**
+ 	 * @tc.steps: step1. test IsShowAIWrite
+ 	 */
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));

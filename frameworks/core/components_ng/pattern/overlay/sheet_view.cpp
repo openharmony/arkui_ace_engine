@@ -69,6 +69,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
         [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
     InitSheetKey(sheetNode, builder->GetId(), targetId);
     sheetPattern->UpdateSheetType();
+    sheetPattern->SetSheetEdgeLightMode(sheetStyle);
     sheetPattern->InitSheetObject();
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
@@ -490,6 +491,7 @@ RefPtr<FrameNode> SheetView::CreateSheetMaskShowInSubwindow(const RefPtr<FrameNo
     // Update sheet type needs to get subwindow messages which is updated
     // after sheetWrapper MountToParent root, after sheetPage MountToParent sheetWrapper.
     sheetNodePattern->UpdateSheetType();
+    sheetNodePattern->SetSheetEdgeLightMode(sheetStyle);
     sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
     sheetWrapperPattern->SetSheetMaskNode(maskNode);
     sheetWrapperPattern->SetSheetPageNode(sheetPageNode);

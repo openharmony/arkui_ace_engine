@@ -37,6 +37,9 @@ function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nat
     return;
   }
   let state = 0;
+  if (modifier.applyHoveredAttribute !== undefined) {
+    state |= UI_STATE_HOVERED;
+  }
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
   }
@@ -49,9 +52,6 @@ function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nat
   if (modifier.applySelectedAttribute !== undefined) {
     state |= UI_STATE_SELECTED;
   }
-  if (modifier.applyHoveredAttribute !== undefined) {
-    state |= UI_STATE_HOVERED;
-  }
 
   getUINativeModule().setSupportedUIState(nativeNode, state);
 }
@@ -62,6 +62,9 @@ function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeN
 
   if (modifier.applyNormalAttribute !== undefined) {
     modifier.applyNormalAttribute(component as any);
+  }
+  if ((currentUIState & UI_STATE_HOVERED) && (modifier.applyHoveredAttribute !== undefined)) {
+    modifier.applyHoveredAttribute(component as any);
   }
   if ((currentUIState & UI_STATE_PRESSED) && (modifier.applyPressedAttribute !== undefined)) {
     modifier.applyPressedAttribute(component as any);
@@ -74,9 +77,6 @@ function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeN
   }
   if ((currentUIState & UI_STATE_SELECTED) && (modifier.applySelectedAttribute !== undefined)) {
     modifier.applySelectedAttribute(component as any);
-  }
-  if ((currentUIState & UI_STATE_HOVERED) && (modifier.applyHoveredAttribute !== undefined)) {
-    modifier.applyHoveredAttribute(component as any);
   }
 }
 

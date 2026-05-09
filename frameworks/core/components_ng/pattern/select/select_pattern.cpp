@@ -358,6 +358,8 @@ void SelectPattern::ConfigMenuParam()
     menuParam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
     menuParam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
     menuParam.systemMaterial = GetMenuSystemMaterial();
+    menuParam.distortionMode = DistortionMode::DISTORTION_DISABLED;
+    menuParam.edgeLightMode = EdgeLightMode::EDGELIGHT_DISABLED;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
         && MaterialUtils::IsMaterialEnabled() && !menuParam.systemMaterial) {
         menuParam.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);

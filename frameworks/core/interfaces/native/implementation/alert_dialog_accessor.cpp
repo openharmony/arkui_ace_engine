@@ -64,6 +64,8 @@ struct DialogPropsForUpdate {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 };
 } // namespace OHOS::Ace::NG
 
@@ -244,6 +246,14 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPr
             dialogProps.wordBreak = wordBreak.value();
         }
     }
+    auto distortionMode = Converter::OptConvert<DistortionMode>(props.distortionMode);
+    if (distortionMode) {
+        dialogProps.distortionMode = distortionMode.value();
+    }
+    auto edgeLightMode = Converter::OptConvert<EdgeLightMode>(props.edgeLightMode);
+    if (edgeLightMode) {
+        dialogProps.edgeLightMode = edgeLightMode.value();
+    }
     auto transitionEffect = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(props.transition);
     if (transitionEffect) {
         dialogProps.transitionEffect = transitionEffect.value();
@@ -378,7 +388,9 @@ DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm p
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
         .levelOrder = params.levelOrder,
-        .systemMaterial = params.systemMaterial
+        .systemMaterial = params.systemMaterial,
+        .distortionMode = params.distortionMode,
+        .edgeLightMode = params.edgeLightMode,
     };
 }
 void UpdateConfirmButton(DialogProperties& dialogProps, const Ark_AlertDialogParamWithConfirm params)
@@ -455,7 +467,9 @@ DialogPropsForUpdate GetPropsWithButtons(const Ark_AlertDialogParamWithButtons p
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
         .levelOrder = params.levelOrder,
-        .systemMaterial = params.systemMaterial
+        .systemMaterial = params.systemMaterial,
+        .distortionMode = params.distortionMode,
+        .edgeLightMode = params.edgeLightMode,
     };
 }
 void ShowWithButtons(const Ark_AlertDialogParamWithButtons params)
@@ -535,7 +549,9 @@ DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions p
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
         .levelOrder = params.levelOrder,
-        .systemMaterial = params.systemMaterial
+        .systemMaterial = params.systemMaterial,
+        .distortionMode = params.distortionMode,
+        .edgeLightMode = params.edgeLightMode,
     };
 }
 void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)

@@ -68,6 +68,10 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND };
+const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,
+    DistortionMode::DISTORTION_ENABLED, DistortionMode::DISTORTION_DISABLED };
+const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
+    EdgeLightMode::EDGELIGHT_ENABLED, EdgeLightMode::EDGELIGHT_DISABLED };
 const std::vector<DialogDisplayModeInSubWindow> DIALOG_DISPLAY_MODE_IN_SUBWINDOW = {
     DialogDisplayModeInSubWindow::SCREEN_BASED, DialogDisplayModeInSubWindow::WINDOW_BASED };
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
@@ -111,6 +115,28 @@ void ParseCustomDialogFocusable(DialogProperties& properties, JSRef<JSObject> ob
         return;
     }
     properties.focusable = focusableValue->ToBoolean();
+}
+
+void ParseCustomDialogDistortionMode(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto distortionMode = obj->GetProperty("distortionMode");
+    if (distortionMode->IsNumber()) {
+        auto distortionModeVal = distortionMode->ToNumber<int32_t>();
+        if (distortionModeVal >= 0 && distortionModeVal < static_cast<int32_t>(DIALOG_DISTORTION_MODE.size())) {
+            properties.distortionMode = DIALOG_DISTORTION_MODE[distortionModeVal];
+        }
+    }
+}
+
+void ParseCustomDialogEdgeLightMode(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto edgeLightMode = obj->GetProperty("edgeLightMode");
+    if (edgeLightMode->IsNumber()) {
+        auto edgeLightModeVal = edgeLightMode->ToNumber<int32_t>();
+        if (edgeLightModeVal >= 0 && edgeLightModeVal < static_cast<int32_t>(DIALOG_EDGELIGHT_MODE.size())) {
+            properties.edgeLightMode = DIALOG_EDGELIGHT_MODE[edgeLightModeVal];
+        }
+    }
 }
 
 void ParseCustomDialogSystemMaterial(DialogProperties& properties, JSRef<JSObject> obj)
@@ -359,6 +385,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         ParseCustomDialogLevelOrder(instance->dialogProperties_, constructorArg);
         ParseCustomDialogFocusable(instance->dialogProperties_, constructorArg);
         ParseCustomDialogSystemMaterial(instance->dialogProperties_, constructorArg);
+        ParseCustomDialogDistortionMode(instance->dialogProperties_, constructorArg);
+        ParseCustomDialogEdgeLightMode(instance->dialogProperties_, constructorArg);
 
         // Parse displayMode.
         ParseCustomDialogDisplayModeInSubWindow(instance->dialogProperties_, constructorArg);

@@ -804,6 +804,12 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) co
         info_->CacheItemHeight(idx, 0.0f);
         return 0.0f;
     }
+    auto cacheHeight = info_->GetCachedHeight(idx);
+    if (cacheHeight && !NearEqual(res, *cacheHeight, 0.01f)) {
+        TAG_LOGI(AceLogTag::ACE_WATERFLOW,
+            "item size change. currentIdx:%{public}d,cacheHeight:%{public}f,itemHeight:%{public}f",
+            idx, *cacheHeight, res);
+    }
     info_->CacheItemHeight(idx, res);
     return res;
 }
