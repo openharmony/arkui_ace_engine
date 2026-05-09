@@ -67,52 +67,42 @@ std::string ParseIdFromUrl(const std::string& url)
     return "";
 }
 
-const std::unordered_map<std::string, std::function<Color(SvgBaseAttribute&)>>& GetColorGettersMap()
-{
-    static const std::unordered_map<std::string, std::function<Color(SvgBaseAttribute&)>> COLOR_GETTERS = {
-        { ATTR_NAME_FILL, [](SvgBaseAttribute& attr) -> Color { return attr.fillState.GetColor(); } },
-        { ATTR_NAME_STROKE, [](SvgBaseAttribute& attr) -> Color { return attr.strokeState.GetColor(); } },
-    };
-    return COLOR_GETTERS;
-}
+const std::unordered_map<std::string, std::function<Color(SvgBaseAttribute&)>> COLOR_GETTERS = {
+    { ATTR_NAME_FILL,
+        [](SvgBaseAttribute& attr) -> Color { return attr.fillState.GetColor(); } },
+    { ATTR_NAME_STROKE,
+        [](SvgBaseAttribute& attr) -> Color { return attr.strokeState.GetColor(); } },
+};
 
-const std::unordered_map<std::string, std::function<Dimension(SvgBaseAttribute&)>>& GetDimensionGettersMap()
-{
-    static const std::unordered_map<std::string, std::function<Dimension(SvgBaseAttribute&)>> DIMENSION_GETTERS = {
-        { ATTR_NAME_STROKE_WIDTH,
-            [](SvgBaseAttribute& attr) -> Dimension {
-                return attr.strokeState.GetLineWidth();
-            } },
-    };
-    return DIMENSION_GETTERS;
-}
+const std::unordered_map<std::string, std::function<Dimension(SvgBaseAttribute&)>> DIMENSION_GETTERS = {
+    { ATTR_NAME_STROKE_WIDTH,
+        [](SvgBaseAttribute& attr) -> Dimension {
+            return attr.strokeState.GetLineWidth();
+        } },
+};
 
-const std::unordered_map<std::string, std::function<double(SvgBaseAttribute&)>>& GetDoubleGettersMap()
-{
-    static const std::unordered_map<std::string, std::function<double(SvgBaseAttribute&)>> DOUBLE_GETTERS = {
-        { ATTR_NAME_FILL_OPACITY,
-            [](SvgBaseAttribute& attr) -> double {
-                return attr.fillState.GetOpacity().GetValue();
-            } },
-        { ATTR_NAME_STROKE_OPACITY,
-            [](SvgBaseAttribute& attr) -> double {
-                return attr.strokeState.GetOpacity().GetValue();
-            } },
-        { ATTR_NAME_MITER_LIMIT,
-            [](SvgBaseAttribute& attr) -> double {
-                return attr.strokeState.GetMiterLimit();
-            } },
-        { ATTR_NAME_STROKE_DASH_OFFSET,
-            [](SvgBaseAttribute& attr) -> double {
-                return attr.strokeState.GetLineDash().dashOffset;
-            } },
-        { ATTR_NAME_OPACITY,
-            [](SvgBaseAttribute& attr) -> double {
-                return attr.opacity * (1.0 / UINT8_MAX);
-            } },
-    };
-    return DOUBLE_GETTERS;
-}
+const std::unordered_map<std::string, std::function<double(SvgBaseAttribute&)>> DOUBLE_GETTERS = {
+    { ATTR_NAME_FILL_OPACITY,
+        [](SvgBaseAttribute& attr) -> double {
+            return attr.fillState.GetOpacity().GetValue();
+        } },
+    { ATTR_NAME_STROKE_OPACITY,
+        [](SvgBaseAttribute& attr) -> double {
+            return attr.strokeState.GetOpacity().GetValue();
+        } },
+    { ATTR_NAME_MITER_LIMIT,
+        [](SvgBaseAttribute& attr) -> double {
+            return attr.strokeState.GetMiterLimit();
+        } },
+    { ATTR_NAME_STROKE_DASH_OFFSET,
+        [](SvgBaseAttribute& attr) -> double {
+            return attr.strokeState.GetLineDash().dashOffset;
+        } },
+    { ATTR_NAME_OPACITY,
+        [](SvgBaseAttribute& attr) -> double {
+            return attr.opacity * (1.0 / UINT8_MAX);
+        } },
+};
 
 std::string GetNodeIdFromUrl(const std::string& url)
 {
@@ -862,17 +852,14 @@ const Rect& SvgNode::GetRootViewBox() const
 void SvgNode::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
 {
     auto attrName = animate->GetAttributeName();
-    auto& colorGettersMap = GetColorGettersMap();
-    auto& dimensionGettersMap = GetDimensionGettersMap();
-    auto& doubleGettersMap = GetDoubleGettersMap();
-    if (auto it = colorGettersMap.find(attrName); it != colorGettersMap.end()) {
-        Color originalValue = it->second(attributes_);
+    if (COLOR_GETTERS.find(attrName) != COLOR_GETTERS.end()) {
+        Color originalValue = COLOR_GETTERS.find(attrName)->second(attributes_);
         AnimateOnAttribute(animate, originalValue);
-    } else if (auto it = dimensionGettersMap.find(attrName); it != dimensionGettersMap.end()) {
-        Dimension originalValue = it->second(attributes_);
+    } else if (DIMENSION_GETTERS.find(attrName) != DIMENSION_GETTERS.end()) {
+        Dimension originalValue = DIMENSION_GETTERS.find(attrName)->second(attributes_);
         AnimateOnAttribute(animate, originalValue);
-    } else if (auto it = doubleGettersMap.find(attrName); it != doubleGettersMap.end()) {
-        double originalValue = it->second(attributes_);
+    } else if (DOUBLE_GETTERS.find(attrName) != DOUBLE_GETTERS.end()) {
+        double originalValue = DOUBLE_GETTERS.find(attrName)->second(attributes_);
         AnimateOnAttribute(animate, originalValue);
     } else if (attrName.find(TRANSFORM) != std::string::npos) {
         AnimateTransform(animate, 0.0f);

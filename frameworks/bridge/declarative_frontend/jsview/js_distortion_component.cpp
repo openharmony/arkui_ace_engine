@@ -21,11 +21,18 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace {
+std::unique_ptr<DistortionComponentModel> DistortionComponentModel::instance_ = nullptr;
+std::mutex DistortionComponentModel::mutex_;
 
 DistortionComponentModel* DistortionComponentModel::GetInstance()
 {
-    static NG::DistortionComponentModelNG instance;
-    return &instance;
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+            instance_.reset(new NG::DistortionComponentModelNG());
+        }
+    }
+    return instance_.get();
 }
 } // namespace OHOS::Ace
 
@@ -68,7 +75,7 @@ NG::Vector4F ParseVector4Option(const JSRef<JSObject>& obj, const char* property
     if (!xVal->IsNumber() || !yVal->IsNumber() || !zVal->IsNumber() || !wVal->IsNumber()) {
         return NG::Vector4F(0.0f, 0.0f, 0.0f, 0.0f);
     }
-
+    
     return NG::Vector4F(
         xVal->ToNumber<float>(),
         yVal->ToNumber<float>(),

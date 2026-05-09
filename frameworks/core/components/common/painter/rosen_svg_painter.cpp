@@ -15,8 +15,6 @@
 
 #include "core/components/common/painter/rosen_svg_painter.h"
 
-#include <mutex>
-
 #include "include/utils/SkParsePath.h"
 
 #include "core/common/dynamic_module_helper.h"
@@ -29,23 +27,6 @@ namespace {
 constexpr float FLAT_ANGLE = 180.0f;
 const char ROTATE_TYPE_AUTO[] = "auto";
 const char ROTATE_TYPE_REVERSE[] = "auto-reverse";
-
-#if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
-const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
-const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
-std::once_flag g_svgFontInitFlag;
-
-void EnsureFontTypeLoaded()
-{
-    std::call_once(g_svgFontInitFlag, []() {
-        RosenSvgPainter::fontTypeChinese_ = RSTypeface::MakeFromFile(FONT_TYPE_HWCHINESE);
-        RosenSvgPainter::fontTypeNormal_ = RSTypeface::MakeFromFile(FONT_TYPE_DROIDSANS);
-    });
-}
-#else
-void EnsureFontTypeLoaded() {}
-#endif
-
 const ArkUISvgCompatibleModifier* GetSvgCompatibleModifier()
 {
     static const ArkUISvgCompatibleModifier* svgCompatibleModifier_ = nullptr;
@@ -62,8 +43,15 @@ const ArkUISvgCompatibleModifier* GetSvgCompatibleModifier()
 }
 } // namespace
 
+#if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
+const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
+const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
+std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeChinese_ = RSTypeface::MakeFromFile(FONT_TYPE_HWCHINESE);
+std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeNormal_ = RSTypeface::MakeFromFile(FONT_TYPE_DROIDSANS);
+#else
 std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeChinese_;
 std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeNormal_;
+#endif
 
 void RosenSvgPainter::SetMask(RSCanvas* canvas)
 {
@@ -248,7 +236,6 @@ void RosenSvgPainter::UpdateLineDash(RSPen& pen, const StrokeState& strokeState)
 
 void RosenSvgPainter::CheckFontType()
 {
-    EnsureFontTypeLoaded();
     if (!fontTypeChinese_) {
         LOGW("can't load HwChinese-Medium.ttf");
     }
@@ -298,7 +285,6 @@ bool RosenSvgPainter::GetMotionPathPosition(const std::string& path, double perc
 
 Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo)
 {
-    EnsureFontTypeLoaded();
     Offset offset = textDrawInfo.offset;
     if (!canvas) {
         LOGE("Paint skCanvas is null");
@@ -354,7 +340,6 @@ Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextI
 double RosenSvgPainter::UpdateTextPath(
     RSCanvas* canvas, const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo)
 {
-    EnsureFontTypeLoaded();
     double offset = pathDrawInfo.offset;
     if (!canvas) {
         LOGE("Paint skCanvas is null");
@@ -428,7 +413,6 @@ double RosenSvgPainter::UpdateTextPath(
 Offset RosenSvgPainter::MeasureTextBounds(
     const SvgTextInfo& svgTextInfo, const TextDrawInfo& textDrawInfo, Rect& bounds)
 {
-    EnsureFontTypeLoaded();
     Offset offset = textDrawInfo.offset;
     RSFont font;
 
@@ -459,7 +443,6 @@ Offset RosenSvgPainter::MeasureTextBounds(
 double RosenSvgPainter::MeasureTextPathBounds(
     const SvgTextInfo& svgTextInfo, const PathDrawInfo& pathDrawInfo, Rect& bounds)
 {
-    EnsureFontTypeLoaded();
     double offset = pathDrawInfo.offset;
 
     RSFont font;

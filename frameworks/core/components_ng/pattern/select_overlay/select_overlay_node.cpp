@@ -101,32 +101,21 @@ constexpr Dimension MENU_BUTTON_SPACING = 4.0_vp;
 constexpr Dimension DEFAULT_ICON_SIZE = 24.0_vp;
 #endif
 
-const std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>>& GetAITypeIdMap()
-{
-    static const std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
-        { TextDataDetectType::PHONE_NUMBER,
-            std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
-        { TextDataDetectType::URL, std::make_pair(OH_DEFAULT_AI_MENU_URL, &TextSystemMenu::IsShowAIUrl) },
-        { TextDataDetectType::EMAIL, std::make_pair(OH_DEFAULT_AI_MENU_EMAIL, &TextSystemMenu::IsShowAIEmail) },
-        { TextDataDetectType::ADDRESS,
-            std::make_pair(OH_DEFAULT_AI_MENU_ADDRESS, &TextSystemMenu::IsShowAIAddress) },
-        { TextDataDetectType::DATE_TIME,
-            std::make_pair(OH_DEFAULT_AI_MENU_DATETIME, &TextSystemMenu::IsShowAIDatetime) },
-    };
-    return AI_TYPE_ID_MAP;
-}
+std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
+    { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
+    { TextDataDetectType::URL, std::make_pair(OH_DEFAULT_AI_MENU_URL, &TextSystemMenu::IsShowAIUrl) },
+    { TextDataDetectType::EMAIL, std::make_pair(OH_DEFAULT_AI_MENU_EMAIL, &TextSystemMenu::IsShowAIEmail) },
+    { TextDataDetectType::ADDRESS, std::make_pair(OH_DEFAULT_AI_MENU_ADDRESS, &TextSystemMenu::IsShowAIAddress) },
+    { TextDataDetectType::DATE_TIME, std::make_pair(OH_DEFAULT_AI_MENU_DATETIME, &TextSystemMenu::IsShowAIDatetime) },
+};
 
-const std::unordered_map<std::string, TextDataDetectType>& GetAIIdTypeMap()
-{
-    static const std::unordered_map<std::string, TextDataDetectType> AI_ID_TYPE_MAP = {
-        { OH_DEFAULT_AI_MENU_PHONE, TextDataDetectType::PHONE_NUMBER },
-        { OH_DEFAULT_AI_MENU_URL, TextDataDetectType::URL },
-        { OH_DEFAULT_AI_MENU_EMAIL, TextDataDetectType::EMAIL },
-        { OH_DEFAULT_AI_MENU_ADDRESS, TextDataDetectType::ADDRESS },
-        { OH_DEFAULT_AI_MENU_DATETIME, TextDataDetectType::DATE_TIME },
-    };
-    return AI_ID_TYPE_MAP;
-}
+std::unordered_map<std::string, TextDataDetectType> AI_ID_TYPE_MAP = {
+    { OH_DEFAULT_AI_MENU_PHONE, TextDataDetectType::PHONE_NUMBER },
+    { OH_DEFAULT_AI_MENU_URL, TextDataDetectType::URL },
+    { OH_DEFAULT_AI_MENU_EMAIL, TextDataDetectType::EMAIL },
+    { OH_DEFAULT_AI_MENU_ADDRESS, TextDataDetectType::ADDRESS },
+    { OH_DEFAULT_AI_MENU_DATETIME, TextDataDetectType::DATE_TIME },
+};
 
 bool IsAIMenuOption(const std::string& id)
 {
@@ -141,105 +130,78 @@ bool IsAskCeliaOption(const std::string& id)
 
 bool IsShowAIMenuOption(OHOS::Ace::TextDataDetectType type)
 {
-    auto& aiTypeIdMap = GetAITypeIdMap();
     auto isShowAIMenu = type != TextDataDetectType::INVALID;
-    auto findIter = aiTypeIdMap.find(type);
-    isShowAIMenu = isShowAIMenu && (findIter != aiTypeIdMap.end()) && findIter->second.second();
+    auto findIter = AI_TYPE_ID_MAP.find(type);
+    isShowAIMenu = isShowAIMenu && (findIter != AI_TYPE_ID_MAP.end()) && findIter->second.second();
     return isShowAIMenu;
 }
 
-const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>>& GetMenuItemEnabledFuncMap()
-{
-    static const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> IS_MENU_ITEM_ENABLED_MAP = {
-        { OH_DEFAULT_CUT, [](const SelectMenuInfo& info) { return info.showCut; } },
-        { OH_DEFAULT_COPY, [](const SelectMenuInfo& info) { return info.showCopy; } },
-        { OH_DEFAULT_SELECT_ALL, [](const SelectMenuInfo& info) { return info.showCopyAll; } },
-        { OH_DEFAULT_AUTO_FILL, [](const SelectMenuInfo& info) { return info.showAutoFill; } },
-        { OH_DEFAULT_PASSWORD_VAULT, [](const SelectMenuInfo& info) { return info.showAutoFill; } },
-        { OH_DEFAULT_PASTE, [](const SelectMenuInfo& info) { return info.showPaste; } },
-        { OH_DEFAULT_TRANSLATE, [](const SelectMenuInfo& info) { return info.showTranslate; } },
-        { OH_DEFAULT_SEARCH, [](const SelectMenuInfo& info) { return info.showSearch; } },
-        { OH_DEFAULT_SHARE, [](const SelectMenuInfo& info) { return info.showShare; } },
-        { OH_DEFAULT_AI_WRITE, [](const SelectMenuInfo& info) { return info.showAIWrite; } }
-    };
-    return IS_MENU_ITEM_ENABLED_MAP;
-}
+const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> isMenuItemEnabledFuncMap = {
+    { OH_DEFAULT_CUT, [](const SelectMenuInfo& info){ return info.showCut; } },
+    { OH_DEFAULT_COPY, [](const SelectMenuInfo& info){ return info.showCopy; } },
+    { OH_DEFAULT_SELECT_ALL, [](const SelectMenuInfo& info){ return info.showCopyAll; } },
+    { OH_DEFAULT_AUTO_FILL, [](const SelectMenuInfo& info){ return info.showAutoFill; } },
+    { OH_DEFAULT_PASSWORD_VAULT, [](const SelectMenuInfo& info){ return info.showAutoFill; } },
+    { OH_DEFAULT_PASTE, [](const SelectMenuInfo& info){ return info.showPaste; } },
+    { OH_DEFAULT_TRANSLATE, [](const SelectMenuInfo& info){ return info.showTranslate; } },
+    { OH_DEFAULT_SEARCH, [](const SelectMenuInfo& info){ return info.showSearch; } },
+    { OH_DEFAULT_SHARE, [](const SelectMenuInfo& info){ return info.showShare; } },
+    { OH_DEFAULT_AI_WRITE, [](const SelectMenuInfo& info){ return info.showAIWrite; } }
+};
 
-const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::TextOverlayTheme>)>>& GetSymbolIdMap()
-{
-    static const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::TextOverlayTheme>)>>
-        GET_SYMBOL_ID_MAP = {
-            { OH_DEFAULT_CUT,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetCutSymbolId();
-                } },
-            { OH_DEFAULT_COPY,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetCopySymbolId();
-                } },
-            { OH_DEFAULT_SELECT_ALL,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetCopyAllSymbolId();
-                } },
-            { OH_DEFAULT_AUTO_FILL,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetAutoFillSymbolId();
-                } },
-            { OH_DEFAULT_PASSWORD_VAULT,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetPasswordVaultSymbolId();
-                } },
-            { OH_DEFAULT_PASTE,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetPasteSymbolId();
-                } },
-            { OH_DEFAULT_CAMERA_INPUT,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetCameraInputSymbolId();
-                } },
-            { OH_DEFAULT_AI_WRITE,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetAIWriteSymbolId();
-                } },
-            { OH_DEFAULT_SEARCH,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetSearchSymbolId();
-                } },
-            { OH_DEFAULT_TRANSLATE,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetTranslateSymbolId();
-                } },
-            { OH_DEFAULT_SHARE,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetShareSymbolId();
-                } },
-            { OH_DEFAULT_AI_MENU_PHONE,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetAIMenuSymbolId();
-                } },
-            { OH_DEFAULT_AI_MENU_URL,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetAIMenuSymbolId();
-                } },
-            { OH_DEFAULT_AI_MENU_EMAIL,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetAIMenuSymbolId();
-                } },
-            { OH_DEFAULT_AI_MENU_ADDRESS,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetAIMenuSymbolId();
-                } },
-            { OH_DEFAULT_AI_MENU_DATETIME,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetAIMenuSymbolId();
-                } },
-            { OH_DEFAULT_ASK_CELIA,
-                [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) {
-                    return textOverlayTheme->GetAskCeliaSymbolId();
-                } }
-        };
-    return GET_SYMBOL_ID_MAP;
-}
+const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::TextOverlayTheme>)>> getSymbolIdMap = {
+    { OH_DEFAULT_CUT,
+        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetCutSymbolId();}
+    },
+    { OH_DEFAULT_COPY,
+        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetCopySymbolId();}
+    },
+    { OH_DEFAULT_SELECT_ALL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetCopyAllSymbolId();}
+    },
+    { OH_DEFAULT_AUTO_FILL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAutoFillSymbolId();}
+    },
+    { OH_DEFAULT_PASSWORD_VAULT, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetPasswordVaultSymbolId();}
+    },
+    { OH_DEFAULT_PASTE,
+        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetPasteSymbolId();}
+    },
+    { OH_DEFAULT_CAMERA_INPUT, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetCameraInputSymbolId();}
+    },
+    { OH_DEFAULT_AI_WRITE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIWriteSymbolId();}
+    },
+    { OH_DEFAULT_SEARCH, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetSearchSymbolId();}
+    },
+    { OH_DEFAULT_TRANSLATE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetTranslateSymbolId();}
+    },
+    { OH_DEFAULT_SHARE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetShareSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_PHONE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_URL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_EMAIL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_ADDRESS, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_AI_MENU_DATETIME, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_ASK_CELIA, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAskCeliaSymbolId();}
+    }
+};
 
 enum class SelectOverlayMenuButtonType {
     NORMAL,
@@ -1023,7 +985,6 @@ std::unordered_map<std::string, std::function<void()>> GetSystemCallback(
 bool IsSystemMenuItemEnabled(const std::shared_ptr<SelectOverlayInfo>& info, const std::string& id)
 {
     CHECK_NULL_RETURN(info, true);
-    auto& isMenuItemEnabledFuncMap = GetMenuItemEnabledFuncMap();
     auto isEnabledFunc = isMenuItemEnabledFuncMap.find(id);
     return isEnabledFunc == isMenuItemEnabledFuncMap.end() ? true : (isEnabledFunc->second)(info->menuInfo);
 }
@@ -1108,9 +1069,7 @@ std::string GetItemContent(const std::string& id, const std::string& content,
         if (info) {
             return textOverlayTheme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
         } else {
-            auto& aiIdTypeMap = GetAIIdTypeMap();
-            auto findIter = aiIdTypeMap.find(id);
-            return findIter == aiIdTypeMap.end() ? content : textOverlayTheme->GetAiMenuOptionName(findIter->second);
+            return textOverlayTheme->GetAiMenuOptionName(AI_ID_TYPE_MAP[id]);
         }
     }
     if (id == OH_DEFAULT_ASK_CELIA) {
@@ -1125,7 +1084,6 @@ void SetSystemOptionsParam(const MenuOptionsParam& item, OptionParam& para)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
-    auto& getSymbolIdMap = GetSymbolIdMap();
     auto symbolIdFunc = getSymbolIdMap.find(item.id);
     if (symbolIdFunc != getSymbolIdMap.end()) {
         para.symbolId = (symbolIdFunc->second)(theme);
@@ -2575,7 +2533,6 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
         symbolColor = { textOverlayTheme->GetAIMenuSymbolColor() };
     }
 
-    auto& getSymbolIdMap = GetSymbolIdMap();
     auto symbolIdFunc = getSymbolIdMap.find(symbolId);
     if (symbolIdFunc != getSymbolIdMap.end()) {
         auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
@@ -2868,7 +2825,6 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
-    auto& getSymbolIdMap = GetSymbolIdMap();
     for (auto item : menuOptionItems) {
         if (itemNum < startIndex) {
             itemNum++;
@@ -3546,8 +3502,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         theme->GetAIWrite(), systemItemParams);
 
     if (IsShowAIMenuOption(info->menuInfo.aiMenuOptionType)) {
-        auto& aiTypeIdMap = GetAITypeIdMap();
-        auto findIter = aiTypeIdMap.find(info->menuInfo.aiMenuOptionType);
+        auto findIter = AI_TYPE_ID_MAP.find(info->menuInfo.aiMenuOptionType);
         AddMenuItemParamIf(true, findIter->second.first,
             theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType), systemItemParams);
     }

@@ -25,38 +25,29 @@ namespace {
 constexpr int32_t START_VALUE = 0;
 constexpr int32_t END_VALUE = 1;
 constexpr Dimension TRANSFORM_ORIGIN_DEFAULT = 0.5_pct;
-const std::unordered_map<std::string, std::function<Color(RenderSvgBase&)>>& GetColorProrerGettersMap()
-{
-    static const std::unordered_map<std::string, std::function<Color(RenderSvgBase&)>> COLOR_PROPER_GETTERS = {
-        { ATTR_NAME_FILL, [](RenderSvgBase& base) -> Color { return base.GetFillState().GetColor(); } },
-        { ATTR_NAME_STROKE, [](RenderSvgBase& base) -> Color { return base.GetStrokeState().GetColor(); } },
-    };
-    return COLOR_PROPER_GETTERS;
-}
-const std::unordered_map<std::string, std::function<Dimension(RenderSvgBase&)>>& GetDimensionProperGettersMap()
-{
-    static const std::unordered_map<std::string, std::function<Dimension(RenderSvgBase&)>> DIMENSION_PROPER_GETTERS = {
-        { ATTR_NAME_STROKE_WIDTH, [](RenderSvgBase& base) -> Dimension { return base.GetStrokeState().GetLineWidth(); } },
-        { ATTR_NAME_FONT_SIZE, [](RenderSvgBase& base) -> Dimension { return base.GetTextStyle().GetFontSize(); } },
-    };
-    return DIMENSION_PROPER_GETTERS;
-}
-const std::unordered_map<std::string, std::function<double(RenderSvgBase&)>>& GetDoubleProperGettersMap()
-{
-    static const std::unordered_map<std::string, std::function<double(RenderSvgBase&)>> DOUBLE_PROPER_GETTERS = {
-        { ATTR_NAME_FILL_OPACITY,
-            [](RenderSvgBase& base) -> double { return base.GetFillState().GetOpacity().GetValue(); } },
-        { ATTR_NAME_STROKE_OPACITY,
-            [](RenderSvgBase& base) -> double { return base.GetStrokeState().GetOpacity().GetValue(); } },
-        { ATTR_NAME_LETTER_SPACING,
-            [](RenderSvgBase& base) -> double { return base.NormalizeToPx(base.GetTextStyle().GetLetterSpacing()); } },
-        { ATTR_NAME_MITER_LIMIT, [](RenderSvgBase& base) -> double { return base.GetStrokeState().GetMiterLimit(); } },
-        { ATTR_NAME_STROKE_DASH_OFFSET,
-            [](RenderSvgBase& base) -> double { return base.GetStrokeState().GetLineDash().dashOffset; } },
-        { ATTR_NAME_OPACITY, [](RenderSvgBase& base) -> double { return base.GetOpacity() * (1.0 / UINT8_MAX); } },
-    };
-    return DOUBLE_PROPER_GETTERS;
-}
+
+const std::unordered_map<std::string, std::function<Color(RenderSvgBase&)>> COLOR_PROPER_GETTERS = {
+    { ATTR_NAME_FILL, [](RenderSvgBase& base) -> Color { return base.GetFillState().GetColor(); } },
+    { ATTR_NAME_STROKE, [](RenderSvgBase& base) -> Color { return base.GetStrokeState().GetColor(); } },
+};
+
+const std::unordered_map<std::string, std::function<Dimension(RenderSvgBase&)>> DIMENSION_PROPER_GETTERS = {
+    { ATTR_NAME_STROKE_WIDTH, [](RenderSvgBase& base) -> Dimension { return base.GetStrokeState().GetLineWidth(); } },
+    { ATTR_NAME_FONT_SIZE, [](RenderSvgBase& base) -> Dimension { return base.GetTextStyle().GetFontSize(); } },
+};
+
+const std::unordered_map<std::string, std::function<double(RenderSvgBase&)>> DOUBLE_PROPER_GETTERS = {
+    { ATTR_NAME_FILL_OPACITY,
+        [](RenderSvgBase& base) -> double { return base.GetFillState().GetOpacity().GetValue(); } },
+    { ATTR_NAME_STROKE_OPACITY,
+        [](RenderSvgBase& base) -> double { return base.GetStrokeState().GetOpacity().GetValue(); } },
+    { ATTR_NAME_LETTER_SPACING,
+        [](RenderSvgBase& base) -> double { return base.NormalizeToPx(base.GetTextStyle().GetLetterSpacing()); } },
+    { ATTR_NAME_MITER_LIMIT, [](RenderSvgBase& base) -> double { return base.GetStrokeState().GetMiterLimit(); } },
+    { ATTR_NAME_STROKE_DASH_OFFSET,
+        [](RenderSvgBase& base) -> double { return base.GetStrokeState().GetLineDash().dashOffset; } },
+    { ATTR_NAME_OPACITY, [](RenderSvgBase& base) -> double { return base.GetOpacity() * (1.0 / UINT8_MAX); } },
+};
 
 const char SVG_TRANSFORM_ORIGIN_LEFT_BOTTOM[] = "left_bottom";
 const char SVG_TRANSFORM_ORIGIN_LEFT_CENTER[] = "left_center";
@@ -448,17 +439,14 @@ void RenderSvgBase::ChangeChildInheritValue(const RefPtr<RenderNode>& svgBase, c
 bool RenderSvgBase::PrepareBaseAnimation(const RefPtr<SvgAnimate>& svgAnimate)
 {
     auto attrName = svgAnimate->GetAttributeName();
-    auto& colorProrerGettersMap = GetColorProrerGettersMap();
-    auto& dimensionProperGettersMap = GetDimensionProperGettersMap();
-    auto& doubleProperGettersMap = GetDoubleProperGettersMap();
-    if (auto it = colorProrerGettersMap.find(attrName); it != colorProrerGettersMap.end()) {
-        Color originalValue = it->second(*this);
+    if (COLOR_PROPER_GETTERS.find(attrName) != COLOR_PROPER_GETTERS.end()) {
+        Color originalValue = COLOR_PROPER_GETTERS.find(attrName)->second(*this);
         PreparePresentationAnimation(svgAnimate, originalValue);
-    } else if (auto it = dimensionProperGettersMap.find(attrName); it != dimensionProperGettersMap.end()) {
-        Dimension originalValue = it->second(*this);
+    } else if (DIMENSION_PROPER_GETTERS.find(attrName) != DIMENSION_PROPER_GETTERS.end()) {
+        Dimension originalValue = DIMENSION_PROPER_GETTERS.find(attrName)->second(*this);
         PreparePresentationAnimation(svgAnimate, originalValue);
-    } else if (auto it = doubleProperGettersMap.find(attrName); it != doubleProperGettersMap.end()) {
-        double originalValue = it->second(*this);
+    } else if (DOUBLE_PROPER_GETTERS.find(attrName) != DOUBLE_PROPER_GETTERS.end()) {
+        double originalValue = DOUBLE_PROPER_GETTERS.find(attrName)->second(*this);
         PreparePresentationAnimation(svgAnimate, originalValue);
     } else if (attrName.find(TRANSFORM_COMPATIBLE) != std::string::npos) {
         double originalValue = 0.0;

@@ -18,23 +18,17 @@
 
 namespace OHOS::Ace::Framework {
 
-const std::unordered_map<std::string, std::function<void(BindingTarget)>>& GetExtraBindFuncs()
-{
-    static const std::unordered_map<std::string, std::function<void(BindingTarget)>> extraBindFuncs = {
-        /*
-        * Binding function map sample:
-        { "XXX", JSXXX::JSBind },
-        */
-        { "CachedImage", JSCachedImage::JSBind },
-        { "MediaCachedImage", JSCachedImage::JSBindMediaCachedImage },
-    };
-    return extraBindFuncs;
-}
-
+static const std::unordered_map<std::string, std::function<void(BindingTarget)>> extraBindFuncs = {
+    /*
+     * Binding function map sample:
+      { "XXX", JSXXX::JSBind },
+     */
+    { "CachedImage", JSCachedImage::JSBind },
+    { "MediaCachedImage", JSCachedImage::JSBindMediaCachedImage },
+};
 
 void RegisterExtraViews(BindingTarget globalObj)
 {
-    auto& extraBindFuncs = GetExtraBindFuncs();
     for (const auto& iter : extraBindFuncs) {
         iter.second(globalObj);
     }
@@ -42,7 +36,6 @@ void RegisterExtraViews(BindingTarget globalObj)
 
 bool RegisterExtraViewByName(BindingTarget globalObj, const std::string& moduleName)
 {
-    auto& extraBindFuncs = GetExtraBindFuncs();
     auto func = extraBindFuncs.find(moduleName);
     if (func == extraBindFuncs.end()) {
         LOGW("JS module not exist in extra, name: %{public}s", moduleName.c_str());

@@ -280,6 +280,8 @@ private:
     RefPtr<Subwindow> RemoveSubwindowMapByNodeId(const int32_t nodeId);
     const std::vector<RefPtr<Subwindow>> RemoveSubwindowMapByInstanceId(const int32_t instanceId);
     const std::vector<RefPtr<Subwindow>> GetAllSubWindow();
+    static std::mutex instanceMutex_;
+    static std::shared_ptr<SubwindowManager> instance_;
 
     std::mutex mutex_;
     std::unordered_map<uint32_t, int32_t> containerMap_;

@@ -107,6 +107,9 @@ public:
     virtual DisplayMode GetDisplayMode() const = 0;
     virtual void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) {}
 
+private:
+    static std::unique_ptr<GridModel> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace
