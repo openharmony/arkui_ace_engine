@@ -72,9 +72,8 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.
     if (isInlineStyle) {
-        auto fontSize = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
-            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
+        auto fontSize = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale(), textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);

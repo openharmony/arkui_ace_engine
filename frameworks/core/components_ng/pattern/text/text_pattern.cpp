@@ -211,6 +211,12 @@ void TextPattern::OnAttachToMainTree()
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
     isDetachFromMainTree_ = false;
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 void TextPattern::OnDetachFromMainTree()

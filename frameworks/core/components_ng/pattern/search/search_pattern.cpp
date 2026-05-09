@@ -297,6 +297,19 @@ void SearchPattern::SetAccessibilityClearAction()
     textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
+void SearchPattern::OnAttachToMainTree()
+{
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            auto host = GetHost();
+            if (host) {
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+    }
+}
+
 void SearchPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();

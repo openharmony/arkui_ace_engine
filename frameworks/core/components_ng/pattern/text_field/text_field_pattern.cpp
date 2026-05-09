@@ -12229,6 +12229,12 @@ void TextFieldPattern::OnAttachToMainTree()
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
     isDetachFromMainTree_ = false;
     CHECK_NULL_VOID(host);
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
     auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
     CHECK_NULL_VOID(autoFillContainerNode);
     firstAutoFillContainerNode_ = WeakClaim(RawPtr(autoFillContainerNode));
