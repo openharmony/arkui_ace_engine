@@ -1013,6 +1013,7 @@
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::NG::DatePickerPattern::GetFormatString(OHOS::Ace::PickerDateF)";
       "OHOS::Ace::NG::DialogManager::GetEmbeddedOverlay(int, OHOS::Ace::RefPtr<OHOS::Ace::NG::PipelineContext> const&)";
+      "OHOS::Ace::NG::DialogManager::GetEmbeddedOverlayWithNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::NG::DialogManager::GetMainPipelineContext(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::DialogManager::ShowInEmbeddedOverlay(std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>)>&&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)"; 
       "OHOS::Ace::NG::DialogView::CreateDialogNode(OHOS::Ace::DialogProperties const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
@@ -2726,6 +2727,7 @@
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (unsigned int)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::ColorInverter>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::DumpLog>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::NG::DialogManager>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::NG::SelectableUtils>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::PluginManager>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::VibratorProxy>::GetInstance()";
