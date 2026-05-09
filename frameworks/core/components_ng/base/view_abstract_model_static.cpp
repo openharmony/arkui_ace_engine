@@ -1519,6 +1519,12 @@ void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::
         return;
     }
     auto paintStyle = style.value();
+    if (paintStyle.strokeWidth.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(paintStyle.strokeWidth.value(), LpxAttribute::LPX_FOCUS_BOX_STROKE, frameNode);
+    }
+    if (paintStyle.margin.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(paintStyle.margin.value(), LpxAttribute::LPX_FOCUS_BOX_MARGIN, frameNode);
+    }
     if (paintStyle.strokeWidth.has_value() && paintStyle.strokeWidth.value().Unit() == DimensionUnit::PERCENT) {
         paintStyle.strokeWidth.value().SetUnit(DimensionUnit::FP);
     }
