@@ -28,7 +28,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     });
 }
 
-const LengthMetrics = arkuiNode.LengthMetrics;
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const emitter = requireNapi('events.emitter');
