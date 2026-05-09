@@ -753,6 +753,7 @@ ohos_source_set("ace_core_extra") {
     ]
     sources += [
       "$ace_root/frameworks/core/common/visual_effect/transparency_utils.cpp",
+      "$ace_root/frameworks/core/common/visual_effect/component_material_interaction.cpp",
     ]
   }
 }

@@ -40,6 +40,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/visual_effect/component_material_interaction.h"
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
@@ -6187,6 +6188,7 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("viewAbstract.uiMaterial");
+    UnRegisterMaterialInteractionEvent(frameNode);
     if (preMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
         auto preConfig = renderContext->GetImmersiveMaterialConfig();
         if (!preConfig.has_value()) {
@@ -6315,6 +6317,22 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
     // This function cannot save uiMaterial to renderContext.
 }
 
+void ViewAbstract::RegisterMaterialInteractionEvent(
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
+{
+    CHECK_NULL_VOID(frameNode);
+    ControlInteractionBase::RegisterMaterialInteractionEvent(frameNode, optionsPtr);
+}
+
+void ViewAbstract::UnRegisterMaterialInteractionEvent(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ControlInteractionBase::UninitLightEffect(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemoveMaterialInteractionEvent();
+}
+
 void ViewAbstract::SetImmersiveOptions(
     const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
 {
@@ -6322,6 +6340,11 @@ void ViewAbstract::SetImmersiveOptions(
     CHECK_NULL_VOID(renderContext);
     if (!optionsPtr) {
         return;
+    }
+    if (optionsPtr->interactive || optionsPtr->lightEffectOptions) {
+        RegisterMaterialInteractionEvent(frameNode, optionsPtr);
+    } else {
+        UnRegisterMaterialInteractionEvent(AceType::RawPtr(frameNode));
     }
     auto materialConfig = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
     if (!materialConfig) {

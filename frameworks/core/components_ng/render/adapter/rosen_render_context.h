@@ -277,6 +277,8 @@ public:
     void OnBackBlendApplyTypeUpdate(BlendApplyType applyType) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
+    void UpdateMaterialInteractionEffect(float scaleX, float scaleY, float offsetX, float offsetY) override;
+
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
     void OnTransform3DMatrixUpdate(const Matrix4& matrix) override;
 
@@ -929,6 +931,8 @@ protected:
     std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
     std::shared_ptr<OverlayTextModifier> overlayTextModifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+
+    std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> materialInteractionEffectModifier_;
 
     std::shared_ptr<Rosen::ModifierNG::RSBoundsClipModifier> clipBoundModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSFrameClipModifier> customClipToFrameModifier_;

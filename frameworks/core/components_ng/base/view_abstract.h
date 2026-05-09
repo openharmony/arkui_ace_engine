@@ -1240,6 +1240,9 @@ private:
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
     static void ResetBorderAndBackgroundEffect(
         FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void RegisterMaterialInteractionEvent(
+        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
+    static void UnRegisterMaterialInteractionEvent(FrameNode* frameNode);
     static void SetImmersiveOptions(
         const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
     static void SetImmersiveConfigs(

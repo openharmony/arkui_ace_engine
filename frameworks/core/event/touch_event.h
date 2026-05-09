@@ -171,6 +171,12 @@ public:
     virtual bool DispatchEvent(const TouchEvent& point) = 0;
     // if return false means need to stop event bubbling.
     virtual bool HandleEvent(const TouchEvent& point) = 0;
+
+    virtual bool HandleInteractionEvent(const TouchEvent& point)
+    {
+        return false;
+    }
+
     virtual bool HandleEvent(const AxisEvent& event)
     {
         return true;
