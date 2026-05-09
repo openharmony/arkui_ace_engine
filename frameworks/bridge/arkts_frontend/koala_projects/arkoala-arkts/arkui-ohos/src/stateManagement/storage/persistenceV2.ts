@@ -26,9 +26,10 @@ import { uiUtils } from '../base/uiUtilsImpl';
 import { IAniStorage, AniStorage, AreaMode } from './persistentStorage';
 import contextConstant from '@ohos.app.ability.contextConstant';
 import { ElementInfo } from '../utils';
-import { IObservedAnyProp } from '../decorator';
+import { V2CollectionCoder, CollectionCoderErrorCallback } from './v2CollectionCoder';
 
 export type StorageDefaultCreator<T> = () => T;
+export type StorageDefaultSubCreators = Map<Class, StorageDefaultCreator<object>>;
 
 type StringOrUndefinedType = String | undefined
 type FixedStringArrayType = FixedArray<StringOrUndefinedType>;
@@ -42,10 +43,18 @@ export function transferTypeName(typename: string): string {
 
 export interface SerializableObject extends jsonx.JsonElementSerializable, jsonx.JsonElementDeserializable {}
 
+/**
+ * Options for PersistenceV2.globalConnect().
+ * Supports regular class objects, collection types (Array, Map, Set), and Date.
+ * Uses built-in V2CollectionCoder serialization (no toJson/fromJson needed).
+ * For collection types and nested sub-objects, provide defaultSubCreators to
+ * enable correct type restoration via class name matching.
+ */
 export interface ConnectOptions<T extends object> {
     type: Class;
     key?: string;
     defaultCreator?: StorageDefaultCreator<T>;
+    defaultSubCreators?: StorageDefaultSubCreators;
     areaMode?: contextConstant.AreaMode;
     toJson?: ToJSONType<T>;
     fromJson?: FromJSONType<T>;
@@ -308,6 +317,20 @@ export class PersistenceV2Impl {
             Class.from<ArrayBuffer>()
         ];
 
+    private static readonly NOT_SUPPORTED_TYPES_GLOBAL_: Array<Class> =
+        [
+            Class.from<WeakSet<object>>(),
+            Class.from<WeakMap<object, object>>(),
+            Class.from<Boolean>(),
+            Class.from<Number>(),
+            Class.from<String>(),
+            Class.from<BigInt>(),
+            Class.from<RegExp>(),
+            Class.from<Function>(),
+            Class.from<Promise<void>>(),
+            Class.from<ArrayBuffer>()
+        ];
+
     public static readonly MIN_PERSISTENCE_ID: RenderIdType = 0x30000000;
     public static nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
 
@@ -318,7 +341,6 @@ export class PersistenceV2Impl {
     private static readonly KEYS_DUPLICATE_: string = 'ERROR, Duplicate key used when connect';
     private static readonly NOT_SUPPORT_AREAMODE_MESSAGE_: string = 'AreaMode Value Error! value range can only in EL1-EL5';
     private static readonly KEYS_ARR_: string = '___keys_arr';
-    private static readonly MAX_DATA_LENGTH_: number = 8000;
 
     private entriesMap_: Map<string, DecoratedVariableBase>;
     private globalEntriesMap_: Map<string, DecoratedVariableBase>;
@@ -435,9 +457,14 @@ export class PersistenceV2Impl {
         return this.doGlobalConnect(connectOptions);
     }
 
+    /**
+     * Shared implementation for globalConnect. Builds classNameToCreator from
+     * defaultSubCreators when provided, enabling correct type restoration for
+     * nested sub-objects during deserialization.
+     */
     private doGlobalConnect<T extends object>(connectOptions: ConnectOptions<T>): T | undefined {
 
-        this.checkTypeIsValidClassObject(connectOptions.type);
+        this.checkTypeIsValidForGlobalConnect(connectOptions.type);
 
         const key = this.getPersistentKeyOrTypeNameWithChecks(connectOptions);
         if (!key) {
@@ -463,12 +490,21 @@ export class PersistenceV2Impl {
 
         const saveCheck: boolean = (connectOptions.enableAutoSave !== undefined ? connectOptions.enableAutoSave : true) as boolean;
 
+        // Build classNameToCreator from defaultSubCreators
+        let classNameToCreator: Map<string, StorageDefaultCreator<object>> | undefined = undefined;
+        if (connectOptions.defaultSubCreators) {
+            classNameToCreator = new Map<string, StorageDefaultCreator<object>>();
+            connectOptions.defaultSubCreators!.forEach((creator: StorageDefaultCreator<object>, clazz: Class) => {
+                classNameToCreator!.set(clazz.getName(), creator);
+            });
+        }
+
         // Not in memory, but on disk
         const areaMode: AreaMode = this.getAreaMode(connectOptions.areaMode);
         this.globalMapAreaMode_.set(key, areaMode);
         if (this.storageBackend_!.has(key, areaMode)) {
             return this.readValueFromDisk<T>(key, connectOptions.type, connectOptions.toJson, connectOptions.fromJson,
-                connectOptions.defaultCreator, saveCheck, areaMode);
+                connectOptions.defaultCreator, saveCheck, areaMode, classNameToCreator);
         }
 
         // Neither in memory or in disk, create new entry
@@ -590,15 +626,12 @@ export class PersistenceV2Impl {
         const ttype = this.typeMap_.get(key!);
 
         this.startObservation(property);
-        const jsonElement = PersistenceV2Impl.toJsonWithType(toJson, property!.get() as T);
+        const jsonElement = PersistenceV2Impl.toJsonWithType(toJson, property!.get() as T, (msg: string) => {
+            this.errorHelper(key!, Serialization, msg);
+        });
         let jsonString = JSON.stringifyJsonElement(jsonElement);
         this.stopObservation();
 
-        if (this.isOverSizeLimit(jsonString)) {
-            StateMgmtConsole.log(
-                `Cannot store the key '${key}'! The length of data must be less than ${PersistenceV2Impl.MAX_DATA_LENGTH_}`);
-            return;
-        }
         const areaMode = (keyType === MapType.GLOBAL_MAP) ? this.globalMapAreaMode_.get(key!) : undefined;
         // Write to backend
         this.storageBackend_!.set(key!, jsonString, areaMode);
@@ -655,6 +688,14 @@ export class PersistenceV2Impl {
         })
     }
 
+    private checkTypeIsValidForGlobalConnect(ttype: Class) {
+        PersistenceV2Impl.NOT_SUPPORTED_TYPES_GLOBAL_.forEach((wrong_ttype) => {
+            if (wrong_ttype == ttype) {
+                throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+            }
+        })
+    }
+
     private getAreaMode(areaMode?: contextConstant.AreaMode): AreaMode {
         if (areaMode === undefined) {
             return AreaMode.EL2;
@@ -704,10 +745,18 @@ export class PersistenceV2Impl {
         try {
             let maybeTarget = StateMgmtTool.tryGetTarget(value);
             let target = maybeTarget ? maybeTarget as T : value;
+            if (target instanceof Map && !(target instanceof Record)) return 'Map';
+            if (target instanceof Set) return 'Set';
+            if (target instanceof Date) return 'Date';
+            if (Array.isArray(target)) return 'Array';
             return transferTypeName(Class.ofAny(target)!.getName());
         } catch (err) {
             // not proxied
         }
+        if (value instanceof Map && !(value instanceof Record)) return 'Map';
+        if (value instanceof Set) return 'Set';
+        if (value instanceof Date) return 'Date';
+        if (Array.isArray(value)) return 'Array';
         return transferTypeName(Class.ofAny(value)!.getName());
     }
 
@@ -739,7 +788,7 @@ export class PersistenceV2Impl {
         JSON.parseUpdate(JSON.stringifyJsonElement(recordArray[1]), valueToUpdate);
     }
 
-    private static toJsonWithType<T extends object | SerializableObject>(toJson: ToJSONType<T> | undefined, obj: T): jsonx.JsonElement {
+    private static toJsonWithType<T extends object | SerializableObject>(toJson: ToJSONType<T> | undefined, obj: T, onError?: CollectionCoderErrorCallback): jsonx.JsonElement {
         let topArray = new Array<jsonx.JsonElement>();
         let classname = PersistenceV2Impl.getTargetClassName(obj);
         let el = jsonx.JsonElement.createString(classname);
@@ -749,12 +798,8 @@ export class PersistenceV2Impl {
         } else if (obj instanceof jsonx.JsonElementSerializable) {
             topArray.push((obj as jsonx.JsonElementSerializable).toJSON());
         } else {
-            topArray.push(JSON.parseJsonElement(JSON.stringify(obj, (key: string, value: Any) => {
-                if (value instanceof IObservedAnyProp) {
-                    (value as IObservedAnyProp).addRefAnyProp();
-                }
-                return value;
-            })));
+            const serialized = V2CollectionCoder.stringify(obj, onError);
+            topArray.push(JSON.parseJsonElement(serialized));
         }
         return jsonx.JsonElement.createArray(topArray);
     }
@@ -766,7 +811,8 @@ export class PersistenceV2Impl {
         fromJson: FromJSONType<T> | undefined,
         defaultCreator: StorageDefaultCreator<T> | undefined,
         enableAutoSave: boolean,
-        areaMode?: AreaMode): T | undefined {
+        areaMode?: AreaMode,
+        classNameToCreator?: Map<string, StorageDefaultCreator<object>>): T | undefined {
         let jsonString: string | undefined = undefined;
         try {
             jsonString = this.storageBackend_!.get(key, areaMode)!;
@@ -800,15 +846,34 @@ export class PersistenceV2Impl {
                         key, undefined, jsonElement, property!.get() as jsonx.JsonElementDeserializable);
                     newObservedValue = property!.get();
                 } else {
-                    // Fallback deserialization for objects without custom fromJson or JsonElementDeserializable.
-                    PersistenceV2Impl.parseUpdateWithType<T>(key, jsonElement, property!.get()!);
-                    newObservedValue = property!.get();
+                    const currentValue = property!.get()!;
+                    const typeNameOnDisk = jsonElement.asArray()[0].asString();
+                    StorageHelper.checkTypeByName(key, ttype, typeNameOnDisk);
+                    const payloadStr = JSON.stringifyJsonElement(jsonElement.asArray()[1]);
+
+                    if (V2CollectionCoder.isNewFormat(payloadStr)) {
+                        const parsed = V2CollectionCoder.parse(payloadStr);
+                        V2CollectionCoder.restoreTo(currentValue, parsed, classNameToCreator, (msg: string) => {
+                            if (this.errorCB_) {
+                                this.errorCB_!(key, Serialization, msg, jsonString);
+                            }
+                            console.error(`PersistenceV2 [${key}]: ${msg}`);
+                        });
+                    } else {
+                        PersistenceV2Impl.parseUpdateWithType<T>(key, jsonElement, currentValue);
+                    }
+                    newObservedValue = currentValue;
                 }
             }
 
             // Collect dependencies
             this.startObservation(property);
-            PersistenceV2Impl.toJsonWithType(toJson, newObservedValue!);
+            PersistenceV2Impl.toJsonWithType(toJson, newObservedValue!, (msg: string) => {
+                if (this.errorCB_) {
+                    this.errorCB_!(key, Serialization, msg, jsonString);
+                }
+                console.error(`PersistenceV2 [${key}]: ${msg}`);
+            });
             this.stopObservation();
 
             // Adds to one of the maps, do not store key on disk
@@ -842,10 +907,6 @@ export class PersistenceV2Impl {
         })
     }
 
-    private isOverSizeLimit(json: string): boolean {
-        return json.length >= PersistenceV2Impl.MAX_DATA_LENGTH_;
-    }
-
     private static isNotAValidClassObject(value: object): boolean {
         const ttype = Class.of(value);
         const wrongType =
@@ -862,13 +923,8 @@ export class PersistenceV2Impl {
             ttype === Class.from<Double>() ||
             ttype === Class.from<Number>() ||
             ttype === Class.from<String>() ||
-            Array.isArray(value) ||
-            value instanceof Array ||
-            value instanceof Set ||
-            value instanceof Map ||
             value instanceof WeakSet ||
             value instanceof WeakMap ||
-            value instanceof Date ||
             value instanceof Boolean ||
             value instanceof Number ||
             value instanceof String ||
