@@ -113,6 +113,8 @@ private:
     void AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode);
     bool IsDefaultPosition(const RefPtr<DialogLayoutProperty>& dialogProp);
     void AvoidTitlebarInSubwindow(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp);
+    void UpdateDistortionNodeSize(
+        const RefPtr<FrameNode>& hostNode, const Dimension& dialogWidth, const Dimension& dialogHeight);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;

@@ -270,6 +270,8 @@ void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayou
     CHECK_NULL_VOID(childLayoutWrapper && dialogProp);
     auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
+    auto childNode = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(childNode);
     auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
     auto dialogHeight = dialogProp->GetHeight().value_or(Dimension(-1, DimensionUnit::VP));
     if (NonNegative(dialogHeight.Value())) {
@@ -278,9 +280,30 @@ void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayou
     if (NonNegative(dialogWidth.Value())) {
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
     }
+    UpdateDistortionNodeSize(childNode->GetParentFrameNode(), dialogWidth, dialogHeight);
     childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(
         dialogWidth.ConvertToPxWithSize(childLayoutConstraint.maxSize.Width()),
         dialogHeight.ConvertToPxWithSize(childLayoutConstraint.maxSize.Height())));
+}
+
+void DialogLayoutAlgorithm::UpdateDistortionNodeSize(
+    const RefPtr<FrameNode>& hostNode, const Dimension& dialogWidth, const Dimension& dialogHeight)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern && dialogPattern->GetHasExtraNodeForDistortion());
+    auto contentColumn = hostNode->GetFirstChild();
+    CHECK_NULL_VOID(contentColumn);
+    auto distortionColumn = AceType::DynamicCast<FrameNode>(contentColumn->GetFirstChild());
+    CHECK_NULL_VOID(distortionColumn);
+    auto distortionNodeLayoutProperty = distortionColumn->GetLayoutProperty();
+    CHECK_NULL_VOID(distortionNodeLayoutProperty);
+    if (NonNegative(dialogHeight.Value())) {
+        distortionNodeLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dialogHeight)));
+    }
+    if (NonNegative(dialogWidth.Value())) {
+        distortionNodeLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
+    }
 }
 
 void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper, bool isTitleCenter)
@@ -881,6 +904,9 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper
     }
     if (!customSize_ && dialogProp->GetHeight().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dialogHeight)));
+    }
+    if (!customSize_) {
+        UpdateDistortionNodeSize(hostNode, dialogWidth, dialogHeight);
     }
     child->Measure(childConstraint);
     child->GetGeometryNode()->SetFrameSize(dialogChildSize_);

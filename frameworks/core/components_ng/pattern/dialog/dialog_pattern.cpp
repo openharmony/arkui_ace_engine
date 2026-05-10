@@ -398,7 +398,7 @@ bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
 
 void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogProperties& dialogProperties)
 {
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) || dialogProperties.customStyle) {
         return;
     }
     CHECK_NULL_VOID(columnNode);
@@ -624,7 +624,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     if (!props.customStyle) {
         UpdateContentRenderContext(contentColumnWrapper, props);
         if (props.height.has_value()) {
-            auto layoutProps = contentColumnWrapper->GetLayoutProperty<LinearLayoutProperty>();
+            auto layoutProps = contentColumn->GetLayoutProperty<LinearLayoutProperty>();
             CHECK_NULL_VOID(layoutProps);
             layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
             layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
@@ -3428,6 +3428,7 @@ void DialogPattern::PlayDistortion()
         .barrelDistortion = { 0, 0, 0, 0 },  // Remove barrel distortion
     };
     option.SetDelay(120);  // Set delay
+    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
     AnimationUtils::Animate(option, [renderContext, param4, childContexts]() {
         renderContext->UpdateDistortionParam(param4);
         for (const auto& childContext : childContexts) {
