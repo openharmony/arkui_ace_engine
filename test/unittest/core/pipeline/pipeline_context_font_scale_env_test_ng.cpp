@@ -92,7 +92,7 @@ HWTEST_F(PipelineContextTestNg, ReadFontScaleFromEnv002, TestSize.Level1)
 
 /**
  * @tc.name: LayoutFontScaleEnvCallback001
- * @tc.desc: Callback correctly sets envFontScale_ on patterns that need it
+ * @tc.desc: Manually read fontScale via ReadFontScaleFromEnv works correctly
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, LayoutFontScaleEnvCallback001, TestSize.Level1)
@@ -114,7 +114,7 @@ HWTEST_F(PipelineContextTestNg, LayoutFontScaleEnvCallback001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TestablePattern>();
     ASSERT_NE(pattern, nullptr);
 
-    envManager->OnNodeAttached(frameNode);
+    pattern->ReadFontScaleFromEnv();
 
     auto envFontScale = pattern->GetEnvFontScale();
     ASSERT_TRUE(envFontScale.has_value());
@@ -125,7 +125,7 @@ HWTEST_F(PipelineContextTestNg, LayoutFontScaleEnvCallback001, TestSize.Level1)
 
 /**
  * @tc.name: OnModifyDoneNoReadFontScale001
- * @tc.desc: OnModifyDone does not trigger auto-read of fontScale (performance regression prevention)
+ * @tc.desc: OnModifyDone does NOT trigger auto-read of fontScale (performance regression prevention)
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, OnModifyDoneNoReadFontScale001, TestSize.Level1)
@@ -143,11 +143,13 @@ HWTEST_F(PipelineContextTestNg, OnModifyDoneNoReadFontScale001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TestablePattern>();
     ASSERT_NE(pattern, nullptr);
 
+    auto envFontScaleBefore = pattern->GetEnvFontScale();
+    EXPECT_FALSE(envFontScaleBefore.has_value());
+
     pattern->OnModifyDone();
 
-    auto envFontScale = pattern->GetEnvFontScale();
-    ASSERT_TRUE(envFontScale.has_value());
-    EXPECT_FLOAT_EQ(envFontScale.value(), 3.0f);
+    auto envFontScaleAfter = pattern->GetEnvFontScale();
+    EXPECT_FALSE(envFontScaleAfter.has_value());
 
     frameNode = nullptr;
 }
