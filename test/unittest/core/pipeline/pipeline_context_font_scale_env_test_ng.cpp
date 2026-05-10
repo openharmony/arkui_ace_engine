@@ -15,9 +15,6 @@
 
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
 
-#define private public
-#define protected public
-
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/with_env_node.h"
 #include "core/pipeline_ng/environment_manager.h"
