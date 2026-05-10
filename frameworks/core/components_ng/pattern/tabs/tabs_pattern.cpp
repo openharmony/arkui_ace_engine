@@ -1228,7 +1228,9 @@ void TabsPattern::InitFloatingBar()
         if (floatingBarPosition_ != FloatingBarPosition::CENTER) {
             ResetTabBarFollowHandPosition();
         }
-        ResetSystemMaterial();
+        if (lastFloatingBar_) {
+            ResetSystemMaterial();
+        }
     }
     if (isFloatingBar_ != lastFloatingBar_) {
         tabsNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
