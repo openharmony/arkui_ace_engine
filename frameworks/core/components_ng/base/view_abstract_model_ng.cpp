@@ -629,6 +629,237 @@ static void BindContextMenuWithRightClick(const RefPtr<FrameNode>& targetNode, s
     inputHub->BindContextMenu(std::move(event));
 }
 
+// bindContextMenu with Array<MenuElement>: long press gesture + option menu
+void ViewAbstractModelNG::BindContextMenuWithLongPressOptions(const RefPtr<FrameNode>& targetNode,
+    std::vector<NG::OptionParam>&& params, MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetPreviewMode(menuParam.previewMode);
+
+    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+        menuParam.enableArrow = false;
+    }
+
+    auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    auto contextMenuShow = [params = std::move(params), weakTarget, menuParam,
+                               previewBuildFunc](NG::OffsetF globalPosition) mutable {
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [params, weakTarget, menuParam, previewBuildFunc, globalPosition]() mutable {
+                auto targetNode = weakTarget.Upgrade();
+                CHECK_NULL_VOID(targetNode);
+                auto pipelineContext = targetNode->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+                CHECK_NULL_VOID(menuTheme);
+                if (pipelineContext->IsDragging()) {
+                    return;
+                }
+                if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+                    auto context = targetNode->GetRenderContext();
+                    CHECK_NULL_VOID(context);
+                    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+                    CHECK_NULL_VOID(gestureHub);
+                    auto pixelMap = context->GetThumbnailPixelMap();
+                    gestureHub->SetPixelMap(pixelMap);
+                }
+                NG::OffsetF menuPosition { globalPosition.GetX() + menuParam.positionOffset.GetX(),
+                    globalPosition.GetY() + menuParam.positionOffset.GetY() };
+                if (!(menuParam.isShowHoverImage && menuParam.hoverScaleInterruption)) {
+                    StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+                }
+                // If previewBuilder exists, create menu node with preview and pass to SubwindowManager
+                if (previewBuildFunc) {
+                    NG::ScopedViewStackProcessor builderViewStackProcessor;
+                    previewBuildFunc();
+                    auto previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
+
+                    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+                    CHECK_NULL_VOID(menuViewModifier);
+                    auto menuNode = menuViewModifier->createWithOptionParamsAndPreview(
+                        std::move(params), targetNode->GetId(), targetNode->GetTag(),
+                        NG::MenuType::CONTEXT_MENU, menuParam, previewCustomNode);
+                    CHECK_NULL_VOID(menuNode);
+                    auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+                    CHECK_NULL_VOID(menuWrapperPattern);
+                    menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
+                    menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+                    SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode,
+                        UpdateMenuPostion(menuPosition, menuParam, targetNode));
+                } else if (menuParam.previewMode != MenuPreviewMode::NONE) {
+                    // IMAGE preview mode: no custom builder, but preview is needed
+                    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+                    CHECK_NULL_VOID(menuViewModifier);
+                    auto menuNode = menuViewModifier->createWithOptionParamsAndPreview(
+                        std::move(params), targetNode->GetId(), targetNode->GetTag(),
+                        NG::MenuType::CONTEXT_MENU, menuParam, nullptr);
+                    CHECK_NULL_VOID(menuNode);
+                    auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+                    CHECK_NULL_VOID(menuWrapperPattern);
+                    menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
+                    menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+                    SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode,
+                        UpdateMenuPostion(menuPosition, menuParam, targetNode));
+                } else {
+                    NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode,
+                        UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam);
+                }
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateOptionsMenu");
+    };
+
+    auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(
+        [contextMenuShow](const GestureEvent& info) mutable {
+            contextMenuShow(NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
+        });
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
+    auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
+    gestureHub->SetLongPressEvent(longPress, false, true, longPressDuration);
+    gestureHub->SetLongPressEventType(GestureTypeName::CONTEXT_MENU_HOVER);
+
+    BindGestureForContextMenu(targetNode, menuParam, contextMenuShow, true);
+}
+
+// bindContextMenu with Array<MenuElement>: right click gesture + option menu
+static void BindContextMenuWithRightClickOptions(
+    const RefPtr<FrameNode>& targetNode, std::vector<NG::OptionParam>&& params, MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto hub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    menuParam.isShowHoverImage = false;
+    menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+
+    auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    OnMouseEventFunc event = [params = std::move(params), weakTarget, menuParam](MouseInfo& info) mutable {
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+            info.SetStopPropagation(true);
+            taskExecutor->PostTask(
+                [params, weakTarget, menuParam, info]() mutable {
+                    auto targetNode = weakTarget.Upgrade();
+                    CHECK_NULL_VOID(targetNode);
+                    menuParam.reuse = !info.GetIsRightButtonEventFromDoulbeTap();
+                    NG::OffsetF menuPosition { info.GetGlobalLocation().GetX()
+                        + menuParam.positionOffset.GetX(),
+                        info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                    auto pipelineContext = targetNode->GetContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+                    CHECK_NULL_VOID(menuTheme);
+                    StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+                    NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode,
+                        UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam);
+                },
+                TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateOptionsMenu");
+        }
+    };
+    auto inputHub = targetNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    inputHub->BindContextMenu(std::move(event));
+}
+
+// bindContextMenu with Array<MenuElement>: create option menu and show in subwindow
+static void CreateOptionMenuWithPreview(const RefPtr<FrameNode>& targetNode,
+    std::vector<NG::OptionParam>&& params, const MenuParam& menuParam,
+    std::function<void()>& previewBuildFunc)
+{
+    CHECK_NULL_VOID(targetNode);
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
+        auto context = targetNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        gestureHub->SetPixelMap(pixelMap);
+    }
+    auto refTargetNode = targetNode;
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+    NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
+    if (previewBuildFunc) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        previewBuildFunc();
+        auto previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        CHECK_NULL_VOID(menuViewModifier);
+        auto menuNode = menuViewModifier->createWithOptionParamsAndPreview(
+            std::move(params), refTargetNode->GetId(), refTargetNode->GetTag(),
+            NG::MenuType::CONTEXT_MENU, menuParam, previewCustomNode);
+        CHECK_NULL_VOID(menuNode);
+        auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
+        menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, refTargetNode,
+            UpdateMenuPostion(menuPosition, menuParam, refTargetNode));
+    } else {
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        CHECK_NULL_VOID(menuViewModifier);
+        auto menuNode = menuViewModifier->createWithOptionParamsAndPreview(std::move(params), refTargetNode->GetId(),
+            refTargetNode->GetTag(), NG::MenuType::CONTEXT_MENU, menuParam, nullptr);
+        CHECK_NULL_VOID(menuNode);
+        auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
+        menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+        SubwindowManager::GetInstance()->ShowMenuNG(
+            menuNode, menuParam, refTargetNode, UpdateMenuPostion(menuPosition, menuParam, refTargetNode));
+    }
+}
+
+// bindContextMenu with Array<MenuElement>: isShow mode + option menu
+static void BindContextMenuSingleWithOptions(const RefPtr<FrameNode>& targetNode,
+    std::vector<NG::OptionParam>&& params, const MenuParam& menuParam,
+    std::function<void()>& previewBuildFunc)
+{
+    CHECK_NULL_VOID(targetNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
+    auto targetId = targetNode->GetId();
+
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        Container::CurrentId(), SubwindowType::TYPE_MENU);
+    if (subwindow) {
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menuNode = overlayManager->GetMenuNode(targetId);
+        if (menuNode) {
+            auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
+            if (wrapperPattern->IsShow() && !menuParam.isShow) {
+                SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
+                UpdateIsShowStatusForMenu(targetId, false);
+            } else if (!wrapperPattern->IsShow() && menuParam.isShow &&
+                       wrapperPattern->GetIsShowFromUser() != menuParam.isShow) {
+                CreateOptionMenuWithPreview(targetNode, std::move(params), menuParam, previewBuildFunc);
+                UpdateIsShowStatusForMenu(targetId, true);
+            }
+        } else if (menuParam.isShow && !params.empty()) {
+            CreateOptionMenuWithPreview(targetNode, std::move(params), menuParam, previewBuildFunc);
+            UpdateIsShowStatusForMenu(targetId, true);
+        }
+    } else {
+        if (menuParam.isShow && !params.empty()) {
+            CreateOptionMenuWithPreview(targetNode, std::move(params), menuParam, previewBuildFunc);
+            UpdateIsShowStatusForMenu(targetId, true);
+        }
+    }
+}
+
 static bool SetMenuTransitionEffect(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam)
 {
     CHECK_NULL_RETURN(targetNode, false);
@@ -678,6 +909,26 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     }
 }
 
+void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::vector<NG::OptionParam>&& params,
+    MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(targetNode);
+    if (!SetMenuTransitionEffect(targetNode, menuParam)) {
+        return;
+    }
+    if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
+        BindContextMenuSingleWithOptions(targetNode, std::move(params), menuParam, previewBuildFunc);
+    } else {
+        if (type == ResponseType::RIGHT_CLICK) {
+            BindContextMenuWithRightClickOptions(targetNode, std::move(params), menuParam);
+        } else if (type == ResponseType::LONG_PRESS) {
+            BindContextMenuWithLongPressOptions(targetNode, std::move(params), menuParam, std::move(previewBuildFunc));
+        }
+        RegisterContextMenuKeyEventOptions(targetNode, std::move(params), menuParam);
+    }
+}
+
 void ViewAbstractModelNG::BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType,
     MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
@@ -702,6 +953,33 @@ void ViewAbstractModelNG::BindContextMenu(std::function<void(MenuBindingType)>& 
             BindContextMenuWithRightClick(targetNode, buildFunc, currentMenuParam);
         }
         BindDragWithContextMenuParams(currentMenuParam);
+    }
+}
+
+void ViewAbstractModelNG::BindContextMenu(std::vector<NG::OptionParam>&& params,
+    MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(targetNode);
+    if (!SetMenuTransitionEffect(targetNode, menuParam)) {
+        return;
+    }
+    if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
+        BindContextMenuSingleWithOptions(targetNode, std::move(params), menuParam, previewBuildFunc);
+    } else {
+        std::vector<MenuBindingType> menuBindTypes = { MenuBindingType::RIGHT_CLICK, MenuBindingType::LONG_PRESS };
+        for (auto& type : menuBindTypes) {
+            auto currentMenuParam = menuParam;
+            auto currentParams = params;
+            if (type == MenuBindingType::LONG_PRESS) {
+                BindContextMenuWithLongPressOptions(
+                    targetNode, std::move(currentParams), currentMenuParam, std::move(previewBuildFunc));
+            } else {
+                BindContextMenuWithRightClickOptions(targetNode, std::move(currentParams), currentMenuParam);
+            }
+            BindDragWithContextMenuParams(currentMenuParam);
+        }
+        RegisterContextMenuKeyEventOptions(targetNode, std::move(params), menuParam);
     }
 }
 
@@ -892,6 +1170,32 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
             std::function<void()> previewBuildFunc = nullptr;
             NG::ViewAbstract::BindMenuWithCustomNode(
                 std::move(builder), targetNode, OffsetF(), param, std::move(previewBuildFunc));
+            return true;
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent), OnKeyEventType::CONTEXT_MENU);
+}
+
+void ViewAbstractModelNG::RegisterContextMenuKeyEventOptions(
+    const RefPtr<FrameNode>& targetNode, std::vector<NG::OptionParam>&& params, const MenuParam& menuParam)
+{
+    auto focusHub = targetNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto onKeyEvent = [wp = AceType::WeakClaim(AceType::RawPtr(targetNode)), params = std::move(params),
+                          param = menuParam](const KeyEvent& event) mutable -> bool {
+        if (event.action != KeyAction::DOWN) {
+            return false;
+        }
+        if (event.code == KeyCode::KEY_MENU || event.keyIntention == KeyIntention::INTENTION_MENU) {
+            auto targetNode = wp.Upgrade();
+            CHECK_NULL_RETURN(targetNode, false);
+            if (!param.placement.has_value()) {
+                param.placement = Placement::BOTTOM_LEFT;
+            }
+            NG::OffsetF menuPosition { param.positionOffset.GetX(), param.positionOffset.GetY() };
+            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode,
+                UpdateMenuPostion(menuPosition, param, targetNode), param);
             return true;
         }
         return false;

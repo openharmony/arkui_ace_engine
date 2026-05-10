@@ -505,7 +505,11 @@ public:
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(ResponseType type, std::vector<NG::OptionParam>&& params,
+        NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) = 0;
     virtual void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(std::vector<NG::OptionParam>&& params, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
     virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,

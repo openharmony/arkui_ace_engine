@@ -28,6 +28,7 @@ class PipelineContext;
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+class MenuPattern;
 class MenuPreviewPattern;
 class MenuWrapperPattern;
 class RenderContext;
@@ -60,6 +61,11 @@ public:
     // create menu with menuItems
     static RefPtr<FrameNode> Create(std::vector<OptionParam>&& params, int32_t targetId,
         const std::string& targetTag = "", MenuType type = MenuType::MENU, const MenuParam& menuParam = MenuParam());
+
+    // create menu with menuItems + preview support
+    static RefPtr<FrameNode> Create(std::vector<OptionParam>&& params, int32_t targetId,
+        const std::string& targetTag, MenuType type, const MenuParam& menuParam,
+        const RefPtr<UINode>& previewCustomNode);
 
     // create menu with custom node from a builder
     static RefPtr<FrameNode> Create(const RefPtr<UINode>& customNode, int32_t targetId,
@@ -135,6 +141,18 @@ private:
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
     static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
         const MenuParam& menuParam, RefPtr<FrameNode> column, int32_t themeScopeId);
+    static void MountGridSection(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
+        const MenuParam& menuParam, const RefPtr<FrameNode>& outerColumn);
+    static RefPtr<FrameNode> CreateGridItem(
+        const OptionParam& param, int32_t index, const WeakPtr<FrameNode>& menuWeak = nullptr);
+    static void MountGridSectionDivider(const RefPtr<FrameNode>& column);
+
+    // Custom builder grid support
+    static bool IsGridStyleEnabled(const MenuParam& menuParam);
+    static bool IsMenuWithOnlyMenuItems(const RefPtr<FrameNode>& customMenuNode);
+    static RefPtr<FrameNode> BuildGridListColumn(const RefPtr<FrameNode>& customMenuNode,
+        const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, int32_t themeScopeId);
+
     static void UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
     static void UpdateMenuPositionTop(MarginProperty& menuNodeMargin,

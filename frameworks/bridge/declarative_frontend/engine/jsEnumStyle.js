@@ -4136,6 +4136,12 @@ let MenuKeyboardAvoidMode;
   MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
 })(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
 
+let MenuGridPosition;
+(function (MenuGridPosition) {
+  MenuGridPosition[MenuGridPosition.TOP = 0] = 'TOP';
+  MenuGridPosition[MenuGridPosition.BOTTOM = 1] = 'BOTTOM';
+})(MenuGridPosition || (MenuGridPosition = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';
