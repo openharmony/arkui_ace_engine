@@ -39,6 +39,7 @@ public:
     void HandleLongPressOnAction(const GestureEvent& info);
     void HandleLongPressOnActionEnd(const GestureEvent& info);
     void HandleLongPressOnActionCancel(const GestureEvent& info);
+    void HandleLongPressOnPending();
     void HandlePreviewLongPressOnAction(const GestureEvent& info);
     void HandlePreviewLongPressOnActionEnd(const GestureEvent& info);
     void HandlePreviewLongPressOnActionCancel(const GestureEvent& info);

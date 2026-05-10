@@ -1006,6 +1006,7 @@ void NGGestureRecognizer::OnPending()
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::PENDING;
     NotifyManagerStateChange(RefereeState::PENDING);
+    SendPendingMsg();
 }
 
 void NGGestureRecognizer::OnBlocked()
@@ -1022,5 +1023,6 @@ void NGGestureRecognizer::OnBlocked()
         refereeState_ = RefereeState::PENDING_BLOCKED;
         NotifyManagerStateChange(RefereeState::PENDING_BLOCKED);
     }
+    SendPendingMsg();
 }
 } // namespace OHOS::Ace::NG

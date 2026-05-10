@@ -32,6 +32,7 @@ public:
     void NotifyLongPressOnAction(const GestureEvent& info);
     void NotifyLongPressOnActionEnd(const GestureEvent& info);
     void NotifyLongPressOnActionCancel(const GestureEvent& info);
+    void NotifyLongPressOnPending();
 
     void NotifyPreviewLongPressOnAction(const GestureEvent& info);
     void NotifyPreviewLongPressOnActionEnd(const GestureEvent& info);

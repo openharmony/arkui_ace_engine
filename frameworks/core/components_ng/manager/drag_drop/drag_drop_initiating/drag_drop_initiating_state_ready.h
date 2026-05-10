@@ -37,6 +37,7 @@ public:
     ~DragDropInitiatingStateReady() = default;
 
     void HandleLongPressOnAction(const GestureEvent& info) override;
+    void HandleLongPressOnPending() override;
     void HandlePanOnActionStart(const GestureEvent& info) override;
     void HandlePanOnReject() override;
     void HandleSequenceOnActionCancel(const GestureEvent& info) override;

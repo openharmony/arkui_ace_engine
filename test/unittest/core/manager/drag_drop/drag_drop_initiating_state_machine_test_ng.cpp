@@ -132,4 +132,61 @@ HWTEST_F(DragDropInitiatingStateMachineTestNG, DragDropInitiatingStateMachineTes
     EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
+/**
+ * @tc.name: DragDropInitiatingStateMachineTestNG003
+ * @tc.desc: Test HandleLongPressOnPending function when machine is initialized.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateMachineTestNG, DragDropInitiatingStateMachineTestNG003, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    machine->HandleLongPressOnPending();
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateMachineTestNG004
+ * @tc.desc: Test HandleLongPressOnPending function when dragDropInitiatingState_ is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateMachineTestNG, DragDropInitiatingStateMachineTestNG004, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    machine->dragDropInitiatingState_.clear();
+    machine->HandleLongPressOnPending();
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropInitiatingStatus::READY));
+}
 } // namespace OHOS::Ace::NG
