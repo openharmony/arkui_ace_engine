@@ -7349,6 +7349,9 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
 #ifdef CROSS_PLATFORM
 #ifdef IOS_PLATFORM
     if (value->isDelete && !value->discardedMarkedText) {
+#else
+    if (value->isDelete) {
+#endif
         if (value->compose.IsValid()) {
             DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
             value->compose.Update(-1);
@@ -7357,12 +7360,6 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
         }
         return true;
     }
-#else
-    if (value->isDelete) {
-        HandleOnDelete(true);
-        return true;
-    }
-#endif
     editingValue_ = value;
 #ifdef IOS_PLATFORM
     if (value->discardedMarkedText) {
