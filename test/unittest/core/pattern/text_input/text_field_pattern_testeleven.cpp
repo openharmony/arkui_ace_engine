@@ -1555,11 +1555,17 @@ HWTEST_F(TextFieldPatternTesteleven, RequestKeyboardNotByFocusSwitch001, TestSiz
  */
 HWTEST_F(TextFieldPatternTesteleven, HandleEditingEventCrossPlatform001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create frameNode
+     */
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. call HandleEditingEventCrossPlatform
+     */
     auto value = std::make_shared<TextEditingValue>();
     value->text = "test";
     auto result = textFieldPattern->HandleEditingEventCrossPlatform(value);
