@@ -1869,6 +1869,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_GetPageRootNode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetPageRootNode)
+        },
+        ani_native_function {
+            "_DumpLogPrint",
+            "iC{std.core.String}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DumpLogPrint)
         }
     };
 

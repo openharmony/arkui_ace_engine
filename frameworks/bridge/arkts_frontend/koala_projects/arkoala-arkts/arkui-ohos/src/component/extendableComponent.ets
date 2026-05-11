@@ -16,16 +16,14 @@
 import { int32 } from '@koalaui/common';
 import { RecordData } from '@ohos.base';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { CustomComponentV2, CustomComponentLifecycle, CustomDelegate } from './customComponent';
+import { CustomComponentLifecycle, CustomDelegate } from './customComponent';
 import { __CustomComponentLifecycle__Internal } from './customComponentLifecycle';
-import { InteropNativeModule, SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
+import { SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
 import {
     IProvideDecoratedVariable,
     IProviderDecoratedVariable,
     IVariableOwner,
-    LocalStorage,
-    StateMgmtDFX,
-    DumpInfo
+    LocalStorage
 } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
@@ -37,6 +35,7 @@ import { IEnvironmentValueBase, IEnvVariable, EnvDecoratedVariable } from '../st
 import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../stateManagement/utils';
 import { CustomComponentContextImpl } from './customComponent.ets';
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
+import { ExtendableComponentDFX } from './extendableComponentDFX';
 
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
@@ -197,6 +196,10 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
             child?.__setParent__Internal(undefined);
         });
         this.childrenWeakRefMap_.clear();
+    }
+
+    __getChildrenWeakRefMap__Internal(): Map<int32, WeakRef<ExtendableComponent>> {
+        return this.childrenWeakRefMap_;
     }
 
     __getActive__Internal(): number {
@@ -383,20 +386,11 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
 
     public __onDumpInspector__Internal(): string {
-        const dumpInfo: DumpInfo = new DumpInfo();
-        const isV2 = this instanceof CustomComponentV2;
-        dumpInfo.viewinfo = {
-            componentName: Class.of(this).getName(),
-            isV2: isV2
-        };
-        let ret: string = '';
-        try {
-            StateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo, isV2);
-            ret = JSON.stringify(dumpInfo);
-        } catch (error) {
-            InteropNativeModule._NativeLog(`dump component ${ dumpInfo.viewinfo.componentName} error: ${(error as Error).message}`);
-        }
-        return ret;
+        return ExtendableComponentDFX.onDumpInspector(this);
+    }
+
+    public __onDumpInfo__Internal(commands: string[]): void {
+        ExtendableComponentDFX.onDumpInfo(this, commands);
     }
 
     onWillApplyTheme(theme: Theme) {}

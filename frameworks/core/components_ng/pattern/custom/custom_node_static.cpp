@@ -34,6 +34,7 @@ CustomNode* CustomNodeStatic::ConstructCustomNode(int32_t id, NodeKoalaInfo&& in
     customNode->SetPageTransitionFunc(std::move(info.pageTransitionFunc));
     customNode->SetOnCleanupFunc(std::move(info.onCleanupFunc));
     customNode->SetOnDumpInspectorFunc(std::move(info.onDumpInspectorFunc));
+    customNode->SetOnDumpInfoFunc(std::move(info.onDumpInfoFunc));
 
     return AceType::RawPtr(customNode);
 }

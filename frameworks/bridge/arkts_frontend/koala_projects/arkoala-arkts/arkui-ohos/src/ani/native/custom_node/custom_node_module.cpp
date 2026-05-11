@@ -17,6 +17,7 @@
 #include "load.h"
 #include "utils/ani_utils.h"
 #include "log/log.h"
+#include "base/log/dump_log.h"
 
 #include <memory>
  
@@ -305,6 +306,42 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return AniUtils::ANIStringToStdString(env, aniStr);
     };
 
+    static ani_method onDumpInfoMethod = nullptr;
+    if (!onDumpInfoMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "onDumpInfo",
+            nullptr, &onDumpInfoMethod);
+    }
+    auto onDumpInfo = [vm, weakRef](const std::vector<std::string>& params) -> void {
+        ani_env *env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        CHECK_NULL_VOID(env);
+        ani_boolean released;
+        ani_ref localRef;
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
+            return;
+        }
+        if (!released) {
+            ani_ref undefined {};
+            if (ANI_OK != env->GetUndefined(&undefined)) {
+                env->Reference_Delete(localRef);
+                return;
+            }
+            ani_array strArray = nullptr;
+            if (ANI_OK != env->Array_New(params.size(), undefined, &strArray)) {
+                env->Reference_Delete(localRef);
+                return;
+            }
+            for (size_t i = 0; i < params.size(); ++i) {
+                ani_string aniStr = nullptr;
+                env->String_NewUTF8(params[i].c_str(), params[i].size(), &aniStr);
+                env->Array_Set(strArray, i, static_cast<ani_ref>(aniStr));
+            }
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onDumpInfoMethod,
+                static_cast<ani_ref>(strArray));
+            env->Reference_Delete(localRef);
+        }
+    };
+
     struct ArkUICustomNodeInfo customNodeInfo {
         .onPageShowFunc = std::move(onPageShow),
         .onPageHideFunc = std::move(onPageHide),
@@ -312,6 +349,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         .pageTransitionFunc = std::move(pageTransition),
         .onCleanupFunc = std::move(onCleanupFunc),
         .onDumpInspectorFunc = std::move(onDumpInspector),
+        .onDumpInfoFunc = std::move(onDumpInfo),
         .setActiveFunc = std::move(setActive),
         .onGetJsViewNameFunc = std::move(getJsViewName),
     };

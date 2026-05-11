@@ -87,6 +87,14 @@ void RegisterPageCallback(const RefPtr<FrameNode>& frameNode, void* jsViewNode)
             }
         });
 
+    pagePattern->RegisterDumpInfoListener([weak = WeakPtr<CustomNode>(customNode)](
+                                              const std::vector<std::string>& params) {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnDumpInfoFunc(params);
+        }
+    });
+
     pagePattern->MarkRenderDone();
     
 #if !defined(PREVIEW)
