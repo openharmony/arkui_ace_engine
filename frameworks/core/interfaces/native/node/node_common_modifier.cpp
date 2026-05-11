@@ -10237,6 +10237,20 @@ void ResetUseUnionEffect(ArkUINodeHandle node)
     ViewAbstract::SetUseUnion(frameNode, false);
 }
 
+void SetDoubleSided(ArkUINodeHandle node, bool doubleSided)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDoubleSided(frameNode, doubleSided);
+}
+ 
+void ResetDoubleSided(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDoubleSided(frameNode, true);
+}
+
 ArkUIOffsetType GetCurrentLocation(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
     const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit)
 {
@@ -11895,6 +11909,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setUseUnionEffect = SetUseUnionEffect,
         .resetUseUnionEffect = ResetUseUnionEffect,
         .getCurrentLocation = GetCurrentLocation,
+        .setDoubleSided = SetDoubleSided,
+        .resetDoubleSided = ResetDoubleSided
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

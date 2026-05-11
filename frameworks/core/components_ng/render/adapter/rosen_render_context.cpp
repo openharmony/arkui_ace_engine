@@ -9030,4 +9030,12 @@ void RosenRenderContext::ResetEdgeLightFilter()
     RequestNextFrame();
 #endif
 }
+
+void RosenRenderContext::OnDoubleSidedUpdate(bool doubleSided)
+{
+    FREE_RS_CONTEXT_CHECK(OnDoubleSidedUpdate, doubleSided);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetDoubleSidedEnabled(doubleSided);
+    RequestNextFrame();
+}
 } // namespace OHOS::Ace::NG

@@ -11294,4 +11294,20 @@ void ViewAbstract::SetEdgeLightParam(const std::optional<EdgeLightParam>& param)
         renderContext->ResetEdgeLightFilter();
     }  
 }
+
+void ViewAbstract::SetDoubleSided(FrameNode* frameNode, bool doubleSided)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateDoubleSided(doubleSided);
+}
+
+void ViewAbstract::SetDoubleSided(bool doubleSided)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetDoubleSided(frameNode, doubleSided);
+}
 } // namespace OHOS::Ace::NG

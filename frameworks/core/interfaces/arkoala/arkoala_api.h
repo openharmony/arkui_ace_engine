@@ -3707,6 +3707,8 @@ struct ArkUICommonModifier {
     void (*resetUseUnionEffect)(ArkUINodeHandle node);
     ArkUIOffsetType (*getCurrentLocation)(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
         const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit);
+    void (*setDoubleSided)(ArkUINodeHandle node, bool doubleSided);
+    void (*resetDoubleSided)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {

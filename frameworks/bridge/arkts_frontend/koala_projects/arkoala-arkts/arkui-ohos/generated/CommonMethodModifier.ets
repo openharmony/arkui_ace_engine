@@ -217,6 +217,7 @@ export class CommonMethodModifier implements CommonMethod {
     public _onNeedSoftkeyboard_0_0value?: OnNeedSoftkeyboardCallback | undefined
     public _accessibilityStateDescription_0_0value?: string | global_resource_Resource | undefined
     public _accessibilityActionOptions_0_0value?: AccessibilityActionOptions | undefined
+    public _doubleSided_0_0value?: boolean | undefined
     public _customProperty_0_0value?: string
     public _customProperty_0_1value?: CustomProperty
     public _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
@@ -4082,6 +4083,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[219] != 0) {
+            switch (flagArray[219]) {
+                case 1: {
+                    peer.setDoubleSidedAttribute((this._doubleSided_0_0value as boolean | undefined));
+                    flagArray[219] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[219] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[219] = 0;
+                    peer.setDoubleSidedAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6745,6 +6763,18 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[219] != 0) {
+            switch (flagArray[219]) {
+                case 1:
+                case 3: {
+                    this.doubleSided((modifier._doubleSided_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.doubleSided((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -8999,6 +9029,16 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[218] = 3
+        }
+        return this
+    }
+    doubleSided(value: boolean | undefined): this {
+        if (((this._flagArray[219]) == (0)) || ((this._doubleSided_0_0value) !== (value))) {
+            this._flagArray[219] = 1
+            this._doubleSided_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[219] = 3
         }
         return this
     }

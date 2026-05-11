@@ -812,6 +812,9 @@ public:
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
+    // DoubleSided
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DoubleSided, bool);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
@@ -1055,6 +1058,7 @@ protected:
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
     virtual void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) {}
+    virtual void OnDoubleSidedUpdate(bool doubleSided) {}
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;

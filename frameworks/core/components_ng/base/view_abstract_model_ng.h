@@ -1113,6 +1113,11 @@ public:
         ViewAbstract::SetEdgeLightParam(param);
     }
 
+    void SetDoubleSided(bool doubleSided) override
+    {
+        ViewAbstract::SetDoubleSided(doubleSided);
+    }
+
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);
