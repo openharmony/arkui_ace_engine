@@ -1657,13 +1657,13 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy023, TestSize.Lev
     marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     pattern->StartMarqueeAnimation();
-    auto offset = pattern->GetTextOffset();
+    auto offset = pattern->GetTextOffset(true);
     EXPECT_EQ(offset, 0.0f);
     pattern->StopMarqueeAnimation(false);
     marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::DEFAULT);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::DEFAULT);
     pattern->StartMarqueeAnimation();
-    offset = pattern->GetTextOffset();
+    offset = pattern->GetTextOffset(true);
     EXPECT_EQ(offset, 0.0f);
 }
 
