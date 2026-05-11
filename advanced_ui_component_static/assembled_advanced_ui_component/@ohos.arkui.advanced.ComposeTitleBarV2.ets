@@ -34,7 +34,7 @@ import common from '@ohos.app.ability.common';
 import hilog from '@ohos.hilog';
 
 
-export class ComposeTitleBarMenuItemV2 {
+export class ComposeTitleBarV2MenuItem {
   public value: ResourceStr = '';
   public symbolStyle?: SymbolGlyphModifier;
   public isEnabled?: boolean;
@@ -117,10 +117,10 @@ export struct ComposeTitleBarV2 {
   private static readonly portraitImageLeftPadding: number = 4;
   private static readonly portraitImageRightPadding: number = 16;
   private static instanceCount: number = 0;
-  @Param item: ComposeTitleBarMenuItemV2 | undefined = undefined;
+  @Param item: ComposeTitleBarV2MenuItem | undefined = undefined;
   @Param title: ResourceStr = '';
   @Param subtitle: ResourceStr = '';
-  @Param menuItems?: Array<ComposeTitleBarMenuItemV2> = [] as Array<ComposeTitleBarMenuItemV2>;
+  @Param menuItems?: Array<ComposeTitleBarV2MenuItem> = [] as Array<ComposeTitleBarV2MenuItem>;
   @Local titleMaxWidth: number = 0;
   @Local uniqueIdValue?: int = undefined;
   @Local onUniqueIdUpdate?: (id: int) => void = undefined;
@@ -138,7 +138,7 @@ export struct ComposeTitleBarV2 {
             action: () => {
               this.getUIContext()?.getRouter()?.back()
             }
-          } as ComposeTitleBarMenuItemV2,
+          } as ComposeTitleBarV2MenuItem,
           index: -1,
           itemIndex: -1
         })
@@ -238,11 +238,11 @@ struct CollapsibleMenuSectionV2 {
   private static readonly focusPadding: number = 4;
   private static readonly marginsNum: number = 2;
   private static readonly focusIndexOffset: number = 2;
-  @Param menuItems: Array<ComposeTitleBarMenuItemV2> = [] as Array<ComposeTitleBarMenuItemV2>;
-  @Param item: ComposeTitleBarMenuItemV2 = {
+  @Param menuItems: Array<ComposeTitleBarV2MenuItem> = [] as Array<ComposeTitleBarV2MenuItem>;
+  @Param item: ComposeTitleBarV2MenuItem = {
     value: $r('sys.symbol.dot_grid_2x2'),
     label: $r('sys.string.ohos_toolbar_more'),
-  } as ComposeTitleBarMenuItemV2;
+  } as ComposeTitleBarV2MenuItem;
   @Param index: number = 0;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
@@ -447,14 +447,14 @@ struct CollapsibleMenuSectionV2 {
       Row() {
         if (this.menuItems) {
           if (this.menuItems.length <= CollapsibleMenuSectionV2.maxCountOfVisibleItems) {
-            ForEach(this.menuItems, (item: ComposeTitleBarMenuItemV2, index: int) => {
+            ForEach(this.menuItems, (item: ComposeTitleBarV2MenuItem, index: int) => {
               ImageMenuItemV2({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
-            }, (item: ComposeTitleBarMenuItemV2) => { return JSON.stringify(item.value) })
+            }, (item: ComposeTitleBarV2MenuItem) => { return JSON.stringify(item.value) })
           } else {
             ForEach(this.menuItems.slice(0, CollapsibleMenuSectionV2.maxCountOfVisibleItems.toInt() - 1),
-              (item: ComposeTitleBarMenuItemV2, index: int) => {
+              (item: ComposeTitleBarV2MenuItem, index: int) => {
                 ImageMenuItemV2({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
-              }, (item: ComposeTitleBarMenuItemV2) => { return JSON.stringify(item.value) })
+              }, (item: ComposeTitleBarV2MenuItem) => { return JSON.stringify(item.value) })
 
             Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
               SymbolGlyph(this.PUBLIC_MORE)
@@ -545,7 +545,7 @@ struct CollapsibleMenuSectionV2 {
       if (this.menuItems) {
         ForEach(this.menuItems!.slice(CollapsibleMenuSectionV2.maxCountOfVisibleItems.toInt() - 1,
           this.menuItems!.length),
-          (item: ComposeTitleBarMenuItemV2, index: int) => {
+          (item: ComposeTitleBarV2MenuItem, index: int) => {
             ImageMenuItemV2({
               item: item, index: this.index * 1000 +
               CollapsibleMenuSectionV2.maxCountOfVisibleItems + index, isPopup: false
@@ -572,7 +572,7 @@ struct ImageMenuItemV2 {
   static readonly buttonBorderRadius: number = 8;
   static readonly focusBorderWidth: number = 2;
   static readonly focusablePrefix: string = 'Id-ComposeTitleBar-ImageMenuItem-';
-  @Param item: ComposeTitleBarMenuItemV2 = {value: 'undefined'} as ComposeTitleBarMenuItemV2;
+  @Param item: ComposeTitleBarV2MenuItem = {value: 'undefined'} as ComposeTitleBarV2MenuItem;
   @Param index: number = 0;
   @Param itemIndex?: number = 0;
   minFontSize: number = 1.75;
