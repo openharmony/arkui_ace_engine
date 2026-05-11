@@ -164,13 +164,11 @@ void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node)
 int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(
     ArkUI_NodeHandle node, void* userData, void (*onDrawCompleted)(void* userData))
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (impl == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     impl->getNodeModifiers()->getFrameNodeModifier()->setDrawCompleteEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onDrawCompleted));
 
@@ -180,10 +178,10 @@ int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(
 
 int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     impl->getNodeModifiers()->getFrameNodeModifier()->resetDrawCompleteEvent(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -191,10 +189,12 @@ int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node)
 int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
     ArkUI_NodeHandle node, void* userData, void (*onLayoutCompleted)(void* userData))
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(onLayoutCompleted, OHOS::Ace::ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Layout callback is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     impl->getNodeModifiers()->getFrameNodeModifier()->setLayoutEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onLayoutCompleted));
 
@@ -203,10 +203,10 @@ int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
 
 int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     impl->getNodeModifiers()->getFrameNodeModifier()->resetLayoutEvent(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -499,7 +499,8 @@ int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle
 
 int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
-    CHECK_NULL_RETURN_WITH_MESSAGE(node && child, OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node && child, OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
         __FUNCTION__, "Parent node or child node parameter is null");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
@@ -972,11 +973,17 @@ ArkUI_ContentTransitionEffect* OH_ArkUI_ContentTransitionEffect_Create(int32_t t
 
 int32_t OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible(ArkUI_ContextHandle uiContext, bool visible)
 {
-    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID,
+        __FUNCTION__, "UI context parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     auto* context = reinterpret_cast<ArkUIContext*>(uiContext);
-    return impl->getNodeModifiers()->getAtomicServiceModifier()->setMenuBarVisible(context, visible);
+    auto result = impl->getNodeModifiers()->getAtomicServiceModifier()->setMenuBarVisible(context, visible);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return result;
 }
 
 int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(
@@ -1042,7 +1049,8 @@ int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle
         __FUNCTION__, "Basic API is not initialized");
     auto invalid = basicAPI->checkUIContextInvalid(instanceId);
     if (invalid == ARKUI_ERROR_CODE_UI_CONTEXT_INVALID) {
-        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, __FUNCTION__, "UI context is invalid");
+        SET_ERROR_MESSAGE(
+            ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, __FUNCTION__, "UI context is invalid");
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }
     auto nodeModifier = impl->getNodeModifiers();
