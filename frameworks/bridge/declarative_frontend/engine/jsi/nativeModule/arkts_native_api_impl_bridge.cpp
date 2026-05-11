@@ -3061,6 +3061,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsCustomContentTransition));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsCustomContentTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsCustomContentTransition));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsBarFloatingStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsBarFloatingStyle));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsBarFloatingStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsBarFloatingStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
 

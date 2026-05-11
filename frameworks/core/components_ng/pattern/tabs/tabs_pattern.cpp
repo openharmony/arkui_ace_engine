@@ -1211,6 +1211,7 @@ void TabsPattern::InitFloatingBar()
             auto backgroundMaskNode = FrameNode::GetOrCreateFrameNode(V2::TABS_BACKGROUND_MASK_ETS_TAG,
                 tabsNode->GetBackgroundMaskId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
             backgroundMaskNode->MountToParent(tabsNode, BG_MASK_INDEX);
+            backgroundMaskNode->SetHitTestMode(HitTestMode::HTMNONE);
             ItemIndex itemIndex = { 0, 1, 2, 3, 4 };
             tabsNode->SetItemIndex(itemIndex);
         }

@@ -5303,6 +5303,8 @@ struct ArkUITabsModifier {
     void (*createTabBarHeightWithResourceObj)(ArkUINodeHandle node, void* heightRawPtr);
     void (*createBarBackgroundEffectWithResourceObj)(ArkUINodeHandle node,
         void* colorRawPtr, void* inactiveColorRawPtr);
+    void (*setTabsBarFloatingStyle)(ArkUINodeHandle node, void* paramRawPtr);
+    void (*resetTabsBarFloatingStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {

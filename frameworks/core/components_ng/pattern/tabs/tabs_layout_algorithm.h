@@ -109,7 +109,7 @@ private:
     SizeF MeasureTabBar(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
     std::optional<float> CalcFloatingBarWidth(LayoutWrapper* layoutWrapper, float barHeight);
     std::optional<float> ParseBarWidthAndMargin(LayoutWrapper* layoutWrapper, float tabsWidth, float tabsHeight);
-    void UpdateBarBottomMargin(LayoutWrapper* layoutWrapper, OffsetF& barOffset) const;
+    void UpdateBarMargin(LayoutWrapper* layoutWrapper, OffsetF& barOffset) const;
     void LayoutBackgroundMask(LayoutWrapper* layoutWrapper);
 
     LayoutCalPolicy widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
