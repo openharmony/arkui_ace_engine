@@ -65,14 +65,9 @@ RefPtr<EventHub> Pattern::CreateEventHub()
     return nullptr;
 }
 
-void Pattern::CheckLocalized()
-{}
-
 void Pattern::ReadFontScaleFromEnv()
 {}
 
-RefPtr<VerticalOverflowHandler> Pattern::GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
-{
-    return nullptr;
-}
+void Pattern::CheckLocalized()
+{}
 } // namespace OHOS::Ace::NG
