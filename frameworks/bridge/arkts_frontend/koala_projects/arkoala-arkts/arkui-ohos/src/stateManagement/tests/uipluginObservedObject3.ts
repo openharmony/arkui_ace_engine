@@ -23,6 +23,7 @@ import { tsuite, tcase, test, eq } from './lib/testFramework'
 import { ObserveSingleton } from '../base/observeSingleton';
 import { STATE_MGMT_FACTORY } from '../decorator'
 import { IObservedAnyProp } from '../decorator';
+import { GlobalStateManager, MockedElement } from '../mock/env_mock';
 let StateMgmtFactory = STATE_MGMT_FACTORY;
 let stateMgmtConsole=console;
 
@@ -62,21 +63,19 @@ class ClassA implements IObservedObject, IWatchSubscriberRegister {
     // @JsonRename("classB")
     private __backing_classB: ClassB_SingleMeta;
     // @JsonIgnore
-    private readonly __meta_classB: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_classB: IMutableStateMeta;
 
     // @Track classC : ClassC = new ClassC();
     // @JsonRename("classC")
     private __backing_classC: ClassC = new ClassC
     // @JsonIgnore
-    private readonly __meta_classC: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_classC: IMutableStateMeta;
 
     constructor() {
-        // init in constructor
-        // need to change to _backing,
-        // otherwise compiler warns about uninitialized
-        // __backing
+        // Per-property metas capture `this` as wildcard LSV target so
+        // fireChange() routes the owner identity without per-call args.
+        this.__meta_classB = StateMgmtFactory.makeMutableStateMeta(this, '__meta_classB');
+        this.__meta_classC = StateMgmtFactory.makeMutableStateMeta(this, '__meta_classC');
         this.__backing_classB = new ClassB_SingleMeta();
         this.propA = 8;
     }
@@ -157,12 +156,10 @@ export class ClassA_ObserveAnyProp_NoAnyMeta implements IObservedObject, IWatchS
     private __backing_classC: ClassC = new ClassC
 
     // @JsonIgnore
-    private readonly __meta_classB: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_classB: IMutableStateMeta;
 
     // @JsonIgnore
-    private readonly __meta_classC: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_classC: IMutableStateMeta;
 
     public addRefAnyProp(): void {
         // "Read" all  tracked variables here
@@ -172,10 +169,9 @@ export class ClassA_ObserveAnyProp_NoAnyMeta implements IObservedObject, IWatchS
     }
 
     constructor() {
-        // init in constructor
-        // need to change to _backing,
-        // otherwise compiler warns about uninitialized
-        // __backing
+        // Per-property metas capture `this` as wildcard LSV target.
+        this.__meta_classB = StateMgmtFactory.makeMutableStateMeta(this, '__meta_classB');
+        this.__meta_classC = StateMgmtFactory.makeMutableStateMeta(this, '__meta_classC');
         this.__backing_classB = new ClassB_ObserveAnyProp();
         this.propA = 8;
     }
@@ -241,11 +237,14 @@ export class ClassA_ObserveAnyProp_NoAnyMeta implements IObservedObject, IWatchS
     }
 }
 
-export class ClassB_SingleMeta implements IObservedObject, IWatchSubscriberRegister, 
+export class ClassB_SingleMeta implements IObservedObject, IWatchSubscriberRegister,
     IObservedAnyProp
 {
 
-    // no constructor defined by app
+    constructor() {
+        // Pass `this` so the meta captures owner identity as wildcard LSV target.
+        this.__meta = StateMgmtFactory.makeMutableStateMeta(this, '__meta');
+    }
 
     // @Watch
     // Watches firing when this object's property changes
@@ -285,8 +284,7 @@ export class ClassB_SingleMeta implements IObservedObject, IWatchSubscriberRegis
     }
 
     // @JsonIgnore
-    private readonly __meta: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta: IMutableStateMeta;
 
     // propB1 : string = "BBB111";
     // @JsonRename("classC")
@@ -358,11 +356,17 @@ export class ClassB_ObserveAnyProp implements IObservedObject, IWatchSubscriberR
         this.__meta_propB2.addRef();
     }
 
-    private readonly __meta_propB1: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    constructor() {
+        // Pass `this` so each per-property meta captures its owner as the
+        // wildcard LSV target; fireChange() then routes the owner identity
+        // through addDirtyRef without a per-call target argument.
+        this.__meta_propB1 = StateMgmtFactory.makeMutableStateMeta(this, '__meta_propB1');
+        this.__meta_propB2 = StateMgmtFactory.makeMutableStateMeta(this, '__meta_propB2');
+    }
 
-    private readonly __meta_propB2: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_propB1: IMutableStateMeta;
+
+    private readonly __meta_propB2: IMutableStateMeta;
 
     private __backing_propB1: string = 'BBB111';
     public get propB1(): string {
@@ -425,12 +429,20 @@ export function run_observed_object3(): Boolean {
         tcase('Test 2: Verify AddRef for V1') {
 
             ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
+            // V1 conditionalAddRef requires the object's V1RenderId to match
+            // the singleton's renderingId, which the framework reads from
+            // GlobalStateManager.instance.currentScope?.id. Mock a scope so
+            // that path returns a real id; production sets currentScope
+            // during render automatically.
+            GlobalStateManager.instance.currentScope = new MockedElement(1);
             let classA = new ClassA()
+            classA.setV1RenderId(1);
 
             StateTracker.reset();
             // Cause addRef
             classA.classB;
             test('Use classA.classB expect 1 add ref for classB', eq(StateTracker.getRefCnt(), 1))
+            GlobalStateManager.instance.currentScope = undefined;
         }
 
         tcase('Test 3: Verify AddRef for V2') {
@@ -447,7 +459,15 @@ export function run_observed_object3(): Boolean {
         tcase('Test 4: Verify 2*AddRef and FireChange for V1') {
 
             ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
+            // Mock the koalaui scope so renderingId resolves to a real id;
+            // tag both ClassA and inner ClassB_SingleMeta with that id so
+            // the V1 conditionalAddRef paths execute. Tag BEFORE the
+            // StateTracker.reset so the assertion only counts the timed
+            // addRefs from the intentional test access.
+            GlobalStateManager.instance.currentScope = new MockedElement(1);
             let classA = new ClassA()
+            classA.setV1RenderId(1);
+            classA.classB.setV1RenderId(1);
 
             StateTracker.reset();
             // Cause addRef
@@ -456,6 +476,7 @@ export function run_observed_object3(): Boolean {
             // This causes fireChange event
             classA.classB = new ClassB_SingleMeta();
             test('New classA.classB expect fire change', eq(StateTracker.getFireChangeCnt(), 1))
+            GlobalStateManager.instance.currentScope = undefined;
         }
 
         tcase('Test 5: Verify 2*AddRef and FireChange for V2') {

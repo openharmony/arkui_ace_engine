@@ -15,7 +15,10 @@
 import { ObserveSingleton } from '../base/observeSingleton';
 import { IBindingSource, ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
-import { RenderIdType, IMutableStateMeta, IComputedDecoratedVariable, IVariableOwner, IDecoratorBaseRegistry } from '../decorator';
+import {
+    RenderIdType, IMutableStateMeta, IComputedDecoratedVariable,
+    IVariableOwner, IDecoratorBaseRegistry,
+} from '../decorator';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ElementInfo } from '../utils';
 

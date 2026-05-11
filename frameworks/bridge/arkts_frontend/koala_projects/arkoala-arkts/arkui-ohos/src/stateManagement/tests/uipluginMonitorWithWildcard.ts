@@ -16,10 +16,16 @@
 
 import { tsuite, tcase, test, eq } from './lib/testFramework'
 import { IMonitor, IMonitorPathInfo, IMonitorDecoratedVariable, MonitorCallback } from '../decorator'
+import { IMutableStateMeta } from '../decorator'
 import { ClassB_ObserveAnyProp, ClassC, ClassA_ObserveAnyProp_NoAnyMeta } from './uipluginObservedObject3'
 import { ObserveSingleton } from '../base/observeSingleton';
 import { STATE_MGMT_FACTORY } from '../decorator'
 import { MyArray } from './uiplugin_custom_arrays'
+import { InteropDecoratorBackingValue } from '../interop/interopBackingValue';
+import {
+    __invokeLastCapturedOnPropertyChange,
+    __resetCapturedOnPropertyChange,
+} from '../mock/interop_component_mock';
 
 import { ParentComponent, ComponentWithArray } from './uipluginAddMonitorWildcards'
 
@@ -196,6 +202,129 @@ function doMakeMonitorWildcardSinglePathKeepLSV(isSync: boolean): void {
     // wildcards over-fire on transit-dep changes. See memory note
     // project_wildcard_monitor_lsv_bug.md.
     test(`${tag} wildcard single path: keep LSV: count=${count} === ${isSync ? 1 : 1}`, eq(count, isSync ? 1 : 1));
+}
+
+
+// Helper: verifies that legacy no-arg fireChange() callers do NOT phantom-fire
+// a wildcard monitor whose LSV is undefined.
+//
+// Regression for the recordMonitorSource fix (commit db49f73b7e1). Without
+// the fix, addDirtyRef(ref, undefined) pushes `undefined` into the
+// per-monitor sources Array, then MonitorValueInternal.readValue's wildcard
+// branch evaluates `sources.includes(this.before)`. When this.before is
+// undefined (uninitialized field, broken path, lambda still returning
+// undefined), the includes() returns true → phantom callback even though
+// the value didn't change.
+//
+// Setup: a wildcard monitor whose lambda reads `meta` (binds the monitor
+// to it) and returns `undefined` for the wildcard target. `meta.fireChange()`
+// is then called with NO target argument — simulating the legacy callers
+// in src/hooks/modifiers/index.ets, src/component/interop.ets, etc.
+//
+// Expectation: count remains 0 in both modes. With the OLD code (no
+// undefined-skip in recordMonitorSource), count would have been 1.
+function doMakeMonitorWildcardLegacyNoArgFireNoPhantom(isSync: boolean): void {
+    const tag = isSync ? 'sync' : 'async';
+    const meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
+    let count: int = 0;
+    const onChanged: MonitorCallback = (_m: IMonitor) => {
+        stateMgmtConsole.debug(`${tag} legacy no-arg fire phantom-fire fired`);
+        count++;
+    }
+
+    let _monitor: IMonitorDecoratedVariable = makeMonitorByMode(
+        isSync,
+        new Array<IMonitorPathInfo>(
+            {
+                path: 'undefined.lsv.*',
+                enableWildcard: true,
+                valueCallback: () => {
+                    // Bind monitor to meta so legacy fireChange() routes
+                    // through addDirtyRef → recordMonitorSource for THIS
+                    // MonitorValueInternal.
+                    meta.addRef();
+                    // Wildcard LSV is undefined — the trigger condition
+                    // for the phantom-fire bug.
+                    return undefined;
+                }
+            } as IMonitorPathInfo
+        ),
+        onChanged
+    );
+
+    // Legacy no-arg fireChange — what hooks/modifiers/index.ets and
+    // interop bridges call. Without the fix, sources becomes [undefined],
+    // and sources.includes(this.before === undefined) === true →
+    // wildcard transit-dep branch trips → phantom callback.
+    meta.fireChange();
+    if (!isSync) { ObserveSingleton.instance.updateDirty(); }
+
+    test(`${tag} wildcard LSV=undefined + legacy no-arg fireChange: count=${count} === 0`,
+        eq(count, 0));
+}
+
+
+// Helper: regression test for the InteropDecoratorBackingValue fix
+// (commit 2ea79bb980f). All four staticStateBindObservedObject lambdas
+// in that class previously called fireChange(value) — putting the
+// underlying observed object into sources. A wildcard monitor whose
+// LSV equals that value (lambda returns bv.get(true) === observedValue)
+// would trip sources.includes(this.before) === true and emit a phantom
+// callback. The fix passes `this` (the BackingValue instance) — a user
+// lambda will never return a BackingValue, so includes() stays false.
+//
+// This test exercises the actual production lambda inside
+// InteropDecoratorBackingValue's constructor. The interop_component_mock's
+// staticStateBindObservedObject captures the lambda;
+// __invokeLastCapturedOnPropertyChange() drives it, simulating an
+// observed-object property change reported by the interop bridge.
+function doMakeMonitorWildcardValueAsTargetAntipattern(isSync: boolean): void {
+    const tag = isSync ? 'sync' : 'async';
+    __resetCapturedOnPropertyChange();
+
+    // The observed value held by the BackingValue. The wildcard's lambda
+    // returns this same object via bv.get(true), so before === observedValue.
+    const observedValue = new ClassA_ObserveAnyProp_NoAnyMeta();
+    const bv = new InteropDecoratorBackingValue<ClassA_ObserveAnyProp_NoAnyMeta>(
+        'bv', observedValue);
+
+    let count: int = 0;
+    const onChanged: MonitorCallback = (_m: IMonitor) => {
+        stateMgmtConsole.debug(`${tag} interop value-as-target test fired`);
+        count++;
+    }
+
+    let _monitor: IMonitorDecoratedVariable = makeMonitorByMode(
+        isSync,
+        new Array<IMonitorPathInfo>(
+            {
+                path: 'bv.observedValue.*',
+                enableWildcard: true,
+                valueCallback: () => {
+                    // get(true) addRef's the BackingValue's meta, binding
+                    // this MonitorValueInternal to it. Returns observedValue,
+                    // which becomes the wildcard LSV (this.before).
+                    return bv.get(true);
+                }
+            } as IMonitorPathInfo
+        ),
+        onChanged
+    );
+
+    // Drive the captured staticStateBindObservedObject onPropertyChange
+    // lambda — what would happen if the interop bridge reported a property
+    // change on observedValue. Lambda runs `this.fireChange(this)` with
+    // the fix, or `this.fireChange(initValue=observedValue)` without it.
+    //
+    // With fix: sources=[bv]; sources.includes(observedValue) === false;
+    //   before === now → no fire.
+    // Without fix: sources=[observedValue]; sources.includes(observedValue)
+    //   === true → wildcard transit-dep branch trips → phantom fire.
+    __invokeLastCapturedOnPropertyChange();
+    if (!isSync) { ObserveSingleton.instance.updateDirty(); }
+
+    test(`${tag} InteropDecoratorBackingValue passes \`this\` (no phantom): count=${count} === 0`,
+        eq(count, 0));
 }
 
 
@@ -752,6 +881,14 @@ function runWildcardSuite(isSync: boolean): void {
 
     tcase(`### ${factoryName} wildcard single path, IObserveAnyProp object, keep LSV`) {
         doMakeMonitorWildcardSinglePathKeepLSV(isSync);
+    }
+
+    tcase(`### ${factoryName} wildcard LSV=undefined + legacy no-arg fireChange — no phantom`) {
+        doMakeMonitorWildcardLegacyNoArgFireNoPhantom(isSync);
+    }
+
+    tcase(`### ${factoryName} InteropDecoratorBackingValue fireChange passes this`) {
+        doMakeMonitorWildcardValueAsTargetAntipattern(isSync);
     }
 
     tcase(`### ${factoryName} wildcard: IMonitor.dirty and IMonitor.value API`) {

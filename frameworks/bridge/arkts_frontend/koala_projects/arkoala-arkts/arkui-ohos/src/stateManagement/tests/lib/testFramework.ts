@@ -43,6 +43,7 @@ export function tsuite(msg: string, testMe: () => void): () => void {
     tCases_ = 0;
     tests_ = 0;
     failed_ = 0;
+    failedAssertionsList = '';
     testMe();
   };
 }

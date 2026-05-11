@@ -165,6 +165,11 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     public setProxyValue?: CompatibleStateChangeCallback<T>;
 
     public fireChange(): void {
+        // BackingValue's meta has `this` (BackingValue) as its constructor-stored
+        // wildcard target — a safe anti-target since no user lambda returns a
+        // BackingValue. Passing the current value here would trip the wildcard
+        // transit-dep branch (sources.includes(this.before)) and fire a phantom
+        // callback (same anti-pattern that BackingValue.set had before its fix).
         this.localValue.fireChange();
     }
 

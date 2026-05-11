@@ -15,6 +15,7 @@
 
 import { IBackingValue } from './iBackingValue';
 import { IMutableStateMeta, IMutableKeyedStateMeta, IObservedObject } from '../decorator';
+import { MonitorTarget } from './mutableStateMeta';
 import { ISubscribedWatches } from '../decorator';
 import { FactoryInternalImpl } from '@factoryInternal/factoryInternal';
 /**
@@ -28,11 +29,10 @@ export interface IFactoryInternal {
     // IBackingValue for Decorator implementations
     mkDecoratorValue<T>(info: string, initValue: T): IBackingValue<T>;
 
-    mkMutableStateMeta(info: string): IMutableStateMeta;
+    mkMutableStateMeta(info: string, target?: MonitorTarget): IMutableStateMeta;
 
     // IMutableKeyedStateMeta used by wrapper classes for Array, Map, Set, Date
-    mkMutableKeyedStateMeta(info: string): IMutableKeyedStateMeta;
-    mkMutableKeyedStateMeta(info: string, observed: IObservedObject): IMutableKeyedStateMeta;
+    mkMutableKeyedStateMeta(info: string, observed?: IObservedObject): IMutableKeyedStateMeta;
     // create a Proxy for observed interface / intrinsic object T
     // see also InterfaceProxyHandler
     mkObservedInterfaceProxy<T extends Object>(x: T): T;

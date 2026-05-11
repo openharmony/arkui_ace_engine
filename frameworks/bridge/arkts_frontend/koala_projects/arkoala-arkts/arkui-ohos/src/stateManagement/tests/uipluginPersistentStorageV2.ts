@@ -371,11 +371,6 @@ export function run_persistent_storage_v2(): Boolean {
         // That will actually write to the backend
         ObserveSingleton.instance.updateDirty();
 
-        //test("Key in correct backend", eq(storageBackend.has(userKeyEL1, AreaMode.EL1), true));
-        //test("Key in correct backend", eq(storageBackend.has(userKeyEL1, AreaMode.EL2), false));
-        //test("Key in correct backend", eq(storageBackend.has(userKeyEL5, AreaMode.EL5), true));
-        //test("Key in correct backend", eq(storageBackend.has(userKeyEL5, AreaMode.EL1), false));
-
         let keys = PersistenceV2.keys();
         test('keys count is 2', eq(keys.length, 2));
 
