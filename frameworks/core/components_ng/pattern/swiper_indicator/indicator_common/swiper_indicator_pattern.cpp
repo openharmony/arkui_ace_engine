@@ -360,6 +360,13 @@ void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /* info */)
     if (isRepeatClicked_) {
         return;
     }
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    if (swiperPattern->GetMaxDisplayCount() > 0) {
+        return;
+    }
     GetMouseClickIndex();
     CHECK_NULL_VOID(mouseClickIndex_);
     SwipeTo(mouseClickIndex_);
@@ -393,6 +400,15 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = GetDirection();
     auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    if (swiperPattern->GetMaxDisplayCount() > 0 && overlongDotIndicatorModifier_) {
+        auto bounds = overlongDotIndicatorModifier_->GetVisualBounds();
+        lengthBeforeCurrentIndex = bounds.first;
+        lengthWithCurrentIndex = bounds.second;
+    }
     if (mainClickOffset < lengthBeforeCurrentIndex) {
         isRtl ? ShowNext() : ShowPrevious();
     } else if (mainClickOffset > lengthWithCurrentIndex) {
@@ -735,8 +751,21 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+    auto gestureState = swiperPattern->GetGestureState();
     swiperPattern->SetTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
     swiperPattern->SetGroupTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
+    if (swiperPattern->GetMaxDisplayCount() > 0) {
+        if (gestureState == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
+            swiperPattern->SetGestureState(GestureState::GESTURE_STATE_RELEASE_LEFT);
+        } else if (gestureState == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+            swiperPattern->SetGestureState(GestureState::GESTURE_STATE_RELEASE_RIGHT);
+        } else {
+            swiperPattern->SetGestureState(GestureState::GESTURE_STATE_NONE);
+        }
+    }
+    if (swiperPattern->IsBindIndicator() && swiperPattern->GetMaxDisplayCount() > 0) {
+        swiperPattern->SetTouchDownOnOverlong(false);
+    }
     auto swiperPaintProperty = swiperPattern->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(swiperPaintProperty);
     auto autoPlay = swiperPaintProperty->GetAutoPlay().value_or(false);
@@ -851,6 +880,9 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
 
     swiperPattern->SetTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
     swiperPattern->SetGroupTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
+    if (swiperPattern->GetMaxDisplayCount() > 0) {
+        swiperPattern->SetGestureState(GestureState::GESTURE_STATE_NONE);
+    }
     swiperPattern->SetTouchBottomRate(std::abs(touchBottomRate));
     TouchBottomType touchBottomType = TouchBottomType::NONE;
 
@@ -908,6 +940,9 @@ void SwiperIndicatorPattern::HandleLongPress(GestureEvent& info)
     auto swiperPaintProperty = swiperPattern->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(swiperPaintProperty);
     auto autoPlay = swiperPaintProperty->GetAutoPlay().value_or(false);
+    if (swiperPattern->IsBindIndicator() && swiperPattern->GetMaxDisplayCount() > 0) {
+        swiperPattern->SetTouchDownOnOverlong(true);
+    }
     if (autoPlay) {
         swiperPattern->SetIndicatorLongPress(true);
         swiperPattern->StopTranslateAnimation();
@@ -977,6 +1012,18 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
 
     swiperPattern->SetTurnPageRate(turnPageRate);
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
+    if (swiperPattern->GetMaxDisplayCount() > 0) {
+        GestureState gestureState =
+            turnPageRate < 0 ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
+        if (NearZero(turnPageRate)) {
+            gestureState = GestureState::GESTURE_STATE_NONE;
+        }
+        swiperPattern->SetGestureState(gestureState);
+        auto host = GetHost();
+        if (host) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
     if (std::abs(turnPageRate) >= 1) {
         int32_t step = (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()
                             ? swiperPattern->GetDisplayCount()
@@ -1144,6 +1191,7 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
         swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     overlongDotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
     overlongDotIndicatorModifier_->SetIsBindIndicator(swiperPattern->IsBindIndicator());
+    overlongDotIndicatorModifier_->SetUseSystemMaterial(UseSystemMaterialForBindIndicator());
 
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
@@ -1173,6 +1221,7 @@ RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintM
     dotIndicatorModifier_->SetLongPointHeadCurve(
         swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     dotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
+    dotIndicatorModifier_->SetUseSystemMaterial(UseSystemMaterialForBindIndicator());
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
     auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);

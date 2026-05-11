@@ -174,6 +174,16 @@ public:
 
     GestureState GetGestureState();
 
+    void SetGestureState(GestureState gestureState)
+    {
+        gestureState_ = gestureState;
+    }
+
+    void SetTouchDownOnOverlong(bool isTouchDownOnOverlong)
+    {
+        isTouchDownOnOverlong_ = isTouchDownOnOverlong;
+    }
+
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
     {
         return touchBottomType_;
