@@ -1415,7 +1415,11 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
             return;
         }
         TAG_LOGI(AceLogTag::ACE_ROUTER, "Router back start PopPage");
-        FireNavigateChangeCallback(GetBackTargetName());
+        auto backTarget = GetBackTargetName();
+        FireNavigateChangeCallback(backTarget);
+        if (!backTarget.empty()) {
+            NotifyForceFullScreenChangeIfNeeded(backTarget, PipelineContext::GetCurrentContext());
+        }
         PopPage(target.params, true, true);
         return;
     }
@@ -1427,6 +1431,7 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
 #if !defined(PREVIEW)
         if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
             info.path = info.url + ".js";
+            NotifyForceFullScreenChangeIfNeeded(target.url, pageInfo.second->GetContextRefPtr());
             PopPageToIndex(pageInfo.first, info.params, true, true);
             return;
         }
@@ -1440,6 +1445,7 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
             TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartBack with url: %{public}s", info.url.c_str());
             return;
         }
+        NotifyForceFullScreenChangeIfNeeded(target.url, pageInfo.second->GetContextRefPtr());
         PopPageToIndex(pageInfo.first, info.params, true, true);
         return;
     }
@@ -1460,6 +1466,19 @@ void PageRouterManager::StartBackToIndex(int32_t index, const std::string& param
     }
 
     if (index > static_cast<int32_t>(restorePageStack_.size())) {
+        do {
+            auto targetIndex = index - static_cast<int32_t>(restorePageStack_.size()) - 1;
+            if (targetIndex < 0 || targetIndex >= static_cast<int32_t>(pageRouterStack_.size())) {
+                break;
+            }
+            auto iter = pageRouterStack_.begin();
+            std::advance(iter, targetIndex);
+            auto targetPage = iter->Upgrade();
+            CHECK_NULL_BREAK(targetPage);
+            auto pattern = targetPage->GetPattern<PagePattern>();
+            CHECK_NULL_BREAK(pattern);
+            NotifyForceFullScreenChangeIfNeeded(pattern->GetPageUrl(), targetPage->GetContextRefPtr());
+        } while (false);
         PopPageToIndex(index - static_cast<int32_t>(restorePageStack_.size()) - 1, params, true, true);
         return;
     }
