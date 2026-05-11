@@ -108,6 +108,16 @@ public:
         return titleBarNode_;
     }
 
+    void SetTitleBarMaskNode(const RefPtr<UINode>& node)
+    {
+        titleBarMaskNode_ = node;
+    }
+
+    const RefPtr<UINode>& GetTitleBarMaskNode() const
+    {
+        return titleBarMaskNode_;
+    }
+
     void SetToolBarNode(const RefPtr<UINode>& toolBarNode)
     {
         toolBarNode_ = toolBarNode;
@@ -395,6 +405,7 @@ protected:
     RefPtr<UINode> toolbarMoreMenuNode_;
     RefPtr<UINode> moreLandscapeMenuNode_;
     RefPtr<UINode> titleBarNode_;
+    RefPtr<UINode> titleBarMaskNode_;
     RefPtr<UINode> toolBarNode_;
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;

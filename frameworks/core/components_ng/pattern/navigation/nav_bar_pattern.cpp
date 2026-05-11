@@ -36,6 +36,8 @@
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components/navigation_bar/navigation_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -436,6 +438,7 @@ float NavBarPattern::OnCoordScrollUpdate(float offset, float currentOffset)
         eventHub->FireOnCoordScrollUpdateAction(offset, currentOffset);
         return 0.0f;
     }
+
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, 0.0f);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -474,6 +477,7 @@ void NavBarPattern::OnModifyDone()
     CHECK_NULL_VOID(titleBarRenderContext);
     // set the titlebar to float on the top
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
+    InitScrollEffectOptions();
     bool needRunTitleBarAnimation = false;
     MountTitleBar(hostNode, needRunTitleBarAnimation);
     bool needRunToolBarAnimation = false;
@@ -578,5 +582,20 @@ void NavBarPattern::BeforeCreateLayoutWrapper()
     auto eventHub = GetEventHub<NavBarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireBeforeCreateLayoutWrapperCallBack();
+}
+
+void NavBarPattern::AdjustScrollOffsetForTitleMode(
+    const RefPtr<TitleBarNode>& titleBarNode, float& startOffset, float& endOffset)
+{
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    if (titleMode == NavigationTitleMode::FREE) {
+        float titleBarHeight = titleBarNode->GetSubtitle()
+                                   ? static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())
+                                   : static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        startOffset += titleBarHeight;
+        endOffset += titleBarHeight;
+    }
 }
 } // namespace OHOS::Ace::NG

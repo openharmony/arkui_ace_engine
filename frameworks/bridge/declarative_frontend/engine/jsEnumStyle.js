@@ -5307,6 +5307,12 @@ let ResolveStrategy;
     ResolveStrategy[ResolveStrategy.UNDEFINED = 5] = 'UNDEFINED';
 })(ResolveStrategy || (ResolveStrategy = {}));
 
+var ScrollEffectType;
+(function (ScrollEffectType) {
+    ScrollEffectType[ScrollEffectType.COMMON_BLUR = 0] = "COMMON_BLUR";
+    ScrollEffectType[ScrollEffectType.GRADUAL_BLUR = 1] = "GRADUAL_BLUR";
+})(ScrollEffectType || (ScrollEffectType = {}));
+
 let ThreatType;
 (function (ThreatType) {
   ThreatType[ThreatType.THREAT_ILLEGAL = 0] = 'THREAT_ILLEGAL';
