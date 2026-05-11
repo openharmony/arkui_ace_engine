@@ -114,6 +114,9 @@ public:
 
     void ResetGridLayoutInfo()
     {
+        if (info_.isOnMoveDragUpdate_) {
+            info_.isOnMoveGridChange_ = true;
+        }
         info_.lineHeightMap_.clear();
         info_.gridMatrix_.clear();
         info_.endIndex_ = info_.startIndex_ - 1;

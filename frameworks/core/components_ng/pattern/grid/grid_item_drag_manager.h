@@ -31,6 +31,8 @@ class GestureEvent;
 
 namespace OHOS::Ace::NG {
 
+class GeometryNode;
+class GridLayoutProperty;
 class RenderContext;
 class GridPattern;
 
@@ -50,7 +52,7 @@ public:
     {
         gridNode_ = GetGridFrameNode();
     }
-    ~GridItemDragManager() override = default;
+    ~GridItemDragManager() override;
 
     RefPtr<FrameNode> GetHost() const
     {
@@ -59,6 +61,7 @@ public:
 
     void InitDragDropEvent();
     void DeInitDragDropEvent();
+    void Reset();
 
 private:
     void HandleOnItemLongPress(const GestureEvent& info);
@@ -71,7 +74,6 @@ private:
     void HandleTransformScale();
     void HandleDragEndAnimation();
     void HandleSwapAnimation(int32_t from, int32_t to);
-    bool HasIrregularItemInRange(int32_t from, int32_t to) const;
     void PrepareIrregularDragState(int32_t from, int32_t to, GridLayoutInfo& info);
 
     struct SimSpanInfo {
@@ -80,9 +82,8 @@ private:
     };
     using SimMatrix = std::map<int32_t, std::map<int32_t, int32_t>>;
     void CalculateGaps(float& mainGap, float& crossGap, const GridLayoutInfo& info) const;
+    bool IsRowInViewport(int32_t row, float mainGap, float mainSize, const GridLayoutInfo& info) const;
     float CalculateMainPosition(int32_t targetRow, float mainGap, const GridLayoutInfo& info) const;
-    float CalculateCrossPosition(int32_t col, int32_t colSpan, const RefPtr<FrameNode>& node,
-        float crossGap, const GridLayoutInfo& info) const;
     std::optional<OffsetF> CreatePositionFromCoords(float mainPos, float crossPos) const;
     std::optional<OffsetF> SearchRowForTarget(const std::map<int32_t, int32_t>& cols, int32_t targetIdx,
         int32_t row, const RefPtr<FrameNode>& node, int32_t colSpan, float mainGap,
@@ -104,9 +105,9 @@ private:
     int32_t FindAvailableColumn(const SimMatrix& matrix, int32_t row,
         int32_t colSpan, int32_t crossCount) const;
     std::pair<int32_t, int32_t> PlaceItemInMatrix(const GridLayoutInfo& info, SimMatrix& matrix,
-        int32_t itemIdx, const SimSpanInfo& span, int32_t crossCount) const;
+        int32_t itemIdx, const SimSpanInfo& span, int32_t crossCount, int32_t viewportEndRow) const;
     bool CopyLayoutToMatrix(SimMatrix& matrix, std::vector<SimSpanInfo>& spans,
-        const GridLayoutInfo& info, int32_t count) const;
+        const GridLayoutInfo& info, int32_t count, float mainGap, float mainSize) const;
     int32_t CalculateColSpan(const std::map<int32_t, int32_t>& rowCols,
         int32_t col, int32_t itemIdx, int32_t crossCount) const;
     int32_t CalculateRowSpan(const GridLayoutInfo& info, int32_t row, int32_t col, int32_t itemIdx) const;
@@ -118,7 +119,8 @@ private:
         const GridLayoutInfo& info) const;
     bool SimulateLayoutInRange(SimMatrix& matrix, const std::vector<int32_t>& order,
         const std::vector<SimSpanInfo>& spans, const GridLayoutInfo& info,
-        int32_t startRebuild, int32_t endRebuild, int32_t from, int32_t to) const;
+        int32_t startRebuild, int32_t endRebuild, int32_t from, int32_t to,
+        float mainGap, float mainSize) const;
 
     struct ItemSpanInfo {
         int32_t rowSpan = 1;
@@ -135,17 +137,62 @@ private:
     RefPtr<FrameNode> GetGridFrameNode() const;
     OffsetF GetParentPaddingOffset() const;
 
+    bool CancelDragOnGridChange();
+    void ProcessSwap(int32_t from);
+    void StopAutoScroll();
+
+    std::pair<std::vector<double>, float> ResolveCrossLens(
+        const RefPtr<GeometryNode>& gridGeometry,
+        const RefPtr<GridLayoutProperty>& layoutProperty,
+        float crossGap, const GridLayoutInfo& info) const;
+    float CalculateCrossPosition(int32_t col, float adjustedCrossGap,
+        const std::vector<double>& crossLens,
+        const RefPtr<GeometryNode>& gridGeometry) const;
+    std::optional<OffsetF> ApplyAlignmentAndRTL(const RefPtr<FrameNode>& node,
+        int32_t row, int32_t col, OffsetF offset,
+        const std::vector<double>& crossLens,
+        const RefPtr<GeometryNode>& gridGeometry,
+        const RefPtr<GridLayoutProperty>& layoutProperty,
+        const GridLayoutInfo& info) const;
+
+    bool IsItemInViewport(int32_t currentIndex, const GridLayoutInfo& info) const;
+    std::pair<int32_t, int32_t> GetRowRangeForItem(int32_t currentIndex,
+        const GridLayoutInfo& info) const;
+    int32_t FindBestCandidate(int32_t currentIndex,
+        const std::vector<int32_t>& candidates, const OffsetF& delta,
+        int32_t currentRow, int32_t endRow, const GridLayoutInfo& info) const;
+    bool IsCandidateValidForAutoScroll(int32_t candidate, int32_t currentRow,
+        int32_t endRow, const GridLayoutInfo& info) const;
+
+    struct MovementBounds {
+        int32_t startRow = 0;
+        int32_t endRow = 0;
+        int32_t startCol = 0;
+        int32_t endCol = 0;
+        bool zeroMove = false;
+    };
+    MovementBounds ComputeMovementBounds(int32_t currentIndex,
+        int32_t currentCol, int32_t currentRow,
+        const OffsetF& delta, const GridLayoutInfo& info) const;
+
+    SimSpanInfo ResolveItemSpan(int32_t forEachIdx, int32_t crossCount) const;
+    static int32_t FindMaxIndexRow(const SimMatrix& matrix);
+    int32_t FindPlacementStartRow(const SimMatrix& matrix, const GridLayoutInfo& info) const;
+
     WeakPtr<FrameNode> frameNode_;
     WeakPtr<ForEachBaseNode> forEachNode_;
     WeakPtr<FrameNode> gridNode_;
     Axis axis_ = Axis::VERTICAL;
     int32_t totalCount_ = -1;
     bool scrolling_ = false;
+    bool autoScrollForward_ = false; // true = scroll toward end (bottom/right)
+    bool inAutoScrollHotZone_ = false; // true when finger is in top/bottom hot zone during drag
     OffsetF dragOffset_;
     OffsetF realOffset_;
 
     int32_t currentIndex_ = -1;
     int32_t fromIndex_ = -1;
+    int32_t moveThroughIndex_ = -1;
     int32_t forEachStartIndex_ = 0;  // Cached ForEach start index in parent Grid
     VectorF prevScale_{1.0f, 1.0f};
     Shadow prevShadow_;

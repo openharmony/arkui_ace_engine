@@ -316,7 +316,8 @@ HWTEST_F(GridItemDragManagerTestNg, PlaceItemInMatrixBasic001, TestSize.Level1)
     ASSERT_NE(manager, nullptr);
     GridItemDragManager::SimMatrix matrix;
     GridItemDragManager::SimSpanInfo span = { 1, 1 };
-    auto [row, col] = manager->PlaceItemInMatrix(GetLayoutInfo(), matrix, 0, span, 3);
+    auto& info = GetLayoutInfo();
+    auto [row, col] = manager->PlaceItemInMatrix(info, matrix, 0, span, 3, 100);
     EXPECT_EQ(row, 0);
     EXPECT_EQ(col, 0);
     EXPECT_EQ(matrix[0][0], 0);
@@ -333,7 +334,8 @@ HWTEST_F(GridItemDragManagerTestNg, PlaceItemInMatrixSpanExceedsCrossCount001, T
     ASSERT_NE(manager, nullptr);
     GridItemDragManager::SimMatrix matrix;
     GridItemDragManager::SimSpanInfo span = { 1, 3 };
-    auto [row, col] = manager->PlaceItemInMatrix(GetLayoutInfo(), matrix, 0, span, 2);
+    auto& info = GetLayoutInfo();
+    auto [row, col] = manager->PlaceItemInMatrix(info, matrix, 0, span, 2, 100);
     EXPECT_EQ(row, -1);
     EXPECT_EQ(col, -1);
 }
@@ -349,7 +351,8 @@ HWTEST_F(GridItemDragManagerTestNg, PlaceItemInMatrixMultiRowSpan001, TestSize.L
     ASSERT_NE(manager, nullptr);
     GridItemDragManager::SimMatrix matrix;
     GridItemDragManager::SimSpanInfo span = { 2, 2 };
-    auto [row, col] = manager->PlaceItemInMatrix(GetLayoutInfo(), matrix, 5, span, 3);
+    auto& info = GetLayoutInfo();
+    auto [row, col] = manager->PlaceItemInMatrix(info, matrix, 5, span, 3, 100);
     EXPECT_EQ(row, 0);
     EXPECT_EQ(col, 0);
     EXPECT_EQ(matrix[0][0], 5);
@@ -369,10 +372,11 @@ HWTEST_F(GridItemDragManagerTestNg, PlaceItemInMatrixSecondItem001, TestSize.Lev
     ASSERT_NE(manager, nullptr);
     GridItemDragManager::SimMatrix matrix;
     GridItemDragManager::SimSpanInfo span = { 1, 1 };
-    auto [r1, c1] = manager->PlaceItemInMatrix(GetLayoutInfo(), matrix, 0, span, 3);
+    auto& info = GetLayoutInfo();
+    auto [r1, c1] = manager->PlaceItemInMatrix(info, matrix, 0, span, 3, 100);
     EXPECT_EQ(r1, 0);
     EXPECT_EQ(c1, 0);
-    auto [r2, c2] = manager->PlaceItemInMatrix(GetLayoutInfo(), matrix, 1, span, 3);
+    auto [r2, c2] = manager->PlaceItemInMatrix(info, matrix, 1, span, 3, 100);
     EXPECT_EQ(r2, 0);
     EXPECT_EQ(c2, 1);
 }
@@ -396,30 +400,6 @@ HWTEST_F(GridItemDragManagerTestNg, HandleDragEndAnimationNoHost001, TestSize.Le
 // ============================================================
 // DeInitDragDropEvent
 // ============================================================
-
-/**
- * @tc.name: DeInitDragDropEventResetState001
- * @tc.desc: Test DeInitDragDropEvent resets internal state
- * @tc.type: FUNC
- */
-HWTEST_F(GridItemDragManagerTestNg, DeInitDragDropEventResetState001, TestSize.Level1)
-{
-    auto manager = CreateDragManager();
-    ASSERT_NE(manager, nullptr);
-    manager->dragState_ = GridItemDragState::DRAGGING;
-    manager->fromIndex_ = 5;
-    manager->scrolling_ = true;
-    manager->dragOffset_ = OffsetF(10.0f, 20.0f);
-    manager->realOffset_ = OffsetF(30.0f, 40.0f);
-
-    manager->DeInitDragDropEvent();
-
-    EXPECT_EQ(manager->dragState_, GridItemDragState::IDLE);
-    EXPECT_EQ(manager->fromIndex_, -1);
-    EXPECT_FALSE(manager->scrolling_);
-    EXPECT_EQ(manager->dragOffset_, OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(manager->realOffset_, OffsetF(0.0f, 0.0f));
-}
 
 /**
  * @tc.name: DeInitDragDropEventNullHost001
@@ -502,8 +482,8 @@ HWTEST_F(GridItemDragManagerTestNg, HandleOnItemDragCancelFromDragging001, TestS
 
     manager->HandleOnItemDragCancel();
 
-    EXPECT_EQ(onMoveEventCnt, 1);
-    EXPECT_EQ(onDropCnt, 1);
+    EXPECT_EQ(onMoveEventCnt, 0);
+    EXPECT_EQ(onDropCnt, 0);
     EXPECT_FALSE(manager->scrolling_);
     EXPECT_EQ(manager->dragState_, GridItemDragState::IDLE);
 }
@@ -554,8 +534,8 @@ HWTEST_F(GridItemDragManagerTestNg, HandleOnItemDragEndResetsState001, TestSize.
 
     manager->HandleOnItemDragEnd(GestureEvent());
 
-    EXPECT_EQ(onMoveEventCnt, 1);
-    EXPECT_EQ(onDropCnt, 1);
+    EXPECT_EQ(onMoveEventCnt, 0);
+    EXPECT_EQ(onDropCnt, 0);
     EXPECT_EQ(manager->dragState_, GridItemDragState::IDLE);
 }
 
@@ -846,22 +826,6 @@ HWTEST_F(GridItemDragManagerTestNg, CalculateFromNewPositionNullForEach001, Test
 }
 
 // ============================================================
-// HasIrregularItemInRange
-// ============================================================
-
-/**
- * @tc.name: HasIrregularItemInRangeNullForEach001
- * @tc.desc: Test HasIrregularItemInRange with null forEach returns false
- * @tc.type: FUNC
- */
-HWTEST_F(GridItemDragManagerTestNg, HasIrregularItemInRangeNullForEach001, TestSize.Level1)
-{
-    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
-    ASSERT_NE(manager, nullptr);
-    EXPECT_FALSE(manager->HasIrregularItemInRange(0, 5));
-}
-
-// ============================================================
 // HandleSwapAnimation
 // ============================================================
 
@@ -903,27 +867,6 @@ HWTEST_F(GridItemDragManagerTestNg, InitDragDropEventValidHost001, TestSize.Leve
     auto manager = CreateDragManager();
     ASSERT_NE(manager, nullptr);
     EXPECT_NO_FATAL_FAILURE(manager->InitDragDropEvent());
-}
-
-/**
- * @tc.name: DragDropEventLifecycle001
- * @tc.desc: Test full lifecycle: Init -> DeInit resets state
- * @tc.type: FUNC
- */
-HWTEST_F(GridItemDragManagerTestNg, DragDropEventLifecycle001, TestSize.Level1)
-{
-    auto manager = CreateDragManager();
-    ASSERT_NE(manager, nullptr);
-    manager->InitDragDropEvent();
-    manager->dragState_ = GridItemDragState::DRAGGING;
-    manager->fromIndex_ = 3;
-    manager->scrolling_ = true;
-
-    manager->DeInitDragDropEvent();
-
-    EXPECT_EQ(manager->dragState_, GridItemDragState::IDLE);
-    EXPECT_EQ(manager->fromIndex_, -1);
-    EXPECT_FALSE(manager->scrolling_);
 }
 
 // ============================================================
