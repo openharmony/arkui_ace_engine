@@ -115,6 +115,9 @@
 #include "web_util.h"
 #include "nweb_hisysevent.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+#include "histogram_plugin_macros.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -225,6 +228,13 @@ constexpr int32_t CHECK_PRE_SIZE = 5;
 constexpr int32_t ADJUST_RATIO = 10;
 constexpr int32_t DRAG_RESIZE_DELAY_TIME = 100;
 constexpr int32_t DRAG_RESIZE_NO_MOVE_CHECK_TIME = 200;
+
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+enum RequestPasswordAutoFillErrorCode {
+    INVALID = 1,
+    FAIL = 2,
+};
+#endif
 
 struct TranslateTextExtraData {
     bool needTranslate = false;
@@ -6190,12 +6200,26 @@ void WebPattern::RequestPasswordAutoFill(WebMenuType menuType)
     if (menuType == WebMenuType::TYPE_CONTEXTMENU) {
         if (!isEditableOnContextMenu_) {
             TAG_LOGE(AceLogTag::ACE_WEB, "web do not send autofill request.");
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+            HISTOGRAM_ENUMERATION("ArkWeb.InteractionEffect.requestPasswordAutoFillError",
+                static_cast<int32_t>(RequestPasswordAutoFillErrorCode::INVALID),
+                static_cast<int32_t>(RequestPasswordAutoFillErrorCode::FAIL));
+#endif
             return;
         }
     }
     autoFillMenuType_ = menuType;
     FakePageNodeInfo();
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    bool is_autofill_suc = RequestAutoFill(GetFocusedType(), AceAutoFillTriggerType::MANUAL_REQUEST);
+    if (!is_autofill_suc) {
+        HISTOGRAM_ENUMERATION("ArkWeb.InteractionEffect.requestPasswordAutoFillError",
+            static_cast<int32_t>(RequestPasswordAutoFillErrorCode::FAIL),
+            static_cast<int32_t>(RequestPasswordAutoFillErrorCode::FAIL));
+    }
+#else
     RequestAutoFill(GetFocusedType(), AceAutoFillTriggerType::MANUAL_REQUEST);
+#endif
     isEditableOnContextMenu_ = false;
 }
 

@@ -57,6 +57,9 @@
 #include "bridge/js_frontend/engine/common/js_engine.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/components/web/web_transfer_api.h"
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+#include "histogram_plugin_macros.h"
+#endif
 
 #define ARKWEB_CREATE_JS_OBJECT(nativeClass, jsClass, funName, eventValue)                                     \
     napi_value Create##jsClass##Object(napi_env env, const RefPtr<nativeClass>& value)                         \
@@ -83,6 +86,9 @@ constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
 
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+constexpr int32_t HISTOGRAM_API_BOOL_COUNTS = 1;
+#endif
 constexpr int32_t CREDENTIAL_UKEY = 4;
 const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
 const char* HUKS_CRYPTO_EXTENSION_CAPABILITY = "SystemCapability.Security.Huks.CryptoExtension";
@@ -4325,6 +4331,9 @@ JSRef<JSVal> JSWeb::CreateFileSelectorParamHandler(const FileSelectorEvent& even
 
 void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
 {
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.onShowFileSelector", HISTOGRAM_API_BOOL_COUNTS);
+#endif
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -5205,9 +5214,19 @@ void JSWeb::InitialScale(float scale)
     WebModel::GetInstance()->InitialScale(scale);
 }
 
-void JSWeb::Password(bool password) {}
+void JSWeb::Password(bool password)
+{
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.password", HISTOGRAM_API_BOOL_COUNTS);
+#endif
+}
 
-void JSWeb::TableData(bool tableData) {}
+void JSWeb::TableData(bool tableData)
+{
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.tableData", HISTOGRAM_API_BOOL_COUNTS);
+#endif
+}
 
 void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args) {}
 
@@ -7183,6 +7202,9 @@ void JSWeb::OnRenderProcessResponding(const JSCallbackInfo& args)
 
 void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
 {
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.selectionMenuOptions", HISTOGRAM_API_BOOL_COUNTS);
+#endif
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
         return;
     }
@@ -7215,6 +7237,9 @@ void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsAction));
         auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc),
                            node = frameNode](const std::string selectInfo) {
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+            HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.action", HISTOGRAM_API_BOOL_COUNTS);
+#endif
             auto webNode = node.Upgrade();
             CHECK_NULL_VOID(webNode);
             ContainerScope scope(webNode->GetInstanceId());
