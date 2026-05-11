@@ -23,11 +23,6 @@ const WritableEnvProperties = {
 };
 
 class WithEnvAttribute {
-    fontScaleEnv(value) {
-        globalThis.WithEnv.setEnvProperty(WritableSystemProperties.ENV_KEY_FONT_SCALE, value);
-        return this;
-    }
-
     env(key, value) {
         globalThis.WithEnv.setEnvProperty(key, value);
         return this;
@@ -35,6 +30,11 @@ class WithEnvAttribute {
 
     customEnv(key, value) {
         globalThis.WithEnv.setCustomEnvProperty(key, value);
+        return this;
+    }
+
+    fontScaleEnv(value) {
+        globalThis.WithEnv.setEnvProperty(WritableSystemProperties.ENV_KEY_FONT_SCALE, value);
         return this;
     }
 }

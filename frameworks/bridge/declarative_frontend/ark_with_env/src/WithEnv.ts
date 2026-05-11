@@ -23,11 +23,6 @@ interface WritableEnvProperties {
 }
 
 class WithEnvAttribute {
-    fontScaleEnv(value: number): WithEnvAttribute {
-        globalThis.WithEnv.setEnvProperty(WritableSystemProperties.ENV_KEY_FONT_SCALE, value);
-        return this;
-    }
-
     env(key: WritableSystemProperties, value: WritableEnvProperties[WritableSystemProperties]): WithEnvAttribute {
         globalThis.WithEnv.setEnvProperty(key, value);
         return this;
@@ -35,6 +30,11 @@ class WithEnvAttribute {
 
     customEnv(key: string, value: any): WithEnvAttribute {
         globalThis.WithEnv.setCustomEnvProperty(key, value);
+        return this;
+    }
+
+    fontScaleEnv(value: number): WithEnvAttribute {
+        globalThis.WithEnv.setEnvProperty(WritableSystemProperties.ENV_KEY_FONT_SCALE, value);
         return this;
     }
 }
