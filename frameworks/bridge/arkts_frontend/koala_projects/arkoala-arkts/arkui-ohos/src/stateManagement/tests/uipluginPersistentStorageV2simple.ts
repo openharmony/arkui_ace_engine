@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { PersistenceV2, PersistenceV2Impl, ConnectOptions, StorageDefaultCreator } from '../storage/persistenceV2'
+import { PersistenceV2, PersistenceV2Impl, ConnectOptions, BaseConnectOptions, StorageDefaultCreator } from '../storage/persistenceV2'
 import { tsuite, tcase, test, eq, not_eq } from './lib/testFramework'
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { PersistentStorageMocked } from '../mock/ani_storage_mock'
@@ -86,9 +86,8 @@ export function run_persistent_storage_v2_simple(): Boolean {
         let person = PersistenceV2.connect<NonObservedPerson>(
             NonObservedPersonType,
             key,
-            toJsonPerson,
-            fromJsonPerson,
-            () => new NonObservedPerson()
+            () => new NonObservedPerson(),
+            { toJson: toJsonPerson, fromJson: fromJsonPerson } as BaseConnectOptions<NonObservedPerson>
         )
         test('backendUpdateCount', eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
         test('Key Count 1', eq(PersistenceV2.keys().length, 1));

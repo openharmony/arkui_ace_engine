@@ -184,13 +184,13 @@ export function run_custom_arrays(): boolean {
             ObserveSingleton.instance.renderingId = ObserveSingleton.InvalidRenderId;
         }
 
-        tcase("Modify custom array") {
+        tcase('Modify custom array') {
             comp.arr.join();
-            test("arr.join() refCnt", eq(comp.getRefCnt('__OB_ANY_INDEX'), 1))
+            test('arr.join() refCnt', eq(comp.getRefCnt('__OB_ANY_INDEX'), 1))
 
             comp.arr.func();
-            test("arr.func() OB_LENGTH refCnt", eq(comp.getFireChangeCnt('__OB_LENGTH'), 1));
-            test("arr.func() OB_ANY_INDEX refCnt", eq(comp.getFireChangeCnt('__OB_ANY_INDEX'), 1));
+            test('arr.func() OB_LENGTH refCnt', eq(comp.getFireChangeCnt('__OB_LENGTH'), 1));
+            test('arr.func() OB_ANY_INDEX refCnt', eq(comp.getFireChangeCnt('__OB_ANY_INDEX'), 1));
         }
     }
 
