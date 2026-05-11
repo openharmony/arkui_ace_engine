@@ -15,12 +15,6 @@
 
 #include "js_drawable_descriptor.h"
 
-#ifdef WINDOWS_PLATFORM
-#include <windows.h>
-#include <winsock2.h>
-#else
-#include <dlfcn.h>
-#endif
 #include <memory>
 
 #ifndef PREVIEW
@@ -28,51 +22,20 @@
 #else
 #include "image_source_preview.h"
 #endif
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-#include "application_context.h"
-#endif
-#include "drawable_api.h"
+
 #include "drawable_bridge.h"
 #include "drawable_descriptor.h"
-#include "resource_manager.h"
 
-#include "base/log.h"
-#include "base/marcos.h"
+#include "drawable_log.h"
 
 namespace OHOS {
 namespace Ace {
 namespace Napi {
 namespace {
-#if defined(WINDOWS_PLATFORM)
-constexpr char LIBACE_MODULE[] = "ace_compatible.dll";
-#elif defined(MAC_PLATFORM)
-constexpr char LIBACE_MODULE[] = "libace_compatible.dylib";
-#elif defined(LINUX_PLATFORM)
-constexpr char LIBACE_MODULE[] = "libace_compatible.so";
-#else
-constexpr char LIBACE_MODULE[] = "libace_compatible.z.so";
-#endif
-
 constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
 constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
 constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
-#ifdef OHOS_PLATFORM
-constexpr char DRAWBLE_GET_DRAWBLE_TYPE[] = "OHOS_ACE_DrawableDescriptor_GetDrawableType";
-constexpr char DRAWBLE_GET_PIXEL_MAP[] = "OHOS_ACE_DrawableDescriptor_GetPixelMap";
-constexpr char LAYER_GET_FOREGROUND[] = "OHOS_ACE_LayeredDrawableDescriptor_GetForeground";
-constexpr char LAYER_GET_BACKGROUND[] = "OHOS_ACE_LayeredDrawableDescriptor_GetBackground";
-constexpr char LAYER_GET_MASK[] = "OHOS_ACE_LayeredDrawableDescriptor_GetMask";
-constexpr char PIXEL_MAP_GET_PIXEL_MAP[] = "OHOS_ACE_PixelMapDrawableDescriptor_GetPixelMap";
-
-using DrawableGetDrawableTypeFunc = size_t (*)(void*);
-using DrawableGetPixelMapFunc = void (*)(void*, void*);
-using LayeredGetForegroundFunc = void (*)(void*, void*);
-using LayeredGetBackgroundFunc = void (*)(void*, void*);
-using LayeredGetMaskFunc = void (*)(void*, void*);
-using PixelMapGetPixelMapFunc = void (*)(void*, void*);
-#endif
-using GetArkUIDrawableDescriptorFunc = const ArkUIDrawableDescriptor* (*)();
 
 constexpr int32_t PARAMS_NUM_ONE = 1;
 constexpr int32_t PARAMS_NUM_TWO = 2;
@@ -81,6 +44,7 @@ constexpr int32_t FOREGROUND_INDEX = 0;
 constexpr int32_t BACKGROUND_INDEX = 1;
 constexpr int32_t MASK_INDEX = 2;
 constexpr uint32_t ANIMATED_TYPE = 2;
+constexpr uint32_t PIXELMAP_TYPE = 3;
 constexpr int32_t MAX_ARG_NUM = 10;
 
 struct LoadAsyncContext {
@@ -102,66 +66,6 @@ const std::vector<struct JsEnumInt> g_animationStopMode = {
     { "FIRST_FRAME", 0 },
     { "LAST_FRAME", 1 },
 };
-
-const ArkUIDrawableDescriptor* GetArkUIDrawableModifier()
-{
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    return GetArkUIDrawableDescriptor();
-#else
-#ifdef WINDOWS_PLATFORM
-    static HMODULE handle = nullptr;
-#else
-    static void* handle = nullptr;
-#endif
-    static void* drawable = nullptr;
-    static bool initialized = false;
-    if (!initialized) {
-#ifdef WINDOWS_PLATFORM
-        handle = LoadLibrary(LIBACE_MODULE);
-        if (handle != nullptr) {
-            drawable = (void*)GetProcAddress(handle, DRAWABLE_FUNC_NAME);
-            initialized = true;
-        }
-#else
-        handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
-        if (handle != nullptr) {
-            drawable = dlsym(handle, DRAWABLE_FUNC_NAME);
-            initialized = true;
-        }
-#endif
-    }
-    if (handle == nullptr) {
-        return nullptr;
-    }
-    auto entry = reinterpret_cast<GetArkUIDrawableDescriptorFunc>(drawable);
-    if (entry == nullptr) {
-        return nullptr;
-    }
-    const auto* result = entry();
-    return result;
-#endif
-}
-
-void UpdateLayeredParam(
-    LayeredDrawableDescriptor* layeredDrawable, int32_t pos, std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
-{
-    if (!layeredDrawable || !pixelMap) {
-        return;
-    }
-    switch (pos) {
-        case FOREGROUND_INDEX:
-            layeredDrawable->SetForeground(pixelMap);
-            break;
-        case BACKGROUND_INDEX:
-            layeredDrawable->SetBackground(pixelMap);
-            break;
-        case MASK_INDEX:
-            layeredDrawable->SetMask(pixelMap);
-            break;
-        default:
-            HILOGW("Arg[%{public}d] index error", pos);
-    }
-}
 
 napi_value CreateString(napi_env env, const std::string& str)
 {
@@ -229,154 +133,53 @@ napi_value JsDrawableDescriptor::ToNapi(
             status = napi_get_reference_value(env, layeredConstructor_, &constructor);
             break;
         case DrawableDescriptor::DrawableType::BASE:
-            status = napi_get_reference_value(env, baseConstructor_, &constructor);
-            break;
         case DrawableDescriptor::DrawableType::PIXELMAP:
-            status = napi_get_reference_value(env, pixelMapConstructor_, &constructor);
+            status = napi_get_reference_value(env, baseConstructor_, &constructor);
             break;
         default:
             status = napi_status::napi_invalid_arg;
             break;
     }
-    if (status == napi_status::napi_ok) {
-        NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &result));
-        NAPI_CALL(env, napi_wrap(env, result, drawable, Destructor, nullptr, nullptr));
+    if (status != napi_status::napi_ok) {
+        HILOGE("create reference failed, drawable constructor is null");
+        return result;
+    }
+    NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &result));
+    if (type == DrawableDescriptor::DrawableType::BASE || type == DrawableDescriptor::DrawableType::PIXELMAP) {
+        TransferToNewDrawable(env, result, drawable);
     } else {
-        HILOGI("create reference failed, drawable constructor is null");
+        NAPI_CALL(env, napi_wrap(env, result, drawable, Destructor, nullptr, nullptr));
     }
 
     return result;
 }
 
-size_t JsDrawableDescriptor::DrawableGetDrawableTypeC(void* drawable)
+void JsDrawableDescriptor::TransferToNewDrawable(napi_env env, napi_value result, DrawableDescriptor* drawable)
 {
-    size_t drawableType = 0;
-#ifdef OHOS_PLATFORM
-    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
-    if (handle == nullptr) {
-        return 0;
-    }
-    auto entry = reinterpret_cast<DrawableGetDrawableTypeFunc>(dlsym(handle, DRAWBLE_GET_DRAWBLE_TYPE));
-    if (entry == nullptr) {
-        dlclose(handle);
-        return 0;
-    }
-    drawableType = entry(drawable);
-    dlclose(handle);
-#endif
-    return drawableType;
-}
-
-std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::DrawableGetPixelMapC(void* drawable)
-{
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
-#ifdef OHOS_PLATFORM
-    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
-    if (handle == nullptr) {
-        return nullptr;
-    }
-    auto entry = reinterpret_cast<DrawableGetPixelMapFunc>(dlsym(handle, DRAWBLE_GET_PIXEL_MAP));
-    if (entry == nullptr) {
-        dlclose(handle);
-        return nullptr;
-    }
-    entry(drawable, &pixelMap);
-    dlclose(handle);
-#endif
-    return pixelMap;
-}
-
-std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetForegroundC(void* drawable)
-{
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
-#ifdef OHOS_PLATFORM
-    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
-    CHECK_NULL_RETURN(handle, nullptr);
-    auto entry = reinterpret_cast<LayeredGetForegroundFunc>(dlsym(handle, LAYER_GET_FOREGROUND));
-    if (entry == nullptr) {
-        dlclose(handle);
-        return nullptr;
-    }
-    entry(drawable, &pixelMap);
-    dlclose(handle);
-#endif
-    return pixelMap;
-}
-
-std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetBackgroundC(void* drawable)
-{
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
-#ifdef OHOS_PLATFORM
-    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
-    CHECK_NULL_RETURN(handle, nullptr);
-    auto entry = reinterpret_cast<LayeredGetBackgroundFunc>(dlsym(handle, LAYER_GET_BACKGROUND));
-    if (entry == nullptr) {
-        dlclose(handle);
-        return nullptr;
-    }
-    entry(drawable, &pixelMap);
-    dlclose(handle);
-#endif
-    return pixelMap;
-}
-
-std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetMaskC(void* drawable)
-{
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
-#ifdef OHOS_PLATFORM
-    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
-    CHECK_NULL_RETURN(handle, nullptr);
-    auto entry = reinterpret_cast<LayeredGetMaskFunc>(dlsym(handle, LAYER_GET_MASK));
-    if (entry == nullptr) {
-        dlclose(handle);
-        return nullptr;
-    }
-    entry(drawable, &pixelMap);
-    dlclose(handle);
-#endif
-    return pixelMap;
-}
-
-std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::PixelMapGetPixelMapC(void* drawable)
-{
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
-#ifdef OHOS_PLATFORM
-    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
-    if (handle == nullptr) {
-        return nullptr;
-    }
-    auto entry = reinterpret_cast<PixelMapGetPixelMapFunc>(dlsym(handle, PIXEL_MAP_GET_PIXEL_MAP));
-    if (entry == nullptr) {
-        dlclose(handle);
-        return nullptr;
-    }
-    entry(drawable, &pixelMap);
-    dlclose(handle);
-#endif
-    return pixelMap;
-}
-
-napi_value JsDrawableDescriptor::CreatDrawable(napi_env env, void* native)
-{
-    if (native == nullptr) {
-        return nullptr;
-    }
-    napi_value cons = nullptr;
-    if (napi_create_object(env, &cons) != napi_ok) {
-        return nullptr;
-    }
-    auto* drawable = new DrawableDescriptor;
-    CHECK_NULL_RETURN(drawable, nullptr);
-    auto napi_status = napi_wrap(env, cons, drawable, Destructor, nullptr, nullptr);
-    if (napi_status != napi_ok) {
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
         delete drawable;
-        return nullptr;
+        return;
     }
-    auto pixelMap = DrawableGetPixelMapC(native);
-    drawable->SetPixelMap(pixelMap);
-    auto baseDes = GetBaseDrawableDescriptor(env);
-    NAPI_CALL(env, napi_define_properties(env, cons, baseDes.size(), baseDes.data()));
-    return cons;
+    void* native = nullptr;
+    napi_unwrap(env, result, &native);
+    if (native == nullptr) {
+        delete drawable;
+        return;
+    }
+    if (drawable->HasPixelMap()) {
+        auto pixelMap = drawable->GetPixelMap();
+        if (pixelMap) {
+            modifier->setPixelMapByPixelMap(native, &pixelMap);
+        }
+    } else {
+        auto rawLen = drawable->GetMediaDataLen();
+        auto rawMediaData = drawable->TakeMediaData();
+        if (rawMediaData && rawLen > 0) {
+            modifier->setPixelRawData(native, rawMediaData.release(), rawLen);
+        }
+    }
+    delete drawable;
 }
 
 napi_value JsDrawableDescriptor::CreatLayeredDrawable(napi_env env, void* native)
@@ -389,16 +192,24 @@ napi_value JsDrawableDescriptor::CreatLayeredDrawable(napi_env env, void* native
         return nullptr;
     }
     auto* layerDrawable = new LayeredDrawableDescriptor;
-    CHECK_NULL_RETURN(layerDrawable, nullptr);
+    if (layerDrawable == nullptr) {
+        return nullptr;
+    }
     auto napi_status = napi_wrap(env, cons, layerDrawable, Destructor, nullptr, nullptr);
     if (napi_status != napi_ok) {
         delete layerDrawable;
         return nullptr;
     }
 
-    auto pixelForeground = LayeredGetForegroundC(native);
-    auto pixelBackground = LayeredGetBackgroundC(native);
-    auto pixelMask = LayeredGetMaskC(native);
+    auto modifier = GetArkUIDrawableModifier();
+    std::shared_ptr<OHOS::Media::PixelMap> pixelForeground;
+    std::shared_ptr<OHOS::Media::PixelMap> pixelBackground;
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMask;
+    if (modifier != nullptr) {
+        modifier->getForegroundPixelMap(native, &pixelForeground);
+        modifier->getBackgroundPixelMap(native, &pixelBackground);
+        modifier->getMaskPixelMap(native, &pixelMask);
+    }
     layerDrawable->SetForeground(pixelForeground);
     layerDrawable->SetBackground(pixelBackground);
     layerDrawable->SetMask(pixelMask);
@@ -449,15 +260,22 @@ napi_value JsDrawableDescriptor::CreatPixelMapDrawable(napi_env env, void* nativ
     if (napi_create_object(env, &cons) != napi_ok) {
         return nullptr;
     }
-    auto* pixelmapDrawable = new DrawableDescriptor;
-    CHECK_NULL_RETURN(pixelmapDrawable, nullptr);
-    auto napi_status = napi_wrap(env, cons, pixelmapDrawable, Destructor, nullptr, nullptr);
-    if (napi_status != napi_ok) {
-        delete pixelmapDrawable;
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
         return nullptr;
     }
-    auto pixelMap = PixelMapGetPixelMapC(native);
-    pixelmapDrawable->SetPixelMap(pixelMap);
+    auto* drawable = modifier->createDrawableDescriptorByType(PIXELMAP_TYPE);
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
+    modifier->getPixelMap(native, &pixelMap);
+    if (pixelMap) {
+        modifier->setPixelMapByPixelMap(drawable, &pixelMap);
+    }
+    auto napi_status = napi_wrap(env, cons, drawable, NewDestructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        modifier->decreaseRef(drawable);
+        return nullptr;
+    }
+    modifier->increaseRef(drawable);
     auto pixelDes = GetPixelMapDrawableDescriptor(env);
     NAPI_CALL(env, napi_define_properties(env, cons, pixelDes.size(), pixelDes.data()));
     return cons;
@@ -482,14 +300,14 @@ napi_value JsDrawableDescriptor::CreateDrawableDescriptorTransfer(napi_env env, 
     int64_t addr = 0;
     napi_get_value_int64(env, argv[0], &addr);
     auto* drawable = reinterpret_cast<void*>(addr);
-    auto drawableType = DrawableGetDrawableTypeC(drawable);
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
+        return nullptr;
+    }
+    auto drawableType = modifier->getDrawableType(drawable);
     auto type = DrawableDescriptor::DrawableType(drawableType);
     napi_value cons = nullptr;
     switch (type) {
-        case DrawableDescriptor::DrawableType::BASE: {
-            cons = CreatDrawable(env, drawable);
-            break;
-        }
         case DrawableDescriptor::DrawableType::LAYERED: {
             cons = CreatLayeredDrawable(env, drawable);
             break;
@@ -638,7 +456,7 @@ napi_value JsDrawableDescriptor::GetPixelMap(napi_env env, napi_callback_info in
     std::string type;
     GetStringFromNapiValue(env, typeName, type);
     std::shared_ptr<Media::PixelMap> pixmap;
-    if (type == "AnimatedDrawableDescriptor") {
+    if (type != LAYERED_DRAWABLE_DESCRIPTOR_NAME) {
         auto modifier = GetArkUIDrawableModifier();
         if (modifier == nullptr) {
             napi_close_escapable_handle_scope(env, scope);
@@ -691,7 +509,7 @@ void JsDrawableDescriptor::LoadExecute(napi_env env, void* data)
         HILOGE("load execute, modifier is nullptr");
         return;
     }
-    modifier->loadSyncAnimated(context->native, &width, &height, &errorCode);
+    modifier->loadSync(context->native, &width, &height, &errorCode);
     context->errorCode = errorCode;
     context->width = width;
     context->height = height;
@@ -753,7 +571,7 @@ napi_value JsDrawableDescriptor::Load(napi_env env, napi_callback_info info)
     GetStringFromNapiValue(env, typeName, type);
     napi_value result;
     napi_get_undefined(env, &result);
-    if (type != "AnimatedDrawableDescriptor") {
+    if (type != ANIMATED_DRAWABLE_DESCRIPTOR_NAME && type != PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
         napi_escape_handle(env, scope, result, &result);
         napi_close_escapable_handle_scope(env, scope);
         return result;
@@ -793,30 +611,33 @@ napi_value JsDrawableDescriptor::LoadSync(napi_env env, napi_callback_info info)
     napi_get_named_property(env, thisVar, "typeName", &typeName);
     std::string type;
     GetStringFromNapiValue(env, typeName, type);
-    if (type == "AnimatedDrawableDescriptor") {
+    napi_value result = nullptr;
+    if (type == ANIMATED_DRAWABLE_DESCRIPTOR_NAME || type == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
         int32_t width = 0;
         int32_t height = 0;
         int32_t errorCode = 0;
         auto modifier = GetArkUIDrawableModifier();
         if (modifier == nullptr) {
-            napi_throw_error(env, std::to_string(errorCode).c_str(), "modifier is nullptr.");
-            napi_close_escapable_handle_scope(env, scope);
-            return nullptr;
-        }
-        modifier->loadSyncAnimated(native, &width, &height, &errorCode);
-        if (errorCode != 0) {
             napi_throw_error(env, std::to_string(errorCode).c_str(), "resource loading failed.");
             napi_close_escapable_handle_scope(env, scope);
             return nullptr;
         }
-        auto result = CreateLoadResult(env, width, height);
-        napi_escape_handle(env, scope, result, &result);
-        napi_close_escapable_handle_scope(env, scope);
-        return result;
+        modifier->loadSync(native, &width, &height, &errorCode);
+        if (errorCode != 0) {
+            napi_throw_error(env, std::to_string(errorCode).c_str(), "resource loading failed.");
+        } else {
+            result = CreateLoadResult(env, width, height);
+        }
+    } else {
+        GET_AND_THROW_LAST_ERROR((env));
     }
-    GET_AND_THROW_LAST_ERROR((env));
+    if (!result) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
-    return nullptr;
+    return result;
 }
 
 napi_value JsDrawableDescriptor::GetAnimationController(napi_env env, napi_callback_info info)
@@ -1104,7 +925,7 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
         std::string src {};
         GetStringFromNapiValue(env, argv[0], src);
         if (!src.empty()) {
-            modifier->setAnimatedPath(animatedDrawable, src.c_str());
+            modifier->setDrawablePath(animatedDrawable, src.c_str());
         }
     }
     if (valueType == napi_object) {
@@ -1118,7 +939,7 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
         } else {
             auto resourceObject = ParseResourceObject(argv[0]);
             if (resourceObject != nullptr) {
-                modifier->setAnimatedResource(animatedDrawable, resourceObject);
+                modifier->setDrawableResource(animatedDrawable, resourceObject);
             }
         }
     }
@@ -1144,24 +965,52 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     return thisVar;
 }
 
-std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager()
+void JsDrawableDescriptor::ParseLayeredArgs(
+    napi_env env, size_t argc, napi_value argv[], LayeredDrawableDescriptor* layeredDrawable)
 {
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    std::shared_ptr<AbilityRuntime::Platform::ApplicationContext> applicationContext =
-        AbilityRuntime::Platform::ApplicationContext::GetInstance();
-    if (!applicationContext) {
-        HILOGE("Failed to get applicationContext!");
-        return nullptr;
+    auto modifier = GetArkUIDrawableModifier();
+    std::shared_ptr<Media::PixelMap> foregroundPixelMap = nullptr;
+    auto handleUndefined = [&layeredDrawable, &foregroundPixelMap](int32_t pos) {
+        if (pos == MASK_INDEX) {
+            auto resMgr = GetResourceManager();
+            layeredDrawable->InitialMask(resMgr);
+        } else if (pos == BACKGROUND_INDEX && foregroundPixelMap) {
+            layeredDrawable->SetBackground(foregroundPixelMap);
+        }
+    };
+    for (size_t i = 0; i < argc && i < PARAMS_NUM_THREE; i++) {
+        auto pos = static_cast<int32_t>(i);
+        if (argv[i] == nullptr) {
+            continue;
+        }
+        napi_valuetype valueType;
+        napi_status status = napi_typeof(env, argv[i], &valueType);
+        if (status != napi_ok || valueType == napi_undefined) {
+            handleUndefined(pos);
+            continue;
+        }
+        void* native = nullptr;
+        napi_unwrap(env, argv[i], &native);
+        if (native == nullptr) {
+            continue;
+        }
+        std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
+        if (modifier != nullptr) {
+            modifier->getPixelMap(native, &pixelMap);
+        }
+        if (!pixelMap) {
+            handleUndefined(pos);
+            continue;
+        }
+        if (pos == FOREGROUND_INDEX) {
+            layeredDrawable->SetForeground(pixelMap);
+            foregroundPixelMap = pixelMap;
+        } else if (pos == BACKGROUND_INDEX) {
+            layeredDrawable->SetBackground(pixelMap);
+        } else if (pos == MASK_INDEX) {
+            layeredDrawable->SetMask(pixelMap);
+        }
     }
-    auto resMgr = applicationContext->GetResourceManager();
-    if (!resMgr) {
-        HILOGE("Failed to get resource manager!");
-    }
-    return resMgr;
-#else
-    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
-    return resMgr;
-#endif
 }
 
 napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_info info)
@@ -1177,47 +1026,80 @@ napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
-    auto pos = -1;
     auto* layeredDrawable = new LayeredDrawableDescriptor;
-    if (argc == 0) {
-        napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
-        napi_escape_handle(env, scope, thisVar, &thisVar);
-        napi_close_escapable_handle_scope(env, scope);
-        return thisVar;
-    }
-    std::shared_ptr<Media::PixelMap> foregroundPixelMap = nullptr;
-    auto updateUndefinedPixelMap = [&pos, &layeredDrawable, &foregroundPixelMap]() -> void {
-        if (pos == MASK_INDEX) {
-            auto resMgr = GetResourceManager();
-            layeredDrawable->InitialMask(resMgr);
-        } else if (pos == BACKGROUND_INDEX && foregroundPixelMap) {
-            UpdateLayeredParam(layeredDrawable, pos, foregroundPixelMap);
-        }
-    };
-    napi_valuetype type;
-    for (const auto& arg : argv) {
-        pos++;
-        napi_typeof(env, arg, &type);
-        if (type == napi_undefined) {
-            updateUndefinedPixelMap();
-            continue;
-        }
-        // parse pixelmap drawable descriptor
-        void* drawable = nullptr;
-        napi_unwrap(env, arg, &drawable);
-        auto drawableDescritor = reinterpret_cast<DrawableDescriptor*>(drawable);
-        if (drawableDescritor) {
-            auto pixelMap = drawableDescritor->GetPixelMap();
-            if (!pixelMap) {
-                updateUndefinedPixelMap();
-            } else {
-                UpdateLayeredParam(layeredDrawable, pos, pixelMap);
-                if (pos == FOREGROUND_INDEX)
-                    foregroundPixelMap = std::move(pixelMap);
-            }
-        }
+    if (argc > 0) {
+        ParseLayeredArgs(env, argc, argv, layeredDrawable);
     }
     napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
+    napi_escape_handle(env, scope, thisVar, &thisVar);
+    napi_close_escapable_handle_scope(env, scope);
+    return thisVar;
+}
+
+void JsDrawableDescriptor::ParsePixelMapConstructorArg(napi_env env, void* drawable, napi_value arg)
+{
+    napi_valuetype valueType;
+    napi_status status = napi_typeof(env, arg, &valueType);
+    if (status != napi_ok) {
+        return;
+    }
+    if (valueType == napi_string) {
+        std::string src {};
+        GetStringFromNapiValue(env, arg, src);
+        if (!src.empty()) {
+            auto modifier = GetArkUIDrawableModifier();
+            if (modifier != nullptr) {
+                modifier->setDrawablePath(drawable, src.c_str());
+            }
+        }
+        return;
+    }
+    if (valueType == napi_object) {
+        auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, arg);
+        auto modifier = GetArkUIDrawableModifier();
+        if (modifier == nullptr) {
+            return;
+        }
+        if (pixelMap) {
+            modifier->setPixelMapByPixelMap(drawable, &pixelMap);
+            return;
+        }
+        auto resourceObject = ParseResourceObject(arg);
+        if (resourceObject != nullptr) {
+            modifier->setDrawableResource(drawable, resourceObject);
+        }
+    }
+}
+
+napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    size_t argc = PARAMS_NUM_ONE;
+    napi_value argv[argc];
+    napi_value thisVar = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    auto* drawable = modifier->createDrawableDescriptorByType(PIXELMAP_TYPE);
+    if (argc > 0 && argv[0] != nullptr) {
+        ParsePixelMapConstructorArg(env, drawable, argv[0]);
+    }
+    modifier->increaseRef(drawable);
+    auto napi_status = napi_wrap(env, thisVar, drawable, NewDestructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        modifier->decreaseRef(drawable);
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -1234,48 +1116,19 @@ napi_value JsDrawableDescriptor::DrawableConstructor(napi_env env, napi_callback
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
-    // create JsDrawable
-    auto* drawable = new DrawableDescriptor;
-    // wrap to napi_value
-    napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
-    napi_escape_handle(env, scope, thisVar, &thisVar);
-    napi_close_escapable_handle_scope(env, scope);
-    return thisVar;
-}
-
-napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback_info info)
-{
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
-    size_t argc = PARAMS_NUM_ONE;
-    napi_value argv[argc];
-    napi_value thisVar = nullptr;
-    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
-    if (status != napi_ok) {
-        GET_AND_THROW_LAST_ERROR((env));
+    auto modifier = GetArkUIDrawableModifier();
+    if (modifier == nullptr) {
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
-    auto* drawable = new DrawableDescriptor;
-    if (argc == 0) {
-        HILOGW("JsDrawableDescriptor::PixelMapConstructor get null pixelMap param");
-        napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
-        napi_escape_handle(env, scope, thisVar, &thisVar);
+    auto* drawable = modifier->createDrawableDescriptorByType(PIXELMAP_TYPE);
+    modifier->increaseRef(drawable);
+    auto napi_status = napi_wrap(env, thisVar, drawable, NewDestructor, nullptr, nullptr);
+    if (napi_status != napi_ok) {
+        modifier->decreaseRef(drawable);
         napi_close_escapable_handle_scope(env, scope);
-        return thisVar;
+        return nullptr;
     }
-    napi_value argPixelMap = argv[0];
-    napi_valuetype type;
-    napi_typeof(env, argPixelMap, &type);
-    if (type == napi_object) {
-        auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, argPixelMap);
-        if (pixelMap) {
-            drawable->SetPixelMap(pixelMap);
-        }
-    }
-
-    // wrap to napi_value
-    napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -1283,7 +1136,7 @@ napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback
 
 std::vector<napi_property_descriptor> JsDrawableDescriptor::GetBaseDrawableDescriptor(napi_env env)
 {
-    napi_value typeName = CreateString(env, std::string(DRAWABLE_DESCRIPTOR_NAME));
+    napi_value typeName = CreateString(env, std::string(PIXELMAP_DRAWABLE_DESCRIPTOR_NAME));
     return {
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),

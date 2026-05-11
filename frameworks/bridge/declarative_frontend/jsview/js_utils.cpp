@@ -37,6 +37,7 @@
 #include "base/want/want_wrap.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -51,6 +52,12 @@ constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 } // namespace
 
 #if !defined(PREVIEW)
+namespace {
+constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+} // namespace
+
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine)
 {
     if (!obj->IsObject()) {
@@ -91,7 +98,25 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngi
 
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
 {
-    return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(obj);
+    if (jsObj->IsUndefined()) {
+        return nullptr;
+    }
+    JSRef<JSVal> jsTypeName = jsObj->GetProperty("typeName");
+    if (!jsTypeName->IsString()) {
+        return nullptr;
+    }
+    auto typeName = jsTypeName->ToString();
+    if (typeName == DRAWABLE_DESCRIPTOR_NAME || typeName == ANIMATED_DRAWABLE_DESCRIPTOR_NAME ||
+        typeName == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+        auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(UnwrapNapiValue(obj));
+        if (!drawableAddr) {
+            return nullptr;
+        }
+        return drawableAddr->GetPixelMap();
+    } else {
+        return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
+    }
 }
 
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)

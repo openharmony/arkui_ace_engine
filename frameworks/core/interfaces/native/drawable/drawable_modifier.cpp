@@ -309,22 +309,22 @@ void SetAnimatedIterations(void* object, int32_t iterations)
     drawable->SetIterations(iterations);
 }
 
-void SetAnimatedPath(void* object, const char* path)
+void SetDrawablePath(void* object, const char* path)
 {
     if (object == nullptr || path == nullptr) {
         return;
     }
-    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto* drawable = static_cast<OHOS::Ace::DrawableDescriptor*>(object);
     auto info = AceType::MakeRefPtr<DrawableDescriptorInfo>(std::string(path));
     drawable->SetDrawableDescriptorInfo(info);
 }
 
-void SetAnimatedResource(void* object, void* resourceObject)
+void SetDrawableResource(void* object, void* resourceObject)
 {
     if (object == nullptr || resourceObject == nullptr) {
         return;
     }
-    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto* drawable = static_cast<OHOS::Ace::DrawableDescriptor*>(object);
     auto* resourcePtr = static_cast<OHOS::Ace::ResourceObject*>(resourceObject);
     auto resourceRef = Referenced::Claim(resourcePtr);
     resourceRef->DecRefCount();
@@ -373,12 +373,12 @@ void SetAnimatedDurations(void* object, const void* durationsVec)
     drawable->SetDurations(*durations);
 }
 
-void LoadSyncAnimated(void* object, int32_t* width, int32_t* height, int32_t* errorCode)
+void LoadSyncDrawable(void* object, int32_t* width, int32_t* height, int32_t* errorCode)
 {
     if (object == nullptr) {
         return;
     }
-    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto* drawable = static_cast<OHOS::Ace::DrawableDescriptor*>(object);
     auto result = drawable->LoadSync();
     *width = result.imageWidth_;
     *height = result.imageHeight_;
@@ -410,12 +410,12 @@ void OnComplete(std::shared_ptr<ArkUIDrawableAsync> asyncCtx)
         OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDrawableParseLoadedResultCallback");
 }
 
-void LoadAsyncAnimated(void* object, const ArkUIDrawableAsync& asyncCtx)
+void LoadAsyncDrawable(void* object, const ArkUIDrawableAsync& asyncCtx)
 {
     if (object == nullptr) {
         return;
     }
-    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto* drawable = static_cast<OHOS::Ace::DrawableDescriptor*>(object);
 
     auto jsCallBack = [asyncCtx](DrawableDescriptorLoadResult result) mutable {
         auto asyncResult = std::make_shared<ArkUIDrawableAsync>();
@@ -519,12 +519,12 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor()
         .setPixelMapList = OHOS::Ace::SetPixelMapList,
         .setAnimatedTotalDuration = OHOS::Ace::SetAnimatedTotalDuration,
         .setAnimatedIterations = OHOS::Ace::SetAnimatedIterations,
-        .setAnimatedPath = OHOS::Ace::SetAnimatedPath,
-        .setAnimatedResource = OHOS::Ace::SetAnimatedResource,
+        .setDrawablePath = OHOS::Ace::SetDrawablePath,
+        .setDrawableResource = OHOS::Ace::SetDrawableResource,
         .setAnimatedAutoPlay = OHOS::Ace::SetAnimatedAutoPlay,
         .setAnimatedDurations = OHOS::Ace::SetAnimatedDurations,
-        .loadSyncAnimated = OHOS::Ace::LoadSyncAnimated,
-        .loadAsyncAnimated = OHOS::Ace::LoadAsyncAnimated,
+        .loadSync = OHOS::Ace::LoadSyncDrawable,
+        .loadAsync = OHOS::Ace::LoadAsyncDrawable,
         .getAnimatedController = OHOS::Ace::GetAnimatedController,
         .startAnimated = OHOS::Ace::StartAnimated,
         .stopAnimated = OHOS::Ace::StopAnimated,

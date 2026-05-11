@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,10 @@
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
+    DECLARE_ACE_TYPE(LayeredDrawableDescriptor, DrawableDescriptor);
 public:
     LayeredDrawableDescriptor() = default;
-    ~LayeredDrawableDescriptor() = default;
+    ~LayeredDrawableDescriptor() override = default;
     explicit LayeredDrawableDescriptor(const RefPtr<PixelMap>& foreground, const RefPtr<PixelMap>& background,
         const RefPtr<PixelMap>& mask, bool foregroundOverBackground = false)
         : foreground_(foreground), background_(background), mask_(mask),
