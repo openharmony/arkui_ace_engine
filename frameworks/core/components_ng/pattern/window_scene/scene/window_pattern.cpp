@@ -1035,7 +1035,7 @@ std::vector<Rosen::Rect> WindowPattern::GetHotAreas()
 bool WindowPattern::GetSessionTouchable() const
 {
     CHECK_NULL_RETURN(session_, false);
-    if (!session_->GetSessionTouchable()) {
+    if (!session_->GetSystemTouchable()) {
         return false;
     }
     return true;
