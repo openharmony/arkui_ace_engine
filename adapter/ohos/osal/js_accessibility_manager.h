@@ -436,6 +436,21 @@ public:
         AccessibilityElementOperatorCallback &callback, const int32_t windowId);
     void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
     void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
+    void NotifyAccessibilityFocusDetachOrInvisible(const RefPtr<NG::FrameNode>& focusNode);
+    bool SendRequestFocusToCandidate(const RefPtr<NG::FrameNode>& candidateNode);
+    RefPtr<NG::FrameNode> FindCandidateByFocusMove(const RefPtr<NG::FrameNode>& focusNode, int32_t direction);
+    bool IsDetachFocusCacheClearEvent(AccessibilityEventType eventType) const;
+    void ClearDetachFocusFallbackCache(int32_t instanceId);
+    void CacheDetachFocusFallbackCandidates(
+        int32_t instanceId, int64_t focusNodeId, const std::vector<int64_t>& candidateIds);
+    struct DetachFocusFallbackData {
+        int64_t focusNodeId = -1;
+        std::vector<int64_t> candidateIds;
+    };
+    DetachFocusFallbackData GetAndClearDetachFocusFallbackCandidates(int32_t instanceId);
+    std::vector<int64_t> QueryDetachFocusFallbackCandidates(
+        const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::PipelineContext>& context, size_t maxCount);
+    void HandleDetachFocusFallbackCallback(int32_t instanceId);
     void SetFocusMoveResultWithNode(
         const WeakPtr<NG::FrameNode>& hostNode,
         AccessibilityElementOperatorCallback& callback,
@@ -972,6 +987,8 @@ private:
     std::optional<std::string> pageMode_ = std::nullopt;
     std::queue<AccessibilityEvent> eventQueue_;
     std::vector<AccessibilityEvent> cacheEventVec_;
+    std::mutex detachFocusFallbackCacheMutex_;
+    std::unordered_map<int32_t, DetachFocusFallbackData> detachFocusFallbackCache_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
     std::unordered_map<int32_t, std::optional<AccessibilityEvent>> pageIdEventMap_;
