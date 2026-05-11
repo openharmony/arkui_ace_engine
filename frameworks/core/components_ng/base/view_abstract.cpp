@@ -51,6 +51,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"

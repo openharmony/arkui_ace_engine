@@ -19,6 +19,7 @@
 
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/utils.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 using namespace OHOS::Ace;

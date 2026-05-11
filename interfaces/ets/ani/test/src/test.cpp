@@ -17,6 +17,8 @@
 #include <chrono>
 #include <cstdint>
 #include "frameworks/base/log/log_wrapper.h"
+
+#include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace {

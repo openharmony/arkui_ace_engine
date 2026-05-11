@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"

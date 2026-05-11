@@ -36,6 +36,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"

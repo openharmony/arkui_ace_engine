@@ -23,6 +23,8 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/render/render_property.h"
+#include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #undef private
 #undef protected
@@ -563,7 +565,7 @@ HWTEST_F(RenderPropertyTestNg, RenderPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call ToJsonValue.
      */
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContext();
     int32_t tempVersion = static_cast<int32_t>(context->GetMinPlatformVersion());
     context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     renderPositionProperty.ToJsonValue(jsonValue, testFilter);

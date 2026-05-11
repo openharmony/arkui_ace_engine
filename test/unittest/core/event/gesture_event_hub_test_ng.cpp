@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 #include "core/common/event_manager.h"
+#include "core/gestures/drag_event.h"
 
 #include "test/mock/frameworks/base/window/mock_drag_window.h"
 #include "test/mock/frameworks/base/subwindow/mock_subwindow.h"

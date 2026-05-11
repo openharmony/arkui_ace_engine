@@ -82,6 +82,8 @@
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"

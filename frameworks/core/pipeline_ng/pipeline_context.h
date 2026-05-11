@@ -35,19 +35,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
-#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
-#include "core/components_ng/manager/full_screen/full_screen_manager.h"
-#include "core/components_ng/manager/memory/memory_manager.h"
-#include "core/components_ng/manager/post_event/post_event_manager.h"
-#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
-#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
-#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"
-#include "core/components_ng/manager/focus/focus_manager.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
@@ -68,6 +58,7 @@ namespace OHOS::Ace::NG {
 
 namespace OHOS::Ace {
 class AIWriteAdapter;
+class RRect;
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
 } // namespace OHOS::Ace
@@ -81,12 +72,22 @@ using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t fra
 class NodeRenderStatusMonitor;
 class MagnifierController;
 class PageInfo;
+class AvoidInfoManager;
+class FocusManager;
+class FrameRateManager;
+class FullScreenManager;
+class MemoryManager;
 class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
+class OverlayManager;
+class PostEventManager;
+class PrivacySensitiveManager;
 class SafeAreaManager;
 class SelectOverlayManager;
+class SharedOverlayManager;
 class NavigationManager;
 class StageManager;
+class ToolbarManager;
 class UIExtensionManager;
 class AccessibilityManagerNG;
 class ForceSplitManager;
@@ -98,6 +99,7 @@ class BackPressHandlerManager;
 class DragDropManager;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
+enum class FocusActiveReason : int32_t;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -602,13 +604,10 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
-    bool GetIsFocusActive() const
-    {
-        return focusManager_ ? focusManager_->GetIsFocusActive() : false;
-    }
+    bool GetIsFocusActive() const;
 
-    bool SetIsFocusActive(
-        bool isFocusActive, FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
+    bool SetIsFocusActive(bool isFocusActive, bool autoFocusInactive = true);
+    bool SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -974,20 +973,14 @@ public:
 
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const;
 
-    RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
-    {
-        return privacySensitiveManager_;
-    }
+    RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const;
 
     const RefPtr<ToolbarManager>& GetToolbarManager() const
     {
         return toolbarManager_;
     }
 
-    void ChangeSensitiveNodes(bool flag) override
-    {
-        privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
-    }
+    void ChangeSensitiveNodes(bool flag) override;
 
     void FlushRequestFocus();
 
@@ -1615,9 +1608,9 @@ private:
     RefPtr<UIExtensionManager> uiExtensionManager_;
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_;
-    RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
-    RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
-    RefPtr<ToolbarManager> toolbarManager_ = MakeRefPtr<ToolbarManager>();
+    RefPtr<FrameRateManager> frameRateManager_;
+    RefPtr<PrivacySensitiveManager> privacySensitiveManager_;
+    RefPtr<ToolbarManager> toolbarManager_;
     Rect displayAvailableRect_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
@@ -1694,8 +1687,8 @@ private:
 
     int32_t preNodeId_ = -1;
 
-    RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
-    RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
+    RefPtr<AvoidInfoManager> avoidInfoMgr_;
+    RefPtr<MemoryManager> memoryMgr_;
     RefPtr<NavigationManager> navigationMgr_;
     RefPtr<ForceSplitManager> forceSplitMgr_;
     RefPtr<FormVisibleManager> formVisibleMgr_;

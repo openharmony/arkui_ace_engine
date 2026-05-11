@@ -22,6 +22,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "bridge/common/utils/engine_helper.h"

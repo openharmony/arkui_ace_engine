@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_SIDE_BAR_CONTAINER_PATTERN_H
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_event_hub.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"

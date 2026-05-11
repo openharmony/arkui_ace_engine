@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"

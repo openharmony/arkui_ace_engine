@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#define private public
+#define protected public
+
 #include "list_test_ng.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -29,11 +32,7 @@
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 
-#define private public
-#define protected public
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
-#undef private
-#undef protected
 
 namespace OHOS::Ace::NG {
 namespace {

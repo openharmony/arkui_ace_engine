@@ -16,6 +16,7 @@
 #include "core/components_ng/event/event_hub.h"
 
 #include "core/common/event_manager.h"
+#include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

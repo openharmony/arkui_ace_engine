@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include "accessibility_frame_node_utils.h"
+
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"

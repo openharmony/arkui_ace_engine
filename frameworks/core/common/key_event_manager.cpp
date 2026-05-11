@@ -22,6 +22,8 @@
 #include "core/common/event_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"

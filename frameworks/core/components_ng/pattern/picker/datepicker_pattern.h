@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern_fwd.h"
+#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace {
 class PickerTheme;

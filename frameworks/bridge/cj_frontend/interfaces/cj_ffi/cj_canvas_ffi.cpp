@@ -30,6 +30,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
+#include "core/pipeline/pipeline_context.h"
 
 using namespace OHOS;
 using namespace OHOS::Ace;

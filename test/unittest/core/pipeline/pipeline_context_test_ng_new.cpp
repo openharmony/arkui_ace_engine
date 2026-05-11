@@ -23,8 +23,10 @@
 #include "test/unittest/core/pattern/scroll/mock_task_executor.h"
 
 #include "base/log/dump_log.h"
-#include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/interfaces/native/node/node_utils.h"
