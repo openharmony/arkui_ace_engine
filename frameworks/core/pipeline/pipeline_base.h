@@ -35,7 +35,6 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
-#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
@@ -65,6 +64,7 @@ enum class AvoidAreaType : uint32_t;
 
 namespace OHOS::Ace {
 class ScheduleTask;
+class SharedImageManager;
 struct RotationEvent;
 namespace NG {
 class FrameNode;
@@ -636,14 +636,7 @@ public:
 
     RefPtr<ImageCache> GetImageCache() const;
 
-    const RefPtr<SharedImageManager>& GetOrCreateSharedImageManager()
-    {
-        std::scoped_lock<std::shared_mutex> lock(imageMtx_);
-        if (!sharedImageManager_) {
-            sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
-        }
-        return sharedImageManager_;
-    }
+    const RefPtr<SharedImageManager>& GetOrCreateSharedImageManager();
 
     const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager()
     {
