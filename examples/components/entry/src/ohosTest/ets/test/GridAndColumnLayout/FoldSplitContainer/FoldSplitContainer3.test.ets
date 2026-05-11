@@ -33,8 +33,9 @@ const driver = Driver.create();
 
 export default function FoldSplitContainer3() {
   describe('FoldSplitContainer3', () => {
-    beforeAll(async (done: Function) => {
-      await FoldSplitContainerStart(done)
+    beforeAll(async (done: () => void) => {
+      await FoldSplitContainerStart()
+      done()
     })
 
     /**

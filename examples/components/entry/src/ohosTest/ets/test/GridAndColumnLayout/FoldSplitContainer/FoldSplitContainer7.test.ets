@@ -32,8 +32,9 @@ const driver = Driver.create();
 
 export default function FoldSplitContainer7() {
   describe('FoldSplitContainer7', () => {
-    beforeAll(async (done: Function) => {
-      await FoldSplitContainerStart(done)
+    beforeAll(async (done: () => void) => {
+      await FoldSplitContainerStart()
+      done()
     })
 
     // bindMenu.item中是否显示右侧图标
