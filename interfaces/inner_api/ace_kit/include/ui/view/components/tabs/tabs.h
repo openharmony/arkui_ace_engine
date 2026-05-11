@@ -26,6 +26,7 @@
 #include "ui/properties/color.h"
 #include "ui/properties/ng/transition_property.h"
 #include "ui/properties/tabs_effect_node_option.h"
+#include "ui/resource/resource_object.h"
 #include "ui/view/components/tabs/tabs_constants.h"
 #include "ui/view/components/tabs/tabs_data.h"
 #include "ui/view/view.h"
@@ -87,6 +88,17 @@ public:
     void SetOnAnimationStart(OnAnimationStartEvent onAnimationStart);
     void SetTabBarFolded(bool isTabBarFolded);
     RefPtr<FrameNode> GetTabBarActiveItem();
+
+    void SetTabBarWidth(const Dimension& tabBarWidth, const RefPtr<ResourceObject>& resObj);
+    void SetTabBarHeight(const Dimension& tabBarHeight, const RefPtr<ResourceObject>& resObj);
+    void SetDivider(const TabsItemDivider& divider, const RefPtr<ResourceObject>& widthResObj,
+        const RefPtr<ResourceObject>& colorResObj, const RefPtr<ResourceObject>& startMarginResObj,
+        const RefPtr<ResourceObject>& endMarginResObj);
+    void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option, const RefPtr<ResourceObject>& resObj);
+    void SetEffectNodeOption(const TabsEffectNodeOption& option, const RefPtr<ResourceObject>& resObj);
+    void SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption, const RefPtr<ResourceObject>& resObj);
+    void SetBarBackgroundColor(const Color& backgroundColor, const RefPtr<ResourceObject>& resObj);
+    void SetBarBackgroundEffect(const EffectOption& effectOption, const RefPtr<ResourceObject>& resObj);
 };
 
 } // namespace OHOS::Ace::Kit

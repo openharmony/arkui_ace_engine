@@ -23,10 +23,14 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/color_inverter.h"
 #include "core/common/container_scope.h"
 #include "core/common/display_info.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -262,6 +266,40 @@ void UIContextImpl::AddWindowSizeChangeCallback(int32_t nodeId)
 {
     CHECK_NULL_VOID(context_);
     context_->AddWindowSizeChangeCallback(nodeId);
+}
+
+bool UIContextImpl::GetConfigPerform()
+{
+    return SystemProperties::ConfigChangePerform();
+}
+
+int32_t UIContextImpl::GetInstanceId()
+{
+    CHECK_NULL_RETURN(context_, -1);
+    return context_->GetInstanceId();
+}
+
+bool UIContextImpl::HasDarkResource(const RefPtr<ResourceObject>& resObj)
+{
+    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+        return false;
+    }
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+    int32_t resId = resObj->GetId();
+    auto params = resObj->GetParams();
+    if (resId == -1 && !params.empty() && params.back().value.has_value()) {
+        std::vector<std::string> splitter;
+        StringUtils::StringSplitter(params.back().value.value(), '.', splitter);
+        return resourceAdapter->ExistDarkResByName(splitter.back(),
+            std::to_string(resObj->GetType()));
+    }
+    return resourceAdapter->ExistDarkResById(std::to_string(resId));
+}
+
+UIContext::ColorInvertFunc UIContextImpl::GetInvertFunc(int32_t instanceId, const std::string& nodeTag)
+{
+    return ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
 }
 
 } // namespace OHOS::Ace::Kit
