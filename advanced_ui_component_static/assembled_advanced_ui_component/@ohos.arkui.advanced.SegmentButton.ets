@@ -1763,6 +1763,36 @@ export struct SegmentButton {
     return false;
   }
 
+  private isMultiplyCapsule(): boolean {
+    return this.options !== undefined &&
+      this.options.type === 'capsule' && (this.options.multiply ?? false);
+  }
+
+  private shouldShowBackground(): boolean {
+    return !this.isMultiplyCapsule() && this.isBackgroundSystemMaterialEnabled();
+  }
+
+  private getButtonBackgroundColor(): ResourceColor | undefined {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
+  }
+
+  private getButtonBorderRadius(): Length | undefined {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.getBackgroundBorderRadius();
+  }
+
+  private getButtonSystemMaterial(): uiMaterial.Material | undefined {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.options.backgroundSystemMaterial;
+  }
+
   build() {
     Stack() {
       if (this.options !== undefined && this.options.buttons !== undefined) {
@@ -1827,6 +1857,10 @@ export struct SegmentButton {
     }
     .id("SegmentButton")
     .direction(this.options ? this.options.direction : undefined)
+    .backgroundColor(this.getButtonBackgroundColor())
+    .borderRadius(this.getButtonBorderRadius())
+    .clip(false)
+    .systemMaterial(this.getButtonSystemMaterial())
     .onBlur(() => {
       this.focusIndex = -1
     })
