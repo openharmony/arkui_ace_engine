@@ -605,6 +605,7 @@ public:
      * @param: Target version to be isolated.
      * @return: return the compare result.
      */
+    [[deprecated("using GreatOrEqualAPITargetVersion. Note: Logic is inverted")]]
     static bool LessThanAPIVersion(PlatformVersion version);
 
     /**
@@ -614,7 +615,7 @@ public:
      * @param: Target version to be isolated.
      * @return: return the compare result.
      */
-    static bool GreatOrEqualAPIVersion(PlatformVersion version);
+    [[deprecated("using GreatOrEqualAPITargetVersion")]] static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
     /**
      * @description: Compare whether the min compatible api version of the application is less than the incoming target
@@ -634,11 +635,13 @@ public:
     static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
     /**
-     * @description: Compare whether the target api version of the application is less than the incoming target
-     * version.
+     * @description: [Deprecated]. Compare whether the target api version of the application is less than the incoming
+     * target version. Unexpected results may be returned in multiple instance scenarios. It is recommended to use the
+     * GreatOrEqualAPITargetVersion method.
      * @param: Target version to be isolated.
      * @return: return the compare result.
      */
+    [[deprecated("using GreatOrEqualAPITargetVersion. Note: Logic is inverted")]]
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
