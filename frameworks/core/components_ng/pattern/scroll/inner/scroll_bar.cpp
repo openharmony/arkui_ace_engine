@@ -567,7 +567,7 @@ void ScrollBar::HandleLongPress(bool smooth)
 {
     Point point(locationInfo_.GetX(), locationInfo_.GetY());
     bool reverse = false;
-    if (AnalysisUpOrDown(point, reverse) && isMousePressed_) {
+    if (AnalysisUpOrDown(point, reverse) && isMousePressed_ && scrollPageCallback_) {
         scrollPageCallback_(reverse, smooth);
         ScheduleCaretLongPress();
     }
@@ -849,7 +849,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     if (scrollBarOnDidStopDraggingCallback_) {
         scrollBarOnDidStopDraggingCallback_(true);
     }
-    if (isTouchScreen_ && dragEndReachEdge_) {
+    if (isTouchScreen_ && dragEndReachEdge_ && reachBarEdgeOverScroll_) {
         reachBarEdgeOverScroll_(.0f);
     } else {
         frictionController_->PlayMotion(frictionMotion_);
