@@ -67,4 +67,9 @@ RefPtr<EventHub> Pattern::CreateEventHub()
 
 void Pattern::CheckLocalized()
 {}
+
+RefPtr<VerticalOverflowHandler> Pattern::GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

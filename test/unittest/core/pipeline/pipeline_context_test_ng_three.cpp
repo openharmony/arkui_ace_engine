@@ -18,6 +18,7 @@
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
 #include "base/ressched/ressched_report.h"
 #include "core/components_ng/event/event_constants.h"
+#include "base/log/dump_log.h"
 
 using namespace testing;
 using namespace testing::ext;
