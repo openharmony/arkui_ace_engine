@@ -3833,6 +3833,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetEditMode));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetEditMode));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableEditMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetEnableEditMode));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableEditMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetEnableEditMode));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMultiSelectable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetMultiSelectable));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMultiSelectable"),

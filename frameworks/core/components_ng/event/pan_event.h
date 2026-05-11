@@ -103,6 +103,9 @@ public:
 
     void SetPanEventType(GestureTypeName typeName);
 
+    void SetPanEventTag(const std::string& tag);
+
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
         ResponseLinkResult& responseLinkResult) override;

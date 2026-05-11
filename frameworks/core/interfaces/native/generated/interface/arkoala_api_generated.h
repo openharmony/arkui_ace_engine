@@ -25202,6 +25202,8 @@ typedef struct GENERATED_ArkUIListModifier {
                             const Opt_Boolean* value);
     void (*setEditModeOptions)(Ark_NativePointer node,
                                const Ark_EditModeOptions* value);
+    void (*setEnableEditMode)(Ark_NativePointer node,
+                              const Opt_Union_Boolean_Bindable_Boolean* value);
     void (*setFocusWrapMode)(Ark_NativePointer node,
                              const Opt_FocusWrapMode* value);
     void (*setSyncLoad)(Ark_NativePointer node,

@@ -501,6 +501,7 @@ void SelectableContainerPattern::InitSwipeSelectEvent()
     gestureHub->SetPanCanCoexistWithScroll(true);
     gestureHub->AddPanEvent(swipeSelectPanEvent_, panDirection, 1, distanceMap);
     gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
+    gestureHub->SetPanEventTag("SWIPESELECT");
     gestureHub->SetExcludedAxisForPanEvent(true);
     gestureHub->SetOnGestureJudgeNativeBegin([weak = WeakClaim(this)](const RefPtr<NG::GestureInfo>& gestureInfo,
                                              const std::shared_ptr<BaseGestureEvent>& event) -> GestureJudgeResult {

@@ -274,6 +274,7 @@ public:
     void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
         const PanDistanceMapDimension& distanceMap, double angle = DEFAULT_PAN_ANGLE);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
+    void SetPanEventTag(const std::string& tag);
     void SetPanEventType(GestureTypeName typeName);
     void SetPanCanCoexistWithScroll(bool value);
     void SetLongPressEventType(GestureTypeName typeName);
