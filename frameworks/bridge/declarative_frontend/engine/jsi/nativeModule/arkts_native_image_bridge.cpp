@@ -595,7 +595,7 @@ ArkUINativeModuleValue ImageBridge::SetImageMatrix(ArkUIRuntimeCallInfo* runtime
     const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
     float matrix[matrix4Len];
     Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
-    for (size_t i = 0; i < transArray->Length(vm); i++) {
+    for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, transArray); i++) {
         Local<JSValueRef> value = transArray->GetValueAt(vm, jsValue, i);
         matrix[i] = value->ToNumber(vm)->Value();
     }

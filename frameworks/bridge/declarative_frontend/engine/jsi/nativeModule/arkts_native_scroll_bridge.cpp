@@ -37,7 +37,7 @@ bool ParsePagination(const EcmaVM* vm, const Local<JSValueRef>& paginationValue,
     uint32_t pLength = 0;
     if (paginationValue->IsArray(vm)) {
         auto paginationArray = panda::Local<panda::ArrayRef>(paginationValue);
-        pLength = paginationArray->Length(vm);
+        pLength = ArkTSUtils::GetArrayLength(vm, paginationArray);
         if (pLength <= 0) {
             return false;
         }
@@ -70,7 +70,7 @@ bool ParsePaginationNG(const EcmaVM* vm, const Local<JSValueRef>& paginationValu
     resObjs.clear();
     if (paginationValue->IsArray(vm)) {
         auto paginationArray = panda::Local<panda::ArrayRef>(paginationValue);
-        pLength = paginationArray->Length(vm);
+        pLength = ArkTSUtils::GetArrayLength(vm, paginationArray);
         if (pLength <= 0) {
             return false;
         }

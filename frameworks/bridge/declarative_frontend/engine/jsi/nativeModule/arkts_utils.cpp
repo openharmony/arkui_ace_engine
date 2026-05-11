@@ -2413,7 +2413,7 @@ bool ArkTSUtils::ParseJsResponseRegion(
     const uint32_t DIMENSION_LENGTH = 4;
     if (jsValue->IsArray(vm)) {
         auto transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
-        uint32_t arrayLength = transArray->Length(vm);
+        uint32_t arrayLength = ArkTSUtils::GetArrayLength(vm, transArray);
         for (uint32_t i = 0; i < arrayLength; i++) {
             CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
@@ -3153,7 +3153,7 @@ Local<JSValueRef> ArkTSUtils::GetModifierKeyState(
     std::vector<std::string> checkKeyCodes;
     std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
     auto paramArray = panda::Local<panda::ArrayRef>(param);
-    auto length = paramArray->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, paramArray);
     for (size_t i = 0; i < length; i++) {
         auto value = panda::ArrayRef::GetValueAt(vm, paramArray, i);
         auto code = value->ToString(vm)->ToString(vm);
@@ -3502,7 +3502,7 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
     const Local<JSValueRef>& menuItems, bool enableLabelInfo)
 {
     auto menuItemsArray = Local<panda::ArrayRef>(menuItems);
-    auto length = menuItemsArray->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, menuItemsArray);
     for (uint32_t index = 0; index < length; index++) {
         Local<JSValueRef> menuItem = panda::ArrayRef::GetValueAt(vm, menuItemsArray, index);
         if (!menuItem->IsObject(vm)) {
@@ -3554,7 +3554,7 @@ void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(node);
         auto paramArrayObj = CreateJsOnMenuItemClick(vm, menuOptionsParam);
-        if (paramArrayObj->Length(vm) != PARAM_ARR_LENGTH_2) {
+        if (ArkTSUtils::GetArrayLength(vm, paramArrayObj) != PARAM_ARR_LENGTH_2) {
             return false;
         }
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
@@ -3631,7 +3631,7 @@ bool ArkTSUtils::ParseJsIgnoresLayoutSafeAreaEdges(
         return false;
     }
     auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
         ArkUI_Int32 edge;
@@ -3659,7 +3659,7 @@ void ArkTSUtils::ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& 
     CalcDimension valueY;
     if (value->IsArray(vm)) {
         auto array = panda::Local<panda::ArrayRef>(value);
-        auto length = array->Length(vm);
+        auto length = ArkTSUtils::GetArrayLength(vm, array);
         if (length == NUM_2) {
             RefPtr<ResourceObject> xResObj;
             RefPtr<ResourceObject> yResObj;
@@ -3697,14 +3697,14 @@ void ArkTSUtils::ParseGradientColorStopsWithFloatColor(const EcmaVM *vm, const L
         return;
     }
     auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
         if (!item->IsArray(vm)) {
             continue;
         }
         auto itemArray = panda::Local<panda::ArrayRef>(item);
-        auto itemLength = itemArray->Length(vm);
+        auto itemLength = ArkTSUtils::GetArrayLength(vm, itemArray);
         if (itemLength < NUM_1) {
             continue;
         }
@@ -3745,14 +3745,14 @@ void ArkTSUtils::ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRe
         return;
     }
     auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
         if (!item->IsArray(vm)) {
             continue;
         }
         auto itemArray = panda::Local<panda::ArrayRef>(item);
-        auto itemLength = itemArray->Length(vm);
+        auto itemLength = ArkTSUtils::GetArrayLength(vm, itemArray);
         if (itemLength < NUM_1) {
             continue;
         }
@@ -3948,7 +3948,7 @@ DragPreviewOption ArkTSUtils::ParseDragPreviewOptions(ArkUIRuntimeCallInfo* info
         ParseDragPreviewMode(previewOption, mode->ToNumber(vm)->Value(), isAuto);
     } else if (mode->IsArray(vm)) {
         Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(mode);
-        for (size_t i = 0; i < params->Length(vm); i++) {
+        for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, params); i++) {
             auto value = panda::ArrayRef::GetValueAt(vm, params, i);
             if (value->IsNumber()) {
                 ParseDragPreviewMode(previewOption, value->ToNumber(vm)->Value(), isAuto);

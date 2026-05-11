@@ -176,7 +176,7 @@ void ParseGradientColorStopsWithColorSpace(const EcmaVM *vm, const Local<JSValue
         return;
     }
     auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     bool isValid = true;
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
@@ -184,7 +184,7 @@ void ParseGradientColorStopsWithColorSpace(const EcmaVM *vm, const Local<JSValue
             continue;
         }
         auto itemArray = panda::Local<panda::ArrayRef>(item);
-        auto itemLength = itemArray->Length(vm);
+        auto itemLength = ArkTSUtils::GetArrayLength(vm, itemArray);
         if (itemLength < NUM_1) {
             continue;
         }
@@ -955,7 +955,7 @@ bool ParseJsDoublePair(const EcmaVM *vm, const Local<JSValueRef> &value, ArkUI_F
         return false;
     }
     auto array = panda::Local<panda::ArrayRef>(value);
-    if (array->Length(vm) != NUM_2) {
+    if (ArkTSUtils::GetArrayLength(vm, array) != NUM_2) {
         return false;
     }
     auto firstArg = panda::ArrayRef::GetValueAt(vm, array, NUM_0);
@@ -2273,7 +2273,7 @@ ArkUINativeModuleValue CommonBridge::SetTransform(ArkUIRuntimeCallInfo *runtimeC
     const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
     float matrix[matrix4Len];
     Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
-    for (size_t i = 0; i < transArray->Length(vm); i++) {
+    for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, transArray); i++) {
         Local<JSValueRef> value = transArray->GetValueAt(vm, jsValue, i);
         matrix[i] = value->ToNumber(vm)->Value();
     }
@@ -2314,14 +2314,14 @@ ArkUINativeModuleValue CommonBridge::SetTransform3D(ArkUIRuntimeCallInfo *runtim
     const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
     float matrix[matrix4Len];
     Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
-    if (transArray->Length(vm) != matrix4Len) {
+    if (ArkTSUtils::GetArrayLength(vm, transArray) != matrix4Len) {
         TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT,
             "Invalid matrix parameter: Expected %{public}d elements, but transArray has %{public}u elements",
-            matrix4Len, transArray->Length(vm));
+            matrix4Len, static_cast<unsigned int>(ArkTSUtils::GetArrayLength(vm, transArray)));
         nodeModifiers->getCommonModifier()->resetTransform3D(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    for (size_t i = 0; i < transArray->Length(vm); i++) {
+    for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, transArray); i++) {
         Local<JSValueRef> value = transArray->GetValueAt(vm, jsValue, i);
         matrix[i] = value->ToNumber(vm)->Value();
     }
@@ -3401,7 +3401,7 @@ ArkUINativeModuleValue CommonBridge::SetLinearGradientBlur(ArkUIRuntimeCallInfo 
     std::vector<ArkUI_Float32> fractionStops;
     if (fractionStopsArg->IsArray(vm)) {
         auto array = panda::Local<panda::ArrayRef>(fractionStopsArg);
-        auto length = array->Length(vm);
+        auto length = ArkTSUtils::GetArrayLength(vm, array);
         for (uint32_t index = 0; index < length; index++) {
             auto fractionStop = panda::ArrayRef::GetValueAt(vm, array, index);
             ArkUI_Float32 first = 0.0;
@@ -5138,7 +5138,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityCustomActions(ArkUIRuntimeC
     }
     
     auto jsArray = panda::Local<panda::ArrayRef>(argObj->ToObject(vm));
-    auto arrayLength = jsArray->Length(vm);
+    auto arrayLength = ArkTSUtils::GetArrayLength(vm, jsArray);
     std::vector<NG::AccessibilityCustomAction> actions;
     
     for (uint32_t i = 0; i < arrayLength; i++) {
@@ -6280,7 +6280,7 @@ ArkUINativeModuleValue CommonBridge::SetAllowDrop(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     Local<panda::ArrayRef> allowDropArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-    auto length = allowDropArray->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, allowDropArray);
     if (length <= 0) {
         GetArkUINodeModifiers()->getCommonModifier()->resetAllowDrop(nativeNode);
         return panda::JSValueRef::Undefined(vm);
@@ -6457,7 +6457,7 @@ ArkUINativeModuleValue CommonBridge::SetObscured(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-    auto length = transArray->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, transArray);
     int32_t reasonArray[length];
 
     for (size_t i = 0; i < length; i++) {
@@ -6729,7 +6729,7 @@ void ParseDragPreViewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValu
         preViewOptions.mode = mode->Int32Value(vm);
     } else if (mode->IsArray(vm)) {
         Local<panda::ArrayRef> modeArray = static_cast<Local<panda::ArrayRef>>(mode);
-        int32_t arrLength = static_cast<int32_t>(modeArray->Length(vm));
+        int32_t arrLength = static_cast<int32_t>(ArkTSUtils::GetArrayLength(vm, modeArray));
         if (arrLength > NUM_4) {
             arrLength = NUM_4;
         }
@@ -7678,7 +7678,7 @@ ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* r
         stringValue = valueArg->ToString(vm)->ToString(vm);
     }
     Local<panda::ArrayRef> keysArray = static_cast<Local<panda::ArrayRef>>(keysArg);
-    auto arrLength = keysArray->Length(vm);
+    auto arrLength = ArkTSUtils::GetArrayLength(vm, keysArray);
     if (arrLength > NUM_10) {
         arrLength = NUM_10;
     }
@@ -8504,7 +8504,7 @@ void CommonBridge::SetGestureAllowedTypes(ArkUIRuntimeCallInfo* runtimeCallInfo,
         return;
     }
     auto typesArr = panda::Local<panda::ArrayRef>(typesArg);
-    auto typesLength = typesArr->Length(vm);
+    auto typesLength = ArkTSUtils::GetArrayLength(vm, typesArr);
     std::set<SourceTool> allowedTypes{};
     for (size_t i = 0; i < typesLength; ++i) {
         auto type = panda::ArrayRef::GetValueAt(vm, typesArr, i);
@@ -11849,7 +11849,7 @@ ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaApproximateChange(ArkUIRunt
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::ArrayRef> ratioList = ratiosArg;
-    uint32_t size = ratioList->Length(vm);
+    uint32_t size = ArkTSUtils::GetArrayLength(vm, ratioList);
     std::vector<double> ratioVec;
     for (uint32_t i = 0; i < size; i++) {
         double radioNumber = 0.0;

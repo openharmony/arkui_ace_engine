@@ -746,7 +746,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioResponseRegion(ArkUIRuntimeCallInfo*
         length = static_cast<uint32_t>(lengthArg->Int32Value(vm));
     } else if (isJsView && valueArg->IsArray(vm)) {
         auto transArray = static_cast<Local<panda::ArrayRef>>(valueArg);
-        length = DIMENSION_LENGTH * transArray->Length(vm);
+        length = DIMENSION_LENGTH * ArkTSUtils::GetArrayLength(vm, transArray);
     }
 
     ArkUI_Float32 regionArray[length];

@@ -723,7 +723,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupResponseRegion(ArkUI
     uint32_t length = 4;
     if (secondArg->IsArray(vm)) {
         auto transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-        length = length * transArray->Length(vm);
+        length = length * ArkTSUtils::GetArrayLength(vm, transArray);
     }
     ArkUI_Float32 regionArray[length];
     int32_t regionUnits[length];
