@@ -4142,6 +4142,12 @@ let SecurityComponentLayoutDirection;
   SecurityComponentLayoutDirection[SecurityComponentLayoutDirection.VERTICAL = 1] = 'VERTICAL';
 })(SecurityComponentLayoutDirection || (SecurityComponentLayoutDirection = {}));
 
+let SecurityComponentRoleType;
+(function (SecurityComponentRoleType) {
+  SecurityComponentRoleType[SecurityComponentRoleType.ROLE_NONE = 0] = 'ROLE_NONE';
+  SecurityComponentRoleType[SecurityComponentRoleType.BUTTON = 1] = 'BUTTON';
+})(SecurityComponentRoleType || (SecurityComponentRoleType = {}));
+
 let LocationIconStyle;
 (function (LocationIconStyle) {
   LocationIconStyle[LocationIconStyle.FULL_FILLED = 0] = 'FULL_FILLED';

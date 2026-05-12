@@ -57,6 +57,7 @@ public:
     static void SetSymbolIconColor(const JSCallbackInfo& info);
     static void SetSymbolRenderingStrategy(const JSCallbackInfo& info);
     static void SetSymbolFontWeight(const JSCallbackInfo& info);
+    static void SetAccessibilityRole(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SAVE_BUTTON_H

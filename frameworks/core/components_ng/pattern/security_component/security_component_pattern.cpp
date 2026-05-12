@@ -489,6 +489,7 @@ void SecurityComponentPattern::ToJsonValueTextNode(std::unique_ptr<JsonValue>& j
     json->PutExtAttr("maxLines", std::to_string(textProp->GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
     json->PutExtAttr("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
         textProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str(), filter);
+    json->PutExtAttr("fallbackLineSpacing", textProp->GetFallbackLineSpacing().value_or(false), filter);
 }
 
 void SecurityComponentPattern::ToJsonValuePadding(const RefPtr<SecurityComponentTheme>& theme,
@@ -740,6 +741,9 @@ void SecurityComponentPattern::UpdateTextProperty(RefPtr<FrameNode>& scNode, Ref
     }
     if (scLayoutProp->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProp->UpdateHeightAdaptivePolicy(scLayoutProp->GetHeightAdaptivePolicy().value());
+    }
+    if (scLayoutProp->GetFallbackLineSpacing().has_value()) {
+        textLayoutProp->UpdateFallbackLineSpacing(scLayoutProp->GetFallbackLineSpacing().value());
     }
 }
 
