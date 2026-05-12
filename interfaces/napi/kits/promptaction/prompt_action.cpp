@@ -1669,7 +1669,7 @@ DistortionMode GetDistortionModeParam(
 EdgeLightMode GetEdgeLightModeParam(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    int32_t edgeLightMode = 2;
+    int32_t edgeLightMode = 0;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, asyncContext->edgeLightModeApi, &valueType);
     if (valueType != napi_number) {

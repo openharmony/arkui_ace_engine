@@ -396,30 +396,36 @@ bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
     return true;
 }
 
-void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogProperties& dialogProperties)
+void DialogPattern::InitDefaultSystemMaterial()
 {
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) || dialogProperties.customStyle) {
+    if (dialogProperties_.customStyle) {
         return;
     }
-    CHECK_NULL_VOID(columnNode);
-    if (!MaterialUtils::IsMaterialEnabled() && !CheckIsEnableMaterial(dialogProperties) &&
-        !dialogProperties.systemMaterial) {
+    if (!MaterialUtils::IsMaterialEnabled() && !CheckIsEnableMaterial(dialogProperties_) &&
+        !dialogProperties_.systemMaterial) {
         return;
     }
     auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THICK);
-    if (dialogProperties.systemMaterial) {
-        material = dialogProperties.systemMaterial;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) && !dialogProperties_.systemMaterial) {
+        dialogProperties_.systemMaterial = material;
     }
-    if (!MaterialUtils::IsEnableMaterialParam(material)) {
+    if (!MaterialUtils::IsEnableMaterialParam(dialogProperties_.systemMaterial)) {
+        dialogProperties_.systemMaterial = nullptr;
         return;
     }
-    auto renderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackBlurStyle(std::nullopt);
-    ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(material));
 }
 
-void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
+void DialogPattern::SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode)
+{
+    CHECK_NULL_VOID(contentRenderContext_);
+    if (dialogProperties_.systemMaterial &&
+        MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
+        contentRenderContext_->UpdateBackBlurStyle(std::nullopt);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties_.systemMaterial));
+    }
+}
+
+void DialogPattern::UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
     const DialogProperties& props, bool isCustomBorder, RefPtr<DialogTheme> dialogTheme)
 {
     auto contentRenderContext = contentNode->GetRenderContext();
@@ -453,7 +459,7 @@ void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme->GetShadowDialog()));
         contentRenderContext->UpdateBackShadow(shadow);
     }
-    SetDialogSystemMaterial(contentNode, props);
+    SetDialogSystemMaterial(contentNode);
     contentRenderContext->SetClipToBounds(true);
 }
 
@@ -1567,7 +1573,7 @@ void DialogPattern::OnColorConfigurationUpdate()
     UpdateTitleAndContentColor();
     UpdateMaskColor();
     UpdateWrapperBackgroundStyle(host, dialogTheme_);
-    SetDialogSystemMaterial(DynamicCast<FrameNode>(host->GetFirstChild()), dialogProperties_);
+    SetDialogSystemMaterial(DynamicCast<FrameNode>(host->GetFirstChild()));
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
@@ -3203,13 +3209,13 @@ bool DialogPattern::NeedEdgeLight()
     if (dialogProperties_.isMask || dialogProperties_.customStyle || !dialogProperties_.systemMaterial ||
         !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
         needFlowLight_ = false;
-    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED) ==
+    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO) ==
                EdgeLightMode::EDGELIGHT_ENABLED) {
         needFlowLight_ = true;
-    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED) ==
+    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO) ==
                EdgeLightMode::EDGELIGHT_DISABLED) {
         needFlowLight_ = false;
-    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED) ==
+    } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO) ==
                    EdgeLightMode::EDGELIGHT_AUTO &&
                dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) &&
                SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE) {
