@@ -19,6 +19,7 @@
 #include <memory>
 #include <stack>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "base/memory/referenced.h"
@@ -211,6 +212,40 @@ enum class VisualState;
             CHECK_NULL_VOID(frameNode);                                         \
             (frameNode)->UnRegisterLpxAttribute(attribute);                     \
         }                                                                       \
+    } while (false)
+#define ACE_CHECK_LPX_UPDATE_CALLBACK(dimension, attribute, callback)            \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(dimension, attribute, callback, frameNode); \
+    } while (false)
+#define ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(dimension, attribute, callback, frameNode) \
+    do {                                                                        \
+        CHECK_NULL_VOID(frameNode);                                             \
+        std::function<void()> lpxUpdateCallback = (callback);                   \
+        if ((dimension).Unit() == DimensionUnit::LPX) {                         \
+            (frameNode)->RegisterLpxAttribute(attribute);                        \
+            (frameNode)->RegisterLpxUpdateCallback(attribute, std::move(lpxUpdateCallback)); \
+        } else {                                                                 \
+            (frameNode)->UnRegisterLpxAttribute(attribute);                      \
+            (frameNode)->UnRegisterLpxUpdateCallback(attribute);                 \
+        }                                                                       \
+    } while (false)
+#define ACE_SET_NODE_LPX_UPDATE_CALLBACK(isLpx, attribute, callback, frameNode)    \
+    do {                                                                        \
+        CHECK_NULL_VOID(frameNode);                                             \
+        std::function<void()> lpxUpdateCallback = (callback);                   \
+        if (isLpx) {                                                            \
+            (frameNode)->RegisterLpxAttribute(attribute);                        \
+            (frameNode)->RegisterLpxUpdateCallback(attribute, std::move(lpxUpdateCallback)); \
+        } else {                                                                 \
+            (frameNode)->UnRegisterLpxAttribute(attribute);                      \
+            (frameNode)->UnRegisterLpxUpdateCallback(attribute);                 \
+        }                                                                       \
+    } while (false)
+#define ACE_SET_LPX_UPDATE_CALLBACK(isLpx, attribute, callback)                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(isLpx, attribute, callback, frameNode); \
     } while (false)
 
 

@@ -2633,6 +2633,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         FlushVsync(GetTimeFromExternalTimer(), 0);
     }
 #endif
+    FireLpxUpdateCallbacks();
     MarkLpxDirtyNodes();
 }
 
@@ -7998,6 +7999,18 @@ void PipelineContext::RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
 void PipelineContext::UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
 {
     lpxDirtyNodes_.erase(node);
+}
+
+void PipelineContext::FireLpxUpdateCallbacks()
+{
+    auto lpxDirtyNodes = lpxDirtyNodes_;
+    for (auto& nodeWeak : lpxDirtyNodes) {
+        auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
+        node->FireLpxUpdateCallbacks();
+    }
 }
 
 void PipelineContext::MarkLpxDirtyNodes()

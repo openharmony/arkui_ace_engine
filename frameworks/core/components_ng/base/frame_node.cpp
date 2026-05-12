@@ -8777,6 +8777,30 @@ bool FrameNode::IsPreMakeAndScroll()
     return false;
 }
 
+void FrameNode::RegisterLpxUpdateCallback(LpxAttribute attribute, std::function<void()>&& callback)
+{
+    if (!callback) {
+        LOGW("RegisterLpxUpdateCallback with null callback");
+        return;
+    }
+    lpxUpdateCallbacks_[attribute] = std::move(callback);
+}
+
+void FrameNode::UnRegisterLpxUpdateCallback(LpxAttribute attribute)
+{
+    lpxUpdateCallbacks_.erase(attribute);
+}
+
+void FrameNode::FireLpxUpdateCallbacks()
+{
+    for (const auto& entry : lpxUpdateCallbacks_) {
+        const auto& callback = entry.second;
+        if (callback) {
+            callback();
+        }
+    }
+}
+
 template<typename T>
 ACE_FORCE_EXPORT RefPtr<T> FrameNode::GetAccessibilityProperty() const
 {
