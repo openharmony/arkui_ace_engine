@@ -78,7 +78,7 @@ void TaihangOptimizer::Init()
             GetReplyBundleNameAndPages(reply, optimizerRef->bundleNameToPages_);
         }
         optimizerRef->SetEnable(swiperReportEnable);
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "SwiperReportEnable Result: %{public}d",
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TaihangOptimizer::Init swiper report enable : %{public}d",
             static_cast<int32_t>(optimizerRef->enable_));
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
@@ -173,12 +173,12 @@ void TaihangOptimizer::HandleSwiperPreMake(const std::unordered_map<std::string,
         curUINode = curUINode->GetChildAtIndex(idx);
     }
     if (curUINode && curUINode->GetTag() == V2::SWIPER_ETS_TAG) {
-        TAG_LOGD(AceLogTag::ACE_SWIPER, "ComponentPreMake nodeMessage exist, curNode path %{public}s",
+        TAG_LOGD(AceLogTag::ACE_SWIPER, "TaihangOptimizer::HandleSwiperPreMake node is exist, path %{public}s",
             curUINode->GetPath().c_str());
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(curUINode);
         PostSwiperPreMakeTask(frameNode, index);
     } else {
-        TAG_LOGW(AceLogTag::ACE_SWIPER, "ComponentPreMake find node is null");
+        TAG_LOGW(AceLogTag::ACE_SWIPER, "TaihangOptimizer::HandleSwiperPreMake node is not exist");
     }
 }
 

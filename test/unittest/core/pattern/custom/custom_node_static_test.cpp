@@ -220,4 +220,5 @@ HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest007, TestSize.Level1)
     EXPECT_GE(result.Width(), 0.0f);
     EXPECT_GE(result.Height(), 0.0f);
 }
+
 } // namespace OHOS::Ace::NG
