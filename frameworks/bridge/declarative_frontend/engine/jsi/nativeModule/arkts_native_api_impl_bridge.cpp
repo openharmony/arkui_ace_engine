@@ -1497,6 +1497,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetRecoverable));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRecoverable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetRecoverable));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFullScreenOverlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetFullScreenOverlay));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFullScreenOverlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetFullScreenOverlay));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSystemTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm),
         NavDestinationBridge::SetNavDestinationSystemTransition));

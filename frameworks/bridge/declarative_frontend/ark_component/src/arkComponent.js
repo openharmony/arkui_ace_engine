@@ -16435,6 +16435,10 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
     return this;
   }
+  fullScreenOverlay(value) {
+    modifierWithKey(this._modifiersWithKeys, FullScreenOverlayModifier.identity, FullScreenOverlayModifier, value);
+    return this;
+  }
   preferredOrientation(orientation) {
     modifierWithKey(this._modifiersWithKeys, PreferredOrientationModifier.identity, PreferredOrientationModifier, orientation);
     return this;
@@ -16592,6 +16596,21 @@ class NavDestinationRecoverableModifier extends ModifierWithKey {
   }
 }
 NavDestinationRecoverableModifier.identity = Symbol('recoverable');
+
+class FullScreenOverlayModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetFullScreenOverlay(node);
+    } else {
+      getUINativeModule().navDestination.setFullScreenOverlay(node, this.value);
+    }
+  }
+}
+FullScreenOverlayModifier.identity = Symbol('fullScreenOverlay');
 
 class NavDestinationMenusModifier extends ModifierWithKey {
   constructor(value) {

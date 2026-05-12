@@ -386,7 +386,7 @@ bool NavDestinationPattern::GetBackButtonState()
     if (navDestinationLayoutProperty->GetHideBackButtonValue(false)) {
         showBackButton = false;
     }
-    if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
+    if (index == 0 && ((pattern->GetNavigationMode() == NavigationMode::SPLIT && !hostNode->IsFullScreenOverlay()) ||
         navigationLayoutProperty->GetHideNavBarValue(false))) {
         showBackButton = false;
     }
