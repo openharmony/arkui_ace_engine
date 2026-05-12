@@ -100,7 +100,8 @@ export class EditableTitleBarThemeV2 {
   @Trace public iconBackgroundColor: ResourceColor = $r('sys.color.titlebar_icon_background_color');
   @Trace public iconBackgroundPressedColor: ResourceColor = $r('sys.color.titlebar_icon_background_pressed_color');
   @Trace public iconBackgroundHoverColor: ResourceColor = $r('sys.color.titlebar_icon_background_hover_color');
-  @Trace public iconBackgroundFocusOutlineColor: ResourceColor = $r('sys.color.titlebar_icon_background_focus_outline_color');
+  @Trace public iconBackgroundFocusOutlineColor: ResourceColor =
+    $r('sys.color.titlebar_icon_background_focus_outline_color');
   @Trace public titleColor: ResourceColor = $r('sys.color.titlebar_title_tertiary_color');
   @Trace public subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
 }
@@ -119,7 +120,7 @@ class ButtonGestureModifierV2 implements GestureModifier {
   applyGesture(event: UIGestureEvent): void {
     if (this.fontSize >= ButtonGestureModifierV2.minFontSize) {
       event.addGesture(
-        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifierV2.longPressTime as int })
+        new LongPressGestureHandler({ repeat: false, duration: Double.toInt(ButtonGestureModifierV2.longPressTime)})
           .onAction(() => {
             if (event) {
               this.onDialogOpen();
@@ -441,7 +442,8 @@ struct EditableTitleBarMenuSectionV2 {
         if (this.menuItemsV2) {
           ForEach((this.menuItemsV2 as EditableTitleBarV2MenuItem[]).slice(EditableTitleBarV2.commonZeroV2.toInt(),
             this.isSaveEnabledV2 ?
-              EditableTitleBarV2.maxOtherCountOfExtraItemsV2.toInt() : EditableTitleBarV2.maxCountOfExtraItemsV2.toInt()),
+              EditableTitleBarV2.maxOtherCountOfExtraItemsV2.toInt() :
+                EditableTitleBarV2.maxCountOfExtraItemsV2.toInt()),
             (item: EditableTitleBarV2MenuItem, index: int) => {
               ImageMenuItemV2({
                 itemV2: item,
@@ -698,8 +700,10 @@ struct ImageMenuItemV2 {
     .backgroundColor(this.getBgColorV2())
     .border({
       radius: $r('sys.float.titlebar_icon_background_shape'),
-      width: this.isInFocusedStyleV2 ? $r('sys.float.titlebar_icon_background_focus_outline_weight') : EditableTitleBarV2.commonZeroV2,
-      color: this.isInFocusedStyleV2 ? this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor : Color.Transparent,
+      width: this.isInFocusedStyleV2 ?
+        $r('sys.float.titlebar_icon_background_focus_outline_weight') : EditableTitleBarV2.commonZeroV2,
+      color: this.isInFocusedStyleV2 ?
+        this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor : Color.Transparent,
       style: BorderStyle.Solid,
     })
     .onFocus(() => {
@@ -775,8 +779,10 @@ struct ImageMenuItemV2 {
         .backgroundColor(EditableTitleBarV2.noneColorV2)
         .border({
           radius: $r('sys.float.titlebar_icon_background_shape'),
-          width: this.isInFocusedStyleV2 ? $r('sys.float.titlebar_icon_background_focus_outline_weight') : EditableTitleBarV2.commonZeroV2,
-          color: this.isInFocusedStyleV2 ? this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor : Color.Transparent,
+          width: this.isInFocusedStyleV2 ?
+            $r('sys.float.titlebar_icon_background_focus_outline_weight') : EditableTitleBarV2.commonZeroV2,
+          color: this.isInFocusedStyleV2 ?
+            this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor : Color.Transparent,
           style: BorderStyle.Solid,
         })
         .onFocus(() => {

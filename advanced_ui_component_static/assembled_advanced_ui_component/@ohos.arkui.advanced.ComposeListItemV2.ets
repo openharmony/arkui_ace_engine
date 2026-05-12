@@ -705,7 +705,7 @@ struct OperateItemStructV2 {
         fadeout: true,
         marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
       })
-      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
+      .maxLines(Double.toInt(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value))
       .draggable(false)
       .flexShrink(1)
   }
@@ -920,7 +920,7 @@ struct OperateItemStructV2 {
               fadeout: true,
               marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
-            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
+.maxLines(Double.toInt(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value))
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -1053,7 +1053,8 @@ function getAccessibilityText(resource: ResourceStr): string {
     } else {
       let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
       if (uiContent) {
-        (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long);
+        resourceString =
+          (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long);
       }
     }
     return resourceString;
@@ -1110,7 +1111,7 @@ export struct ComposeListItemV2 {
   @Local canTouch: boolean = true;
   @Local canHover: boolean = true;
   @Local isHover: boolean = false;
-  @Local itemHeight: number = ItemHeight.FIRST_HEIGHT as number;
+  @Local itemHeight: number = Int.toDouble(ItemHeight.FIRST_HEIGHT);
   @Local isActive: boolean = false;
   @Local hoveringColor: ResourceColor = '#0d000000';
   @Local touchDownColor: ResourceColor = '#1a000000';
@@ -1166,8 +1167,8 @@ export struct ComposeListItemV2 {
         const systemIconLineHeight =
           LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value as number;
         this.itemHeight =
-          (this.contentItemV2?.iconStyle as IconTypeV2) <= IconTypeV2.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT as number :
-            systemIconLineHeight as number;
+          (this.contentItemV2?.iconStyle as IconTypeV2) <= IconTypeV2.HEAD_SCULPTURE ?
+            Int.toDouble(ItemHeight.SECOND_HEIGHT) : systemIconLineHeight;
       }
     } else if (this.contentItemV2?.description === undefined) {
       let iconStyle: IconTypeV2 = (this.contentItemV2?.iconStyle as IconTypeV2);
@@ -1332,7 +1333,8 @@ export struct ComposeListItemV2 {
     if (this.containerDirection === FlexDirection.Row) {
       return LengthMetrics.vp(0);
     }
-    let iconSize: number = ICON_SIZE_MAP.get(this.contentItemV2?.iconStyle! as number) as number;
+    let iconStyleVal: number | undefined = this.contentItemV2?.iconStyle;
+    let iconSize: number = iconStyleVal !== undefined ? (ICON_SIZE_MAP.get(iconStyleVal) as number ?? 0) : 0;
     if (this.contentItemV2?.icon && iconSize && (iconSize as number) <= HEADSCULPTURE_SIZE) {
       return LengthMetrics.vp(iconSize + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
     }

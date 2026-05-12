@@ -43,7 +43,6 @@ generate_static_abc("assembled_advanced_ets_abc") {
       "./@ohos.arkui.advanced.ToolBar.ets",
       "./@ohos.arkui.advanced.ToolBarV2.ets",
       "./@ohos.arkui.advanced.TreeView.ets",
-      "./@ohos.arkui.advanced.TreeViewV2.ets",
 
       "./@ohos.arkui.advanced.ArcButton.ets",
       "./@ohos.arkui.advanced.ArcSlider.ets",
