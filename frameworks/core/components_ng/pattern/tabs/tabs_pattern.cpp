@@ -1532,6 +1532,7 @@ void TabsPattern::ApplySystemMaterial()
     if (uiMaterial) {
         tabBarPattern->SetUseNewMaterial(true);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackBlurStyle(std::nullopt);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), uiMaterial.GetRawPtr());
     } else {
         tabBarPattern->SetUseNewMaterial(false);
