@@ -67,6 +67,7 @@ group("core_pattern_unittest") {
     "lazy_layout:lazy_column_layout_test",
     "lazy_layout:lazy_grid_layout_test",
     "lazy_layout:dynamiclayout_grid_test_ng",
+    "lazy_waterflow_layout:lazy_water_flow_layout_test",
     "linear_indicator:linear_indicator_test_ng",
     "linear_layout:linear_layout_test_ng",
     "linear_split:linear_split_test_ng",
