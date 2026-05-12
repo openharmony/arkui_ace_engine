@@ -213,10 +213,11 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     }
     RecordInputEventWithPos(pointerEvent, inputType, sourceType, inputTime);
 }
- 
+
 void AceViewOhos::RecordInputEventWithPos(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const PerfActionType inputType, const PerfSourceType sourceType, uint64_t inputTime)
 {
+    CHECK_NULL_VOID(pointerEvent);
     PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
     if (pMonitor == nullptr) {
         return;
