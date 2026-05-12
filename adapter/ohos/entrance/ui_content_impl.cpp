@@ -2168,15 +2168,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     static std::once_flag onceFlag;
     std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
     AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    ResschedEventListener::GetInstance()->AddContainerId(focusWindowId, instanceId_);
-    static std::once_flag registerFlag;
-    std::call_once(registerFlag, []() {
-        ResourceSchedule::ResSchedClient::GetInstance().RegisterEventListener(
-            ResschedEventListener::GetInstance(),
-            ResourceSchedule::ResType::EventType::EVENT_COMPONENT_PREMAKE);
-    });
-#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     AceNewPipeJudgement::InitAceNewPipeConfig();
     NG::XComponentResolutionConfig::GetInstance().GetApsSdrRatio(context->GetBundleName(),
         static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE));
@@ -2409,6 +2400,15 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     ApsMonitorImpl::GetInstance().SetContainerInstanceId(instanceId_);
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(&ApsMonitorImpl::GetInstance());
 #endif
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    ResschedEventListener::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
+    static std::once_flag registerFlag;
+    std::call_once(registerFlag, []() {
+        ResourceSchedule::ResSchedClient::GetInstance().RegisterEventListener(
+            ResschedEventListener::GetInstance(),
+            ResourceSchedule::ResType::EventType::EVENT_COMPONENT_PREMAKE);
+    });
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
