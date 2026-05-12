@@ -30,6 +30,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/select_content_overlay/select_overlay_callback.h"
 #include "core/components_ng/manager/select_content_overlay/select_overlay_holder.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"

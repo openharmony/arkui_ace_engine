@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <atomic>
 #include <future>
@@ -29,6 +30,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/platform_utils.h"

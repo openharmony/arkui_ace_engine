@@ -27,6 +27,9 @@ class JSSwiperTheme : public JSSwiper {
 public:
     static void ApplyThemeInConstructor()
     {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             // no need to apply custom theme colors
@@ -43,6 +46,9 @@ public:
 
     static void ApplyThemeToDotIndicator(SwiperParameters &swiperParameters, const JSRef<JSObject>& obj)
     {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors.has_value()) {
             return;
@@ -58,6 +64,9 @@ public:
 
     static void ApplyThemeToDotIndicatorForce(SwiperParameters &swiperParameters)
     {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
         if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
             swiperParameters.colorVal = themeColors->CompBackgroundSecondary();
             swiperParameters.selectedColorVal = themeColors->CompBackgroundEmphasize();
@@ -67,6 +76,9 @@ public:
 
     static void ApplyThemeToIndicatorStyle(SwiperParameters &swiperParameters, const JSRef<JSObject>& obj)
     {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors.has_value()) {
             return;
@@ -82,6 +94,9 @@ public:
 
     static void ApplyThemeToDigitIndicator(SwiperDigitalParameters &swiperParameters, const JSRef<JSObject>& obj)
     {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors.has_value()) {
             return;
@@ -97,6 +112,9 @@ public:
 
     static void ApplyThemeToDisplayArrow(SwiperArrowParameters &swiperParameters, const JSRef<JSObject>& obj)
     {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors.has_value()) {
             return;
@@ -113,6 +131,9 @@ public:
 
     static void ApplyThemeToDisplayArrowForce(SwiperArrowParameters &swiperParameters)
     {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (themeColors.has_value()) {
             swiperParameters.arrowColor = themeColors->IconPrimary();

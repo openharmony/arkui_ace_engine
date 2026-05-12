@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 #include "js_third_provider_interaction_operation.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "accessibility_system_ability_client.h"
+#include "base/log/dump_log.h"
 #include "frameworks/core/accessibility/hidumper/accessibility_hidumper.h"
 #include "js_third_accessibility_hover_ng.h"
 #include "core/components_ng/property/accessibility_property.h"

@@ -642,6 +642,7 @@ struct ArkUIAniCommonModifier {
     void(*resolveUIContext)(std::vector<int32_t>& instance);
     ani_long (*getPageRootNode)();
     ani_boolean(*isEasySplit)(ArkUI_Int32 instanceId);
+    void(*dumpLogPrint)(int32_t depth, const char* content);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -650,6 +651,7 @@ struct  ArkUICustomNodeInfo {
     std::function<void()> pageTransitionFunc;
     std::function<void()> onCleanupFunc;
     std::function<std::string()> onDumpInspectorFunc;
+    std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<void(bool, bool)> setActiveFunc;
     std::function<std::string()> onGetJsViewNameFunc;
 };
@@ -750,6 +752,7 @@ struct ArkUIAniDragControllerModifier {
     void (*aniDragActionCancelDataLoading)(const char* key);
     void (*aniDragActionNotifyDragStartReques)(int requestStatus);
     void (*aniDragActionEnableDropDisallowedBadge)(bool enabled);
+    bool (*aniDragActionInterruptFollowHandMorphDropAnimation)();
     int32_t (*aniSpringLoadingContextGetState)(ani_long ptr);
     int32_t (*aniSpringLoadingContextGetCurrentNotifySequence)(ani_long ptr);
     void (*aniSpringLoadingContextGetDragInfos)(ani_long ptr, ArkUIDragInfos& info);
@@ -902,6 +905,11 @@ struct ArkUIAniDetachedFreeRootModifier {
 struct ArkUIAniGestureEventUIObserverModifier {
     void (*removePanListenerCallback)(
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    std::pair<bool, int32_t> (*getNodeInfo)(
+        int32_t instanceId, int32_t nodeId, const std::string& nodeKey, bool isStr, bool isInt);
+    std::pair<bool, bool> (*isNodeRenderStateRegisterLimited)(int32_t instanceId, int32_t resourceId, int32_t nodeId);
+    void (*triggerNodeRenderStateForFirstRegister)(int32_t instanceId, int32_t resourceId, int32_t nodeId);
+    void (*removeNodeRenderStateCallback)(int32_t instanceId, int32_t resourceId, int32_t nodeId, bool isRemoveAll);
     void (*removeClickListenerCallback)(
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
     void (*removeTapListenerCallback)(

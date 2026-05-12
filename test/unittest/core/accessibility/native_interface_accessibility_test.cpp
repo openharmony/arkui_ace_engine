@@ -19,6 +19,7 @@
 #include "frameworks/core/accessibility/accessibility_utils.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_provider.h"
 #include "interfaces/native/native_interface_accessibility.h"
+#include "interfaces/native/node/node_model.h"
 #include "interfaces/native/native_type.h"
 #include "securec.h"
 
@@ -1050,5 +1051,108 @@ HWTEST_F(NativeInterfaceAccessibilityTestNg, GetNativeAccessibilityProviderTest0
     // both nullptr
     ret = OH_ArkUI_NativeModule_GetNativeAccessibilityProvider(nullptr, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: accessibilityTest024
+ * @tc.desc: provider register and async event invalid parameter branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityProviderTest024, TestSize.Level1)
+{
+    ArkUI_AccessibilityProvider provider;
+    ArkUI_AccessibilityProviderCallbacks callbacks = {};
+    ArkUI_AccessibilityProviderCallbacksWithInstance callbacksWithInstance = {};
+
+    int32_t ret = OH_ArkUI_AccessibilityProviderRegisterCallback(&provider, &callbacks);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+
+    ret = OH_ArkUI_AccessibilityProviderRegisterCallbackWithInstance(
+        nullptr, &provider, &callbacksWithInstance);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+
+    ret = OH_ArkUI_AccessibilityProviderRegisterCallbackWithInstance(
+        "instanceId", &provider, &callbacksWithInstance);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+
+    OH_ArkUI_SendAccessibilityAsyncEvent(nullptr, nullptr, MockEventCallBack);
+    OH_ArkUI_SendAccessibilityAsyncEvent(&provider, nullptr, nullptr);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: accessibilityTest025
+ * @tc.desc: add/get element info and destroy element info invalid parameter branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest025, TestSize.Level1)
+{
+    EXPECT_EQ(OH_ArkUI_AddAndGetAccessibilityElementInfo(nullptr), nullptr);
+
+    OH_ArkUI_DestoryAccessibilityElementInfo(nullptr);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: accessibilityTest026
+ * @tc.desc: OH_ArkUI_FindAccessibilityActionArgumentByKey nullptr value test
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityActionArgumentTest026, TestSize.Level1)
+{
+    std::map<std::string, std::string> actionArgumentsMap;
+    actionArgumentsMap["key"] = "value";
+    ArkUI_AccessibilityActionArguments arguments(actionArgumentsMap);
+
+    int32_t ret = OH_ArkUI_FindAccessibilityActionArgumentByKey(
+        &arguments, "key", nullptr);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+}
+
+/**
+ * @tc.name: accessibilityTest027
+ * @tc.desc: OH_ArkUI_NativeModule_GetNativeAccessibilityProvider invalid node branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, GetNativeAccessibilityProviderTest027, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AccessibilityProvider* provider =
+        reinterpret_cast<ArkUI_AccessibilityProvider*>(1);
+    ArkUI_NodeHandle invalidNode = nullptr;
+
+    int32_t ret = OH_ArkUI_NativeModule_GetNativeAccessibilityProvider(
+        &invalidNode, &provider);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(provider, nullptr);
+
+    auto node = OHOS::Ace::NodeModel::CreateNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    provider = reinterpret_cast<ArkUI_AccessibilityProvider*>(1);
+
+    ret = OH_ArkUI_NativeModule_GetNativeAccessibilityProvider(&node, &provider);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(provider, nullptr);
+
+    OHOS::Ace::NodeModel::DisposeNode(node);
+}
+
+/**
+ * @tc.name: accessibilityTest028
+ * @tc.desc: OH_ArkUI_NativeModule_GetNativeAccessibilityProvider custom node success
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, GetNativeAccessibilityProviderTest028, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto node = OHOS::Ace::NodeModel::CreateNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(node, nullptr);
+    ArkUI_AccessibilityProvider* provider = nullptr;
+
+    int32_t ret = OH_ArkUI_NativeModule_GetNativeAccessibilityProvider(&node, &provider);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(provider, nullptr);
+
+    OHOS::Ace::NodeModel::DisposeNode(node);
 }
 } // namespace OHOS::Ace::NG

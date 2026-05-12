@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 
@@ -1167,6 +1169,15 @@ void SelectContentOverlayManager::SetTextSelectionHolderId(int32_t id)
         return;
     }
     textSelectHolderId_ = id;
+}
+
+void SelectContentOverlayManager::SetTextSelectionClearPolicy(TextSelectionClearPolicy policy)
+{
+    textSelectionClearPolicy_ = policy;
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_VOID(callback);
+    callback->SetTextSelectionClearPolicy(policy);
 }
 
 void SelectContentOverlayManager::RemoveHoldSelectionCallback(int32_t id)

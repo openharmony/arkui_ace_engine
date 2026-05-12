@@ -99,28 +99,32 @@ void MergeRows(std::vector<RationNum>& upperRow, const std::vector<RationNum>& l
 
 void ToUpperTriangle(std::vector<std::vector<RationNum>>& matrix)
 {
-    int32_t rowNum = static_cast<int32_t>(matrix.size());
-    int32_t collomNum = static_cast<int32_t>(matrix[0].size());
+    int32_t rowNum = matrix.size();
+    int32_t colNum = matrix[0].size();
 
-    // turn the matrix to upper matrix
-    for (int32_t i = 0; i < rowNum && i < collomNum; ++i) {
-        // find the pivot with min non-zero abs value, if cannot find, means the whole collom is zero
-        int32_t minRow = FindPivot(matrix, i, i);
-        if (matrix[minRow][i] == 0) {
+    for (int32_t i = 0; i < rowNum && i < colNum; ++i) {
+        int32_t pivotRow = FindPivot(matrix, i, i);
+        if (matrix[pivotRow][i] == 0) {
             continue;
         }
-        // swap row if the min non-zero abs row is not the current one
-        if (minRow != i) {
-            SwapRows(matrix, i, minRow);
+
+        if (pivotRow != i) {
+            SwapRows(matrix, i, pivotRow);
         }
-        // eleminate vars
+
+        auto& rowI = matrix[i];
+        RationNum pivot = rowI[i];
+
         for (int32_t j = i + 1; j < rowNum; ++j) {
-            if (matrix[j][i] == 0) {
+            auto& rowJ = matrix[j];
+            if (rowJ[i] == 0) {
                 continue;
             }
-            RationNum factor = matrix[j][i] / matrix[i][i];
-            for (int32_t k = i; k < collomNum; ++k) {
-                matrix[j][k] -= factor * matrix[i][k];
+
+            RationNum factor = rowJ[i] / pivot;
+
+            for (int32_t k = i; k < colNum; ++k) {
+                rowJ[k] -= factor * rowI[k];
             }
         }
     }
@@ -132,25 +136,29 @@ void ToDiagonal(std::vector<std::vector<RationNum>>& matrix)
     if (rowNum == 0) {
         return;
     }
-    int32_t collomNum = static_cast<int32_t>(matrix[0].size());
+    int32_t colNum = static_cast<int32_t>(matrix[0].size());
     
-    // turn the upper triangle matrix to diagonal matrix
     for (int32_t i = rowNum - 1; i >= 0; i--) {
-        bool nonZero = false;
-        int32_t nonZeroIdx = i;
-        for (; nonZeroIdx < collomNum - 1; nonZeroIdx++) {
-            if (matrix[i][nonZeroIdx] != 0) {
-                nonZero = true;
+        int32_t pivotCol = i;
+        bool foundPivot = false;
+        for (; pivotCol < colNum; pivotCol++) {
+            if (matrix[i][pivotCol] != 0) {
+                foundPivot = true;
                 break;
             }
         }
-        // if the row are all zeros, continue, otherwise delete other rows by the non-zero one
-        if (!nonZero) {
+
+        if (!foundPivot) {
             continue;
         }
+        
         for (int32_t j = i - 1; j >= 0; j--) {
-            RationNum factor = matrix[j][nonZeroIdx] / matrix[i][nonZeroIdx];
-            for (int32_t k = nonZeroIdx; k < collomNum; k++) {
+            if (matrix[j][pivotCol] == 0) {
+                continue;
+            }
+            
+            RationNum factor = matrix[j][pivotCol] / matrix[i][pivotCol];
+            for (int32_t k = pivotCol; k < colNum; k++) {
                 matrix[j][k] -= factor * matrix[i][k];
             }
         }
@@ -166,12 +174,6 @@ void GaussianElimination(std::vector<std::vector<RationNum>>& matrix)
     
     ToUpperTriangle(matrix);
     ToDiagonal(matrix);
-    
-    for (int32_t i = rowNum - 1; i >= 0; i--) {
-        for (int32_t j = i - 1; j >= 0; j--) {
-            MergeRows(matrix[j], matrix[i]);
-        }
-    }
     TransferToInteger(matrix);
 }
 

@@ -473,6 +473,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute;
     singleLine(enable: boolean): RichEditorAttribute;
     orphanCharOptimization(enable: Optional<boolean>): RichEditorAttribute;
+    horizontalScrolling(enabled: Optional<boolean>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1085,6 +1086,8 @@ declare class ArkContainerPicker extends ArkComponent implements UIPickerCompone
     canLoop(isLoop: Optional<boolean>): this;
     enableHapticFeedback(enable: Optional<boolean>): this;
     selectionIndicator(style: Optional<PickerIndicatorStyle>): this;
+    displayedItemCount(count: Optional<number>): this;
+    itemHeight(height: Optional<LengthMetrics>): this;
 }
 
 declare class ArkSliderComponent extends ArkComponent implements SliderAttribute {
@@ -1936,7 +1939,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     onScrollStop(event: () => void): this;
     fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     childrenMainSize(value: ChildrenMainSize): this;
-    backPressCloseSwipeAction(value: boolean): this;
+    backPressBehavior(value: ListBackPressBehavior | undefined): this;
 }
 declare class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2167,7 +2170,7 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     constructor(nativePtr: KNode, classType?: ModifierType);
     fontColor(value: Array<ResourceColor | ColorMetrics> | undefined): SymbolGlyphAttribute;
     fontSize(value: number | string | Resource): SymbolGlyphAttribute;
-    fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
+    fontWeight(value: number | FontWeight | string, fontWeightConfigs?: FontWeightConfigs): SymbolGlyphAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
     minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
@@ -2180,7 +2183,7 @@ declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanA
     constructor(nativePtr: KNode, classType?: ModifierType);
     fontColor(value: ResourceColor[]): SymbolSpanAttribute;
     fontSize(value: number | string | Resource): SymbolSpanAttribute;
-    fontWeight(value: number | FontWeight | string): SymbolSpanAttribute;
+    fontWeight(value: number | FontWeight | string, fontWeightConfigs?: FontWeightConfigs): SymbolSpanAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolSpanAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolSpanAttribute;
 }
@@ -2204,6 +2207,21 @@ declare class ArkContainerSpanComponent extends ArkComponent implements Containe
 declare class ArkLazyVGridLayoutComponent extends ArkComponent implements LazyVGridLayoutAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     columnsTemplate(value: string): this;
+    onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
+    columnsGap(value: LengthMetrics): this;
+    rowsGap(value: LengthMetrics): this;
+}
+
+declare class ArkLazyColumnLayoutComponent extends ArkComponent implements LazyColumnLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    space(value: LengthMetrics | undefined): this;
+    alignItems(value: HorizontalAlign | undefined): this;
+    onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
+}
+
+declare class ArkLazyVWaterFlowLayoutComponent extends ArkComponent implements LazyVWaterFlowLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    columnsTemplate(value: string | ItemFillPolicy): this;
     onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
     columnsGap(value: LengthMetrics): this;
     rowsGap(value: LengthMetrics): this;

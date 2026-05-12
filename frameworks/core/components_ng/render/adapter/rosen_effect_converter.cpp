@@ -33,7 +33,7 @@ constexpr uint32_t maskEdLightParams = 0b0011u;
 std::shared_ptr<Rosen::RSNGFilterBase> RosenEffectConverter::ConvertToFrostedGlassFilter(
     const FrostedGlassParam& param, float oneVpValue)
 {
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
     auto filter = std::make_shared<Rosen::RSNGFrostedGlassFilter>();
     filter->Setter<Rosen::FrostedGlassBlurParamsTag>(ConvertToVector2f(param.blurParams, oneVpValue, maskBlurParams));
     filter->Setter<Rosen::FrostedGlassWeightsEmbossTag>(ConvertToVector2f(param.weightsEmboss));

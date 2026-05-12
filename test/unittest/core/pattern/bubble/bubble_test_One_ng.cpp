@@ -70,6 +70,10 @@ constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float POSITION_OFFSET = 100.0f;
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
 
+constexpr float TEST_BORDER_RADIUS = 16.0f;
+constexpr float TEST_ARROW_OFFSET = 1.0f;
+constexpr float TEST_LARGE_OFFSET = 1000.0f;
+
 const std::string CLIP_PATH = "M100 0 L0 100 L50 200 L150 200 L200 100 Z";
 const std::string BUBBLE_MESSAGE = "Hello World";
 const std::string BUBBLE_NEW_MESSAGE = "Good";
@@ -353,10 +357,10 @@ HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement001, TestSize.Level0)
     layoutAlgorithm->arrowPlacement_ = Placement::BOTTOM;
     layoutAlgorithm->bCaretMode_ = false;
     layoutAlgorithm->arrowOffset_.SetUnit(DimensionUnit::LPX);
-    layoutAlgorithm->borderRadius_.SetValue(16.0f);
-    layoutAlgorithm->arrowOffset_.SetValue(1.0f);
-    layoutAlgorithm->childOffset_.SetX(1000.0f);
-    layoutAlgorithm->childSize_.SetWidth(1000.0f);
+    layoutAlgorithm->borderRadius_.SetValue(TEST_BORDER_RADIUS);
+    layoutAlgorithm->arrowOffset_.SetValue(TEST_ARROW_OFFSET);
+    layoutAlgorithm->childOffset_.SetX(TEST_LARGE_OFFSET);
+    layoutAlgorithm->childSize_.SetWidth(TEST_LARGE_OFFSET);
     layoutAlgorithm->GetArrowBuildPlacement(arrowBuildPlacement);
     EXPECT_EQ(arrowBuildPlacement, Placement::TOP_LEFT);
     arrowBuildPlacement = Placement::NONE;

@@ -22,7 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
-#include "frameworks/core/components/common/properties/decoration.h"
+#include "core/components/common/properties/decoration.h"
 
 // avoid windows build error about macro defined in wincon.h
 #ifdef DOUBLE_CLICK
@@ -263,7 +263,7 @@ struct TextSelector {
     OnAccessibilityCallback onAccessibilityCallback_;
     int32_t lastValidStart = 0;
     std::string lastReportContent_;
-    std::string lastReportSelectionText_;
+    std::string lastReportSelectionText_ = "";
 };
 
 enum class TextSpanType : int32_t {

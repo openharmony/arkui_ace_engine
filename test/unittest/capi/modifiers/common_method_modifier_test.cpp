@@ -2362,7 +2362,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOnVisibleAreaChangeTest, TestSize
 
     EXPECT_EQ(checkEvent.size(), 0);
 
-    modifier_->setOnVisibleAreaChange(node_, &numberArrayResult, &func);
+    modifier_->setOnVisibleAreaChange0(node_, &numberArrayResult, &func);
 
     EXPECT_EQ(checkEvent.size(), 2);
     EXPECT_EQ(checkEvent[0].nodeId, FAKE_RES_ID);
@@ -2372,8 +2372,8 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOnVisibleAreaChangeTest, TestSize
     EXPECT_FLOAT_EQ(checkEvent[0].currentRatio, 0.0f);
     EXPECT_FLOAT_EQ(checkEvent[1].currentRatio, ratioVec[0]);
 
-    modifier_->setOnVisibleAreaChange(node_, &numberArrayResultInvalid1, &func);
-    modifier_->setOnVisibleAreaChange(node_, &numberArrayResultInvalid2, &func);
+    modifier_->setOnVisibleAreaChange0(node_, &numberArrayResultInvalid1, &func);
+    modifier_->setOnVisibleAreaChange0(node_, &numberArrayResultInvalid2, &func);
 
     EXPECT_EQ(checkEvent.size(), 6);
     EXPECT_FLOAT_EQ(checkEvent[3].currentRatio, 0.0f);

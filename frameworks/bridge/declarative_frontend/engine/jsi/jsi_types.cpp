@@ -17,6 +17,7 @@
 
 #include "base/log/ace_performance_monitor.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
@@ -557,7 +558,7 @@ bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& value
         return false;
     }
     auto arrayRef = Local<ArrayRef>(arg);
-    uint32_t length = arrayRef->Length(info_->GetVM());
+    uint32_t length = NG::ArkTSUtils::GetArrayLength(info_->GetVM(), arrayRef);
     valueArr.reserve(length);
     for (uint32_t i = 0; i < length; ++i) {
         auto jsDouble = panda::ArrayRef::GetValueAt(info_->GetVM(), arrayRef, i);

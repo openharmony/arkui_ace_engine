@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/pipeline/base/element_register.h"
 #include "ui/base/geometry/ng/offset_t.h"
@@ -1525,9 +1526,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
     DragSummaryInfo dragSummaryInfo;
     int32_t dataSize = 1;
 
-    RefPtr<MockInteractionInterface> mockInteractionInterface = AceType::MakeRefPtr<MockInteractionInterface>();
-    ASSERT_NE(mockInteractionInterface, nullptr);
-    EXPECT_CALL(*mockInteractionInterface, GetAppDragSwitchState(_)).WillRepeatedly(testing::Return(1));
     RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     ASSERT_NE(unifiedData, nullptr);
     dragAction->unifiedData = unifiedData;

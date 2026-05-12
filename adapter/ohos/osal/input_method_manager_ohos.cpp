@@ -14,6 +14,9 @@
  */
 
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/container.h"
+#include "core/common/container_handler.h"
+#include "core/common/frontend.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"

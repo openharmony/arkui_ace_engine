@@ -77,7 +77,7 @@ public:
         return false;
     }
 
-    bool CheckIfNeedSetOuterBorderProp() const override
+    bool CheckIfNeedSetOuterBorderProp() override
     {
         return false;
     }

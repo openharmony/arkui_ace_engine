@@ -20,6 +20,7 @@
 #endif
 
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 
 namespace OHOS::Ace::NG {
 bool CheckBoxGroupAccessibilityProperty::IsCheckable() const

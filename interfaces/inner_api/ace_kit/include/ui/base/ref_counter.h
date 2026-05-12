@@ -53,7 +53,7 @@ public:
                 return false;
             }
             ACE_DCHECK(count > 0);
-        } while (!count_.compare_exchange_weak(count, count + 1, std::memory_order_relaxed));
+        } while (ACE_UNLIKELY(!count_.compare_exchange_weak(count, count + 1, std::memory_order_relaxed)));
         return true;
     }
 

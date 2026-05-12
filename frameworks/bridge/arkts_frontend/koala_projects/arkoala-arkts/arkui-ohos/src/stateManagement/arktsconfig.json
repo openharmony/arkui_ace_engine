@@ -5,7 +5,6 @@
             "std": ["node_modules/@panda/sdk/ets/stdlib/std"],
             "escompat": ["node_modules/@panda/sdk/ets/stdlib/escompat"],
             "#stateMgmtTool": ["tools/arkts/stateMgmtTool.ts"],
-            "@koalaui/compat": ["../../../../incremental/compat/src/arkts"],
             "@koalaui/runtime": ["./mock/env_mock"],
             "#generated": ["mock/interop.ts"],
             "@koalaui/common" : ["mock/koalaui-common.ts"],
@@ -16,7 +15,18 @@
             "arkui.ani": ["./mock/env_mock"],
             "@factoryInternal": ["./mock"],
             "@uicontext": ["./mock"],
-            "@ohos.app.ability.contextConstant": ["./mock/contextConstant"]
+            "@ohos.app.ability.contextConstant": ["./mock/contextConstant"],
+
+            "@decoratorEnv": ["./mock/decoratorEnv_mock"],
+            "@component/customComponent": ["./mock/customComponent_mock"],
+            "@component/extendableComponent": ["./mock/extendableComponent"],
+            "@component/interop": ["./mock/interop_component_mock"],
+            "@peerNode": ["./mock/peerNode_mock"],
+            "@aceTrace": ["./mock/aceTrace_mock"],
+            "@ohos.base": ["./mock/ohos_mock"],
+
+            "@ohos/arkui/UIContext": ["./mock/ohos_mock"],
+            "arkui/base/UIContextUtil": ["./mock/UIContextUtil"]
         }
     }
 }

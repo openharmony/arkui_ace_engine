@@ -17,6 +17,7 @@
 #include "ui/animation/animation_constants.h"
 
 #include "base/error/error_code.h"
+#include "base/log/ace_trace.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
@@ -25,6 +26,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG::ViewAnimate {
 namespace {

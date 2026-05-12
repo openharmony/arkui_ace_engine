@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-import { IMutableStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, STATE_MGMT_FACTORY, WatchIdType } from '../decorator';
+import { IMutableStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, OBSERVE, STATE_MGMT_FACTORY, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveWrappedBase } from './observeWrappedBase';
+import { IObservedAnyProp } from '../decorator';
 
-export class WrappedDate extends Date implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
+export class WrappedDate extends Date implements IObservedObject, ObserveWrappedBase, ISubscribedWatches,
+    IObservedAnyProp {
     private store_: Date;
     @JSONStringifyIgnore
     private meta_: IMutableStateMeta;
@@ -75,7 +77,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
     }
 
     public shouldAddRef(): boolean {
-        return this.allowDeep_ || ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return OBSERVE.renderingComponent > 0;
     }
 
     /**
@@ -921,5 +923,9 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
         if (this.shouldAddRef()) {
             this.meta_.addRef();
         }
+    }
+
+    public addRefAnyProp(): void {
+        this.conditionalAddRef();
     }
 }

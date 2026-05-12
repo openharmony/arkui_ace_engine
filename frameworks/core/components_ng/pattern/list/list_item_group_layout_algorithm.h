@@ -18,6 +18,7 @@
 
 #include <optional>
 #include "base/geometry/axis.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_info.h"
@@ -178,6 +179,11 @@ public:
     void SetListLayoutProperty(RefPtr<ListLayoutProperty> layoutProperty)
     {
         listLayoutProperty_ = std::move(layoutProperty);
+    }
+
+    void SetDefaultMultiSelectStyleEnabled(bool enabled)
+    {
+        defaultMultiSelectStyleEnabled_ = enabled;
     }
 
     void SetJumpIndex(int32_t index)
@@ -427,6 +433,8 @@ public:
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    bool NeedReserveEditModeCheckBoxSpace() const;
+    void UpdateListItemEditModeCheckBoxSpace(const RefPtr<LayoutWrapper>& wrapper) const;
     void UpdateRecycledItems();
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
@@ -491,6 +499,7 @@ private:
     int32_t itemStartIndex_;
     int32_t footerCount_;
     RefPtr<ListLayoutProperty> listLayoutProperty_;
+    bool defaultMultiSelectStyleEnabled_ = true;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
 

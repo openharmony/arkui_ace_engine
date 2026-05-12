@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/property/flex_property.h"

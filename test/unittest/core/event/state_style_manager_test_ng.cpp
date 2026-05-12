@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/event/ace_events.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -931,5 +932,117 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest030, TestSize.Level1)
     EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_SELECTED));
     EXPECT_EQ(callbackUIState, UI_STATE_SELECTED);
     EXPECT_TRUE(stateStyleMgr->IsExcludeInner(UI_STATE_SELECTED));
+}
+
+/**
+ * @tc.name: StateStyleTest031
+ * @tc.desc: test GetHoverListener when hoverFunc_ already exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create state style manager.
+     * @tc.expected: stateStyleMgr is not null.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    ASSERT_NE(stateStyleMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetHoverListener for the first time.
+     * @tc.expected: hoverFunc_ should be created and not null.
+     */
+    auto hoverListener1 = stateStyleMgr->GetHoverListener();
+    ASSERT_NE(hoverListener1, nullptr);
+
+    /**
+     * @tc.steps: step3. Call GetHoverListener for the second time.
+     * @tc.expected: Should return the same hoverFunc_ instance (cached).
+     */
+    auto hoverListener2 = stateStyleMgr->GetHoverListener();
+    EXPECT_EQ(hoverListener1, hoverListener2);
+}
+
+/**
+ * @tc.name: StateStyleTest032
+ * @tc.desc: test GetHoverListener callback when isHover is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create state style manager.
+     * @tc.expected: stateStyleMgr is not null.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    ASSERT_NE(stateStyleMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. Set supported state to UI_STATE_HOVERED.
+     */
+    stateStyleMgr->SetSupportedStates(UI_STATE_HOVERED);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_HOVERED));
+
+    /**
+     * @tc.steps: step3. Get hover listener.
+     * @tc.expected: hoverListener is not null.
+     */
+    auto hoverListener = stateStyleMgr->GetHoverListener();
+    ASSERT_NE(hoverListener, nullptr);
+
+    /**
+     * @tc.steps: step4. Execute hover callback with isHover = true.
+     * @tc.expected: Should update UI state to UI_STATE_HOVERED.
+     */
+    HoverInfo hoverInfo;
+    auto callback = hoverListener->GetOnHoverFunc();
+    ASSERT_NE(callback, nullptr);
+    callback(true, hoverInfo);
+    EXPECT_TRUE(stateStyleMgr->IsCurrentStateOn(UI_STATE_HOVERED));
+}
+
+/**
+ * @tc.name: StateStyleTest033
+ * @tc.desc: test GetHoverListener callback when isHover is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create state style manager.
+     * @tc.expected: stateStyleMgr is not null.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    ASSERT_NE(stateStyleMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. Set supported state to UI_STATE_HOVERED and set current state to HOVERED.
+     */
+    stateStyleMgr->SetSupportedStates(UI_STATE_HOVERED);
+    stateStyleMgr->SetCurrentUIState(UI_STATE_HOVERED, true);
+    EXPECT_TRUE(stateStyleMgr->IsCurrentStateOn(UI_STATE_HOVERED));
+
+    /**
+     * @tc.steps: step3. Get hover listener.
+     * @tc.expected: hoverListener is not null.
+     */
+    auto hoverListener = stateStyleMgr->GetHoverListener();
+    ASSERT_NE(hoverListener, nullptr);
+
+    /**
+     * @tc.steps: step4. Execute hover callback with isHover = false.
+     * @tc.expected: Should reset UI state from UI_STATE_HOVERED.
+     */
+    HoverInfo hoverInfo;
+    auto callback = hoverListener->GetOnHoverFunc();
+    ASSERT_NE(callback, nullptr);
+    callback(false, hoverInfo);
+    EXPECT_FALSE(stateStyleMgr->IsCurrentStateOn(UI_STATE_HOVERED));
 }
 } // namespace OHOS::Ace::NG

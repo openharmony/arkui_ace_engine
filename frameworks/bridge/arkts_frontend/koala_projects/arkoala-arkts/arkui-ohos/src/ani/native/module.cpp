@@ -919,6 +919,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionEnableDropDisallowedBadge)
         },
         ani_native_function {
+            "_DragController_interruptFollowHandMorphDropAnimation",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionInterruptFollowHandMorphDropAnimation)
+        },
+        ani_native_function {
             "_DragSpringLoadingContext_get_state",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SpringLoadingContextGetState)
@@ -1781,6 +1786,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::RemovePanListenerCallback)
         },
         ani_native_function {
+            "_GestureEventUIObserver_SetOnNodeRenderState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetOnNodeRenderState)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_RemoveOnNodeRenderState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveOnNodeRenderState)
+        },
+        ani_native_function {
             "_GestureEventUIObserver_SetClickListenerCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetClickListenerCallback)
@@ -1854,6 +1869,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_GetPageRootNode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetPageRootNode)
+        },
+        ani_native_function {
+            "_DumpLogPrint",
+            "iC{std.core.String}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DumpLogPrint)
         }
     };
 

@@ -77,6 +77,13 @@ public:
         }
     }
 
+    void ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end)
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->ScrollToVisible(start, end);
+        }
+    }
+
     void SetStyledPlaceholder(const RefPtr<SpanString>& spanString)
     {
         CHECK_NULL_VOID(spanString);

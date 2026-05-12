@@ -259,6 +259,8 @@ export struct CounterComponent {
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
   private initFlag: boolean = true;
+  private yearTextWidth: number = 0;
+  private monthDayTextWidth: number = 0;
 
   getTextInputFontSize() {
     let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
@@ -271,8 +273,7 @@ export struct CounterComponent {
     }
   }
 
-  private getMeasuredTextWidth(): number {
-    let text = this.getValue();
+  private getMeasuredTextWidth(text: string): number {
     let measureUtils = this.getUIContext().getMeasureUtils();
     let widthPx = measureUtils.measureText({
       textContent: text,
@@ -461,7 +462,8 @@ export struct CounterComponent {
   private updateInlineStyleOptions() {
     if (this.initFlag) {
       this.initFlag = false;
-      this.value = this.inlineStyleOptions.value !== undefined ? this.inlineStyleOptions.value : 0;
+      const truncatedValue = Math.trunc(this.inlineStyleOptions.value);
+      this.value = Number.isFinite(truncatedValue) ? truncatedValue : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }
@@ -596,6 +598,12 @@ export struct CounterComponent {
         this.dateStyleOptions = options;
       }
       this.updateDateStyleOptions();
+      if (this.yearTextWidth <= 0) {
+        this.yearTextWidth = this.getMeasuredTextWidth('0000');
+      }
+      if (this.monthDayTextWidth <= 0) {
+        this.monthDayTextWidth = this.getMeasuredTextWidth('00');
+      }
     } else {
 
     }
@@ -1998,7 +2006,7 @@ export struct CounterComponent {
             })
               .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
               .direction(this.counterDirection)
-              .width(this.getMeasuredTextWidth())
+              .width(this.getMeasuredTextWidth(this.getValue()))
               .height('20vp')
               .padding(0)
               .borderRadius(0)
@@ -2320,7 +2328,7 @@ export struct CounterComponent {
             .maxLength(5)
             .padding(0)
             .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
-            .width('38vp')
+            .width(this.yearTextWidth)
             .height('20vp')
             .borderRadius(0)
             .borderWidth(0)
@@ -2452,7 +2460,7 @@ export struct CounterComponent {
             .maxLength(3)
             .padding(0)
             .backgroundColor(this.hasFocusText2 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
-            .width('19vp')
+            .width(this.monthDayTextWidth)
             .height('20vp')
             .borderRadius(0)
             .key('DateTextInput2' + this.timeStamp.toString())
@@ -2592,7 +2600,7 @@ export struct CounterComponent {
             .maxLength(3)
             .padding(0)
             .backgroundColor(this.hasFocusText3 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
-            .width('19vp')
+            .width(this.monthDayTextWidth)
             .height('20vp')
             .borderRadius(0)
             .key('DateTextInput3' + this.timeStamp.toString())

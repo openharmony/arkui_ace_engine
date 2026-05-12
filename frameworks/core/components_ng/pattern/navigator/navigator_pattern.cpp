@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 void NavigatorPattern::OnModifyDone()

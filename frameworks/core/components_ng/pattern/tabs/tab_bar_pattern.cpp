@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/base/modifier.h"
 
 #include <optional>
 
@@ -25,9 +26,11 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/event/scrollable_event.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -554,6 +557,7 @@ void TabBarPattern::AddTabBarItemClickAndTouchEvent(const RefPtr<FrameNode>& tab
         auto index = host->GetChildFlatIndex(tabBarItemId).second;
         for (auto touchInfo : info.GetTouches()) {
             tabBar->HandleTouchEvent(touchInfo.GetTouchType(), index);
+            tabBar->HandleTouchUpAndClickTo(touchInfo);
         }
     };
     auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -1429,6 +1433,12 @@ bool TabBarPattern::CustomizeExpandSafeArea()
     CHECK_NULL_RETURN(host, false);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_RETURN(tabsNode, false);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, false);
+    if (tabsPattern->IsFloatingBar()) {
+        return true;
+    }
+
     auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_RETURN(tabLayoutProperty, false);
     return tabLayoutProperty->GetSafeAreaPaddingProperty() ? true : false;
@@ -1773,14 +1783,16 @@ void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& sel
             selectedImagePaintProperty->UpdateSvgFillColor(
                 iconStyles_[selectedIndexes[maskIndex]].selectedColor.value());
         } else {
-            selectedImagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
+            auto defaultColor = useNewMaterial_ ? tabTheme->GetIconEmphasize() : tabTheme->GetBottomTabIconOn();
+            selectedImagePaintProperty->UpdateSvgFillColor(defaultColor);
         }
 
         if (iconStyles_[selectedIndexes[maskIndex]].unselectedColor.has_value()) {
             unselectedImagePaintProperty->UpdateSvgFillColor(
                 iconStyles_[selectedIndexes[maskIndex]].unselectedColor.value());
         } else {
-            unselectedImagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+            auto defaultColor = useNewMaterial_ ? tabTheme->GetIconPrimary() : tabTheme->GetBottomTabIconOff();
+            unselectedImagePaintProperty->UpdateSvgFillColor(defaultColor);
         }
     }
 }
@@ -2043,6 +2055,9 @@ void TabBarPattern::HandleTouchDown(int32_t index)
     if (removeSwiperEventCallback) {
         removeSwiperEventCallback();
     }
+    if (useNewMaterial_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabTheme = host->GetTheme<TabTheme>(true);
@@ -2055,6 +2070,9 @@ void TabBarPattern::HandleTouchUp(int32_t index)
     const auto& addSwiperEventCallback = swiperController_->GetAddSwiperEventCallback();
     if (addSwiperEventCallback) {
         addSwiperEventCallback();
+    }
+    if (useNewMaterial_) {
+        return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2289,8 +2307,9 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         if (isSelected) {
             UpdateSelectedTextColor(tabTheme, axis, textLayoutProperty, index, columnId);
         } else {
+            auto defaultColor = useNewMaterial_ ? tabTheme->GetFontPrimary() : tabTheme->GetSubTabTextOffColor();
             textLayoutProperty->UpdateTextColor(
-                labelStyles_[columnId].unselectedColor.value_or(tabTheme->GetSubTabTextOffColor()));
+                labelStyles_[columnId].unselectedColor.value_or(defaultColor));
         }
         UpdateSubTabFocusedTextColor(tabTheme, columnId == focusedColumnId, textLayoutProperty, index, isSelected);
         if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
@@ -2310,7 +2329,8 @@ void TabBarPattern::UpdateSelectedTextColor(const RefPtr<TabTheme>& tabTheme, OH
                                  selectedModes_[index] == SelectedMode::BOARD && axis == Axis::HORIZONTAL
                              ? tabTheme->GetSubTabBoardTextOnColor()
                              : tabTheme->GetSubTabTextOnColor();
-    textLayoutProperty->UpdateTextColor(labelStyles_[columnId].selectedColor.value_or(selectedColor));
+    auto defaultColor = useNewMaterial_ ? tabTheme->GetFontEmphasize() : selectedColor;
+    textLayoutProperty->UpdateTextColor(labelStyles_[columnId].selectedColor.value_or(defaultColor));
 }
 
 void TabBarPattern::UpdateImageColor(int32_t indicator)
@@ -3891,5 +3911,48 @@ void TabBarPattern::UpdateSubTabBarImageIndicator()
     indicatorNode->MarkModifyDone();
 }
 
+int32_t TabBarPattern::GetChildrenSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    return static_cast<int32_t>(host->GetChildren().size() - MASK_COUNT - IMAGE_INDICATOR_COUNT);
+}
 
+int32_t TabBarPattern::GetSelectChildIndex(const Offset& offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    int32_t index = 0;
+    auto childSize = GetChildrenSize();
+    for (auto child : host->GetChildren()) {
+        auto childNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(childNode, -1);
+        auto geometryNode = childNode->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, -1);
+        auto childOffset = geometryNode->GetFrameOffset();
+        auto childWidth = geometryNode->GetFrameSize().Width();
+        if (GreatOrEqual(offset.GetX(), childOffset.GetX()) &&
+            LessNotEqual(offset.GetX(), childOffset.GetX() + childWidth)) {
+            return index;
+        } else if (index == 0 && LessNotEqual(offset.GetX(), childOffset.GetX())) {
+            return index;
+        } else if (index == childSize - 1 && GreatOrEqual(offset.GetX(), childOffset.GetX() + childWidth)) {
+            return index;
+        }
+        index++;
+        if (index >= childSize) {
+            break;
+        }
+    }
+    return -1;
+}
+
+void TabBarPattern::HandleTouchUpAndClickTo(const TouchLocationInfo& info)
+{
+    if (!useNewMaterial_ || info.GetTouchType() != TouchType::UP) {
+        return;
+    }
+    auto index = GetSelectChildIndex(info.GetLocalLocation());
+    HandleClick(SourceType::NONE, index);
+}
 } // namespace OHOS::Ace::NG

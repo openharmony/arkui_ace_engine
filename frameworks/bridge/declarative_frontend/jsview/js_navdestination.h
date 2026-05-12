@@ -27,6 +27,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetHideTitleBar(const JSCallbackInfo& info);
     static void SetHideBackButton(const JSCallbackInfo& info);
+    static void SetFullScreenOverlay(const JSCallbackInfo& info);
     static void SetTitle(const JSCallbackInfo& info);
     static void SetBackButtonIcon(const JSCallbackInfo& info);
     static void SetOnShown(const JSCallbackInfo& info);

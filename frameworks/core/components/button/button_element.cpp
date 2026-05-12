@@ -15,6 +15,7 @@
 
 #include "core/components/button/button_element.h"
 
+#include "core/event/key_event.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace {

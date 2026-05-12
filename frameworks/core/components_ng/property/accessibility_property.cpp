@@ -14,12 +14,14 @@
  */
 
 #include "accessibility_property.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/json/json_util.h"
 #include "base/utils/multi_thread.h"
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/native/native_type.h"
 
@@ -114,6 +116,29 @@ void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType ev
     }
 }
 
+void AccessibilityProperty::SetAccessibilityNextFocusParams(const AccessibilityNextFocusParams& params)
+{
+    accessibilityNextFocusParams_ = params;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityNextFocusParams, params);
+    UpdateAccessibilityNextFocusIdMap(params.nextFocusInspectorKey);
+}
+
+AccessibilityNextFocusParams AccessibilityProperty::GetAccessibilityNextFocusParams() const
+{
+    return accessibilityNextFocusParams_.value_or(AccessibilityNextFocusParams{});
+}
+
+bool AccessibilityProperty::HasAccessibilityNextFocusParams() const
+{
+    return accessibilityNextFocusParams_.has_value();
+}
+
+void AccessibilityProperty::ResetAccessibilityNextFocusParams()
+{
+    accessibilityNextFocusParams_.reset();
+}
+
 void AccessibilityProperty::UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey)
 {
     auto frameNode = host_.Upgrade();
@@ -122,10 +147,13 @@ void AccessibilityProperty::UpdateAccessibilityNextFocusIdMap(const std::string&
     CHECK_NULL_VOID(pipeline);
     auto containerId = pipeline->GetInstanceId();
 
+    bool descendantMode = accessibilityNextFocusParams_.has_value()
+        ? accessibilityNextFocusParams_->descendantMode : false;
+
     auto jsAccessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(jsAccessibilityManager);
     jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(containerId, nextFocusInspectorKey,
-                                                              frameNode->GetAccessibilityId());
+                                                              frameNode->GetAccessibilityId(), descendantMode);
 }
 
 std::string AccessibilityProperty::GetText() const
@@ -1124,10 +1152,15 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
 
 void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey)
 {
-    if (accessibilityNextFocusInspectorKey == accessibilityNextFocusInspectorKey_.value_or("")) {
+    std::string oldKey = accessibilityNextFocusParams_.has_value()
+        ? accessibilityNextFocusParams_->nextFocusInspectorKey : "";
+    if (accessibilityNextFocusInspectorKey == oldKey) {
         return;
     }
-    accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    if (!accessibilityNextFocusParams_.has_value()) {
+        accessibilityNextFocusParams_ = AccessibilityNextFocusParams{};
+    }
+    accessibilityNextFocusParams_->nextFocusInspectorKey = accessibilityNextFocusInspectorKey;
     auto frameNode = host_.Upgrade();
     FREE_NODE_CHECK(frameNode, SetAccessibilityNextFocusInspectorKey, accessibilityNextFocusInspectorKey);
     UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);
@@ -1506,6 +1539,37 @@ AccessibilityActionOptions AccessibilityProperty::GetAccessibilityActionOptions(
 void AccessibilityProperty::ResetAccessibilityActionOptions()
 {
     accessibilityActionOptions_.reset();
+}
+
+void AccessibilityProperty::SetAccessibilityCustomActions(
+    const std::vector<AccessibilityCustomAction>& accessibilityCustomActions)
+{
+    accessibilityCustomActions_ = accessibilityCustomActions;
+}
+
+std::vector<AccessibilityCustomAction> AccessibilityProperty::GetAccessibilityCustomActions()
+{
+    return accessibilityCustomActions_.value_or(std::vector<AccessibilityCustomAction> {});
+}
+
+void AccessibilityProperty::ResetAccessibilityCustomActions()
+{
+    accessibilityCustomActions_.reset();
+}
+
+bool AccessibilityProperty::ActActionCustom(const std::string& actionName)
+{
+    auto customActions = GetAccessibilityCustomActions();
+    for (auto& customAction : customActions) {
+        if (customAction.actionName == actionName) {
+            if (customAction.customActionCallback) {
+                customAction.customActionCallback();
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
 }
 
 void AccessibilityProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

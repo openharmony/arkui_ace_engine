@@ -22,6 +22,8 @@
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -29,6 +31,10 @@
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2175,6 +2181,27 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg194, TestSize.Level1)
     cursorValue = 10;
     context_->SetCursor(cursorValue);
     EXPECT_TRUE(context_->eventManager_->GetMouseStyleManager()->userSetCursor_);
+
+    /**
+     * @tc.steps4: Set custom cursor with empty pixelMap.
+     * @tc.expected: userSetCursor_ remains false because SetCursor returns early.
+     */
+    auto mouseStyleManager = context_->eventManager_->GetMouseStyleManager();
+    ASSERT_NE(mouseStyleManager, nullptr);
+    mouseStyleManager->userSetCursor_ = false;
+    CustomCursorInfo emptyCustomCursorInfo;
+    context_->SetCursor(emptyCustomCursorInfo);
+    EXPECT_FALSE(mouseStyleManager->userSetCursor_);
+
+    /**
+     * @tc.steps5: Set custom cursor with non-empty pixelMap.
+     * @tc.expected: userSetCursor_ is set to true.
+     */
+    mouseStyleManager->userSetCursor_ = false;
+    CustomCursorInfo customCursorInfo;
+    customCursorInfo.pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    context_->SetCursor(customCursorInfo);
+    EXPECT_TRUE(mouseStyleManager->userSetCursor_);
 }
 
 /**

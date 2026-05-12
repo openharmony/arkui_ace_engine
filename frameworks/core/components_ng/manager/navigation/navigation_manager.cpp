@@ -22,13 +22,18 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
 constexpr int32_t INVALID_NODE_ID = -1;
+constexpr int32_t PRIMARY_NAV_PATH_INDEX = 0;
+constexpr int32_t SECONDARY_NAV_PATH_INDEX = 1;
+constexpr int32_t MAX_SEQUENTIAL_RECOVERY_COUNT = 2;
 constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
 constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
 constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
+constexpr char NAV_PATH_ARRAY_KEY[] = "navPathArray";
 
 NavigationManager::NavigationManager()
 {
@@ -813,6 +818,10 @@ void NavigationManager::RestoreNavDestinationInfo(const std::string& navDestinat
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "restore navdestination info is an invalid json object!");
         return;
     }
+    if (navDestinationJson->Contains(NAV_PATH_ARRAY_KEY)) {
+        RestoreNavDestinationInfoInSequence(navDestinationJson, isColdStart);
+        return;
+    }
     auto name = navDestinationJson->GetString("name");
     auto param = navDestinationJson->GetString("param");
     auto mode = navDestinationJson->GetInt("mode");
@@ -838,6 +847,223 @@ void NavigationManager::RestoreNavDestinationInfo(const std::string& navDestinat
     auto navigationStack = pattern->GetNavigationStack();
     CHECK_NULL_VOID(navigationStack);
     navigationStack->CallPushDestinationInner(NavdestinationRecoveryInfo(name, param, mode));
+}
+
+std::optional<NavdestinationRecoveryInfo> NavigationManager::ParseNavdestinationRecoveryInfo(
+    const std::unique_ptr<JsonValue>& navdestinationJson) const
+{
+    if (!navdestinationJson || !navdestinationJson->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "sequential restore aborted, navPathArray item is invalid");
+        return std::nullopt;
+    }
+    auto name = navdestinationJson->GetString("name");
+    auto param = navdestinationJson->GetString("param");
+    auto mode = navdestinationJson->GetInt("mode");
+    auto launchMode = navdestinationJson->GetInt("launchMode", 0);
+    return NavdestinationRecoveryInfo(name, param, mode, launchMode);
+}
+
+bool NavigationManager::RestoreNavdestinationToNavigationStack(
+    const std::string& navigationId, const NavdestinationRecoveryInfo& recoveryInfo)
+{
+    if (navigationMap_.empty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "sequential restore failed, no active navigation found in current page");
+        return false;
+    }
+    auto navigationNode = GetNavigationByInspectorId(navigationId);
+    if (!navigationNode) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "sequential restore failed, navigationId %{public}s not found", navigationId.c_str());
+        return false;
+    }
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    if (!pattern) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "sequential restore failed, navigation pattern is null, navigationId %{public}s", navigationId.c_str());
+        return false;
+    }
+    auto navigationStack = pattern->GetNavigationStack();
+    if (!navigationStack) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "sequential restore failed, navigation stack is null, navigationId %{public}s", navigationId.c_str());
+        return false;
+    }
+    navigationStack->CallPushDestinationInner(recoveryInfo);
+    return true;
+}
+
+bool NavigationManager::CheckSequentialRestoreArray(
+    const std::unique_ptr<JsonValue>& navPathArray, int32_t& arraySize) const
+{
+    if (!navPathArray || !navPathArray->IsArray()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "sequential restore aborted, navPathArray is invalid");
+        return false;
+    }
+    arraySize = navPathArray->GetArraySize();
+    if (arraySize <= 0) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "sequential restore skipped, navPathArray is empty");
+        return false;
+    }
+    if (arraySize > MAX_SEQUENTIAL_RECOVERY_COUNT) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "navPathArray size %{public}d exceeds limit, only the first two pages will be restored", arraySize);
+    }
+    return true;
+}
+
+std::optional<std::pair<std::string, NavdestinationRecoveryInfo>> NavigationManager::ParsePrimaryRecoveryInfo(
+    const std::unique_ptr<JsonValue>& navPathArray) const
+{
+    auto primaryJson = navPathArray->GetArrayItem(PRIMARY_NAV_PATH_INDEX);
+    auto primaryInfo = ParseNavdestinationRecoveryInfo(primaryJson);
+    if (!primaryInfo.has_value()) {
+        return std::nullopt;
+    }
+    auto navigationId = primaryJson->GetString("navigationId", "");
+    if (navigationId.empty()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "sequential restore uses an empty navigationId, it may fail in multi-navigation scenario");
+    }
+    return std::make_pair(navigationId, primaryInfo.value());
+}
+
+std::optional<NavdestinationRecoveryInfo> NavigationManager::ParseSecondaryRecoveryInfo(
+    const std::unique_ptr<JsonValue>& navPathArray, int32_t arraySize, const std::string& navigationId) const
+{
+    if (arraySize <= SECONDARY_NAV_PATH_INDEX) {
+        return std::nullopt;
+    }
+    auto secondaryJson = navPathArray->GetArrayItem(SECONDARY_NAV_PATH_INDEX);
+    auto secondaryInfo = ParseNavdestinationRecoveryInfo(secondaryJson);
+    if (!secondaryInfo.has_value()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "secondary navdestination is invalid, only the primary page will be restored");
+        return std::nullopt;
+    }
+    auto secondaryNavigationId = secondaryJson->GetString("navigationId", navigationId);
+    if (!secondaryNavigationId.empty() && secondaryNavigationId != navigationId) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "secondary navigationId %{public}s mismatches primary navigationId %{public}s, "
+            "primary navigationId will be used",
+            secondaryNavigationId.c_str(), navigationId.c_str());
+    }
+    return secondaryInfo;
+}
+
+bool NavigationManager::RestorePrimaryRecoveryInfo(
+    const std::string& navigationId, const NavdestinationRecoveryInfo& primaryInfo, bool isColdStart)
+{
+    if (isColdStart) {
+        navigationRecoveryInfo_[navigationId] = { primaryInfo };
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "sequential restore primary page prepared for cold start, name: %{public}s, navigationId: %{public}s",
+            primaryInfo.name.c_str(), navigationId.c_str());
+        return true;
+    }
+    if (!RestoreNavdestinationToNavigationStack(navigationId, primaryInfo)) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "sequential restore primary page requested, name: %{public}s, navigationId: %{public}s",
+        primaryInfo.name.c_str(), navigationId.c_str());
+    return true;
+}
+
+void NavigationManager::UpdatePendingSequentialRecoveryInfo(const std::string& navigationId,
+    const NavdestinationRecoveryInfo& primaryInfo, const std::optional<NavdestinationRecoveryInfo>& secondaryInfo)
+{
+    if (!secondaryInfo.has_value()) {
+        pendingSequentialRecoveryInfo_.erase(navigationId);
+        return;
+    }
+    pendingSequentialRecoveryInfo_[navigationId] = { primaryInfo, secondaryInfo };
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "sequential restore secondary page is pending on primary onShown, primary: %{public}s, secondary: "
+        "%{public}s, navigationId: %{public}s",
+        primaryInfo.name.c_str(), secondaryInfo->name.c_str(), navigationId.c_str());
+}
+
+void NavigationManager::RestoreNavDestinationInfoInSequence(
+    const std::unique_ptr<JsonValue>& navDestinationJson, bool isColdStart)
+{
+    // The new sequential-restore protocol is carried by navPathArray. We only consume
+    // the first two entries: index 0 is the primary page, index 1 is the secondary page.
+    auto navPathArray = navDestinationJson->GetValue(NAV_PATH_ARRAY_KEY);
+    int32_t arraySize = 0;
+    if (!CheckSequentialRestoreArray(navPathArray, arraySize)) {
+        return;
+    }
+    // Parse the primary page first. If the primary entry itself is invalid, the whole
+    // sequential restore should stop because the secondary page is defined to depend on it.
+    auto primaryRecovery = ParsePrimaryRecoveryInfo(navPathArray);
+    if (!primaryRecovery.has_value()) {
+        return;
+    }
+    const auto& [navigationId, primaryInfo] = primaryRecovery.value();
+    // The secondary page is optional. If it cannot be parsed, we downgrade to
+    // "restore primary only" instead of failing the entire request.
+    auto secondaryInfo = ParseSecondaryRecoveryInfo(navPathArray, arraySize, navigationId);
+    // Step 1: restore the primary page immediately.
+    // Cold start stores recovery info for later stack rebuild, while hot start pushes it
+    // straight into the live NavigationStack.
+    if (!RestorePrimaryRecoveryInfo(navigationId, primaryInfo, isColdStart)) {
+        return;
+    }
+    // Step 2 and 3: clear stale pending state when there is no secondary page,
+    // otherwise defer it until the primary page reaches its first onShown.
+    UpdatePendingSequentialRecoveryInfo(navigationId, primaryInfo, secondaryInfo);
+}
+
+void NavigationManager::HandleSequentialRestoreOnShown(
+    const RefPtr<NavDestinationGroupNode>& navDestination, const std::string& shownName)
+{
+    CHECK_NULL_VOID(navDestination);
+    if (pendingSequentialRecoveryInfo_.empty()) {
+        return;
+    }
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navDestination->GetNavigationNode());
+    if (!navigationNode) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "sequential restore failed, navDestination has no navigation node");
+        return;
+    }
+    auto navigationId = navigationNode->GetCurId();
+    auto iter = pendingSequentialRecoveryInfo_.find(navigationId);
+    if (iter == pendingSequentialRecoveryInfo_.end()) {
+        return;
+    }
+    if (shownName != iter->second.primaryInfo.name) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "sequential restore waiting for primary %{public}s, but current onShown callback is %{public}s",
+            iter->second.primaryInfo.name.c_str(), shownName.c_str());
+        return;
+    }
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    if (!pattern) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "sequential restore failed, navDestination pattern is null, navigationId: %{public}s",
+            navigationId.c_str());
+        pendingSequentialRecoveryInfo_.erase(iter);
+        return;
+    }
+    if (pattern->GetName() != iter->second.primaryInfo.name) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "sequential restore waiting for primary %{public}s, but current onShown page is %{public}s",
+            iter->second.primaryInfo.name.c_str(), pattern->GetName().c_str());
+        return;
+    }
+    if (!iter->second.secondaryInfo.has_value()) {
+        pendingSequentialRecoveryInfo_.erase(iter);
+        return;
+    }
+    auto secondaryInfo = iter->second.secondaryInfo.value();
+    pendingSequentialRecoveryInfo_.erase(iter);
+    if (!RestoreNavdestinationToNavigationStack(navigationId, secondaryInfo)) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "sequential restore secondary page requested, name: %{public}s, navigationId: %{public}s",
+        secondaryInfo.name.c_str(), navigationId.c_str());
 }
 
 RefPtr<FrameNode> NavigationManager::GetNavigationByInspectorId(const std::string& id) const

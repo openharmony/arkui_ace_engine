@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/pipeline/container_window_manager.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cstdint>
 #include <functional>
@@ -61,6 +63,7 @@
 #include "frameworks/base/utils/measure_util.h"
 
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "frameworks/compatible/components/canvas/rosen_render_custom_paint.h"
@@ -94,6 +97,9 @@ constexpr Dimension EXTENSION_MENU_ITEM_DEFAULT_WIDTH = 216.0_vp;
 constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 constexpr Dimension MENU_BUTTON_SPACING = 4.0_vp;
+#ifdef OHOS_PLATFORM
+constexpr Dimension DEFAULT_ICON_SIZE = 24.0_vp;
+#endif
 
 std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
     { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
@@ -1258,9 +1264,7 @@ RefPtr<FrameNode> CreateMenuTextNode(const std::string& value, const RefPtr<Fram
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProperty, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = parent->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     UpdateMenuTextNodeProperty(textProperty, cfg, theme);
     auto textOverlayTheme = parent->GetTheme<TextOverlayTheme>(true);
@@ -1308,9 +1312,7 @@ void SetMenuItemStartSymbolIcon(const RefPtr<FrameNode>& menuItem, const OptionP
     CHECK_NULL_VOID(symbol);
     auto layoutProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = menuItem->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     layoutProperty->UpdateFontSize(theme->GetEndIconWidth());
     if (param.symbolColor.has_value()) {
@@ -1348,7 +1350,7 @@ void SetMenuItemEndSymbolIcon(const RefPtr<FrameNode>& menuItem, const OptionPar
     CHECK_NULL_VOID(props);
     auto pipeline = menuItem->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = menuItem->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto menuTheme = pipeline->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -1384,7 +1386,7 @@ void SetMenuItemStartImageIcon(const RefPtr<FrameNode>& menuItem, const OptionPa
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = menuItem->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     auto iconNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -1450,7 +1452,7 @@ void UpdateMenuItemOpacityAndAction(const MenuItemSetupInfo& cfg, const RowNodeP
 }
 
 RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, const int32_t targetNodeId,
-    bool isUsingMouse, bool isSubMenu);
+    bool isUsingMouse, bool isSubMenu, int32_t themeScopeId);
 
 struct MenuItemRowText {
     const std::string& content;
@@ -1464,9 +1466,12 @@ void SetSubMenuItemBuildCallback(const RefPtr<FrameNode>& menuItem, RefPtr<Frame
     CHECK_NULL_VOID(menuItemModifier);
     menuItemModifier->setTextNode(menuItem, leftTextNode);
     if (!param.subMenuItems.empty()) {
-        auto subMenuBuildCallback = [param, isUsingMouse]() mutable -> RefPtr<UINode> {
+        auto subMenuBuildCallback = [ param, isUsingMouse,
+            weakMenuItem = AceType::WeakClaim(menuItem.GetRawPtr())]() mutable -> RefPtr<UINode> {
+            auto menuItem = AceType::DynamicCast<FrameNode>(weakMenuItem.Upgrade());
+            auto themeScopId = menuItem ? menuItem->GetThemeScopeId() : 0;
             auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            return CreateInnerMenuWithItems(param.subMenuItems, targetNodeId, isUsingMouse, true);
+            return CreateInnerMenuWithItems(param.subMenuItems, targetNodeId, isUsingMouse, true, themeScopId);
         };
         menuItemModifier->setSubSelectMenuBuilder(menuItem, subMenuBuildCallback);
     }
@@ -1478,6 +1483,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const Menu
     auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(leftRow);
+    leftRow->SetThemeScopeId(menuItem->GetThemeScopeId());
     auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(leftRowLayoutProps);
     leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
@@ -1500,6 +1506,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const Menu
     auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(rightRow);
+    rightRow->SetThemeScopeId(menuItem->GetThemeScopeId());
     auto rightRowLayoutProps = rightRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rightRowLayoutProps);
     rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
@@ -1522,9 +1529,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const Menu
 
 void GetExtensionMenuItemDividerInfo(const RefPtr<FrameNode>& node, V2::ItemDivider& divider)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = node->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -1622,6 +1627,9 @@ void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<Sel
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
+    if (pasteNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
+    }
     pasteLayoutProperty->UpdateStateEffect(true);
     auto horInterval = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
                        static_cast<float>(theme->GetOutPadding().ConvertToPx());
@@ -1633,9 +1641,20 @@ void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<Sel
         auto middleSpace = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
         pasteLayoutProperty->UpdateBackgroundRightPadding(Dimension(horInterval + middleSpace));
         pasteLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    } else {
+        pasteLayoutProperty->UpdateIconSize(DEFAULT_ICON_SIZE);
     }
     pasteLayoutProperty->UpdateTextIconSpace(Dimension(theme->GetIconContentPadding().ConvertToPx()));
     pasteButtonRenderContext->UpdateOpacity(1.0);
+    if (pasteNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto pasteNodeNonConst = pasteNode;
+        auto buttonNode = GetSecCompChildNode(pasteNodeNonConst, V2::BUTTON_ETS_TAG);
+        CHECK_NULL_VOID(buttonNode);
+        auto buttonPattern = buttonNode->GetPatternPtr<ButtonPattern>();
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetClickedColor(theme->GetClickedColor());
+        buttonPattern->SetBlendColor(theme->GetClickedColor(), theme->GetHoverColor());
+    }
 }
 
 void CreateMenuItemPasteDivider(const RefPtr<FrameNode>& innerMenuNode, const RefPtr<FrameNode>& menuItem,
@@ -1660,11 +1679,11 @@ void CreateMenuItemPasteDivider(const RefPtr<FrameNode>& innerMenuNode, const Re
 }
 
 RefPtr<FrameNode> CreateMenuItemPaste(const std::string& content, const std::string& labelInfo,
-    const RefPtr<FrameNode>& innerMenuNode, OptionParam& param, size_t index, bool isUsingMouse)
+    const RefPtr<FrameNode>& innerMenuNode, OptionParam& param, size_t index, bool isUsingMouse, int32_t themeScopeId)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = innerMenuNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     auto overlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(overlayTheme, nullptr);
@@ -1672,11 +1691,13 @@ RefPtr<FrameNode> CreateMenuItemPaste(const std::string& content, const std::str
         static_cast<int32_t>(PasteButtonPasteDescription::PASTE), static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
         static_cast<int32_t>(ButtonType::NORMAL), true, overlayTheme->GetPasteSymbolId());
     CHECK_NULL_RETURN(pasteNode, nullptr);
+    pasteNode->SetThemeScopeId(themeScopeId);
     SetPasteNodeProperties(pasteNode, theme, param.enabled, isUsingMouse);
     const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     auto menuItem = menuItemModifier ? menuItemModifier->getOrCreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), false, index) : nullptr;
     CHECK_NULL_RETURN(menuItem, nullptr);
+    menuItem->SetThemeScopeId(themeScopeId);
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_RETURN(menuModifier, nullptr);
     menuModifier->addMenuItemNode(innerMenuNode, menuItem);
@@ -1720,7 +1741,8 @@ void CreateMenuItemDivider(const RefPtr<FrameNode>& menuItem, bool isUsingMouse,
 }
 
 RefPtr<FrameNode> CreateMenuItem(const std::string& content, const std::string& labelInfo,
-    RefPtr<FrameNode> innerMenuNode, OptionParam& param, size_t index, bool isUsingMouse, bool isSubMenu)
+    RefPtr<FrameNode> innerMenuNode, OptionParam& param, size_t index, bool isUsingMouse, bool isSubMenu,
+    int32_t themeScopeId)
 {
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1731,12 +1753,13 @@ RefPtr<FrameNode> CreateMenuItem(const std::string& content, const std::string& 
     auto menuItem = menuItemModifier ? menuItemModifier->getOrCreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), false, index) : nullptr;
     CHECK_NULL_RETURN(menuItem, nullptr);
+    menuItem->SetThemeScopeId(themeScopeId);
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_RETURN(menuModifier, nullptr);
     menuModifier->addMenuItemNode(innerMenuNode, menuItem);
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = menuItem->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     BorderRadiusProperty border;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1755,7 +1778,7 @@ RefPtr<FrameNode> CreateMenuItem(const std::string& content, const std::string& 
 }
 
 RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, const int32_t targetNodeId,
-    bool isUsingMouse, bool isSubMenu)
+    bool isUsingMouse, bool isSubMenu, int32_t themeScopeId)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -1769,6 +1792,7 @@ RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, con
     auto menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_RETURN(menuModifier, nullptr);
     auto innerMenuNode = menuModifier->menuCreateFrameNode(targetNodeId, stack->ClaimNodeId());
+    innerMenuNode->SetThemeScopeId(themeScopeId);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
     if (!isUsingMouse && isSubMenu) {
         menuModifier->menuSetNeedDivider(innerMenuNode);
@@ -1778,11 +1802,11 @@ RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, con
 #ifdef OHOS_PLATFORM
         if (params[i].value == textOverlayTheme->GetPasteLabel()) {
             menuItem = CreateMenuItemPaste(params[i].value, params[i].labelInfo, innerMenuNode, params[i], i,
-                isUsingMouse);
+                isUsingMouse, themeScopeId);
         } else {
 #endif
             menuItem = CreateMenuItem(params[i].value, params[i].labelInfo, innerMenuNode, params[i], i, isUsingMouse,
-                isSubMenu);
+                isSubMenu, themeScopeId);
 #ifdef OHOS_PLATFORM
         }
 #endif
@@ -1793,17 +1817,31 @@ RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, con
     return innerMenuNode;
 }
 
-RefPtr<FrameNode> GetRightClickMenuWrapper(std::vector<OptionParam>& params)
+RefPtr<FrameNode> GetRightClickMenuWrapper(std::vector<OptionParam>& params,
+    const std::shared_ptr<SelectOverlayInfo>& info)
 {
+    auto caller = info->callerFrameNode.Upgrade();
+    int32_t themeScopeId = 0;
+    if (caller) {
+        themeScopeId = caller->GetThemeScopeId();
+    }
     RefPtr<FrameNode> menuWrapper = nullptr;
     auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto innerMenuNode = CreateInnerMenuWithItems(params, targetNodeId, true, false);
+    auto innerMenuNode = CreateInnerMenuWithItems(params, targetNodeId, true, false, themeScopeId);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     CHECK_NULL_RETURN(menuViewModifier, nullptr);
     menuWrapper = menuViewModifier->createWithCustomNode(innerMenuNode, targetNodeId, "SelectOverlayMenuByRightClick",
         { .isShowInSubWindow = false, .type = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU }, true, nullptr);
     menuWrapper->UpdateInspectorId("select_overlay_right_click_menuWrapper");
+    if (innerMenuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto menu = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(menu, menuWrapper);
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_RETURN(menuModifier, menuWrapper);
+        menuModifier->textMenuOnThemeScopeUpdate(menu, themeScopeId);
+        menuModifier->textMenuOnThemeScopeUpdate(innerMenuNode, themeScopeId);
+    }
     return menuWrapper;
 }
 
@@ -1837,6 +1875,14 @@ RefPtr<UINode> FindAccessibleFocusNodeInExtMenu(const RefPtr<FrameNode>& extensi
         child = child->GetFirstChild();
     }
     return nullptr;
+}
+
+RefPtr<UINode> GetExtensionInnerMenu(RefPtr<FrameNode>& extensionMenu)
+{
+    CHECK_NULL_RETURN(extensionMenu, nullptr);
+    auto extensionMenuScroll = extensionMenu->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(extensionMenuScroll, nullptr);
+    return extensionMenuScroll->GetChildAtIndex(0);
 }
 
 void GetAutoFillSubMenuOptionsParams(std::vector<MenuOptionsParam>& subMenuOptionsParams)
@@ -2643,7 +2689,8 @@ RefPtr<FrameNode> SelectOverlayNode::GetExtensionMenuOutterrMenu(std::vector<Opt
     CHECK_NULL_RETURN(backButton_, nullptr);
     auto buttonId = backButton_->GetId();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto innerMenuNode = CreateInnerMenuWithItems(params, nodeId, false, false);
+    auto themeScopeId = caller ? caller->GetThemeScopeId() : GetThemeScopeId();
+    auto innerMenuNode = CreateInnerMenuWithItems(params, nodeId, false, false, themeScopeId);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
 
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
@@ -2662,6 +2709,8 @@ RefPtr<FrameNode> SelectOverlayNode::GetExtensionMenuOutterrMenu(std::vector<Opt
     CHECK_NULL_RETURN(menu, nullptr);
     menuWrapper->RemoveChild(menu);
     menuWrapper.Reset();
+    menu->AllowUseParentTheme(false);
+    menu->SetThemeScopeId(themeScopeId);
     if (menuParam.blurStyleOption->colorMode != ThemeColorMode::SYSTEM) {
         const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
         if (menuModifier) {
@@ -3543,23 +3592,22 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
         return;
     }
     auto info = pattern->GetSelectOverlayInfo();
-    auto caller = info->callerFrameNode.Upgrade();
-    bool needRebuildMenu = menuItemChanged;
-    if (caller && caller->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        auto newThemeScopeId = caller->GetThemeScopeId();
-        if (newThemeScopeId != cachedThemeScopeId_) {
-            cachedThemeScopeId_ = newThemeScopeId;
-            needRebuildMenu = true;
-        } else if (newThemeScopeId != 0) {
-            needRebuildMenu = true;
-        }
-        selectMenu_->SetThemeScopeId(newThemeScopeId);
-        if (selectMenuInner_) {
-            selectMenuInner_->SetThemeScopeId(newThemeScopeId);
-        }
-    }
-    if (needRebuildMenu && info->menuInfo.menuBuilder == nullptr) {
+    if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
         UpdateMenuInner(info, noAnimation, false);
+    }
+    if (info && extensionMenu_) {
+        auto caller = info->callerFrameNode.Upgrade();
+        auto callerThemeScopId = 0;
+        if (caller) {
+            callerThemeScopId = caller->GetThemeScopeId();
+        }
+        auto extensionInnerMenu = GetExtensionInnerMenu(extensionMenu_);
+        if (extensionInnerMenu) {
+            auto children = extensionInnerMenu->GetChildren();
+            for (const auto& child : children) {
+                child->SetThemeScopeId(callerThemeScopId);
+            }
+        }
     }
     selectMenu_->MarkModifyDone();
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -3743,7 +3791,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, nullptr);
-    RefPtr<FrameNode> menuWrapper = GetRightClickMenuWrapper(params);
+    RefPtr<FrameNode> menuWrapper = GetRightClickMenuWrapper(params, info);
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     if (hasCollaborationMenu && needCollaborationMenu) {
         ExpandedMenuPluginLoader::GetInstance().CreateServiceCollaborationMenu(menuWrapper, info);
@@ -4107,6 +4155,163 @@ void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
     styleOption.colorMode = ConvertColorMode(colorMode);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdateBackBlurStyle(styleOption);
+}
+
+void UpdateButtonColor(const RefPtr<FrameNode>& button, const Color& clickedColor, const Color& hoverColor)
+{
+    CHECK_NULL_VOID(button);
+    if (auto buttonPattern = button->GetPatternPtr<ButtonPattern>()) {
+        buttonPattern->SetClickedColor(clickedColor);
+        buttonPattern->SetBlendColor(clickedColor, hoverColor);
+    }
+}
+
+void UpdateTextColor(const RefPtr<FrameNode>& textNode, const Color& textColor)
+{
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->UpdateTextColor(textColor);
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void UpdatePasteButtonColor(const RefPtr<FrameNode>& button, const Color& textColor,
+    const Color& clickedColor, const Color& hoverColor)
+{
+    auto pastePaintProperty = button->GetPaintProperty<SecurityComponentPaintProperty>();
+    if (pastePaintProperty) {
+        pastePaintProperty->UpdateFontColor(textColor);
+        button->MarkModifyDone();
+        button->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    RefPtr<FrameNode> buttonNode = button;
+    auto innerButton = GetSecCompChildNode(buttonNode, V2::BUTTON_ETS_TAG);
+    if (innerButton) {
+        UpdateButtonColor(innerButton, clickedColor, hoverColor);
+        innerButton->MarkModifyDone();
+        innerButton->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void UpdateNormalButtonColor(const RefPtr<FrameNode>& button, const Color& textColor,
+    const Color& clickedColor, const Color& hoverColor)
+{
+    UpdateButtonColor(button, clickedColor, hoverColor);
+
+    auto buttonChild = button->GetFirstChild();
+    auto textNode = AceType::DynamicCast<FrameNode>(buttonChild);
+    if (textNode) {
+        UpdateTextColor(textNode, textColor);
+    }
+    button->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void UpdateMenuItemsColors(const RefPtr<FrameNode>& menuNode, const Color& textColor,
+    const Color& clickedColor, const Color& hoverColor)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto children = menuNode->GetChildren();
+    for (const auto& child : children) {
+        auto button = AceType::DynamicCast<FrameNode>(child);
+        if (!button) {
+            continue;
+        }
+        if (button->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+            UpdatePasteButtonColor(button, textColor, clickedColor, hoverColor);
+        } else {
+            UpdateNormalButtonColor(button, textColor, clickedColor, hoverColor);
+        }
+    }
+    menuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void UpdateMenuItemsTextAndSymbolColors(const RefPtr<UINode>& menuInnerNode)
+{
+    CHECK_NULL_VOID(menuInnerNode);
+    auto children = menuInnerNode->GetChildren();
+    auto theme = menuInnerNode->GetTheme<SelectTheme>(true);
+    CHECK_NULL_VOID(theme);
+    for (const auto& child : children) {
+        auto menuItem = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(menuItem);
+        V2::ItemDivider divider;
+        GetExtensionMenuItemDividerInfo(menuItem, divider);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        if (menuItemModifier) {
+            menuItemModifier->updateDividerColor(menuItem, divider.color);
+        }
+        auto row = menuItem->GetChildAtIndex(0);
+        CHECK_NULL_VOID(row);
+        auto rowChildren = row->GetChildren();
+        for (const auto& rowChild : rowChildren) {
+            auto node = AceType::DynamicCast<FrameNode>(rowChild);
+            CHECK_NULL_VOID(node);
+            if (node->GetTag() == V2::SYMBOL_ETS_TAG) {
+                auto layoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
+                layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
+                node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            }
+            if (node->GetTag() == V2::TEXT_ETS_TAG) {
+                auto textRenderContext = node->GetRenderContext();
+                CHECK_NULL_VOID(textRenderContext);
+                textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
+                node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                UpdateTextColor(node, theme->GetMenuFontColor());
+            }
+        }
+    }
+    menuInnerNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void UpdateFuncButtonsColors(const RefPtr<FrameNode>& moreButton, const RefPtr<FrameNode>& backButton,
+    const Color& clickedColor, const Color& hoverColor)
+{
+    if (moreButton) {
+        UpdateButtonColor(moreButton, clickedColor, hoverColor);
+        moreButton->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    if (backButton) {
+        UpdateButtonColor(backButton, clickedColor, hoverColor);
+        backButton->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void SelectOverlayNode::UpdateMenuColors()
+{
+    CHECK_NULL_VOID(selectMenuInner_);
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto info = pattern->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(info);
+    auto caller = info->callerFrameNode.Upgrade();
+    CHECK_NULL_VOID(caller);
+
+    auto textOverlayTheme = caller->GetTheme<TextOverlayTheme>(true);
+    CHECK_NULL_VOID(textOverlayTheme);
+    auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
+    auto textColor = textStyle.GetTextColor();
+    auto clickedColor = textOverlayTheme->GetButtonClickedColor();
+    auto hoverColor = textOverlayTheme->GetButtonHoverColor();
+    auto newMoreOrBackSymbolColor = textOverlayTheme->GetSymbolColor();
+
+    UpdateMenuItemsColors(selectMenuInner_, textColor, clickedColor, hoverColor);
+    UpdateFuncButtonsColors(moreButton_, backButton_, clickedColor, hoverColor);
+    auto extensionInnerMenu = GetExtensionInnerMenu(extensionMenu_);
+    if (extensionInnerMenu) {
+        UpdateMenuItemsTextAndSymbolColors(extensionInnerMenu);
+    }
+
+    if (moreOrBackSymbol_) {
+        auto layoutProperty = moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
+        if (layoutProperty) {
+            layoutProperty->UpdateSymbolColorList({ newMoreOrBackSymbolColor });
+            moreOrBackSymbol_->MarkModifyDone();
+            moreOrBackSymbol_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
+    UpdateSelectMenuBg(caller);
 }
 
 void SelectOverlayNode::AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info)

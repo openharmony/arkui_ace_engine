@@ -23,6 +23,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
@@ -857,6 +858,8 @@ uint32_t SelectOverlayLayoutAlgorithm::GetSafeAreaTop()
     uint32_t topArea = 0;
     if (safeAreaManager) {
         topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+        auto cutoutLen = safeAreaManager->GetCutoutSafeAreaWithoutProcess().top_.Length();
+        topArea = std::max(topArea, cutoutLen);
     }
     auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
     if (avoidInfoMgr && avoidInfoMgr->NeedAvoidContainerModal()) {

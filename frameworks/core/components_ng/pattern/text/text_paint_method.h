@@ -23,7 +23,6 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 

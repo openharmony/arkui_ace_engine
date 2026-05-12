@@ -36,6 +36,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -47,6 +48,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/theme/icon_theme.h"
 #undef private
 #undef protected
 

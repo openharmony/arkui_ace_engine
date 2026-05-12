@@ -18,6 +18,7 @@
 
 #include "core/animation/animator.h"
 #include "core/components/display/display_component.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {

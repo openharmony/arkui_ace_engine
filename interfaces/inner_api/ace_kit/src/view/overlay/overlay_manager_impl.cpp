@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "ui/base/utils/utils.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {
@@ -48,6 +49,16 @@ void OverlayManagerImpl::CloseDialog(RefPtr<FrameNode>& dialogNode)
     auto aceNode = frameNode->GetAceNode();
     CHECK_NULL_VOID(aceNode);
     overlayManager_->CloseDialog(aceNode);
+}
+
+WeakPtr<FrameNode> OverlayManagerImpl::GetRootNode() const
+{
+    CHECK_NULL_RETURN(overlayManager_, nullptr);
+    if (auto strongNode = overlayManager_->GetRootNode().Upgrade()) {
+        return FrameNode::GetFrameNode(reinterpret_cast<ArkUINodeHandle>(AceType::DynamicCast<NG::FrameNode>(
+            strongNode).GetRawPtr()));
+    }
+    return nullptr;
 }
 
 void OverlayManagerImpl::ShowMenu(const int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode>& menu)

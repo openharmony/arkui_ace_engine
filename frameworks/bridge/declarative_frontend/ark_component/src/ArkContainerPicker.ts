@@ -33,11 +33,31 @@ class ArkContainerPickerComponent extends ArkComponent implements UIPickerCompon
     return this;
   }
   enableHapticFeedback(enable: Optional<boolean>): this {
-    modifierWithKey(this._modifiersWithKeys, TextpickerEnableHapticFeedbackModifier.identity, TextpickerEnableHapticFeedbackModifier, enable);
+    modifierWithKey(
+      this._modifiersWithKeys,
+      ContainerPickerEnableHapticFeedbackModifier.identity,
+      ContainerPickerEnableHapticFeedbackModifier,
+      enable);
     return this;
   }
   selectionIndicator(style: Optional<PickerIndicatorStyle>): this {
     modifierWithKey(this._modifiersWithKeys, ContainerPickerSelectionIndicatorModifier.identity, ContainerPickerSelectionIndicatorModifier, style);
+    return this;
+  }
+  displayedItemCount(count: Optional<number>): this {
+    modifierWithKey(
+      this._modifiersWithKeys,
+      ContainerPickerDisplayedItemCountModifier.identity,
+      ContainerPickerDisplayedItemCountModifier,
+      count);
+    return this;
+  }
+  itemHeight(height: Optional<LengthMetrics>): this {
+    modifierWithKey(
+      this._modifiersWithKeys,
+      ContainerPickerItemHeightModifier.identity,
+      ContainerPickerItemHeightModifier,
+      height);
     return this;
   }
 
@@ -137,6 +157,35 @@ class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey<Optional
         getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, strokeWidth, dividerColor, startMargin, endMargin, backgroundColor, undefined, undefined,
           undefined, undefined);
       }
+    }
+  }
+}
+
+class ContainerPickerDisplayedItemCountModifier extends ModifierWithKey<Optional<number>> {
+  constructor(value: Optional<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('containerPickerDisplayedItemCount');
+  
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerDisplayedItemCount(node);
+    } else {
+      getUINativeModule().containerPicker.setContainerPickerDisplayedItemCount(node, this.value);
+    }
+  }
+}
+
+class ContainerPickerItemHeightModifier extends ModifierWithKey<Optional<LengthMetrics>> {
+  constructor(value: Optional<LengthMetrics>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('containerPickerItemHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerItemHeight(node);
+    } else {
+      getUINativeModule().containerPicker.setContainerPickerItemHeight(node, this.value);
     }
   }
 }

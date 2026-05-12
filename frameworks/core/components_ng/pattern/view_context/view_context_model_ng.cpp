@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/common/container.h"
 
+#include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"

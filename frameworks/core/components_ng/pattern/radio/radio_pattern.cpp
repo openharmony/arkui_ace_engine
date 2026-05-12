@@ -19,10 +19,15 @@
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/event/click_event.h"
+#include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 

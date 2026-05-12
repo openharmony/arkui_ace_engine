@@ -46,7 +46,8 @@ public:
     }
     UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
         napi_value storage) override;
-    void InitializeDynamic(const DynamicInitialConfig& config) override {}
+    void InitializeDynamic(const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender = nullptr) override
+    {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
@@ -115,7 +116,9 @@ public:
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override {}
 
     // ArkTS Form
-    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override {}
+    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage,
+        sptr<IRemoteObject> connectToRenders) override
+    {}
     void RunFormPage() override {}
     void OnFormSurfaceChange(float width, float height,
         OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),

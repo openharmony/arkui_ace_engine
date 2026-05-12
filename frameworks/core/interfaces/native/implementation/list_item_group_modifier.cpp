@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "frameworks/core/components/list/list_theme.h"
 #include "children_main_size_peer.h"
@@ -52,10 +53,16 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto arkOptions = Converter::OptConvertPtr<Ark_ListItemGroupOptions>(options);
     CHECK_NULL_VOID(arkOptions);
+    auto spaceWidth = Converter::OptConvert<Dimension>(arkOptions.value().spaceWidth);
     auto space = Converter::OptConvert<Dimension>(arkOptions.value().space);
+    ListItemGroupModelStatic::SetSpaceWidth(frameNode, spaceWidth);
     ListItemGroupModelStatic::SetSpace(frameNode, space);
     auto style = Converter::OptConvert<V2::ListItemGroupStyle>(arkOptions.value().style);
     ListItemGroupModelStatic::SetStyle(frameNode, style);
+    auto headerStyle = Converter::OptConvert<V2::ListItemGroupHeaderFooterStyle>(arkOptions.value().headerStyle);
+    ListItemGroupModelStatic::SetHeaderStyle(frameNode, headerStyle);
+    auto footerStyle = Converter::OptConvert<V2::ListItemGroupHeaderFooterStyle>(arkOptions.value().footerStyle);
+    ListItemGroupModelStatic::SetFooterStyle(frameNode, footerStyle);
     auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
     if (header.has_value()) {
         CallbackHelper(header.value()).BuildAsync([weak = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
@@ -64,7 +71,7 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
             auto builder = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            // ListItemGroupModelStatic::SetHeader(AceType::RawPtr(headerNode), std::move(builder));
+            ListItemGroupModelStatic::SetHeader(AceType::RawPtr(headerNode), uiNode);
             }, node);
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
@@ -75,8 +82,28 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
             auto builder = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            // ListItemGroupModelStatic::SetFooter(AceType::RawPtr(footerNode), std::move(builder));
+            ListItemGroupModelStatic::SetFooter(AceType::RawPtr(footerNode), uiNode);
             }, node);
+    }
+    if (arkOptions.value().headerComponent.tag != INTEROP_TAG_UNDEFINED) {
+        const Ark_ComponentContentBase& headerComponent = arkOptions.value().headerComponent.value;
+        auto componentPeer = reinterpret_cast<FrameNodePeer*>(headerComponent);
+        CHECK_NULL_VOID(componentPeer);
+        if (auto header = FrameNodePeer::GetFrameNodeByPeer(componentPeer)) {
+            ListItemGroupModelStatic::SetHeader(frameNode, header, true);
+        } else {
+            ListItemGroupModelStatic::SetHeader(frameNode, nullptr, true);
+        }
+    }
+    if (arkOptions.value().footerComponent.tag != INTEROP_TAG_UNDEFINED) {
+        const Ark_ComponentContentBase& footerComponent = arkOptions.value().footerComponent.value;
+        auto componentPeer = reinterpret_cast<FrameNodePeer*>(footerComponent);
+        CHECK_NULL_VOID(componentPeer);
+        if (auto footer = FrameNodePeer::GetFrameNodeByPeer(componentPeer)) {
+            ListItemGroupModelStatic::SetFooter(frameNode, footer, true);
+        } else {
+            ListItemGroupModelStatic::SetFooter(frameNode, nullptr, true);
+        }
     }
 }
 } // ListItemGroupInterfaceModifier

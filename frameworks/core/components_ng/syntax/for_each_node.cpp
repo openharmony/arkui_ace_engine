@@ -15,6 +15,8 @@
 
 #include "core/components_ng/syntax/for_each_node.h"
 
+#include "base/log/dump_log.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -285,7 +287,7 @@ void ForEachNode::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
     }
 }
 
-void ForEachNode::MoveData(int32_t from, int32_t to)
+void ForEachNode::MoveData(int32_t from, int32_t to, bool isNeedUpdate)
 {
     if (from == to) {
         return;
@@ -310,6 +312,11 @@ void ForEachNode::MoveData(int32_t from, int32_t to)
     children.insert(toIter, child);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    if (isNeedUpdate) {
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(std::min(from, to));
+        }
+    }
 }
 
 RefPtr<FrameNode> ForEachNode::GetFrameNode(int32_t index)
@@ -328,19 +335,25 @@ void ForEachNode::InitDragManager(const RefPtr<UINode>& child)
     CHECK_NULL_VOID(childNode);
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
-    auto pattern = childNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->InitDragManager(AceType::Claim(this));
+    if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+        auto pattern = childNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+        auto pattern = childNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    }
 }
 
 void ForEachNode::InitAllChildrenDragManager(bool init)
 {
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         onMoveEvent_ = nullptr;
         onLongPressEvent_ = nullptr;
         onDragStartEvent_ = nullptr;
@@ -353,18 +366,30 @@ void ForEachNode::InitAllChildrenDragManager(bool init)
         if (!child || (child->GetChildren().size() != 1)) {
             continue;
         }
-        auto listItem = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
-        if (!listItem) {
+        auto childNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
+        if (!childNode) {
             continue;
         }
-        auto pattern = listItem->GetPattern<ListItemPattern>();
-        if (!pattern) {
-            continue;
-        }
-        if (init) {
-            pattern->InitDragManager(AceType::Claim(this));
-        } else {
-            pattern->DeInitDragManager();
+        if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+            auto pattern = childNode->GetPattern<ListItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
+        } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+            auto pattern = childNode->GetPattern<GridItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
         }
     }
 }

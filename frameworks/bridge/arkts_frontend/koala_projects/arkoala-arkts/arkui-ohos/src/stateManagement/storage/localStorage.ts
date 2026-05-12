@@ -66,9 +66,19 @@ export class LocalStorage {
                     }
                 }
             } else {
-                for (const entry of Object.entries(initializingProperties)) {
-                    if (entry && entry[1]) {
-                        this.setOrCreate(entry[0], entry[1]);
+                const cls = Class.of(initializingProperties as Object);
+                const fields = reflect.getInstanceFieldsRecursive(cls);
+                const getters = reflect.getInstanceGettersRecursive(cls);
+                for (const getter of getters) {
+                    const value = getter.invoke(initializingProperties as Object);
+                    if (value) {
+                        this.setOrCreate(getter.getName().substring(6), value);
+                    }
+                }
+                for (const field of fields) {
+                    const value = field.getValue(initializingProperties as Object);
+                    if (value) {
+                        this.setOrCreate(field.getName(), value);
                     }
                 }
             }
@@ -287,6 +297,11 @@ export class LocalStorage {
         watchFunc?: WatchFuncType
     ): StorageLinkDecoratedVariable<T> | undefined {
         return this.store_.__makeStorageLink<T>(owner, propName, varName, decoratorName, defaultValue, watchFunc);
+    }
+
+    public __makeStoragePropRef<T>(propName: string, decoratorName: string,
+        defaultValue: T): AbstractProperty<T> | undefined {
+        return this.store_.setAndRef<T>(propName, defaultValue, decoratorName);
     }
 
     /**

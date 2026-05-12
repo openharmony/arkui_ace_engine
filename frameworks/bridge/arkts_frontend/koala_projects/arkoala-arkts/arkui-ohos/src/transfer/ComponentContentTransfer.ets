@@ -50,7 +50,7 @@ export class ComponentContentTransfer {
         let nodeRawPtr = getFrameNodeRawPtr.invoke(nodePtrDyn as Object).toNumber();
 
         let instanceId = ESValue.wrap(input).invokeMethod('getInstanceId').toNumber();
-        let uiContextSta = new UIContext(instanceId as int32);
+        let uiContextSta = new UIContext(instanceId.toInt());
         return new TransComponentContent(uiContextSta as UIContext, Double.toLong(nodeRawPtr), frameNodePeer);
     }
 
@@ -147,7 +147,7 @@ export class ReactiveComponentContentTransfer {
         let nodeRawPtr = getFrameNodeRawPtr.invoke(nodePtrDyn as Object).toNumber();
 
         let instanceId = ESValue.wrap(input).invokeMethod('getInstanceId').toNumber();
-        let uiContextSta = new UIContext(instanceId as int32);
+        let uiContextSta = new UIContext(instanceId.toInt());
         return new TransReactiveComponentContent(uiContextSta as UIContext, Double.toLong(nodeRawPtr), frameNodePeer);
     }
 

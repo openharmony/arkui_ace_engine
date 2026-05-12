@@ -25,6 +25,8 @@
 #include "test/mock/frameworks/core/common/mock_font_manager.h"
 #include "test/mock/frameworks/core/common/mock_frontend.h"
 
+#include "core/accessibility/accessibility_manager_ng.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -40,6 +42,7 @@ constexpr int32_t DEFAULT_RESTORE_ID0 = 100;
 constexpr int32_t DEFAULT_RESTORE_ID1 = 101;
 constexpr int32_t DEFAULT_RESTORE_ID2 = 102;
 constexpr int32_t NOT_REGISTER_ID = 307;
+constexpr uint32_t DEFAULT_SIZE0 = 0;
 constexpr uint32_t DEFAULT_SIZE1 = 1;
 constexpr uint32_t DEFAULT_SIZE2 = 2;
 constexpr uint32_t DEFAULT_SIZE3 = 3;

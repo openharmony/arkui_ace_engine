@@ -66,9 +66,12 @@ protected:
     static void SetCachedMaxCount(const JSCallbackInfo& info);
     static void SetOnSelected(const JSCallbackInfo& info);
     static void SetNestedScroll(const JSCallbackInfo& info);
+    static void SetBarFloatingStyle(const JSCallbackInfo& info);
 
 private:
     static int32_t GetThemeScopeId();
+    static std::optional<Dimension> ParseBarFloatingDimension(
+        const JSRef<JSVal>& value, RefPtr<ResourceObject>& resObj);
 };
 
 } // namespace OHOS::Ace::Framework

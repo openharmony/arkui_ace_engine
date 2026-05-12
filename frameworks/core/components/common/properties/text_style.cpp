@@ -19,7 +19,7 @@
 
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
-#include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace {
 namespace StringUtils {

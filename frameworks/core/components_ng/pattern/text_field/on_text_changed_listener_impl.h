@@ -62,6 +62,7 @@ private:
     void PostSyncTaskToUI(const std::function<void()>& task, const std::string& name);
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
+    void UpdateImePanelStatus(const KeyBoardInfo& keyboardInfo, bool isVoiceKB, bool isCandidate);
     int32_t CheckPreviewTextParams(const std::u16string &text, const MiscServices::Range &range);
     int32_t HandlePrivateCommand(
         const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand);

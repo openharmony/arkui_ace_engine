@@ -21,7 +21,9 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

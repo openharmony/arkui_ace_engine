@@ -45,8 +45,10 @@
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/parse/svg_circle.h"

@@ -29,17 +29,12 @@ export function getRawObject<T>(value: T): T {
 
 export type StateUnion<T> = StateDecoratedVariable<T> | ProvideDecoratedVariable<T> | PropDecoratedVariable<T>
 
-export function getObservedObject<T>(value: T, staticState: StateUnion<T>): T {
-    const callback = (): void => {
-        staticState.fireChange();
-    };
-    let global = ESValue.getGlobal();
-    let staticStateBindObservedObject = global.getProperty('staticStateBindObservedObject');
-    return staticStateBindObservedObject.invoke(ESValue.wrap(value), ESValue.wrap(callback)).unwrap()! as Object as T;
+export function getObservedObject<T>(value: T): T {
+    return value;
 }
 
 export class InteropNativeModule {
-    public static _NativeLog(txt: string) {
+    public static _NativeLog(txt: string): void {
         console.log(txt)
     }
 }

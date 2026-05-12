@@ -15,6 +15,9 @@
 
 #include "arkoala_api_generated.h"
 
+#include <optional>
+
+#include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -112,6 +115,24 @@ void SetSelectionIndicatorImpl(Ark_NativePointer node,
     auto pickerIndicatorStyle = Converter::OptConvertPtr<PickerIndicatorStyle>(value);
     ContainerPickerModelStatic::SetIndicatorStyle(frameNode, pickerIndicatorStyle);
 }
+void SetItemHeightImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || value->tag == INTEROP_TAG_UNDEFINED) {
+        ContainerPickerModelStatic::SetItemHeight(frameNode, std::nullopt);
+        return;
+    }
+    Dimension dim = Converter::Convert<Dimension>(value->value);
+    ContainerPickerModelStatic::SetItemHeight(frameNode, dim);
+}
+void SetDisplayedItemCountImpl(Ark_NativePointer node, const Opt_Int32* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convertedValue = Converter::OptConvertPtr<int32_t>(value);
+    ContainerPickerModelStatic::SetDisplayedItemCount(frameNode, convertedValue);
+}
 } // UIPickerComponentAttributeModifier
 const GENERATED_ArkUIUIPickerComponentModifier* GetUIPickerComponentModifier()
 {
@@ -123,6 +144,8 @@ const GENERATED_ArkUIUIPickerComponentModifier* GetUIPickerComponentModifier()
         UIPickerComponentAttributeModifier::SetCanLoopImpl,
         UIPickerComponentAttributeModifier::SetEnableHapticFeedbackImpl,
         UIPickerComponentAttributeModifier::SetSelectionIndicatorImpl,
+        UIPickerComponentAttributeModifier::SetItemHeightImpl,
+        UIPickerComponentAttributeModifier::SetDisplayedItemCountImpl,
     };
     return &ArkUIUIPickerComponentModifierImpl;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,8 @@ public:
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
     virtual void SetSyncLoad(bool syncLoad) {}
     virtual void SetEditModeOptions(NG::EditModeOptions& editModeOptions) {};
+    virtual void SetEnableEditMode(bool enableEditMode) {};
+    virtual void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) {};
     virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) {};
@@ -103,6 +105,7 @@ public:
     virtual void SetSupportLazyLoadingEmptyBranch(bool enable) {};
 
     virtual DisplayMode GetDisplayMode() const = 0;
+    virtual void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) {}
 
 private:
     static std::unique_ptr<GridModel> instance_;

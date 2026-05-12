@@ -23,6 +23,7 @@
 #include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "pixel_map_peer.h"
+#include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -42,7 +43,8 @@ namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto imageSpanNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, id, AceType::MakeRefPtr<ImagePattern>());
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        id, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_RETURN(imageSpanNode, nullptr);
     imageSpanNode->SetDraggable(false);
 
@@ -54,6 +56,10 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateImageSourceInfo(srcInfo);
     layoutProperty->UpdateHasPlaceHolderStyle(false);
+    layoutProperty->UpdateIsYUVDecode(true);
+    auto pattern = imageSpanNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetNeedLoadAlt(true);
 
     imageSpanNode->IncRefCount();
     return AceType::RawPtr(imageSpanNode);

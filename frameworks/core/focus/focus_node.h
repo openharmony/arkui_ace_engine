@@ -18,15 +18,16 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
-#include "core/event/key_event.h"
+#include "core/event/key_code.h"
 
 namespace OHOS::Ace {
 
+struct KeyEvent;
+class KeyEventInfo;
 class FocusNode;
 class FocusGroup;
 class ClickInfo;

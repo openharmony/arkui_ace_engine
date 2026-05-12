@@ -5,7 +5,7 @@
 
   "scripts": {
     "clean": "make -f tests/Makefile clean",
-    "build": "make -f tests/Makefile framework",
+    "build": "make -f tests/Makefile build",
     "test": "make -f tests/Makefile"
   }
 }

@@ -16,6 +16,7 @@
 #include "core/components/checkable/checkable_element.h"
 
 #include "core/components/checkable/render_checkable.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 

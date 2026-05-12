@@ -68,7 +68,6 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    // instructive change begin
     get from(): NavContentInfo {
         return this.getFrom()
     }
@@ -99,26 +98,11 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     set updateTransition(updateTransition: UpdateTransitionCallback | undefined) {
         this.setUpdateTransition(updateTransition)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, NavigationTransitionProxyInternal.getFinalizer())
-        // instructive change begin
-        // this.from = this.getFrom()
-        // this.to = this.getTo()
-        // this.isInteractive = this.getIsInteractive()
-        // this.cancelTransition = this.getCancelTransition()
-        // this.updateTransition = this.getUpdateTransition()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, NavigationTransitionProxyInternal.construct())
-        // instructive change begin
-        // this.from = this.getFrom()
-        // this.to = this.getTo()
-        // this.isInteractive = this.getIsInteractive()
-        // this.cancelTransition = this.getCancelTransition()
-        // this.updateTransition = this.getUpdateTransition()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._NavigationTransitionProxy_construct()
@@ -182,7 +166,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: NavContentInfo = NavContentInfo_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as NavContentInfo)
     }
     private setFrom_serialize(from: NavContentInfo): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -195,7 +179,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: NavContentInfo = NavContentInfo_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as NavContentInfo)
     }
     private setTo_serialize(to: NavContentInfo): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -213,7 +197,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         }
         const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private setIsInteractive_serialize(isInteractive: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -250,7 +234,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         }
         const returnResult: VoidCallback | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as VoidCallback | undefined)
     }
     private setCancelTransition_serialize(cancelTransition: VoidCallback | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -288,7 +272,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         }
         const returnResult: UpdateTransitionCallback | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as UpdateTransitionCallback | undefined)
     }
     private setUpdateTransition_serialize(updateTransition: UpdateTransitionCallback | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -433,7 +417,7 @@ export class NavPathInfo implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private setName_serialize(name: string): void {
         ArkUIGeneratedNativeModule._NavPathInfo_setName(this.peer!.ptr, name)
@@ -448,7 +432,7 @@ export class NavPathInfo implements MaterializedBase {
         }
         const returnResult: Object | null | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Object | null | undefined)
     }
     private setParam_serialize(param: Object | null | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -486,7 +470,7 @@ export class NavPathInfo implements MaterializedBase {
         }
         const returnResult: arkui_component_common_Callback<PopInfo, void> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as arkui_component_common_Callback<PopInfo, void> | undefined)
     }
     private setOnPop_serialize(onPop: arkui_component_common_Callback<PopInfo, void> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -510,7 +494,7 @@ export class NavPathInfo implements MaterializedBase {
         }
         const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private setIsEntry_serialize(isEntry: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -534,7 +518,7 @@ export class NavPathInfo implements MaterializedBase {
         }
         const returnResult: string | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string | undefined)
     }
 }
 export class NavPathStackInternal {
@@ -940,7 +924,7 @@ export class NavPathStack implements MaterializedBase {
         }
         const returnResult: NavPathInfo | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as NavPathInfo | undefined)
     }
     private pop1_serialize(result: Object, animated?: boolean): NavPathInfo | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -962,7 +946,7 @@ export class NavPathStack implements MaterializedBase {
         }
         const returnResult: NavPathInfo | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as NavPathInfo | undefined)
     }
     private popToName0_serialize(name: string, animated?: boolean): int32 {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1062,7 +1046,7 @@ export class NavPathStack implements MaterializedBase {
         })
         const returnResult: Array<string> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<string>)
     }
     private getParamByIndex_serialize(index: int32): Object | null | undefined {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getParamByIndex(this.peer!.ptr, index)
@@ -1074,24 +1058,23 @@ export class NavPathStack implements MaterializedBase {
         }
         const returnResult: Object | null | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Object | null | undefined)
     }
     private getParamByName_serialize(name: string): Array<Object | null | undefined> {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer : Array<Object | null | undefined> = Array.create<Object | null | undefined>(bufferLength, undefined)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            const bufferTempBuf_runtimeType  = retvalDeserializer.readInt8().toInt()
-            let bufferTempBuf : Object | null | undefined = undefined
+        const buffer: Array<Object | null | undefined> = new Array<Object | null | undefined>(bufferLength, (arg0: int32):Object | null | undefined => {
+            const bufferTempBuf_runtimeType = retvalDeserializer.readInt8()!.toInt();
+            let bufferTempBuf: Object | null | undefined = undefined;
             if ((bufferTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
                 bufferTempBuf = (retvalDeserializer.readObject() as object);
             }
-            buffer[bufferBufCounterI] = bufferTempBuf
-        }
+            return bufferTempBuf;
+        })
         const returnResult: Array<Object | null | undefined> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<Object | null | undefined>)
     }
     private getIndexByName_serialize(name: string): Array<int32> {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name)
@@ -1102,7 +1085,7 @@ export class NavPathStack implements MaterializedBase {
         })
         const returnResult: Array<int32> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<int32>)
     }
     private getParent_serialize(): NavPathStack | null {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getParent(this.peer!.ptr)
@@ -1114,7 +1097,7 @@ export class NavPathStack implements MaterializedBase {
         }
         const returnResult: NavPathStack | null = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as NavPathStack | null)
     }
     private size_serialize(): int32 {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_size(this.peer!.ptr)
@@ -1138,7 +1121,7 @@ export class NavPathStack implements MaterializedBase {
         })
         const returnResult: Array<NavPathInfo> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<NavPathInfo>)
     }
     private setPathStack_serialize(pathStack: Array<NavPathInfo>, animated?: boolean): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1760,8 +1743,8 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
 }
 export type SystemBarStyle = window.SystemBarStyle;
 export interface NavigationCommonTitle {
-    main: string | global_resource_Resource | undefined;
-    sub: string | global_resource_Resource | undefined;
+    main?: string | global_resource_Resource | undefined;
+    sub?: string | global_resource_Resource | undefined;
 }
 export interface NavigationCustomTitle {
     builder: CustomBuilder;
@@ -1770,7 +1753,8 @@ export interface NavigationCustomTitle {
 export enum NavigationMode {
     Stack = 0,
     Split = 1,
-    Auto = 2
+    Auto = 2,
+    AUTO_WITH_ASPECT_RATIO = 3
 }
 export enum NavBarPosition {
     Start = 0,
@@ -1827,7 +1811,7 @@ export enum NavigationOperation {
     REPLACE = 3
 }
 export interface ToolbarItem {
-    value: ResourceStr | undefined;
+    value?: ResourceStr | undefined;
     icon?: ResourceStr;
     symbolIcon?: SymbolGlyphModifier;
     action?: (() => void);
@@ -1868,6 +1852,11 @@ export interface MoreButtonOptions {
     backgroundBlurStyle?: BlurStyle;
     backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
     backgroundEffect?: BackgroundEffectOptions;
+}
+export interface NavigationModuleInfo {
+    moduleName: string;
+    pagePath: string;
+    isUserCreateStack?: boolean;
 }
 export interface NavigationAttribute extends CommonMethod {
     setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
@@ -1939,7 +1928,7 @@ export interface NavigationAttribute extends CommonMethod {
     enableModeChangeAnimation(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableModeChangeAnimation')
     }
-    splitPlaceholder(value: ComponentContent<object>): this {
+    splitPlaceholder(value: ComponentContent<Object>): this {
         throw new Error('Unimplemented method splitPlaceholder')
     }
     enableVisibilityLifecycleWithContentCover(value: boolean | undefined): this {
@@ -1988,11 +1977,6 @@ export interface NavigationDividerStyle {
     color?: ResourceColor;
     startMargin?: Length;
     endMargin?: Length;
-}
-export interface NavigationModuleInfo {
-    moduleName: string;
-    pagePath: string;
-    isUserCreateStack?: boolean;
 }
 
 export class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
@@ -2120,7 +2104,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         this.getPeer()?.setEnableModeChangeAnimationAttribute(value_casted)
         return this
     }
-    public splitPlaceholder(value: ComponentContent<object>): this {
+    public splitPlaceholder(value: ComponentContent<Object>): this {
         hookSplitPlaceholder(this, value)
         return this
     }

@@ -64,6 +64,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
@@ -73,6 +74,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/common/app_bar_helper.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;

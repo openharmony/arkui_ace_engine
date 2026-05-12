@@ -17,6 +17,7 @@
 
 #include "core/animation/spring_animation.h"
 #include "core/components/close_icon/close_icon_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

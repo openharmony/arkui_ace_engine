@@ -14,7 +14,6 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
-
 #include <cstdint>
 #include <securec.h>
 
@@ -30,6 +29,11 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "compatible/components/component_loader.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/ui_material.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"

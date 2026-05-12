@@ -19,16 +19,20 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
-#include "core/components/box/box_component.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/edge.h"
+#include "core/components/common/properties/border.h"
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
+class BoxComponent;
 class SelectTheme;
-} // namespace OHOS::Ace
+class ThemeManager;
+class OptionComponent;
+}
 
 namespace OHOS::Ace {
 

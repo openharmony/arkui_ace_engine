@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/common/container.h"
 
 #include "interfaces/native/node/node_model.h"
 
@@ -43,6 +44,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/event/overflow_scroll_event_hub.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -64,6 +66,7 @@
 #include "core/interfaces/native/node/node_common_modifier_multi_thread.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "securec.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1240,6 +1243,29 @@ void SetBackgroundColorWithColorSpace(
     }
 }
 
+void SetBackgroundColorForHDR(
+    ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32* hdrValues, void* bgColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(hdrValues);
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else if (ColorSpace::BT2020 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::BT2020);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
+        ViewAbstract::SetBackgroundColor(frameNode, backgroundColor);
+    } else {
+        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+        auto backgroundColorResObj = AceType::Claim(bgColor);
+        ViewAbstract::SetBackgroundColor(frameNode, backgroundColor, backgroundColorResObj);
+    }
+}
+
 void ResetBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1950,11 +1976,8 @@ void CheckBackShadowResObj(const std::vector<RefPtr<ResourceObject>> objs, Shado
     RefPtr<ResourceObject> colorResObj = objs[NUM_3];
     if (radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -5219,6 +5242,23 @@ void ResetId(ArkUINodeHandle node)
     ViewAbstract::SetInspectorId(frameNode, id);
 }
 
+void SetInspectorLabel(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    frameNode->SetInspectorLabel(valueStr);
+}
+
+void ResetInspectorLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string defaultStr = "";
+    frameNode->SetInspectorLabel(defaultStr);
+}
+
 void SetKey(ArkUINodeHandle node, ArkUI_CharPtr key)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5821,6 +5861,24 @@ void ResetAccessibilityNextFocusId(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
 }
 
+void SetAccessibilityNextFocusParams(ArkUINodeHandle node, ArkUI_Bool descendantMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::AccessibilityNextFocusParams params;
+    params.descendantMode = descendantMode;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode, params);
+}
+
+void ResetAccessibilityNextFocusParams(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityNextFocusParams();
+}
+
 void SetAccessibilityDefaultFocus(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6148,7 +6206,7 @@ void ResetPointLightBloom(ArkUINodeHandle node)
     ViewAbstractModelNG::RemoveResObj(frameNode, "shadow");
     ViewAbstract::SetBloom(frameNode, 0.0f);
     Shadow shadow;
-    shadow.SetBlurRadius(0);
+    shadow.SetBlurRadius(-1);
     ViewAbstract::SetBackShadow(frameNode, shadow);
 #endif
 }
@@ -8273,6 +8331,14 @@ ArkUI_CharPtr GetKey(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+ArkUI_CharPtr GetInspectorLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = frameNode->GetInspectorLabel();
+    return g_strValue.c_str();
+}
+
 int GetEnabled(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -9606,6 +9672,10 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
     if (arkUITouchEvent->historySize > 0) {
         for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
             SetSingleHistoryEvent(allHistoryEvents, arkUITouchEvent, i);
+            if (arkUITouchEvent->historyEvents[i].touchPointSize > 0 &&
+                !arkUITouchEvent->historyEvents[i].touchPointes) {
+                continue;
+            }
             for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
                 allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
                 allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
@@ -11271,6 +11341,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetBackground = ResetBackground,
         .setBackgroundColor = SetBackgroundColor,
         .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
+        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
         .resetBackgroundColor = ResetBackgroundColor,
         .setWidth = SetWidth,
         .resetWidth = ResetWidth,
@@ -11462,6 +11533,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityDescription = ResetAccessibilityDescription,
         .setId = SetId,
         .resetId = ResetId,
+        .setInspectorLabel = SetInspectorLabel,
+        .resetInspectorLabel = ResetInspectorLabel,
         .setKey = SetKey,
         .resetKey = ResetKey,
         .setRestoreId = SetRestoreId,
@@ -11503,6 +11576,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityGroup = ResetAccessibilityGroup,
         .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
         .resetAccessibilityNextFocusId = ResetAccessibilityNextFocusId,
+        .setAccessibilityNextFocusParams = SetAccessibilityNextFocusParams,
+        .resetAccessibilityNextFocusParams = ResetAccessibilityNextFocusParams,
         .setAccessibilityDefaultFocus = SetAccessibilityDefaultFocus,
         .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
         .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,
@@ -11638,6 +11713,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getPaddingDimension = GetPaddingDimension,
         .getConfigSize = GetConfigSize,
         .getKey = GetKey,
+        .getInspectorLabel = GetInspectorLabel,
         .getEnabled = GetEnabled,
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
@@ -11832,6 +11908,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
     static const CJUICommonModifier modifier = {
         .setBackgroundColor = SetBackgroundColor,
         .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
+        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
         .resetBackgroundColor = ResetBackgroundColor,
         .setWidth = SetWidth,
         .resetWidth = ResetWidth,
@@ -12004,6 +12081,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetAccessibilityDescription = ResetAccessibilityDescription,
         .setId = SetId,
         .resetId = ResetId,
+        .setInspectorLabel = SetInspectorLabel,
+        .resetInspectorLabel = ResetInspectorLabel,
         .setKey = SetKey,
         .resetKey = ResetKey,
         .setRestoreId = SetRestoreId,

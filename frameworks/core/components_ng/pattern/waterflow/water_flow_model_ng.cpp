@@ -1069,4 +1069,9 @@ bool WaterFlowModelNG::GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode)
         WaterFlowLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode, false);
     return enable;
 }
+
+void WaterFlowModelNG::CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarWidth(frameNode, resObj);
+}
 } // namespace OHOS::Ace::NG

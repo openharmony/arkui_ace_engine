@@ -35,6 +35,7 @@
 namespace OHOS::Ace::NG {
 
 class TitleBarNode;
+class TitleBarPattern;
 
 class NavDestinationPatternBase : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(NavDestinationPatternBase, Pattern, FocusView);
@@ -311,7 +312,40 @@ public:
     {
         return navigationNode_.Upgrade();
     }
+
+    void SetScrollableNode(const WeakPtr<FrameNode>& scrollableNode)
+    {
+        scrollableNode_ = scrollableNode;
+    }
+
+    WeakPtr<FrameNode> GetScrollableNode() const
+    {
+        return scrollableNode_;
+    }
+
+    virtual void OnContentScrollUpdate(double offset, double currentOffset);
+
+    void UpdateTitleBarOptions(float currentOffset);
+    void UpdateTitleBarGradientOptions(
+        const RefPtr<TitleBarPattern>& titleBarPattern, float currentOffset, float startOffset, float endOffset);
+    void SetTitleBarOptions(
+        const RefPtr<TitleBarPattern>& titleBarPattern, const NavigationTitleBarStyle& titleBarBgStyle);
+    void UpdateBackgroundBlurStyle(const RefPtr<TitleBarPattern>& titleBarPattern);
+    void UpdateTitleBarStartOptions(const RefPtr<TitleBarPattern>& titleBarPattern);
+    void UpdateTitleBarEndOptions(const RefPtr<TitleBarPattern>& titleBarPattern);
+    void InitScrollEffectOptions();
+    void ParseScrollOffsetValue(const RefPtr<TitleBarNode>& titleBarNode);
+
+    bool IsScrollEffectEnabled() const
+    {
+        return isScrollEffectEnabled_;
+    }
+
+    RefPtr<FrameNode> GetTitleBarMaskFrameNode();
+
 protected:
+    virtual void AdjustScrollOffsetForTitleMode(
+        const RefPtr<TitleBarNode>& titleBarNode, float& startOffset, float& endOffset) {}
     void AbortBarAnimation();
     void UpdateHideBarProperty();
     void ExpandContentSafeAreaIfNeeded();
@@ -351,7 +385,10 @@ protected:
     NavigationMenuOptions menuOptions_;
 
     WeakPtr<UINode> navigationNode_;
+    WeakPtr<FrameNode> scrollableNode_;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
+    bool isScrollEffectEnabled_ = false;
+    double currentScrollOffset_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 

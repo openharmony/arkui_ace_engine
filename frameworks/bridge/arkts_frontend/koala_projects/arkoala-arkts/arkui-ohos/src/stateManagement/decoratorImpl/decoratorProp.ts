@@ -56,7 +56,7 @@ function deepCopy<T>(value: T): T {
 }
 
 export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropDecoratedVariable<T> {
-    private __soruceValue: IBackingValue<T>;
+    private __sourceValue: IBackingValue<T>;
     private __localValue: IBackingValue<T>;
     // initValue is the init value either from parent @Component or local initialized value
     // constructor takes a copy of it
@@ -68,7 +68,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
         const deepCopyValue = deepCopy<T>(initValue);
         this.__localValue = new DecoratorBackingValue<T>(varName, deepCopyValue);
         // if initValue not from parent, this __sourceValue should never changed
-        this.__soruceValue = new DecoratorBackingValue<T>(varName, initValue);
+        this.__sourceValue = new DecoratorBackingValue<T>(varName, initValue);
         this.registerWatchForObservedObjectChanges(initValue);
     }
 
@@ -79,7 +79,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     public get(): T {
         // @State V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
         const value = this.__localValue.get(this.shouldAddRef());
-        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
 
         return value;
     }
@@ -114,12 +113,12 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
 
     // @Prop updates from parent, value from parent needs to be copied
     public update(newValue: T): void {
-        const sourceValue = this.__soruceValue.get(false);
+        const sourceValue = this.__sourceValue.get(false);
         if (sourceValue !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
 
-            this.__soruceValue.setSilently(newValue);
+            this.__sourceValue.setSilently(newValue);
             StateUpdateLoop.add(() => {
                 if (this.__localValue.set(uiUtils.makeV1Observed(deepCopy<T>(newValue)) as T)) {
                     this.execWatchFuncs();
@@ -129,11 +128,11 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     }
 
     public updateForStorage(newValue: T): void {
-        const sourceValue = this.__soruceValue.get(false);
+        const sourceValue = this.__sourceValue.get(false);
         if (sourceValue !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
-            this.__soruceValue.setSilently(newValue);
+            this.__sourceValue.setSilently(newValue);
             this.__localValue.set(uiUtils.makeV1Observed(deepCopy<T>(newValue)) as T);
             this.execWatchFuncs();
         }

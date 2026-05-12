@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <unordered_set>
+#include <fstream>
 #include "matrix.h"
 #include "nia_ls.h"
 #define NLS_DEBUG
@@ -95,17 +97,21 @@ bool ClausesMatchExceptOppositeLits(
     return true;
 }
 
-void RemoveDuplicateClauses(std::vector<std::vector<int>>& clauseVec)
+void RemoveDuplicateClauses(std::vector<std::vector<int>>& clauseVec, int numLit)
 {
-    std::sort(clauseVec.begin(), clauseVec.end());
-    size_t uniqueClauseCount = 0;
-    for (size_t clauseIdx = 0; clauseIdx < clauseVec.size(); clauseIdx++) {
-        if (uniqueClauseCount > 0 && IsSameCls(clauseVec[clauseIdx], clauseVec[uniqueClauseCount - 1])) {
-            continue;
+    std::unordered_set<std::vector<int>, VectorHash>
+        seen(0, VectorHash(numLit));
+    size_t write = 0;
+
+    for (size_t i = 0; i < clauseVec.size(); ++i) {
+        if (seen.insert(clauseVec[i]).second) {
+            if (write != i) {
+                clauseVec[write] = std::move(clauseVec[i]);
+            }
+            write++;
         }
-        clauseVec[uniqueClauseCount++] = clauseVec[clauseIdx];
     }
-    clauseVec.resize(uniqueClauseCount);
+    clauseVec.resize(write);
 }
 
 void RemoveDuplicateClauseLiterals(std::vector<int>& clauseLits)
@@ -120,6 +126,54 @@ void RemoveDuplicateClauseLiterals(std::vector<int>& clauseLits)
     clauseLits.resize(uniqueLiteralCount);
 }
 
+void RemoveDuplicateClausesDirect(std::vector<Clause>& clauses, int numLit)
+{
+    for (auto& clause : clauses) {
+        RemoveDuplicateClauseLiterals(clause.literals);
+    }
+
+    struct VectorHashPtr {
+        VectorHash base;
+        explicit VectorHashPtr(int n) : base(n) {}
+        size_t operator()(const std::vector<int>* v) const
+        {
+            return base(*v);
+        }
+    };
+
+    struct VectorEqualPtr {
+        bool operator()(const std::vector<int>* a,
+                        const std::vector<int>* b) const
+        {
+            return *a == *b;
+        }
+    };
+
+    std::unordered_set<const std::vector<int>*, VectorHashPtr,
+        VectorEqualPtr> seen(0, VectorHashPtr(numLit));
+
+    seen.reserve(clauses.size());
+
+    std::vector<bool> keep(clauses.size(), false);
+    for (size_t i = 0; i < clauses.size(); ++i) {
+        if (seen.insert(&clauses[i].literals).second) {
+            keep[i] = true;
+        }
+    }
+
+    size_t write = 0;
+    for (size_t i = 0; i < clauses.size(); ++i) {
+        if (keep[i]) {
+            if (write != i) {
+                clauses[write] = std::move(clauses[i]);
+            }
+            ++write;
+        }
+    }
+
+    clauses.resize(write);
+}
+
 void MarkUnitLiterals(const std::vector<std::vector<int>>& clauseVec, std::vector<bool>& unitLit, uint64_t numLits)
 {
     for (const auto& clauseLits : clauseVec) {
@@ -127,6 +181,16 @@ void MarkUnitLiterals(const std::vector<std::vector<int>>& clauseVec, std::vecto
             continue;
         }
         unitLit[clauseLits[0] + numLits] = true;
+    }
+}
+
+void MarkUnitLiteralsDirect(std::vector<Clause>& clauses, std::vector<char>& unitLit, uint64_t numLits)
+{
+    for (const auto& clause : clauses) {
+        if (clause.literals.size() != 1) {
+            continue;
+        }
+        unitLit[clause.literals[0] + numLits] = true;
     }
 }
 
@@ -143,17 +207,64 @@ bool ClauseContainsUnitLiteral(const std::vector<int>& clauseLits, const std::ve
     return false;
 }
 
+bool ClauseContainsUnitLiteralDirect(const std::vector<int>& clauseLits,
+    const std::vector<char>& unitLit, uint64_t numLits)
+{
+    if (clauseLits.size() == 1) {
+        return false;
+    }
+    for (int litIdx : clauseLits) {
+        if (unitLit[litIdx + numLits]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void FilterClausesSatisfiedByUnitLiterals(
     std::vector<std::vector<int>>& clauseVec, const std::vector<bool>& unitLit, uint64_t numLits)
 {
     size_t keptClauseCount = 0;
-    for (const auto& clauseLits : clauseVec) {
+    for (size_t i = 0; i < clauseVec.size(); ++i) {
+        auto& clauseLits = clauseVec[i];
+
         if (clauseLits.empty() || ClauseContainsUnitLiteral(clauseLits, unitLit, numLits)) {
             continue;
         }
-        clauseVec[keptClauseCount++] = clauseLits;
+
+        if (keptClauseCount != i) {
+            clauseVec[keptClauseCount] = std::move(clauseLits);
+        }
+
+        ++keptClauseCount;
     }
+
     clauseVec.resize(keptClauseCount);
+}
+
+void FilterClausesSatisfiedByUnitLiteralsDirect(
+    std::vector<Clause>& clauses, uint64_t numLits, uint64_t additionalLen)
+{
+    std::vector<char> unitLit(K_DIR_COUNT * numLits + additionalLen, false);
+    MarkUnitLiteralsDirect(clauses, unitLit, numLits);
+
+    size_t keptClauseCount = 0;
+    size_t clausesSize = clauses.size();
+    for (size_t i = 0; i < clausesSize; ++i) {
+        auto& clauseLits = clauses[i].literals;
+
+        if (clauseLits.empty() || ClauseContainsUnitLiteralDirect(clauseLits, unitLit, numLits)) {
+            continue;
+        }
+
+        if (keptClauseCount != i) {
+            clauses[keptClauseCount] = std::move(clauses[i]);
+        }
+
+        ++keptClauseCount;
+    }
+
+    clauses.resize(keptClauseCount);
 }
 } // namespace
 
@@ -192,25 +303,25 @@ void LsSolver::ReadFromFile(const std::string& fileName, const std::vector<std::
 {
     std::string inString;
     uint64_t inputNumLits;
-    FILE* fp = freopen(fileName.c_str(), "r", stdin);
-    if (fp == nullptr) {
-        perror("fopen failed");
+    std::ifstream ifs(fileName.c_str());
+    if (!ifs.is_open()) {
+        perror("ReadFromFile:open failed");
         return;
     }
-    std::cin >> inputNumLits;
+    ifs >> inputNumLits;
     MakeLitsSpace(inputNumLits);
-    getline(std::cin, inString);
-    getline(std::cin, inString);
+    getline(ifs, inString);
+    getline(ifs, inString);
     while (inString != "0") {
         BuildLits(inString);
-        getline(std::cin, inString);
+        getline(ifs, inString);
     }
     int size;
-    std::cin >> size;
+    ifs >> size;
     originalVec.resize(size);
     int sizeNow = 0;
     while (sizeNow < size) {
-        std::cin >> inString;
+        ifs >> inString;
         if (inString == "(") {
             continue;
         } else if (inString == ")") {
@@ -224,8 +335,8 @@ void LsSolver::ReadFromFile(const std::string& fileName, const std::vector<std::
     basicComponentName = hasBC ? "BC" : "";
     bcWidthIdx = hasBC ?
         static_cast<int>(TransferNameToVar("BC_width", true)) : static_cast<int>(TransferNameToVar(".w", true));
-    bcHightIdx = hasBC ?
-        static_cast<int>(TransferNameToVar("BC_hight", true)) : static_cast<int>(TransferNameToVar(".h", true));
+    bcHeightIdx = hasBC ?
+        static_cast<int>(TransferNameToVar("BC_height", true)) : static_cast<int>(TransferNameToVar(".h", true));
     PrepareComponentsIdx();
     PrepareSoftComponentsIdx(softCNames);
     numVars = vars.size();
@@ -236,8 +347,7 @@ void LsSolver::ReadFromFile(const std::string& fileName, const std::vector<std::
 
 void LsSolver::RecordInfoAfterReadFile()
 {
-    litsAfterReadFile = lits;
-    varsAfterReadFile = vars;
+    clauses.clear();
 }
 
 // restore the vars/lits/clauses
@@ -249,8 +359,6 @@ void LsSolver::RestoreInforBeforeBuildOrigin()
     std::fill(litAppear.begin(), litAppear.end(), true);
     reconstructStack.clear();
     clauses.clear();
-    lits = litsAfterReadFile;
-    vars = varsAfterReadFile;
 }
 
 void LsSolver::AddUnitClause(std::vector<std::vector<int>>& vec, const std::vector<int>& unitLits)
@@ -459,60 +567,95 @@ bool CmpCoffVar(const CoffVar& cv1, const CoffVar& cv2)
     return cv1.varIdx < cv2.varIdx;
 }
 
-// if a+b+...<=k and a+b+...>=k only exist in 2 clauses respectively, and these 2 clause have common literals, then
-// convert them to a+b+...=k
-void LsSolver::ConvertInequalToEqual(bool& modified)
+void LsSolver::CollectLitAppearInfo(std::vector<int>& appearCount,
+    std::vector<int>& appearClauseIdx, std::vector<char>& hasNegativeAppear)
 {
-    std::vector<std::vector<int>> inequalLitInClauses(numLits);
     for (size_t clauseIdx = 0; clauseIdx < clauses.size(); clauseIdx++) {
         for (int litIdx : clauses[clauseIdx].literals) {
-            if (litIdx <= 0) {
+            if (litIdx < 0) {
+                hasNegativeAppear[-litIdx] = true;
                 continue;
             }
+
             const Lit& currentLit = lits[litIdx];
             if (!currentLit.isNiaLit || currentLit.isEqual || currentLit.litsIndex == 0) {
                 continue;
             }
-            inequalLitInClauses[litIdx].push_back(static_cast<int>(clauseIdx));
+
+            appearCount[litIdx]++;
+
+            if (appearCount[litIdx] == 1) {
+                appearClauseIdx[litIdx] = static_cast<int>(clauseIdx);
+            }
         }
     }
+}
 
+void LsSolver::ConvertSingleAppearIneqToEq(const std::vector<int>& appearCount,
+    const std::vector<int>& appearClauseIdx, const std::vector<char>& hasNegativeAppear, bool& modified)
+{
     std::vector<int> inequals;
-    for (uint64_t litIdx = 0; litIdx < numLits; litIdx++) {
-        if (inequalLitInClauses[litIdx].size() == 1) {
-            std::sort(lits[litIdx].coffVars.begin(), lits[litIdx].coffVars.end(), CmpCoffVar);
-            inequals.push_back(static_cast<int>(litIdx));
-        }
-    }
+    inequals.reserve(litsInCls->arraySize);
 
-    std::sort(inequals.begin(), inequals.end(), [this](int lIdx1, int lIdx2) {
-        return CompareLit(lits[lIdx1], lits[lIdx2], true);
-    });
+    for (size_t idx = 0; idx < litsInCls->arraySize; ++idx) {
+        int litIdx = litsInCls->array[idx];
+
+        if (litIdx == 0 || hasNegativeAppear[litIdx]) {
+            continue;
+        }
+
+        if (appearCount[litIdx] != 1) {
+            continue;
+        }
+
+        const Lit& currentLit = lits[litIdx];
+        if (!currentLit.isNiaLit || currentLit.isEqual || currentLit.litsIndex == 0) {
+            continue;
+        }
+
+        inequals.push_back(litIdx);
+    }
 
     if (inequals.empty()) {
         return;
     }
 
     for (size_t currIdx = 0; currIdx < inequals.size() - 1; currIdx++) {
-        const int currLitIdx = inequals[currIdx];
-        const int nextLitIdx = inequals[currIdx + 1];
+        int currLitIdx = inequals[currIdx];
+        int nextLitIdx = inequals[currIdx + 1];
 
         if (lits[currLitIdx].litsIndex == 0) {
             continue;
         }
-        
+
         if (!IsNegLit(lits[currLitIdx], lits[nextLitIdx])) {
             continue;
         }
-        const std::vector<int>& clauseCurrLits = clauses[inequalLitInClauses[currLitIdx][0]].literals;
-        const std::vector<int>& clauseNextLits = clauses[inequalLitInClauses[nextLitIdx][0]].literals;
-        if (!ClausesMatchExceptOppositeLits(clauseCurrLits, clauseNextLits, currLitIdx, nextLitIdx)) {
+
+        const std::vector<int>& clauseCurrLits = clauses[appearClauseIdx[currLitIdx]].literals;
+        const std::vector<int>& clauseNextLits = clauses[appearClauseIdx[nextLitIdx]].literals;
+        if (!ClausesMatchExceptOppositeLits(clauseCurrLits, clauseNextLits,
+            currLitIdx, nextLitIdx)) {
             continue;
         }
+
         modified = true;
         lits[currLitIdx].isEqual = true;
         lits[nextLitIdx].litsIndex = 0;
     }
+}
+
+// if a+b+...<=k and a+b+...>=k only exist in 2 clauses respectively, and these 2 clause have common literals, then
+// convert them to a+b+...=k
+void LsSolver::ConvertInequalToEqual(bool& modified)
+{
+    std::vector<int> appearCount(numLits, 0);
+    std::vector<int> appearClauseIdx(numLits, -1);
+    std::vector<char> hasNegativeAppear(numLits, false);
+
+    CollectLitAppearInfo(appearCount, appearClauseIdx, hasNegativeAppear);
+    ConvertSingleAppearIneqToEq(appearCount, appearClauseIdx,
+        hasNegativeAppear, modified);
 }
 
 void LsSolver::FindUnitEqualLits(std::vector<int>& unitEqualLitsAll)
@@ -528,7 +671,7 @@ void LsSolver::FindUnitEqualLits(std::vector<int>& unitEqualLitsAll)
     }
 }
 
-void LsSolver::FixValue(RationNum& bcWidth, RationNum& bcHight, RationNum& radius)
+void LsSolver::FixValue(RationNum& bcWidth, RationNum& bcHeight, RationNum& radius)
 {
     if (bcWidth != 0) {
         int rootBcWidthIdx = Find(bcWidthIdx);
@@ -537,12 +680,12 @@ void LsSolver::FixValue(RationNum& bcWidth, RationNum& bcHight, RationNum& radiu
         vars[rootBcWidthIdx].upperBound = bcWidth;
         vars[rootBcWidthIdx].lowBound = bcWidth;
     }
-    if (bcHight != 0) {
-        int rootBcHightIdx = Find(bcHightIdx);
-        bcHight = (bcHight - faConst[bcHightIdx]) / faCoff[bcHightIdx];
-        presetValues[rootBcHightIdx] = bcHight;
-        vars[rootBcHightIdx].upperBound = bcHight;
-        vars[rootBcHightIdx].lowBound = bcHight;
+    if (bcHeight != 0) {
+        int rootBcHeightIdx = Find(bcHeightIdx);
+        bcHeight = (bcHeight - faConst[bcHeightIdx]) / faCoff[bcHeightIdx];
+        presetValues[rootBcHeightIdx] = bcHeight;
+        vars[rootBcHeightIdx].upperBound = bcHeight;
+        vars[rootBcHeightIdx].lowBound = bcHeight;
     }
     if (radius != 0) {
         int radiusIdx = static_cast<int>(TransferNameToVar("radius", true));
@@ -554,23 +697,21 @@ void LsSolver::FixValue(RationNum& bcWidth, RationNum& bcHight, RationNum& radiu
     }
 }
 
-void LsSolver::PreprocessOnSize(RationNum bcWidth, RationNum bcHight, RationNum radius)
+void LsSolver::PreprocessOnSize(RationNum bcWidth, RationNum bcHeight, RationNum radius)
 {
-    FixValue(bcWidth, bcHight, radius);
+    FixValue(bcWidth, bcHeight, radius);
     bool modified = true;
     while (modified && !buildUnsat) { // if the formula has been modified, it should try to update by equalities again
         modified = false;
         ReduceClause(modified);
         ConvertInequalToEqual(modified); // 将不等式转为等式
         UpdateByEquals(modified);        // 通过等式来更新文字
-        ReduceClause(modified);
         FindBound(modified);
         if (unsatInPreprocess) { // 如果在预处理过程中已经发现unsat，则直接返回
             return;
         }
         EliminateMultipleInequalities(modified); // 删除多余的不等式
     }
-    ReduceClause(modified);
 }
 // initialize the fa, faCoff, faConst, presetValues
 void LsSolver::PrepareFaCoffs()
@@ -758,15 +899,6 @@ void LsSolver::DeleteRedundantClauses(std::vector<std::vector<int>>& clauseVec)
     std::cout << "start build\n";
     PrintVec(clauseVec);
 #endif
-
-    RemoveDuplicateClauses(clauseVec);
-    for (auto& clauseLits : clauseVec) {
-        RemoveDuplicateClauseLiterals(clauseLits);
-    }
-#ifdef LS_DEBUG
-    std::cout << "after delete redundant clauses\n";
-    PrintVec(clauseVec);
-#endif
     std::vector<bool> unitLit(K_DIR_COUNT * numLits + additionalLen, false);
     MarkUnitLiterals(clauseVec, unitLit, numLits);
     FilterClausesSatisfiedByUnitLiterals(clauseVec, unitLit, numLits);
@@ -775,25 +907,30 @@ void LsSolver::DeleteRedundantClauses(std::vector<std::vector<int>>& clauseVec)
     PrintVec(clauseVec);
     std::cout.flush();
 #endif
+    for (auto& clauseLits : clauseVec) {
+        RemoveDuplicateClauseLiterals(clauseLits);
+    }
+    RemoveDuplicateClauses(clauseVec, numLits);
+#ifdef LS_DEBUG
+    std::cout << "after delete redundant clauses\n";
+    PrintVec(clauseVec);
+#endif
 }
 
 void LsSolver::BuildInstanceOriginal(const std::vector<std::string>& unitLits)
 {
     RestoreInforBeforeBuildOrigin();
-    std::vector<std::vector<int>> clauseVec = originalVec;
+    std::vector<std::vector<int>>& clauseVec = originalVec;
     std::vector<int> unitLitsInt;
     for (const auto& l : unitLits) {
         unitLitsInt.emplace_back(feasible2litidx[l]);
     }
     AddUnitClause(clauseVec, unitLitsInt);
-    DeleteRedundantClauses(clauseVec);
     PrepareClauseForResolution(clauseVec);
     // now the vars are all in the resolution vars
     UnitProp();
     Resolution();
     UnitProp();
-    bool modified = false;
-    ReduceClause(modified);
     PrepareFaCoffs();
     PreprocessOnSize();
     if (unsatInPreprocess) {
@@ -829,10 +966,10 @@ void LsSolver::RestoreInfo(const TmpInfo& info)
     buildUnsat = info.currentBuildUnsat;
 }
 
-void LsSolver::BuildInstanceNewWidth(int bcWidth, int bcHight, int radius)
+void LsSolver::BuildInstanceNewWidth(int bcWidth, int bcHeight, int radius)
 {
     RestoreInfo(infoAfterOrigin);
-    PreprocessOnSize(RationNum(bcWidth), RationNum(bcHight), RationNum(radius));
+    PreprocessOnSize(RationNum(bcWidth), RationNum(bcHeight), RationNum(radius));
 }
 
 // 找到出现最多的变量
@@ -964,6 +1101,11 @@ void LsSolver::EliminateMultipleInequalities(bool& modified)
         }
         for (size_t idxPos = idxPre + 1; idxPos < unitIneqsNum; idxPos++) {
             Lit* l2 = &lits[unitIneqs[idxPos]];
+
+            if (unitIneqs[idxPre] == unitIneqs[idxPos]) {
+                continue;
+            }
+
             if (l2->litsIndex == 0) {
                 continue;
             }
@@ -1029,15 +1171,18 @@ void LsSolver::FindBound(bool& modified)
     }
 }
 
-void LsSolver::PrepareClauseForResolution(const std::vector<std::vector<int>> clauseVec)
+void LsSolver::PrepareClauseForResolution(const std::vector<std::vector<int>>& clauseVec)
 {
     clauses.resize(clauseVec.size());
     numClauses = 0;
-    for (auto clauseCurr : clauseVec) {
+
+    for (const auto& clauseCurr : clauseVec) {
         bool isTautology = false;
-        for (auto lIdx : clauseCurr) {
-            if ((lits[std::abs(lIdx)].litsIndex == 0 && lIdx > 0) ||
-                (lits[std::abs(lIdx)].litsIndex < 0 && lIdx < 0)) {
+        for (int lIdx : clauseCurr) {
+            int var = std::abs(lIdx);
+            Lit& lit = lits[var];
+            int idx = lit.litsIndex;
+            if ((idx == 0 && lIdx > 0) || (idx < 0 && lIdx < 0)) {
                 isTautology = true;
                 break;
             }
@@ -1045,14 +1190,23 @@ void LsSolver::PrepareClauseForResolution(const std::vector<std::vector<int>> cl
         if (isTautology) {
             continue;
         }
-        for (auto lIdx : clauseCurr) {
-            clauses[numClauses].literals.push_back(lIdx);
-            Lit* l = &(lits[std::abs(lIdx)]);
-            if (l->litsIndex <= 0) {
+
+        auto& clause = clauses[numClauses];
+        clause.literals.reserve(clauseCurr.size());
+
+        for (int lIdx : clauseCurr) {
+            clause.literals.push_back(lIdx);
+
+            int var = std::abs(lIdx);
+            Lit& lit = lits[var];
+
+            if (lit.litsIndex <= 0) {
                 continue;
             }
-            if (!l->isNiaLit) {
-                vars[l->delta.ToInt()].clauseIdxs.push_back(static_cast<int>(numClauses));
+
+            if (!lit.isNiaLit) {
+                int vIdx = lit.delta.ToInt();
+                vars[vIdx].clauseIdxs.push_back(numClauses);
             }
         }
         numClauses++;
@@ -1062,21 +1216,25 @@ void LsSolver::PrepareClauseForResolution(const std::vector<std::vector<int>> cl
 
 uint64_t LsSolver::TransferNameToVar(const std::string& name, bool isNia)
 {
-    if (name2var.find(name) == name2var.end()) {
-        name2var[name] = vars.size();
-        Variable var;
-        var.varName = name;
-        var.isNia = isNia;
-        vars.push_back(var);
+    auto [it, inserted] = name2var.try_emplace(name, vars.size());
+
+    if (inserted) {
+        vars.emplace_back();
+        int idx = static_cast<int>(vars.size()) - 1;
+
+        vars.back().varName = name;
+        vars.back().isNia = isNia;
+
         if (isNia) {
-            niaVarVec.push_back(static_cast<int>(vars.size()) - 1);
+            niaVarVec.emplace_back(idx);
         } else {
-            boolVarVec.push_back(static_cast<int>(vars.size()) - 1);
+            boolVarVec.emplace_back(idx);
         }
-        return vars.size() - 1;
-    } else {
-        return name2var[name];
+
+        return idx;
     }
+
+    return it->second;
 }
 
 void LsSolver::UnitProp()
@@ -1122,11 +1280,9 @@ uint64_t LsSolver::HashLitsToNum(const std::vector<int>& litIndices)
     if (litIndices.empty()) {
         return 0;
     }
-    std::vector<int> tmp = litIndices; // avoid mutating caller data
-    std::sort(tmp.begin(), tmp.end());
     // FNV-1a 64-bit variant mixing with std::hash
     uint64_t hash = 14695981039346656037ULL; // 14695981039346656037ULL: FNV offset basis
-    for (int v : tmp) {
+    for (int v : litIndices) {
         uint64_t hv = std::hash<int>{}(v);
         hash ^= hv;
         hash *= 1099511628211U; // 1099511628211ULL: FNV prime
@@ -1159,6 +1315,7 @@ void LsSolver::Resolution()
                       // number, then map it to the clauseIdx, if deleted, set it to -1
     std::vector<uint64_t> clauselit(clauses.size()); // hash the lits of clause to a number
     for (int clsIdx = 0; clsIdx < clauses.size(); clsIdx++) {
+        std::sort(clauses[clsIdx].literals.begin(), clauses[clsIdx].literals.end());
         clauselit[clsIdx] = HashLitsToNum(clauses[clsIdx].literals);
         clauselitMap[clauselit[clsIdx]] = clsIdx;
     }
@@ -1306,6 +1463,7 @@ void LsSolver::ResolvePosAndNegClause(uint64_t posClauseIdx, uint64_t negClauseI
     if (isTautology) {
         return;
     }
+    std::sort(newClause.literals.begin(), newClause.literals.end());
     uint64_t clauseLitHash = HashLitsToNum(newClause.literals);
     auto it = clauselitMap.find(clauseLitHash);
     if (it != clauselitMap.end()) {
@@ -1416,18 +1574,43 @@ void LsSolver::GcdForLit(Lit& l)
 
 void LsSolver::DetermineLitAppear()
 {
-    for (int idx = 0; idx < litAppear.size(); idx++) {
-        litAppear[idx] = false;
-    }
-    litsInCls->Clear();
+    std::vector<char> localAppear(litAppear.size(), 0);
+
+    std::vector<int> originalOrder(
+        litsInCls->array.begin(),
+        litsInCls->array.begin() + litsInCls->arraySize
+    );
+
     for (const auto& c : clauses) {
         for (const auto& l : c.literals) {
             int lIdx = std::abs(l);
-            litAppear[lIdx] = true;
-            litsInCls->InsertElement(lIdx);
+            localAppear[lIdx] = 1;
         }
     }
+
+    std::vector<char> secondAppear(localAppear.size(), 0);
+
+    litsInCls->Clear();
+
+    for (int litIndex : originalOrder) {
+        if (localAppear[litIndex]) {
+            litsInCls->InsertElement(litIndex);
+            secondAppear[litIndex] = 1;
+        }
+    }
+
+    size_t localAppearSize = localAppear.size();
+    for (size_t idx = 0; idx < localAppearSize; ++idx) {
+        if (localAppear[idx] && !secondAppear[idx]) {
+            litsInCls->InsertElement(idx);
+        }
+    }
+
+    for (size_t i = 0; i < localAppearSize; ++i) {
+        litAppear[i] = localAppear[i];
+    }
 }
+
 
 bool LsSolver::CompareLitByCoffVars(const Lit& x, const Lit& y)
 {
@@ -1435,17 +1618,16 @@ bool LsSolver::CompareLitByCoffVars(const Lit& x, const Lit& y)
         return x.coffVars.size() < y.coffVars.size();
     }
 
-    size_t coffVarSize = x.coffVars.size();
-    std::vector<bool> xSignEncode(coffVarSize + 1, false);
-    std::vector<bool> ySignEncode(coffVarSize + 1, false);
-    for (size_t idx = 0; idx < coffVarSize; idx++) {
-        RationNum absXCoff = x.coffVars[idx].coff.Abs();
-        RationNum absYCoff = y.coffVars[idx].coff.Abs();
-        if (absXCoff != absYCoff) {
-            return absXCoff < absYCoff;
+    size_t n = x.coffVars.size();
+    for (size_t i = 0; i < n; i++) {
+        const auto& xC = x.coffVars[i].coff;
+        const auto& yC = y.coffVars[i].coff;
+
+        RationNum absX = xC.Abs();
+        RationNum absY = yC.Abs();
+        if (absX != absY) {
+            return absX < absY;
         }
-        xSignEncode[idx] = x.coffVars[idx].coff > 0;
-        ySignEncode[idx] = y.coffVars[idx].coff > 0;
     }
 
     RationNum absXKey = x.key.Abs();
@@ -1453,53 +1635,58 @@ bool LsSolver::CompareLitByCoffVars(const Lit& x, const Lit& y)
     if (absXKey != absYKey) {
         return absXKey < absYKey;
     }
-    
-    xSignEncode[coffVarSize] = x.key > 0;
-    ySignEncode[coffVarSize] = y.key > 0;
-    
-    std::vector<bool> xAdjustedSignEncode = xSignEncode;
-    std::vector<bool> yAdjustedSignEncode = ySignEncode;
-    if (x.key <= 0) {
-        xAdjustedSignEncode.flip();
-    }
-    if (y.key <= 0) {
-        yAdjustedSignEncode.flip();
+
+    bool xFlip = (x.key <= 0);
+    bool yFlip = (y.key <= 0);
+
+    for (size_t i = 0; i < n; i++) {
+        bool xSign = (x.coffVars[i].coff > 0) ^ xFlip;
+        bool ySign = (y.coffVars[i].coff > 0) ^ yFlip;
+        if (xSign != ySign) {
+            return xSign < ySign;
+        }
     }
 
-    if (xAdjustedSignEncode != yAdjustedSignEncode) {
-        return xAdjustedSignEncode < yAdjustedSignEncode;
-    } else {
-        return xSignEncode[coffVarSize] < ySignEncode[coffVarSize];
-    }
+    bool xKeySign = (x.key > 0);
+    bool yKeySign = (y.key > 0);
+    return xKeySign < yKeySign;
 }
 
-bool LsSolver::CompareLit(const Lit& x, const Lit& y, bool isQuick = false)
+
+bool LsSolver::CompareLit(const Lit& x, const Lit& y, bool isQuick)
 {
     if (x.isEqual != y.isEqual) {
         return x.isEqual < y.isEqual;
     }
+
     if (x.isNiaLit != y.isNiaLit) {
         return x.isNiaLit < y.isNiaLit;
     }
-    if (x.coffVars.size() != y.coffVars.size()) {
-        return x.coffVars.size() < y.coffVars.size();
+
+    size_t sizeX = x.coffVars.size();
+    size_t sizeY = y.coffVars.size();
+    if (sizeX != sizeY) {
+        return sizeX < sizeY;
     }
-    for (size_t i = 0; i < x.coffVars.size(); i++) {
-        if (x.coffVars[i].varIdx != y.coffVars[i].varIdx) {
-            return x.coffVars[i].varIdx < y.coffVars[i].varIdx;
+
+    for (size_t i = 0; i < sizeX; i++) {
+        const auto& xv = x.coffVars[i];
+        const auto& yv = y.coffVars[i];
+
+        if (xv.varIdx != yv.varIdx) {
+            return xv.varIdx < yv.varIdx;
+        }
+
+        if (isQuick && xv.coff != yv.coff) {
+            return xv.coff < yv.coff;
         }
     }
 
     if (isQuick) {
-        for (size_t i = 0; i < x.coffVars.size(); i++) {
-            if (x.coffVars[i].coff != y.coffVars[i].coff) {
-                return x.coffVars[i].coff < y.coffVars[i].coff;
-            }
-        }
         return x.key < y.key;
-    } else {
-        return CompareLitByCoffVars(x, y);
     }
+
+    return CompareLitByCoffVars(x, y);
 }
 
 void LsSolver::ReduceDuplicatedLits(bool& modified)
@@ -1507,19 +1694,25 @@ void LsSolver::ReduceDuplicatedLits(bool& modified)
     if (!litsBeenModified) {
         return;
     }
+    if (litsInCls->arraySize == 0) {
+        return;
+    }
     std::vector<int> sameLit(numLits, 0); // sameLit[i] = j means lit i and j are the same lit
     
-    std::vector<int> sortedLitIndices(litsInCls->array.begin(), litsInCls->array.begin() + litsInCls->arraySize);
-    std::sort(sortedLitIndices.begin(), sortedLitIndices.end(), [this](int lIdx1, int lIdx2) {
-        return CompareLit(lits[lIdx1], lits[lIdx2], true);
+    std::sort(litsInCls->array.begin(), litsInCls->array.begin() + litsInCls->arraySize, [this](int lIdx1, int lIdx2) {
+        return CompareLit(lits[lIdx1], lits[lIdx2], false);
     });
     for (int32_t idx = 0; idx < litsInCls->arraySize; ++idx) {
         litsInCls->indexInArray[litsInCls->array[idx]] = idx;
     }
 
-    int lIdxPrev = sortedLitIndices[0];
-    for (int currIdx = 1; currIdx < sortedLitIndices.size(); currIdx++) {
-        int lIdxCurr = sortedLitIndices[currIdx];
+    if (litsInCls->array.empty()) {
+        return;
+    }
+
+    int lIdxPrev = litsInCls->array[0];
+    for (int currIdx = 1; currIdx < litsInCls->arraySize; currIdx++) {
+        int lIdxCurr = litsInCls->array[currIdx];
         if (!lits[lIdxCurr].isNiaLit) {
             lIdxPrev = lIdxCurr;
             continue;
@@ -1705,21 +1898,27 @@ bool LsSolver::IsClauseTautology(const Clause& c)
 // 删除单个 clause 中的重复文字，并对文字排序，删除已确定为假的文字
 void LsSolver::ReduceDuplicatedLitsInClause(Clause& c, bool& modified)
 {
-    std::sort(c.literals.begin(), c.literals.end());
-    unsigned clauseSz = 0;
+    // 过滤确定为假的文字
+    size_t originalLitSize = c.literals.size();
+    size_t newLitSize = 0;
     for (int l : c.literals) {
         if ((lits[std::abs(l)].litsIndex == 0 && l < 0) || (lits[std::abs(l)].litsIndex < 0 && l > 0)) {
             continue;
         }
-        if (clauseSz == 0 || c.literals[clauseSz - 1] != l) {
-            c.literals[clauseSz++] = l;
-        }
+
+        c.literals[newLitSize++] = l;
     }
-    if (c.literals.size() != clauseSz) {
+    c.literals.resize(newLitSize);
+
+    // 去重
+    std::sort(c.literals.begin(), c.literals.end());
+    c.literals.erase(std::unique(c.literals.begin(), c.literals.end()), c.literals.end());
+    newLitSize = c.literals.size();
+    if (originalLitSize != newLitSize) {
         modified = true;
     }
-    c.literals.resize(clauseSz);
-    if (clauseSz == 0) {
+    
+    if (newLitSize == 0) {
         buildUnsat = true;
     }
 }
@@ -1731,34 +1930,31 @@ void LsSolver::ReduceDuplicatedLitsInClause(Clause& c, bool& modified)
 // 4. 删除重复的子句，以及其中包含出现于单元子句中文字的子句
 void LsSolver::ReduceClause(bool& modified)
 {
-    ReduceDuplicatedLits(modified); // 删除重复的文字，即编号不同但是实际一样的
     DetermineLitsByBound(modified); // 根据var的bound确定文字是否已经为true或false
     int reducedClauseNum = 0;
     uint64_t originalClauseNum = numClauses;
     for (int i = 0; i < numClauses; i++) {
         if (!clauses[i].isDelete && !IsClauseTautology(clauses[i])) {
-            clauses[reducedClauseNum++] = clauses[i];
+            if (reducedClauseNum != i) {
+                clauses[reducedClauseNum] = std::move(clauses[i]);
+            }
+            reducedClauseNum++;
         }
     }
     clauses.resize(reducedClauseNum);
-    numClauses = reducedClauseNum;
     for (auto& c : clauses) {
         ReduceDuplicatedLitsInClause(c, modified);
     }
-    std::vector<std::vector<int>> clauseVec(numClauses);
-    for (size_t cIdx = 0; cIdx < clauses.size(); cIdx++) {
-        clauseVec[cIdx] = clauses[cIdx].literals;
-    }
-    DeleteRedundantClauses(clauseVec);
-    numClauses = clauseVec.size();
-    clauses.resize(numClauses);
-    for (size_t cIdx = 0; cIdx < numClauses; cIdx++) {
-        clauses[cIdx].literals = clauseVec[cIdx];
-    }
+    FilterClausesSatisfiedByUnitLiteralsDirect(clauses, numLits, additionalLen);
+    DetermineLitAppear();
+
+    bool hasDuplicatedLits = false;
+    ReduceDuplicatedLits(hasDuplicatedLits); // 删除重复的文字，即编号不同但是实际一样的
+    RemoveDuplicateClausesDirect(clauses, numLits);
+    numClauses = clauses.size();
     if (originalClauseNum != numClauses) {
         modified = true;
     }
-    DetermineLitAppear();
 }
 
 void LsSolver::PrepareClsLitIdxForVars()
@@ -1883,7 +2079,8 @@ bool LsSolver::IsSameLit(const Lit& l1, const Lit& l2)
         (l1.coffVars.size() != l2.coffVars.size())) {
         return false;
     }
-    for (size_t idx = 0; idx < l1.coffVars.size(); idx++) {
+    size_t coffVarsSize = l1.coffVars.size();
+    for (size_t idx = 0; idx < coffVarsSize; idx++) {
         if ((l1.coffVars[idx].coff != l2.coffVars[idx].coff) || (l1.coffVars[idx].varIdx != l2.coffVars[idx].varIdx)) {
             return false;
         }
@@ -1923,7 +2120,7 @@ void LsSolver::PrepareComponentsIdx()
             vEnd = vName.substr(pos + 1);
             vName = vName.substr(0, pos);
         }
-        if ((vEnd == "x" || vEnd == "y" || vEnd == "width" || vEnd == "hight") && (vName != basicComponentName)) {
+        if ((vEnd == "x" || vEnd == "y" || vEnd == "width" || vEnd == "height") && (vName != basicComponentName)) {
             if (kidsNames2Fre.find(vName) != kidsNames2Fre.end()) {
                 kidsNames2Fre[vName]++;
             } else {
@@ -1942,7 +2139,7 @@ void LsSolver::PrepareComponentsIdx()
 void LsSolver::AddComponent(const std::string& cName)
 {
     componentsIdx.push_back(name2var[cName + "_width"]);
-    componentsIdx.push_back(name2var[cName + "_hight"]);
+    componentsIdx.push_back(name2var[cName + "_height"]);
     componentsIdx.push_back(name2var[cName + "_x"]);
     componentsIdx.push_back(name2var[cName + "_y"]);
     componentsFeasibleIdx.push_back(name2var[cName + "_feasible"]);
@@ -1953,7 +2150,7 @@ void LsSolver::PrepareSoftComponentsIdx(const std::vector<std::string>& softCNam
 {
     for (const auto& softCName : softCNames) {
         softComponentsIdx.push_back(name2var[softCName + "_width"]);
-        softComponentsIdx.push_back(name2var[softCName + "_hight"]);
+        softComponentsIdx.push_back(name2var[softCName + "_height"]);
         softComponentsIdx.push_back(name2var[softCName + "_x"]);
         softComponentsIdx.push_back(name2var[softCName + "_y"]);
     }
@@ -2019,7 +2216,8 @@ void LsSolver::SetPreValue()
                 preValue1[varIdx] = (-l1->key / l1->coffVars[0].coff);
                 preValue2[varIdx] = (-l2->key / l2->coffVars[0].coff);
             }
-        } //(a==0 OR a==1)
+        }
+        // (a==0 OR a==1)
     }
 }
 LsSolver::~LsSolver()

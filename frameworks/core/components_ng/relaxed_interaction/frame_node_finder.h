@@ -22,6 +22,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/relaxed_interaction/relaxed_interaction_types.h"
 
@@ -29,7 +30,31 @@ namespace OHOS::Ace::NG {
 
 class PipelineContext;
 
+class ComponentUtils {
+public:
+    static std::string ToString(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+    static Axis GetAxis(const RefPtr<FrameNode>& frameNode);
+};
+
 using GestureRecognizerPred = std::function<bool (const RefPtr<NGGestureRecognizer>& gestureRecognizer)>;
+
+struct ClickRecognizerPred {
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+};
+
+struct ContentSwitchRecognizerPred {
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+};
+
+struct ScrollRecognizerPred {
+    ScrollRecognizerPred(RelaxedScrollDirection direction)
+        : direction_(direction) {}
+
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+
+private:
+    RelaxedScrollDirection direction_;
+};
 
 class FrameNodeMatch {
 public:
@@ -67,18 +92,6 @@ private:
     RefPtr<FrameNode> node_;
 };
 
-struct ClickRecognizerPred {
-    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
-};
-
-struct ContentSwitchRecognizerPred {
-    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
-};
-
-struct ScrollRecognizerPred {
-    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
-};
-
 /**
  * @brief FrameNode finder providing FrameNode query functionality
  *
@@ -110,6 +123,7 @@ private:
     FrameNodeMatch FindAt(const RefPtr<UINode>& rootNode, float x, float y);
     FrameNodeMatch Find(const TouchTestResult& touchTestResult);
     FrameNodeMatch FindLeaf(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+    bool Test(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
     void CleanResult(const TouchTestResult& touchTestResult, int32_t touchId);
     void GetFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes,
         const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);

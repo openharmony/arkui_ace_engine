@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/search/search_model_ng.h"
-
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/search/search_theme.h"
@@ -28,6 +27,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
+#include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1112,7 +1112,7 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto textFieldTheme = pattern->GetTheme();
+    auto textFieldTheme = frameNode->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
@@ -2130,6 +2130,37 @@ void SearchModelNG::SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecora
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateTextDecorationStyle(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetLineThicknessScale(float value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto& children = frameNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateLineThicknessScale(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetLineThicknessScale(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto& children = frameNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateLineThicknessScale(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

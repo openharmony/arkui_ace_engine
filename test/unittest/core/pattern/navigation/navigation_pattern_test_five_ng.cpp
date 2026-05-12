@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

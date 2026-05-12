@@ -14,6 +14,7 @@
  */
 
 #include "grid_row_model_ng.h"
+#include "core/common/container.h"
 
 #include "grid_row_layout_pattern.h"
 

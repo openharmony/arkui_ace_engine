@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -27,6 +28,7 @@
 #include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "frameworks/base/error/error_code.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"

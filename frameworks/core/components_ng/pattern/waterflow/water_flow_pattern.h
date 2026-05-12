@@ -123,6 +123,7 @@ public:
 
     void ScrollPage(bool reverse, bool smooth = false,
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
+    void ScrollBy(float offset);
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
         std::optional<float> extraOffset = std::nullopt) override;
@@ -193,6 +194,7 @@ public:
         return { FocusType::SCOPE, true };
     }
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override;
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
     // ------------------------ Focus ^^^ --------------------------------
     void BeforeCreateLayoutWrapper() override;

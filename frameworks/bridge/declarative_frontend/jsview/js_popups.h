@@ -52,11 +52,14 @@ public:
     static void ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam);
     static void ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuSystemMaterial(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuDistortionMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuEdgeLightMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuModalMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuOffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam);
     static void InitMenuParamColorMode(NG::MenuParam& menuParam);
     static void ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
     static void SetSheetRenderStrategy(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    static void ParseSheetEdgeLightMode(const JSRef<JSVal>& edgeLightMode, NG::SheetStyle& sheetStyle);
     static void ParseMenuScrollBar(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
 private:
     static void ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
@@ -95,6 +98,7 @@ private:
     static void ParseTransitionParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseAnchorPositionParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuTargetSpace(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::Framework
 

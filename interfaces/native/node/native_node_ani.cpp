@@ -24,7 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/syntax/node_content_peer.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 namespace {
 constexpr char NAV_PATH_STACK_CLASS[] = "arkui.component.navigation.NavPathStack";

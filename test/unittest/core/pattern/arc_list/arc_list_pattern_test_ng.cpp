@@ -390,4 +390,324 @@ HWTEST_F(ArcListPatternTestNg, CreateAnalyzerOverlay, TestSize.Level1)
     auto overlayNode = host->GetOverlayNode();
     EXPECT_NE(overlayNode, nullptr);
 }
+
+/**
+ * @tc.name: GetDefaultScrollingConfig001
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when IsScrollAble returns false due to isScrollable_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = false;
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig002
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when direction is not FORWARD or BACKWARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    ListItemInfo info = { 0, 0.0f, 100.0f, false };
+    pattern_->itemPosition_[0] = info;
+    pattern_->maxListItemIndex_ = 5;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::LEFT);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig003
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when itemPosition_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->itemPosition_.clear();
+    pattern_->maxListItemIndex_ = 5;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig004
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when maxListItemIndex_ is negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    ListItemInfo info = { 0, 0.0f, 100.0f, false };
+    pattern_->itemPosition_[0] = info;
+    pattern_->maxListItemIndex_ = -1;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig005
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when GetMidIndex returns negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig005, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->itemPosition_.clear();
+    pattern_->maxListItemIndex_ = 5;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->spaceWidth_ = 0.0f;
+
+    auto host = pattern_->GetHost();
+    if (host) {
+        host->children_ = {};
+    }
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig006
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when targetIndex equals midIndex (FORWARD at boundary)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig006, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->maxListItemIndex_ = 0;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->spaceWidth_ = 0.0f;
+
+    ListItemInfo info0 = { 0, 0.0f, 200.0f, false };
+    pattern_->itemPosition_[0] = info0;
+
+    pattern_->startIndex_ = 0;
+    pattern_->endIndex_ = 0;
+    pattern_->startMainPos_ = 0.0f;
+    pattern_->endMainPos_ = 200.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig007
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when targetIndex equals midIndex (BACKWARD at boundary)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig007, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->maxListItemIndex_ = 5;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->spaceWidth_ = 0.0f;
+
+    ListItemInfo info0 = { 0, 0.0f, 200.0f, false };
+    pattern_->itemPosition_[0] = info0;
+
+    pattern_->startIndex_ = 0;
+    pattern_->endIndex_ = 3;
+    pattern_->startMainPos_ = 0.0f;
+    pattern_->endMainPos_ = 300.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+    pattern_->itemStartIndex_ = 0;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::BACKWARD);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig008
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when CalculateScrollingDistanceToIndex returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig008, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->spaceWidth_ = 0.0f;
+
+    ListItemInfo info0 = { 0, 0.0f, 100.0f, false };
+    ListItemInfo info1 = { 1, 100.0f, 200.0f, false };
+    pattern_->itemPosition_[0] = info0;
+    pattern_->itemPosition_[1] = info1;
+
+    pattern_->startIndex_ = 0;
+    pattern_->endIndex_ = 1;
+    pattern_->startMainPos_ = 0.0f;
+    pattern_->endMainPos_ = 200.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig009
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig when targetPos is near zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig009, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->spaceWidth_ = 0.0f;
+
+    ListItemInfo info0 = { 0, 0.0f, 100.0f, false };
+    ListItemInfo info1 = { 1, 100.0f, 200.0f, false };
+    ListItemInfo info2 = { 2, 150.0f, 250.0f, false };
+    pattern_->itemPosition_[0] = info0;
+    pattern_->itemPosition_[1] = info1;
+    pattern_->itemPosition_[2] = info2;
+
+    pattern_->startIndex_ = 0;
+    pattern_->endIndex_ = 2;
+    pattern_->startMainPos_ = 0.0f;
+    pattern_->endMainPos_ = 250.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::FORWARD);
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig010
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig with FORWARD direction returns valid config
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig010, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->spaceWidth_ = 0.0f;
+
+    ListItemInfo info0 = { 0, 0.0f, 100.0f, false };
+    ListItemInfo info1 = { 1, 100.0f, 200.0f, false };
+    ListItemInfo info2 = { 2, 200.0f, 300.0f, false };
+    ListItemInfo info3 = { 3, 300.0f, 400.0f, false };
+    ListItemInfo info4 = { 4, 400.0f, 500.0f, false };
+    pattern_->itemPosition_[0] = info0;
+    pattern_->itemPosition_[1] = info1;
+    pattern_->itemPosition_[2] = info2;
+    pattern_->itemPosition_[3] = info3;
+    pattern_->itemPosition_[4] = info4;
+
+    pattern_->startIndex_ = 0;
+    pattern_->endIndex_ = 4;
+    pattern_->startMainPos_ = 0.0f;
+    pattern_->endMainPos_ = 500.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::FORWARD);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(result->direction, SmartGestureDirection::FORWARD);
+    EXPECT_TRUE(result->distance.has_value());
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig011
+ * @tc.desc: Test ArcListPattern GetDefaultScrollingConfig with BACKWARD direction returns valid config
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, GetDefaultScrollingConfig011, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    pattern_->isScrollable_ = true;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->contentMainSize_ = 400.0f;
+    pattern_->spaceWidth_ = 0.0f;
+
+    ListItemInfo info0 = { 0, 0.0f, 100.0f, false };
+    ListItemInfo info1 = { 1, 100.0f, 200.0f, false };
+    ListItemInfo info2 = { 2, 200.0f, 300.0f, false };
+    ListItemInfo info3 = { 3, 300.0f, 400.0f, false };
+    ListItemInfo info4 = { 4, 400.0f, 500.0f, false };
+    pattern_->itemPosition_[0] = info0;
+    pattern_->itemPosition_[1] = info1;
+    pattern_->itemPosition_[2] = info2;
+    pattern_->itemPosition_[3] = info3;
+    pattern_->itemPosition_[4] = info4;
+
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->startMainPos_ = 100.0f;
+    pattern_->endMainPos_ = 500.0f;
+    pattern_->currentDelta_ = 0.0f;
+    pattern_->contentStartOffset_ = 0.0f;
+    pattern_->contentEndOffset_ = 0.0f;
+    pattern_->isStackFromEnd_ = false;
+
+    auto result = pattern_->GetDefaultScrollingConfig(SmartGestureDirection::BACKWARD);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(result->direction, SmartGestureDirection::BACKWARD);
+    EXPECT_TRUE(result->distance.has_value());
+}
 } // namespace OHOS::Ace::NG

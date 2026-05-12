@@ -20,6 +20,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
@@ -1382,7 +1383,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg038, Test
     float pointOffset = FIFTY_FLOAT;
     switchModifier.pointOffset_->Set(pointOffset);
     switchModifier.FixPointOffset();
-    EXPECT_EQ(switchModifier.pointOffset_->Get(), TEN_FLOAT);
+    EXPECT_EQ(switchModifier.pointOffset_->Get(), FIFTY_FLOAT - FORTY_FLOAT / 2.0f);
 }
 
 /**

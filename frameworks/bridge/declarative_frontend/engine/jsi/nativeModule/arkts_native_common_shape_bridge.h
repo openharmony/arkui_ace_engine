@@ -16,10 +16,15 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_COMMON_SHAPE_BRIDGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_COMMON_SHAPE_BRIDGE_H
 
+#include "core/components/common/properties/color.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+
+ACE_FORCE_EXPORT bool NeedUseShapeColorModifierPayload(FrameNode* frameNode, const Color& color);
+
 class CommonShapeBridge : public CommonBridge {
 public:
     static ArkUINativeModuleValue SetStrokeDashArray(ArkUIRuntimeCallInfo* runtimeCallInfo);

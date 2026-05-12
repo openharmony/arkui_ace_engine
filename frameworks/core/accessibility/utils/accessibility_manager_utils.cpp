@@ -18,6 +18,123 @@
 
 namespace OHOS::Ace::NG {
 
+void NextFocusRelationController::RebuildTargetPrimaryForTarget(
+    const std::string& targetInspectorId,
+    TargetMap& targetMap,
+    std::map<int64_t, NextFocusSourceEntry>& sourceMap,
+    std::map<std::string, std::set<int64_t>>& targetSourcesMap)
+{
+    auto targetIt = targetSourcesMap.find(targetInspectorId);
+    if (targetIt == targetSourcesMap.end() || targetIt->second.empty()) {
+        targetMap.erase(targetInspectorId);
+        return;
+    }
+    for (auto sourceAccessibilityId : targetIt->second) {
+        auto sourceIt = sourceMap.find(sourceAccessibilityId);
+        if (sourceIt == sourceMap.end()) {
+            continue;
+        }
+        if (sourceIt->second.targetInspectorId != targetInspectorId) {
+            continue;
+        }
+        targetMap[targetInspectorId] = { sourceAccessibilityId, sourceIt->second.descendantMode };
+        return;
+    }
+    targetMap.erase(targetInspectorId);
+}
+
+void NextFocusRelationController::RemoveSourceRelationByAccessibilityId(
+    int64_t sourceAccessibilityId,
+    TargetMap& targetMap,
+    std::map<int64_t, NextFocusSourceEntry>& sourceMap,
+    std::map<std::string, std::set<int64_t>>& targetSourcesMap)
+{
+    auto sourceIt = sourceMap.find(sourceAccessibilityId);
+    if (sourceIt == sourceMap.end()) {
+        return;
+    }
+    auto oldTargetInspectorId = sourceIt->second.targetInspectorId;
+    sourceMap.erase(sourceIt);
+    auto targetIt = targetSourcesMap.find(oldTargetInspectorId);
+    if (targetIt != targetSourcesMap.end()) {
+        targetIt->second.erase(sourceAccessibilityId);
+        if (targetIt->second.empty()) {
+            targetSourcesMap.erase(targetIt);
+        }
+    }
+    RebuildTargetPrimaryForTarget(oldTargetInspectorId, targetMap, sourceMap, targetSourcesMap);
+}
+
+void NextFocusRelationController::HandleExistingContext(
+    std::map<int32_t, TargetMap>::iterator& targetMapIt,
+    std::map<int32_t, std::map<int64_t, NextFocusSourceEntry>>::iterator& sourceMapIt,
+    std::map<int32_t, std::map<std::string, std::set<int64_t>>>::iterator& targetSourcesIt,
+    const std::string& nextFocusInspectorKey, int64_t sourceAccessibilityId, bool descendantMode)
+{
+    auto& targetMap = targetMapIt->second;
+    auto& sourceMap = sourceMapIt->second;
+    auto& targetSourcesMap = targetSourcesIt->second;
+
+    RemoveSourceRelationByAccessibilityId(sourceAccessibilityId, targetMap, sourceMap, targetSourcesMap);
+    if (nextFocusInspectorKey.empty()) {
+        return;
+    }
+    sourceMap[sourceAccessibilityId] = { nextFocusInspectorKey, descendantMode };
+    targetSourcesMap[nextFocusInspectorKey].insert(sourceAccessibilityId);
+    targetMap[nextFocusInspectorKey] = { sourceAccessibilityId, descendantMode }; // latest source wins
+}
+
+void NextFocusRelationController::UpdateNextFocusIdMap(
+    int32_t containerId, const std::string& nextFocusInspectorKey, int64_t sourceAccessibilityId, bool descendantMode)
+{
+    auto targetFindIt = nextFocusMapWithSubWindow_.find(containerId);
+    auto sourceFindIt = nextFocusSourceMapWithSubWindow_.find(containerId);
+    auto targetSourcesFindIt = nextFocusTargetSourcesWithSubWindow_.find(containerId);
+    if (targetFindIt == nextFocusMapWithSubWindow_.end() &&
+        sourceFindIt == nextFocusSourceMapWithSubWindow_.end() &&
+        targetSourcesFindIt == nextFocusTargetSourcesWithSubWindow_.end() &&
+        nextFocusInspectorKey.empty()) {
+        return;
+    }
+
+    auto targetIt = nextFocusMapWithSubWindow_.try_emplace(containerId).first;
+    auto sourceIt = nextFocusSourceMapWithSubWindow_.try_emplace(containerId).first;
+    auto targetSourcesIt = nextFocusTargetSourcesWithSubWindow_.try_emplace(containerId).first;
+    HandleExistingContext(
+        targetIt, sourceIt, targetSourcesIt, nextFocusInspectorKey, sourceAccessibilityId, descendantMode);
+
+    if (targetIt->second.empty() && sourceIt->second.empty() && targetSourcesIt->second.empty()) {
+        nextFocusMapWithSubWindow_.erase(targetIt);
+        nextFocusSourceMapWithSubWindow_.erase(containerId);
+        nextFocusTargetSourcesWithSubWindow_.erase(containerId);
+    }
+}
+
+bool NextFocusRelationController::GetNextFocusDescendantMode(int32_t containerId, const std::string& inspectorId) const
+{
+    if (inspectorId.empty()) {
+        return false;
+    }
+    auto containerIt = nextFocusMapWithSubWindow_.find(containerId);
+    if (containerIt == nextFocusMapWithSubWindow_.end()) {
+        return false;
+    }
+    auto it = containerIt->second.find(inspectorId);
+    if (it != containerIt->second.end()) {
+        return it->second.descendantMode;
+    }
+    return false;
+}
+
+const NextFocusRelationController::TargetMap& NextFocusRelationController::GetTargetMap(int32_t containerId) const
+{
+    auto containerIt = nextFocusMapWithSubWindow_.find(containerId);
+    if (containerIt == nextFocusMapWithSubWindow_.end()) {
+        return emptyTargetMap_;
+    }
+    return containerIt->second;
+}
+
 void AccessibilityEventBlockerInAction::AddBlockedEvent(int64_t actionId, AccessibilityEventType event)
 {
     CHECK_EQUAL_VOID(actionId, -1);

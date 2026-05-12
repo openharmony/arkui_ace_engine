@@ -20,6 +20,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
@@ -135,6 +136,9 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite002, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level2)
 {
+    /**
+ 	 * @tc.steps: step1. get controller
+ 	 */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -148,6 +152,9 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level2)
     richEditorPattern->copyOption_ = CopyOptions::Local;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
+    /**
+ 	 * @tc.steps: step1. test IsShowAIWrite
+ 	 */
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
@@ -511,10 +518,16 @@ HWTEST_F(RichEditorAITestOneNg, StartAITask001, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect001, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
+    /**
+     * @tc.steps: step2. add aiSpan
+     */
     std::map<int32_t, AISpan> aiSpanMap;
     AISpan aiSpan0;
     aiSpanMap[0] = aiSpan0;

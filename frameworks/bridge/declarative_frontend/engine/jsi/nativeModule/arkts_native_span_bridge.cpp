@@ -16,16 +16,17 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 
 #include <string>
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "core/components/common/layout/constants.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -52,7 +53,7 @@ bool ParseFontVariations(EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vect
         return false;
     }
     auto array = Local<panda::ArrayRef>(jsValue);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     axisValues.reserve(length);
     fontVariations.reserve(length);
     for (uint32_t i = 0; i < length; ++i) {
@@ -444,7 +445,7 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
         textColor = theme->GetTextStyle().GetTextColor();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontColor(
-        nativeNode, textColor.GetValue(), AceType::RawPtr(colorResObj));
+        nativeNode, textColor.GetValue(), AceType::RawPtr(colorResObj), false);
     return panda::JSValueRef::Undefined(vm);
 }
 

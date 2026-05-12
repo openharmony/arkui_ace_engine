@@ -16,7 +16,7 @@
 #include "core/common/ai/text_translation_adapter.h"
 
 #include "core/common/ai/text_translation_mgr.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 

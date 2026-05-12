@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_tabs_function.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
@@ -1023,6 +1024,79 @@ void JSTabs::SetNestedScroll(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+std::optional<Dimension> JSTabs::ParseBarFloatingDimension(const JSRef<JSVal>& value, RefPtr<ResourceObject>& resObj)
+{
+    CalcDimension dimension;
+    auto parseOk = ParseJsDimensionVp(value, dimension, resObj);
+    if (parseOk) {
+        return dimension;
+    } else {
+        return std::nullopt;
+    }
+    return dimension;
+}
+
+void JSTabs::SetBarFloatingStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TabsModel::GetInstance()->ResetBarFloatingStyle();
+        return;
+    }
+    BarFloatingStyleParameters parameters;
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+
+    RefPtr<ResourceObject> smallBarWidthObj;
+    RefPtr<ResourceObject> mediumBarWidthObj;
+    RefPtr<ResourceObject> largeBarWidthObj;
+    RefPtr<ResourceObject> barSideMarginObj;
+    RefPtr<ResourceObject> barBottomMarginObj;
+    RefPtr<ResourceObject> maskColorObj;
+    RefPtr<ResourceObject> maskHeightObj;
+
+    JSRef<JSVal> barWidthVal = object->GetProperty("barWidth");
+    if (barWidthVal->IsObject()) {
+        JSRef<JSObject> barWidthObject = JSRef<JSObject>::Cast(barWidthVal);
+        parameters.smallBarWidth =
+            ParseBarFloatingDimension(barWidthObject->GetProperty("smallBarWidth"), smallBarWidthObj);
+        parameters.mediumBarWidth =
+            ParseBarFloatingDimension(barWidthObject->GetProperty("mediumBarWidth"), mediumBarWidthObj);
+        parameters.largeBarWidth =
+            ParseBarFloatingDimension(barWidthObject->GetProperty("largeBarWidth"), largeBarWidthObj);
+    }
+
+    parameters.barSideMargin = ParseBarFloatingDimension(object->GetProperty("barSideMargin"), barSideMarginObj);
+    parameters.barBottomMargin = ParseBarFloatingDimension(object->GetProperty("barBottomMargin"), barBottomMarginObj);
+    Color colorVal;
+    bool parseOk = ParseJsColor(object->GetProperty("maskColor"), colorVal, maskColorObj);
+    if (parseOk) {
+        parameters.maskColor = colorVal;
+    } else {
+        parameters.maskColor = std::nullopt;
+    }
+    parameters.maskHeight = ParseBarFloatingDimension(object->GetProperty("maskHeight"), maskHeightObj);
+
+    if (object->GetProperty("adaptToHandedness")->IsBoolean()) {
+        parameters.adaptToHandedness = object->GetProperty("adaptToHandedness")->ToBoolean();
+    }
+
+    auto systemMaterialObj = object->GetProperty("systemMaterial");
+    if (systemMaterialObj->IsObject()) {
+        const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
+        parameters.systemMaterial = material->Copy();
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        parameters.smallBarWidthObject = smallBarWidthObj;
+        parameters.mediumBarWidthObject = mediumBarWidthObj;
+        parameters.largeBarWidthObject = largeBarWidthObj;
+        parameters.barSideMarginObject = barSideMarginObj;
+        parameters.barBottomMarginObject = barBottomMarginObj;
+        parameters.maskColorObject = maskColorObj;
+        parameters.maskHeightObject = maskHeightObj;
+    }
+    TabsModel::GetInstance()->SetBarFloatingStyle(parameters);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -1073,6 +1147,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onSelected", &JSTabs::SetOnSelected);
     JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
     JSClass<JSTabs>::StaticMethod("nestedScroll", &JSTabs::SetNestedScroll);
+    JSClass<JSTabs>::StaticMethod("barFloatingStyle", &JSTabs::SetBarFloatingStyle);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

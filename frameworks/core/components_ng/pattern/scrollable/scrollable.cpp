@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +14,23 @@
  */
 
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/base/modifier.h"
 
 #include "base/log/jank_frame_report.h"
+#include "core/animation/scroll_motion.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/multi_thread.h"
+#include "core/common/container.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/event_report.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/common/properties/os_content.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -91,6 +96,16 @@ constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 #endif
 
 } // namespace
+
+Scrollable::Scrollable() = default;
+
+Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis)
+    : callback_(std::move(callback)), axis_(axis)
+{}
+
+Scrollable::Scrollable(const ScrollPositionCallback& callback, Axis axis)
+    : callback_(callback), axis_(axis)
+{}
 
 double Scrollable::GetVelocityScale()
 {
@@ -497,7 +512,8 @@ void Scrollable::SetAxis(Axis axis)
 
 void Scrollable::HandleTouchDown(bool fromcrown)
 {
-    if ((state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) || isScrollBarDragging_) {
+    if ((state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) || isScrollBarDragging_ ||
+        isSmartGestureFling_) {
         isTouchStopAnimation_ = true;
     } else {
         isTouchStopAnimation_ = false;
@@ -517,7 +533,7 @@ void Scrollable::HandleTouchDown(bool fromcrown)
 
 void Scrollable::CheckStopFlingInTouchUp()
 {
-    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
+    if (!isDragging_ && !isScrollBarDragging_ && !isSmartGestureFling_ && isTouchStopAnimation_) {
         isUserFling_ = false;
         if (onDidStopFlingCallback_) {
             onDidStopFlingCallback_();
@@ -833,7 +849,23 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
     velocityScale = !NearZero(ret) ? ret : defaultVelocityScale;
     velocityScale = isScrollFromTouchPad ? velocityScale * touchPadVelocityScaleRate_ : velocityScale;
     double gain = GetGain(GetDragOffset());
-    if (isReverseCallback_ && isReverseCallback_()) {
+    bool isReverse = isReverseCallback_ && isReverseCallback_();
+    if (GreatNotEqualCustomPrecision(gain, 1.0f, 0.01f)) {
+        if ((isReverse && gestureVelocity < 0) || (!isReverse && gestureVelocity > 0)) {
+            auto node = weakHost_.Upgrade();
+            bool isBackToTop = backToTopCallback_ && backToTopCallback_();
+            if (node && isBackToTop) {
+                auto nodeIdStr = std::to_string(static_cast<uint64_t>(node->GetId()));
+                auto nodeStr = node->GetTag() + nodeIdStr;
+                TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+                    "LayoutDirectionEst %{public}s, gain: %{public}f, velocity: %{public}f, reverse: %{public}d",
+                    nodeStr.c_str(), gain, gestureVelocity, isReverse);
+                OsContent::CallSendAction("ace_action", "scroll_gain", "{ \"nodeId\":" + nodeIdStr +
+                    ", \"compId\": \"" + node->GetInspectorIdValue("") + "\"}");
+            }
+        }
+    }
+    if (isReverse) {
         currentVelocity_ = -gestureVelocity * velocityScale * gain;
     } else {
         currentVelocity_ = gestureVelocity * velocityScale * gain;

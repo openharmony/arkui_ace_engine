@@ -20,6 +20,10 @@
 #include <string>
 #include <unordered_map>
 
+#ifdef WINDOWS_PLATFORM
+#include <pthread.h>
+#endif
+
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/event/touch_event.h"

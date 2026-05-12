@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-import { UIContextImpl } from './UIContextImpl'
-
 export class UIContextUtil {
-    public static getOrCreateCurrentUIContext(): UIContextImpl | undefined {
+    public static getOrCreateCurrentUIContext(): Object | undefined {
+        return undefined;
+    }
+    public static getOrCreateUIContextById(instanceId: int): Object | undefined {
         return undefined;
     }
 }

@@ -16,12 +16,15 @@
 #include "gtest/gtest.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #define protected public
 #define private public
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/render/render_property.h"
+#include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #undef private
 #undef protected
@@ -168,7 +171,8 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level0)
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(json->GetString("colorBlend"), "#FFFFFFFF");
-    EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("radius"), "0.000000");
+    EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("radius"),
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? "0.000000" : "-1.000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "#FF000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetX"), "0.000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetY"), "0.000000");
@@ -561,7 +565,7 @@ HWTEST_F(RenderPropertyTestNg, RenderPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call ToJsonValue.
      */
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContext();
     int32_t tempVersion = static_cast<int32_t>(context->GetMinPlatformVersion());
     context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     renderPositionProperty.ToJsonValue(jsonValue, testFilter);

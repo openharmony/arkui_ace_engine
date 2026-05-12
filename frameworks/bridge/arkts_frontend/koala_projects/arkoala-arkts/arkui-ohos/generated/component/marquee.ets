@@ -234,11 +234,11 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
     }
 }
 export interface MarqueeOptions {
-    start: boolean | undefined;
+    start?: boolean | undefined;
     step?: double;
     loop?: int32;
     fromStart?: boolean;
-    src: string | undefined;
+    src?: string | undefined;
     spacing?: arkui_component_units_LengthMetrics;
     delay?: int32;
 }

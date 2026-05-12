@@ -15,15 +15,20 @@
 
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
 #include "ui/base/referenced.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "base/utils/system_properties.h"
 #include "core/common/event_manager.h"
+#endif
 #include "core/components_ng/base/observer_handler.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
+#endif
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 namespace {
 constexpr int32_t GESTURE_DEBUG_TEST_NODE_ID = 1001;
 constexpr char GESTURE_DEBUG_TEST_TAG[] = "gestureDebugTestNode";
@@ -40,6 +45,7 @@ void ResetGestureDebugBoundaryTestEnv()
     SystemProperties::gestureDebugBoundaryEnabled_ = false;
 }
 } // namespace
+#endif
 
 class MockNGGestureRecognizer : public NGGestureRecognizer {
 public:
@@ -1801,6 +1807,28 @@ HWTEST_F(GestureRecognizerTestNg, IsInAttachedNodeTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGestureEventCurrentLocalLocationTest001
+ * @tc.desc: Test SetGestureEventCurrentLocalLocation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, SetGestureEventCurrentLocalLocationTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->AttachFrameNode(frameNode);
+    TouchEvent event;
+    event.x = 1.0;
+    event.y = 1.0;
+    event.passThrough = true;
+    event.postEventNodeId = 0;
+    GestureEvent info;
+    clickRecognizer->SetGestureEventCurrentLocalLocation(info, event);
+    auto offset = info.GetCurrentLocalLocation();
+    EXPECT_DOUBLE_EQ(offset.GetX(), 1.0);
+    EXPECT_DOUBLE_EQ(offset.GetY(), 1.0);
+}
+
+/**
  * @tc.name: ShouldResponseTest001
  * @tc.desc: Test ShouldResponse with RecognizerGroup
  * @tc.type: FUNC
@@ -1984,6 +2012,7 @@ HWTEST_F(GestureRecognizerTestNg, OnRejectBridgeObjTest004, TestSize.Level1)
     EXPECT_NE(clickRecognizer, nullptr);
 }
 
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 /**
  * @tc.name: ReportToGestureDebugManagerTest001
  * @tc.desc: Test ReportToGestureDebugManager returns directly when attached node is null.
@@ -2089,7 +2118,7 @@ HWTEST_F(GestureRecognizerTestNg, ReportToGestureDebugManagerTest003, TestSize.L
     ASSERT_NE(iter, manager->nodeStates_.end());
     EXPECT_EQ(iter->second.node.Upgrade(), frameNode);
     EXPECT_EQ(iter->second.activeGestures.count(), 1);
-    EXPECT_TRUE(iter->second.delayedResetTasks.empty());
+    EXPECT_TRUE(iter->second.activeGestures.test(2));
 
     /**
      * @tc.steps: step3. reset global test state.
@@ -2099,7 +2128,7 @@ HWTEST_F(GestureRecognizerTestNg, ReportToGestureDebugManagerTest003, TestSize.L
 
 /**
  * @tc.name: ReportToGestureDebugManagerTest004
- * @tc.desc: Test ReportToGestureDebugManager forwards end callback to HandleGestureEnd.
+ * @tc.desc: Test ReportToGestureDebugManager ignores end and cancel callback types.
  * @tc.type: FUNC
  */
 HWTEST_F(GestureRecognizerTestNg, ReportToGestureDebugManagerTest004, TestSize.Level1)
@@ -2124,58 +2153,34 @@ HWTEST_F(GestureRecognizerTestNg, ReportToGestureDebugManagerTest004, TestSize.L
     recognizer->ReportToGestureDebugManager(GestureCallbackType::START, GestureListenerType::PAN);
     ASSERT_FALSE(manager->nodeStates_.empty());
 
+    auto iter = manager->nodeStates_.find(frameNode->GetId());
+    ASSERT_NE(iter, manager->nodeStates_.end());
+    auto activeBefore = iter->second.activeGestures;
+
     /**
      * @tc.steps: step2. call ReportToGestureDebugManager with end callback type.
-     * @tc.expected: step2. manager clears the node state.
+     * @tc.expected: step2. manager state keeps unchanged.
      */
     recognizer->ReportToGestureDebugManager(GestureCallbackType::END, GestureListenerType::PAN);
-    EXPECT_TRUE(manager->nodeStates_.empty());
+    iter = manager->nodeStates_.find(frameNode->GetId());
+    ASSERT_NE(iter, manager->nodeStates_.end());
+    EXPECT_EQ(iter->second.activeGestures, activeBefore);
 
     /**
-     * @tc.steps: step3. reset global test state.
-     */
-    ResetGestureDebugBoundaryTestEnv();
-}
-
-/**
- * @tc.name: ReportToGestureDebugManagerTest005
- * @tc.desc: Test ReportToGestureDebugManager forwards cancel callback to HandleGestureEnd.
- * @tc.type: FUNC
- */
-HWTEST_F(GestureRecognizerTestNg, ReportToGestureDebugManagerTest005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. reset test environment and prepare existing gesture debug state.
-     */
-    ResetGestureDebugBoundaryTestEnv();
-    auto pipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeline, nullptr);
-    auto eventManager = pipeline->GetEventManager();
-    ASSERT_NE(eventManager, nullptr);
-    auto manager = eventManager->GetGestureDebugBoundaryManager();
-    ASSERT_NE(manager, nullptr);
-    auto recognizer = AceType::MakeRefPtr<MockNGGestureRecognizer>();
-    ASSERT_NE(recognizer, nullptr);
-    auto frameNode =
-        FrameNode::CreateFrameNode(GESTURE_DEBUG_TEST_TAG, GESTURE_DEBUG_TEST_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    recognizer->AttachFrameNode(frameNode);
-    SystemProperties::gestureDebugBoundaryEnabled_ = true;
-    recognizer->ReportToGestureDebugManager(GestureCallbackType::START, GestureListenerType::PAN);
-    ASSERT_FALSE(manager->nodeStates_.empty());
-
-    /**
-     * @tc.steps: step2. call ReportToGestureDebugManager with cancel callback type.
-     * @tc.expected: step2. manager clears the node state.
+     * @tc.steps: step3. call ReportToGestureDebugManager with cancel callback type.
+     * @tc.expected: step3. manager state keeps unchanged.
      */
     recognizer->ReportToGestureDebugManager(GestureCallbackType::CANCEL, GestureListenerType::PAN);
-    EXPECT_TRUE(manager->nodeStates_.empty());
+    iter = manager->nodeStates_.find(frameNode->GetId());
+    ASSERT_NE(iter, manager->nodeStates_.end());
+    EXPECT_EQ(iter->second.activeGestures, activeBefore);
 
     /**
-     * @tc.steps: step3. reset global test state.
+     * @tc.steps: step4. reset global test state.
      */
     ResetGestureDebugBoundaryTestEnv();
 }
+#endif
 
 /**
  * @tc.name: HandleEventToBridgeObjListTest001

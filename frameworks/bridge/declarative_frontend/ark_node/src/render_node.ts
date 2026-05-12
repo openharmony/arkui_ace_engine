@@ -131,18 +131,19 @@ interface CommandPath {
 }
 
 class LengthMetrics {
-  public unit: LengthUnit;
-  public value: number;
-  public res: Resource;
+  private unit_: LengthUnit;
+  private value_: number;
+  private res_: Resource | undefined;
+  private autoRefresh_: boolean = false;
   constructor(value: number, unit?: LengthUnit, res?: Resource) {
     if (unit in LengthUnit) {
-        this.unit = unit;
-        this.value = value;
+        this.unit_ = unit;
+        this.value_ = value;
     } else {
-        this.unit = LengthUnit.VP;
-        this.value = unit === undefined ? value : 0;
+        this.unit_ = LengthUnit.VP;
+        this.value_ = unit === undefined ? value : 0;
     }
-    this.res = res === undefined ? undefined : res;
+    this.res_ = res === undefined ? undefined : res;
   }
   static px(value: number) {
     return new LengthMetrics(value, LengthUnit.PX);
@@ -162,6 +163,28 @@ class LengthMetrics {
   static resource(res: Resource) {
     let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
     return new LengthMetrics(length[0], length[1], res);
+  }
+  private updateValue(): void {
+    if (this.autoRefresh_ && this.res_ !== undefined) {
+      const length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(this.res_);
+      if (length === undefined) {
+        JSXNodeLogConsole.warn('Failed to obtain the length metrics resource when refresh length value.');
+        return;
+      }
+      this.value_ = length[0];
+      this.unit_ = length[1];
+    }
+  }
+  get value(): number {
+    this.updateValue();
+    return this.value_;
+  }
+  get unit() : LengthUnit {
+    return this.unit_;
+  }
+  public autoRefresh(value: boolean): LengthMetrics {
+    this.autoRefresh_ = value;
+    return this;
   }
 }
 
@@ -208,6 +231,7 @@ class ColorMetrics {
   private greenValue_: number;
   private blueValue_: number;
   private headRoom_: number;
+  private autoRefresh_: boolean = false;
   private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE, res?: Resource) {
     this.red_ = ColorMetrics.clamp(red);
     this.green_ = ColorMetrics.clamp(green);
@@ -223,7 +247,25 @@ class ColorMetrics {
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
+  public autoRefresh(value: boolean): ColorMetrics {
+    this.autoRefresh_ = value;
+    return this;
+  }
+  private refreshColorValue(): void {
+    if (this.autoRefresh_ && this.res_ !== undefined) {
+      const chanels: Array<number> = getUINativeModule().nativeUtils.parseResourceColor(this.res_);
+      if (chanels === undefined) {
+        JSXNodeLogConsole.warn('Failed to obtain the color resource when refresh color value.');
+        return;
+      }
+      this.red_ = chanels[0];
+      this.green_ = chanels[1];
+      this.blue_ = chanels[2];
+      this.alpha_ = chanels[3];
+    }
+  }
   private toNumeric(): number {
+    this.refreshColorValue();
     return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
   }
   static numeric(value: number): ColorMetrics {
@@ -411,9 +453,9 @@ class ColorMetrics {
     return this.headRoom_;
   }
   static createHDRColorWithLinearExposure(linearExposure: number, colorSpace: ColorSpace,
-    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    red: number, green: number, blue: number, alpha: number = 1.0): ColorMetrics {
     const clampedLinearExposure = Math.max(linearExposure, 1);
-    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    const clampedAlpha = Math.min(Math.max(alpha, 0), 1);
     const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
     colorMetrics.setIsHDR(true);
     colorMetrics.setColorSpace(colorSpace);
@@ -424,9 +466,9 @@ class ColorMetrics {
     return colorMetrics;
   }
   static createHDRColorWithLogExposure(exposure: number, colorSpace: ColorSpace,
-    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+    red: number, green: number, blue: number, alpha: number = 1.0): ColorMetrics {
     const clampedExposure = Math.max(exposure, 0);
-    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    const clampedAlpha = Math.min(Math.max(alpha, 0), 1);
     const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
     colorMetrics.setIsHDR(true);
     colorMetrics.setColorSpace(colorSpace);
@@ -438,8 +480,8 @@ class ColorMetrics {
     return colorMetrics;
   }
   static createHDRColor(colorSpace: ColorSpace,
-    red: number, green: number, blue: number, alpha?: number): ColorMetrics {
-    const clampedAlpha = alpha !== undefined ? Math.min(Math.max(alpha, 0), 1) : undefined;
+    red: number, green: number, blue: number, alpha: number = 1.0): ColorMetrics {
+    const clampedAlpha = Math.min(Math.max(alpha, 0), 1);
     const colorMetrics = new ColorMetrics(0, 0, 0, clampedAlpha);
     colorMetrics.setIsHDR(true);
     colorMetrics.setColorSpace(colorSpace);
@@ -514,6 +556,20 @@ function checkCornerRadiusValid(corners: CornerRadius): boolean {
   return !!(corners && (corners.topLeft) && (corners.topRight) && (corners.bottomRight) && (corners.bottomLeft));
 }
 
+interface BackgroundBlur {
+  radius: number,
+  grayscale?: [number, number]
+}
+
+interface ContentBlur {
+  radius: number,
+  grayscale?: [number, number]
+}
+
+interface ForegroundBlur {
+  radius: number
+}
+
 class RenderNode {
   private _isDisposed: boolean;
   private childrenList: Array<RenderNode>;
@@ -547,6 +603,9 @@ class RenderNode {
   private lengthMetricsUnitValue: LengthMetricsUnit;
   private markNodeGroupValue: boolean;
   private apiTargetVersion: number;
+  private backgroundBlurValue: BackgroundBlur;
+  private contentBlurValue: ContentBlur;
+  private foregroundBlurValue: ForegroundBlur;
 
   constructor(type: string, cptrVal: number = 0) {
     this._isDisposed = false;
@@ -578,6 +637,9 @@ class RenderNode {
     this.translationValue = { x: 0, y: 0 };
     this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
     this.markNodeGroupValue = false;
+    this.backgroundBlurValue = { radius: 0, grayscale: [0, 0] };
+    this.contentBlurValue = { radius: 0, grayscale: [0, 0] };
+    this.foregroundBlurValue = { radius: 0 };
     if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
       return;
     }
@@ -679,7 +741,9 @@ class RenderNode {
     getUINativeModule().renderNode.setShadowElevation(this.nodePtr, this.shadowElevationValue);
   }
   set shadowRadius(radius: number) {
-    this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<number>(radius, 0);
+    this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<number>(radius,
+      ((typeof ViewStackProcessor['getApiVersion'] === 'function') &&
+      (ViewStackProcessor['getApiVersion']() >= 26)) ? -1 : 0);
     getUINativeModule().renderNode.setShadowRadius(this.nodePtr, this.shadowRadiusValue);
   }
   set size(size: Size) {
@@ -734,6 +798,52 @@ class RenderNode {
         this.markNodeGroupValue = isNodeGroup;
     }
     getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
+  }
+  set backgroundBlur(blurValue: BackgroundBlur | undefined) {
+    if (blurValue === undefined || blurValue === null) {
+      this.backgroundBlurValue = { radius: 0, grayscale: [0, 0] as [number, number] };
+      getUINativeModule().renderNode.setBackgroundBlur(this.nodePtr, 0, 0, 0);
+      return;
+    }
+    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    const grayscale = blurValue.grayscale;
+    let grayscale1 = 0;
+    let grayscale2 = 0;
+    if (grayscale) {
+      grayscale1 = (grayscale[0] >= 0 && grayscale[0] <= 127) ? grayscale[0] : 0;
+      grayscale2 = (grayscale[1] >= 0 && grayscale[1] <= 127) ? grayscale[1] : 0;
+    }
+    this.backgroundBlurValue = { radius: radius, grayscale: [grayscale1, grayscale2] as [number, number] };
+    getUINativeModule().renderNode.setBackgroundBlur(
+      this.nodePtr, radius, grayscale1, grayscale2);
+  }
+  set contentBlur(blurValue: ContentBlur | undefined) {
+    if (blurValue === undefined || blurValue === null) {
+      this.contentBlurValue = { radius: 0, grayscale: [0, 0] as [number, number] };
+      getUINativeModule().renderNode.setContentBlur(this.nodePtr, 0, 0, 0);
+      return;
+    }
+    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    const grayscale = blurValue.grayscale;
+    let grayscale1 = 0;
+    let grayscale2 = 0;
+    if (grayscale) {
+      grayscale1 = (grayscale[0] >= 0 && grayscale[0] <= 127) ? grayscale[0] : 0;
+      grayscale2 = (grayscale[1] >= 0 && grayscale[1] <= 127) ? grayscale[1] : 0;
+    }
+    this.contentBlurValue = { radius: radius, grayscale: [grayscale1, grayscale2] as [number, number] };
+    getUINativeModule().renderNode.setContentBlur(
+      this.nodePtr, radius, grayscale1, grayscale2);
+  }
+  set foregroundBlur(blurValue: ForegroundBlur | undefined) {
+    if (blurValue === undefined || blurValue === null) {
+      this.foregroundBlurValue = { radius: 0 };
+      getUINativeModule().renderNode.setForegroundBlur(this.nodePtr, 0);
+      return;
+    }
+    const radius = (blurValue.radius === undefined || blurValue.radius === null || blurValue.radius < 0) ? 0 : blurValue.radius;
+    this.foregroundBlurValue = { radius: radius };
+    getUINativeModule().renderNode.setForegroundBlur(this.nodePtr, radius);
   }
   get backgroundColor(): number {
     return this.backgroundColorValue;
@@ -791,6 +901,15 @@ class RenderNode {
   }
   get markNodeGroup() {
     return this.markNodeGroupValue;
+  }
+  get backgroundBlur(): BackgroundBlur {
+    return this.backgroundBlurValue;
+  }
+  get contentBlur(): ContentBlur {
+    return this.contentBlurValue;
+  }
+  get foregroundBlur(): ForegroundBlur {
+    return this.foregroundBlurValue;
   }
   checkUndefinedOrNullWithDefaultValue<T>(arg: T, defaultValue: T): T {
     if (arg === undefined || arg === null) {

@@ -51,3 +51,28 @@ ace_unittest("dynamiclayout_grid_test_ng") {
     "$ace_root/test/unittest:ace_components_layout",
   ]
 }
+
+ace_unittest("lazy_column_layout_test") {
+  module_name = "ScrollingSet-LazyColumnLayout"
+  type = "new"
+  sources = [
+    "column_layout/lazy_column_layout_test.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_info.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.cpp",
+  ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "lazy_layout_test_min.cpp",
+      "lazy_layout_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "lazy_layout_test_min.cpp",
+      "lazy_layout_test_core.cpp",
+    ]
+  }
+}

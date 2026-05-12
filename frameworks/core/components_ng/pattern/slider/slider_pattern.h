@@ -29,65 +29,35 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_custom_content_options.h"
 
+namespace OHOS::Ace {
+class AccessibilitySAObserverCallback;
+}
+
 namespace OHOS::Ace::NG {
 class SliderPattern : public Pattern {
     DECLARE_ACE_TYPE(SliderPattern, Pattern);
+
+private:
+    static constexpr int32_t PARTICLE_NODE_ZINDEX = 2;
+    static constexpr int32_t DRAG_FRAME_NODE_ZINDEX = 4;
+    static constexpr int32_t BLUR_COVER_NODE_ZINDEX = 5;
+    static constexpr int32_t DRAG_POINT_NODE_ZINDEX = 3;
+    static constexpr int32_t PREFIX_SUFFIX_STACK_ZINDEX = 10;
+    
+    static constexpr int32_t PARTICLE_EMITTER_RATE = 50;
+    static constexpr int32_t PARTICLE_LIFE_TIME = 2000;
+    static constexpr int32_t PARTICLE_LIFE_TIME_RANGE = 1000;
+    static constexpr int32_t PARTICLE_OPACITY_END_MILLS = 1600;
+    static constexpr int32_t PARTICLE_COLOR_END_MILLS = 2000;
+    static constexpr float PARTICLE_RADIUS = 2.0f;
+    static constexpr int32_t LOW_GRADE_ANIMATION_DELAY_MS = 100;
+    static constexpr int32_t LOW_GRADE_DURATION_MULTIPLIER = 2;
 
 public:
     SliderPattern() = default;
     ~SliderPattern() override = default;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (!IsSliderVisible()) {
-            return nullptr;
-        }
-        auto paintParameters = UpdateContentParameters();
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto context = host->GetContext();
-        CHECK_NULL_RETURN(context, nullptr);
-        auto theme = context->GetTheme<SliderTheme>();
-        CHECK_NULL_RETURN(theme, nullptr);
-        if (!sliderContentModifier_) {
-            sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(
-                paintParameters,
-                [weak = WeakClaim(this)](const PointF& imageCenter) {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->UpdateImagePosition(imageCenter);
-                }, theme);
-            sliderContentModifier_->SetHost(GetHost());
-        }
-        InitAccessibilityVirtualNodeTask();
-        sliderContentModifier_->SetUseContentModifier(UseContentModifier());
-        auto overlayGlobalOffset = CalculateGlobalSafeOffset();
-        std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
-        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
-        if (!sliderTipModifier_ && bubbleFlag_) {
-            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
-                auto pattern = weak.Upgrade();
-                if (!pattern) {
-                    return std::pair<OffsetF, float>();
-                }
-                auto blockCenter = pattern->GetBlockCenter();
-                auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
-                auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
-                return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
-            });
-        }
-        auto textDirection = TextDirection::AUTO;
-        auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
-        if (layoutProperty) {
-            textDirection = layoutProperty->GetLayoutDirection();
-        }
-        if ((HasPrefix() || HasSuffix()) && !contentModifierNode_ && !endsInitFlag_) {
-            endsInitFlag_ = true;
-            InitSliderEndsState();
-        }
-        return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
-            sliderTipModifier_, tipParameters, textDirection);
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     void InitSliderEndsState()
     {
@@ -268,6 +238,10 @@ public:
     void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
     Axis GetDirection() const;
     int32_t OnInjectionEvent(const std::string& command) override;
+    bool IsContentModifierNode(const RefPtr<FrameNode>& node);
+    bool IsMaterialNode(const RefPtr<FrameNode>& node);
+    bool IsPrefixOrSuffixNode(const RefPtr<FrameNode>& node);
+    bool IsImageBlockNode(const RefPtr<FrameNode>& node);
 
 private:
     void OnAttachToFrameNode() override;
@@ -444,6 +418,44 @@ private:
     void InitOrRefreshSlipFactor();
     RefPtr<PanEvent> CreatePanEvent();
 
+    bool HasSystemMaterial() const;
+    bool IsHighGradeMaterial() const;
+    bool IsMiddleGradeMaterial() const;
+    void CreateDragFrameNode();
+    void CreateDragPointNode();
+    void CreateBlurCoverNode();
+    void CreateSelectedTrackFrameNode();
+    void CreateParticleFrameNode();
+    void UpdateDragFrameNode();
+    void UpdateSelectedTrackFrameNode();
+    void UpdateParticleFrameNode();
+    void UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius);
+    void RegisterMaterialNodePositionCallback();
+    void ShowMaterialNode();
+    void HideMaterialNode();
+    void HideMaterialNodes();
+    void ResetMaterialNodeAppearance(const RefPtr<RenderContext>& pointRC,
+        const RefPtr<RenderContext>& blurRC);
+    void AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
+        const RefPtr<RenderContext>& blurRC);
+    void ApplyDragFrameNodeSystemMaterial();
+    void ResetHostMaterialEffects();
+    AnimationOption CreateDragAnimationOption() const;
+    AnimationOption CreateLowGradeSpringOption() const;
+    float GetBlockRadius() const;
+    float GetDragFrameBaseScale() const;
+    void StartLongPressTimer();
+    void HandleLongPress();
+    void HandleHighGradeLongPress();
+    void HandleMiddleGradeLongPress();
+    void HandleLowGradeLongPress();
+    void StartDeformAnimation();
+    void RestoreDeformAnimation();
+    void ScheduleDeformRestore();
+    std::list<NG::ParticleOption> CreateParticleOptions(const RSRect& selectedRect, const Color& themeColor);
+    void StartParticleEffect();
+    void StopParticleEffect();
+
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     void SetSkipGestureEvents()
@@ -541,7 +553,16 @@ private:
     RefPtr<SliderContentModifier> sliderContentModifier_;
     bool isTouchUpFlag_ = false;
 
-    // tip Parameters
+    RefPtr<FrameNode> dragFrameNode_;
+    RefPtr<FrameNode> dragPointNode_;
+    RefPtr<FrameNode> blurCoverNode_;
+    RefPtr<FrameNode> selectedTrackFrameNode_;
+    RefPtr<FrameNode> particleFrameNode_;
+    bool isFrameNodeVisible_ = false;
+    CancelableCallback<void()> longPressTask_;
+    CancelableCallback<void()> deformRestoreTask_;
+    bool isDeformStarted_ = false;
+
     bool bubbleFlag_ = false;
     RefPtr<SliderTipModifier> sliderTipModifier_;
 

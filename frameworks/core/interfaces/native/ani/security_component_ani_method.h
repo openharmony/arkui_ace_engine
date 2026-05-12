@@ -19,6 +19,7 @@
 #include "ani.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/ani/ani_api.h"
+#include "ui/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
 class SecurityComponentAniMethod {

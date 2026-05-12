@@ -15,6 +15,8 @@
 
 #include "bridge/common/media_query/media_queryer.h"
 
+#include <regex>
+
 #include "bridge/common/media_query/media_query_info.h"
 #include "bridge/common/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"

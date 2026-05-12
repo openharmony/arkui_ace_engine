@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/common/container.h"
 
 #include <cstdint>
 #include <optional>
@@ -47,6 +48,44 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
+template<typename T>
+inline bool HasLpxUnit(const std::optional<T>& value)
+{
+    return value.has_value() && value.value().Unit() == DimensionUnit::LPX;
+}
+
+template<typename T>
+inline bool HasCalcLpxUnit(const std::optional<T>& value)
+{
+    return value.has_value() && value.value().GetDimension().Unit() == DimensionUnit::LPX;
+}
+
+inline bool HasPaddingLpxUnit(const std::optional<MarginProperty>& prop)
+{
+    CHECK_NULL_RETURN(prop.has_value(), false);
+    auto& p = prop.value();
+    return HasCalcLpxUnit(p.left) || HasCalcLpxUnit(p.right) ||
+           HasCalcLpxUnit(p.top) || HasCalcLpxUnit(p.bottom) ||
+           HasCalcLpxUnit(p.start) || HasCalcLpxUnit(p.end);
+}
+
+inline bool HasBorderRadiusLpxUnit(const std::optional<BorderRadiusProperty>& prop)
+{
+    CHECK_NULL_RETURN(prop.has_value(), false);
+    auto& r = prop.value();
+    return HasLpxUnit(r.radiusTopLeft) || HasLpxUnit(r.radiusTopRight) ||
+           HasLpxUnit(r.radiusBottomLeft) || HasLpxUnit(r.radiusBottomRight) ||
+           HasLpxUnit(r.radiusTopStart) || HasLpxUnit(r.radiusTopEnd) ||
+           HasLpxUnit(r.radiusBottomStart) || HasLpxUnit(r.radiusBottomEnd);
+}
+
+inline bool HasImageSpanSizeLpxUnit(const std::optional<ImageSpanSize>& size)
+{
+    CHECK_NULL_RETURN(size.has_value(), false);
+    auto& s = size.value();
+    return HasLpxUnit(s.width) || HasLpxUnit(s.height);
+}
 
 std::string GetDeclaration(const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
@@ -123,6 +162,7 @@ std::string SpanItem::GetFontWeightConfigs() const
 void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter,
     const RefPtr<TextPattern>& textPattern) const
 {
+    const auto& symbolStyle = this->symbolStyle;
     json->PutExtAttr("font", GetFont().c_str(), filter);
     json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
     json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
@@ -133,7 +173,8 @@ void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const Inspec
     json->PutExtAttr("textCase",
         V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
     if (spanItemType == SpanItemType::SYMBOL) {
-        const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
+        const std::optional<std::vector<Color>>& colorListOptional =
+            symbolStyle ? symbolStyle->GetSymbolColorList() : std::nullopt;
         auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
         json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
     } else {
@@ -148,12 +189,13 @@ void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const Inspec
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
     json->PutExtAttr("fontVariations", ConvertFontVariationsToJson(
         fontStyle->GetFontVariations().value_or(FONT_VARIATIONS_LIST {})), filter);
-    json->PutExtAttr("renderingStrategy",
-        GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
-    json->PutExtAttr(
-        "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
-    json->Put("symbolEffect",
-        GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
+    json->PutExtAttr("renderingStrategy", GetSymbolRenderingStrategyInJson(
+        symbolStyle ? symbolStyle->GetSymbolRenderingStrategy() : std::nullopt).c_str(), filter);
+    json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(
+        symbolStyle ? symbolStyle->GetSymbolEffectStrategy() : std::nullopt).c_str(), filter);
+    json->Put("symbolEffect", GetSymbolEffectOptionsInJson(
+        symbolStyle ? symbolStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions()) : SymbolEffectOptions())
+        .c_str());
     auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
     auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
     json->PutExtAttr("textShadow", jsonShadow, filter);
@@ -270,14 +312,14 @@ void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModify
 void SpanNode::SetTextBackgroundStyle(const TextBackgroundStyle& style)
 {
     BaseSpan::SetTextBackgroundStyle(style);
-    spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->SetBackgroundStyle(GetTextBackgroundStyle());
     spanItem_->MarkReLayoutParagraph();
 }
 
 void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)
 {
     BaseSpan::UpdateTextBackgroundFromParent(style);
-    spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->SetBackgroundStyle(GetTextBackgroundStyle());
     spanItem_->MarkReLayoutParagraph();
 }
 
@@ -296,8 +338,11 @@ void SpanNode::DumpInfo()
         dumpLog.AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
         dumpLog.AddDesc(std::string("RenderStrategy: ").append(std::to_string(textStyle->GetRenderStrategy())));
         dumpLog.AddDesc(std::string("EffectStrategy: ").append(std::to_string(textStyle->GetEffectStrategy())));
-        dumpLog.AddDesc(std::string("SymbolEffect:").append(
-            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString()));
+        dumpLog.AddDesc(std::string("SymbolEffect:")
+            .append(spanItem_->symbolStyle ? spanItem_->symbolStyle->GetSymbolEffectOptions()
+                                                    .value_or(NG::SymbolEffectOptions())
+                                                    .ToString()
+                                            : NG::SymbolEffectOptions().ToString()));
     }
 }
 
@@ -833,8 +878,8 @@ bool SpanItem::UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<Fram
         UpdateSymbolSpanColor(frameNode, textStyle_.value());
         if (!symbolEffectSwitch_ || pattern->IsDragging()) {
             textStyle_.value().SetEffectStrategy(0);
-        } else if (fontStyle) {
-            textStyle_.value().SetEffectStrategy(fontStyle->propSymbolEffectStrategy.value_or(0));
+        } else if (symbolStyle) {
+            textStyle_.value().SetEffectStrategy(symbolStyle->propSymbolEffectStrategy.value_or(0));
         }
     }
     FontRegisterCallback(frameNode, textStyle_.value());
@@ -847,8 +892,8 @@ bool SpanItem::CheckSpanNeedReCreate(int32_t index)
     needReCreateParagraph_ |= (index != itemIndex_);
     itemIndex_ = index;
     CHECK_NULL_RETURN(unicode != 0, needReCreateParagraph_);
-    if (fontStyle && fontStyle->HasSymbolType()) {
-        return (fontStyle->GetSymbolType().value() == SymbolType::CUSTOM) | needReCreateParagraph_;
+    if (symbolStyle && symbolStyle->HasSymbolType()) {
+        return (symbolStyle->GetSymbolType().value() == SymbolType::CUSTOM) | needReCreateParagraph_;
     }
     return needReCreateParagraph_;
 }
@@ -895,11 +940,11 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeWidth, StrokeWidth);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeColor, StrokeColor);
 
-    if (isSymbol) {
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolColorList, SymbolColorList);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, RenderStrategy);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolType, SymbolType);
+    if (isSymbol && symbolStyle) {
+        UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolColorList, SymbolColorList);
+        UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolRenderingStrategy, RenderStrategy);
+        UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolEffectOptions, SymbolEffectOptions);
+        UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolType, SymbolType);
     } else {
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFamily, FontFamilies);
     }
@@ -972,10 +1017,10 @@ void SpanItem::UpdateSymbolSpanParagraph(
     auto symbolUnicode = GetSymbolUnicode();
     symbolSpanStyle.SetTextStyleUid(nodeId_);
     symbolSpanStyle.SetSymbolUid(nodeId_);
-    if (fontStyle || textLineStyle) {
-        UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true);
+    if (fontStyle || textLineStyle || symbolStyle) {
+        UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true, symbolStyle);
         if (fontStyle && fontStyle->HasFontWeight()) {
-            symbolSpanStyle.SetEnableVariableFontWeight(false);
+            symbolSpanStyle.SetEnableVariableFontWeight(fontStyle->GetEnableVariableFontWeight().value_or(false));
         }
         if (frameNode) {
             FontRegisterCallback(frameNode, symbolSpanStyle);
@@ -998,7 +1043,7 @@ void SpanItem::UpdateSymbolSpanParagraph(
         builder->AddSymbol(symbolUnicode);
     }
 
-    if (fontStyle || textLineStyle) {
+    if (fontStyle || textLineStyle || symbolStyle) {
         builder->PopStyle();
     }
 }
@@ -1082,6 +1127,7 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(pattern);
+        pattern->ClearParagraphCache();
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);
@@ -1332,6 +1378,7 @@ void SpanItem::CopyBaseSpanItem(RefPtr<SpanItem> sameSpan) const
     sameSpan->urlAddress = urlAddress;
     CopySpanItemEvents(sameSpan);
     sameSpan->resMap_ = resMap_;
+    sameSpan->lpxFlags_ = lpxFlags_;
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -1560,6 +1607,9 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
                 break;
         }
     }
+    if (sameSpan->backgroundStyle.has_value()) {
+        sameSpan->SetBackgroundStyle(sameSpan->backgroundStyle);
+    }
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         sameSpan->textLineStyle->ResetParagraphSpacing();
         sameSpan->urlAddress = std::nullopt;
@@ -1576,7 +1626,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
 
 std::string SpanItem::SymbolColorToString()
 {
-    auto colors = fontStyle->GetSymbolColorList();
+    auto colors = symbolStyle ? symbolStyle->GetSymbolColorList() : std::nullopt;
     auto colorStr = std::string("[");
     if (colors.has_value()) {
         for (const auto& color : colors.value()) {
@@ -1712,17 +1762,49 @@ void ImageSpanItem::UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& im
     CHECK_NULL_VOID(imageNode);
     auto property = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(property);
-    backgroundStyle = property->GetPlaceHolderStyle();
+    SetBackgroundStyle(property->GetPlaceHolderStyle());
 }
 
 void ImageSpanItem::SetImageSpanOptions(const ImageSpanOptions& options)
 {
     this->options = options;
+    ClearLpxFlag(LPX_FLAG_IMAGE_MARGIN | LPX_FLAG_IMAGE_PADDING | LPX_FLAG_IMAGE_BORDER_RADIUS | LPX_FLAG_IMAGE_SIZE);
+    if (options.imageAttribute.has_value()) {
+        auto& attr = options.imageAttribute.value();
+        if (HasPaddingLpxUnit(attr.marginProp)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_MARGIN);
+        }
+        if (HasPaddingLpxUnit(attr.paddingProp)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_PADDING);
+        }
+        if (HasBorderRadiusLpxUnit(attr.borderRadius)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_BORDER_RADIUS);
+        }
+        if (HasImageSpanSizeLpxUnit(attr.size)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_SIZE);
+        }
+    }
 }
 
 void ImageSpanItem::ResetImageSpanOptions()
 {
     options.imageAttribute.reset();
+    ClearLpxFlag(LPX_FLAG_IMAGE_MARGIN | LPX_FLAG_IMAGE_PADDING | LPX_FLAG_IMAGE_BORDER_RADIUS | LPX_FLAG_IMAGE_SIZE);
+}
+
+void SpanItem::SetBackgroundStyle(const std::optional<TextBackgroundStyle>& style)
+{
+    backgroundStyle = style;
+    ClearLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
+    if (style.has_value() && HasBorderRadiusLpxUnit(style->backgroundRadius)) {
+        SetLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
+    }
+}
+
+void SpanItem::ResetBackgroundStyle()
+{
+    backgroundStyle.reset();
+    ClearLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
 }
 
 RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
@@ -1735,7 +1817,7 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         sameSpan->onClick = onClick;
         sameSpan->onLongPress = onLongPress;
         if (backgroundStyle.has_value()) {
-            sameSpan->backgroundStyle = backgroundStyle;
+            sameSpan->SetBackgroundStyle(backgroundStyle);
         }
         if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
             sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());
@@ -2001,7 +2083,7 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         sameSpan->onClick = onClick;
         sameSpan->onLongPress = onLongPress;
         if (backgroundStyle.has_value()) {
-            sameSpan->backgroundStyle = backgroundStyle;
+            sameSpan->SetBackgroundStyle(backgroundStyle);
         }
         if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
             sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());
@@ -2057,7 +2139,10 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("RenderStrategy", std::to_string(textStyle->GetRenderStrategy()).c_str());
         json->Put("EffectStrategy", std::to_string(textStyle->GetEffectStrategy()).c_str());
         json->Put("SymbolEffect",
-            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
+            (spanItem_->symbolStyle
+                    ? spanItem_->symbolStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString()
+                    : NG::SymbolEffectOptions().ToString())
+                .c_str());
     }
     json->Put("LineThicknessScale", std::to_string(textStyle->GetLineThicknessScale()).c_str());
     json->Put("TextDirection", StringUtils::ToString(textStyle->GetTextDirection()).c_str());

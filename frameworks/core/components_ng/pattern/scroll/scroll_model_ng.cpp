@@ -963,4 +963,17 @@ void ScrollModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, co
 {
     ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
+
+void ScrollModelNG::CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarWidth(frameNode, resObj);
+}
+
+void ScrollModelNG::CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarWidth(frameNode, resObj);
+}
 } // namespace OHOS::Ace::NG

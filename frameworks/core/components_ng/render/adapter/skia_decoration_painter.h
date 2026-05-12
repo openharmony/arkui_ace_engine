@@ -40,11 +40,7 @@ class SkiaDecorationPainter : public virtual AceType {
 public:
     SkiaDecorationPainter() = default;
     ~SkiaDecorationPainter() override = default;
-    static float ConvertRadiusToSigma(float radius)
-    {
-        constexpr float BlurSigmaScale = 0.57735f;
-        return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
-    }
+    static float ConvertRadiusToSigma(float radius);
 
     static sk_sp<SkShader> CreateGradientShader(const NG::Gradient& gradient, const SizeF& size);
     static SkPath SkiaCreateSkPath(const RefPtr<BasicShape>& basicShape, const SizeF& size);

@@ -99,8 +99,16 @@ void SetScrollBarColorImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Color>(value);
     ScrollableModelStatic::SetScrollBarColor(frameNode, convValue);
 }
-void SetScrollBarWidthImpl(Ark_NativePointer node,
-                           const Opt_Union_F64_String* value)
+void SetScrollBarWidth0Impl(Ark_NativePointer node, const Opt_Union_F64_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
+}
+void SetScrollBarWidth1Impl(Ark_NativePointer node, const Opt_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -421,7 +429,8 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::ConstructImpl,
         ScrollableCommonMethodModifier::SetScrollBarImpl,
         ScrollableCommonMethodModifier::SetScrollBarColorImpl,
-        ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
+        ScrollableCommonMethodModifier::SetScrollBarWidth0Impl,
+        ScrollableCommonMethodModifier::SetScrollBarWidth1Impl,
         ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
         ScrollableCommonMethodModifier::SetAutoAdjustScrollBarMargin,
         ScrollableCommonMethodModifier::SetNestedScrollImpl,

@@ -17,7 +17,6 @@
 #include "interfaces/native/node/list_option.h"
 #include "interfaces/native/node/node_model.h"
 
-#include "bridge/common/utils/utils.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -25,7 +24,6 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -300,6 +298,14 @@ ArkUI_Float32 GetListSpace(ArkUINodeHandle node)
     return ListModelNG::GetListSpace(frameNode);
 }
 
+void SetListSpaceWidth(ArkUINodeHandle node, ArkUI_Float32 space, ArkUI_Int32 unit, ArkUI_VoidPtr resObjRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSpace(frameNode, Dimension(space, static_cast<DimensionUnit>(unit)));
+    ListModelNG::CreateWithResourceObjSpace(frameNode, AceType::Claim(reinterpret_cast<ResourceObject*>(resObjRawPtr)));
+}
+
 void SetListSpace(ArkUINodeHandle node, ArkUI_Float32 space)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -312,6 +318,15 @@ void ResetListSpace(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListSpace(frameNode, Dimension(0, DimensionUnit::VP));
+    ListModelNG::CreateWithResourceObjSpace(frameNode, nullptr);
+}
+
+void ResetListSpaceWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSpace(frameNode, Dimension(0, DimensionUnit::VP));
+    ListModelNG::CreateWithResourceObjSpace(frameNode, nullptr);
 }
 
 ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
@@ -452,12 +467,14 @@ ArkUI_Float32 GetListScrollBarWidth(ArkUINodeHandle node)
     return ListModelNG::GetScrollBarWidth(frameNode);
 }
 
-void SetListScrollBarWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
+void SetListScrollBarWidth(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_VoidPtr resObjRawPtr)
 {
     CHECK_NULL_VOID(value);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListScrollBarWidth(frameNode, value);
+    ListModelNG::CreateWithResourceObjScrollBarWidth(
+        frameNode, AceType::Claim(reinterpret_cast<ResourceObject*>(resObjRawPtr)));
 }
 
 void ResetListScrollBarWidth(ArkUINodeHandle node)
@@ -465,6 +482,7 @@ void ResetListScrollBarWidth(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListScrollBarWidth(frameNode, "0vp");
+    ListModelNG::CreateWithResourceObjScrollBarWidth(frameNode, nullptr);
 }
 
 ArkUI_Uint32 GetListScrollBarColor(ArkUINodeHandle node)
@@ -889,6 +907,8 @@ void SetListEditModeOptions(ArkUINodeHandle node, ArkUIEditModeOptions options)
     CHECK_NULL_VOID(frameNode);
     EditModeOptions newOptions;
     newOptions.enableGatherSelectedItemsAnimation = options->enableGatherSelectedItemsAnimation;
+    newOptions.useDefaultMultiSelectStyle = options->useDefaultMultiSelectStyle;
+    newOptions.enableFingerMultiSelect = options->enableFingerMultiSelect;
     ListModelNG::SetEditModeOptions(frameNode, newOptions);
 }
 
@@ -900,12 +920,34 @@ void ResetListEditModeOptions(ArkUINodeHandle node)
     ListModelNG::SetEditModeOptions(frameNode, newOptions);
 }
 
-void GetListEditModeOptions(ArkUINodeHandle node, ArkUI_Bool (*values)[1])
+void GetListEditModeOptions(ArkUINodeHandle node, ArkUI_Bool (*values)[3])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     EditModeOptions options = ListModelNG::GetEditModeOptions(frameNode);
     (*values)[0] = options.enableGatherSelectedItemsAnimation ? 1 : 0;
+    (*values)[1] = options.useDefaultMultiSelectStyle ? 1 : 0;
+}
+
+void SetListEnableEditMode(ArkUINodeHandle node, ArkUI_Bool enableEditMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetEnableEditMode(frameNode, enableEditMode);
+}
+ 	 
+void ResetListEnableEditMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetEnableEditMode(frameNode, false);
+}
+ 	 
+ArkUI_Bool GetListEnableEditMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ListModelNG::GetEnableEditMode(frameNode);
 }
 
 void SetListFadingEdge(
@@ -1108,6 +1150,8 @@ const ArkUIListModifier* GetListModifier()
         .setChainAnimationOptions = SetChainAnimationOptions,
         .resetChainAnimationOptions = ResetChainAnimationOptions,
         .getListSpace = GetListSpace,
+        .setListSpaceWidth = SetListSpaceWidth,
+        .resetListSpaceWidth = ResetListSpaceWidth,
         .setListSpace = SetListSpace,
         .resetListSpace = ResetListSpace,
         .setNodeAdapter = SetNodeAdapter,
@@ -1138,6 +1182,9 @@ const ArkUIListModifier* GetListModifier()
         .setEditModeOptions = SetListEditModeOptions,
         .resetEditModeOptions = ResetListEditModeOptions,
         .getEditModeOptions = GetListEditModeOptions,
+        .setListEnableEditMode = SetListEnableEditMode,
+        .resetListEnableEditMode = ResetListEnableEditMode,
+        .getListEnableEditMode = GetListEnableEditMode,
         .setListFadingEdge = SetListFadingEdge,
         .resetListFadingEdge = ResetListFadingEdge,
         .setShowCached = SetShowCached,
@@ -1253,6 +1300,7 @@ const CJUIListModifier* GetCJUIListModifier()
         .setChainAnimationOptions = SetChainAnimationOptions,
         .resetChainAnimationOptions = ResetChainAnimationOptions,
         .getListSpace = GetListSpace,
+        .setListSpaceWidth = SetListSpaceWidth,
         .setListSpace = SetListSpace,
         .resetListSpace = ResetListSpace,
         .setNodeAdapter = SetNodeAdapter,

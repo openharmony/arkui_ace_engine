@@ -54,6 +54,7 @@ public:
         scrollBar_ = scrollBar;
     }
 
+    void UpdatePreviewTextDecorationColor(RefPtr<TextFieldPaintProperty> paintProperty);
     void UpdateScrollBar();
     void SetShowUnderlineWidth();
     void SetFloatingCursor();

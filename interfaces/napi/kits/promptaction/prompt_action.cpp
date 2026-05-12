@@ -53,8 +53,8 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
-const std::vector<DialogDisplayMode> DIALOG_DISPLAY_MODE = {
-    DialogDisplayMode::SCREEN_BASED, DialogDisplayMode::WINDOW_BASED };
+const std::vector<DialogDisplayModeInSubWindow> DIALOG_DISPLAY_MODE_IN_SUBWINDOW = {
+    DialogDisplayModeInSubWindow::SCREEN_BASED, DialogDisplayModeInSubWindow::WINDOW_BASED };
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -292,17 +292,14 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     napi_get_named_property(env, shadowNApi, "type", &typeApi);
     napi_get_named_property(env, shadowNApi, "fill", &fillApi);
     ResourceInfo recv;
-    double radiusValue = 0.0;
+    double radiusValue = -1.0;
     if (ParseResourceParam(env, radiusApi, recv)) {
         CalcDimension radius;
         if (ParseResource(recv, radius)) {
-            radiusValue = LessNotEqual(radius.Value(), 0.0) ? 0.0 : radius.Value();
+            radiusValue = radius.Value();
         }
     } else {
         napi_get_value_double(env, radiusApi, &radiusValue);
-        if (LessNotEqual(radiusValue, 0.0)) {
-            radiusValue = 0.0;
-        }
     }
     shadowProps.SetBlurRadius(radiusValue);
     Color color;
@@ -684,6 +681,7 @@ struct PromptAsyncContext {
     napi_value buttonsNApi = nullptr;
     napi_value autoCancel = nullptr;
     napi_value showInSubWindow = nullptr;
+    napi_value displayModeInSubWindowApi = nullptr;
     napi_value isModal = nullptr;
     napi_value alignmentApi = nullptr;
     napi_value offsetApi = nullptr;
@@ -746,8 +744,9 @@ struct PromptAsyncContext {
     napi_value dialogImmersiveModeApi = nullptr;
     napi_value focusableApi = nullptr;
     HasInvertColor hasInvertColor;
-    napi_value displayModeApi = nullptr;
     napi_value systemMaterialApi = nullptr;
+    napi_value distortionModeApi = nullptr;
+    napi_value edgeLightModeApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1260,11 +1259,8 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     napi_get_named_property(env, asyncContext->shadowApi, "color", &colorApi);
     napi_get_named_property(env, asyncContext->shadowApi, "type", &typeApi);
     napi_get_named_property(env, asyncContext->shadowApi, "fill", &fillApi);
-    double radius = 0.0;
+    double radius = -1.0;
     napi_get_value_double(env, radiusApi, &radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     Color color;
     ShadowColorStrategy shadowColorStrategy;
@@ -1419,18 +1415,20 @@ int32_t GetDialogKeyboardAvoidMode(napi_env env, napi_value keyboardAvoidModeApi
     return 0;
 }
 
-DialogDisplayMode GetDialogDisplayMode(napi_env env, napi_value displayModeApi)
+DialogDisplayModeInSubWindow GetDisplayModeInSubWindow(napi_env env,
+    const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    int32_t mode = 0;
+    CHECK_NULL_RETURN(asyncContext->showInSubWindowBool, DIALOG_DISPLAY_MODE_IN_SUBWINDOW[0]);
+    int32_t displayMode = 0;
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, displayModeApi, &valueType);
+    napi_typeof(env, asyncContext->displayModeInSubWindowApi, &valueType);
     if (valueType == napi_number) {
-        napi_get_value_int32(env, displayModeApi, &mode);
+        napi_get_value_int32(env, asyncContext->displayModeInSubWindowApi, &displayMode);
     }
-    if (mode >= 0 && mode < static_cast<int32_t>(DIALOG_DISPLAY_MODE.size())) {
-        return DIALOG_DISPLAY_MODE[mode];
+    if (displayMode >= 0 && displayMode < static_cast<int32_t>(DIALOG_DISPLAY_MODE_IN_SUBWINDOW.size())) {
+        return DIALOG_DISPLAY_MODE_IN_SUBWINDOW[displayMode];
     }
-    return DIALOG_DISPLAY_MODE[0];
+    return DIALOG_DISPLAY_MODE_IN_SUBWINDOW[0];
 }
 
 void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
@@ -1497,7 +1495,6 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
         napi_get_named_property(env, argv[index], "shadow", &asyncContext->shadowApi);
         napi_get_named_property(env, argv[index], "width", &asyncContext->widthApi);
         napi_get_named_property(env, argv[index], "height", &asyncContext->heightApi);
-        napi_get_named_property(env, argv[index], "displayModeInSubWindow", &asyncContext->displayModeApi);
 
         napi_typeof(env, asyncContext->builder, &valueType);
         if (valueType == napi_function) {
@@ -1506,6 +1503,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     }
     napi_get_named_property(env, argv[index], "enableHoverMode", &asyncContext->enableHoverMode);
     napi_get_named_property(env, argv[index], "showInSubWindow", &asyncContext->showInSubWindow);
+    napi_get_named_property(env, argv[index], "displayModeInSubWindow", &asyncContext->displayModeInSubWindowApi);
     napi_get_named_property(env, argv[index], "isModal", &asyncContext->isModal);
     napi_get_named_property(env, argv[index], "alignment", &asyncContext->alignmentApi);
     napi_get_named_property(env, argv[index], "offset", &asyncContext->offsetApi);
@@ -1528,6 +1526,8 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
     napi_get_named_property(env, argv[index], "focusable", &asyncContext->focusableApi);
     napi_get_named_property(env, argv[index], "systemMaterial", &asyncContext->systemMaterialApi);
+    napi_get_named_property(env, argv[index], "distortionMode", &asyncContext->distortionModeApi);
+    napi_get_named_property(env, argv[index], "edgeLightMode", &asyncContext->edgeLightModeApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
 }
@@ -1650,6 +1650,34 @@ RefPtr<UiMaterial> GetSystemMaterialParam(napi_env env, const std::shared_ptr<Pr
     UiMaterial* material = nullptr;
     napi_unwrap(env, asyncContext->systemMaterialApi, reinterpret_cast<void**>(&material));
     return material ? material->Copy() : nullptr;
+}
+
+DistortionMode GetDistortionModeParam(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    int32_t distortionMode = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->distortionModeApi, &valueType);
+    if (valueType != napi_number) {
+        return static_cast<DistortionMode>(distortionMode);
+    }
+
+    napi_get_value_int32(env, asyncContext->distortionModeApi, &distortionMode);
+    return static_cast<DistortionMode>(distortionMode);
+}
+
+EdgeLightMode GetEdgeLightModeParam(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    int32_t edgeLightMode = 2;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->edgeLightModeApi, &valueType);
+    if (valueType != napi_number) {
+        return static_cast<EdgeLightMode>(edgeLightMode);
+    }
+
+    napi_get_value_int32(env, asyncContext->edgeLightModeApi, &edgeLightMode);
+    return static_cast<EdgeLightMode>(edgeLightMode);
 }
 
 PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -1796,6 +1824,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
             napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
             napi_get_named_property(env, argv[0], "systemMaterial", &asyncContext->systemMaterialApi);
+            napi_get_named_property(env, argv[0], "distortionMode", &asyncContext->distortionModeApi);
+            napi_get_named_property(env, argv[0], "edgeLightMode", &asyncContext->edgeLightModeApi);
             napi_get_named_property(env, argv[0], "onDidAppear", &asyncContext->onDidAppear);
             napi_get_named_property(env, argv[0], "onDidDisappear", &asyncContext->onDidDisappear);
             napi_get_named_property(env, argv[0], "onWillAppear", &asyncContext->onWillAppear);
@@ -1987,6 +2017,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
         .systemMaterial = GetSystemMaterialParam(asyncContext->env, asyncContext),
+        .distortionMode = GetDistortionModeParam(env, asyncContext),
+        .edgeLightMode = GetEdgeLightModeParam(env, asyncContext),
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -2208,6 +2240,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
             napi_get_named_property(env, argv[0], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
             napi_get_named_property(env, argv[0], "systemMaterial", &asyncContext->systemMaterialApi);
+            napi_get_named_property(env, argv[0], "distortionMode", &asyncContext->distortionModeApi);
+            napi_get_named_property(env, argv[0], "edgeLightMode", &asyncContext->edgeLightModeApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             if (!HasProperty(env, argv[0], "buttons")) {
                 DeleteContextAndThrowError(env, asyncContext, "Required input parameters are missing.");
@@ -2332,6 +2366,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
         .systemMaterial = GetSystemMaterialParam(env, asyncContext),
+        .distortionMode = GetDistortionModeParam(env, asyncContext),
+        .edgeLightMode = GetEdgeLightModeParam(env, asyncContext),
     };
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -2645,6 +2681,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     GetDialogLevelModeAndUniqueId(env, asyncContext, dialogLevelMode, dialogLevelUniqueId, dialogImmersiveMode);
     PromptDialogAttr promptDialogAttr = { .autoCancel = asyncContext->autoCancelBool,
         .showInSubWindow = asyncContext->showInSubWindowBool,
+        .displayModeInSubWindow = GetDisplayModeInSubWindow(env, asyncContext),
         .isModal = asyncContext->isModalBool,
         .enableHoverMode = enableHoverMode,
         .customBuilder = std::move(builder),
@@ -2682,6 +2719,8 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
         .systemMaterial = GetSystemMaterialParam(env, asyncContext),
+        .distortionMode = GetDistortionModeParam(env, asyncContext),
+        .edgeLightMode = GetEdgeLightModeParam(env, asyncContext),
     };
     return promptDialogAttr;
 }
@@ -2896,7 +2935,6 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
         promptDialogAttr.customBuilder = nullptr;
     } else {
         ParseCustomDialogIdCallback(asyncContext, openCallback);
-        promptDialogAttr.dialogDisplayMode = GetDialogDisplayMode(env, asyncContext->displayModeApi);
     }
 
     OpenCustomDialog(env, asyncContext, promptDialogAttr, openCallback);
@@ -2945,6 +2983,7 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     if (valueType == napi_boolean) {
         napi_get_value_bool(env, asyncContext->showInSubWindow, &asyncContext->showInSubWindowBool);
     }
+    napi_get_named_property(env, arg, "displayModeInSubWindow", &asyncContext->displayModeInSubWindowApi);
     napi_get_named_property(env, arg, "isModal", &asyncContext->isModal);
     napi_typeof(env, asyncContext->isModal, &valueType);
     if (valueType == napi_boolean) {
@@ -2971,6 +3010,8 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     napi_get_named_property(env, arg, "immersiveMode", &asyncContext->dialogImmersiveModeApi);
     napi_get_named_property(env, arg, "focusable", &asyncContext->focusableApi);
     napi_get_named_property(env, arg, "systemMaterial", &asyncContext->systemMaterialApi);
+    napi_get_named_property(env, arg, "distortionMode", &asyncContext->distortionModeApi);
+    napi_get_named_property(env, arg, "edgeLightMode", &asyncContext->edgeLightModeApi);
 
     ParseBaseDialogOptionsEvent(env, arg, asyncContext);
 }

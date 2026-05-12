@@ -19,6 +19,7 @@
 #define protected public
 
 #include "core/common/event_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -2262,5 +2263,42 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionProxyTest001, TestSize.Level1)
     AAFwk::WantParams reWantParams;
     EXPECT_EQ(proxy->SendDataSync(wantParams, reWantParams), 1);
     EXPECT_NE(proxy->GetPattern(), nullptr);
+}
+
+/**
+ * @tc.name: UIExtensionComponentEmbeddedInitOptionsTest
+ * @tc.desc: Test UIExtensionModelNG Create with densityDpi, isWindowModeFollowHost, placeholderMap, and SetOnDrawReady
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentEmbeddedInitOptionsTest, TestSize.Level1)
+{
+    UIExtensionModelNG model;
+    auto wantWrap = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
+    auto placeholderNode = FrameNode::GetOrCreateFrameNode("placeholder", 1,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    placeholderMap[PlaceholderType::UNDEFINED] = placeholderNode;
+
+    NG::EmbeddedUIExtensionConfig config;
+    config.wantWrap = wantWrap;
+    config.sessionType = SessionType::EMBEDDED_UI_EXTENSION;
+    config.placeholderMap = placeholderMap;
+    config.densityDpi = true;
+    config.isWindowModeFollowHost = true;
+    model.Create(config);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_TRUE(pattern->densityDpi_);
+    EXPECT_TRUE(pattern->isWindowModeFollowHost_);
+    EXPECT_FALSE(pattern->placeholderMap_.empty());
+
+    bool onDrawReadyCalled = false;
+    model.SetOnDrawReady([&onDrawReadyCalled]() { onDrawReadyCalled = true; });
+    ASSERT_NE(pattern->onDrawReadyCallback_, nullptr);
+    pattern->onDrawReadyCallback_();
+    EXPECT_TRUE(onDrawReadyCalled);
 }
 } // namespace OHOS::Ace::NG

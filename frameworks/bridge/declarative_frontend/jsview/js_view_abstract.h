@@ -44,6 +44,9 @@
 namespace OHOS::Ace {
 class CalcDimensionRect;
 struct TextDetectConfig;
+namespace NG {
+struct DrawingContext;
+} // namespace NG
 }
 
 namespace OHOS::Ace::Framework {
@@ -352,6 +355,7 @@ public:
     static void JsOnTouchIntercept(const JSCallbackInfo& info);
     static void JsOnGestureCollectIntercept(const JSCallbackInfo& info);
     static void JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info);
+    static void JsShouldRecognizerParallelWith(const JSCallbackInfo& info);
     static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
     static void JsOnTouchTestDone(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
@@ -359,6 +363,7 @@ public:
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info);
+    static void JsSmartGestureShortcut(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
@@ -617,6 +622,7 @@ public:
     static void JsDefaultFocus(const JSCallbackInfo& info);
     static void JsGroupDefaultFocus(const JSCallbackInfo& info);
     static void JsDebugLine(const JSCallbackInfo& info);
+    static void JsInspectorLabel(const JSCallbackInfo& info);
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
@@ -649,6 +655,7 @@ public:
     static void JsDragPreview(const JSCallbackInfo& info);
     static void JsAccessibilityVirtualNode(const JSCallbackInfo& info);
     static void JsAccessibilityActionOptions(const JSCallbackInfo& info);
+    static void JsAccessibilityCustomActions(const JSCallbackInfo& info);
     static void ParseAccessibilityDescriptionJson(const std::string& description,
         std::pair<bool, std::string>& autoEventPair, std::pair<bool, std::string>& descriptionPair);
 
@@ -936,6 +943,7 @@ public:
         Color& color, bool state);
     static void JSAllowForceDark(const JSCallbackInfo& info);
     static std ::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision);
+    static void JSEdgeLight(const JSCallbackInfo& info);
 
 private:
     static DepthVector3 ParseDepthVector3(const JSRef<JSVal>& vectorValue);

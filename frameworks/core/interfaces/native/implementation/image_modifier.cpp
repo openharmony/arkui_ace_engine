@@ -95,6 +95,7 @@ void AssignCast(std::optional<Color>& dst, const Ark_ColorContent& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageModifier {
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0};
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
@@ -103,6 +104,44 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
+}
+
+void ApplyResourceColorValues(
+    Ark_NativePointer node, const Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool isValid = false;
+    Converter::VisitUnionPtr(
+        value,
+        [frameNode, &isValid](const Ark_ColorFilter& filter) {
+            if (filter && filter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+                isValid = true;
+                ImageModelNG::SetColorFilterMatrix(frameNode, filter->GetColorFilterMatrix());
+                return;
+            }
+        },
+        [frameNode, &isValid](const Ark_drawing_ColorFilter& colorStrategy) {
+            if (colorStrategy->drawingColorFilter) {
+                isValid = true;
+                ImageModelNG::SetDrawingColorFilter(frameNode, colorStrategy->drawingColorFilter);
+                drawing_ColorFilterPeer::Destroy(colorStrategy);
+            }
+        },
+        [frameNode, &isValid](const Ark_ResourceColor& color) {
+            auto colorValue = Converter::OptConvert<Color>(color);
+            if (colorValue.has_value()) {
+                isValid = true;
+                auto colorFilter =
+                    DrawingColorFilter::CreateDrawingColorFilter(colorValue.value(), BlendMode::SRC_ATOP);
+                ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
+            }
+        },
+        []() {});
+    if (isValid) {
+        return;
+    }
+    ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLORFILTER_MATRIX);
 }
 } // ImageModifier
 namespace ImageInterfaceModifier {
@@ -132,6 +171,68 @@ void SetImageOptionsImpl(Ark_NativePointer node,
         },
         []() {});
     CHECK_NULL_VOID(imageAIOptions);
+}
+void SetImageOptions1Impl(Ark_NativePointer node,
+                          const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                          const Opt_ImageAIOptions* imageAIOptions,
+                          const Opt_String* reloadKey)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(src);
+    Converter::VisitUnion(*src,
+        [frameNode](const Ark_DrawableDescriptor& value) {
+            auto desc = Converter::Convert<DrawableDescriptor*>(value);
+            ImageModelStatic::SetDrawableDescriptor(frameNode, desc);
+        },
+        [frameNode](const auto& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            CHECK_NULL_VOID(info);
+            if (auto pixelMap = info->GetPixmap(); pixelMap) {
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            } else {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                    info->GetModuleName(), info->GetIsUriPureNumber());
+            }
+        },
+        []() {});
+    CHECK_NULL_VOID(imageAIOptions);
+    if (reloadKey) {
+        auto key = Converter::OptConvert<std::string>(*reloadKey);
+        if (key) {
+            ImageModelStatic::SetReloadKey(frameNode, *key);
+        }
+    }
+}
+void SetImageOptions2Impl(Ark_NativePointer node,
+                          const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                          const Opt_String* reloadKey)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(src);
+    Converter::VisitUnion(*src,
+        [frameNode](const Ark_DrawableDescriptor& value) {
+            auto desc = Converter::Convert<DrawableDescriptor*>(value);
+            ImageModelStatic::SetDrawableDescriptor(frameNode, desc);
+        },
+        [frameNode](const auto& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            CHECK_NULL_VOID(info);
+            if (auto pixelMap = info->GetPixmap(); pixelMap) {
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            } else {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                    info->GetModuleName(), info->GetIsUriPureNumber());
+            }
+        },
+        []() {});
+    if (reloadKey) {
+        auto key = Converter::OptConvert<std::string>(*reloadKey);
+        if (key) {
+            ImageModelStatic::SetReloadKey(frameNode, *key);
+        }
+    }
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
@@ -290,9 +391,9 @@ void SetSyncLoadImpl(Ark_NativePointer node,
     ImageModelNG::SetSyncMode(frameNode, *convValue);
 }
 void SetColorFilterImpl(Ark_NativePointer node,
-                        const Opt_Union_ColorFilter_drawing_ColorFilter* value)
+                        const Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor* value)
 {
-    ImageCommonMethods::ApplyColorFilterValues(node, value);
+    ImageModifier::ApplyResourceColorValues(node, value);
 }
 void SetCopyOptionImpl(Ark_NativePointer node,
                        const Opt_CopyOptions* value)
@@ -519,6 +620,8 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
     static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
         ImageModifier::ConstructImpl,
         ImageInterfaceModifier::SetImageOptionsImpl,
+        ImageInterfaceModifier::SetImageOptions1Impl,
+        ImageInterfaceModifier::SetImageOptions2Impl,
         ImageAttributeModifier::SetAltImpl,
         ImageAttributeModifier::SetMatchTextDirectionImpl,
         ImageAttributeModifier::SetFitOriginalSizeImpl,

@@ -24,6 +24,15 @@ import { Content } from "arkui.Content"
 import { NodeContent } from "arkui.NodeContent"
 import { ArkUIAniModule } from "arkui.ani"
 
+export interface ContentSlotAttribute {
+    // instructive change start
+    setContentSlotOptions(content?: Content): this  {  throw new Error("Unimplemented method setContentSlotOptions") }
+    // instructive change end
+    debugLine(sourceLine: string, moduleName?: string): this {
+        throw new Error("Unimplemented method debugLine")
+    }
+}
+
 export class ArkContentSlotPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)

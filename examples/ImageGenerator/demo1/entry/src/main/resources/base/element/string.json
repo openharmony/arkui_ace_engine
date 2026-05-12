@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Ability Jump Demo Module"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Ability Jump Demo Entry Ability"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "AbilityJumpDemo"
+    }
+  ]
+}

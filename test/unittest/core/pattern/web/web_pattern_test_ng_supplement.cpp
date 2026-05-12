@@ -14,6 +14,7 @@
  */
 
 #include <gmock/gmock.h>
+#include "core/accessibility/accessibility_manager.h"
 
 #include "gtest/gtest.h"
 #define protected public
@@ -31,6 +32,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -902,6 +904,30 @@ HWTEST_F(WebPatternTestNgSupplement, GetAccessibilityNodeByFocusMove001, TestSiz
 }
 
 /**
+ * @tc.name: CheckAccessibilityNodeReady001
+ * @tc.desc: CheckAccessibilityNodeReady.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, CheckAccessibilityNodeReady001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    OHOS::Ace::SetReturnStatus("true");
+    EXPECT_TRUE(webPattern->delegate_->CheckAccessibilityNodeReady(frameNode, 0));
+#endif
+}
+
+/**
  * @tc.name: SetAccessibilityState001
  * @tc.desc: SetAccessibilityState.
  * @tc.type: FUNC
@@ -1637,8 +1663,8 @@ HWTEST_F(WebPatternTestNgSupplement, ReleaseResizeHoldTest001, TestSize.Level1)
     webPattern->layoutMode_ = WebLayoutMode::NONE;
     webPattern->rootLayerChangeSize_ = Size(100, 200);
     webPattern->ReleaseResizeHold();
-    EXPECT_NE(webPattern->rootLayerChangeSize_.width_, webPattern->drawSize_.width_);
-    EXPECT_NE(webPattern->rootLayerChangeSize_.height_, webPattern->drawSize_.height_);
+    EXPECT_NE(webPattern->rootLayerChangeSize_.Width(), webPattern->drawSize_.Width());
+    EXPECT_NE(webPattern->rootLayerChangeSize_.Height(), webPattern->drawSize_.Height());
 #endif
 }
 
@@ -2591,6 +2617,140 @@ HWTEST_F(WebPatternTestNgSupplement, OnNestedScrollV2_002, TestSize.Level1)
     x = 1.0f, y = 0.5f;
     EXPECT_FALSE(webPattern->OnNestedScrollV2(x, y));
     EXPECT_TRUE(y == 0.5f);
+#endif
+}
+
+/**
+ * @tc.name: OnNestedFling_001
+ * @tc.desc: OnNestedFling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedFling_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->parentsMap_.clear();
+    webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
+    float vx = 2.0f;
+    float vy = 3.0f;
+    EXPECT_FALSE(webPattern->OnNestedFling(vx, vy));
+#endif
+}
+
+/**
+ * @tc.name: OnNestedFling_002
+ * @tc.desc: OnNestedFling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedFling_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
+    webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
+    webPattern->SetNestedScrollParent(parent);
+    float vx = 2.0f;
+    float vy = 3.0f;
+    EXPECT_FALSE(webPattern->OnNestedFling(vx, vy));
+
+    webPattern->parentsMap_ = { { Axis::VERTICAL, parent } };
+    webPattern->expectedScrollAxis_ = Axis::VERTICAL;
+    EXPECT_FALSE(webPattern->OnNestedFling(vx, vy));
+#endif
+}
+
+/**
+ * @tc.name: OnNestedFling_003
+ * @tc.desc: OnNestedFling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedFling_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<SwiperPattern> swiperParent = AceType::MakeRefPtr<SwiperPattern>();
+    // HORIZONTAL + SELF_ONLY → CheckParentScroll false → return false
+    webPattern->parentsMap_ = { { Axis::HORIZONTAL, swiperParent } };
+    webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
+    webPattern->nestedScroll_.scrollLeft = NestedScrollMode::SELF_ONLY;
+    webPattern->SetNestedScrollParent(swiperParent);
+    float vx = 2.0f;
+    float vy = 3.0f;
+    EXPECT_FALSE(webPattern->OnNestedFling(vx, vy));
+
+    // VERTICAL + SELF_ONLY → CheckParentScroll false → return false
+    webPattern->parentsMap_ = { { Axis::VERTICAL, swiperParent } };
+    webPattern->expectedScrollAxis_ = Axis::VERTICAL;
+    webPattern->nestedScroll_.scrollUp = NestedScrollMode::SELF_ONLY;
+    EXPECT_FALSE(webPattern->OnNestedFling(vx, vy));
+#endif
+}
+
+/**
+ * @tc.name: OnNestedFling_004
+ * @tc.desc: OnNestedFling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnNestedFling_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<SwiperPattern> swiperParent = AceType::MakeRefPtr<SwiperPattern>();
+    webPattern->parentsMap_ = { { Axis::HORIZONTAL, swiperParent } };
+    webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
+    webPattern->nestedScroll_.scrollLeft = NestedScrollMode::SELF_ONLY;
+    webPattern->SetNestedScrollParent(swiperParent);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    float vx = 2.0f;
+    float vy = 3.0f;
+    EXPECT_FALSE(webPattern->OnNestedFling(vx, vy));
 #endif
 }
 

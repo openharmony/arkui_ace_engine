@@ -18,6 +18,7 @@
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
 namespace OHOS::Ace::NG {

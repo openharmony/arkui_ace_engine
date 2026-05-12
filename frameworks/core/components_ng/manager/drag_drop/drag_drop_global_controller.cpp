@@ -18,7 +18,9 @@
 #include <csignal>
 #include <thread>
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -300,6 +302,50 @@ void DragDropGlobalController::NotifyPendingFailed(int32_t requestId)
     }
 }
 
+void DragDropGlobalController::SavePendingFollowHandMorphDropAnimation(std::function<void()> callback)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    pendingFollowHandMorphDropAnimationCallback_ = std::move(callback);
+    isWaitingFollowHandMorphDropAnimation_ = (pendingFollowHandMorphDropAnimationCallback_ != nullptr);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Save pending follow-hand morph animation, waiting=%{public}d",
+        isWaitingFollowHandMorphDropAnimation_);
+}
+
+bool DragDropGlobalController::ConsumeAndExecutePendingFollowHandMorphDropAnimation()
+{
+    std::function<void()> callback;
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        if (!isWaitingFollowHandMorphDropAnimation_) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "No pending follow-hand morph animation to consume.");
+            return false;
+        }
+        callback = std::move(pendingFollowHandMorphDropAnimationCallback_);
+        pendingFollowHandMorphDropAnimationCallback_ = nullptr;
+        isWaitingFollowHandMorphDropAnimation_ = false;
+    }
+    if (callback) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Execute pending follow-hand morph animation.");
+        callback();
+        return true;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Pending follow-hand morph animation has no executable callback.");
+    return false;
+}
+
+bool DragDropGlobalController::InterruptPendingFollowHandMorphDropAnimation()
+{
+    auto interrupted = ConsumeAndExecutePendingFollowHandMorphDropAnimation();
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Interrupt pending follow-hand morph animation, result=%{public}d", interrupted);
+    return interrupted;
+}
+
+bool DragDropGlobalController::IsWaitingFollowHandMorphDropAnimation() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return isWaitingFollowHandMorphDropAnimation_;
+}
+
 void DragDropGlobalController::ResetPrePendingStatus()
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
@@ -307,25 +353,6 @@ void DragDropGlobalController::ResetPrePendingStatus()
     dragResult_ = DragRet::DRAG_FAIL;
     suggestedDropOperation_ = DragBehavior::UNKNOWN;
     disableDropAnimation_ = false;
-}
-
-void DragDropGlobalController::SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled)
-{
-    std::unique_lock<std::shared_mutex> lock(mutex_);
-    isAppGlobalDragEnabled_ = isAppGlobalDragEnabled;
-    isAlreadyGetAppGlobalDrag_ = true;
-}
-
-bool DragDropGlobalController::IsAppGlobalDragEnabled() const
-{
-    std::shared_lock<std::shared_mutex> lock(mutex_);
-    return isAppGlobalDragEnabled_;
-}
-
-bool DragDropGlobalController::IsAlreadyGetAppGlobalDrag() const
-{
-    std::shared_lock<std::shared_mutex> lock(mutex_);
-    return isAlreadyGetAppGlobalDrag_;
 }
 
 bool DragDropGlobalController::IsCurrentDrag(int32_t requestId) const

@@ -210,6 +210,9 @@ public:
     void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
     {}
+    void SetShouldRecognizerParallelWith(
+        NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc) override
+    {}
     void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
     void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) override {}
@@ -262,6 +265,8 @@ public:
         const std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
         override {};
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) override {}
+    void ResetSmartGestureShortcut() override {}
     void SetEnabled(bool enabled) override;
     void SetTouchable(bool touchable) override;
     void SetFocusable(bool focusable) override;
@@ -388,7 +393,10 @@ public:
     void SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions) override;
     void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) override;
     void ResetAccessibilityActionOptions() override;
+    void SetAccessibilityCustomActions(const std::vector<NG::AccessibilityCustomAction>& actions) override;
+    void ResetAccessibilityCustomActions() override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void SetAccessibilityNextFocusParams(const NG::AccessibilityNextFocusParams& params) override;
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void ResetOnAccessibilityFocus() override;

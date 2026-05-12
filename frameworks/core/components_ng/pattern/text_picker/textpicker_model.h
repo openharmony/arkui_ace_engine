@@ -22,11 +22,11 @@
 #include "base/geometry/dimension.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/common/resource/resource_object.h"
 namespace OHOS::Ace {
+class TextTheme;
 struct TextPickerDialog {
     CalcDimension height;
     uint32_t selectedValue;

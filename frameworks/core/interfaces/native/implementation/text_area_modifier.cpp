@@ -28,6 +28,7 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 
@@ -103,6 +104,13 @@ void SetTextAreaOptionsImpl(Ark_NativePointer node,
     }
 
     auto controller = TextFieldModelStatic::GetController(frameNode, placeholder, text);
+    if (!controller) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+        pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+        controller = TextFieldModelStatic::GetController(frameNode, placeholder, text);
+    }
     if (peerPtr) {
         peerPtr->SetController(controller);
         auto styledStringCache = peerPtr->GetStyledStringCache();
@@ -538,6 +546,7 @@ void SetDecorationImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetTextDecoration(frameNode, options.textDecoration);
     TextFieldModelStatic::SetTextDecorationColor(frameNode, options.color);
     TextFieldModelStatic::SetTextDecorationStyle(frameNode, options.textDecorationStyle);
+    TextFieldModelStatic::SetLineThicknessScale(frameNode, options.lineThicknessScale);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node,
                           const Opt_Union_F64_String_Resource* value)
@@ -930,6 +939,9 @@ void SetVoiceButtonImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    auto isShowVoiceButton = optValue ? Converter::OptConvert<bool>(optValue->enabled).value_or(true) : false;
+    TextFieldModelNG::SetIsShowVoiceButton(frameNode, isShowVoiceButton);
 }
 void SetHorizontalScrollingImpl(Ark_NativePointer node,
                                 const Opt_Boolean* value)

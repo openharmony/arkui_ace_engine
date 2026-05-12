@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,6 +33,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.arkui.inspector.ets",
   "arkui-preprocessed/@ohos.arkui.observer.ets",
   "arkui-preprocessed/@ohos.arkui.shape.ets",
+  "arkui-preprocessed/@ohos.arkui.smartGestureController.ets",
   "arkui-preprocessed/@ohos.arkui.theme.ets",
   "arkui-preprocessed/@ohos.arkui.uiMaterial.ets",
   "arkui-preprocessed/@ohos.font.ets",
@@ -79,6 +80,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/CustomLayoutRootModifier.ets",
   "arkui-preprocessed/arkui/DataPanelModifier.ets",
   "arkui-preprocessed/arkui/DatePickerModifier.ets",
+  "arkui-preprocessed/arkui/DepthComponentModifier.ets",
   "arkui-preprocessed/arkui/DividerModifier.ets",
   "arkui-preprocessed/arkui/EffectComponentModifier.ets",
   "arkui-preprocessed/arkui/EllipseModifier.ets",
@@ -88,6 +90,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/FlowItemModifier.ets",
   "arkui-preprocessed/arkui/FolderStackModifier.ets",
   "arkui-preprocessed/arkui/FormComponentModifier.ets",
+  "arkui-preprocessed/arkui/FormLinkModifier.ets",
   "arkui-preprocessed/arkui/FrameNode.ets",
   "arkui-preprocessed/arkui/GaugeModifier.ets",
   "arkui-preprocessed/arkui/Graphics.ets",
@@ -232,6 +235,8 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/customDialogController.ets",
   "arkui-preprocessed/arkui/component/dataPanel.ets",
   "arkui-preprocessed/arkui/component/datePicker.ets",
+  "arkui-preprocessed/arkui/component/depthComponent.ets",
+  "arkui-preprocessed/arkui/component/distortionComponent.ets",
   "arkui-preprocessed/arkui/component/divider.ets",
   "arkui-preprocessed/arkui/component/dynamicComponent.ets",
   "arkui-preprocessed/arkui/component/effectComponent.ets",
@@ -239,6 +244,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/embeddedComponent.ets",
   "arkui-preprocessed/arkui/component/enums.ets",
   "arkui-preprocessed/arkui/component/extendableComponent.ets",
+  "arkui-preprocessed/arkui/component/extendableComponentDFX.ets",
   "arkui-preprocessed/arkui/component/flex.ets",
   "arkui-preprocessed/arkui/component/flowItem.ets",
   "arkui-preprocessed/arkui/component/focus.ets",
@@ -350,7 +356,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/FrameNode.ets",
   "arkui-preprocessed/arkui/framework/GlobalScope.ets",
   "arkui-preprocessed/arkui/framework/Graphics.ets",
-  "arkui-preprocessed/arkui/framework/ImageModifier.ets",
   "arkui-preprocessed/arkui/framework/NodeController.ets",
   "arkui-preprocessed/arkui/framework/RenderNode.ets",
   "arkui-preprocessed/arkui/framework/Scene.ets",
@@ -370,7 +375,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/ohos.arkui.drawableDescriptor.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.observer.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.shape.ets",
-  "arkui-preprocessed/arkui/framework/ohos.arkui.theme.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.uiMaterial.ets",
   "arkui-preprocessed/arkui/framework/ohos.curves.ets",
   "arkui-preprocessed/arkui/framework/ohos.data.unifiedDataChannel.ets",
@@ -379,6 +383,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/ohos.graphics.drawing.ets",
   "arkui-preprocessed/arkui/framework/ohos.graphics.text.ets",
   "arkui-preprocessed/arkui/framework/ohos.graphics.uiEffect.ets",
+  "arkui-preprocessed/arkui/framework/ohos.inputMethod.ExtraConfig.ets",
   "arkui-preprocessed/arkui/framework/ohos.intl.ets",
   "arkui-preprocessed/arkui/framework/ohos.matrix4.ets",
   "arkui-preprocessed/arkui/framework/ohos.measure.ets",
@@ -391,7 +396,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/peers/CallbackKind.ets",
   "arkui-preprocessed/arkui/framework/resource.ets",
   "arkui-preprocessed/arkui/framework/searchOps.ets",
-  "arkui-preprocessed/arkui/framework/stdlib.ets",
   "arkui-preprocessed/arkui/framework/textFieldOps.ets",
   "arkui-preprocessed/arkui/handwritten/index.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/ColorMetricsTransfer.ets",
@@ -446,6 +450,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorComputed.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorConsume.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorConsumer.ets",
+  "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorInteropWatch.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorLink.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorLocal.ets",
@@ -465,6 +470,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/index.ets",
   "arkui-preprocessed/arkui/stateManagement/internal.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopBackingValue.ets",
+  "arkui-preprocessed/arkui/stateManagement/interop/interopBinding.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopStorage.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopStorageV2.ets",
   "arkui-preprocessed/arkui/stateManagement/remember.ets",
@@ -497,11 +503,11 @@ arkui_files = [
   "arkui-preprocessed/arkui/theme/system/ArkSystemShapes.ets",
   "arkui-preprocessed/arkui/theme/system/ArkSystemTheme.ets",
   "arkui-preprocessed/arkui/theme/system/ArkSystemTypography.ets",
+  "arkui-preprocessed/arkui/transfer/BindingTransfer.ets",
   "arkui-preprocessed/arkui/transfer/ColorFilterTransfer.ets",
   "arkui-preprocessed/arkui/transfer/ComponentContentTransfer.ets",
   "arkui-preprocessed/arkui/transfer/FrameNodeTransfer.ets",
   "arkui-preprocessed/arkui/transfer/RenderNodeTransfer.ets",
-  "arkui-preprocessed/arkui/transfer/BindingTransfer.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBadgeNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBaseNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBlankNode.ets",
@@ -574,6 +580,7 @@ arkui_path_keys = [
   "arkui.incremental.runtime.state",
   "@ohos/animator",
   "@ohos/arkui/UIContext",
+  "@ohos/arkui/smartGestureController",
   "@ohos/measure",
   "@ohos/font",
   "@ohos/router",
@@ -605,6 +612,12 @@ arkui_path_keys = [
   "@ohos.arkui.ArcSwiper",
   "#arktheme",
   "arkui/base/ArkUIObjectFinalizationRegisterProxy",
+  "@component/customComponent",
+  "@component/extendableComponent",
+  "@component/interop",
+  "@peerNode",
+  "@aceTrace",
+  "@decoratorEnv",
 ]
 
 arkui_path_values = [
@@ -630,6 +643,7 @@ arkui_path_values = [
   "../incremental/public/src/state.ets",
   "arkui-preprocessed/@ohos.animator.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
+  "arkui-preprocessed/@ohos.arkui.smartGestureController.ets",
   "arkui-preprocessed/@ohos.measure.ets",
   "arkui-preprocessed/@ohos.font.ets",
   "arkui-preprocessed/@ohos.router.ets",
@@ -661,4 +675,17 @@ arkui_path_values = [
   "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
   "arkui-preprocessed/arkui/theme",
   "arkui-preprocessed/arkui/base/ArkUIObjectFinalizationRegisterProxy.ets",
+  "arkui-preprocessed/arkui/component/customComponent.ets",
+  "arkui-preprocessed/arkui/component/extendableComponent.ets",
+  "arkui-preprocessed/arkui/component/interop",
+  "arkui-preprocessed/arkui/PeerNode.ets",
+  "arkui-preprocessed/arkui/base/AceTrace.ets",
+  "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
 ]
+
+if (defined(ace_engine_feature_enable_smart_gesture) &&
+    !ace_engine_feature_enable_smart_gesture) {
+  arkui_files -= [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
+  arkui_names -= [ "@ohos/arkui/smartGestureController" ]
+  arkui_path_values -= [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
+}

@@ -15,6 +15,8 @@
 
 #include "frameworks/compatible/components/svg/parse/svg_dom.h"
 
+#include <regex>
+
 #include "frameworks/compatible/components/svg/parse/svg_animation.h"
 #include "frameworks/compatible/components/svg/parse/svg_circle.h"
 #include "frameworks/compatible/components/svg/parse/svg_clip_path.h"

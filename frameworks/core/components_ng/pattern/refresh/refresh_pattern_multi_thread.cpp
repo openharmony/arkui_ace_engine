@@ -16,33 +16,6 @@
 #include "ui/base/utils/utils.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/log/dump_log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/multi_thread.h"
-#include "base/utils/utils.h"
-#include "core/animation/spring_curve.h"
-#include "core/common/container.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/refresh/refresh_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
-#include "core/components_ng/pattern/refresh/refresh_animation_state.h"
-#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/i18n/localization.h"
-#include "frameworks/base/utils/time_util.h"
-#include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
-
 namespace OHOS::Ace::NG {
 void RefreshPattern::OnAttachToFrameNodeMultiThread()
 {

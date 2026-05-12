@@ -20,11 +20,14 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/singleton.h"
-#include "core/components/box/box_component.h"
 #include "core/components/common/properties/tween_option.h"
-#include "core/components/text/text_component.h"
 #include "core/components/toast/toast_theme.h"
-#include "core/pipeline/pipeline_context.h"
+
+namespace OHOS::Ace {
+class BoxComponent;
+class TextComponent;
+class PipelineContext;
+}
 
 namespace OHOS::Ace {
 using ToastAnimationCallback = std::function<void()>;

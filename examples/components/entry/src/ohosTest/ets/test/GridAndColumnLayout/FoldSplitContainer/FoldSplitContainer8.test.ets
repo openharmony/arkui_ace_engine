@@ -36,8 +36,9 @@ const CURSOR_CONTROL_18 = 18;
 
 export default function FoldSplitContainer8() {
   describe('FoldSplitContainer8', () => {
-    beforeAll(async (done: Function) => {
-      await FoldSplitContainerStart(done)
+    beforeAll(async (done: () => void) => {
+      await FoldSplitContainerStart()
+      done()
     })
     // obscured
     /*

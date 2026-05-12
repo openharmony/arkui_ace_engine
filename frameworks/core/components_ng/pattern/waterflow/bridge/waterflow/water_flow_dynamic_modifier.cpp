@@ -544,6 +544,14 @@ ArkUI_Float32 GetWaterFlowBarWidth(ArkUINodeHandle node)
     return WaterFlowModelNG::GetScrollBarWidth(frameNode);
 }
 
+void SetWaterFlowScrollBarWidthWithResource(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::CreateWithResourceObjScrollBarWidth(
+        frameNode, AceType::Claim(reinterpret_cast<ResourceObject*>(resObjRawPtr)));
+}
+
 void CreateWaterFlowScrollBarColorWithResourceObj(ArkUINodeHandle node, void* colorRawPtr)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
@@ -1570,6 +1578,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowDynamicModifier()
             .setWaterFlowScrollBarWidth = SetWaterFlowBarWidthImpl,
             .resetWaterFlowScrollBarWidth = nullptr,
             .getWaterFlowScrollBarWidth = nullptr,
+            .setWaterFlowScrollBarWidthWithResource = nullptr,
             .setWaterFlowScrollBarColor = SetWaterFlowScrollBarColorImpl,
             .resetWaterFlowScrollBarColor = nullptr,
             .getWaterFlowScrollBarColor = nullptr,
@@ -1675,6 +1684,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowDynamicModifier()
         .setWaterFlowScrollBarWidth = SetWaterFlowBarWidth,
         .resetWaterFlowScrollBarWidth = ResetWaterFlowBarWidth,
         .getWaterFlowScrollBarWidth = GetWaterFlowBarWidth,
+        .setWaterFlowScrollBarWidthWithResource = SetWaterFlowScrollBarWidthWithResource,
         .setWaterFlowScrollBarColor = SetWaterFlowScrollBarColor,
         .resetWaterFlowScrollBarColor = ResetWaterFlowScrollBarColor,
         .getWaterFlowScrollBarColor = GetWaterFlowScrollBarColor,

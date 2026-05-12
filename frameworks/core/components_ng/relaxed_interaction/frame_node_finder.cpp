@@ -23,34 +23,110 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/gesture_group.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/common/event_manager.h"
 
 namespace OHOS::Ace::NG {
 
+std::string ComponentUtils::ToString(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+{
+    if (!gestureRecognizer) {
+        return "NGGestureRecognizer{nullptr}";
+    }
+    auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
+    if (!currentNode) {
+        return "NGGestureRecognizer{frameNode=nullptr}";
+    }
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(gestureRecognizer);
+    std::ostringstream buffer;
+    buffer  << "NGGestureRecognizer{frameNode=" << currentNode->ToString()
+            << ", frameNode.tag=" << currentNode->GetTag()
+            << ", frameNode.axis=" << static_cast<int32_t>(GetAxis(currentNode))
+            << ", isPan=" << (AceType::InstanceOf<PanRecognizer>(gestureRecognizer) ? "Y" : "N")
+            << ", groupRecognizer.valid=" << (bool)recognizerGroup
+            << ", groupRecognizer.size="
+            << (recognizerGroup ? std::to_string(recognizerGroup->GetGroupRecognizer().size()) : "N/A")
+            << "}";
+    return buffer.str();
+}
+
+Axis ComponentUtils::GetAxis(const RefPtr<FrameNode>& frameNode)
+{
+    if (!frameNode) {
+        return Axis::NONE;
+    }
+    auto pattern = frameNode->GetPattern();
+    if (!pattern) {
+        return Axis::NONE;
+    }
+    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    if (scrollablePattern) {
+        return scrollablePattern->GetAxis();
+    }
+    return Axis::NONE;
+}
+
 bool ClickRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
 {
-    auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
-    return AceType::InstanceOf<ClickRecognizer>(gestureRecognizer);
+    auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
+    if (!clickRecognizer) {
+        return false;
+    }
+    return clickRecognizer->GetCount() == 1;
 }
 
 bool ContentSwitchRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
 {
+    if (!AceType::InstanceOf<PanRecognizer>(gestureRecognizer)) {
+        return false;
+    }
+
     std::set<std::string> tags = {
         V2::SWIPER_ETS_TAG,
         V2::TABS_ETS_TAG,
     };
     auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
+    if (!currentNode) {
+        return false;
+    }
     return tags.count(currentNode->GetTag());
 }
 
 bool ScrollRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
 {
-    std::set<std::string> tags = {
+    if (!AceType::InstanceOf<PanRecognizer>(gestureRecognizer)) {
+        return false;
+    }
+
+    auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
+    if (!currentNode) {
+        return false;
+    }
+
+    const std::set<std::string> tags = {
         V2::SCROLL_ETS_TAG,
         V2::LIST_ETS_TAG,
     };
-    auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
-    return tags.count(currentNode->GetTag());
+    if (tags.count(currentNode->GetTag()) == 0) {
+        return false;
+    }
+
+    if (direction_ == RelaxedScrollDirection::FORWARD || direction_ == RelaxedScrollDirection::BACKWARD) {
+        return true;
+    }
+
+    auto axis = ComponentUtils::GetAxis(currentNode);
+    if (axis == Axis::FREE) {
+        return true;
+    }
+    if (direction_ == RelaxedScrollDirection::LEFT || direction_ == RelaxedScrollDirection::RIGHT) {
+        return axis == Axis::HORIZONTAL;
+    }
+    if (direction_ == RelaxedScrollDirection::UP || direction_ == RelaxedScrollDirection::DOWN) {
+        return axis == Axis::VERTICAL;
+    }
+    return false;
 }
 
 FrameNodeFinder::FrameNodeFinder(WeakPtr<PipelineContext> context, GestureRecognizerPred pred)
@@ -134,7 +210,7 @@ FrameNodeMatch FrameNodeFinder::FindLeaf(
     auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
     auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(gestureRecognizer);
     if (!recognizerGroup || recognizerGroup->GetGroupRecognizer().empty()) {
-        if (pred_(gestureRecognizer)) {
+        if (Test(gestureRecognizer)) {
             return gestureRecognizer;
         }
         return {};
@@ -154,6 +230,16 @@ FrameNodeMatch FrameNodeFinder::FindLeaf(
     return {};
 }
 
+bool FrameNodeFinder::Test(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+{
+    auto ret = pred_(gestureRecognizer);
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "Test [%{public}s] for %{public}s",
+            ret ? "  PASS" : "NOPASS", ComponentUtils::ToString(gestureRecognizer).c_str());
+    }
+    return ret;
+}
+
 void FrameNodeFinder::CleanResult(const TouchTestResult& touchTestResult, int32_t touchId)
 {
     std::list<RefPtr<NG::NGGestureRecognizer>> hitTestRecognizers;
@@ -169,11 +255,12 @@ void FrameNodeFinder::CleanResult(const TouchTestResult& touchTestResult, int32_
     auto context = context_.Upgrade();
     auto eventManager = context->GetEventManager();
     auto ref = eventManager->GetGestureRefereeNG(nullptr);
-    if (ref) {
-        ref->CleanGestureStateVoluntarily(touchId);
-        ref->CleanGestureScope(touchId);
-        CleanFrameNodes(relaxedInteractionFrameNodes);
+    if (!ref) {
+        return;
     }
+    ref->CleanGestureStateVoluntarily(touchId);
+    ref->CleanGestureScope(touchId);
+    CleanFrameNodes(relaxedInteractionFrameNodes);
 }
 
 void FrameNodeFinder::GetFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes,
@@ -188,10 +275,11 @@ void FrameNodeFinder::GetFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes
             frameNodes.emplace(node);
         }
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
-        if (group) {
-            auto groupRecognizers = group->GetGroupRecognizer();
-            GetFrameNodes(frameNodes, groupRecognizers);
+        if (!group) {
+            continue;
         }
+        auto groupRecognizers = group->GetGroupRecognizer();
+        GetFrameNodes(frameNodes, groupRecognizers);
     }
 }
 
@@ -204,11 +292,12 @@ void FrameNodeFinder::CleanFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNod
         }
 
         auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
-        if (gestureEventHub) {
-            gestureEventHub->CleanExternalRecognizers();
-            gestureEventHub->CleanInnerRecognizer();
-            gestureEventHub->CleanNodeRecognizer();
+        if (!gestureEventHub) {
+            continue;
         }
+        gestureEventHub->CleanExternalRecognizers();
+        gestureEventHub->CleanInnerRecognizer();
+        gestureEventHub->CleanNodeRecognizer();
     }
 }
 

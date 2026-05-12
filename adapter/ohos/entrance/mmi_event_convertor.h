@@ -24,7 +24,7 @@
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "core/event/axis_event.h"
-#include "core/event/key_event.h"
+#include "core/event/key_code.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
@@ -33,6 +33,10 @@
 
 namespace OHOS::Ace::NG {
 struct FocusAxisEvent;
+}
+
+namespace OHOS::Ace {
+struct KeyEvent;
 }
 
 namespace OHOS::Ace::Platform {

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_model.h"
@@ -1421,6 +1422,27 @@ ArkUI_Uint32 GetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node)
     return RichEditorModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
 }
 
+void SetRichEditorHorizontalScrolling(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetHorizontalScrolling(frameNode, value);
+}
+ 
+ArkUI_Bool GetRichEditorHorizontalScrolling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::GetHorizontalScrolling(frameNode);
+}
+ 
+void ResetRichEditorHorizontalScrolling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ResetHorizontalScrolling(frameNode);
+}
+
 void SetRichEditorSingleLine(ArkUINodeHandle node, ArkUI_Bool singleLine)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1925,6 +1947,13 @@ void SetStyledPlaceholder(ArkUINodeHandle node, const ArkUI_StyledString_Descrip
     RichEditorModelNG::SetStyledPlaceholder(frameNode, spanStringRawPtr);
 }
 
+void ScrollToVisible(ArkUINodeHandle node, int32_t start, int32_t end)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ScrollToVisible(frameNode, start, end);
+}
+
 void SetRichEditorNapiOnWillChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2181,9 +2210,13 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setStyledString = SetStyledString,
         .getStyledString = GetStyledString,
         .setStyledPlaceholder = SetStyledPlaceholder,
+        .scrollToVisible = ScrollToVisible,
         .setRichEditorOrphanCharOptimization = SetRichEditorOrphanCharOptimization,
         .resetRichEditorOrphanCharOptimization = ResetRichEditorOrphanCharOptimization,
         .getRichEditorOrphanCharOptimization = GetRichEditorOrphanCharOptimization,
+        .setRichEditorHorizontalScrolling = SetRichEditorHorizontalScrolling,
+        .resetRichEditorHorizontalScrolling = ResetRichEditorHorizontalScrolling,
+        .getRichEditorHorizontalScrolling = GetRichEditorHorizontalScrolling,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2219,6 +2252,9 @@ const CJUIRichEditorModifier* GetCJUIRichEditorDynamicModifier()
         .setRichEditorBarState = SetRichEditorBarState,
         .resetRichEditorBarState = ResetRichEditorBarState,
         .getRichEditorBarState = GetRichEditorBarState,
+        .setRichEditorHorizontalScrolling = SetRichEditorHorizontalScrolling,
+        .getRichEditorHorizontalScrolling = GetRichEditorHorizontalScrolling,
+        .resetRichEditorHorizontalScrolling = ResetRichEditorHorizontalScrolling,
         .setRichEditorSingleLine = SetRichEditorSingleLine,
         .resetRichEditorSingleLine = ResetRichEditorSingleLine,
         .getRichEditorSingleLine = GetRichEditorSingleLine,

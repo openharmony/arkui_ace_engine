@@ -46,7 +46,8 @@ public:
             auto offset = paintWrapper->GetContentOffset();
             bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                            : direction_ == TextDirection::RTL;
-            auto pointOffset = isSelect_ ^ isRtl ? size.Width() - size.Height() : 0.0f;
+            auto pointOffset = isSelect_ ^ isRtl ? size.Width() - static_cast<float>(size.Height() / NUM_TWO)
+                                                 : static_cast<float>(size.Height() / NUM_TWO);
             auto renderContext = paintWrapper->GetRenderContext();
             CHECK_NULL_RETURN(renderContext, nullptr);
             auto host = renderContext->GetHost();
@@ -94,10 +95,10 @@ public:
         }
         horizontalPadding += horizontalIncrement;
         verticalPadding += verticalIncrement;
-        float boundsRectOriginX = offset.GetX() - horizontalPadding;
-        float boundsRectOriginY = offset.GetY() - verticalPadding;
-        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
-        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        float boundsRectOriginX = offset.GetX() - horizontalPadding - actualPointRadius;
+        float boundsRectOriginY = offset.GetY() - verticalPadding - actualPointRadius;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding + 2 * actualPointRadius;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding + 2 * actualPointRadius;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         switchModifier_->SetBoundsRect(boundsRect);
     }
@@ -237,6 +238,20 @@ public:
     void SetHasSystemMaterial(bool has)
     {
         hasSystemMaterial_ = has;
+    }
+
+    void SetMaterialNodePositionCallback(SwitchModifier::MaterialNodePositionCallback&& callback)
+    {
+        if (switchModifier_) {
+            switchModifier_->SetMaterialNodePositionCallback(std::move(callback));
+        }
+    }
+
+    void SetSlideFinishedCallback(SwitchModifier::SlideFinishedCallback&& callback)
+    {
+        if (switchModifier_) {
+            switchModifier_->SetSlideFinishedCallback(std::move(callback));
+        }
     }
 
     void SetShowHoverEffect(bool showHoverEffect)

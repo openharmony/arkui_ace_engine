@@ -19,10 +19,17 @@
 #include <string>
 #include <vector>
 
+#include "base/geometry/axis.h"
 #include "base/utils/linear_map.h"
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_enums.h"
+#include "ui/base/utils/utils.h"
+
+namespace OHOS::Ace {
+class TextStyle;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::V2 {
 

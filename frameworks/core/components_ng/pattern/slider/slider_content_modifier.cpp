@@ -34,6 +34,7 @@ constexpr float HALF = 0.5f;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr double DEFAULT_SCALE_VALUE = 1.0;
+constexpr float MAX_BLOCK_SCALE_FOR_MATERIAL = 3.0f;
 constexpr int32_t STEPS_MIN_NUMBER = 2;
 } // namespace
 SliderContentModifier::SliderContentModifier(const Parameters& parameters,
@@ -71,6 +72,10 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     blockBorderColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor.value_or(Color())));
     blockSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(parameters.blockSize);
+    
+    blockAlpha_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    blockScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    
     // non-animatable property
     stepRatio_ = AceType::MakeRefPtr<PropertyFloat>(parameters.stepRatio);
     sliderMode_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -106,6 +111,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(stepColor_);
     AttachProperty(blockBorderColor_);
     AttachProperty(blockSize_);
+    AttachProperty(blockAlpha_);
+    AttachProperty(blockScale_);
     AttachProperty(stepRatio_);
     AttachProperty(sliderMode_);
     AttachProperty(directionAxis_);
@@ -214,6 +221,8 @@ void GetRSColorSpaceByGradientColors(
             matrixType = RSCMSMatrixType::REC2020;
             break;
         case ColorSpace::DISPLAY_P3:
+            matrixType = RSCMSMatrixType::DCIP3;
+            break;
         case ColorSpace::SRGB:
         default:
             matrixType = RSCMSMatrixType::SRGB;
@@ -224,19 +233,29 @@ void GetRSColorSpaceByGradientColors(
     rsColorSpace = RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType);
 }
 
-// return max hdr
-float GetUIColorsByGradientColors(
+float GetHDRMaxByGradientColors(const std::vector<GradientColor>& gradientColors)
+{
+    float hdrMax = COLOR_HEAD_ROOM_DEFAULT_VALUE;
+    for (size_t index = 0; index < gradientColors.size(); index++) {
+        Color color = gradientColors[index].GetColor();
+        if (color.GetHeadRoomColor().has_value()) {
+            auto colorWithHeadRoom = color.GetHeadRoomColor().value();
+            hdrMax = std::max(hdrMax, colorWithHeadRoom.headRoom);
+        }
+    }
+    return hdrMax;
+}
+
+void GetUIColorsByGradientColors(
     const std::vector<GradientColor>& gradientColors, std::vector<RSUIColor>& resultColors)
 {
     resultColors.clear();
-    float maxHdr = COLOR_HEAD_ROOM_DEFAULT_VALUE;
     for (size_t index = 0; index < gradientColors.size(); index++) {
         Color color = gradientColors[index].GetColor();
         RSUIColor rsUIColor;
         if (color.GetHeadRoomColor().has_value()) {
             auto colorWithHeadRoom = color.GetHeadRoomColor().value();
             rsUIColor = GetHDRUIColorByHeadRoom(colorWithHeadRoom);
-            maxHdr = std::max(maxHdr, colorWithHeadRoom.headRoom);
         } else {
             auto linearColor = gradientColors[index].GetLinearColor();
             rsUIColor = RSUIColor(
@@ -247,11 +266,32 @@ float GetUIColorsByGradientColors(
         }
         resultColors.emplace_back(rsUIColor);
     }
-    return maxHdr;
+}
+
+void GetColor4fsByGradientColors(
+    const std::vector<GradientColor>& gradientColors, std::vector<RSColor4f>& resultColors)
+{
+    resultColors.clear();
+    for (size_t index = 0; index < gradientColors.size(); index++) {
+        uint32_t colorValue = gradientColors[index].GetLinearColor().GetValue();
+        RSColor4f rsColor4f = RSColor(colorValue).GetColor4f();
+        resultColors.emplace_back(rsColor4f);
+    }
 }
 
 std::shared_ptr<RSShaderEffect> CreateLinearGradientShader(
     const RSPoint& start, const RSPoint& end, const std::vector<RSUIColor>& colors,
+    const std::shared_ptr<RSColorSpace>& colorSpace, const std::vector<float>& pos)
+{
+#ifndef USE_ROSEN_DRAWING
+    return RSShaderEffect::CreateLinearGradient(start, end, colors, colorSpace, pos, RSTileMode::CLAMP);
+#else
+    return RSRecordingShaderEffect::CreateLinearGradient(start, end, colors, colorSpace, pos, RSTileMode::CLAMP);
+#endif
+}
+
+std::shared_ptr<RSShaderEffect> CreateLinearGradientShader(
+    const RSPoint& start, const RSPoint& end, const std::vector<RSColor4f>& colors,
     const std::shared_ptr<RSColorSpace>& colorSpace, const std::vector<float>& pos)
 {
 #ifndef USE_ROSEN_DRAWING
@@ -305,16 +345,23 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     brush.SetAntiAlias(true);
     std::shared_ptr<RSColorSpace> rsColorSpace = nullptr;
     GetRSColorSpaceByGradientColors(gradientColors, rsColorSpace);
-    std::vector<RSUIColor> rsUIColors;
+    float hdrMax = GetHDRMaxByGradientColors(gradientColors);
+    if (GreatNotEqual(hdrMax, COLOR_HEAD_ROOM_DEFAULT_VALUE)) {
 #ifdef ENABLE_ROSEN_BACKEND
-    float hdrMax = GetUIColorsByGradientColors(gradientColors, rsUIColors);
-    ApplyHDRHeadRoom(host_, hdrMax);
-#else
-    GetUIColorsByGradientColors(gradientColors, rsUIColors);
+        ApplyHDRHeadRoom(host_, hdrMax);
 #endif
-    brush.SetShaderEffect(reverse_ ?
-        CreateLinearGradientShader(endPoint, startPoint, rsUIColors, rsColorSpace, pos) :
-        CreateLinearGradientShader(startPoint, endPoint, rsUIColors, rsColorSpace, pos));
+        std::vector<RSUIColor> rsUIColors;
+        GetUIColorsByGradientColors(gradientColors, rsUIColors);
+        brush.SetShaderEffect(reverse_ ?
+            CreateLinearGradientShader(endPoint, startPoint, rsUIColors, rsColorSpace, pos) :
+            CreateLinearGradientShader(startPoint, endPoint, rsUIColors, rsColorSpace, pos));
+    } else {
+        std::vector<RSColor4f> rsColor4fs;
+        GetColor4fsByGradientColors(gradientColors, rsColor4fs);
+        brush.SetShaderEffect(reverse_ ?
+            CreateLinearGradientShader(endPoint, startPoint, rsColor4fs, rsColorSpace, pos) :
+            CreateLinearGradientShader(startPoint, endPoint, rsColor4fs, rsColorSpace, pos));
+    }
     canvas.AttachBrush(brush);
     auto trackRadius = isEnlarge_ ? trackBorderRadius * scaleValue_ : trackBorderRadius;
     RSRoundRect roundRect(trackRect, trackRadius, trackRadius);
@@ -495,18 +542,18 @@ void SliderContentModifier::CreateDefaultBlockBrush(RSBrush& brush, float& radiu
     auto blockSize = blockSize_->Get();
     auto borderWidth = blockBorderWidth_->Get();
     if (GreatOrEqual(borderWidth * HALF, radius)) {
-        brush.SetColor(ToRSColor(blockBorderColor_->Get()));
+        brush.SetColor(ToRSColor(blockBorderColor_->Get().BlendOpacity(blockAlpha_->Get())));
         return;
     }
     std::vector<GradientColor> gradientColors = GetBlockColor();
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
-        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        colors.emplace_back(gradientColors[i].GetLinearColor().BlendOpacity(blockAlpha_->Get()).GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
     radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
-    float drawRadius = isEnlarge_ ? radius * scaleValue_ : radius;
+    float drawRadius = (isEnlarge_ ? radius * scaleValue_ : radius) * blockScale_->Get();
     RSRect blockRect = GetBlockRect(drawRadius);
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
@@ -536,14 +583,19 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         pen.SetAntiAlias(true);
         pen.SetWidth(borderWidth);
-        pen.SetColor(ToRSColor(blockBorderColor_->Get()));
+        pen.SetColor(ToRSColor(blockBorderColor_->Get().BlendOpacity(blockAlpha_->Get())));
         canvas.AttachPen(pen);
     }
     canvas.DrawCircle(
-        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), isEnlarge_ ? radius * scaleValue_ : radius);
+        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())),
+        (isEnlarge_ ? radius * scaleValue_ : radius) * blockScale_->Get());
     canvas.DetachBrush();
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         canvas.DetachPen();
+    }
+    
+    if (materialNodePositionCallback_) {
+        materialNodePositionCallback_(blockCenter.GetX(), blockCenter.GetY(), blockRadius);
     }
 }
 
@@ -555,11 +607,15 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
         return;
     }
 
+    if (GreatNotEqual(blockScale_->Get(), 1.0f)) {
+        return;
+    }
+
     auto& canvas = context.canvas;
     RSPen circleStatePen;
     circleStatePen.SetAntiAlias(true);
     // add animate color
-    circleStatePen.SetColor(ToRSColor(boardColor_->Get()));
+    circleStatePen.SetColor(ToRSColor(boardColor_->Get().BlendOpacity(blockAlpha_->Get())));
     circleStatePen.SetWidth(isEnlarge_ ? hotCircleShadowWidth_ * scaleValue_ : hotCircleShadowWidth_);
     canvas.AttachPen(circleStatePen);
     auto blockSize = blockSize_->Get();
@@ -769,6 +825,34 @@ RSRect SliderContentModifier::GetTrackRect()
         } else {
             rect.SetTop(backStart.GetY());
             rect.SetBottom(backEnd.GetY());
+        }
+    }
+    return rect;
+}
+
+RSRect SliderContentModifier::GetSelectedTrackRect()
+{
+    auto selectedBorderRadius = selectedBorderRadius_->Get();
+    auto direction = static_cast<Axis>(directionAxis_->Get());
+    auto blockCenter = GetBlockCenter();
+    auto trackThickness = trackThickness_->Get();
+    auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
+    auto rect = GetTrackRect();
+    auto insetOffset = .0f;
+    if (sliderMode == SliderModelNG::SliderMode::INSET) {
+        insetOffset = std::max(selectedBorderRadius, trackThickness * HALF);
+    }
+    if (!reverse_) {
+        if (direction == Axis::HORIZONTAL) {
+            rect.SetRight(blockCenter.GetX() + insetOffset);
+        } else {
+            rect.SetBottom(blockCenter.GetY() + insetOffset);
+        }
+    } else {
+        if (direction == Axis::HORIZONTAL) {
+            rect.SetLeft(blockCenter.GetX() - insetOffset);
+        } else {
+            rect.SetTop(blockCenter.GetY() - insetOffset);
         }
     }
     return rect;
@@ -1208,15 +1292,16 @@ void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
     if (GreatNotEqual(scaleValue_, DEFAULT_SCALE_VALUE)) {
         circleSize = circleSize * scaleValue_;
     }
+    auto maxCircleSize = circleSize * MAX_BLOCK_SCALE_FOR_MATERIAL;
     RectF rect;
     if (directionAxis_->Get() == static_cast<int32_t>(Axis::HORIZONTAL)) {
-        auto maxWidth = std::max(circleSize.Height(), frameSize.Height()) * HALF;
-        rect.SetOffset(OffsetF(-circleSize.Width(), blockCenterY_->Get() - maxWidth));
-        rect.SetSize(SizeF(circleSize.Width() / HALF + frameSize.Width(), maxWidth / HALF));
+        auto maxWidth = std::max(maxCircleSize.Height(), frameSize.Height()) * HALF;
+        rect.SetOffset(OffsetF(-maxCircleSize.Width(), blockCenterY_->Get() - maxWidth));
+        rect.SetSize(SizeF(maxCircleSize.Width() / HALF + frameSize.Width(), maxWidth / HALF));
     } else {
-        auto maxWidth = std::max(circleSize.Width(), frameSize.Width()) * HALF;
-        rect.SetOffset(OffsetF(blockCenterX_->Get() - maxWidth, -circleSize.Height()));
-        rect.SetSize(SizeF(maxWidth / HALF, circleSize.Height() / HALF + frameSize.Height()));
+        auto maxWidth = std::max(maxCircleSize.Width(), frameSize.Width()) * HALF;
+        rect.SetOffset(OffsetF(blockCenterX_->Get() - maxWidth, -maxCircleSize.Height()));
+        rect.SetSize(SizeF(maxWidth / HALF, maxCircleSize.Height() / HALF + frameSize.Height()));
     }
 
     SetBoundsRect(rect);

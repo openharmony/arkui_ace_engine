@@ -692,6 +692,26 @@ HWTEST_P(GridScrollerTestNg, ScrollPage001, TestSize.Level1)
 INSTANTIATE_TEST_SUITE_P(Smooth, GridScrollerTestNg, testing::Bool());
 
 /**
+ * @tc.name: ScrollPage002
+ * @tc.desc: Test ScrollPage with smooth half-page focus scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollPage002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 600.0f);
+
+    pattern_->ScrollPage(false, true, AccessibilityScrollType::SCROLL_HALF);
+    EXPECT_TRUE(TickPosition(-HEIGHT / 2));
+
+    pattern_->ScrollPage(true, true, AccessibilityScrollType::SCROLL_HALF);
+    EXPECT_TRUE(TickPosition(0));
+}
+
+/**
  * @tc.name: AnimateTo006
  * @tc.desc: Test AnimateTo with duration animation, canOverScroll
  * @tc.type: FUNC

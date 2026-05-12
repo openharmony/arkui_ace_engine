@@ -22,6 +22,7 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
@@ -106,6 +107,21 @@ void ListModelNG::ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeTy
 void ListModelNG::SetSpace(const Dimension& space)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
+}
+
+void ListModelNG::ResetListSpace()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, Space, PROPERTY_UPDATE_MEASURE);
+}
+
+void ListModelNG::SetSpaceWidth(const Dimension& spaceWidth)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, SpaceWidth, spaceWidth);
+}
+
+void ListModelNG::ResetListSpaceWidth()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE);
 }
 
 void ListModelNG::SetInitialIndex(int32_t initialIndex)
@@ -1046,6 +1062,42 @@ EditModeOptions ListModelNG::GetEditModeOptions(FrameNode* frameNode)
     return pattern->GetEditModeOptions();
 }
 
+void ListModelNG::SetEnableEditMode(bool enableEditMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableEditMode(frameNode, enableEditMode);
+}
+
+void ListModelNG::SetEnableEditMode(FrameNode* frameNode, bool enableEditMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditMode(enableEditMode);
+}
+
+bool ListModelNG::GetEnableEditMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetEnableEditMode();
+}
+
+void ListModelNG::SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableEditModeChangeEvent(frameNode, std::move(changeEvent));
+}
+
+void ListModelNG::SetEnableEditModeChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeChangeEvent(std::move(changeEvent));
+}
+
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
@@ -1692,5 +1744,44 @@ bool ListModelNG::GetSupportEmptyBranchInLazyLoading(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         ListLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode, false);
     return enable;
+}
+
+void ListModelNG::CreateWithResourceObjSpace(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjSpace(frameNode, resObj);
+}
+
+void ListModelNG::CreateWithResourceObjSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("list.spaceWidth");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SpaceWidth, result, frameNode);
+    };
+    pattern->AddResObj("list.spaceWidth", resObj, std::move(updateFunc));
+}
+
+void ListModelNG::CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarWidth(frameNode, resObj);
+}
+
+void ListModelNG::CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarWidth(frameNode, resObj);
 }
 } // namespace OHOS::Ace::NG

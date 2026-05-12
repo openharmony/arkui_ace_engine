@@ -15,6 +15,7 @@
 
 #include "navigator_event_hub.h"
 
+#include "core/common/recorder/event_recorder.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {

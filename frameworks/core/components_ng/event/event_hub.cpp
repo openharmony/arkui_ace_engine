@@ -16,6 +16,7 @@
 #include "core/components_ng/event/event_hub.h"
 
 #include "core/common/event_manager.h"
+#include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -96,6 +97,7 @@ bool EventHub::AddSupportedUIStateWithCallback(
     }
     auto result = stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
     AddPressedListener();
+    AddHoverListener();
     return result;
 }
 
@@ -194,11 +196,19 @@ void EventHub::AddPressedListener()
     }
 }
 
+void EventHub::AddHoverListener()
+{
+    if (stateStyleMgr_ && stateStyleMgr_->HasStateStyle(UI_STATE_HOVERED)) {
+        GetOrCreateInputEventHub()->AddOnHoverEvent(stateStyleMgr_->GetHoverListener());
+    }
+}
+
 void EventHub::MarkModifyDone()
 {
     if (stateStyleMgr_) {
         // focused style is managered in focus event hub.
         AddPressedListener();
+        AddHoverListener();
         if (stateStyleMgr_->HasStateStyle(UI_STATE_DISABLED)) {
             if (enabled_) {
                 stateStyleMgr_->ResetCurrentUIState(UI_STATE_DISABLED);

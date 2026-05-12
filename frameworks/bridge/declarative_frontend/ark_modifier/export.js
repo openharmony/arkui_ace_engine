@@ -37,7 +37,8 @@ export default {
   TextTimerModifier, TimePickerModifier, ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier,
   ModifierUtils, AttributeUpdater, ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier,
   SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, ModifierMap, IndicatorComponentModifier,
-  LazyVGridLayoutModifier, EmbeddedComponentModifier, UIPickerComponentModifier, UnionEffectContainerModifier
+  LazyVGridLayoutModifier, EmbeddedComponentModifier, UIPickerComponentModifier, UnionEffectContainerModifier,
+  LazyColumnLayoutModifier, LazyVWaterFlowLayoutModifier
 };
 `;
     }

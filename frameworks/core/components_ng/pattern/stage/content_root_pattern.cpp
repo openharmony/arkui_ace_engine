@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

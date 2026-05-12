@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

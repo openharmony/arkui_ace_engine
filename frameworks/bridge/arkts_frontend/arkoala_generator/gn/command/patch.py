@@ -246,12 +246,16 @@ def apply_patch(input_path, output_path, patch_dir):
 
     patch_files = collect_patch_files(patch_abs)
 
+    input_basename = os.path.basename(os.path.normpath(input_abs))
+    copy_dest = os.path.join(output_abs, input_basename)
+
     if os.path.exists(output_abs):
         print(f"Removing existing output directory: {output_abs}")
         shutil.rmtree(output_abs)
 
-    print(f"Copying {input_abs} -> {output_abs}")
-    shutil.copytree(input_abs, output_abs)
+    os.makedirs(output_abs, exist_ok=True)
+    print(f"Copying {input_abs} -> {copy_dest}")
+    shutil.copytree(input_abs, copy_dest)
 
     if not patch_files:
         print("No patch files found. Output is a copy of input without changes.")
@@ -433,16 +437,29 @@ def create_patch(input_path, output_path, patch_dir):
         print(f"Error: Input directory does not exist: {input_abs}")
         return False
 
-    if not os.path.isdir(output_abs):
-        print(f"Error: Output directory does not exist: {output_abs}")
+    # When apply_patch copies input into output/basename(input), we must
+    # compare against that subdirectory so paths stay aligned with patches.
+    input_basename = os.path.basename(os.path.normpath(input_abs))
+    actual_output = os.path.join(output_abs, input_basename)
+    if not os.path.isdir(actual_output):
+        actual_output = output_abs
+
+    if not os.path.isdir(actual_output):
+        print(f"Error: Output directory does not exist: {actual_output}")
         return False
 
     if os.path.exists(patch_abs):
         shutil.rmtree(patch_abs)
     os.makedirs(patch_abs, exist_ok=True)
 
+    # When actual_output is a subdirectory of output_abs, patch paths must
+    # include the basename prefix so they align with apply_patch expectations.
+    path_prefix = ''
+    if actual_output != output_abs:
+        path_prefix = input_basename + '/'
+
     input_files = list_relative_files(input_abs)
-    output_files = list_relative_files(output_abs)
+    output_files = list_relative_files(actual_output)
     all_files = sorted(input_files | output_files)
 
     skipped_binary = []
@@ -452,7 +469,7 @@ def create_patch(input_path, output_path, patch_dir):
         in_input = rel in input_files
         in_output = rel in output_files
         in_path = os.path.join(input_abs, rel) if in_input else None
-        out_path = os.path.join(output_abs, rel) if in_output else None
+        out_path = os.path.join(actual_output, rel) if in_output else None
 
         if in_input and in_output and files_equal(in_path, out_path):
             continue
@@ -464,8 +481,9 @@ def create_patch(input_path, output_path, patch_dir):
             skipped_binary.append(rel)
             continue
 
-        from_label = 'a/' + rel if in_input else '/dev/null'
-        to_label = 'b/' + rel if in_output else '/dev/null'
+        patch_rel = path_prefix + rel
+        from_label = 'a/' + patch_rel if in_input else '/dev/null'
+        to_label = 'b/' + patch_rel if in_output else '/dev/null'
 
         diff = list(difflib.unified_diff(
             from_lines, to_lines,
@@ -478,7 +496,7 @@ def create_patch(input_path, output_path, patch_dir):
         if not patch_text.endswith('\n'):
             patch_text += '\n'
 
-        patch_file = os.path.join(patch_abs, rel + '.patch')
+        patch_file = os.path.join(patch_abs, patch_rel + '.patch')
         parent = os.path.dirname(patch_file)
         if parent:
             os.makedirs(parent, exist_ok=True)

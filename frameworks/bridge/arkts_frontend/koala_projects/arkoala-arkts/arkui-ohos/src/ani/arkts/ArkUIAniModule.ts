@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
+import { KeyboardAvoidMode, PanListenerCallback, NodeIdentity, NodeRenderStateChangeCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
 import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus } from '@ohos.arkui.drawableDescriptor';
 import { Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
@@ -289,6 +289,7 @@ export class ArkUIAniModule {
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
     native static _DragController_enableDropDisallowedBadge(enabled: boolean): void
+    native static _DragController_interruptFollowHandMorphDropAnimation(): boolean
     native static _DragController_getDragPreview(): dragController.DragPreview
     native static _DragController_setForegroundColor(color: KLong, dragPreviewPtr: KPointer): void
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
@@ -382,6 +383,7 @@ export class ArkUIAniModule {
     native static _GetAllUIContexts(): Array<KInt>
     native static _ResolveUIContext(): Array<KInt>
     native static _GetPageRootNode(): KPointer
+    native static _DumpLogPrint(depth: KInt, content: string): void
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
@@ -510,6 +512,8 @@ export class ArkUIAniModule {
     // for GestureEvent UIObserver
     native static _GestureEventUIObserver_SetPanListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: PanListenerCallback): void
     native static _GestureEventUIObserver_RemovePanListenerCallback(instanceId: KInt, tag: string, callback?: PanListenerCallback): void
+    native static _GestureEventUIObserver_SetOnNodeRenderState(instanceId: KInt, resourceId: KInt, nodeIdentity: NodeIdentity, callback: NodeRenderStateChangeCallback): void
+ 	native static _GestureEventUIObserver_RemoveOnNodeRenderState(instanceId: KInt, nodeIdentity: NodeIdentity, callback?: NodeRenderStateChangeCallback): void
     native static _GestureEventUIObserver_SetClickListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_RemoveClickListenerCallback(instanceId: KInt, tag: string, callback?: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_SetTapListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: GestureEventListenerCallback): void

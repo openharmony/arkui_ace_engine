@@ -17,8 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_UTILS_ACCESSIBILITY_MANAGER_UTILS_H
 
 #include <map>
+#include <set>
+#include <string>
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -357,6 +360,58 @@ public:
 
 private:
     std::map<int32_t, std::list<WeakPtr<FrameNode>>> controller_;
+};
+
+class NextFocusRelationController {
+public:
+    struct NextFocusMapEntry {
+        int64_t sourceAccessibilityId = -1;
+        bool descendantMode = false;
+    };
+
+    struct NextFocusSourceEntry {
+        std::string targetInspectorId;
+        bool descendantMode = false;
+    };
+
+    using TargetMap = std::map<std::string, NextFocusMapEntry>;
+
+    void UpdateNextFocusIdMap(int32_t containerId,
+        const std::string& nextFocusInspectorKey, int64_t sourceAccessibilityId, bool descendantMode);
+
+    bool GetNextFocusDescendantMode(int32_t containerId, const std::string& inspectorId) const;
+
+    const TargetMap& GetTargetMap(int32_t containerId) const;
+
+    size_t GetContainerCount() const
+    {
+        return nextFocusMapWithSubWindow_.size();
+    }
+
+private:
+    void RebuildTargetPrimaryForTarget(
+        const std::string& targetInspectorId, TargetMap& targetMap,
+        std::map<int64_t, NextFocusSourceEntry>& sourceMap,
+        std::map<std::string, std::set<int64_t>>& targetSourcesMap);
+
+    void RemoveSourceRelationByAccessibilityId(
+        int64_t sourceAccessibilityId, TargetMap& targetMap,
+        std::map<int64_t, NextFocusSourceEntry>& sourceMap,
+        std::map<std::string, std::set<int64_t>>& targetSourcesMap);
+
+    void HandleExistingContext(
+        std::map<int32_t, TargetMap>::iterator& targetMapIt,
+        std::map<int32_t, std::map<int64_t, NextFocusSourceEntry>>::iterator& sourceMapIt,
+        std::map<int32_t, std::map<std::string, std::set<int64_t>>>::iterator& targetSourcesIt,
+        const std::string& nextFocusInspectorKey, int64_t sourceAccessibilityId, bool descendantMode);
+
+    // targetInspectorId -> primary source info (used by prev-focus lookup and descendantMode query by target)
+    std::map<int32_t, TargetMap> nextFocusMapWithSubWindow_;
+    // sourceAccessibilityId -> source->target edge info
+    std::map<int32_t, std::map<int64_t, NextFocusSourceEntry>> nextFocusSourceMapWithSubWindow_;
+    // targetInspectorId -> set of sourceAccessibilityId that point to this target
+    std::map<int32_t, std::map<std::string, std::set<int64_t>>> nextFocusTargetSourcesWithSubWindow_;
+    TargetMap emptyTargetMap_;
 };
 
 class AccessibilityEventBlockerInAction {

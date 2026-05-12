@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "core/common/container.h"
 #include <cmath>
 #include "ui/base/utils/utils.h"
 
@@ -1276,7 +1277,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
     modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), textStyle.GetTextDecorationColor(),
-        textStyle.GetTextDecorationStyle());
+        textStyle.GetTextDecorationStyle(), textStyle.GetLineThicknessScale());
 }
 
 bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyle,
@@ -1535,6 +1536,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     }
     if (layoutProperty->HasTextDecorationStyle()) {
         textStyle.SetTextDecorationStyle(layoutProperty->GetTextDecorationStyle().value());
+    }
+    if (layoutProperty->HasLineThicknessScale()) {
+        textStyle.SetLineThicknessScale(layoutProperty->GetLineThicknessScale().value());
     }
     if (layoutProperty->HasLetterSpacing()) {
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());

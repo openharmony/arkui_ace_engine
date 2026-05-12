@@ -210,9 +210,9 @@ HWTEST_F(TextFieldTenPatternNg, HandleSurfaceChanged001, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, pattern);
 
-    pattern->HandleSurfaceChanged(10, 10, 20, 20, WindowSizeChangeReason::UNDEFINED);
+    pattern->HandleSurfaceChanged(10, 10, 20, 20);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_TRUE(layoutProperty->propNeedReCreateParagraph_);
+    EXPECT_FALSE(layoutProperty->propNeedReCreateParagraph_);
 }
 
 /**
@@ -554,7 +554,7 @@ HWTEST_F(TextFieldTenPatternNg, CreateTextDragInfo001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     RefPtr<TextPattern> pattern = textNode->GetPattern<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    RefPtr<MockTextBase> mockBase = AceType::MakeRefPtr<MockTextBase>();
     WeakPtr<MockTextBase> textBase = mockBase;
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textNode);
@@ -609,7 +609,7 @@ HWTEST_F(TextFieldTenPatternNg, GetUrlSpanColor001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    RefPtr<MockTextBase> mockBase = AceType::MakeRefPtr<MockTextBase>();
     WeakPtr<MockTextBase> textBase = mockBase;
 
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
@@ -918,6 +918,30 @@ HWTEST_F(TextFieldTenPatternNg, SetResponseRegion001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetResponseRegion002
+ * @tc.desc: test SetResponseRegion with symbol tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, SetResponseRegion002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create symbol frame node and call SetResponseRegion.
+     * @tc.expected: gestureHub response region remains empty.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    SizeF frameSize(10.0f, 20.0f);
+    SizeF boundsSize(30.0f, 40.0f);
+
+    pattern->SetResponseRegion(frameSize, boundsSize);
+
+    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
+}
+
+/**
  * @tc.name: GetStartAndEnd001
  * @tc.desc: test TextPattern GetStartAndEnd
  * @tc.type: FUNC
@@ -1208,7 +1232,7 @@ HWTEST_F(TextFieldTenPatternNg, BaseTextSelectOverlayTest001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    RefPtr<MockTextBase> mockBase = AceType::MakeRefPtr<MockTextBase>();
     WeakPtr<MockTextBase> textBase = mockBase;
 
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
@@ -1232,7 +1256,7 @@ HWTEST_F(TextFieldTenPatternNg, GetAncestorNodeViewPort001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
+    auto textSelectOverlay = pattern->GetSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     auto parentPattern1 = AceType::MakeRefPtr<TextPattern>();
@@ -1305,6 +1329,7 @@ HWTEST_F(TextFieldTenPatternNg, GetVisibleDragViewHandles, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, pattern);
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);
+    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
     pattern->selectOverlay_->OnBind(manager);
 
     RectF firstRect;
@@ -1344,7 +1369,7 @@ HWTEST_F(TextFieldTenPatternNg, ApplySelectAreaWithKeyboard, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     RefPtr<TextPattern> pattern = textNode->GetPattern<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    RefPtr<MockTextBase> mockBase = AceType::MakeRefPtr<MockTextBase>();
     WeakPtr<MockTextBase> textBase = mockBase;
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textNode);

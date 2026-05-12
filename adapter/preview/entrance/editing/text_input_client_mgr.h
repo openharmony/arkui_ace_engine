@@ -18,7 +18,6 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/singleton.h"
-#include "core/event/key_event.h"
 #include "core/common/ime/text_input_connection.h"
 
 namespace OHOS::Ace::Platform {

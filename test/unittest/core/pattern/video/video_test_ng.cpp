@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -1513,63 +1514,51 @@ HWTEST_F(VideoTestNg, CallVideoStaticPatternToJsonValue, TestSize.Level1)
 
 /**
  * @tc.name: VideoModelNGUpdateControllerBarTest001
- * @tc.desc: Test UpdateControllerBar with normal video node
+ * @tc.desc: Test SetControls with normal and full screen video node
  * @tc.type: FUNC
  */
 HWTEST_F(VideoTestNg, VideoModelNGUpdateControllerBarTest001, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create Video node
+     * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
-
-    /**
-     * @tc.steps: step2. Call SetControls(bool controls) with true
-     * @tc.expected: step2. UpdateControllerBar is called successfully
-     */
-    VideoModelNG().SetControls(true);
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
     ASSERT_TRUE(videoLayoutProperty);
-    EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
 
     /**
-     * @tc.steps: step3. Call SetControls(bool controls) with false
-     * @tc.expected: step3. UpdateControllerBar is called successfully
+     * @tc.steps: step2. Call SetControls with false and true
+     * @tc.expected: step2. Controls property updated correctly
      */
-    VideoModelNG().SetControls(false);
-    videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(videoLayoutProperty);
+    VideoModelNG::SetControls(frameNode.GetRawPtr(), false);
     EXPECT_FALSE(videoLayoutProperty->GetControlsValue(false));
+
+    VideoModelNG::SetControls(frameNode.GetRawPtr(), true);
+    EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
 }
 
 /**
  * @tc.name: VideoModelNGUpdateControllerBarTest002
- * @tc.desc: Test UpdateControllerBar with full screen video node
+ * @tc.desc: Test SetControls in full screen mode
  * @tc.type: FUNC
  */
 HWTEST_F(VideoTestNg, VideoModelNGUpdateControllerBarTest002, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create Video node
-     * @tc.expected: step1. Create Video successfully
+     * @tc.steps: step1. Create Video and enter full screen mode
+     * @tc.expected: step1. Full screen node created successfully
      */
     auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
     g_testProperty.videoController = videoController;
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
 
-    /**
-     * @tc.steps: step2. Enter full screen mode
-     * @tc.expected: step2. Full screen node is created
-     */
     pattern->FullScreen();
     auto fullScreenNode = pattern->GetFullScreenNode();
     ASSERT_TRUE(fullScreenNode);
@@ -1577,121 +1566,95 @@ HWTEST_F(VideoTestNg, VideoModelNGUpdateControllerBarTest002, TestSize.Level0)
     ASSERT_TRUE(fullScreenPattern);
 
     /**
-     * @tc.steps: step3. Call SetControls(bool controls) with true in full screen mode
-     * @tc.expected: step3. UpdateControllerBar updates both normal and full screen nodes
+     * @tc.steps: step2. Call SetControls in full screen mode
+     * @tc.expected: step2. Both normal and full screen nodes updated
      */
-    VideoModelNG().SetControls(true);
+    VideoModelNG::SetControls(frameNode.GetRawPtr(), false);
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(videoLayoutProperty);
-    EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
-
-    auto fullScreenLayoutProperty = fullScreenPattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(fullScreenLayoutProperty);
-    EXPECT_TRUE(fullScreenLayoutProperty->GetControlsValue(true));
-
-    /**
-     * @tc.steps: step4. Call SetControls(bool controls) with false in full screen mode
-     * @tc.expected: step4. UpdateControllerBar updates both normal and full screen nodes
-     */
-    VideoModelNG().SetControls(false);
-    videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(videoLayoutProperty);
     EXPECT_FALSE(videoLayoutProperty->GetControlsValue(false));
-
-    fullScreenLayoutProperty = fullScreenPattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(fullScreenLayoutProperty);
+    auto fullScreenLayoutProperty = fullScreenPattern->GetLayoutProperty<VideoLayoutProperty>();
     EXPECT_FALSE(fullScreenLayoutProperty->GetControlsValue(false));
+
+    VideoModelNG::SetControls(frameNode.GetRawPtr(), true);
+    EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
+    EXPECT_TRUE(fullScreenLayoutProperty->GetControlsValue(true));
 }
 
 /**
  * @tc.name: VideoModelNGUpdateControllerBarTest003
- * @tc.desc: Test SetControls(FrameNode* frameNode, bool controls)
+ * @tc.desc: Test SetControls when controls value unchanged (skip update)
  * @tc.type: FUNC
  */
 HWTEST_F(VideoTestNg, VideoModelNGUpdateControllerBarTest003, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create Video node
-     * @tc.expected: step1. Create Video successfully
+     * @tc.steps: step1. Create Video with controls=true (default)
+     * @tc.expected: step1. Create Video successfully, controls is true
      */
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
-
-    /**
-     * @tc.steps: step2. Call SetControls(FrameNode* frameNode, bool controls) with true
-     * @tc.expected: step2. UpdateControllerBar is called successfully
-     */
-    VideoModelNG::SetControls(frameNode.GetRawPtr(), true);
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
     ASSERT_TRUE(videoLayoutProperty);
     EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
 
     /**
-     * @tc.steps: step3. Call SetControls(FrameNode* frameNode, bool controls) with false
-     * @tc.expected: step3. UpdateControllerBar is called successfully
+     * @tc.steps: step2. Call SetControls with same value (true)
+     *            UpdateControlsIfNeeded checks: controls != GetControlsValue()
+     *            true != true is false, skip UpdateControllerBar
+     * @tc.expected: step2. UpdateControllerBar is skipped, no redundant update
+     */
+    VideoModelNG::SetControls(frameNode.GetRawPtr(), true);
+    EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
+
+    /**
+     * @tc.steps: step3. Set controls to false first
+     * @tc.expected: step3. Controls property is false
      */
     VideoModelNG::SetControls(frameNode.GetRawPtr(), false);
-    videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(videoLayoutProperty);
+    EXPECT_FALSE(videoLayoutProperty->GetControlsValue(false));
+
+    /**
+     * @tc.steps: step4. Call SetControls with same value (false)
+     *            false != false is false, skip UpdateControllerBar
+     * @tc.expected: step4. UpdateControllerBar is skipped, no redundant update
+     */
+    VideoModelNG::SetControls(frameNode.GetRawPtr(), false);
     EXPECT_FALSE(videoLayoutProperty->GetControlsValue(false));
 }
 
 /**
- * @tc.name: VideoModelNGUpdateControllerBarTest004
- * @tc.desc: Test SetControls(FrameNode* frameNode, bool controls) with full screen node
+ * @tc.name: VideoPatternUpdateControllerBarTest001
+ * @tc.desc: Test VideoPattern::UpdateControllerBar() with controls true/false
  * @tc.type: FUNC
  */
-HWTEST_F(VideoTestNg, VideoModelNGUpdateControllerBarTest004, TestSize.Level0)
+HWTEST_F(VideoTestNg, VideoPatternUpdateControllerBarTest001, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create Video node
+     * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    g_testProperty.videoController = videoController;
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
-
-    /**
-     * @tc.steps: step2. Enter full screen mode
-     * @tc.expected: step2. Full screen node is created
-     */
-    pattern->FullScreen();
-    auto fullScreenNode = pattern->GetFullScreenNode();
-    ASSERT_TRUE(fullScreenNode);
-    auto fullScreenPattern = AceType::DynamicCast<VideoPattern>(fullScreenNode->GetPattern());
-    ASSERT_TRUE(fullScreenPattern);
-
-    /**
-     * @tc.steps: step3. Call SetControls(FrameNode* frameNode, bool controls) with true on full screen node
-     * @tc.expected: step3. UpdateControllerBar updates both normal and full screen nodes
-     */
-    VideoModelNG::SetControls(frameNode.GetRawPtr(), true);
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
     ASSERT_TRUE(videoLayoutProperty);
-    EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
-
-    auto fullScreenLayoutProperty = fullScreenPattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(fullScreenLayoutProperty);
-    EXPECT_TRUE(fullScreenLayoutProperty->GetControlsValue(true));
 
     /**
-     * @tc.steps: step4. Call SetControls(FrameNode* frameNode, bool controls) with false on full screen node
-     * @tc.expected: step4. UpdateControllerBar updates both normal and full screen nodes
+     * @tc.steps: step2. Call UpdateControllerBar() with controls true
+     * @tc.expected: step2. Controls property is true
      */
-    VideoModelNG::SetControls(frameNode.GetRawPtr(), false);
-    videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(videoLayoutProperty);
-    EXPECT_FALSE(videoLayoutProperty->GetControlsValue(false));
+    pattern->UpdateControllerBar();
+    EXPECT_TRUE(videoLayoutProperty->GetControlsValue(true));
 
-    fullScreenLayoutProperty = fullScreenPattern->GetLayoutProperty<VideoLayoutProperty>();
-    ASSERT_TRUE(fullScreenLayoutProperty);
-    EXPECT_FALSE(fullScreenLayoutProperty->GetControlsValue(false));
+    /**
+     * @tc.steps: step3. Call UpdateControllerBar() with controls false
+     * @tc.expected: step3. Controls property is false
+     */
+    videoLayoutProperty->UpdateControls(false);
+    pattern->UpdateControllerBar();
+    EXPECT_FALSE(videoLayoutProperty->GetControlsValue(false));
 }
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_content_modifier.h"
+#include "core/common/container.h"
 #include <cstdint>
 #include <optional>
 #include "ui/common/layout/constants.h"
@@ -1023,10 +1024,14 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
             lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
         if (SystemProperties::GetTextTraceEnabled()) {
-            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateTextColorMeasureFlag[textColor:%s][lastTextColor:%s]["
-                                  "animatableTextColor:%s]",
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateTextColorMeasureFlag[textColor:%s][lastTextColor:%s]["
+                "animatableTextColor:%s][textColorPH:%u][lastTextColorPH:%u][animatableTextColorPH:%u]",
                 textColor_->ColorToString().c_str(), lastTextColor_.ColorToString().c_str(),
-                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
+                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str(),
+                static_cast<uint8_t>(textColor_->GetPlaceholder()),
+                static_cast<uint8_t>(lastTextColor_.GetPlaceholder()),
+                static_cast<uint8_t>(animatableTextColor_->Get().GetPlaceholder()));
         }
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
     }
@@ -1659,13 +1664,14 @@ void TextContentModifier::ContentModifierDump()
                             .append(std::to_string(static_cast<uint8_t>(animatableTextColor.GetPlaceholder()))));
     }
     dumpLog.AddDesc(
-        std::string(" onlyTextColorAnimation: ")
+        std::string("onlyTextColorAnimation: ")
             .append(std::to_string(onlyTextColorAnimation_))
             .append(" textColor_:")
             .append(textColor_.has_value() ? textColor_.value().ToString() : "NA")
             .append("|PH:")
             .append(textColor_.has_value() ? std::to_string(static_cast<uint8_t>(textColor_.value().GetPlaceholder()))
-                                           : "NA"));
+                                           : "NA")
+            .append(" ContentOffset:" + paintOffset_.ToString()));
 }
 
 void TextContentModifier::SetIsFocused(const bool isFocused)

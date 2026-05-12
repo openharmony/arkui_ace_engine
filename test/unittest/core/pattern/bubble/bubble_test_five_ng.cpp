@@ -1119,6 +1119,7 @@ HWTEST_F(BubbleFiveTestNg, ButtonOnHover001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
@@ -1146,6 +1147,7 @@ HWTEST_F(BubbleFiveTestNg, ButtonOnHover002, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();

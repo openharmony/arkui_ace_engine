@@ -57,6 +57,9 @@
 #include "bridge/js_frontend/engine/common/js_engine.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/components/web/web_transfer_api.h"
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+#include "histogram_plugin_macros.h"
+#endif
 
 #define ARKWEB_CREATE_JS_OBJECT(nativeClass, jsClass, funName, eventValue)                                     \
     napi_value Create##jsClass##Object(napi_env env, const RefPtr<nativeClass>& value)                         \
@@ -83,6 +86,9 @@ constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
 
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+constexpr int32_t HISTOGRAM_API_BOOL_COUNTS = 1;
+#endif
 constexpr int32_t CREDENTIAL_UKEY = 4;
 const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
 const char* HUKS_CRYPTO_EXTENSION_CAPABILITY = "SystemCapability.Security.Huks.CryptoExtension";
@@ -2559,6 +2565,10 @@ JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& event
 
     JSRef<JSObject> messageObj = JSClass<JSWebConsoleLog>::NewInstance();
     auto jsWebConsoleLog = Referenced::Claim(messageObj->Unwrap<JSWebConsoleLog>());
+    if (!jsWebConsoleLog) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "LoadWebConsoleLogEventToJSValue jsWebConsoleLog is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     jsWebConsoleLog->SetMessage(eventInfo.GetMessage());
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(messageObj), static_cast<void *>(jsWebConsoleLog.GetRawPtr()));
 
@@ -2584,6 +2594,10 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
 
     JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
     auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
+    if (!jsWebDialog) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDialogEventToJSValue jsWebDialog is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     jsWebDialog->SetResult(eventInfo.GetResult());
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebDialog.GetRawPtr()));
     obj->SetProperty("url", eventInfo.GetUrl());
@@ -2718,6 +2732,10 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "LoadInterceptEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     requestEvent->SetLoadInterceptEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("data", requestObj);
@@ -2746,6 +2764,10 @@ JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEv
     obj->SetProperty("origin", eventInfo.GetOrigin());
     JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
     auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
+    if (!geolocationEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "LoadWebGeolocationShowEventToJSValue geolocationEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     geolocationEvent->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(geolocationObj), static_cast<void *>(geolocationEvent.GetRawPtr()));
     obj->SetPropertyObject("geolocation", geolocationObj);
@@ -2993,6 +3015,10 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
 {
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "LoadOverrideEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(requestObj);
+    }
     requestEvent->SetLoadOverrideEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     return JSRef<JSVal>::Cast(requestObj);
@@ -3947,11 +3973,19 @@ JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
 
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedErrorEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     requestEvent->SetErrorEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
 
     JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
     auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
+    if (!errorEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedErrorEventToJSValue errorEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     errorEvent->SetEvent(eventInfo);
 
     obj->SetPropertyObject("request", requestObj);
@@ -3988,11 +4022,19 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
 
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedHttpErrorEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     requestEvent->SetHttpErrorEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
 
     JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
     auto responseEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
+    if (!responseEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ReceivedHttpErrorEventToJSValue responseEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     responseEvent->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(responseObj), static_cast<void *>(responseEvent.GetRawPtr()));
 
@@ -4077,6 +4119,10 @@ JSRef<JSVal> OnInterceptRequestEventToJSValue(const OnInterceptRequestEvent& eve
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnInterceptRequestEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     requestEvent->SetOnInterceptRequestEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("request", requestObj);
@@ -4131,10 +4177,18 @@ JSRef<JSVal> OnOverrideErrorPageEventToJSValue(const OnOverrideErrorPageEvent& e
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnOverrideErrorPageEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     requestEvent->SetOnOverrideErrorPageEvent(eventInfo);
 
     JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
     auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
+    if (!errorEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnOverrideErrorPageEventToJSValue errorEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     errorEvent->SetOverrideErrorPageEvent(eventInfo);
 
     obj->SetPropertyObject("request", requestObj);
@@ -4238,11 +4292,19 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
 
     JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
     auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
+    if (!fileSelectorParam) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "FileSelectorEventToJSValue fileSelectorParam is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     fileSelectorParam->SetParam(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(paramObj), static_cast<void *>(fileSelectorParam.GetRawPtr()));
 
     JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
     auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
+    if (!fileSelectorResult) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "FileSelectorEventToJSValue fileSelectorResult is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     fileSelectorResult->SetResult(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(fileSelectorResult.GetRawPtr()));
 
@@ -4269,6 +4331,9 @@ JSRef<JSVal> JSWeb::CreateFileSelectorParamHandler(const FileSelectorEvent& even
 
 void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
 {
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.onShowFileSelector", HISTOGRAM_API_BOOL_COUNTS);
+#endif
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -4374,11 +4439,19 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
 
     JSRef<JSObject> paramObj = JSClass<JSContextMenuParam>::NewInstance();
     auto contextMenuParam = Referenced::Claim(paramObj->Unwrap<JSContextMenuParam>());
+    if (!contextMenuParam) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ContextMenuEventToJSValue contextMenuParam is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     contextMenuParam->SetParam(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(paramObj), static_cast<void *>(contextMenuParam.GetRawPtr()));
 
     JSRef<JSObject> resultObj = JSClass<JSContextMenuResult>::NewInstance();
     auto contextMenuResult = Referenced::Claim(resultObj->Unwrap<JSContextMenuResult>());
+    if (!contextMenuResult) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ContextMenuEventToJSValue contextMenuResult is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     contextMenuResult->SetResult(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(contextMenuResult.GetRawPtr()));
 
@@ -5034,6 +5107,10 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
     auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
+    if (!permissionEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "PermissionRequestEventToJSValue permissionEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     permissionEvent->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(permissionObj), static_cast<void*>(permissionEvent.GetRawPtr()));
     obj->SetPropertyObject("request", permissionObj);
@@ -5077,6 +5154,10 @@ JSRef<JSVal> ScreenCaptureRequestEventToJSValue(const WebScreenCaptureRequestEve
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     JSRef<JSObject> requestObj = JSClass<JSScreenCaptureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSScreenCaptureRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ScreenCaptureRequestEventToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     requestEvent->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("handler", requestObj);
@@ -5133,9 +5214,19 @@ void JSWeb::InitialScale(float scale)
     WebModel::GetInstance()->InitialScale(scale);
 }
 
-void JSWeb::Password(bool password) {}
+void JSWeb::Password(bool password)
+{
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.password", HISTOGRAM_API_BOOL_COUNTS);
+#endif
+}
 
-void JSWeb::TableData(bool tableData) {}
+void JSWeb::TableData(bool tableData)
+{
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.tableData", HISTOGRAM_API_BOOL_COUNTS);
+#endif
+}
 
 void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args) {}
 
@@ -5338,6 +5429,11 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     obj->SetProperty("targetUrl", eventInfo.GetTargetUrl());
     JSRef<JSObject> handlerObj = JSClass<JSWebWindowNewHandler>::NewInstance();
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
+    if (!handler) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WindowNewEventToJSValue handler is nullptr");
+        napi_close_handle_scope(env, scope);
+        return JSRef<JSVal>::Cast(obj);
+    }
     handler->SetEvent(eventInfo);
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void *>(handler.GetRawPtr()));
     obj->SetPropertyObject("handler", handlerObj);
@@ -5369,6 +5465,11 @@ JSRef<JSVal> WindowNewExtEventToJSValue(const WebWindowNewExtEvent& eventInfo)
     obj->SetProperty("navigationPolicy", static_cast<int>(eventInfo.GetNavigationPolicy()));
     JSRef<JSObject> handlerObj = JSClass<JSWebWindowNewHandler>::NewInstance();
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
+    if (!handler) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WindowNewExtEventToJSValue handler is nullptr");
+        napi_close_handle_scope(env, scope);
+        return JSRef<JSVal>::Cast(obj);
+    }
     handler->SetEvent(eventInfo);
 
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void*>(handler.GetRawPtr()));
@@ -6535,6 +6636,10 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     obj->SetPropertyObject("touchEvent", eventObj);
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "NativeEmbeadTouchToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     requestEvent->SetResult(eventInfo.GetResult());
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("result", requestObj);
@@ -6574,6 +6679,10 @@ JSRef<JSVal> NativeEmbeadMouseToJSValue(const NativeEmbeadMouseInfo& eventInfo)
     obj->SetPropertyObject("mouseEvent", eventObj);
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedMouseRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedMouseRequest>());
+    if (!requestEvent) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "NativeEmbeadMouseToJSValue requestEvent is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     requestEvent->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("result", requestObj);
     return JSRef<JSVal>::Cast(obj);
@@ -7093,6 +7202,9 @@ void JSWeb::OnRenderProcessResponding(const JSCallbackInfo& args)
 
 void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
 {
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.selectionMenuOptions", HISTOGRAM_API_BOOL_COUNTS);
+#endif
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
         return;
     }
@@ -7125,6 +7237,9 @@ void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsAction));
         auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc),
                            node = frameNode](const std::string selectInfo) {
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+            HISTOGRAM_BOOLEAN("ArkWeb.InteractionEffect.action", HISTOGRAM_API_BOOL_COUNTS);
+#endif
             auto webNode = node.Upgrade();
             CHECK_NULL_VOID(webNode);
             ContainerScope scope(webNode->GetInstanceId());
@@ -7179,6 +7294,10 @@ JSRef<JSVal> InterceptKeyboardEventToJSValue(const InterceptKeyboardEvent& event
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     JSRef<JSObject> webKeyboardControllerObj = JSClass<JSWebKeyboardController>::NewInstance();
     auto webKeyboardController = Referenced::Claim(webKeyboardControllerObj->Unwrap<JSWebKeyboardController>());
+    if (!webKeyboardController) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "InterceptKeyboardEventToJSValue webKeyboardController is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     webKeyboardController->SeWebKeyboardController(eventInfo.GetCustomKeyboardHandler());
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(webKeyboardControllerObj),
         static_cast<void*>(webKeyboardController.GetRawPtr()));

@@ -148,8 +148,14 @@ void SetOnRefreshingImpl(Ark_NativePointer node,
     auto onRefreshing = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
     RefreshModelStatic::SetOnRefreshing(frameNode, std::move(onRefreshing));
 }
-void SetRefreshOffsetImpl(Ark_NativePointer node,
-                          const Opt_Float64* value)
+void SetRefreshOffset0Impl(Ark_NativePointer node, const Opt_Float64* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    RefreshModelStatic::SetRefreshOffset(frameNode, convValue);
+}
+void SetRefreshOffset1Impl(Ark_NativePointer node, const Opt_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -197,8 +203,17 @@ void SetPullDownRatioImpl(Ark_NativePointer node,
     Validator::ClampByRange(convValue, PULLDOWNRATIO_MIN, PULLDOWNRATIO_MAX);
     RefreshModelStatic::SetPullDownRatio(frameNode, convValue);
 }
-void SetMaxPullDownDistanceImpl(Ark_NativePointer node,
-                                const Opt_Float64* value)
+void SetMaxPullDownDistance0Impl(Ark_NativePointer node, const Opt_Float64* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    if (convValue.has_value()) {
+        convValue = std::max(convValue.value(), 0.0f);
+    }
+    RefreshModelStatic::SetMaxPullDownDistance(frameNode, convValue);
+}
+void SetMaxPullDownDistance1Impl(Ark_NativePointer node, const Opt_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -216,12 +231,14 @@ const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
         RefreshInterfaceModifier::SetRefreshOptionsImpl,
         RefreshAttributeModifier::SetOnStateChangeImpl,
         RefreshAttributeModifier::SetOnRefreshingImpl,
-        RefreshAttributeModifier::SetRefreshOffsetImpl,
+        RefreshAttributeModifier::SetRefreshOffset0Impl,
+        RefreshAttributeModifier::SetRefreshOffset1Impl,
         RefreshAttributeModifier::SetPullToRefreshImpl,
         RefreshAttributeModifier::setPullUpToCancelRefreshImpl,
         RefreshAttributeModifier::SetOnOffsetChangeImpl,
         RefreshAttributeModifier::SetPullDownRatioImpl,
-        RefreshAttributeModifier::SetMaxPullDownDistanceImpl,
+        RefreshAttributeModifier::SetMaxPullDownDistance0Impl,
+        RefreshAttributeModifier::SetMaxPullDownDistance1Impl,
     };
     return &ArkUIRefreshModifierImpl;
 }

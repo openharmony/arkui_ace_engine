@@ -19,25 +19,20 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/rect.h"
-#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/bilateral_spring_node.h"
 #include "core/animation/spring_model.h"
 #include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/list/arc_list_theme.h"
-#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/common/vibrator/vibrator_utils.h"
 #endif
@@ -176,6 +171,38 @@ std::function<bool(int32_t)> ArcListPattern::GetScrollIndexAbility()
         }
         return true;
     };
+}
+
+std::optional<ScrollingConfig> ArcListPattern::GetDefaultScrollingConfig(SmartGestureDirection direction) const
+{
+    if (!IsScrollAble(direction)) {
+        return std::nullopt;
+    }
+    if (itemPosition_.empty() || maxListItemIndex_ < 0) {
+        return std::nullopt;
+    }
+    auto midIndex = GetMidIndex();
+    if (midIndex < 0) {
+        return std::nullopt;
+    }
+
+    int32_t targetIndex = midIndex;
+    if (direction == SmartGestureDirection::FORWARD) {
+        targetIndex = std::min(midIndex + 1, maxListItemIndex_);
+    } else if (direction == SmartGestureDirection::BACKWARD) {
+        targetIndex = std::max(midIndex - 1, 0);
+    } else {
+        return std::nullopt;
+    }
+    if (targetIndex == midIndex) {
+        return std::nullopt;
+    }
+
+    float targetPos = 0.0f;
+    if (!CalculateScrollingDistanceToIndex(targetIndex, ScrollAlign::CENTER, targetPos) || NearZero(targetPos)) {
+        return std::nullopt;
+    }
+    return CreateScrollingConfig(direction, std::abs(targetPos));
 }
 
 bool ArcListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup)
@@ -354,7 +381,7 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
     return true;
 }
 
-int32_t ArcListPattern::GetMidIndex()
+int32_t ArcListPattern::GetMidIndex() const
 {
     float midPos = contentMainSize_ / FLOAT_TWO;
     for (auto& pos : itemPosition_) {

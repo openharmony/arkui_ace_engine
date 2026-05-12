@@ -19,7 +19,6 @@
 #include "base/utils/singleton.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_options.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT DialogManagerStatic : public Singleton<DialogManagerStatic> {

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
-
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/udmf/udmf_client.h"
@@ -575,6 +575,24 @@ void SearchModelStatic::SetTextDecorationStyle(FrameNode* frameNode,
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, textFieldChild);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelStatic::SetLineThicknessScale(FrameNode* frameNode, const std::optional<float>& valueOpt)
+{
+    if (valueOpt.has_value()) {
+        auto lineThicknessScale = valueOpt.value() < 0 ? DEFAULT_LINE_THICKNESS_SCALE : valueOpt.value();
+        SearchModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto& children = frameNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineThicknessScale, textFieldChild);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

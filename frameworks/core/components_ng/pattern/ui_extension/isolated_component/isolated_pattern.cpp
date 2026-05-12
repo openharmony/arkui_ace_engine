@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"

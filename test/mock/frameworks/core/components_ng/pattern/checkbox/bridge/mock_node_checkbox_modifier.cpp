@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/bridge/checkbox_custom_modifier.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 const int32_t ERROR_INT_CODE = -1;
@@ -149,7 +150,30 @@ void UpdatePaintPropertyBySettingData(ArkUINodeHandle node, ArkUICheckboxSetting
     CheckBoxModelNG::UpdatePaintPropertyBySettingData(frameNode, settingData, isLunar);
 }
 
+namespace {
+void SetCheckboxShape(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelNG::SetCheckboxStyle(frameNode, static_cast<CheckBoxStyle>(value));
+}
+}
+
 namespace NodeModifier {
+const ArkUICheckboxModifier* GetCheckboxModifier()
+{
+    static const ArkUICheckboxModifier modifier = {
+        .setSelect = SetSelect,
+        .setSelectedColor = SetSelectedColor,
+        .resetSelectedColor = ResetSelectedColor,
+        .setCheckboxOnChange = SetCheckboxOnChange,
+        .setIsUserSetMargin = SetIsUserSetMargin,
+        .getSelect = GetSelect,
+        .setCheckboxShape = SetCheckboxShape,
+    };
+    return &modifier;
+}
+
 const ArkUICheckboxCustomModifier* GetCheckboxCustomModifier()
 {
     static const ArkUICheckboxCustomModifier modifier = {

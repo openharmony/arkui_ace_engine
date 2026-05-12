@@ -113,7 +113,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
     override __addProvide__Internal<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean): void {}
 
     override __isViewActive__Internal(): boolean {
-        return this.dynamicComponent.invokeMethod('isViewActive').unwrap() as boolean;
+        return true;
     }
 }
 

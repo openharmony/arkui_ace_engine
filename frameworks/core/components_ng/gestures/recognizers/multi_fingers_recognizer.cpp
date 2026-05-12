@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_MAX_FINGERS = 10;
+constexpr int32_t FINGER_COUNT_HASH_MULTIPLIER = 100;
 } // namespace
 
 MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers, bool isLimitFingerCount)
@@ -99,7 +100,11 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         if (maxTimeStamp <= currentTimeStamp && point.second.pointers.size() >= touchPoints_.size()) {
             lastPointEvent_ = point.second.GetTouchEventPointerEvent();
             maxTimeStamp = currentTimeStamp;
-        } else if (point.second.pointers.size() < touchPoints_.size()) {
+        } else if (point.second.pointers.size() < touchPoints_.size() &&
+                   logLimit_ != static_cast<int32_t>(point.second.pointers.size() * FINGER_COUNT_HASH_MULTIPLIER +
+                                                     touchPoints_.size())) {
+            logLimit_ =
+                static_cast<int32_t>(point.second.pointers.size() * FINGER_COUNT_HASH_MULTIPLIER + touchPoints_.size());
             std::string str = "[";
             for (const auto& point : touchPoints_) {
                 str +=

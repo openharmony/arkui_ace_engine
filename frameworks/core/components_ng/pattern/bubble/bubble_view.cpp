@@ -29,6 +29,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -176,19 +177,85 @@ int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode)
 bool BubbleView::SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, const RefPtr<PopupParam>& param)
 {
     CHECK_NULL_RETURN(bubbleNode, false);
-    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+    CHECK_NULL_RETURN(param, false);
+    auto renderContext = bubbleNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+
+    auto systemMaterial = param->GetSystemMaterial();
+    if (!MaterialUtils::IsEnableMaterialParam(systemMaterial)) {
         return false;
     }
-    auto systemMaterial = param->GetSystemMaterial();
-    if (MaterialUtils::IsEnableMaterialParam(systemMaterial)) {
-        auto renderContext = bubbleNode->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        renderContext->UpdateBackBlurStyle(std::nullopt);
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(bubbleNode), AceType::RawPtr(systemMaterial));
-        return true;
+
+    // Handle low-end devices with IMMERSIVE material
+    if (ShouldHandleLowEndImmersiveMaterial(systemMaterial)) {
+        return HandleLowEndImmersiveMaterialForBubble(bubbleNode, systemMaterial, renderContext);
     }
-    return false;
+
+    // Normal processing for other cases
+    return ApplySystemMaterialForBubble(bubbleNode, systemMaterial, renderContext);
+}
+
+bool BubbleView::ShouldHandleLowEndImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial)
+{
+    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+        return false;
+    }
+
+    auto materialType = static_cast<Ace::MaterialType>(systemMaterial->GetType());
+    return materialType == Ace::MaterialType::IMMERSIVE;
+}
+
+bool BubbleView::HandleLowEndImmersiveMaterialForBubble(
+    const RefPtr<FrameNode>& bubbleNode,
+    const RefPtr<UiMaterial>& systemMaterial,
+    const RefPtr<RenderContext>& renderContext)
+{
+    auto pipelineContext = bubbleNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, false);
+
+    SetLowEndImmersiveBackgroundForBubble(renderContext, themeConstants);
+    SetLowEndImmersiveShadowForBubble(bubbleNode, systemMaterial, renderContext, pipelineContext);
+    return true;
+}
+
+void BubbleView::SetLowEndImmersiveBackgroundForBubble(
+    const RefPtr<RenderContext>& renderContext,
+    const RefPtr<ThemeConstants>& themeConstants)
+{
+    auto resId = Ace::TokenColors::GetSystemColorResIdByIndex(Ace::TokenColors::COMP_BACKGROUND_PRIMARY);
+    auto backgroundColor = themeConstants->GetColor(resId);
+    renderContext->UpdateBackgroundColor(backgroundColor);
+}
+
+void BubbleView::SetLowEndImmersiveShadowForBubble(
+    const RefPtr<FrameNode>& bubbleNode,
+    const RefPtr<UiMaterial>& systemMaterial,
+    const RefPtr<RenderContext>& renderContext,
+    const RefPtr<PipelineContext>& pipelineContext)
+{
+    auto immersiveOptions = systemMaterial->GetImmersiveOptions();
+    if (!immersiveOptions || !immersiveOptions->applyShadow) {
+        return;
+    }
+
+    auto dipScale = pipelineContext->GetDipScale();
+    auto shadow = Ace::MaterialUtils::GetImmersiveShadow(dipScale);
+    renderContext->UpdateBackShadow(shadow);
+}
+
+bool BubbleView::ApplySystemMaterialForBubble(
+    const RefPtr<FrameNode>& bubbleNode,
+    const RefPtr<UiMaterial>& systemMaterial,
+    const RefPtr<RenderContext>& renderContext)
+{
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(bubbleNode), AceType::RawPtr(systemMaterial));
+    return true;
 }
 
 RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int32_t targetId,
@@ -689,7 +756,7 @@ void BubbleView::GetPopupMaxWidthAndHeight(
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
     auto top = static_cast<float>(safeAreaManager->GetSystemSafeArea().top_.Length());
     auto bubblePattern = popupNode->GetPattern<BubblePattern>();
-    if (bubblePattern) {
+    if (param->GetTargetOffset().IsZero() && bubblePattern) {
         auto floatButtonsRect = bubblePattern->GetWindowButtonRect(popupNode);
         top = std::max(top, floatButtonsRect.Height());
     }

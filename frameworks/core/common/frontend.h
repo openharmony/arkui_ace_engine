@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FRONTEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FRONTEND_H
 
+#include <mutex>
 #include <string>
 #include <utility>
 
@@ -26,6 +27,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/resource_configuration.h"
 #include "bridge/common/utils/source_map.h"
+#include "core/common/frontend_type.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/router_recover_record.h"
 #include "core/event/ace_event_handler.h"
@@ -46,6 +48,10 @@ class AssetManager;
 class TaskExecutor;
 class AccessibilityManager;
 enum class ContentInfoType;
+
+namespace NG {
+class FrameNode;
+}
 
 #ifndef WEARABLE_PRODUCT
 constexpr int32_t DEFAULT_DESIGN_WIDTH = 720;
@@ -84,11 +90,6 @@ struct WindowConfig {
     }
 };
 
-enum class FrontendType {
-    JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS,
-    DYNAMIC_HYBRID_STATIC, STATIC_HYBRID_DYNAMIC
-};
-
 struct PageTarget;
 
 
@@ -117,7 +118,7 @@ public:
     ~Frontend() override;
 
     int32_t instanceId_ = -1;
-    enum State : uint8_t { ON_CREATE = 0, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
+    using State = FrontendState;
     static std::string stateToString(int state);
 
     static RefPtr<Frontend> Create();
@@ -186,6 +187,8 @@ public:
     {
         return UIContentErrorCode::NO_ERRORS;
     }
+
+    virtual void CallRunIntentPageFromNative(const std::string& url, const std::string& paramStr) {}
 
     virtual std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
     {
@@ -546,6 +549,11 @@ public:
     bool IsUseSubFrontendManagerNeeded() const
     {
         return isUseSubFrontendManagerNeeded_;
+    }
+
+    virtual bool IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+    {
+        return false;
     }
 
 protected:

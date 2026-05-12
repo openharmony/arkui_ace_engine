@@ -60,6 +60,7 @@ public:
         return node_->GetChildrenBoundingBox();
     }
     LayoutContext& GetContext() override { return node_->GetContext(); }
+    void SetAvoidSafeArea(bool avoid) override { node_->SetAvoidSafeArea(avoid); }
 
 private:
     std::shared_ptr<SmartLayoutNode> node_;

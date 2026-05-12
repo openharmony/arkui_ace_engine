@@ -45,12 +45,10 @@ public:
         return true;
     }
 
-    static PointF ToPoint(const ScrollActionInfo& actionInfo);
-
 private:
     bool ExecuteTargetMode();
 
-    RefPtr<ScrollPattern> FindScrollPattern(float x, float y);
+    RefPtr<Pattern> FindScrollPattern(float x, float y);
 
 private:
     Command cmd_;

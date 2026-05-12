@@ -21,7 +21,6 @@
 #include <vector>
 #include "core/components/common/layout/common_text_constants.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -50,6 +49,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -604,7 +604,7 @@ void JSText::SetTextContentAlign(const JSCallbackInfo& info)
         return;
     }
     int32_t index = args->ToNumber<int32_t>();
-    auto isNormalValue = index >= 0 && index < TEXT_CONTENT_ALIGNS.size();
+    auto isNormalValue = index >= 0 && static_cast<size_t>(index) < TEXT_CONTENT_ALIGNS.size();
     if (!isNormalValue) {
         TextModel::GetInstance()->ReSetTextContentAlign();
         return;
@@ -1196,6 +1196,23 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
+bool JSText::BindPreviewMenu(const JSRef<JSVal> argsMenuOptions, NG::TextResponseType responseType,
+    NG::TextSpanType textSpanType, std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam)
+{
+    JSRef<JSObject> menuOptions = JSRef<JSObject>::Cast(argsMenuOptions);
+    auto menuType = menuOptions->GetProperty("menuType");
+    bool isPreviewMenu = !menuType->IsUndefined() && !menuType->IsNull() && menuType->IsNumber() &&
+                        (menuType->ToNumber<int32_t>() == 1);
+    bool bindImagePreviewMenu = isPreviewMenu && responseType == NG::TextResponseType::LONG_PRESS;
+    if (bindImagePreviewMenu) {
+        TextModel::GetInstance()->BindPreviewMenu(textSpanType, buildFunc, menuParam);
+        return true;
+    } else {
+        TextModel::GetInstance()->UnBindPreviewMenu();
+        return false;
+    }
+}
+
 void JSText::BindSelectionMenu(const JSCallbackInfo& info)
 {
     // TextSpanType
@@ -1244,7 +1261,11 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     if (info.Length() > static_cast<uint32_t>(resquiredParameterCount)) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
         if (argsMenuOptions->IsObject()) {
-            ParseMenuParam(info, argsMenuOptions, menuParam);
+            auto menuOptions = JSRef<JSObject>::Cast(argsMenuOptions);
+            ParseMenuParam(info, menuOptions, menuParam);
+            if (BindPreviewMenu(menuOptions, responseType, textSpanType, buildFunc, menuParam)) {
+                return;
+            }
         }
     }
 

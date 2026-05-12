@@ -94,6 +94,11 @@ public:
     void UseCustomAnimation(bool useCustomAnimation);
     bool IsUseCustomAnimation();
 
+    void SetDragAnimationType(DragAnimationType dragAnimationType);
+    void SetDragAnimationType(int32_t dragAnimationType);
+    DragAnimationType GetDragAnimationType() const;
+    int32_t GetDragAnimationTypeValue() const;
+
     void SetCopy(bool copy);
     bool IsCopy();
 
@@ -130,6 +135,13 @@ public:
     void SetDropAnimation(std::function<void()>&& executeDropAnimation);
     bool HasDropAnimation() const;
     void ExecuteDropAnimation();
+
+    void SetFollowHandMorphDropAnimation(std::function<void()>&& onAnimationFinished);
+    bool HasFollowHandMorphDropAnimation() const;
+    void ExecuteFollowHandMorphDropAnimation();
+
+    void SetFollowHandMorphAnimationOption(const std::string& animationOption);
+    const std::string& GetFollowHandMorphAnimationOption() const;
 
     void SetIsDragEndPending(bool isDragEndPending);
     bool IsDragEndPending() const;
@@ -182,6 +194,7 @@ private:
     SourceTool sourceTool_ = { SourceTool::UNKNOWN };
     Rect previewRect_;
     bool useCustomAnimation_ = false;
+    DragAnimationType dragAnimationType_ = DragAnimationType::DEFAULT;
     bool isGetDataSuccess_ = false;
     bool copy_ = true;
     DragBehavior dragBehavior_ = DragBehavior::UNKNOWN;
@@ -192,6 +205,8 @@ private:
     std::vector<KeyCode> pressedKeyCodes_;
     bool isCapi_ = false;
     std::function<void()> executeDropAnimation_;
+    std::function<void()> executeFollowHandMorphDropAnimation_;
+    std::string followHandMorphAnimationOption_;
     int32_t requestId_ = -1;
     bool isDragEndPending_ = false;
     int32_t displayId_ = -1;

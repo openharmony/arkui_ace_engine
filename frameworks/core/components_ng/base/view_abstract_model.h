@@ -26,15 +26,14 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -54,6 +53,10 @@
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+namespace NG {
+class DrawModifier;
+class CustomAnimatableArithmetic;
+} // namespace NG
 
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
@@ -346,6 +349,8 @@ public:
     virtual void SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
+    virtual void SetShouldRecognizerParallelWith(
+        NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc) = 0;
     virtual void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) = 0;
@@ -429,6 +434,8 @@ public:
             responseRegionMap) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
     virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
+    virtual void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) {}
+    virtual void ResetSmartGestureShortcut() {}
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
@@ -450,6 +457,7 @@ public:
     virtual void SetAutoEventParam(const std::string& param) {}
     virtual void SetRestoreId(int32_t restoreId) = 0;
     virtual void SetDebugLine(const std::string& line) = 0;
+    virtual void SetInspectorLabel(const std::string& inspectorLabel) {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest) = 0;
@@ -529,6 +537,7 @@ public:
     virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
     virtual void SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions) = 0;
     virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
+    virtual void SetAccessibilityNextFocusParams(const NG::AccessibilityNextFocusParams& params) = 0;
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
     virtual void SetOnAccessibilityActionIntercept(
@@ -541,6 +550,8 @@ public:
     virtual void SetAccessibilityFocusDrawLevel(int32_t drawLevel) = 0;
     virtual void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) = 0;
     virtual void ResetAccessibilityActionOptions() = 0;
+    virtual void SetAccessibilityCustomActions(const std::vector<NG::AccessibilityCustomAction>& actions) = 0;
+    virtual void ResetAccessibilityCustomActions() = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
@@ -586,6 +597,8 @@ public:
 
     // depth space
     virtual void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) {};
+    // edgelight
+    virtual void SetEdgeLightParam(const std::optional<NG::EdgeLightParam>& param) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

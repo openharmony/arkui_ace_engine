@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/grid_property.h"
@@ -80,15 +81,15 @@ IgnoreLayoutSafeAreaOpts LayoutProperty::GenIgnoreOpts() const
     return options;
 }
 
-void LayoutProperty::ExpandConstraintWithSafeArea() {}
+void LayoutProperty::ExpandConstraintWithSafeArea(RefPtr<FrameNode>& host) {}
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint) {}
 
-void LayoutProperty::CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint) {}
+void LayoutProperty::CheckCalcLayoutConstraint(RefPtr<FrameNode>& host, const LayoutConstraintF& parentConstraint) {}
 
 void LayoutProperty::UpdateLayoutConstraintWithLayoutRect() {}
 
-void LayoutProperty::CheckBorderAndPadding() {}
+void LayoutProperty::CheckBorderAndPadding(RefPtr<FrameNode>& host) {}
 
 void LayoutProperty::CheckAspectRatio() {}
 

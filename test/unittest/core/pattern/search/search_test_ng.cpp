@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "search_base.h"
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/color.h"
@@ -644,7 +645,7 @@ HWTEST_F(SearchTestNg, Pattern007, TestSize.Level1)
     info.AddTouchLocationInfo(std::move(touchInfo1));
     ASSERT_NE(events.size(), 0);
     for (auto event : events) {
-        event->callback_(info);
+        (*event)(info);
     }
 }
 
@@ -679,7 +680,7 @@ HWTEST_F(SearchTestNg, Pattern008, TestSize.Level1)
     info.AddTouchLocationInfo(std::move(touchInfo1));
     ASSERT_NE(events.size(), 0);
     for (auto event : events) {
-        event->callback_(info);
+        (*event)(info);
     }
 }
 
@@ -960,11 +961,9 @@ HWTEST_F(SearchTestNg, SetSearchIconSymbolGlyphModofier001, TestSize.Level1)
     auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(symbolLayoutProperty, nullptr);
 
-    const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-    EXPECT_EQ(symbolStyle->GetFontSize(), Dimension(16, DimensionUnit::FP));
+    EXPECT_EQ(symbolLayoutProperty->GetFontSize(), Dimension(16, DimensionUnit::FP));
     std::vector<Color> color = { searchTheme->GetSymbolIconColor() };
-    EXPECT_EQ(symbolStyle->GetSymbolColorList(), color);
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorList(), color);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 
@@ -1120,11 +1119,9 @@ HWTEST_F(SearchTestNg, SetCancelIconSymbolGlyphModofier001, TestSize.Level1)
     auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(symbolLayoutProperty, nullptr);
 
-    const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-    EXPECT_EQ(symbolStyle->GetFontSize(), Dimension(16, DimensionUnit::FP));
+    EXPECT_EQ(symbolLayoutProperty->GetFontSize(), Dimension(16, DimensionUnit::FP));
     std::vector<Color> color = { searchTheme->GetSymbolIconColor() };
-    EXPECT_EQ(symbolStyle->GetSymbolColorList(), color);
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorList(), color);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 

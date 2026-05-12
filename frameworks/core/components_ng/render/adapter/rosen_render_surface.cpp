@@ -115,7 +115,15 @@ RosenRenderSurface::~RosenRenderSurface()
     }
     UnregisterSurface();
     if (isTexture_) {
-        Rosen::RSInterfaces::GetInstance().UnregisterSurfaceBufferCallback(getpid(), GetUniqueIdNum());
+        auto rosenRenderContext = DynamicCast<RosenRenderContext>(renderContext_.Upgrade());
+        CHECK_NULL_VOID(rosenRenderContext);
+        auto rsNode = rosenRenderContext->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        auto rsUIContext = rsNode->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        auto rsRenderInterface = rsUIContext->GetRSRenderInterface();
+        CHECK_NULL_VOID(rsRenderInterface);
+        rsRenderInterface->UnregisterSurfaceBufferCallback(getpid(), GetUniqueIdNum());
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         while (!availableBuffers_.empty()) {
             auto surfaceNode = availableBuffers_.front();
@@ -607,11 +615,15 @@ void RosenRenderSurface::RegisterBufferCallback()
     if (uid == 0) {
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "RegisterBufferCallback uid is invalid");
     }
-    Rosen::RSInterfaces::GetInstance().RegisterSurfaceBufferCallback(getpid(), uid, bufferCallback_);
     auto rosenRenderContext = DynamicCast<RosenRenderContext>(renderContext_.Upgrade());
     CHECK_NULL_VOID(rosenRenderContext);
     auto rsNode = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
+    auto rsUIContext = rsNode->GetRSUIContext();
+    CHECK_NULL_VOID(rsUIContext);
+    auto rsRenderInterface = rsUIContext->GetRSRenderInterface();
+    CHECK_NULL_VOID(rsRenderInterface);
+    rsRenderInterface->RegisterSurfaceBufferCallback(getpid(), uid, bufferCallback_);
     rsNode->SetExportTypeChangedCallback([weak = WeakClaim(this)](bool isExportTexture) {
         auto renderSurface = weak.Upgrade();
         CHECK_NULL_VOID(renderSurface);

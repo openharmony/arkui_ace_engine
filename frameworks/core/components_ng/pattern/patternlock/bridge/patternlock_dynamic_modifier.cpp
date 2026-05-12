@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/node/pattern_lock_modifier.h"
+#include "core/common/container.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/patternlock/bridge/patternlock_model_impl.h"

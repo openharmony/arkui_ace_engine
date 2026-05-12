@@ -60,8 +60,11 @@ int32_t InteractionImpl::UpdatePreviewStyleWithAnimation(const OHOS::Ace::Previe
     return -1;
 }
 
-int32_t InteractionImpl::StopDrag(DragDropRet result)
+int32_t InteractionImpl::StopDrag(DragDropRet result,
+    std::function<void()> callback)
 {
+    static_cast<void>(result);
+    static_cast<void>(callback);
     return -1;
 }
 
@@ -84,6 +87,12 @@ int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary,
 
 int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
 {
+    return -1;
+}
+
+int32_t InteractionImpl::GetDragAnimationType(int32_t& dragAnimationType)
+{
+    dragAnimationType = static_cast<int32_t>(DragAnimationType::DEFAULT);
     return -1;
 }
 
@@ -111,18 +120,6 @@ int32_t InteractionImpl::UnRegisterCoordinationListener()
 {
     return -1;
 }
-
-int32_t InteractionImpl::SetDraggableState(bool state)
-{
-    return -1;
-}
-
-int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
-{
-    return -1;
-}
-
-void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime) {}
 
 int32_t  InteractionImpl::GetDragBundleInfo(DragBundleInfo& dragBundleInfo)
 {

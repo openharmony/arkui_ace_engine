@@ -25,10 +25,12 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/stage/page_transition_effect.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
 class OverlayManager;
+using IsPageInStackCallback = std::function<bool(const RefPtr<FrameNode>& page)>;
 
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT StageManager : public virtual AceType {
@@ -154,6 +156,17 @@ public:
 
     virtual void OnAbortAnimation() {}
     virtual void OnStageNodeStructureChanged() {}
+    void SetIsPageInStackCallback(IsPageInStackCallback&& callback)
+    {
+        isPageInStackCallback_ = std::move(callback);
+    }
+    bool IsPageInStack(const RefPtr<FrameNode>& page)
+    {
+        if (isPageInStackCallback_) {
+            return isPageInStackCallback_(page);
+        }
+        return false;
+    }
 
 protected:
     void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
@@ -179,6 +192,7 @@ protected:
 #endif
     std::string replaceSrcPageInfo_;
     std::function<std::string(const std::string& url)> getPagePathCallback_;
+    IsPageInStackCallback isPageInStackCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

@@ -238,6 +238,17 @@ template("build_component_ng") {
           }
         }
       }
+
+      if (defined(config.gesture_debug_boundary_support) &&
+          config.gesture_debug_boundary_support &&
+          defined(invoker.gesture_debug_sources)) {
+        sources += invoker.gesture_debug_sources
+      }
+
+      if (defined(config.smart_gesture_support) &&
+          config.smart_gesture_support && defined(invoker.smart_gesture_sources)) {
+        sources += invoker.smart_gesture_sources
+      }
     }
   }
 

@@ -42,6 +42,12 @@ public:
 };
 
 void AnimationUtils::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
+{
+    OpenImplicitAnimation(option, curve, wrapFinishCallback, nullptr);
+}
+
+void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& wrapFinishCallback, const RefPtr<PipelineBase>& context)
 {
@@ -53,12 +59,22 @@ void AnimationUtils::OpenImplicitAnimation(
     }
 }
 
+bool AnimationUtils::CloseImplicitAnimation()
+{
+    return CloseImplicitAnimation(nullptr);
+}
+
 bool AnimationUtils::CloseImplicitAnimation(const RefPtr<PipelineBase>& context)
 {
 #ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().CloseAnimation();
 #endif
     return false;
+}
+
+bool AnimationUtils::CloseImplicitCancelAnimation()
+{
+    return CloseImplicitCancelAnimation(nullptr);
 }
 
 bool AnimationUtils::CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& context)
@@ -69,7 +85,13 @@ bool AnimationUtils::CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& co
     return true;
 }
 
-CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus()
+{
+    return CloseImplicitCancelAnimationReturnStatus(nullptr);
+}
+
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(
+    const RefPtr<PipelineBase>& context, bool nodeExceptionSensitive)
 {
 #ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().CloseAnimation();
@@ -77,9 +99,20 @@ CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(c
     return CancelAnimationStatus::SUCCESS;
 }
 
+bool AnimationUtils::IsImplicitAnimationOpen()
+{
+    return IsImplicitAnimationOpen(nullptr);
+}
+
 bool AnimationUtils::IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context)
 {
     return false;
+}
+
+void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
+    const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
+{
+    Animate(option, callback, finishCallback, repeatCallback, nullptr);
 }
 
 void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
@@ -111,6 +144,11 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     }
 }
 
+void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    AddKeyFrame(fraction, curve, callback, nullptr);
+}
+
 void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve,
     const PropertyCallback& callback, const RefPtr<PipelineBase>& context)
 {
@@ -118,6 +156,7 @@ void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve,
         callback();
     }
 }
+
 void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback,
     const RefPtr<PipelineBase>& context)
 {
@@ -126,10 +165,41 @@ void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callbac
     }
 }
 
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback)
+{
+    AddKeyFrame(fraction, callback, nullptr);
+}
+
+void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    AddDurationKeyFrame(duration, curve, callback, nullptr);
+}
+
+void AnimationUtils::AddDurationKeyFrame(
+    int duration, const RefPtr<Curve>& curve, const PropertyCallback& callback,
+    const RefPtr<PipelineBase>& context)
+{
+    if (callback) {
+        callback();
+    }
+}
+
+void AnimationUtils::AnimateWithCurrentOptions(
+    const PropertyCallback& callback, const FinishCallback& finishCallback)
+{
+    AnimateWithCurrentOptions(callback, finishCallback, true, nullptr);
+}
+
 void AnimationUtils::AnimateWithCurrentOptions(
     const PropertyCallback& callback, const FinishCallback& finishCallback,
     bool timingSensitive, const RefPtr<PipelineBase>& context)
 {}
+
+void AnimationUtils::AnimateWithCurrentCallback(
+    const AnimationOption& option, const PropertyCallback& callback)
+{
+    AnimateWithCurrentCallback(option, callback, nullptr);
+}
 
 void AnimationUtils::AnimateWithCurrentCallback(
     const AnimationOption& option, const PropertyCallback& callback,
@@ -140,6 +210,12 @@ void AnimationUtils::AnimateWithCurrentCallback(
     callback();
     AnimManager::GetInstance().CloseAnimation();
 #endif
+}
+
+std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
+    const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
+{
+    return StartAnimation(option, callback, finishCallback, repeatCallback, nullptr);
 }
 
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
@@ -204,6 +280,11 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
         anim->Resume();
     }
 #endif
+}
+
+void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
+{
+    ExecuteWithoutAnimation(callback, nullptr);
 }
 
 void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback,

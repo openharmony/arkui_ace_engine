@@ -18,7 +18,9 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
@@ -186,18 +188,15 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
             nodeModifiers->getTextClockModifier()->resetFontColor(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
-        if (!Framework::JSTextClockTheme::ObtainTextColor(color)) {
-            auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-            CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-            auto theme = frameNode->GetTheme<TextTheme>(true);
-            color = theme ? theme->GetTextClockFontColor() : Color::BLACK;
-            if (SystemProperties::ConfigChangePerform()) {
-                nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
-                nodeModifiers->getTextClockModifier()->setTextColorByUser(nativeNode, false);
-                return panda::JSValueRef::Undefined(vm);
-            }
-        }
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        auto theme = frameNode->GetTheme<TextTheme>(true);
+        color = theme ? theme->GetTextClockFontColor() : Color::BLACK;
         nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
+        if (SystemProperties::ConfigChangePerform()) {
+            nodeModifiers->getTextClockModifier()->setTextColorByUser(nativeNode, false);
+            return panda::JSValueRef::Undefined(vm);
+        }
     } else {
         if (isJsView) {
             nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());

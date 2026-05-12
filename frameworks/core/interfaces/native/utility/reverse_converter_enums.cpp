@@ -1177,6 +1177,18 @@ void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src)
     }
 }
 
+void AssignArkValue(Ark_DragAnimationType& dst, const DragAnimationType& src)
+{
+    switch (src) {
+        case DragAnimationType::DEFAULT: dst = ARK_DRAG_ANIMATION_TYPE_DEFAULT; break;
+        case DragAnimationType::FOLLOW_HAND_MORPH: dst = ARK_DRAG_ANIMATION_TYPE_FOLLOW_HAND_MORPH; break;
+        default:
+            dst = static_cast<Ark_DragAnimationType>(-1);
+            LOGE("Unexpected enum value in DragAnimationType: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
 {
     switch (src) {

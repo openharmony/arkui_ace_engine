@@ -17,7 +17,9 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -721,7 +723,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupResponseRegion(ArkUI
     uint32_t length = 4;
     if (secondArg->IsArray(vm)) {
         auto transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-        length = length * transArray->Length(vm);
+        length = length * ArkTSUtils::GetArrayLength(vm, transArray);
     }
     ArkUI_Float32 regionArray[length];
     int32_t regionUnits[length];

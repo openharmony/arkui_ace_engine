@@ -15,8 +15,13 @@
 
 #include "gtest/gtest.h"
 #include "vector"
+#include "unordered_map"
 
 #include "core/common/container_scope.h"
+
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+#include "base/utils/container_scope/container_scope_diagnostics.h"
+#endif
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,12 +34,38 @@ constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t TEST_INSTANCE_ID_CONTAINER = 100000;
 constexpr int32_t TEST_INSTANCE_ID_SUB_CONTAINER = 1000000;
 const std::vector<int32_t> TEST_CONTAINERS = { 100000, 100001, 100002, 100003 };
+std::unordered_map<int32_t, bool> g_mockThreadCheckResult;
+
+void MockThreadCheckResult(int32_t id, bool canRunOnCurrentThread)
+{
+    g_mockThreadCheckResult[id] = canRunOnCurrentThread;
+}
+
+void ClearMockThreadCheckResult()
+{
+    g_mockThreadCheckResult.clear();
+}
 } // namespace
+
+class Container {
+public:
+    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
+};
+
+bool Container::CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
+{
+    auto iter = g_mockThreadCheckResult.find(currentId);
+    if (iter != g_mockThreadCheckResult.end()) {
+        return iter->second;
+    }
+    return defaultRes;
+}
 
 class ContainerScopeTest : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
+        ContainerScope::RegisterThreadCheckFunc(&Container::CheckRunOnThreadByThreadId);
         ContainerScope::UpdateCurrent(INSTANCE_ID_PLATFORM);
     }
     static void TearDownTestSuite()
@@ -43,8 +74,23 @@ public:
         ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
         ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
     }
-    void SetUp() {};
-    void TearDown() {};
+    void SetUp() override
+    {
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+        ContainerScope::EnableTracking(true);
+        ContainerScope::ClearHistory();
+#endif
+        ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+    }
+    void TearDown() override
+    {
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+        ContainerScope::EnableTracking(false);
+        ContainerScope::ClearHistory();
+#endif
+        ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+        ContainerScope::UpdateLocalCurrent(INSTANCE_ID_UNDEFINED);
+    }
 };
 
 /**
@@ -54,17 +100,9 @@ public:
  */
 HWTEST_F(ContainerScopeTest, ContainerScopeTest001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Get currentId from initial env
-     * @tc.expected: CurrentId equals the value in initial env
-     */
     int32_t scopeId = ContainerScope::CurrentId();
-    EXPECT_EQ(scopeId, INSTANCE_ID_PLATFORM);
+    EXPECT_EQ(scopeId, INSTANCE_ID_UNDEFINED);
 
-    /**
-     * @tc.steps: step2. Update currentId and get it
-     * @tc.expected: CurrentId equals updated value
-     */
     ContainerScope::UpdateCurrent(TEST_INSTANCE_ID_CONTAINER);
     scopeId = ContainerScope::CurrentId();
     EXPECT_EQ(scopeId, TEST_INSTANCE_ID_CONTAINER);
@@ -73,9 +111,6 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest001, TestSize.Level1)
     scopeId = ContainerScope::CurrentId();
     EXPECT_EQ(scopeId, TEST_INSTANCE_ID_SUB_CONTAINER);
 
-    /**
-     * @tc.steps: step3. restore currentId to default value
-     */
     ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
 }
 
@@ -92,25 +127,21 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest002, TestSize.Level1)
     int32_t scopeId = ContainerScope::CurrentId();
     EXPECT_EQ(scopeId, INSTANCE_ID_UNDEFINED);
 
-    /**
-     * @tc.steps: step2. Call constructor of ContainerScope
-     */
-    ContainerScope scope(TEST_INSTANCE_ID_CONTAINER);
+    {
+        /**
+         * @tc.steps: step2. Call constructor of ContainerScope
+         */
+        ContainerScope scope(TEST_INSTANCE_ID_CONTAINER);
 
+        /**
+         * @tc.steps: step3. Get currentId
+         * @tc.expected: CurrentId equals value in constructor
+         */
+        scopeId = ContainerScope::CurrentId();
+        EXPECT_EQ(scopeId, TEST_INSTANCE_ID_CONTAINER);
+    }
     /**
-     * @tc.steps: step3. Get currentId
-     * @tc.expected: CurrentId equals value in constructor
-     */
-    scopeId = ContainerScope::CurrentId();
-    EXPECT_EQ(scopeId, TEST_INSTANCE_ID_CONTAINER);
-
-    /**
-     * @tc.steps: step4. Call destructor of ContainerScope
-     */
-    scope.~ContainerScope();
-
-    /**
-     * @tc.steps: step5. Get currentId
+     * @tc.steps: step4. Call destructor of ContainerScope. Get currentId
      * @tc.expected: CurrentId equals default value
      */
     scopeId = ContainerScope::CurrentId();
@@ -462,7 +493,14 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest011, TestSize.Level1)
     EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::UNDEFINED), "No valid instance exists");
 
     /**
-     * @tc.steps: step7. Test invalid enum value (out of range)
+     * @tc.steps: step7. Test LOCAL reason description
+     * @tc.expected: Returns correct description for LOCAL
+     */
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::LOCAL),
+        "No specific instance was specified, return the local thread instance");
+
+    /**
+     * @tc.steps: step8. Test invalid enum value (out of range)
      * @tc.expected: Returns "Unknown reason"
      */
     EXPECT_EQ(ContainerScope::ReasonToDescription(static_cast<InstanceIdGenReason>(999)), "Unknown reason");
@@ -656,5 +694,452 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest017, TestSize.Level1)
     ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
     ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
     ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+}
+
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+
+/**
+ * @tc.desc: PushCurrent and PopCurrent when tracking disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest030, TestSize.Level1)
+{
+    ContainerScope::EnableTracking(false);
+    EXPECT_FALSE(ContainerScope::IsTrackingEnabled());
+
+    uint64_t pushUid = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 100,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+    EXPECT_EQ(pushUid, 0);
+    EXPECT_EQ(ContainerScope::CurrentId(), TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::GetStackHistory().size(), 0);
+    EXPECT_EQ(ContainerScope::GetActiveFrames().size(), 0);
+
+    ContainerScope::PopCurrent(0, INSTANCE_ID_UNDEFINED, "test.cpp", 200,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+    EXPECT_EQ(ContainerScope::CurrentId(), INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ContainerScope::GetStackHistory().size(), 0);
+}
+
+/**
+ * @tc.name: ContainerScopeTest031
+ * @tc.desc: PushCurrent first frame has parentUid=0 (root)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest031, TestSize.Level1)
+{
+    uint64_t uid = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 300,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    EXPECT_NE(uid, 0);
+    EXPECT_EQ(ContainerScope::CurrentId(), TEST_INSTANCE_ID_CONTAINER);
+
+    auto activeFrames = ContainerScope::GetActiveFrames();
+    EXPECT_EQ(activeFrames.size(), 1);
+    EXPECT_EQ(activeFrames[0].uid, uid);
+    EXPECT_EQ(activeFrames[0].parentUid, 0);
+    EXPECT_EQ(activeFrames[0].newValue, TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ((activeFrames[0].anomalies & FrameAnomaly::UNPAIRED_PUSH), 0u);
+
+    ContainerScope::PopCurrent(uid, INSTANCE_ID_UNDEFINED, "test.cpp", 400,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+}
+
+/**
+ * @tc.name: ContainerScopeTest032
+ * @tc.desc: PushCurrent nested frames have correct parentUid chain
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest032, TestSize.Level1)
+{
+    uint64_t uid1 = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 500,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+    uint64_t uid2 = ContainerScope::PushCurrent(TEST_INSTANCE_ID_SUB_CONTAINER, "test.cpp", 600,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    auto activeFrames = ContainerScope::GetActiveFrames();
+    EXPECT_EQ(activeFrames.size(), 2);
+    EXPECT_EQ(activeFrames[0].uid, uid1);
+    EXPECT_EQ(activeFrames[0].parentUid, 0);
+    EXPECT_EQ(activeFrames[1].uid, uid2);
+    EXPECT_EQ(activeFrames[1].parentUid, uid1);
+
+    ContainerScope::PopCurrent(uid2, INSTANCE_ID_UNDEFINED, "test.cpp", 700,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+    ContainerScope::PopCurrent(uid1, INSTANCE_ID_UNDEFINED, "test.cpp", 800,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+}
+
+/**
+ * @tc.name: ContainerScopeTest033
+ * @tc.desc: PushCurrent with CONTAINER_INDIRECT marks UNPAIRED_PUSH anomaly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest033, TestSize.Level1)
+{
+    uint64_t uid = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 900,
+        static_cast<int32_t>(CurrentIdSourceType::CONTAINER_INDIRECT));
+
+    EXPECT_NE(uid, 0);
+
+    auto activeFrames = ContainerScope::GetActiveFrames();
+    EXPECT_EQ(activeFrames.size(), 1);
+    EXPECT_NE((activeFrames[0].anomalies & FrameAnomaly::UNPAIRED_PUSH), 0u);
+    EXPECT_EQ(activeFrames[0].anomalyDetailKind, AnomalyDetailKind::CONTAINER_INIT_NO_POP);
+
+    ContainerScope::PopCurrent(uid, INSTANCE_ID_UNDEFINED, "test.cpp", 1000,
+        static_cast<int32_t>(CurrentIdSourceType::CONTAINER_INDIRECT));
+}
+
+/**
+ * @tc.name: ContainerScopeTest034
+ * @tc.desc: PopCurrent with uid=0 triggers StackUnderflow when activeOrder empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest034, TestSize.Level1)
+{
+    ContainerScope::PopCurrent(0, INSTANCE_ID_UNDEFINED, "test.cpp", 1100,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    auto history = ContainerScope::GetStackHistory();
+    EXPECT_EQ(history.size(), 1);
+
+    const auto& frame = history.back();
+    EXPECT_NE((frame.anomalies & FrameAnomaly::STACK_UNDERFLOW), 0u);
+    EXPECT_EQ(frame.anomalyDetailKind, AnomalyDetailKind::POP_UID_NO_MATCHING_PUSH);
+    EXPECT_EQ(frame.uid, 0);
+}
+
+/**
+ * @tc.name: ContainerScopeTest035
+ * @tc.desc: PopCurrent with uid not found triggers StackUnderflow when activeOrder not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest035, TestSize.Level1)
+{
+    uint64_t uid1 = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 1200,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    ContainerScope::PopCurrent(99999, INSTANCE_ID_UNDEFINED, "test.cpp", 1300,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    auto history = ContainerScope::GetStackHistory();
+    bool foundUnderflow = false;
+    for (const auto& f : history) {
+        if (f.uid == 99999) {
+            EXPECT_NE((f.anomalies & FrameAnomaly::STACK_UNDERFLOW), 0u);
+            EXPECT_EQ(f.anomalyDetailKind, AnomalyDetailKind::POP_UID_NO_MATCHING_PUSH);
+            foundUnderflow = true;
+        }
+    }
+    EXPECT_TRUE(foundUnderflow);
+
+    ContainerScope::PopCurrent(uid1, INSTANCE_ID_UNDEFINED, "test.cpp", 1400,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+}
+
+/**
+ * @tc.name: ContainerScopeTest036
+ * @tc.desc: PopCurrent normal match no anomaly
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest036, TestSize.Level1)
+{
+    ContainerScope::UpdateCurrent(100);
+
+    uint64_t uid = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 1500,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    auto activeFrames = ContainerScope::GetActiveFrames();
+    EXPECT_EQ(activeFrames[0].oldValue, 100);
+
+    ContainerScope::PopCurrent(uid, 100, "test.cpp", 1600,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    auto history = ContainerScope::GetStackHistory();
+    EXPECT_EQ(history.size(), 1);
+
+    const auto& frame = history.back();
+    EXPECT_EQ(frame.uid, uid);
+    EXPECT_EQ((frame.anomalies & FrameAnomaly::STACK_UNDERFLOW), 0u);
+    EXPECT_EQ((frame.anomalies & FrameAnomaly::OUT_OF_ORDER_POP), 0u);
+    EXPECT_EQ((frame.anomalies & FrameAnomaly::VALUE_MISMATCH), 0u);
+
+    EXPECT_EQ(ContainerScope::GetActiveFrames().size(), 0);
+    EXPECT_TRUE(ContainerScope::IsStackBalanced());
+}
+
+/**
+ * @tc.name: ContainerScopeTest037
+ * @tc.desc: PopCurrent out of order triggers OUT_OF_ORDER_POP
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest037, TestSize.Level1)
+{
+    uint64_t uid1 = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 1700,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+    uint64_t uid2 = ContainerScope::PushCurrent(TEST_INSTANCE_ID_SUB_CONTAINER, "test.cpp", 1800,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    ContainerScope::PopCurrent(uid1, INSTANCE_ID_UNDEFINED, "test.cpp", 1900,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    auto history = ContainerScope::GetStackHistory();
+    bool foundOutOfOrder = false;
+    for (const auto& f : history) {
+        if (f.uid == uid1) {
+            EXPECT_NE((f.anomalies & FrameAnomaly::OUT_OF_ORDER_POP), 0u);
+            EXPECT_EQ(f.anomalyDetailKind, AnomalyDetailKind::OUT_OF_ORDER_POP_DYNAMIC);
+            EXPECT_GE(f.skippedCount, 1u);
+            EXPECT_EQ(f.expectedTopUid, uid2);
+            foundOutOfOrder = true;
+        }
+    }
+    EXPECT_TRUE(foundOutOfOrder);
+
+    ContainerScope::PopCurrent(uid2, INSTANCE_ID_UNDEFINED, "test.cpp", 2000,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+}
+
+/**
+ * @tc.name: ContainerScopeTest038
+ * @tc.desc: PopCurrent with restoreId mismatch triggers VALUE_MISMATCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest038, TestSize.Level1)
+{
+    ContainerScope::UpdateCurrent(100);
+
+    uint64_t uid = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 2100,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    ContainerScope::PopCurrent(uid, 300, "test.cpp", 2200,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    auto history = ContainerScope::GetStackHistory();
+    EXPECT_EQ(history.size(), 1);
+
+    const auto& frame = history.back();
+    EXPECT_NE((frame.anomalies & FrameAnomaly::VALUE_MISMATCH), 0u);
+    EXPECT_EQ(frame.anomalyDetailKind, AnomalyDetailKind::POP_VALUE_MISMATCH);
+}
+
+/**
+ * @tc.name: ContainerScopeTest039
+ * @tc.desc: History FIFO eviction for both matched pop and underflow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest039, TestSize.Level1)
+{
+    ContainerScope::SetMaxHistorySize(1);
+
+    uint64_t uid1 = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 2300,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+    ContainerScope::PopCurrent(uid1, INSTANCE_ID_UNDEFINED, "test.cpp", 2400,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    EXPECT_EQ(ContainerScope::GetStackHistory().size(), 1);
+    EXPECT_EQ(ContainerScope::GetStackHistory()[0].uid, uid1);
+
+    ContainerScope::PopCurrent(0, INSTANCE_ID_UNDEFINED, "test.cpp", 2500,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    EXPECT_EQ(ContainerScope::GetStackHistory().size(), 1);
+    EXPECT_EQ(ContainerScope::GetStackHistory()[0].uid, 0);
+
+    ContainerScope::SetMaxHistorySize(64);
+}
+
+/**
+ * @tc.name: ContainerScopeTest040
+ * @tc.desc: Constructor (id, fileId, line) and (id, enable, fileId, line) variations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest040, TestSize.Level1)
+{
+    auto before = ContainerScope::GetActiveFrames().size();
+
+    {
+        ContainerScope scope1(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 2600);
+        EXPECT_EQ(ContainerScope::GetActiveFrames().size(), before + 1);
+    }
+    EXPECT_EQ(ContainerScope::GetActiveFrames().size(), before);
+    {
+        ContainerScope scope2(TEST_INSTANCE_ID_CONTAINER, true, "test.cpp", 2700);
+        EXPECT_EQ(ContainerScope::GetActiveFrames().size(), before + 1);
+    }
+    EXPECT_EQ(ContainerScope::GetActiveFrames().size(), before);
+
+    {
+        ContainerScope scope3(TEST_INSTANCE_ID_CONTAINER, false, "test.cpp", 2800);
+        EXPECT_EQ(ContainerScope::GetActiveFrames().size(), before);
+    }
+    EXPECT_EQ(ContainerScope::GetActiveFrames().size(), before);
+}
+
+/**
+ * @tc.name: ContainerScopeTest041
+ * @tc.desc: ToString for all branches: root/no pop, has pop/multiple anomalies, OUT_OF_ORDER_POP_DYNAMIC
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest041, TestSize.Level1)
+{
+    CurrentIdStackFrame frame1;
+    frame1.uid = 1;
+    frame1.parentUid = 0;
+    frame1.oldValue = 100;
+    frame1.newValue = 200;
+    frame1.pushFileId = "push.cpp";
+    frame1.pushLine = 100;
+    frame1.popFileId = nullptr;
+    frame1.anomalies = FrameAnomaly::NONE;
+    frame1.anomalyDetailKind = AnomalyDetailKind::NONE;
+
+    std::string str1 = frame1.ToString();
+    EXPECT_TRUE(str1.find("uid=1") != std::string::npos);
+    EXPECT_TRUE(str1.find("parent=root") != std::string::npos);
+    EXPECT_TRUE(str1.find("pop=") == std::string::npos);
+    EXPECT_TRUE(str1.find("anomalies=") == std::string::npos);
+
+    CurrentIdStackFrame frame2;
+    frame2.uid = 2;
+    frame2.parentUid = 1;
+    frame2.popFileId = "pop.cpp";
+    frame2.popLine = 200;
+    frame2.anomalies = FrameAnomaly::UNPAIRED_PUSH | FrameAnomaly::STACK_UNDERFLOW | FrameAnomaly::VALUE_MISMATCH;
+    frame2.anomalyDetailKind = AnomalyDetailKind::POP_VALUE_MISMATCH;
+
+    std::string str2 = frame2.ToString();
+    EXPECT_TRUE(str2.find("parent=1") != std::string::npos);
+    EXPECT_TRUE(str2.find("pop=pop.cpp:200") != std::string::npos);
+    EXPECT_TRUE(str2.find("UNPAIRED_PUSH") != std::string::npos);
+    EXPECT_TRUE(str2.find("STACK_UNDERFLOW") != std::string::npos);
+    EXPECT_TRUE(str2.find("VALUE_MISMATCH") != std::string::npos);
+    EXPECT_TRUE(str2.find("POP restore value differs") != std::string::npos);
+
+    CurrentIdStackFrame frame3;
+    frame3.uid = 3;
+    frame3.anomalies = FrameAnomaly::OUT_OF_ORDER_POP;
+    frame3.anomalyDetailKind = AnomalyDetailKind::OUT_OF_ORDER_POP_DYNAMIC;
+    frame3.skippedCount = 2;
+    frame3.skippedUids[0] = 10;
+    frame3.skippedUids[1] = 20;
+    frame3.expectedTopUid = 30;
+
+    std::string str3 = frame3.ToString();
+    EXPECT_TRUE(str3.find("OUT_OF_ORDER_POP") != std::string::npos);
+    EXPECT_TRUE(str3.find("not top") != std::string::npos);
+    EXPECT_TRUE(str3.find("expected=30") != std::string::npos);
+    EXPECT_TRUE(str3.find("skipped 2 frames") != std::string::npos);
+    EXPECT_TRUE(str3.find("[uid=10") != std::string::npos);
+    EXPECT_TRUE(str3.find("uid=20") != std::string::npos);
+}
+
+/**
+ * @tc.name: ContainerScopeTest042
+ * @tc.desc: Diagnose with balanced stack and with anomalies
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest042, TestSize.Level1)
+{
+    ContainerScope::ClearHistory();
+    std::string report1 = ContainerScope::Diagnose();
+    EXPECT_TRUE(report1.find("Stack balanced: YES") != std::string::npos);
+    EXPECT_TRUE(report1.find("STACK_UNDERFLOW:") == std::string::npos);
+
+    uint64_t uid = ContainerScope::PushCurrent(TEST_INSTANCE_ID_CONTAINER, "test.cpp", 2900,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+    ContainerScope::PopCurrent(0, INSTANCE_ID_UNDEFINED, "test.cpp", 3000,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+
+    std::string report2 = ContainerScope::Diagnose();
+    EXPECT_TRUE(report2.find("Stack balanced: NO") != std::string::npos);
+    EXPECT_TRUE(report2.find("STACK_UNDERFLOW:") != std::string::npos);
+
+    ContainerScope::PopCurrent(uid, INSTANCE_ID_UNDEFINED, "test.cpp", 3100,
+        static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
+}
+#endif // ENABLE_CONTAINER_SCOPE_TRACKING
+
+/**
+ * @tc.name: ContainerScopeTest018
+ * @tc.desc: SafelyId - local fallback and checkThread option
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare ids and thread check result
+     */
+    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateLocalCurrent(TEST_INSTANCE_ID_SUB_CONTAINER);
+    MockThreadCheckResult(TEST_INSTANCE_ID_CONTAINER, false);
+    MockThreadCheckResult(TEST_INSTANCE_ID_SUB_CONTAINER, true);
+
+    /**
+     * @tc.steps: step2. checkThread=true prefers local thread id
+     * @tc.expected: SafelyId equals local id
+     */
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
+
+    /**
+     * @tc.steps: step3. checkThread=false ignores local fallback
+     * @tc.expected: SafelyId equals active id
+     */
+    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_CONTAINER);
+
+    /**
+     * @tc.steps: step4. clear set value
+     */
+    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateLocalCurrent(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ClearMockThreadCheckResult();
+}
+
+/**
+ * @tc.name: ContainerScopeTest019
+ * @tc.desc: CurrentIdWithReason - local fallback and checkThread option
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare ids and thread check result
+     */
+    ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::UpdateLocalCurrent(TEST_INSTANCE_ID_SUB_CONTAINER);
+    MockThreadCheckResult(TEST_INSTANCE_ID_CONTAINER, false);
+    MockThreadCheckResult(TEST_INSTANCE_ID_SUB_CONTAINER, true);
+
+    /**
+     * @tc.steps: step2. checkThread=true returns local fallback with LOCAL reason
+     */
+    auto currentIdWithReason = ContainerScope::CurrentIdWithReason();
+    EXPECT_EQ(currentIdWithReason.first, TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(currentIdWithReason.second, InstanceIdGenReason::LOCAL);
+
+    /**
+     * @tc.steps: step3. checkThread=false keeps foreground path and reason
+     */
+    auto currentIdWithReasonWithoutThreadCheck = ContainerScope::CurrentIdWithReason(false);
+    EXPECT_EQ(currentIdWithReasonWithoutThreadCheck.first, TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(currentIdWithReasonWithoutThreadCheck.second, InstanceIdGenReason::FOREGROUND);
+
+    /**
+     * @tc.steps: step4. clear set value
+     */
+    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::UpdateLocalCurrent(INSTANCE_ID_UNDEFINED);
+    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+    ClearMockThreadCheckResult();
 }
 } // namespace OHOS::Ace

@@ -69,7 +69,7 @@ import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
 import { uiUtils } from './uiUtilsImpl';
 import { FactoryInternal } from './iFactoryInternal';
-import { EnvDecoratedVariable } from '../decoratorImpl/decoratorEnv';
+import { EnvDecoratedVariable } from '@decoratorEnv';
 import { ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
@@ -553,7 +553,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IStoragePropRefDecoratedVariable<T> {
-        const ref = AppStorage.setAndRef<T>(propName, uiUtils.makeV1Observed(initValue));
+        const ref = AppStorage.__makeStoragePropRef<T>(propName, '@StoragePropRef', uiUtils.makeV1Observed(initValue));
         if (ref === undefined) {
             throw new TypeError(`@StoragePropRef('${propName}') ${varName} failed to makeStoragePropRef`);
         }
@@ -574,7 +574,8 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T> {
-        const ref = owningView.__getLocalStorage__Internal().setAndRef<T>(propName, uiUtils.makeV1Observed(initValue));
+        const ref = owningView.__getLocalStorage__Internal().__makeStoragePropRef<T>(
+            propName, '@LocalStoragePropRef', uiUtils.makeV1Observed(initValue));
         if (ref === undefined) {
             throw new TypeError(`@LocalStoragePropRef('${propName}') ${varName} makeLocalStoragePropRef`);
         }
@@ -626,5 +627,19 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             varName,
             envOptions
         ) as IEnvDecoratedVariable<T>;
+    }
+
+    makeSyncMonitor(
+        pathInfos: Array<IMonitorPathInfo>,
+        monitorCallback: (m: IMonitor) => void,
+        options?: MakeMonitorOptions
+    ): IMonitorDecoratedVariable {
+        return new MonitorFunctionDecorator(
+            pathInfos,
+            monitorCallback,
+            options?.owner,
+            true,
+            options?.functionName
+        );
     }
 }

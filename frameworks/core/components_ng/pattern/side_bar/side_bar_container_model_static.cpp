@@ -161,6 +161,12 @@ void SideBarContainerModelStatic::SetShowControlButton(FrameNode* frameNode, boo
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowControlButton, showControlButton, frameNode);
 }
 
+void SideBarContainerModelStatic::SetShowSideBarWithGesture(FrameNode* frameNode, bool showSideBarWithGesture)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowSideBarWithGesture, showSideBarWithGesture,
+        frameNode);
+}
+
 void SideBarContainerModelStatic::SetAutoHide(FrameNode* frameNode, bool autoHide)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, AutoHide, autoHide, frameNode);

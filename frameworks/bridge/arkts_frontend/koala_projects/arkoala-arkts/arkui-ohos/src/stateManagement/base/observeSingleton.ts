@@ -19,7 +19,7 @@ import { IBindingSource, ITrackedDecoratorRef } from './mutableStateMeta';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
 import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
-import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
+import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { PersistenceV2Impl } from '../storage/persistenceV2';
 import { GlobalStateManager } from '@koalaui/runtime';
 
@@ -133,6 +133,25 @@ export class ObserveSingleton implements IObserve {
     }
 
     /**
+     * Sync-monitor batch nesting depth. While > 0, calls to
+     * updateDirtySyncMonitorPaths() defer the drain so a logically-single
+     * mutation (e.g. WrappedArray.push, which fires both OB_LENGTH and
+     * OB_ARRAY_ANY_KEY) coalesces into ONE sync callback per monitor instead
+     * of one per fireChange. The drain runs when the outermost batch ends.
+     */
+    private syncMonitorBatchDepth_: int = 0;
+
+    public beginSyncMonitorBatch(): void {
+        this.syncMonitorBatchDepth_++;
+    }
+
+    public endSyncMonitorBatch(): void {
+        if (--this.syncMonitorBatchDepth_ === 0) {
+            this.drainSyncMonitorPaths();
+        }
+    }
+
+    /**
      * Process synchronous monitor paths that have been marked as dirty.
      *
      * Synchronous monitors (those with id >= MIN_SYNC_MONITOR_ID) need to be
@@ -140,9 +159,16 @@ export class ObserveSingleton implements IObserve {
      * which are processed during the next updateDirty() cycle.
      *
      * Called from MutableStateMeta.fireChange() to ensure real-time tracking
-     * for synchronous monitors.
+     * for synchronous monitors. Defers while inside a sync-monitor batch.
      */
     public updateDirtySyncMonitorPaths(): void {
+        if (this.syncMonitorBatchDepth_ > 0) {
+            return;
+        }
+        this.drainSyncMonitorPaths();
+    }
+
+    private drainSyncMonitorPaths(): void {
         const monitors = this.syncMonitorPathRefsChanged_;
         this.syncMonitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
         const monitorsToRun = this.notifyDirtyMonitorPaths(monitors);
@@ -198,13 +224,39 @@ export class ObserveSingleton implements IObserve {
         );
     }
 
+    public updateDirtyComputedAndMonitorWhenUnfreeze(): void {
+        do {
+            while (this.computedPropRefsChanged_.size > 0) {
+                const computedProps = this.computedPropRefsChanged_;
+                this.computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                this.updateDirtyComputedProps(computedProps);
+            }
+            if (this.monitorPathRefsChanged_.size > 0) {
+                const monitors = this.monitorPathRefsChanged_;
+                this.monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                let monitorsToRun: Set<MonitorFunctionDecorator> = this.notifyDirtyMonitorPaths(monitors);
+                if (monitorsToRun && monitorsToRun.size > 0) {
+                    monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => {
+                        monitor.runMonitorFunction();
+                    });
+                }
+            }
+        } while (
+            this.monitorPathRefsChanged_.size + this.computedPropRefsChanged_.size > 0
+        )
+    }
+
     private updateDirtyComputedProps(computedProps: Set<WeakRef<ITrackedDecoratorRef>>): void {
         computedProps.forEach((computedPropWeak: WeakRef<ITrackedDecoratorRef>) => {
             let computedPropRef = computedPropWeak.deref();
             if (!computedPropRef) {
                 return;
             }
-            const computed = computedPropRef as IComputedDecoratorRef;
+            // Cast to the concrete @Computed class (mirrors how the monitor
+            // drain casts to MonitorFunctionDecorator) — this is the only
+            // call site that needs isFreeze/fireChange on a tracked ref, so
+            // a one-purpose interface earns its keep less than the symmetry.
+            const computed = computedPropRef as ComputedDecoratedVariable<Any>;
             if (computed.isFreeze()) {
                 this.computedPropRefsDelayed_.add(computedPropWeak);
             } else {

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper/swiper_model_static.h"
 #include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"

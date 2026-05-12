@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/components_ng/pattern/swiper/swiper_change_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2327,20 +2328,37 @@ void SetSwiperOnContentDidScroll(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
-        ArkUINodeEvent event;
-        event.kind = COMPONENT_ASYNC_EVENT;
-        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
-        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
-        event.componentAsyncEvent.subKind = ON_SWIPER_DID_CONTENT_SCROLL;
-        event.componentAsyncEvent.data[NUM_0].i32 = selectedIndex;
-        event.componentAsyncEvent.data[NUM_1].i32 = index;
-        event.componentAsyncEvent.data[NUM_2].f32 = position;
-        event.componentAsyncEvent.data[NUM_3].f32 = mainAxisLength / density;
-        SendArkUISyncEvent(&event);
-    };
-    SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(onEvent));
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto onEvent = [node, extraParam](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+            ArkUINodeEvent event;
+            event.kind = COMPONENT_ASYNC_EVENT;
+            event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+            bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+            double density = usePx ? PipelineBase::GetCurrentDensity() : 1;
+            event.componentAsyncEvent.subKind = ON_SWIPER_DID_CONTENT_SCROLL;
+            event.componentAsyncEvent.data[NUM_0].i32 = selectedIndex;
+            event.componentAsyncEvent.data[NUM_1].i32 = index;
+            event.componentAsyncEvent.data[NUM_2].f32 = position;
+            event.componentAsyncEvent.data[NUM_3].f32 = mainAxisLength * density;
+            SendArkUISyncEvent(&event);
+        };
+        SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(onEvent));
+    } else {
+        auto onEvent = [node, extraParam](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+            ArkUINodeEvent event;
+            event.kind = COMPONENT_ASYNC_EVENT;
+            event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+            bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+            double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
+            event.componentAsyncEvent.subKind = ON_SWIPER_DID_CONTENT_SCROLL;
+            event.componentAsyncEvent.data[NUM_0].i32 = selectedIndex;
+            event.componentAsyncEvent.data[NUM_1].i32 = index;
+            event.componentAsyncEvent.data[NUM_2].f32 = position;
+            event.componentAsyncEvent.data[NUM_3].f32 = mainAxisLength / density;
+            SendArkUISyncEvent(&event);
+            };
+        SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(onEvent));
+    }
 }
 
 void SetSwiperUnselected(ArkUINodeHandle node, void* extraParam)

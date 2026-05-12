@@ -19,10 +19,18 @@
 #define private public
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -407,6 +415,157 @@ HWTEST_F(ScrollableUtilsTest, GetMoveOffset002, TestSize.Level1)
     };
     auto notMove = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
     EXPECT_EQ(notMove, 0.0f);
+}
+
+/**
+ * @tc.name: GetMoveOffset003
+ * @tc.desc: Test list focus navigation scroll uses list item center limit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, GetMoveOffset003, TestSize.Level1)
+{
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto parentFrameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listPattern);
+    parentFrameNode->geometryNode_->SetFrameSize({ 100, 100 });
+    parentFrameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(parentFrameNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 0, 100, 100));
+    auto listProperty = parentFrameNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(listProperty, nullptr);
+    listProperty->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
+    listPattern->contentMainSize_ = 100.0f;
+
+    auto listItemNode =
+        FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<ListItemPattern>(nullptr));
+    listItemNode->geometryNode_->SetFrameSize({ 100, 80 });
+    listItemNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(listItemNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 60, 100, 80));
+    parentFrameNode->AddChild(listItemNode);
+
+    MoveOffsetParam param { true, 0.0f, 0.0f, false, true };
+    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, listItemNode, param);
+
+    EXPECT_EQ(moveOffset, -50.0f);
+}
+
+/**
+ * @tc.name: GetMoveOffset004
+ * @tc.desc: Test grouped list-item focus navigation scroll uses direct child limit offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, GetMoveOffset004, TestSize.Level1)
+{
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto parentFrameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listPattern);
+    parentFrameNode->geometryNode_->SetFrameSize({ 100, 100 });
+    parentFrameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(parentFrameNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 0, 100, 100));
+    auto listProperty = parentFrameNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(listProperty, nullptr);
+    listProperty->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
+    listPattern->contentMainSize_ = 100.0f;
+
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    auto listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, options);
+    auto listItemGroupNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, -1, listItemGroupPattern);
+    listItemGroupNode->geometryNode_->SetFrameSize({ 100, 140 });
+    listItemGroupNode->geometryNode_->UpdateMargin(MarginPropertyF());
+    listItemGroupNode->geometryNode_->UpdatePaddingWithBorder(PaddingPropertyF());
+    listItemGroupNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(listItemGroupNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 20, 100, 140));
+    listItemGroupPattern->SetIndexInList(0);
+    listItemGroupPattern->itemPosition_[0] = { -1, 60.0f, 120.0f, false };
+    parentFrameNode->AddChild(listItemGroupNode);
+
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
+    auto listItemNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, -1, listItemPattern);
+    listItemNode->geometryNode_->SetFrameSize({ 100, 60 });
+    listItemNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(listItemNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 80, 100, 60));
+    listItemPattern->SetIndexInList(0);
+    listItemPattern->SetIndexInListItemGroup(0);
+    listItemGroupNode->AddChild(listItemNode);
+
+    MoveOffsetParam param { true, 0.0f, 0.0f, false, true };
+    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, listItemNode, param);
+
+    EXPECT_EQ(moveOffset, -40.0f);
+}
+
+/**
+ * @tc.name: GetMoveOffset005
+ * @tc.desc: Test focused list-item group uses center-limited scroll offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, GetMoveOffset005, TestSize.Level1)
+{
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto parentFrameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listPattern);
+    parentFrameNode->geometryNode_->SetFrameSize({ 100, 100 });
+    parentFrameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(parentFrameNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 0, 100, 100));
+    auto listProperty = parentFrameNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(listProperty, nullptr);
+    listProperty->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
+    listPattern->contentMainSize_ = 100.0f;
+
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    auto listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, options);
+    auto listItemGroupNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, -1, listItemGroupPattern);
+    listItemGroupNode->geometryNode_->SetFrameSize({ 100, 140 });
+    listItemGroupNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(listItemGroupNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 20, 100, 140));
+    listItemGroupPattern->SetIndexInList(0);
+    listItemGroupPattern->itemTotalCount_ = 1;
+    listItemGroupPattern->itemDisplayStartIndex_ = 0;
+    listItemGroupPattern->itemDisplayEndIndex_ = 0;
+    parentFrameNode->AddChild(listItemGroupNode);
+
+    MoveOffsetParam param { true, 0.0f, 0.0f, false, true };
+    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, listItemGroupNode, param);
+
+    EXPECT_EQ(moveOffset, -40.0f);
+}
+
+/**
+ * @tc.name: GetMoveOffset006
+ * @tc.desc: Test scroll focus navigation uses snap-limited offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, GetMoveOffset006, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto parentFrameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, -1, scrollPattern);
+    parentFrameNode->geometryNode_->SetFrameSize({ 100, 100 });
+    parentFrameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(parentFrameNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 0, 100, 100));
+    auto scrollProperty = parentFrameNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollProperty, nullptr);
+    scrollProperty->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
+    scrollPattern->currentOffset_ = -50.0f;
+    scrollPattern->scrollableDistance_ = 300.0f;
+    scrollPattern->snapOffsets_ = { 0.0f, -100.0f, -200.0f, -300.0f };
+
+    auto curFrameNode = FrameNode::CreateFrameNode("FocusedChild", -1, AceType::MakeRefPtr<Pattern>());
+    curFrameNode->geometryNode_->SetFrameSize({ 20, 50 });
+    curFrameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    AceType::DynamicCast<MockRenderContext>(curFrameNode->renderContext_)->SetPaintRectWithTransform(
+        RectF(0, 75, 20, 50));
+    parentFrameNode->AddChild(curFrameNode);
+
+    MoveOffsetParam param { true, 0.0f, 0.0f, false, true };
+    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
+
+    EXPECT_EQ(moveOffset, -50.0f);
 }
 
 /**

@@ -36,7 +36,13 @@
     "pages/SVG/svgExample007",
     "pages/SVG/svgExample008",
     "pages/SVG/svgExample017",
+    "pages/SVG/svgExample018",
     "pages/ImageOrientation/Index",
-    "pages/ImageDfxExamples/ImageDfxExamples009"
+    "pages/ImageDfxExamples/ImageDfxExamples009",
+    "pages/example/ImageReloadKeyExample",
+    "pages/example/ImageReloadKeyScenarioExample",
+    "pages/testcase/ImageReloadKeyTestCase",
+    "pages/example/ImageBase64SvgExample",
+    "pages/example/ImageContentDetectionExample"
   ]
 }

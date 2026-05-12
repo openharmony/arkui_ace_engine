@@ -89,6 +89,7 @@ constexpr static int32_t DEFAULT_CONTENT_ZINDEX_EMBED = 2;
 constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_OVERLAY = 2;
 constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_OVERLAY = 1;
 constexpr static int32_t DEFAULT_CONTENT_ZINDEX_OVERLAY = 0;
+constexpr Dimension CLOSE_SIDEBAR_PAN_DISTANCE = 100.0_vp;
 } // namespace
 
 class SideBarPatternTestNg : public testing::Test {
@@ -707,7 +708,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg023, TestSize.Level1)
     SideBarContainerModelNG sideBarContainerModelInstance;
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->HandleDragStart();
+    pattern->HandleDragStart(true);
     EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
 }
 
@@ -731,7 +732,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg024, TestSize.Level1)
      * @tc.expected: step2. check whether the pattern->sideBarStatus_ is correct.
      */
     pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
-    pattern->HandleDragStart();
+    pattern->HandleDragStart(true);
     EXPECT_NE(pattern->sideBarStatus_, SideBarStatus::SHOW);
 }
 
@@ -3026,5 +3027,409 @@ HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern003, TestSize.Level1)
     pattern->showSideBar_ = false;
     pattern->sideBarStatus_ = SideBarStatus::SHOW;
     pattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+}
+
+/**
+ * @tc.name: SideBarContainerDoSpringAnimation001
+ * @tc.desc: Test SideBarContainerPattern OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerDoSpringAnimation001, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    pattern->DoSpringAnimation();
+    ASSERT_NE(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarContainerDoSpringAnimation002
+ * @tc.desc: Test SideBarContainerPattern OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerDoSpringAnimation002, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->DoSpringAnimation();
+    ASSERT_NE(pattern->sideBarStatus_, SideBarStatus::HIDDEN);
+}
+
+/**
+ * @tc.name: SideBarContainerDoSpringAnimation003
+ * @tc.desc: Test SideBarContainerPattern DoSpringAnimation creates interpolatingSpringAnimation_
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerDoSpringAnimation003, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+
+    pattern->DoSpringAnimation();
+
+    ASSERT_NE(pattern->interpolatingSpringAnimation_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarContainerDoSpringAnimation004
+ * @tc.desc: Test SideBarContainerPattern DoSpringAnimation with autoHide enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerDoSpringAnimation004, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->autoHide_ = true;
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+
+    pattern->DoSpringAnimation();
+
+    EXPECT_EQ(pattern->inAnimation_, false);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::HIDDEN);
+}
+
+/**
+ * @tc.name: SideBarHandleDragEndForContent001
+ * @tc.desc: Test HandleDragEndForContent springs back when dragging below threshold
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarHandleDragEndForContent001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    pattern->realSideBarWidth_ = 200.0_vp;
+    pattern->currentContentDragOffset_ = 50.0f;
+
+    float xOffset = -50.0f;
+    pattern->HandleDragEndForContent(xOffset, SideBarPosition::START);
+
+    ASSERT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarHandleDragEndForContent002
+ * @tc.desc: Test HandleDragEndForContent at exact threshold distance
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarHandleDragEndForContent002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    pattern->realSideBarWidth_ = 200.0_vp;
+    pattern->realDividerWidth_ = 1.0f;
+
+    float thresholdPx = CLOSE_SIDEBAR_PAN_DISTANCE.ConvertToPx();
+    pattern->HandleDragEndForContent(-thresholdPx, SideBarPosition::START);
+
+    ASSERT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarHandleDragStart001
+ * @tc.desc: Test HandleDragStart with isDividerDrag = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarHandleDragStart001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    pattern->isDividerDraggable_ = true;
+
+    pattern->HandleDragStart(true);
+
+    EXPECT_EQ(pattern->isInDividerDrag_, true);
+    EXPECT_EQ(pattern->preSidebarWidth_, pattern->realSideBarWidth_);
+}
+
+/**
+ * @tc.name: SideBarHandleDragStart002
+ * @tc.desc: Test HandleDragStart with isDividerDrag = false (content drag)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarHandleDragStart002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+
+    pattern->HandleDragStart(false);
+
+    EXPECT_EQ(pattern->isInDividerDrag_, false);
+}
+
+/**
+ * @tc.name: SideBarHandleDragStart003
+ * @tc.desc: Test HandleDragStart does not start when sidebar is hidden
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarHandleDragStart003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->isDividerDraggable_ = true;
+
+    pattern->HandleDragStart(true);
+
+    EXPECT_EQ(pattern->isInDividerDrag_, false);
+}
+
+/**
+ * @tc.name: SideBarHandleDragStart004
+ * @tc.desc: Test HandleDragStart does not start when divider is not draggable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarHandleDragStart004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    pattern->isDividerDraggable_ = false;
+
+    pattern->HandleDragStart(true);
+
+    EXPECT_EQ(pattern->isInDividerDrag_, false);
+}
+
+/**
+ * @tc.name: SideBarShowSideBarWithGesture001
+ * @tc.desc: Test SetShowSideBarWithGesture property
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarShowSideBarWithGesture001, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    sideBarContainerModelInstance.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    sideBarContainerModelInstance.SetShowSideBarWithGesture(AceType::RawPtr(frameNode), true);
+
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    EXPECT_NE(sideBarLayoutProperty, nullptr);
+    auto showSideBarWithGesture = sideBarLayoutProperty->GetShowSideBarWithGesture();
+    ASSERT_TRUE(showSideBarWithGesture.value());
+}
+
+/**
+ * @tc.name: SideBarShowSideBarWithGesture002
+ * @tc.desc: Test SetShowSideBarWithGesture with false value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarShowSideBarWithGesture002, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    sideBarContainerModelInstance.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    sideBarContainerModelInstance.SetShowSideBarWithGesture(AceType::RawPtr(frameNode), false);
+
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    EXPECT_NE(sideBarLayoutProperty, nullptr);
+    auto showSideBarWithGesture = sideBarLayoutProperty->GetShowSideBarWithGesture();
+    ASSERT_FALSE(showSideBarWithGesture.value());
+}
+
+/**
+ * @tc.name: SideBarShowSideBarWithGesture003
+ * @tc.desc: Test ShowSideBarWithGesture default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarShowSideBarWithGesture003, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    sideBarContainerModelInstance.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    EXPECT_NE(sideBarLayoutProperty, nullptr);
+    auto showSideBarWithGesture = sideBarLayoutProperty->GetShowSideBarWithGesture();
+    ASSERT_FALSE(showSideBarWithGesture.value_or(false));
+}
+
+/**
+ * @tc.name: SideBarLayoutAlgorithm001
+ * @tc.desc: Test LayoutAlgorithm with sideBarInDragGesture
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarLayoutAlgorithm001, TestSize.Level1)
+{
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->SetSideBarInDragGesture(true);
+    layoutAlgorithm->SetCurrentContentDragOffset(50.0f);
+    layoutAlgorithm->SetSideBarStatus(SideBarStatus::SHOW);
+    layoutAlgorithm->SetRealSideBarWidth(200.0_vp);
+    layoutAlgorithm->SetRealDividerWidth(1.0f);
+
+    EXPECT_EQ(layoutAlgorithm->GetSideBarStatus(), SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarLayoutAlgorithm002
+ * @tc.desc: Test LayoutAlgorithm with HIDDEN status and drag gesture
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarLayoutAlgorithm002, TestSize.Level1)
+{
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->SetSideBarInDragGesture(true);
+    layoutAlgorithm->SetCurrentContentDragOffset(80.0f);
+    layoutAlgorithm->SetSideBarStatus(SideBarStatus::HIDDEN);
+
+    EXPECT_EQ(layoutAlgorithm->GetSideBarStatus(), SideBarStatus::HIDDEN);
+}
+
+/**
+ * @tc.name: SideBarSideBarInDragGesture001
+ * @tc.desc: Test SetSideBarInDragGesture and GetCurrentContentDragOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarSideBarInDragGesture001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetSideBarInDragGesture(true);
+    EXPECT_EQ(pattern->sideBarInDragGesture_, true);
+
+    pattern->SetCurrentContentDragOffset(123.45f);
+    EXPECT_FLOAT_EQ(pattern->currentContentDragOffset_, 123.45f);
+
+    pattern->SetSideBarInDragGesture(false);
+    EXPECT_EQ(pattern->sideBarInDragGesture_, false);
+}
+
+/**
+ * @tc.name: SideBarCleanInterpolatingSpringAnimation001
+ * @tc.desc: Test CleanInterpolatingSpringAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarCleanInterpolatingSpringAnimation001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+
+    pattern->DoSpringAnimation();
+    ASSERT_NE(pattern->interpolatingSpringAnimation_, nullptr);
+
+    pattern->CleanInterpolatingSpringAnimation();
+    EXPECT_EQ(pattern->interpolatingSpringAnimation_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarGetSpringAnimationPropertyCallback001
+ * @tc.desc: Test GetSpringAnimationPropertyCallback updates currentOffset for START position
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarGetSpringAnimationPropertyCallback001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    sideBarLayoutProperty->UpdateSideBarPosition(SideBarPosition::START);
+
+    pattern->realSideBarWidth_ = 200.0_vp;
+    pattern->realDividerWidth_ = 1.0f;
+    pattern->animDir_ = SideBarAnimationDirection::LTR;
+
+    auto callback = pattern->GetSpringAnimationPropertyCallback();
+    ASSERT_NE(callback, nullptr);
+
+    callback();
+
+    EXPECT_FLOAT_EQ(pattern->currentOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: SideBarGetSpringAnimationPropertyCallback002
+ * @tc.desc: Test GetSpringAnimationPropertyCallback updates currentOffset for END position
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarGetSpringAnimationPropertyCallback002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    sideBarLayoutProperty->UpdateSideBarPosition(SideBarPosition::END);
+
+    pattern->realSideBarWidth_ = 200.0_vp;
+    pattern->realDividerWidth_ = 1.0f;
+    pattern->animDir_ = SideBarAnimationDirection::LTR;
+
+    auto callback = pattern->GetSpringAnimationPropertyCallback();
+    ASSERT_NE(callback, nullptr);
+
+    callback();
+
+    EXPECT_FLOAT_EQ(pattern->currentOffset_, pattern->realDividerWidth_);
 }
 } // namespace OHOS::Ace::NG

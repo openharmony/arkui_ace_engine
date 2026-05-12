@@ -100,4 +100,5 @@ RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CUSTOM_NODE_WIDTH), CalcLength(CUSTOM_NODE_HEIGHT)));
     return frameNode;
 }
+
 } // namespace OHOS::Ace::NG

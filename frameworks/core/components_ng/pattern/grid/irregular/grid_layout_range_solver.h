@@ -101,6 +101,20 @@ private:
      */
     std::pair<int32_t, int32_t> CheckMultiRow(int32_t idx);
 
+    /**
+     * @brief Updates startItem and startLine for multi-row item at current column.
+     *
+     * @param row The current row mapping.
+     * @param colIdx The current column index.
+     * @param colIt Iterator pointing to current column in row.
+     * @param currentRowIdx The current row index.
+     * @param startLine Reference to the startLine to update.
+     * @param startItem Reference to the startItem to update.
+     */
+    void UpdateStartItemForMultiRow(const std::map<int32_t, int32_t>& row, int32_t colIdx,
+        const std::map<int32_t, int32_t>::const_iterator& colIt, int32_t currentRowIdx,
+        int32_t& startLine, int32_t& startItem) const;
+
     const GridLayoutInfo* info_;
     const LayoutWrapper* wrapper_;
     const GridLayoutOptions* opts_;

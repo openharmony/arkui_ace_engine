@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/tab_bar/render_tab_bar.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/event_report.h"
 #include "core/common/container.h"

@@ -32,11 +32,13 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -164,6 +166,10 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("keyboardAvoidMode", &JSSelect::SetKeyboardAvoidMode);
     JSClass<JSSelect>::StaticMethod("minKeyboardAvoidDistance", &JSSelect::SetMinKeyboardAvoidDistance);
     JSClass<JSSelect>::StaticMethod("menuSystemMaterial", &JSSelect::SetMenuSystemMaterial);
+    JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyleOptions", &JSSelect::SetMenuBackgroundBlurStyleOptions);
+    JSClass<JSSelect>::StaticMethod("menuBackgroundEffect", &JSSelect::SetMenuBackgroundEffect);
+    JSClass<JSSelect>::StaticMethod("menuDistortionMode", &JSSelect::SetMenuDistortionMode);
+    JSClass<JSSelect>::StaticMethod("menuEdgeLightMode", &JSSelect::SetMenuEdgeLightMode);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -1252,5 +1258,86 @@ void JSSelect::SetMenuSystemMaterial(const JSCallbackInfo& info)
     }
     const auto* menuSystemMaterial = CreateUiMaterialFromNapiValue(info[0]);
     SelectModel::GetInstance()->SetMenuSystemMaterial(menuSystemMaterial->Copy());
+}
+
+void JSSelect::SetMenuBackgroundBlurStyleOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    BlurStyleOption styleOption;
+    if (info[0]->IsObject()) {
+        auto jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSViewAbstract::ParseBlurStyleOption(jsObj, styleOption);
+    }
+    SelectModel::GetInstance()->SetMenuBackgroundBlurStyleOptions(styleOption);
+}
+
+void JSSelect::SetMenuBackgroundEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    EffectOption option;
+    if (info[0]->IsObject()) {
+        auto jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSViewAbstract::ParseEffectOption(jsObj, option);
+    }
+    SelectModel::GetInstance()->SetMenuBackgroundEffect(option);
+}
+
+void JSSelect::SetMenuDistortionMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        SelectModel::GetInstance()->SetMenuDistortionMode(std::nullopt);
+        return;
+    }
+    std::optional<DistortionMode> mode = std::nullopt;
+    int32_t value = info[0]->ToNumber<int32_t>();
+    switch (value) {
+        case static_cast<int32_t>(DistortionMode::DISTORTION_AUTO):
+            mode = DistortionMode::DISTORTION_AUTO;
+            break;
+        case static_cast<int32_t>(DistortionMode::DISTORTION_ENABLED):
+            mode = DistortionMode::DISTORTION_ENABLED;
+            break;
+        case static_cast<int32_t>(DistortionMode::DISTORTION_DISABLED):
+            mode = DistortionMode::DISTORTION_DISABLED;
+            break;
+        default:
+            break;
+    }
+    SelectModel::GetInstance()->SetMenuDistortionMode(mode);
+}
+
+void JSSelect::SetMenuEdgeLightMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        SelectModel::GetInstance()->SetMenuEdgeLightMode(std::nullopt);
+        return;
+    }
+    std::optional<EdgeLightMode> mode = std::nullopt;
+    int32_t value = info[0]->ToNumber<int32_t>();
+    switch (value) {
+        case static_cast<int32_t>(EdgeLightMode::EDGELIGHT_AUTO):
+            mode = EdgeLightMode::EDGELIGHT_AUTO;
+            break;
+        case static_cast<int32_t>(EdgeLightMode::EDGELIGHT_ENABLED):
+            mode = EdgeLightMode::EDGELIGHT_ENABLED;
+            break;
+        case static_cast<int32_t>(EdgeLightMode::EDGELIGHT_DISABLED):
+            mode = EdgeLightMode::EDGELIGHT_DISABLED;
+            break;
+        default:
+            break;
+    }
+    SelectModel::GetInstance()->SetMenuEdgeLightMode(mode);
 }
 } // namespace OHOS::Ace::Framework

@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/image/image_source_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 struct MenuItemLabelFontStyle {

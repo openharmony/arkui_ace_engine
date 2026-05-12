@@ -19,6 +19,7 @@
 #include "base/utils/feature_param.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"
@@ -217,10 +218,20 @@ void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 
     vOverflowHandler->SetOverflowDisabledFlag(
         vOverflowHandler->IsOverflowDisabled() || hostNode->IsAncestorScrollable());
-    if (FeatureParam::IsSmartLayoutEnabled() && !vOverflowHandler->IsOverflowDisabled() &&
-        vOverflowHandler->IsOverflow()) {
+
+    // Determine if smart layout should execute this frame
+    bool shouldExecuteSmartLayout = FeatureParam::IsSmartLayoutEnabled() &&
+        !vOverflowHandler->IsOverflowDisabled() && vOverflowHandler->IsOverflow();
+    // State change detection: restore scales when transitioning from executed to not-executed
+    if (vOverflowHandler->WasSmartLayoutExecuted() && !shouldExecuteSmartLayout) {
+        vOverflowHandler->RestoreScales(layoutWrapper);
+        vOverflowHandler->SetSmartLayoutExecuted(false);
+    }
+
+    if (shouldExecuteSmartLayout) {
         SmartLayoutAlgorithm smartLayoutAlgorithm;
         smartLayoutAlgorithm.PerformSmartLayout(layoutWrapper);
+        vOverflowHandler->SetSmartLayoutExecuted(true);
     } else if (FeatureParam::IsPageOverflowEnabled()) {
         if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
             return;

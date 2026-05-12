@@ -19,8 +19,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/counter/counter_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -14,6 +14,7 @@
  */
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h"
 
+#include "bridge/common/utils/utils.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/base/utils/string_utils.h"
@@ -27,7 +28,9 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+constexpr int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 } // namespace
 
 ArkUINativeModuleValue SymbolSpanBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -43,7 +46,7 @@ ArkUINativeModuleValue SymbolSpanBridge::SetFontColor(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto array = Local<panda::ArrayRef>(secondArg);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
 
     std::vector<ArkUI_Uint32> colorArray;
     std::vector<Color> colorArr;
@@ -132,14 +135,47 @@ ArkUINativeModuleValue SymbolSpanBridge::SetFontWeight(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
         std::string weight = secondArg->ToString(vm)->ToString(vm);
-        GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanFontWeightStr(
-            nativeNode, weight.c_str());
+        auto parseResult = Framework::ParseFontWeight(weight);
+        int32_t variableFontWeight;
+        if (parseResult.first) {
+            variableFontWeight = Framework::GetFontWeightNumericValue(parseResult.second);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanFontWeight(
+            nativeNode, static_cast<int32_t>(parseResult.second));
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanVariableFontWeight(
+            nativeNode, variableFontWeight);
+    } else if (secondArg->IsNumber()) {
+        int32_t weightNum = secondArg->Int32Value(vm);
+        std::string weight = std::to_string(weightNum);
+        FontWeight fontWeightEnum = Framework::ConvertStrToFontWeight(weight);
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanFontWeight(
+            nativeNode, static_cast<int32_t>(fontWeightEnum));
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanVariableFontWeight(
+            nativeNode, weightNum);
     } else {
         GetArkUINodeModifiers()->getSymbolSpanModifier()->resetSymbolSpanFontWeight(nativeNode);
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->resetSymbolSpanVariableFontWeight(nativeNode);
+    }
+    if (!thirdArg->IsNull() && !thirdArg->IsUndefined() && thirdArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanEnableVariableFontWeight(nativeNode,
+            thirdArg->ToBoolean(vm)->Value());
+    } else {
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->resetSymbolSpanEnableVariableFontWeight(nativeNode);
+    }
+    if (!fourthArg->IsNull() && !fourthArg->IsUndefined() && fourthArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanEnableDeviceFontWeightCategory(nativeNode,
+            fourthArg->ToBoolean(vm)->Value());
+    } else {
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->resetSymbolSpanEnableDeviceFontWeightCategory(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -152,6 +188,7 @@ ArkUINativeModuleValue SymbolSpanBridge::ResetFontWeight(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSymbolSpanModifier()->resetSymbolSpanFontWeight(nativeNode);
+    GetArkUINodeModifiers()->getSymbolSpanModifier()->resetSymbolSpanVariableFontWeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

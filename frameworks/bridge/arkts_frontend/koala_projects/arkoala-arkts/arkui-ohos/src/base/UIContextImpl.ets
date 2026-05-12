@@ -30,12 +30,16 @@ import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, OrderOverlayOptions, DragController, TargetInfo,
     CustomBuilderWithId, KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType,
-    PageInfo, CustomKeyboardContinueFeature, Magnifier } from '@ohos/arkui/UIContext';
+    PageInfo, CustomKeyboardContinueFeature, Magnifier, BaseGestureHandlingProposal, ClickActionProposal,
+    SelectActionProposal, NoneActionProposal, BackPressActionProposal, PageSwitchActionProposal,
+    ScrollActionProposal, GestureHandlingResolution, SmartGestureMonitorCallback, SmartGestureController,
+    getProposalKind } from '@ohos/arkui/UIContext';
 import { ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode, GlobalUIStateManager } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
+import { extractors } from '#handwritten';
 import { Context, PointerStyle, PixelMap } from '#external';
-import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
+import { Nullable,  WidthBreakpoint, HeightBreakpoint, SmartGestureAction, OperateIntention } from 'arkui/component/enums';
 import { KeyEvent, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from 'arkui/component/common';
 import { GlobalScope_ohos_font } from '#generated';
 import router from '@ohos/router';
@@ -87,6 +91,7 @@ import { Scroller } from 'arkui/component/scroll';
 import { FreeRootNode } from '../CallbackTransformer';
 import { StyledString } from "arkui/component/styledString"
 import { default as text } from "@ohos.graphics.text"
+import { smartGestureController } from '@ohos/arkui/smartGestureController';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -558,6 +563,13 @@ export class DragControllerImpl extends DragController {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         ArkUIAniModule._DragController_enableDropDisallowedBadge(enabled);
         ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public interruptFollowHandMorphDropAnimation(): boolean {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let interrupted = ArkUIAniModule._DragController_interruptFollowHandMorphDropAnimation();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return interrupted;
     }
 }
 
@@ -1345,6 +1357,234 @@ export class CursorControllerImpl extends CursorController {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         IUIContext.setCustomCursor(value, focusX, focusY);
         ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
+export class SmartGestureControllerImpl extends SmartGestureController {
+    instanceId_: int32;
+    private monitorWrapperMap_: Map<SmartGestureMonitorCallback, smartGestureController.SmartGestureMonitorRawCallback>;
+
+    constructor(instanceId: int32) {
+        super();
+        this.instanceId_ = instanceId;
+        this.monitorWrapperMap_ = new Map<SmartGestureMonitorCallback, smartGestureController.SmartGestureMonitorRawCallback>();
+    }
+
+    public enableSmartTapAndSlideGestures(enabled: boolean): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        smartGestureController.enableSmartTapAndSlideGestures(enabled);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public registerMonitor(monitorCallback: SmartGestureMonitorCallback): void {
+        if (this.monitorWrapperMap_.has(monitorCallback)) {
+            return;
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const monitorWrapper = this.createMonitorWrapper(monitorCallback);
+        smartGestureController.registerMonitor(monitorWrapper);
+        this.monitorWrapperMap_.set(monitorCallback, monitorWrapper);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public unregisterMonitor(monitorCallback: SmartGestureMonitorCallback): void {
+        const monitorWrapper = this.monitorWrapperMap_.get(monitorCallback);
+        if (monitorWrapper === undefined) {
+            return;
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        smartGestureController.unregisterMonitor(monitorWrapper);
+        this.monitorWrapperMap_.delete(monitorCallback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public clearMonitors(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        smartGestureController.clearMonitors();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        this.monitorWrapperMap_.clear();
+    }
+
+    public requestSelected(id: string): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        smartGestureController.requestSelected(id);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public clearSelected(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        smartGestureController.clearSelected();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    private normalizeOperateIntention(intention: OperateIntention | undefined): OperateIntention {
+        const normalized = intention ?? OperateIntention.TAP;
+        switch (normalized) {
+            case OperateIntention.SLIDE_FORWARD:
+                return OperateIntention.SLIDE_FORWARD;
+            case OperateIntention.BACK_PRESS:
+                return OperateIntention.BACK_PRESS;
+            case OperateIntention.TAP:
+            default:
+                return OperateIntention.TAP;
+        }
+    }
+
+    private createMonitorWrapper(
+        monitorCallback: SmartGestureMonitorCallback
+    ): smartGestureController.SmartGestureMonitorRawCallback {
+        return (
+            rawProposal: smartGestureController.SmartGestureProposalRaw
+        ): smartGestureController.SmartGestureHandlingResolutionRaw => {
+            const proposal = this.fromRawProposal(rawProposal);
+            const resolution = monitorCallback(proposal);
+            return this.toRawResolution(resolution);
+        };
+    }
+
+    private fromRawProposal(
+        raw: smartGestureController.SmartGestureProposalRaw
+    ): BaseGestureHandlingProposal {
+        const operateIntention = this.normalizeOperateIntention(raw.operateIntention);
+        switch (raw.action) {
+            case SmartGestureAction.NONE: {
+                const proposal = new NoneActionProposal();
+                proposal.operateIntention = operateIntention;
+                return proposal;
+            }
+            case SmartGestureAction.BACK_PRESS: {
+                const proposal = new BackPressActionProposal();
+                proposal.operateIntention = operateIntention;
+                return proposal;
+            }
+            case SmartGestureAction.CLICK: {
+                const node = this.fromRawNodePtr(raw.nodePtr);
+                const proposal = new ClickActionProposal(node);
+                proposal.operateIntention = operateIntention;
+                return proposal;
+            }
+            case SmartGestureAction.SELECT: {
+                const node = this.fromRawNodePtr(raw.nodePtr);
+                const proposal = new SelectActionProposal(node);
+                proposal.operateIntention = operateIntention;
+                return proposal;
+            }
+            case SmartGestureAction.PAGE_FORWARD: {
+                const node = this.fromRawNodePtr(raw.nodePtr);
+                const pageCount = (raw.pageCount ?? (0 as int)) as int;
+                const proposal = new PageSwitchActionProposal(node, pageCount);
+                proposal.operateIntention = operateIntention;
+                return proposal;
+            }
+            case SmartGestureAction.SCROLL_FORWARD: {
+                const node = this.fromRawNodePtr(raw.nodePtr);
+                const proposal = new ScrollActionProposal(node, raw.distance ?? 0);
+                proposal.operateIntention = operateIntention;
+                return proposal;
+            }
+            default:
+                throw new TypeError('Unsupported smart gesture proposal action.');
+        }
+    }
+
+    private toRawResolution(
+        resolution: GestureHandlingResolution
+    ): smartGestureController.SmartGestureHandlingResolutionRaw {
+        this.validateResolution(resolution);
+        const rawResolution: smartGestureController.SmartGestureHandlingResolutionRaw = {
+            isConsumed: resolution.isConsumed,
+        };
+        if (resolution.selectedProposal !== undefined) {
+            rawResolution.selectedProposal = this.toRawProposal(resolution.selectedProposal);
+        }
+        return rawResolution;
+    }
+
+    private toRawProposal(
+        proposal: BaseGestureHandlingProposal | undefined
+    ): smartGestureController.SmartGestureProposalRaw {
+        if (proposal === undefined || proposal === null) {
+            throw new TypeError('selectedProposal must be one of built-in proposal classes or their subclasses.');
+        }
+
+        const selectedProposal = proposal as BaseGestureHandlingProposal;
+        const actionMaybe = getProposalKind(selectedProposal);
+        if (actionMaybe === undefined) {
+            throw new TypeError('selectedProposal must be one of built-in proposal classes or their subclasses.');
+        }
+        const action = actionMaybe as SmartGestureAction;
+
+        const rawProposal: smartGestureController.SmartGestureProposalRaw = {
+            action: action,
+            operateIntention: OperateIntention.TAP,
+        };
+
+        switch (action) {
+            case SmartGestureAction.NONE:
+            case SmartGestureAction.BACK_PRESS:
+                return rawProposal;
+            case SmartGestureAction.CLICK:
+            case SmartGestureAction.SELECT: {
+                const targeted = selectedProposal as ClickActionProposal | SelectActionProposal;
+                rawProposal.nodePtr = this.toRawNodePtr(targeted.node);
+                return rawProposal;
+            }
+            case SmartGestureAction.PAGE_FORWARD: {
+                const pageSwitch = selectedProposal as PageSwitchActionProposal;
+                rawProposal.nodePtr = this.toRawNodePtr(pageSwitch.node);
+                rawProposal.pageCount = pageSwitch.pageCount;
+                return rawProposal;
+            }
+            case SmartGestureAction.SCROLL_FORWARD: {
+                const scroll = selectedProposal as ScrollActionProposal;
+                rawProposal.nodePtr = this.toRawNodePtr(scroll.node);
+                rawProposal.distance = scroll.distance;
+                return rawProposal;
+            }
+            default:
+                throw new TypeError('Unsupported smart gesture proposal action.');
+        }
+    }
+
+    private validateResolution(resolution: GestureHandlingResolution): void {
+        if (resolution === undefined || resolution === null) {
+            throw new TypeError('registerMonitor callback must return GestureHandlingResolution.');
+        }
+        if (!(resolution instanceof GestureHandlingResolution)) {
+            throw new TypeError('registerMonitor callback must return GestureHandlingResolution.');
+        }
+        if (typeof resolution.isConsumed !== 'boolean') {
+            throw new TypeError('The type of isConsumed is not boolean.');
+        }
+        if (resolution.selectedProposal !== undefined) {
+            const selectedProposal = resolution.selectedProposal;
+            if (!(selectedProposal instanceof BaseGestureHandlingProposal) ||
+                getProposalKind(selectedProposal as BaseGestureHandlingProposal) === undefined) {
+                throw new TypeError('selectedProposal must be one of built-in proposal classes or their subclasses.');
+            }
+        }
+    }
+
+    private fromRawNodePtr(nodePtr?: long): FrameNode {
+        if (nodePtr === undefined || nodePtr === null) {
+            throw new TypeError('Invalid smart gesture proposal.');
+        }
+        const peerPtr = nodePtr as KPointer;
+        if (peerPtr === nullptr || peerPtr === 0) {
+            throw new TypeError('Invalid smart gesture proposal.');
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(peerPtr);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(UIContextUtil.getOrCreateUIContextById(this.instanceId_), peerPtr);
+        }
+        if (!node) {
+            throw new TypeError('Invalid smart gesture proposal.');
+        }
+        return node;
+    }
+
+    private toRawNodePtr(node: FrameNode): long {
+        return extractors.toFrameNodePtr(node) as long;
     }
 }
 

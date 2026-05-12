@@ -34,6 +34,7 @@
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
+#include "frameworks/core/common/color_inverter.h"
 
 using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
@@ -576,7 +577,7 @@ RefPtr<ResourceObject> ArkTSUtils::GetResourceObject(const EcmaVM* vm, const Loc
 
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
     std::vector<ResourceObjectParams> resObjParamsList;
-    auto size = static_cast<int32_t>(params->Length(vm));
+    auto size = static_cast<int32_t>(GetArrayLength(vm, params));
     for (int32_t i = 0; i < size; i++) {
         auto item = panda::ArrayRef::GetValueAt(vm, params, i);
 
@@ -667,7 +668,7 @@ bool IsGetResourceByName(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
         return false;
     }
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
-    if (params->Length(vm) == 0) {
+    if (ArkTSUtils::GetArrayLength(vm, params) == 0) {
         return false;
     }
     return true;
@@ -764,7 +765,7 @@ void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& typ
         return;
     }
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
-    auto paramCount = params->Length(vm);
+    auto paramCount = static_cast<uint32_t>(ArkTSUtils::GetArrayLength(vm, params));
     auto name = panda::StringRef::NewFromUtf8(vm, resName.c_str());
     if (resType == ResourceType::PLURAL || resType == ResourceType::STRING) {
         std::vector<Local<JSValueRef>> tmpParams;
@@ -1199,7 +1200,7 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg
     if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
         return false;
     }
-    int32_t length = static_cast<int32_t>(handle->Length(vm));
+    int32_t length = static_cast<int32_t>(GetArrayLength(vm, handle.ToLocal()));
     if (length != defaultLength) {
         return false;
     }
@@ -1318,10 +1319,10 @@ bool ArkTSUtils::ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>
     auto jsObj = jsValue->ToObject(vm);
     int32_t resId;
     int32_t resType;
+    CompleteResourceObject(vm, jsObj);
     if (jsObj->IsNull() || !GetResourceIdAndType(vm, jsObj, resId, resType)) {
         return false;
     }
-    CompleteResourceObject(vm, jsObj);
     resourceObject = GetResourceObject(vm, jsObj);
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
     CHECK_NULL_RETURN(resourceWrapper, false);
@@ -1790,7 +1791,7 @@ bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values,
     }
 
     Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(values);
-    for (size_t i = 0; i < valueArray->Length(vm); i++) {
+    for (size_t i = 0; i < GetArrayLength(vm, valueArray); i++) {
         Local<JSValueRef> value = valueArray->GetValueAt(vm, values, i);
         if (value->IsNumber()) {
             result.emplace_back(value->Uint32Value(vm));
@@ -1881,7 +1882,7 @@ std::string GetReplaceContentStr(
 
 void ReplaceHolder(const EcmaVM* vm, std::string& originStr, const Local<panda::ArrayRef>& params, int32_t containCount)
 {
-    auto size = static_cast<int32_t>(params->Length(vm));
+    auto size = static_cast<int32_t>(ArkTSUtils::GetArrayLength(vm, params));
     if (containCount == size) {
         return;
     }
@@ -2028,6 +2029,33 @@ bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsVa
         return false;
     } else {
         resourceType = type->Uint32Value(vm);
+    }
+    auto resIdNum = id->Int32Value(vm);
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsValue)) {
+            return false;
+        }
+        auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        if (!args->IsArray(vm)) {
+            return false;
+        }
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        auto resName = param->ToString(vm)->ToString(vm);
+        if (resourceType == static_cast<uint32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetStringByName(resName);
+            return StringUtils::StringToCalcDimensionNG(value, result, false);
+        }
+        if (resourceType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+            auto value = std::to_string(resourceWrapper->GetIntByName(resName));
+            StringUtils::StringToDimensionWithUnitNG(value, result);
+            return true;
+        }
+        if (resourceType == static_cast<uint32_t>(ResourceType::FLOAT)) {
+            result = resourceWrapper->GetDimensionByName(resName);
+            return true;
+        }
+        return false;
     }
     if (resourceType == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(id->Uint32Value(vm));
@@ -2385,7 +2413,7 @@ bool ArkTSUtils::ParseJsResponseRegion(
     const uint32_t DIMENSION_LENGTH = 4;
     if (jsValue->IsArray(vm)) {
         auto transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
-        uint32_t arrayLength = transArray->Length(vm);
+        uint32_t arrayLength = ArkTSUtils::GetArrayLength(vm, transArray);
         for (uint32_t i = 0; i < arrayLength; i++) {
             CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
@@ -2533,9 +2561,10 @@ double ArkTSUtils::parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& 
 double ArkTSUtils::parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
     RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo)
 {
-    double radius = 0.0;
+    double radius = -1.0;
     ArkTSUtils::ParseJsDouble(vm, jsValue, radius, resObj);
-    if (LessNotEqual(radius, 0.0)) {
+    if (LessNotEqual(radius, 0.0) &&
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         radius = 0.0;
     }
     return radius;
@@ -3124,7 +3153,7 @@ Local<JSValueRef> ArkTSUtils::GetModifierKeyState(
     std::vector<std::string> checkKeyCodes;
     std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
     auto paramArray = panda::Local<panda::ArrayRef>(param);
-    auto length = paramArray->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, paramArray);
     for (size_t i = 0; i < length; i++) {
         auto value = panda::ArrayRef::GetValueAt(vm, paramArray, i);
         auto code = value->ToString(vm)->ToString(vm);
@@ -3473,7 +3502,7 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
     const Local<JSValueRef>& menuItems, bool enableLabelInfo)
 {
     auto menuItemsArray = Local<panda::ArrayRef>(menuItems);
-    auto length = menuItemsArray->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, menuItemsArray);
     for (uint32_t index = 0; index < length; index++) {
         Local<JSValueRef> menuItem = panda::ArrayRef::GetValueAt(vm, menuItemsArray, index);
         if (!menuItem->IsObject(vm)) {
@@ -3525,7 +3554,7 @@ void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(node);
         auto paramArrayObj = CreateJsOnMenuItemClick(vm, menuOptionsParam);
-        if (paramArrayObj->Length(vm) != PARAM_ARR_LENGTH_2) {
+        if (ArkTSUtils::GetArrayLength(vm, paramArrayObj) != PARAM_ARR_LENGTH_2) {
             return false;
         }
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
@@ -3602,7 +3631,7 @@ bool ArkTSUtils::ParseJsIgnoresLayoutSafeAreaEdges(
         return false;
     }
     auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
         ArkUI_Int32 edge;
@@ -3630,7 +3659,7 @@ void ArkTSUtils::ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& 
     CalcDimension valueY;
     if (value->IsArray(vm)) {
         auto array = panda::Local<panda::ArrayRef>(value);
-        auto length = array->Length(vm);
+        auto length = ArkTSUtils::GetArrayLength(vm, array);
         if (length == NUM_2) {
             RefPtr<ResourceObject> xResObj;
             RefPtr<ResourceObject> yResObj;
@@ -3668,14 +3697,14 @@ void ArkTSUtils::ParseGradientColorStopsWithFloatColor(const EcmaVM *vm, const L
         return;
     }
     auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
         if (!item->IsArray(vm)) {
             continue;
         }
         auto itemArray = panda::Local<panda::ArrayRef>(item);
-        auto itemLength = itemArray->Length(vm);
+        auto itemLength = ArkTSUtils::GetArrayLength(vm, itemArray);
         if (itemLength < NUM_1) {
             continue;
         }
@@ -3716,14 +3745,14 @@ void ArkTSUtils::ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRe
         return;
     }
     auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
         if (!item->IsArray(vm)) {
             continue;
         }
         auto itemArray = panda::Local<panda::ArrayRef>(item);
-        auto itemLength = itemArray->Length(vm);
+        auto itemLength = ArkTSUtils::GetArrayLength(vm, itemArray);
         if (itemLength < NUM_1) {
             continue;
         }
@@ -3919,7 +3948,7 @@ DragPreviewOption ArkTSUtils::ParseDragPreviewOptions(ArkUIRuntimeCallInfo* info
         ParseDragPreviewMode(previewOption, mode->ToNumber(vm)->Value(), isAuto);
     } else if (mode->IsArray(vm)) {
         Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(mode);
-        for (size_t i = 0; i < params->Length(vm); i++) {
+        for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, params); i++) {
             auto value = panda::ArrayRef::GetValueAt(vm, params, i);
             if (value->IsNumber()) {
                 ParseDragPreviewMode(previewOption, value->ToNumber(vm)->Value(), isAuto);
@@ -4318,11 +4347,8 @@ void ArkTSUtils::ParseShadowPropsUpdate(
         vm, GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::RADIUS)), radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -4651,11 +4677,8 @@ bool ArkTSUtils::ParseShadowProps(
         return false;
     }
     auto jsObj = jsValue->ToObject(vm);
-    double radius = 0.0;
+    double radius = -1.0;
     ParseShadowPropsUpdate(vm, jsObj, radius, shadow);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(vm, jsObj, shadow);
 

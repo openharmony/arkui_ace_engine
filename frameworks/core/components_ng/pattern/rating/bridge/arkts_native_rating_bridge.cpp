@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rating/bridge/arkts_native_rating_bridge.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr double RATING_SCORE_DEFAULT_VALUE = 0.0;

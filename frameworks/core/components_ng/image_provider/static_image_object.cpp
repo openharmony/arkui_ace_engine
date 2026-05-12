@@ -48,21 +48,23 @@ void StaticImageObject::MakeCanvasImage(
 {
     auto ctx = ctxWp.Upgrade();
     CHECK_NULL_VOID(ctx);
-    RefPtr<CanvasImage> cachedImage = QueryCanvasFromCache(src_, targetSize);
-    if (cachedImage) {
-        ctx->SuccessCallback(cachedImage);
-        return;
-    }
-    cachedImage = QueryWeakCanvasFromCache(src_, targetSize);
-    if (cachedImage) {
-        auto notifyMakeCanvasImageSuccess = [ctx, cachedImage]() { ctx->SuccessCallback(cachedImage); };
-        if (syncLoad) {
-            notifyMakeCanvasImageSuccess();
-        } else {
-            ImageUtils::PostToUI(
-                std::move(notifyMakeCanvasImageSuccess), "ArkUIMakePixelmapSuccess", ctx->GetContainerId());
+    if (!src_.IsSkipCacheRead()) {
+        RefPtr<CanvasImage> cachedImage = QueryCanvasFromCache(src_, targetSize);
+        if (cachedImage) {
+            ctx->SuccessCallback(cachedImage);
+            return;
         }
-        return;
+        cachedImage = QueryWeakCanvasFromCache(src_, targetSize);
+        if (cachedImage) {
+            auto notifyMakeCanvasImageSuccess = [ctx, cachedImage]() { ctx->SuccessCallback(cachedImage); };
+            if (syncLoad) {
+                notifyMakeCanvasImageSuccess();
+            } else {
+                ImageUtils::PostToUI(
+                    std::move(notifyMakeCanvasImageSuccess), "ArkUIMakePixelmapSuccess", ctx->GetContainerId());
+            }
+            return;
+        }
     }
     ImageProvider::MakeCanvasImage(Claim(this), ctx, targetSize,
         { .forceResize = forceResize,

@@ -16,7 +16,9 @@
 
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 static const std::string DEFAULT_FONT_WEIGHT = "400";
 static const std::vector<OHOS::Ace::MarqueeUpdateStrategy> MARQUEE_UPDATE_STRATEGYS = {

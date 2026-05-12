@@ -196,7 +196,9 @@
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
 #ifndef CROSS_PLATFORM
+#include "frameworks/bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_distortion_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_with_env.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -520,6 +522,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSContextMenu::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
     JSTextMenu::JSBind(globalObj);
+    JSDepthComponent::JSBind(globalObj);
+    JSWithEnv::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);
 #endif

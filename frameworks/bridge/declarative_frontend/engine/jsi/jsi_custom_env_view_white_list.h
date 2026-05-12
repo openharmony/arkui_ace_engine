@@ -49,6 +49,7 @@ static const std::unordered_set<std::string> supportedTargetsInCustomEnv = {
     "Button",
     "Canvas",
     "LazyForEach",
+    "LazyColumnLayout",
     "LazyVGridLayout",
     "List",
     "ListItem",
@@ -197,6 +198,7 @@ static const std::unordered_set<std::string> supportedTargetsInCustomEnv = {
     "PinchRecognizer",
     "RotationRecognizer",
     "TouchRecognizer",
+    "LazyVWaterFlowLayout",
 };
 } // namespace OHOS::Ace::Framework
 

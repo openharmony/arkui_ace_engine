@@ -19,11 +19,6 @@ import { RenderIdType, IMutableStateMeta, IComputedDecoratedVariable, IVariableO
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ElementInfo } from '../utils';
 
-export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
-    fireChange(): void;
-    isFreeze(): boolean;
-}
-
 export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<T>, IDecoratorBaseRegistry {
     public static readonly MIN_COMPUTED_ID: RenderIdType = 0x10000000;
     public static nextComputedId_: RenderIdType = ComputedDecoratedVariable.MIN_COMPUTED_ID;
@@ -53,8 +48,8 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
     fireChange(): void {
         const newValue: T = this.runFunctionAndObserve();
         if (this.cachedValue_ !== newValue) {
-            this.meta_.fireChange();
             this.cachedValue_ = newValue;
+            this.meta_.fireChange();
         }
     }
     clearReverseBindings(): void {

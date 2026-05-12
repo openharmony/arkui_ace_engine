@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_TOOLBAR_TOOLBAR_MANAGER_H
 
 #include "base/memory/ace_type.h"
+#include "ui/properties/blur_style_option.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {

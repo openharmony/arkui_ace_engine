@@ -38,6 +38,8 @@
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
@@ -194,6 +196,15 @@ struct PointLightProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
+struct MaterialPreProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PreBorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PreBorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PreBackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PreBackgroundColor, Color);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+};
+
 struct OuterBorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OuterBorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OuterBorderColor, BorderColorProperty);
@@ -276,6 +287,20 @@ struct OverlayProperty {
 
 struct MotionPathProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MotionPath, MotionPathOption);
+};
+
+struct UnionEffectProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(UseUnionEffect, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(UnionMode, UnionMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CenterGravityOptions, CenterGravityOptions);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+};
+
+struct EdgeLightProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EdgeLightParam, EdgeLightParam);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 } // namespace OHOS::Ace::NG

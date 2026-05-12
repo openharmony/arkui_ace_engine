@@ -19,6 +19,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "ui/gestures/gesture_event.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT ResSchedClickOptimizer final : public std::enable_shared_from_this<ResSchedClickOptimizer> {

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_MODEL_NG_H
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -24,8 +23,12 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
-#include "core/components_ng/pattern/tabs/tabs_node.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+
+namespace OHOS::Ace::NG {
+class TextLayoutProperty;
+class TabsNode;
+}
 
 namespace OHOS::Ace::NG {
 

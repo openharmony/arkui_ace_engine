@@ -97,22 +97,36 @@ private:
      * @brief Calculate offset with margin
      * @param layoutNode Layout node
      * @param geoNode Geometry node (for getting margin)
+     * @param boundingBoxOffsetX Pre-calculated bounding box X offset
+     * @param boundingBoxOffsetY Pre-calculated bounding box Y offset
      * @return Calculated offset
      */
     OffsetF CalculateOffsetWithMargin(
         const ISmartLayoutNode& layoutNode,
-        const RefPtr<GeometryNode> geoNode);
+        const RefPtr<GeometryNode> geoNode,
+        double boundingBoxOffsetX,
+        double boundingBoxOffsetY);
 
     /**
      * @brief Apply layout result to a single child
      * @param childWrapper Child element LayoutWrapper
      * @param nodeMap Node mapping table
      * @param sizeScale Size scale factor
+     * @param boundingBoxOffsetX Pre-calculated bounding box X offset
+     * @param boundingBoxOffsetY Pre-calculated bounding box Y offset
      */
     void ApplyChildLayout(
         const RefPtr<LayoutWrapper>& childWrapper,
         const std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>>& nodeMap,
-        double sizeScale);
+        double sizeScale,
+        double boundingBoxOffsetX,
+        double boundingBoxOffsetY);
+
+    /**
+     * @brief Pre-calculate bounding box offsets for all children
+     * @return Pair of (offsetX, offsetY) for bounding box centering
+     */
+    std::pair<double, double> CalculateBoundingBoxOffsets();
 };
 
 } // namespace OHOS::Ace::NG

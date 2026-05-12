@@ -87,7 +87,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         hasLazyLayoutChild_ = childLayoutProperty && childLayoutProperty->GetNeedLazyLayout();
         if (hasLazyLayoutChild_) {
             childSize = MeasureLazyChild(layoutWrapper, childWrapper, childLayoutConstraint, axis,
-                idealSize.ConvertToSizeT());
+                idealSize.ConvertToSizeT(), isMainFix);
         } else {
             childWrapper->Measure(childLayoutConstraint);
             childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -136,6 +136,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
     UseInitialOffset(axis, selfSize, layoutWrapper);
+    MeasureLazyChildAgain(childWrapper, childLayoutConstraint, axis, selfSize, hasLazyLayoutChild_);
 }
 
 OffsetF ScrollLayoutAlgorithm::GetAlignmentPosition(const RefPtr<ScrollLayoutProperty>& layoutProperty, Axis axis,
@@ -165,13 +166,49 @@ OffsetF ScrollLayoutAlgorithm::GetAlignmentPosition(const RefPtr<ScrollLayoutPro
 }
 
 SizeF ScrollLayoutAlgorithm::MeasureLazyChild(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childWrapper,
-    LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& contentSize)
+    LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& contentSize, bool isMainFix)
 {
     auto layoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, SizeF());
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    auto currentReferencePos = static_cast<float>(currentOffset_ + contentStartOffset_);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(constraint, SizeF());
     auto viewPortLength = GetMainAxisSize(contentSize, axis);
+    SizeF estimatedIdealSize = contentSize;
+    if (LessOrEqual(viewPortLength, 0.0f)) {
+        auto estimatedSize = CreateIdealSize(
+            constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_PARENT);
+        estimatedIdealSize = estimatedSize.ConvertToSizeT();
+    }
+
+    if (!isMainFix) {
+        estimatedIdealSize.Constrain(constraint->minSize, constraint->maxSize);
+    } else {
+        auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(
+            OptionalSizeF(estimatedIdealSize), layoutProperty->GetCalcLayoutConstraint(), constraint->percentReference);
+        if (finalSize.Width().has_value()) {
+            estimatedIdealSize.SetWidth(finalSize.Width().value());
+        }
+        if (finalSize.Height().has_value()) {
+            estimatedIdealSize.SetHeight(finalSize.Height().value());
+        }
+    }
+    auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(scrollNode, SizeF());
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollPattern, SizeF());
+    if (scrollPattern->IsSelectScroll() && scrollPattern->GetHasOptionWidth()) {
+        auto selectScrollWidth = scrollPattern->GetSelectScrollWidth();
+        estimatedIdealSize.SetWidth(selectScrollWidth);
+    }
+
+    auto estimatedCurrentOffset = currentOffset_;
+    EstimateInitialOffset(layoutWrapper, axis, estimatedIdealSize, estimatedCurrentOffset);
+    auto estimatedContentStartOffset = contentStartOffset_;
+    if (GreatOrEqual(contentStartOffset_ + contentEndOffset_, GetMainAxisSize(estimatedIdealSize, axis))) {
+        estimatedContentStartOffset = 0;
+    }
+    auto currentReferencePos = static_cast<float>(estimatedCurrentOffset + estimatedContentStartOffset);
+    viewPortLength = GetMainAxisSize(estimatedIdealSize, axis);
     SizeF childSize;
     childLayoutConstraint.viewPosRef = ViewPosReference {
         .viewPosStart = 0.0f,
@@ -183,29 +220,26 @@ SizeF ScrollLayoutAlgorithm::MeasureLazyChild(LayoutWrapper* layoutWrapper, cons
     childWrapper->Measure(childLayoutConstraint);
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, childSize);
+
     childSize = geometryNode->GetMarginFrameSize();
-    auto idealSize = contentSize;
-    if (LessOrEqual(idealSize.Width(), 0.0f)) {
-        idealSize.SetWidth(childSize.Width());
-    }
-    if (LessOrEqual(idealSize.Height(), 0.0f)) {
-        idealSize.SetHeight(childSize.Height());
-    }
-    auto alignmentPosition = GetAlignmentPosition(layoutProperty, axis, layoutDirection, idealSize, childSize);
-    auto alignedReferencePos = static_cast<float>(currentOffset_ + contentStartOffset_) +
-        (axis == Axis::HORIZONTAL ? alignmentPosition.GetX() : alignmentPosition.GetY());
-    if (!NearEqual(alignedReferencePos, currentReferencePos)) {
+    return childSize;
+}
+
+void ScrollLayoutAlgorithm::MeasureLazyChildAgain(const RefPtr<LayoutWrapper>& childWrapper,
+    LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& selfSize, bool hasLazyLayoutChild)
+{
+    CHECK_NULL_VOID(hasLazyLayoutChild);
+    auto lastReferencePos = childLayoutConstraint.viewPosRef.value().referencePos;
+    if (GreatNotEqual(currentOffset_ + contentStartOffset_, lastReferencePos)) {
         childLayoutConstraint.viewPosRef = ViewPosReference {
             .viewPosStart = 0.0f,
-            .viewPosEnd = GetMainAxisSize(idealSize, axis),
-            .referencePos = alignedReferencePos,
+            .viewPosEnd = GetMainAxisSize(selfSize, axis),
+            .referencePos = currentOffset_ + contentStartOffset_,
             .referenceEdge = ReferenceEdge::START,
             .axis = axis,
         };
         childWrapper->Measure(childLayoutConstraint);
-        childSize = geometryNode->GetMarginFrameSize();
     }
-    return childSize;
 }
 
 void ScrollLayoutAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper)
@@ -248,6 +282,24 @@ double DimensionToFloat(const CalcDimension& value, float selfLength)
     return value.Unit() == DimensionUnit::PERCENT ? -value.Value() * selfLength : -value.ConvertToPx();
 }
 } // namespace
+
+void ScrollLayoutAlgorithm::EstimateInitialOffset(LayoutWrapper* layoutWrapper, Axis axis, SizeF selfSize,
+    double& estimateCurrentOffset)
+{
+    auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    if (scrollPattern->NeedSetInitialOffset()) {
+        auto initialOffset = scrollPattern->GetInitialOffset();
+        if (axis == Axis::VERTICAL) {
+            auto offset = initialOffset.GetY();
+            estimateCurrentOffset = DimensionToFloat(offset, selfSize.Height()) - contentStartOffset_;
+        } else {
+            estimateCurrentOffset = DimensionToFloat(initialOffset.GetX(), selfSize.Width()) - contentStartOffset_;
+        }
+    }
+}
 
 void ScrollLayoutAlgorithm::UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper)
 {

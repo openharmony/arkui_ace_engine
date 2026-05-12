@@ -14,12 +14,15 @@
  */
 
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
-
 #include "display_info.h"
 #include "dm/display_manager.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "window.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/ui_material.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "base/geometry/rect.h"
@@ -252,32 +255,15 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 void SubwindowOhos::InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetMultiInstanceEnabled()) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector != nullptr) {
-            rsUiDirector->SetRSSurfaceNode(window_->GetSurfaceNode());
-            auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
-            if (context != nullptr) {
-                context->SetRSUIDirector(rsUiDirector);
-            }
-            rsUiDirector->Init();
-            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "UIContent Init Rosen Backend");
-        }
-    } else {
-        rsUiDirector = window_->GetRSUIDirector();
-        if (!rsUiDirector) {
-            rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        }
+    rsUiDirector = window_->GetRSUIDirector();
+    if (rsUiDirector) {
         rsUiDirector->SetRSSurfaceNode(window_->GetSurfaceNode());
-        auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
-        if (context != nullptr) {
-            context->SetRSUIDirector(rsUiDirector);
-        }
-        if (!rsUiDirector->GetRSUIContext()) {
-            rsUiDirector->Init(true, true);
-        }
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "UIContent Init Rosen Backend");
     }
+    auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    if (context != nullptr) {
+        context->SetRSUIDirector(rsUiDirector);
+    }
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "UIContent Init Rosen Backend");
 #endif
 }
 
@@ -1704,30 +1690,14 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 void SubwindowOhos::InitDialogWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetMultiInstanceEnabled()) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector != nullptr) {
-            rsUiDirector->SetRSSurfaceNode(dialogWindow_->GetSurfaceNode());
-            auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
-            if (context != nullptr) {
-                context->SetRSUIDirector(rsUiDirector);
-            }
-            rsUiDirector->Init();
-        }
-    } else {
         rsUiDirector = dialogWindow_->GetRSUIDirector();
-        if (!rsUiDirector) {
-            rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        if (rsUiDirector) {
+            rsUiDirector->SetRSSurfaceNode(dialogWindow_->GetSurfaceNode());
         }
-        rsUiDirector->SetRSSurfaceNode(dialogWindow_->GetSurfaceNode());
         auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
         if (context != nullptr) {
             context->SetRSUIDirector(rsUiDirector);
         }
-        if (!rsUiDirector->GetRSUIContext()) {
-            rsUiDirector->Init(true, true);
-        }
-    }
 #endif
 }
 
@@ -2442,10 +2412,9 @@ void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
 
 void SubwindowOhos::ResizeWindowForFoldStatus()
 {
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
-    CHECK_NULL_VOID(defaultDisplay);
     CHECK_NULL_VOID(window_);
-    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    auto windowSize = GetSubWindowSize(parentContainerId_, window_->GetDisplayId());
+    auto ret = window_->Resize(windowSize.Width(), windowSize.Height());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
             static_cast<int32_t>(ret));

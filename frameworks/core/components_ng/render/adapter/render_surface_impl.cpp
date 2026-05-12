@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,9 @@
 #include "core/common/container.h"
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "cross_platform/surface_utils.h"
+#include "core/components_ng/render/adapter/render_capture_utils.h"
 #endif
+#include "pixel_map.h"
 namespace OHOS::Ace::NG {
 
 RenderSurfaceImpl::~RenderSurfaceImpl()
@@ -149,6 +151,8 @@ void RenderSurfaceImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
 {
     LOGI("RenderSurfaceImpl::SetExtSurfaceBounds (%{public}d, %{public}d) - (%{public}d x %{public}d)", left, top,
         width, height);
+    surfaceHeight_ = height;
+    surfaceWidth_ = width;
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -180,6 +184,15 @@ void RenderSurfaceImpl::SetIsFullScreen(bool isFullScreen)
 }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
+std::shared_ptr<Media::PixelMap> RenderSurfaceImpl::SurfaceCapture()
+{
+    CHECK_NULL_RETURN(extSurface_, nullptr);
+    return CapturePixelMap(surfaceWidth_, surfaceHeight_, "RenderSurfaceImpl::SurfaceCapture",
+        [surface = extSurface_](uintptr_t pointerVal, int32_t width, int32_t height) {
+            return surface->SurfaceCapture(pointerVal, width, height);
+        });
+}
+
 void RenderSurfaceImpl::SetSurfaceRotation(bool isLock)
 {
     if (extSurface_) {

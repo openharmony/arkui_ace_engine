@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1244,6 +1245,18 @@ void TabContentModelNG::SetPadding(const PaddingProperty& padding)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
+    if (padding.left.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.left.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.right.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.right.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.top.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.top.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.bottom.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.bottom.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
     frameNodePattern->SetPadding(padding);
 }
 
@@ -1392,6 +1405,9 @@ void TabContentModelNG::SetOnWillHide(FrameNode* tabContentNode, std::function<v
 
 void TabContentModelNG::InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
     CHECK_NULL_VOID(textLayoutProperty);
     auto& textStyle = textLayoutProperty->GetTextLineStyle();
     CHECK_NULL_VOID(textStyle);

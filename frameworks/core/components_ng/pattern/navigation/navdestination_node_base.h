@@ -108,6 +108,16 @@ public:
         return titleBarNode_;
     }
 
+    void SetTitleBarMaskNode(const RefPtr<UINode>& node)
+    {
+        titleBarMaskNode_ = node;
+    }
+
+    const RefPtr<UINode>& GetTitleBarMaskNode() const
+    {
+        return titleBarMaskNode_;
+    }
+
     void SetToolBarNode(const RefPtr<UINode>& toolBarNode)
     {
         toolBarNode_ = toolBarNode;
@@ -383,6 +393,8 @@ protected:
     OffsetF CalcTranslateForSlideTransition(const SizeF& paintRect, bool isRight, bool isEnter, bool isEnd);
 
     OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const override;
+    OffsetF GetParentGlobalOffsetWithSafeAreaInner(
+        RefPtr<FrameNode>& host, RefPtr<FrameNode>& parentNode) const override;
 
     bool isHomeDestination_ = false;
     RefPtr<UINode> contentNode_;
@@ -393,6 +405,7 @@ protected:
     RefPtr<UINode> toolbarMoreMenuNode_;
     RefPtr<UINode> moreLandscapeMenuNode_;
     RefPtr<UINode> titleBarNode_;
+    RefPtr<UINode> titleBarMaskNode_;
     RefPtr<UINode> toolBarNode_;
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;

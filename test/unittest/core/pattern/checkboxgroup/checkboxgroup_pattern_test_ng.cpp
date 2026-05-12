@@ -29,6 +29,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/checkable_theme.h"
@@ -47,6 +48,8 @@
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -912,7 +915,7 @@ HWTEST_F(CheckBoxGroupPatternTestNG, OnInjectionEvent001, TestSize.Level1)
  */
 HWTEST_F(CheckBoxGroupPatternTestNG, UpdateGroupManager001, TestSize.Level1)
 {
-    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AIWriteAdapter::MakeRefPtr<StagePattern>());
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AceType::MakeRefPtr<StagePattern>());
     ASSERT_NE(stageNode, nullptr);
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(pageNode, nullptr);

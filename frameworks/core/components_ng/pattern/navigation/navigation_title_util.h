@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 

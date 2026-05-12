@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "base/log/dump_log.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1375,4 +1376,25 @@ namespace OHOS::Ace::NG {
         }
     }
 
+    void LazyForEachBuilder::UpdateThemeScopeUpdate(int32_t themeScopeId)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->UpdateThemeScopeUpdate(themeScopeId);
+        }
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            node.second.second->UpdateThemeScopeUpdate(themeScopeId);
+        }
+        for (const auto& node : nodeList_) {
+            if (node.second == nullptr) {
+                continue;
+            }
+            node.second->UpdateThemeScopeUpdate(themeScopeId);
+        }
+    }
 }

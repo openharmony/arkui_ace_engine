@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 #include "ui/base/geometry/calc_dimension.h"
+#include "core/common/container.h"
 #include "ui/properties/color.h"
 
 #include "base/utils/utf_helper.h"
+#include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/search/bridge/search_custom_modifier.h"
@@ -46,6 +49,7 @@ constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
@@ -760,14 +764,15 @@ void ResetSearchDividerColor(ArkUINodeHandle node)
     }
 }
 
-void SetSearchDecoration(
-    ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style, void* resRawPtr)
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+    ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE, void* resRawPtr = nullptr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     SearchModelNG::SetTextDecorationColor(frameNode, Color(color));
     SearchModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+    SearchModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
@@ -778,6 +783,12 @@ void SetSearchDecoration(
     }
 }
 
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+    ArkUI_Int32 style, void* resRawPtr)
+{
+    SetSearchDecoration(node, decoration, color, style, DEFAULT_LINE_THICKNESS_SCALE, resRawPtr);
+}
+
 void ResetSearchDecoration(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
@@ -785,6 +796,7 @@ void ResetSearchDecoration(ArkUINodeHandle node)
     SearchModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     SearchModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     SearchModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    SearchModelNG::SetLineThicknessScale(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -1635,6 +1647,12 @@ void ResetSearchMargin(ArkUINodeHandle node)
     SearchModelNG::SetUserMargin(frameNode);
 }
 
+void SetUserMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetUserMargin(frameNode);
+}
+
 void SetSearchCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance)
 {
     auto* frameNode = GetFrameNode(node);
@@ -2143,6 +2161,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchInspectorId = nullptr,
             .setSearchDecoration = nullptr,
             .resetSearchDecoration = nullptr,
+            .getSearchDecoration = nullptr,
             .setSearchLetterSpacing = nullptr,
             .resetSearchLetterSpacing = nullptr,
             .setSearchLineHeight = nullptr,
@@ -2310,6 +2329,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchInspectorId = ResetSearchInspectorId,
         .setSearchDecoration = SetSearchDecoration,
         .resetSearchDecoration = ResetSearchDecoration,
+        .getSearchDecoration = nullptr,
         .setSearchLetterSpacing = SetSearchLetterSpacing,
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,
@@ -2473,6 +2493,7 @@ const CJUISearchModifier* GetCJUISearchModifier()
         .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchDecoration = SetSearchDecoration,
         .resetSearchDecoration = ResetSearchDecoration,
+        .getSearchDecoration = nullptr,
         .setSearchLetterSpacing = SetSearchLetterSpacing,
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,
@@ -2538,6 +2559,7 @@ const ArkUISearchCustomModifier* GetSearchCustomModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISearchCustomModifier modifier = {
         .setKeyboardAppearanceConfig = SetKeyboardAppearanceConfig,
+        .setUserMargin = SetUserMargin,
         .setTextValue = SetTextValue,
         .setOnChangeEvent = SetOnChangeEvent,
         .createNormalSearch = CreateNormalSearch,

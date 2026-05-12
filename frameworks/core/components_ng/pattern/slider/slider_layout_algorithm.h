@@ -37,12 +37,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    void CalculateBlockOffset(
-        LayoutWrapper* layoutWrapper, const RectF& contentRect, float selectOffset, Axis axis, bool reverse);
-    void CalculatePrefixOffset(
-        LayoutWrapper* layoutWrapper, const RectF& contentRect, float borderBlank, Axis axis, bool reverse);
-    void CalculateSuffixOffset(
-        LayoutWrapper* layoutWrapper, const RectF& contentRect, float borderBlank, Axis axis, bool reverse);
+    void CalculateBlockOffset(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child);
     SizeF CalculateHotSize(LayoutWrapper* layoutWrapper, const SizeF& blockSize, float themeBlockHotSize);
     void GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dimension& themeTrackThickness, Dimension& themeBlockSize,
         Dimension& hotBlockShadowWidth, Dimension& themeBlockHotSize);

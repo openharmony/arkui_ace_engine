@@ -456,6 +456,7 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
+    virtual void SetLineThicknessScale(float value) {};
     virtual void SetTextOverflow(Ace::TextOverflow value) {};
     virtual void SetTextIndent(const Dimension& value) {};
     virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) = 0;

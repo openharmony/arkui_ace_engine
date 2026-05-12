@@ -58,7 +58,7 @@ constexpr int32_t NUM_2 = 2;
 
 bool ParseFloatArray(const EcmaVM* vm, const panda::Local<panda::ArrayRef>& array, std::vector<float>& outArray)
 {
-    uint32_t length = array->Length(vm);
+    uint32_t length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t i = 0; i < length; ++i) {
         auto jsValue = panda::ArrayRef::GetValueAt(vm, array, i);
         bool isNumber = false;
@@ -160,6 +160,14 @@ ArkUI_Int32 GetExpandMode(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 ind
     CHECK_NULL_RETURN(!expandModeArg.IsNull(), 1);
     return expandModeArg->IsNumber() || expandModeArg->IsBoolean() ? expandModeArg->ToNumber(vm)->Value() : 1;
 }
+ArkUI_Int32 GetChildrenCountMode(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> childrenCountModeArg = runtimeCallInfo->GetCallArgRef(index);
+    CHECK_NULL_RETURN(!childrenCountModeArg.IsNull(), 0);
+    return childrenCountModeArg->IsNumber() || childrenCountModeArg->IsBoolean()
+               ? childrenCountModeArg->ToNumber(vm)->Value() : 0;
+}
 ArkUI_Bool GetIsExcludeInner(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -223,8 +231,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateEventTargetObject(EcmaVM* vm, con
     return target;
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
-    EcmaVM* vm, const TouchLocationInfo& touchInfo, TouchEventInfo& info)
+Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(EcmaVM* vm, const TouchLocationInfo& touchInfo)
 {
     double density = PipelineBase::GetCurrentDensity();
     const Offset& globalOffset = touchInfo.GetGlobalLocation();
@@ -253,7 +260,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
     touchInfoObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
-    touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<TouchLocationInfo*>(&touchInfo)));
     return touchInfoObj;
 }
 
@@ -578,7 +585,7 @@ ArkUINativeModuleValue FrameNodeBridge::AdoptChild(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
     auto childNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
-    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->adoptChild(parentNode, childNode, nullptr);
+    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->adoptChild(parentNode, childNode);
     return panda::NumberRef::New(vm, result);
 }
 
@@ -594,7 +601,7 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveAdoptedChild(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
     auto childNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     auto result =
-        GetArkUINodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(parentNode, childNode, nullptr);
+        GetArkUINodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(parentNode, childNode);
     return panda::NumberRef::New(vm, result);
 }
 
@@ -669,7 +676,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionToWindow(ArkUIRuntimeCall
 
     ArkUI_Float32 targetNodePositionOffset[2];
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
-        nativeNode, &position, &targetNodePositionOffset, true, nullptr);
+        nativeNode, &position, &targetNodePositionOffset, true);
     if (result != ERROR_CODE_NO_ERROR) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
@@ -781,7 +788,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCa
 
     ArkUI_Float32 targetNodePositionOffset[2];
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
-        nativeNode, &position, &targetNodePositionOffset, true, nullptr);
+        nativeNode, &position, &targetNodePositionOffset, true);
     if (result != ERROR_CODE_NO_ERROR) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
@@ -936,8 +943,8 @@ ArkUINativeModuleValue FrameNodeBridge::GetChildrenCount(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, 0));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    int isExpanded = GetIsExpanded(runtimeCallInfo, 1);
-    auto number = GetArkUINodeModifiers()->getFrameNodeModifier()->getChildrenCount(nativeNode, isExpanded);
+    int childrenCountMode = GetChildrenCountMode(runtimeCallInfo, 1);
+    auto number = GetArkUINodeModifiers()->getFrameNodeModifier()->getChildrenCount(nativeNode, childrenCountMode);
     return panda::NumberRef::New(vm, number);
 }
 
@@ -962,7 +969,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetFirstChildIndexWithoutExpand(ArkUIRun
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t index = -1;
-    GetArkUINodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(nativeNode, &index, nullptr);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(nativeNode, &index);
     return panda::NumberRef::New(vm, index);
 }
 
@@ -973,7 +980,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetLastChildIndexWithoutExpand(ArkUIRunt
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t index = -1;
-    GetArkUINodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(nativeNode, &index, nullptr);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(nativeNode, &index);
     return panda::NumberRef::New(vm, index);
 }
 
@@ -1038,7 +1045,7 @@ ArkUINativeModuleValue FrameNodeBridge::MoveTo(ArkUIRuntimeCallInfo* runtimeCall
     auto targetNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 : index of child node position
     int index = thirdArg->ToNumber(vm)->Value();
-    GetArkUINodeModifiers()->getFrameNodeModifier()->moveNodeTo(nativeNode, targetNativeNode, index, nullptr);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->moveNodeTo(nativeNode, targetNativeNode, index);
     return panda::NumberRef::New(vm, ERROR_CODE_NO_ERROR);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1251,14 +1258,14 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     const std::list<TouchLocationInfo>& touchList = infoPtr->GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {
-        panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location, *infoPtr));
+        panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location));
     }
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "touches"), touchArr);
     auto changeTouchArr = panda::ArrayRef::New(vm);
     idx = 0; // reset index counter
     const std::list<TouchLocationInfo>& changeTouch = infoPtr->GetChangedTouches();
     for (const TouchLocationInfo& change : changeTouch) {
-        panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change, *infoPtr));
+        panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change));
     }
     if (changeTouch.size() > 0) {
         eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "type"),
@@ -2505,7 +2512,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::ArrayRef> ratioList = ratiosArg;
-    uint32_t size = ratioList->Length(vm);
+    uint32_t size = ArkTSUtils::GetArrayLength(vm, ratioList);
     std::vector<double> ratioVec(size);
     for (uint32_t i = 0; i < size; i++) {
         double radioNumber = 0.0;
@@ -2596,7 +2603,7 @@ ArkUINativeModuleValue FrameNodeBridge::AddFrameNodeToNodeContent(ArkUIRuntimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
-    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->addChild(nativeContent, nativeNode, nullptr);
+    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->addChild(nativeContent, nativeNode);
     GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
     if (result != ERROR_CODE_NO_ERROR) {
         LOGW("AddFrameNodeToNodeContent failed error:%{public}d", result);
@@ -2613,7 +2620,7 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveFrameNodeFromNodeContent(ArkUIRunt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
     GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
-    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->removeChild(nativeContent, nativeNode, nullptr);
+    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->removeChild(nativeContent, nativeNode);
     if (result != ERROR_CODE_NO_ERROR) {
         LOGW("RemoveFrameNodeFromNodeContent failed error:%{public}d", result);
     }
@@ -2881,7 +2888,7 @@ ArkUINativeModuleValue FrameNodeBridge::CancelAnimations(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(propertiesArg->IsArray(vm), panda::BooleanRef::New(vm, false));
     panda::Local<panda::ArrayRef> propertiesArrArg = panda::Local<panda::ArrayRef>(propertiesArg);
     std::vector<AnimationPropertyType> properties;
-    auto length = propertiesArrArg->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, propertiesArrArg);
     for (uint32_t i = 0; i != length; ++i) {
         panda::Local<panda::JSValueRef> propertyArg = panda::ArrayRef::GetValueAt(vm, propertiesArrArg, i);
         AnimationPropertyType propertyType = AnimationPropertyType::ROTATION;

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/shape/shape_model_static.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"

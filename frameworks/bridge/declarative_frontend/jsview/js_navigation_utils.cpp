@@ -34,6 +34,10 @@ constexpr char PADDING_END_PROPERTY[] = "paddingEnd";
 constexpr char MAIN_TITLE_MODIFIER[] = "mainTitleModifier";
 constexpr char SUB_TITLE_MODIFIER[] = "subTitleModifier";
 constexpr char TEXT_HIDE_PROPERTY[] = "hideItemValue";
+constexpr char SCROLL_EFFECT_OPTIONS_PROPERTY[] = "scrollEffectOptions";
+constexpr char SCROLL_EFFECT_TYPE_PROPERTY[] = "scrollEffectType";
+constexpr char BLUR_EFFECTIVE_START_OFFSET_PROPERTY[] = "blurEffectiveStartOffset";
+constexpr char BLUR_EFFECTIVE_END_OFFSET_PROPERTY[] = "blurEffectiveEndOffset";
 
 void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
     const JSRef<JSObject>& itemObject)
@@ -187,6 +191,40 @@ void ParseTextOptions(const JSCallbackInfo& info, const JSRef<JSVal>& obj, NG::N
     JSViewAbstract::SetTextStyleApply(info, options.subTitleApplyFunc, subTitleModifierProperty);
 }
 
+void ParseTitleBarScrollEffectOptions(const JSRef<JSObject>& optObj, NG::NavigationBackgroundOptions& options)
+{
+    options.scrollEffectOptions.reset();
+    auto scrollEffectOptionsProperty = optObj->GetProperty(SCROLL_EFFECT_OPTIONS_PROPERTY);
+    if (!scrollEffectOptionsProperty->IsObject()) {
+        return;
+    }
+    auto scrollEffectOptionsObject = JSRef<JSObject>::Cast(scrollEffectOptionsProperty);
+    auto scrollEffectTypeProperty = scrollEffectOptionsObject->GetProperty(SCROLL_EFFECT_TYPE_PROPERTY);
+    auto scrollEffectType = static_cast<int32_t>(NG::ScrollEffectType::COMMON_BLUR);
+    if (scrollEffectTypeProperty->IsNumber()) {
+        auto parsedScrollEffectType = scrollEffectTypeProperty->ToNumber<int32_t>();
+        if (parsedScrollEffectType < static_cast<int32_t>(NG::ScrollEffectType::COMMON_BLUR) ||
+            parsedScrollEffectType > static_cast<int32_t>(NG::ScrollEffectType::GRADUAL_BLUR)) {
+            return;
+        }
+        scrollEffectType = parsedScrollEffectType;
+    }
+
+    NG::ScrollEffectOptions scrollEffectOptions;
+    scrollEffectOptions.scrollEffectType = static_cast<NG::ScrollEffectType>(scrollEffectType);
+    CalcDimension startOffset;
+    if (JSViewAbstract::ParseLengthMetricsToDimension(
+            scrollEffectOptionsObject->GetProperty(BLUR_EFFECTIVE_START_OFFSET_PROPERTY), startOffset)) {
+        scrollEffectOptions.blurEffectiveStartOffset = startOffset;
+    }
+    CalcDimension endOffset;
+    if (JSViewAbstract::ParseLengthMetricsToDimension(
+            scrollEffectOptionsObject->GetProperty(BLUR_EFFECTIVE_END_OFFSET_PROPERTY), endOffset)) {
+        scrollEffectOptions.blurEffectiveEndOffset = endOffset;
+    }
+    options.scrollEffectOptions = scrollEffectOptions;
+}
+
 void ParseToolBarItemAction(const WeakPtr<NG::FrameNode>& targetNode,
     const JSCallbackInfo& info, const JSRef<JSObject>& itemObject, NG::BarItem& toolBarItem)
 {
@@ -320,6 +358,7 @@ void JSNavigationUtils::ParseTitleBarOptions(
         ParseBarOptions(info[1], options.brOptions);
         ParseTextOptions(info, info[1], options.textOptions);
         JSRef<JSObject> jsObjOption = JSRef<JSObject>::Cast(info[1]);
+        ParseTitleBarScrollEffectOptions(jsObjOption, options.bgOptions);
         auto enableHoverModeProperty = jsObjOption->GetProperty("enableHoverMode");
         if (enableHoverModeProperty->IsBoolean()) {
             options.enableHoverMode = enableHoverModeProperty->ToBoolean();

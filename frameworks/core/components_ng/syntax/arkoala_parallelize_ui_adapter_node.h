@@ -42,7 +42,7 @@ public:
 
     void FlushUpdateAndMarkDirty() override {}
 
-    void MoveData(int32_t from, int32_t to) override {}
+    void MoveData(int32_t from, int32_t to, bool isNeedUpdate = false) override {}
 
     RefPtr<FrameNode> GetFrameNode(int32_t index) override
     {

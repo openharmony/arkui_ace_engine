@@ -39,11 +39,8 @@ void Shadow::RegisterShadowResourceObj(Shadow& shadow,
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     if (radiusObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(resObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusObj, std::move(updateFunc));
@@ -114,5 +111,34 @@ Shadow Shadow::CreateShadow(ShadowStyle style)
             return ShadowConfig::NoneShadow;
     }
     return ShadowConfig::NoneShadow;
+}
+
+double Shadow::GetBlurRadius() const
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return std::max(blurRadius_, 0.0);
+    }
+    return blurRadius_;
+}
+
+void Shadow::SetBlurRadius(double blurRadius)
+{
+    if (blurRadius >= 0.0) {
+        blurRadius_ = blurRadius;
+        isHardwareAcceleration_ = false;
+        return;
+    }
+    blurRadius_ = Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0.0: blurRadius;
+}
+
+bool Shadow::IsValid() const
+{
+    if (isHardwareAcceleration_) {
+        return elevation_ > 0.0f && elevation_ < LIGHT_HEIGHT;
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
+    }
+    return blurRadius_ >= 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
 }
 } // namespace OHOS::Ace

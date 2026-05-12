@@ -20,6 +20,11 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Ace {
+enum class WidthBreakpoint;
+enum class HeightBreakpoint;
+}
+
 namespace OHOS::Ace::NG {
 class State {
 public:

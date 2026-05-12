@@ -16,6 +16,7 @@
 #include <variant>
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
@@ -498,6 +499,7 @@ void SetDecorationImpl(Ark_NativePointer node, const Opt_TextDecorationOptions* 
     SearchModelStatic::SetTextDecoration(frameNode, options->textDecoration);
     SearchModelStatic::SetTextDecorationColor(frameNode, options->color);
     SearchModelStatic::SetTextDecorationStyle(frameNode, options->textDecorationStyle);
+    SearchModelStatic::SetLineThicknessScale(frameNode, options->lineThicknessScale);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node, const Opt_Union_F64_String_Resource* value)
 {

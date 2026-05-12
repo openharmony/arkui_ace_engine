@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "base/memory/ace_type.h"
-#include "base/thread/cancelable_callback.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
@@ -43,7 +42,6 @@ struct GestureDebugBoundaryInfo {
 struct GestureDebugBoundaryState {
     WeakPtr<FrameNode> node;
     std::bitset<GESTURE_DEBUG_TYPE_COUNT> activeGestures;
-    std::unordered_map<GestureListenerType, CancelableCallback<void()>> delayedResetTasks;
 };
 
 class GestureDebugBoundaryManager : public AceType {
@@ -54,18 +52,13 @@ public:
     ~GestureDebugBoundaryManager() override = default;
 
     void HandleGestureAccept(GestureListenerType type, const RefPtr<FrameNode>& node);
-    void HandleGestureEnd(GestureListenerType type, const RefPtr<FrameNode>& node);
+    void ResetAllGesturesOnNewRound();
     void ClearNode(int32_t nodeId);
 
 private:
-    static constexpr uint32_t DELAY_RESET_MS = 300;
     static constexpr float MIN_SIZE_THRESHOLD_VP = 32.0f;
     static constexpr float DEFAULT_STROKE_WIDTH_PX = 8.0f;
 
-    void ScheduleDelayReset(GestureListenerType type, int32_t nodeId, const WeakPtr<FrameNode>& weakNode);
-    void CancelDelayReset(GestureListenerType type, GestureDebugBoundaryState& state);
-    GestureDebugBoundaryState* GetNodeState(int32_t nodeId);
-    void EraseNodeState(int32_t nodeId);
     std::optional<GestureDebugBoundaryInfo> BuildRenderInfo(
         const RefPtr<FrameNode>& node, const GestureDebugBoundaryState& state);
     Color ResolveGestureColor(const RefPtr<FrameNode>& node, GestureListenerType type) const;

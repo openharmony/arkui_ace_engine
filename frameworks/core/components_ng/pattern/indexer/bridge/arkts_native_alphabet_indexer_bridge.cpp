@@ -18,12 +18,14 @@
 #include "ui/base/utils/utils.h"
 
 #include "core/interfaces/native/node/node_api.h"
-#include "core/components_ng/pattern/indexer/indexer_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/indexer/indexer_model_impl.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_indexer_theme.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
 namespace OHOS::Ace::NG {
 namespace {

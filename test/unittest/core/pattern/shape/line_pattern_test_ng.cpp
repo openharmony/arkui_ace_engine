@@ -14,6 +14,7 @@
  */
 
 #include <memory>
+#include "core/accessibility/accessibility_manager.h"
 
 #include "gtest/gtest.h"
 #include "include/core/SkCanvas.h"

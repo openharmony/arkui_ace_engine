@@ -33,7 +33,11 @@
 #include "core/components/transition/transition_component.h"
 #include "core/components/tween/tween_component.h"
 #include "core/pipeline/base/sole_child_component.h"
-#include "core/pipeline/pipeline_context.h"
+
+namespace OHOS::Ace {
+class PipelineContext;
+class ColumnComponent;
+}
 
 namespace OHOS::Ace {
 

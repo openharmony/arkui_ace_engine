@@ -14,6 +14,7 @@
  */
 
 #include "core/components/text_overlay/text_overlay_element.h"
+#include "core/event/key_event.h"
 
 #include "core/components/text_overlay/render_text_overlay.h"
 

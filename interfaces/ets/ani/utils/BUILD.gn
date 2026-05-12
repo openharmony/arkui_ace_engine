@@ -20,7 +20,10 @@ ohos_source_set("ani_utils") {
 
   include_dirs = [ "." ]
 
-  external_deps = [ "runtime_core:ani" ]
+  external_deps = [
+    "runtime_core:ani",
+    "hilog:libhilog",
+  ]
 
   configs = [ "$ace_root:ace_config" ]
 

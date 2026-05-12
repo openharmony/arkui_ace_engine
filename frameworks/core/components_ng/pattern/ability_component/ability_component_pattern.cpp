@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
 
+#include "session/host/include/extension_session.h"
 #include "session_manager/include/extension_session_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"

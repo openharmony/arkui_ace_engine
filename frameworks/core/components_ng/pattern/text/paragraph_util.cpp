@@ -234,7 +234,7 @@ void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spa
             continue;
         }
         spanItem->SetNeedRemoveNewLine(false);
-        if (spanItem->content.back() == u'\n') {
+        if (!spanItem->content.empty() && spanItem->content.back() == u'\n') {
             if (std::next(it) == spans.end()) {
                 break;
             }

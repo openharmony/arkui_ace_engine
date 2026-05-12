@@ -359,6 +359,19 @@ if (globalThis.WaterFlow === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.LazyVWaterFlowLayout === undefined) {
+  globalThis.LazyVWaterFlowLayout = {
+    create: function() {
+      getUINativeModule().loadNativeModule('LazyVWaterFlowLayout');
+      let module = globalThis.requireNapi('arkui.components.arklazywaterflowlayout');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().lazyVWaterFlowLayout.create();
+    }
+  }
+}
+
+// @ts-ignore
 if (globalThis.FlowItem === undefined) {
   globalThis.FlowItem = {
     create: function(params) {
@@ -461,4 +474,17 @@ if (globalThis.TextClock === undefined) {
     },
     name: 'JSTextClock'
   };
+}
+
+// @ts-ignore
+if (globalThis.LazyColumnLayout === undefined) {
+  globalThis.LazyColumnLayout = {
+    create: function () {
+      getUINativeModule().loadNativeModule('LazyColumnLayout');
+      let module = globalThis.requireNapi('arkui.components.arklazycolumnlayout');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().lazyColumnLayout.create();
+    }
+  }
 }

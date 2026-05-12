@@ -58,6 +58,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -96,29 +97,18 @@ extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
-extern const char _binary_jsEnumStyle_abc_start[];
-extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkCommon_abc_start[];
 extern const char _binary_arkDynamicComponent_abc_start[];
-extern const char _binary_arkComponent_abc_start[];
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 extern const char _binary_jsPreload_abc_start[];
 extern const char _binary_jsPreload_abc_end[];
-#endif
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
-extern const char _binary_jsEnumStyle_abc_end[];
-extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkCommon_abc_end[];
 extern const char _binary_arkDynamicComponent_abc_end[];
-extern const char _binary_arkComponent_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
-extern const char* _binary_jsEnumStyle_abc_end;
-extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkCommon_abc_end;
 extern const char* _binary_arkDynamicComponent_abc_end;
-extern const char* _binary_arkComponent_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -253,15 +243,7 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
 
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 {
-#if defined(CROSS_PLATFORM)
-    std::string str("arkui_binary_jsEnumStyle_abc_loadFile");
-    return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
-#elif defined(PREVIEW)
-    return EvaluateAbcFile(runtime, "./module/arkui/jsEnumStyle.abc");
-#else
-    return EvaluateAbcFile(runtime, "/etc/abc/framework/jsEnumStyle.abc");
-#endif
+    return EvaluateAbcFile(runtime, NG::GetSystemPath("jsEnumStyle.abc"));
 }
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
@@ -279,13 +261,8 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
 {
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
-    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
-#else
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsPreload_abc_start));
     int32_t codeLength = _binary_jsPreload_abc_end - _binary_jsPreload_abc_start;
-#endif
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
@@ -305,15 +282,7 @@ inline bool PreloadArkDynamicComponent(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
-#if defined(CROSS_PLATFORM)
-    std::string str("arkui_binary_arkComponent_abc_loadFile");
-    return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
-#elif defined(PREVIEW)
-    return EvaluateAbcFile(runtime, "./module/arkui/arkComponent.abc");
-#else
-    return EvaluateAbcFile(runtime, "/etc/abc/framework/arkComponent.abc");
-#endif
+    return EvaluateAbcFile(runtime, NG::GetSystemPath("arkComponent.abc"));
 }
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
@@ -866,6 +835,8 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
+        { "LazyColumnLayout", "arkui.components.arklazycolumnlayout" },
+        { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
@@ -1728,10 +1699,10 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         if (instance == nullptr) {
             return;
         }
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
 #ifdef OHOS_PLATFORM
         auto tid = gettid();
         ConnectServerManager::Get().AddInstance(tid, "ets");
-        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
@@ -1740,9 +1711,11 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
-
-        std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);
-        arkNativeEngine->RunBufferScript(buffer);
+        std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+        if (!arkRuntime->InitializeFromExistVM(vm)) {
+            return;
+        }
+        EvaluateAbcFile(arkRuntime, NG::GetSystemPath("jsEnumStyle.abc"));
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }

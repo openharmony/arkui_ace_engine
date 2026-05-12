@@ -69,6 +69,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
         [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
     InitSheetKey(sheetNode, builder->GetId(), targetId);
     sheetPattern->UpdateSheetType();
+    sheetPattern->SetSheetEdgeLightMode(sheetStyle);
     sheetPattern->InitSheetObject();
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
@@ -82,6 +83,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     scrollNode->MountToParent(sheetNode);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
     CreateCloseIconButtonNode(sheetNode, sheetStyle);
     return sheetNode;
 }
@@ -113,7 +115,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     CHECK_NULL_RETURN(layoutProps, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     auto sheetDragBarHeight = sheetTheme->GetSheetDragBarHeight();
     CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode, sheetDragBarHeight);
@@ -123,7 +125,9 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     layoutProps->UpdateMargin(margin);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
+    bool needSpacingOptimize = GetFallbackLineSpacingStyleOptimizeFlag(AceType::RawPtr(pipeline));
+    if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() &&
+        !needSpacingOptimize) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(
             std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight() - sheetTheme->GetSheetTitleAreaMargin() -
                                      sheetPattern->GetDragBarHeight(sheetPattern->GetDragBarNode()))));
@@ -197,7 +201,7 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
     buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
@@ -243,7 +247,7 @@ void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
 {
     auto pipeline = buttonNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = buttonNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     RefPtr<FrameNode> iconNode;
 
@@ -337,15 +341,21 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     CHECK_NULL_RETURN(sheetTitle, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     auto titleProp = sheetTitle->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleTextFontSize = sheetTheme->GetTitleTextFontSize();
     auto sheetTitleFontWeight = sheetTheme->GetSheetTitleFontWeight();
     titleTextFontSize.SetUnit(DimensionUnit::FP);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto titlePattern = sheetTitle->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(titlePattern, nullptr);
+        titlePattern->SetFallbackLineSpacingAndIncludeFontPadding(
+            titlePattern->GetFallbackLineSpacingStyleOptimizeFlag());
+    }
 
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto textTheme = sheetTitle->GetTheme<TextTheme>(true);
     if (textTheme && textTheme->GetIsTextFadeout()) {
         titleProp->UpdateTextOverflow(TextOverflow::MARQUEE);
         titleProp->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
@@ -388,14 +398,20 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     CHECK_NULL_RETURN(sheetSubtitle, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(sheetSubtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleTextFontSize = sheetTheme->GetSubtitleTextFontSize();
     titleTextFontSize.SetUnit(DimensionUnit::VP);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto titlePattern = sheetSubtitle->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(titlePattern, nullptr);
+        titlePattern->SetFallbackLineSpacingAndIncludeFontPadding(
+            titlePattern->GetFallbackLineSpacingStyleOptimizeFlag());
+    }
 
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto textTheme = sheetSubtitle->GetTheme<TextTheme>(true);
     if (textTheme && textTheme->GetIsTextFadeout()) {
         titleProp->UpdateTextOverflow(TextOverflow::MARQUEE);
         titleProp->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
@@ -475,6 +491,7 @@ RefPtr<FrameNode> SheetView::CreateSheetMaskShowInSubwindow(const RefPtr<FrameNo
     // Update sheet type needs to get subwindow messages which is updated
     // after sheetWrapper MountToParent root, after sheetPage MountToParent sheetWrapper.
     sheetNodePattern->UpdateSheetType();
+    sheetNodePattern->SetSheetEdgeLightMode(sheetStyle);
     sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
     sheetWrapperPattern->SetSheetMaskNode(maskNode);
     sheetWrapperPattern->SetSheetPageNode(sheetPageNode);
@@ -490,12 +507,14 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     SetTitleColumnMinSize(layoutProperty, sheetStyle, sheetTheme);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     bool isTitleCustombuilder = sheetStyle.isTitleBuilder.has_value() && sheetStyle.isTitleBuilder.value();
-    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() || isTitleCustombuilder) {
+    bool needSpacingOptimize = GetFallbackLineSpacingStyleOptimizeFlag(AceType::RawPtr(pipeline));
+    if ((pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() && !needSpacingOptimize) ||
+        isTitleCustombuilder) {
         layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight())));
     }
@@ -519,7 +538,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             auto subtitleRow = BuildSubTitle(sheetNode, sheetStyle);
             CHECK_NULL_RETURN(subtitleRow, nullptr);
             subtitleRow->MountToParent(titleColumn);
-            if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
+            if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() && !needSpacingOptimize) {
                 layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
                     sheetTheme->GetOperationAreaHeightDouble() - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
@@ -533,5 +552,16 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
         }
     }
     return titleColumn;
+}
+
+bool SheetView::GetFallbackLineSpacingStyleOptimizeFlag(PipelineContext* pipeline)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        CHECK_NULL_RETURN(pipeline, false);
+        auto fontManager = pipeline->GetFontManager();
+        CHECK_NULL_RETURN(fontManager, false);
+        return fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

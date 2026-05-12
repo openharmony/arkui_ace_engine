@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
-
 #include "core/common/ace_engine.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/base/modifier.h"
+
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"

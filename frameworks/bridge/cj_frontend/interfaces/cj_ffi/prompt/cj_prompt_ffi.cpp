@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -93,13 +95,17 @@ std::vector<ButtonInfo> CreateButtonInfoVector(CButtonInfo* buttonsInfo, int32_t
     return buttons;
 }
 
-void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name)
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name,
+    const RefPtr<NG::OverlayManager>& overlay = nullptr)
 {
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    if (overlay) {
+        overlayManager = overlay;
+    }
     context->GetTaskExecutor()->PostTask(
         [task = std::move(task), weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
@@ -150,9 +156,6 @@ void CreateCustomShadow(const NativeShadowOptions& shadowOption, Shadow& shadow)
     shadow.SetOffsetX(xValue);
     shadow.SetOffsetY(shadowOption.offsetY);
     double radiusValue = shadowOption.radius;
-    if (LessNotEqual(radiusValue, 0.0)) {
-        radiusValue = 0.0;
-    }
     shadow.SetBlurRadius(radiusValue);
     shadow.SetColor(Color(shadowOption.color));
     int32_t shadowType = static_cast<int32_t>(shadowOption.shadowType);
@@ -651,7 +654,9 @@ void FfiPromptCloseCustomDialog(int32_t id)
         overlayManager->CloseCustomDialog(id);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(id);
     };
-    MainWindowOverlay(std::move(task), "ArkUICloseCustomDialog");
+    auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, id);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
+    MainWindowOverlay(std::move(task), "ArkUICloseCustomDialog", currentOverlay);
     return;
 }
 

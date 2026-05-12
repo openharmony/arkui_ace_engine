@@ -18,10 +18,11 @@ import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
-import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 import { IncrementalNode } from '@koalaui/runtime';
-import { CustomComponentLifecycle } from '../component/customComponent';
-import { IEnvVariable } from './decoratorImpl/decoratorEnv'
+import { CustomComponentLifecycle } from '@component/customComponent';
+import { IEnvVariable } from '@decoratorEnv';
+import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
+export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
 
 export interface IDecoratorBaseRegistry {
     registerToOwningView(): void;
@@ -38,6 +39,8 @@ export interface IVariableOwner {
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
+    __getCustomComponentContext__Internal(): CustomComponentContext;
+    __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
 }
 
 export interface IDecoratedVariable {
@@ -127,12 +130,25 @@ export interface IMutableStateMeta {
 export interface IMutableKeyedStateMeta {
     addRef(key: string): void;
     fireChange(key: string): void;
+    // Fire several keys as one logical mutation. Sync-monitor callbacks that
+    // bind multiple of the keys (e.g. wildcard binding on both OB_LENGTH and
+    // OB_ARRAY_ANY_KEY) fire ONCE total instead of once per key. Each key
+    // still goes through the per-key fireChange, so non-overlapping bindings
+    // still see their own notification.
+    // ReadonlyArray<string> at the boundary so callers can pass hoisted
+    // immutable batches (e.g. WrappedArray.LENGTH_AND_ANY_KEY) without
+    // worrying about a future mutation slipping in. Array<string> still
+    // satisfies the type since Array implements ReadonlyArray.
+    fireChangeBatch(keys: ReadonlyArray<string>): void;
 }
 
 export interface IObserve {
     renderingComponent: int;
     renderingId: RenderIdType | undefined;
     shouldAddRef(iObjectsRenderId: RenderIdType): boolean;
+}
+export interface IObservedAnyProp {
+    addRefAnyProp(): void;
 }
 
 export const OBSERVE: IObserve = ObserveSingleton.instance;
@@ -268,6 +284,7 @@ export interface IStateMgmtFactory {
         varName: string,
         envOptions?: EnvOptions<T>
     ): IEnvDecoratedVariable<T>;
+    makeSyncMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -283,7 +300,9 @@ export interface ISubscribedWatches extends IWatchSubscriberRegister {
     executeOnSubscribingWatches(propertyName: string): void;
 }
 
-export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {
+export interface IComputedDecoratedVariable<T> extends ITrackedDecoratorRef, IDecoratedImmutableVariable<T> {
+    isFreeze(): boolean;
+    fireChange(): void;
     setOwner(owningView: IVariableOwner);
     resetOnReuse(): void;
 }
@@ -301,6 +320,7 @@ export interface IMonitorDecoratedVariable {
 export interface IMonitorPathInfo {
     path: string;
     valueCallback: MonitorValueCallback;
+    enableWildcard?: boolean;
 }
 
 export interface IMonitorValue<T> {

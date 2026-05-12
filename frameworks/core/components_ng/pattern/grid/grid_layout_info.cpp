@@ -55,6 +55,54 @@ void GridLayoutInfo::ClearDragState()
     currentRect_.Reset();
 }
 
+void GridLayoutInfo::UpdateDragOriginalIndex(int32_t from, int32_t to)
+{
+    if (from == to) {
+        return;
+    }
+    if (dragOriginalIndexMap_.empty()) {
+        return;
+    }
+    if (from < to) {
+        auto fromIter = dragOriginalIndexMap_.find(from);
+        int32_t fromOrig = (fromIter != dragOriginalIndexMap_.end()) ? fromIter->second : from;
+        for (int32_t i = from; i < to; ++i) {
+            auto nextIter = dragOriginalIndexMap_.find(i + 1);
+            dragOriginalIndexMap_[i] = (nextIter != dragOriginalIndexMap_.end()) ? nextIter->second : (i + 1);
+        }
+        dragOriginalIndexMap_[to] = fromOrig;
+    } else {
+        auto fromIter = dragOriginalIndexMap_.find(from);
+        int32_t fromOrig = (fromIter != dragOriginalIndexMap_.end()) ? fromIter->second : from;
+        for (int32_t i = from; i > to; --i) {
+            auto prevIter = dragOriginalIndexMap_.find(i - 1);
+            dragOriginalIndexMap_[i] = (prevIter != dragOriginalIndexMap_.end()) ? prevIter->second : (i - 1);
+        }
+        dragOriginalIndexMap_[to] = fromOrig;
+    }
+}
+
+int32_t GridLayoutInfo::GetOriginalIndex(int32_t currentIndex) const
+{
+    if (!isOnMoveDragUpdate_) {
+        return currentIndex;
+    }
+    auto it = dragOriginalIndexMap_.find(currentIndex);
+    if (it != dragOriginalIndexMap_.end()) {
+        return it->second;
+    }
+    return currentIndex;
+}
+
+void GridLayoutInfo::ClearOnMoveDragState()
+{
+    dragOriginalIndexMap_.clear();
+    isOnMoveDragUpdate_ = false;
+    isOnMoveGridChange_ = false;
+    fromDragIndex_ = -1;
+    toDragIndex_ = -1;
+}
+
 void GridLayoutInfo::MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex)
 {
     auto lastItemIndex = itemIndex;

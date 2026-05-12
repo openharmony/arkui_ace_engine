@@ -8,7 +8,8 @@
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "build": "rm -rf ./dist && tsc --build tsconfig.release.json"
+    "build": "rm -rf ./dist && tsc --build tsconfig.json && cat ./dist/ArkLog.js ./dist/ArkComponent.js ./src/arkComponent.js > ./dist/temp.js && rm -rf ./dist/ArkComponent.js && mv ./dist/temp.js ./dist/arkComponent.js",
+    "genabc": "es2abc --output ./dist/arkComponent.abc --module ./dist/arkComponent.js"
   },
   "author": "ArkUI",
   "license": "Apache-2.0"

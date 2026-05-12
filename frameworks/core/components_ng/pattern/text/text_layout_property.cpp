@@ -158,6 +158,16 @@ void TextLayoutProperty::UpdateMarqueeOptionsFromJson(const std::unique_ptr<Json
     UpdateTextMarqueeSpacing(Dimension::FromString(json->GetString("spacing")));
 }
 
+std::string TextLayoutProperty::GetFontWeightConfigs() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("enableVariableFontWeight",
+        GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
+    jsonValue->Put("enableDeviceFontWeightCategory",
+        GetEnableDeviceFontWeightCategory().value_or(true) ? "true" : "false");
+    return jsonValue->ToString();
+}
+
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
@@ -182,6 +192,9 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         } else {
             json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(std::vector<Color>()).c_str(), filter);
         }
+        json->PutExtAttr("fontWeightConfigs", GetFontWeightConfigs().c_str(), filter);
+        json->PutExtAttr("variableFontWeight",
+            std::to_string(GetVariableFontWeight().value_or(0)).c_str(), filter);
     } else {
         json->PutExtAttr("fontColor", GetTextColor().value_or(defaultColor).ColorToString().c_str(), filter);
     }
@@ -218,8 +231,11 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
             .c_str(), filter);
     json->PutExtAttr("baselineOffset",
         std::to_string(static_cast<int32_t>(GetBaselineOffset().value_or(0.0_vp).Value())).c_str(), filter);
-    json->PutExtAttr("textAlign",
-        V2::ConvertWrapTextAlignToString(GetTextAlign().value_or(TextAlign::START)).c_str(), filter);
+        json->PutExtAttr("textAlign",
+            V2::ConvertWrapTextAlignToString(
+                GetTextAlign().value_or(theme ? theme->GetTextStyle().GetTextAlign() : TextAlign::START))
+                .c_str(),
+            filter);
     json->PutExtAttr(
         "textDirection", StringUtils::ToString(GetTextDirection().value_or(TextDirection::INHERIT)).c_str(), filter);
     json->PutExtAttr("textVerticalAlign", V2::ConvertWrapTextVerticalAlignToString(

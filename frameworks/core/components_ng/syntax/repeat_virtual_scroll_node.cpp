@@ -545,7 +545,7 @@ void RepeatVirtualScrollNode::SetOnMove(std::function<void(int32_t, int32_t)>&& 
 }
 
 // FOREAch
-void RepeatVirtualScrollNode::MoveData(int32_t from, int32_t to) {}
+void RepeatVirtualScrollNode::MoveData(int32_t from, int32_t to, bool isNeedUpdate) {}
 
 RefPtr<FrameNode> RepeatVirtualScrollNode::GetFrameNode(int32_t index)
 {

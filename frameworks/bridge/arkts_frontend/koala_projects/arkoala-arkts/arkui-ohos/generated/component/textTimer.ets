@@ -410,6 +410,17 @@ export function TextTimerImpl(
     })
 }
 
+export class TextTimerController_serializer {
+    public static write(buffer: SerializerBase, value: TextTimerController): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): TextTimerController {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return TextTimerControllerInternal.fromPtr(ptr)
+    }
+}
 export class TextTimerConfiguration_serializer {
     public static write(buffer: SerializerBase, value: TextTimerConfiguration): void {
         let valueSerializer: SerializerBase = buffer
@@ -450,17 +461,6 @@ export class TextTimerConfiguration_serializer {
         const startTimeTmpResult: int32 | undefined = startTimeTmpBuf
         let value: TextTimerConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, count: countTmpResult, isCountDown: isCountDownTmpResult, started: startedTmpResult, elapsedTime: elapsedTimeTmpResult, startTime: startTimeTmpResult} as TextTimerConfiguration)
         return value
-    }
-}
-export class TextTimerController_serializer {
-    public static write(buffer: SerializerBase, value: TextTimerController): void {
-        let valueSerializer: SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): TextTimerController {
-        let valueDeserializer: DeserializerBase = buffer
-        let ptr: KPointer = valueDeserializer.readPointer()
-        return TextTimerControllerInternal.fromPtr(ptr)
     }
 }
 export class TextTimerOptions_serializer {

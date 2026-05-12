@@ -76,7 +76,6 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         const shouldAddRef = this.shouldAddRef();
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
-            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
             uiUtils.builtinContainersAddRefAnyKey(value);
             this.selfTrack();
             ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();
@@ -108,12 +107,12 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         // Update ObservedObjectRegistry registration
         this.updateObservedObjectRegistration(oldValue, value);
 
-        if (this.setProxyValue) {
-            this.setProxyValue!(value);
-        }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(this.backing_.get(false));
         this.execWatchFuncs();
+        if (this.setProxyValue) {
+            this.setProxyValue!(value);
+        }
     }
     // only set value
     public set(newValue: T, check: boolean): void {

@@ -90,6 +90,7 @@ public:
     static ArkUINativeModuleValue ResetContentTransition(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetAntiAlias(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetAntiAlias(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetReloadKey(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

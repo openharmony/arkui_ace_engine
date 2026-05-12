@@ -16,7 +16,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int PARAM_ARR_LENGTH_1 = 1;
@@ -434,7 +436,7 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxResponseRegion(ArkUIRuntimeCal
         length = lengthArg->Uint32Value(vm);
     } else if (isJsView && secondArg->IsArray(vm)) {
         auto transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-        length = DIMENSION_LENGTH * transArray->Length(vm);
+        length = DIMENSION_LENGTH * ArkTSUtils::GetArrayLength(vm, transArray);
     }
 
     ArkUI_Float32 regionArray[length];

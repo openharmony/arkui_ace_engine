@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { NodePosition, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "./Graphics"
+import { NodePosition, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext, BackgroundBlur, ContentBlur, ForegroundBlur } from "./Graphics"
 import { BorderStyle } from "./component/enums"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule, nullptr } from "@koalaui/interop"
@@ -71,6 +71,9 @@ export class RenderNode implements MaterializedBase {
     private markNodeGroupValue: boolean = false
     private frameNode_: WeakRef<FrameNode> | undefined = undefined
     private isDisposed_: boolean = false;
+    private backgroundBlurValue: BackgroundBlur = { radius: 0, grayscale: [0, 0] as [int32, int32] }
+    private contentBlurValue: ContentBlur = { radius: 0, grayscale: [0, 0] as [int32, int32] }
+    private foregroundBlurValue: ForegroundBlur = { radius: 0 }
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -319,6 +322,79 @@ export class RenderNode implements MaterializedBase {
     }
     set lengthMetricsUnit(lengthMetricsUnit: LengthMetricsUnit) {
         this.setLengthMetricsUnit(lengthMetricsUnit)
+    }
+    get backgroundBlur(): BackgroundBlur {
+        return this.backgroundBlurValue
+    }
+    set backgroundBlur(blurValue: BackgroundBlur | undefined) {
+        if (blurValue === undefined || blurValue === null) {
+            this.backgroundBlurValue = { radius: 0, grayscale: [0, 0] as [int32, int32] }
+            RenderNodeExtender.setBackgroundBlur(this, 0, 0, 0)
+            return
+        }
+        const blurValueCast = blurValue as (BackgroundBlur)
+        let radius = blurValueCast.radius
+        if (radius < 0) {
+            radius = 0
+        }
+        const grayscale = blurValueCast.grayscale
+        let grayscale1: int32 = 0
+        let grayscale2: int32 = 0
+        if (grayscale) {
+            if (grayscale[0] >= 0 && grayscale[0] <= 127) {
+                grayscale1 = grayscale[0]
+            }
+            if (grayscale[1] >= 0 && grayscale[1] <= 127) {
+                grayscale2 = grayscale[1]
+            }
+        }
+        this.backgroundBlurValue = { radius: radius, grayscale: [grayscale1, grayscale2] as [int32, int32] }
+        RenderNodeExtender.setBackgroundBlur(this, radius, grayscale1, grayscale2)
+    }
+    get contentBlur(): ContentBlur {
+        return this.contentBlurValue
+    }
+    set contentBlur(blurValue: ContentBlur | undefined) {
+        if (blurValue === undefined || blurValue === null) {
+            this.contentBlurValue = { radius: 0, grayscale: [0, 0] as [int32, int32] }
+            RenderNodeExtender.setContentBlur(this, 0, 0, 0)
+            return
+        }
+        const blurValueCast = blurValue as (ContentBlur)
+        let radius = blurValueCast.radius
+        if (radius < 0) {
+            radius = 0
+        }
+        const grayscale = blurValueCast.grayscale
+        let grayscale1: int32 = 0
+        let grayscale2: int32 = 0
+        if (grayscale) {
+            if (grayscale[0] >= 0 && grayscale[0] <= 127) {
+                grayscale1 = grayscale[0]
+            }
+            if (grayscale[1] >= 0 && grayscale[1] <= 127) {
+                grayscale2 = grayscale[1]
+            }
+        }
+        this.contentBlurValue = { radius: radius, grayscale: [grayscale1, grayscale2] as [int32, int32] }
+        RenderNodeExtender.setContentBlur(this, radius, grayscale1, grayscale2)
+    }
+    get foregroundBlur(): ForegroundBlur {
+        return this.foregroundBlurValue
+    }
+    set foregroundBlur(blurValue: ForegroundBlur | undefined) {
+        if (blurValue === undefined || blurValue === null) {
+            this.foregroundBlurValue = { radius: 0 }
+            RenderNodeExtender.setForegroundBlur(this, 0)
+            return
+        }
+        const blurValueCast = blurValue as (ForegroundBlur)
+        let radius = blurValueCast.radius
+        if (radius < 0) {
+            radius = 0
+        }
+        this.foregroundBlurValue = { radius: radius }
+        RenderNodeExtender.setForegroundBlur(this, radius)
     }
     static ctor_rendernode(id: int32, callback: DrawCallback): KPointer {
         const retval  = RenderNodeExtender.constructorRenderNode(id)

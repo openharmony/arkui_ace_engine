@@ -15,6 +15,7 @@
 
 #include "prompt_controller.h"
 
+#include "frameworks/core/components_ng/pattern/overlay/overlay_manager.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Napi {

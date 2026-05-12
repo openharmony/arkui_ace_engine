@@ -18,7 +18,9 @@
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/event/input_event.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
 #include "core/components_ng/relaxed_interaction/relaxed_interaction_types.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -34,63 +36,50 @@ ExecutorResult ScrollTouchExecutor::ExecuteStep()
     return result ? ExecutorResult::SUCCESS : ExecutorResult::FAILED;
 }
 
-PointF ScrollTouchExecutor::ToPoint(const ScrollActionInfo& actionInfo)
-{
-    float dx = 0.0f;
-    float dy = 0.0f;
-    switch (actionInfo.direction) {
-        case RelaxedScrollDirection::UP:
-            dy = -actionInfo.distance;
-            break;
-        case RelaxedScrollDirection::DOWN:
-            dy = actionInfo.distance;
-            break;
-        case RelaxedScrollDirection::LEFT:
-            dx = -actionInfo.distance;
-            break;
-        case RelaxedScrollDirection::RIGHT:
-            dx = actionInfo.distance;
-            break;
-        case RelaxedScrollDirection::FORWARD:
-            dy = -actionInfo.distance;
-            break;
-        case RelaxedScrollDirection::BACKWARD:
-            dy = actionInfo.distance;
-            break;
-        default:
-            break;
-    }
-    return PointF { dx, dy };
-}
-
 bool ScrollTouchExecutor::ExecuteTargetMode()
 {
     float x = cmd_.actionInfo.coordinates.x1;
     float y = cmd_.actionInfo.coordinates.y1;
 
-    RefPtr<ScrollPattern> scroll = FindScrollPattern(x, y);
+    RefPtr<Pattern> scroll = FindScrollPattern(x, y);
     if (!scroll) {
         return false;
     }
 
-    RefPtr<ScrollableController> scrollController = scroll->GetOrCreatePositionController();
-    auto point = ToPoint(cmd_.actionInfo);
-    scrollController->ScrollBy(point.GetX(), point.GetY(), true);
+    ScrollingConfig config;
+    switch (cmd_.actionInfo.direction) {
+        case RelaxedScrollDirection::UP:
+        case RelaxedScrollDirection::LEFT:
+        case RelaxedScrollDirection::BACKWARD:
+            config.direction = SmartGestureDirection::BACKWARD;
+            break;
+        default:
+            config.direction = SmartGestureDirection::FORWARD;
+            break;
+    }
+
+    if (!scroll->IsScrollAble(config.direction)) {
+        WorkflowDumper::GetInstance().AddLog("Node is not scrollable");
+        return false;
+    }
+
+    config.distance = static_cast<double>(cmd_.actionInfo.distance);
+    scroll->PerformScroll(config);
     return true;
 }
 
-RefPtr<ScrollPattern> ScrollTouchExecutor::FindScrollPattern(float x, float y)
+RefPtr<Pattern> ScrollTouchExecutor::FindScrollPattern(float x, float y)
 {
     auto context = context_.Upgrade();
     if (!context) {
         return nullptr;
     }
-    auto result = FindFrameNode(x, y, ScrollRecognizerPred());
+    auto result = FindFrameNode(x, y, ScrollRecognizerPred(cmd_.actionInfo.direction));
     if (!result.GetNode()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "No FrameNode found at coordinates.");
         return nullptr;
     }
-    return AceType::DynamicCast<ScrollPattern>(result.GetNode()->GetPattern());
+    return result.GetNode()->GetPattern();
 }
 
 } // namespace OHOS::Ace::NG

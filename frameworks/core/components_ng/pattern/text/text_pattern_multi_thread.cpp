@@ -85,20 +85,9 @@ void TextPattern::OnAttachToMainTreeMultiThread()
             host->GetRenderContext()->SetClipToFrame(true);
         }
     }
-    InitSurfaceChangedCallback();
-    InitSurfacePositionChangedCallback();
     pipeline->AddWindowStateChangedCallback(host->GetId());
     pipeline->AddWindowSizeChangeCallback(host->GetId());
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    if (!textLayoutProperty->HasTextAlign()) {
-        textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
-    }
-    if (textLayoutProperty->GetPositionProperty() && !(textLayoutProperty->GetPositionProperty()->HasAlignment())) {
-        textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-    }
+    OnAttachToMainTreeMultiThreadExtension();
     isDetachFromMainTree_ = false;
 }
 
@@ -141,6 +130,8 @@ void TextPattern::OnDetachFromMainTreeMultiThread()
     RemoveFormVisibleChangeCallback(node->GetId());
     isDetachFromMainTree_ = true;
 }
+
+void TextPattern::OnAttachToMainTreeMultiThreadExtension() {}
 
 void TextPattern::SetTextDetectEnableMultiThread(bool enable)
 {

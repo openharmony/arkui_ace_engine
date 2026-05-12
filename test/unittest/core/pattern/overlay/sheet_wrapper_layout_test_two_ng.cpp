@@ -52,6 +52,13 @@ void SheetWrapperLayoutTestTwoNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 

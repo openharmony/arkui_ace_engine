@@ -14,6 +14,8 @@
  */
 
 #include "base/subwindow/subwindow_manager.h"
+
+#include "base/error/error_code.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"

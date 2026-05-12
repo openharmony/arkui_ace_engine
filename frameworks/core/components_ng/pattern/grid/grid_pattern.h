@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,7 +88,7 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
-    ScrollOffsetAbility GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
@@ -114,6 +114,9 @@ public:
 
     void ResetGridLayoutInfo()
     {
+        if (info_.isOnMoveDragUpdate_) {
+            info_.isOnMoveGridChange_ = true;
+        }
         info_.lineHeightMap_.clear();
         info_.gridMatrix_.clear();
         info_.endIndex_ = info_.startIndex_ - 1;
@@ -296,6 +299,8 @@ public:
 
     int32_t GetFirstIndex() const override;
 
+    void ApplyEditModeToCachedItems(bool enabled) override;
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -319,6 +324,8 @@ private:
     void ClearMultiSelect() override;
     bool IsItemSelected(float offsetX, float offsetY) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
+    int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
+    void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
 

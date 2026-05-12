@@ -45,10 +45,22 @@ public:
 
     void SetFontFamilies(std::vector<std::string>& familyNames) override;
     void SetSymbolType(SymbolType value) override;
+    void SetVariableFontWeight(int32_t value) override;
+    void ResetVariableFontWeight() override;
+    void SetEnableVariableFontWeight(bool value) override;
+    void ResetEnableVariableFontWeight() override;
+    void SetEnableDeviceFontWeightCategory(bool value) override;
+    void ResetEnableDeviceFontWeightCategory() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetVariableFontWeight(FrameNode* frameNode, int32_t value);
+    static void ResetVariableFontWeight(FrameNode* frameNode);
+    static void SetEnableVariableFontWeight(FrameNode* frameNode, bool value);
+    static void ResetEnableVariableFontWeight(FrameNode* frameNode);
+    static void SetEnableDeviceFontWeightCategory(FrameNode* frameNode, bool value);
+    static void ResetEnableDeviceFontWeightCategory(FrameNode* frameNode);
     static void SetRenderingStrategy(FrameNode* frameNode, const std::uint32_t renderingStrategy);
     static void SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy);
     static void SetClipEdge(FrameNode* frameNode);

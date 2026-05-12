@@ -35,7 +35,9 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string NAVIGATION_ID1 = "Navigation1";
 const std::string PAGE1 = "Page1";
+const std::string PAGE2 = "Page2";
 const std::string PARAM1 = "Param1";
+const std::string PARAM2 = "Param2";
 constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
 constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
 constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
@@ -66,6 +68,43 @@ std::string BuildSerializedIntentInfo(
     intentJson->Put(INTENT_NAVIGATION_ID_KEY, navigationInspectorId.c_str());
     intentJson->Put(INTENT_NAVDESTINATION_NAME_KEY, navDestinationName.c_str());
     return intentJson->ToString();
+}
+
+std::string BuildSequentialRestoreInfo(const std::string& navigationId, int32_t pageCount)
+{
+    auto root = JsonUtil::Create(true);
+    auto navPathArray = JsonUtil::CreateArray(true);
+    if (pageCount >= 1) {
+        auto primary = JsonUtil::Create(true);
+        primary->Put("name", PAGE1.c_str());
+        primary->Put("param", PARAM1.c_str());
+        primary->Put("mode", 1);
+        primary->Put("navigationId", navigationId.c_str());
+        primary->Put("launchMode", static_cast<int32_t>(LaunchMode::MOVE_TO_TOP_SINGLETON));
+        navPathArray->Put(primary);
+    }
+    const int32_t PAGE_COUNT_TWO = 2;
+    if (pageCount >= PAGE_COUNT_TWO) {
+        auto secondary = JsonUtil::Create(true);
+        secondary->Put("name", PAGE2.c_str());
+        secondary->Put("param", PARAM2.c_str());
+        secondary->Put("mode", 0);
+        secondary->Put("navigationId", navigationId.c_str());
+        secondary->Put("launchMode", static_cast<int32_t>(LaunchMode::NEW_INSTANCE));
+        navPathArray->Put(secondary);
+    }
+    const int32_t PAGE_COUNT_THREE = 3;
+    if (pageCount >= PAGE_COUNT_THREE) {
+        auto ignored = JsonUtil::Create(true);
+        ignored->Put("name", "Page3");
+        ignored->Put("param", "Param3");
+        ignored->Put("mode", 0);
+        ignored->Put("navigationId", navigationId.c_str());
+        ignored->Put("launchMode", static_cast<int32_t>(LaunchMode::POP_TO_SINGLETON));
+        navPathArray->Put(ignored);
+    }
+    root->Put("navPathArray", navPathArray);
+    return root->ToString();
 }
 } // namespace
 
@@ -1496,6 +1535,178 @@ HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo002, TestSize.Level1)
     ASSERT_NE(pipelineContext, nullptr);
     NavigationManagerTestNg::TearDownTestSuite();
 }
+
+/**
+ * @tc.name: RestoreNavDestinationInfo003
+ * @tc.desc: Verify cold-start sequential restore stores only the primary page and keeps secondary pending.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo003, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = CreateNavigationNode(AceType::MakeRefPtr<MockNavigationStack>());
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = NAVIGATION_ID1;
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    auto navDestinationInfo = BuildSequentialRestoreInfo(NAVIGATION_ID1, 3);
+    navigationManager->navigationRecoveryInfo_.clear();
+    navigationManager->pendingSequentialRecoveryInfo_.clear();
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, true);
+
+    ASSERT_EQ(navigationManager->navigationRecoveryInfo_[NAVIGATION_ID1].size(), 1);
+    EXPECT_EQ(navigationManager->navigationRecoveryInfo_[NAVIGATION_ID1][0].name, PAGE1);
+    EXPECT_EQ(navigationManager->navigationRecoveryInfo_[NAVIGATION_ID1][0].mode, 1);
+    EXPECT_EQ(navigationManager->navigationRecoveryInfo_[NAVIGATION_ID1][0].launchMode,
+        static_cast<int32_t>(LaunchMode::MOVE_TO_TOP_SINGLETON));
+    ASSERT_EQ(navigationManager->pendingSequentialRecoveryInfo_.count(NAVIGATION_ID1), 1);
+    ASSERT_TRUE(navigationManager->pendingSequentialRecoveryInfo_[NAVIGATION_ID1].secondaryInfo.has_value());
+    EXPECT_EQ(navigationManager->pendingSequentialRecoveryInfo_[NAVIGATION_ID1].secondaryInfo->name, PAGE2);
+    EXPECT_EQ(navigationManager->pendingSequentialRecoveryInfo_[NAVIGATION_ID1].secondaryInfo->launchMode,
+        static_cast<int32_t>(LaunchMode::NEW_INSTANCE));
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RestoreNavDestinationInfo004
+ * @tc.desc: Verify hot-start sequential restore requests primary immediately with launchMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo004, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto mockStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationGroupNode = CreateNavigationNode(mockStack);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = NAVIGATION_ID1;
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->AddNavigation(1, navigationGroupNode);
+
+    auto navDestinationInfo = BuildSequentialRestoreInfo(NAVIGATION_ID1, 2);
+    navigationManager->pendingSequentialRecoveryInfo_.clear();
+    mockStack->recoveryPushCalls_.clear();
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, false);
+
+    ASSERT_EQ(mockStack->recoveryPushCalls_.size(), 1);
+    EXPECT_EQ(mockStack->recoveryPushCalls_[0].name, PAGE1);
+    EXPECT_EQ(mockStack->recoveryPushCalls_[0].launchMode, static_cast<int32_t>(LaunchMode::MOVE_TO_TOP_SINGLETON));
+    ASSERT_EQ(navigationManager->pendingSequentialRecoveryInfo_.count(NAVIGATION_ID1), 1);
+    EXPECT_EQ(navigationManager->pendingSequentialRecoveryInfo_[NAVIGATION_ID1].primaryInfo.name, PAGE1);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RestoreNavDestinationInfo005
+ * @tc.desc: Verify the secondary page is restored after the primary page reaches onShown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo005, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto mockStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationGroupNode = CreateNavigationNode(mockStack);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = NAVIGATION_ID1;
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->AddNavigation(1, navigationGroupNode);
+
+    auto navDestinationInfo = BuildSequentialRestoreInfo(NAVIGATION_ID1, 2);
+    navigationManager->pendingSequentialRecoveryInfo_.clear();
+    mockStack->recoveryPushCalls_.clear();
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, false);
+    ASSERT_EQ(mockStack->recoveryPushCalls_.size(), 1);
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    navDestinationPattern->SetName(PAGE1);
+    navDestinationPattern->SetNavigationNode(navigationGroupNode);
+    navigationManager->HandleSequentialRestoreOnShown(navDestination, PAGE1);
+
+    ASSERT_EQ(mockStack->recoveryPushCalls_.size(), 2);
+    EXPECT_EQ(mockStack->recoveryPushCalls_[1].name, PAGE2);
+    EXPECT_EQ(mockStack->recoveryPushCalls_[1].launchMode, static_cast<int32_t>(LaunchMode::NEW_INSTANCE));
+    EXPECT_EQ(navigationManager->pendingSequentialRecoveryInfo_.count(NAVIGATION_ID1), 0);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RestoreNavDestinationInfo007
+ * @tc.desc: Verify the secondary page is not restored when onShown name is not the primary page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo007, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto mockStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationGroupNode = CreateNavigationNode(mockStack);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = NAVIGATION_ID1;
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->AddNavigation(1, navigationGroupNode);
+
+    auto navDestinationInfo = BuildSequentialRestoreInfo(NAVIGATION_ID1, 2);
+    navigationManager->pendingSequentialRecoveryInfo_.clear();
+    mockStack->recoveryPushCalls_.clear();
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, false);
+    ASSERT_EQ(mockStack->recoveryPushCalls_.size(), 1);
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    navDestinationPattern->SetName(PAGE1);
+    navDestinationPattern->SetNavigationNode(navigationGroupNode);
+    navigationManager->HandleSequentialRestoreOnShown(navDestination, PAGE2);
+
+    EXPECT_EQ(mockStack->recoveryPushCalls_.size(), 1);
+    EXPECT_EQ(navigationManager->pendingSequentialRecoveryInfo_.count(NAVIGATION_ID1), 1);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RestoreNavDestinationInfo006
+ * @tc.desc: Verify empty navPathArray does not restore any page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo006, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto mockStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationGroupNode = CreateNavigationNode(mockStack);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = NAVIGATION_ID1;
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->AddNavigation(1, navigationGroupNode);
+
+    auto navDestinationInfo = BuildSequentialRestoreInfo(NAVIGATION_ID1, 0);
+    navigationManager->pendingSequentialRecoveryInfo_.clear();
+    mockStack->recoveryPushCalls_.clear();
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, false);
+
+    EXPECT_TRUE(mockStack->recoveryPushCalls_.empty());
+    EXPECT_EQ(navigationManager->pendingSequentialRecoveryInfo_.count(NAVIGATION_ID1), 0);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
 HWTEST_F(NavigationManagerTestNg, SetForceSplitNavState001, TestSize.Level1)
 {
     /**

@@ -169,12 +169,13 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree004, Te
     AccessibilityProperty accessibilityProperty;
 
     accessibilityProperty.SetAccessibilityNextFocusInspectorKey(accessibilityNextFocusInspectorKey);
-    EXPECT_EQ(accessibilityNextFocusInspectorKey, accessibilityProperty.accessibilityNextFocusInspectorKey_);
+    EXPECT_EQ(accessibilityNextFocusInspectorKey,
+        accessibilityProperty.accessibilityNextFocusParams_->nextFocusInspectorKey);
 
     accessibilityNextFocusInspectorKey = "";
     accessibilityProperty.SetAccessibilityNextFocusInspectorKey(accessibilityNextFocusInspectorKey);
-    EXPECT_EQ(
-        accessibilityNextFocusInspectorKey, accessibilityProperty.accessibilityNextFocusInspectorKey_.value_or(""));
+    EXPECT_EQ(accessibilityNextFocusInspectorKey,
+        accessibilityProperty.accessibilityNextFocusParams_->nextFocusInspectorKey);
 
     std::string text = "test";
     accessibilityProperty.SetAccessibilityTextWithEvent(text);

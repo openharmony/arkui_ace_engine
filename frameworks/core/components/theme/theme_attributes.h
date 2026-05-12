@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H
 
 #include <string>
+
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 
@@ -71,7 +73,7 @@ extern const char THEME_PATTERN_SELECT[];
 extern const char THEME_PATTERN_SLIDER[];
 extern const char THEME_PATTERN_TEXT[];
 extern const char THEME_PATTERN_TEXTFIELD[];
-extern const char THEME_PATTERN_RICH_EDITOR[];
+extern ACE_FORCE_EXPORT const char THEME_PATTERN_RICH_EDITOR[];
 extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
@@ -88,6 +90,7 @@ extern const char THEME_PATTERN_SHADOW[];
 extern const char THEME_PATTERN_CONTAINER_MODAL[];
 extern const char THEME_PATTERN_AGING_ADAPATION_DIALOG[];
 extern const char THEME_PATTERN_SCROLLABLE[];
+extern const char THEME_PATTERN_SELECTABLE[];
 extern const char THEME_PATTERN_APP[];
 extern const char THEME_PATTERN_LINEAR_INDICATOR[];
 extern const char THEME_PATTERN_CONTAINER_PICKER[];
@@ -96,7 +99,7 @@ extern const char THEME_PATTERN_CORNER_MARK[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
-extern const char PATTERN_BG_COLOR[];
+extern ACE_FORCE_EXPORT const char PATTERN_BG_COLOR[];
 extern const char PATTERN_UNDERLINE_ACTIVED_COLOR[];
 extern const char PATTERN_UNDERLINE_TYPING_COLOR[];
 extern const char PATTERN_BG_COLOR_HOVERED[];

@@ -17,6 +17,7 @@
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"

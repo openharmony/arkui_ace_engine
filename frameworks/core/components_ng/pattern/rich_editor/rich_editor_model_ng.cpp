@@ -1009,7 +1009,7 @@ void RichEditorModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
     CHECK_NULL_VOID(pattern);
     pattern->SetMaxLinesHeight(FLT_MAX);
     pattern->SetMaxLines(value);
-    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
 }
 
 int32_t RichEditorModelNG::GetMaxLines(FrameNode* frameNode)
@@ -1230,6 +1230,44 @@ bool RichEditorModelNG::GetSingleLine(FrameNode* frameNode)
     return value;
 }
 
+void RichEditorModelNG::SetHorizontalScrolling(bool isEnable)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetHorizontalScrolling(isEnable);
+}
+ 
+void RichEditorModelNG::ResetHorizontalScrolling()
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetHorizontalScrolling(false);
+}
+ 
+void RichEditorModelNG::SetHorizontalScrolling(FrameNode* frameNode, bool isEnable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetHorizontalScrolling(isEnable);
+}
+ 
+void RichEditorModelNG::ResetHorizontalScrolling(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetHorizontalScrolling(false);
+}
+ 
+bool RichEditorModelNG::GetHorizontalScrolling(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(richEditorPattern, false);
+    return richEditorPattern->GetHorizontalScrolling();
+}
+
 Color RichEditorModelNG::GetScrollBarColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, Color());
@@ -1441,6 +1479,14 @@ void RichEditorModelNG::SetStyledPlaceholder(FrameNode* frameNode, const SpanStr
     auto target = value->GetSubSpanString(0, length);
     mutableSpanString->AppendSpanString(target);
     pattern->SetPlaceholderStyledString(mutableSpanString);
+}
+
+void RichEditorModelNG::ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToVisible(start, end);
 }
 
 void RichEditorModelNG::SetOnStyledStringWillChange(FrameNode* frameNode,

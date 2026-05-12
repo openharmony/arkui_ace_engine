@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/common/container.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
@@ -29,6 +30,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -57,7 +59,7 @@ uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF&
 }; // namespace
 
 TextLayoutAlgorithm::TextLayoutAlgorithm(
-    std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> pManager, bool isSpanStringMode,
+    std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> pManager, const bool isSpanStringMode,
     const TextStyle& textStyle, bool isMarquee)
 {
     if (SystemProperties::GetTextTraceEnabled()) {
@@ -513,10 +515,13 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const s
     auto needReLayout = textStyle.NeedReLayout();
     if (SystemProperties::GetTextTraceEnabled()) {
         ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::CreateParagraphAndLayout[contentConstraint:%s][maxSize:%s][Len:%d]["
-                              "needReCreateParagraph:%d][needReLayout:%d][fontSize:%s][fontColor:%s]",
+                              "needReCreateParagraph:%d][needReLayout:%d][fontSize:%s][fontColor:%s][fontColorPH:%u]["
+                              "symbolColorList:%s]",
             contentConstraint.ToString().c_str(), maxSize.ToString().c_str(), static_cast<int32_t>(content.length()),
             needReCreateParagraph_, needReLayout, textStyle.GetFontSize().ToString().c_str(),
-            textStyle.GetTextColor().ColorToString().c_str());
+            textStyle.GetTextColor().ColorToString().c_str(),
+            static_cast<uint8_t>(textStyle.GetTextColor().GetPlaceholder()),
+            StringUtils::SymbolColorListToStringWithHolder(textStyle.GetSymbolColorList()).c_str());
     }
     if (needReCreateParagraph_ && !CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;

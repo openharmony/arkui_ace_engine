@@ -14,9 +14,17 @@
  */
 
 import { LocalStorage } from '../storage/localStorage';
-import { IProvideDecoratedVariable, IProviderDecoratedVariable, IVariableOwner } from '../decorator';
+import {
+    IDecoratorBaseRegistry,
+    IProvideDecoratedVariable,
+    IProviderDecoratedVariable,
+    IVariableOwner,
+} from '../decorator';
+import { CustomComponentLifecycle } from '@component/customComponent';
+import { IEnvVariable } from '@decoratorEnv';
+import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../utils';
 
-export class ExtendableComponent implements IVariableOwner { // implements IExtendableComponent {
+export class ExtendableComponent implements IVariableOwner {
     protected parent_: ExtendableComponent | null;
     public localStorage_: LocalStorage;
     public isActive_: int = 1;
@@ -27,31 +35,60 @@ export class ExtendableComponent implements IVariableOwner { // implements IExte
         this.localStorage_ = (storage !== undefined)? storage : new LocalStorage();
     }
 
-    isViewActive(): boolean {
-        return true;
-    }
+    static current: Object | undefined = undefined;
 
-    getUniqueId(): int
-    {
+    getUniqueId(): int {
         return ExtendableComponent.uniqueId_++;
     }
 
-    getLocalStorage(): LocalStorage {
-        return new LocalStorage();
+    getownedStateVariables(): Array<Object> {
+        return new Array<Object>();
     }
 
-    addProvide<T>(alias: String, v: IProvideDecoratedVariable<T>, allowOverride: Boolean|undefined): void {
-        console.log("addProvide not implemented");
+    __getLifecycle__Internal(): CustomComponentLifecycle {
+        return {} as CustomComponentLifecycle;
     }
-    addProvider<T>(alias: String, v: IProviderDecoratedVariable<T>): void {
-        console.log("addProvider not implemented");
+
+    __isViewActive__Internal(): boolean {
+        return true;
     }
-    findProvide<T>(alias: String): IProvideDecoratedVariable<T>|undefined {
-        console.log("findProvide not implemented");
+
+    __getLocalStorage__Internal(): LocalStorage {
+        return this.localStorage_;
+    }
+
+    __addProvide__Internal<T>(alias: string, v: IProvideDecoratedVariable<T>, allowOverride?: boolean): void {
+    }
+
+    __findProvide__Internal<T>(alias: string): IProvideDecoratedVariable<T> | undefined {
         return undefined;
     }
-    findProvider<T>(alias: String): IProviderDecoratedVariable<T>|undefined {
-        console.log("findProvider not implemented");
+
+    __addProvider__Internal<T>(alias: string, v: IProviderDecoratedVariable<T>): void {
+    }
+
+    __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined {
         return undefined;
     }
- }
+
+    __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void {
+    }
+
+    __addEnvInstance__Internal(envProperty: IEnvVariable): void {
+    }
+
+    __getCustomComponentContext__Internal(): CustomComponentContext {
+        return {
+            registerActiveAndInactiveCallback: (
+                active?: ActiveAndInactiveCallbackType,
+                inactive?: ActiveAndInactiveCallbackType
+            ): void => {}
+        } as CustomComponentContext;
+    }
+
+    __registerActiveAndInactiveCallback__Internal(
+        active?: ActiveAndInactiveCallbackType,
+        inactive?: ActiveAndInactiveCallbackType
+    ): void {
+    }
+}

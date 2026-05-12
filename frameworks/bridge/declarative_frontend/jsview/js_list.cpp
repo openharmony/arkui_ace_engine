@@ -20,7 +20,6 @@
 #include "base/geometry/axis.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
@@ -199,10 +198,12 @@ void JSList::SetScrollBarColor(const JSCallbackInfo& info)
 
 void JSList::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 {
-    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    RefPtr<ResourceObject> resObj;
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth, resObj);
     if (!scrollBarWidth.empty()) {
         ListModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
     }
+    ListModel::GetInstance()->CreateWithResourceObjScrollBarWidth(resObj);
 }
 
 void JSList::SetEdgeEffect(const JSCallbackInfo& info)
@@ -284,11 +285,24 @@ void JSList::Create(const JSCallbackInfo& args)
     if (arg0->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg0);
         JSRef<JSVal> spaceValue = obj->GetProperty("space");
-        if (!spaceValue->IsNull()) {
-            CalcDimension space;
+        JSRef<JSVal> spaceWidthValue = obj->GetProperty("spaceWidth");
+        CalcDimension space;
+        RefPtr<ResourceObject> resObj;
+        if (spaceValue->IsNull() || spaceValue->IsUndefined()) {
+            ListModel::GetInstance()->ResetListSpace();
+        }
+        if (spaceWidthValue->IsNull() || spaceWidthValue->IsUndefined()) {
+            ListModel::GetInstance()->ResetListSpaceWidth();
+        }
+        if (!spaceWidthValue->IsNull() && !spaceWidthValue->IsUndefined()) {
+            ConvertFromJSValue(spaceWidthValue, space, resObj);
+            ListModel::GetInstance()->SetSpaceWidth(space);
+        } else if (!spaceValue->IsNull()) {
+            ListModel::GetInstance()->ResetListSpaceWidth();
             ConvertFromJSValue(spaceValue, space);
             ListModel::GetInstance()->SetSpace(space);
         }
+        ListModel::GetInstance()->CreateWithResourceObjSpace(resObj);
         int32_t initialIndex = 0;
         if (ConvertFromJSValue(obj->GetProperty("initialIndex"), initialIndex) && initialIndex >= 0) {
             ListModel::GetInstance()->SetInitialIndex(initialIndex);
@@ -665,6 +679,15 @@ void JSList::SetEditModeOptions(const JSCallbackInfo& info)
     NG::EditModeOptions options;
     JSScrollable::ParseEditModeOptions(info, options);
     ListModel::GetInstance()->SetEditModeOptions(options);
+}
+
+void JSList::SetEnableEditMode(const JSCallbackInfo& info)
+{
+    bool enableEditMode = false;
+    if (info[0]->IsBoolean()) {
+        ParseJsBool(info[0], enableEditMode);
+    }
+    ListModel::GetInstance()->SetEnableEditMode(enableEditMode);
 }
 
 void JSList::SetScrollSnapAnimationSpeed(const JSCallbackInfo& args)
@@ -1063,6 +1086,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);
+    JSClass<JSList>::StaticMethod("enableEditMode", &JSList::SetEnableEditMode);
     JSClass<JSList>::StaticMethod("scrollSnapAnimationSpeed", &JSList::SetScrollSnapAnimationSpeed);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

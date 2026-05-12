@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "frameworks/compatible/components/stepper/stepper_model_impl.h"
-
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "frameworks/compatible/components/stepper/stepper_model_impl.h"
 #include "frameworks/compatible/components/stepper/stepper_component.h"
 #include "frameworks/core/components/stepper/stepper_theme.h"
 

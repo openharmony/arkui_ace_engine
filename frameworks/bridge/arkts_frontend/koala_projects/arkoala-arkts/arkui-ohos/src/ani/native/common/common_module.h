@@ -141,6 +141,7 @@ ani_int GetLastForegroundUIContext(ani_env* env, [[maybe_unused]]ani_object obj)
 ani_array GetAllUIContexts(ani_env* env, [[maybe_unused]]ani_object obj);
 ani_array ResolveUIContext(ani_env* env, [[maybe_unused]]ani_object obj);
 ani_long GetPageRootNode(ani_env* env, [[maybe_unused]] ani_object obj);
+void DumpLogPrint(ani_env* env, [[maybe_unused]] ani_object obj, ani_int depth, ani_string content);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

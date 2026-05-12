@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/accessibility/accessibility_constants.h"
+#include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_manager_ng.h"
 #include "frameworks/core/components_ng/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"

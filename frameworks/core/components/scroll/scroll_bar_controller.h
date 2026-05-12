@@ -20,10 +20,8 @@
 
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
-#include "core/animation/scroll_motion.h"
 #include "core/common/vibrator/vibrator.h"
 #include "core/event/touch_event.h"
-#include "core/gestures/drag_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"

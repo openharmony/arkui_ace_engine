@@ -748,6 +748,8 @@ HWTEST_F(TextPickerColumnExtendTestNg, UpdateConfirmButtonTextLayoutProperty001,
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
 
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -759,7 +761,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, UpdateConfirmButtonTextLayoutProperty001,
     pipeline->fontScale_ = 2.0f;
     pipeline->SetMaxAppFontScale(2.0f);
 
-    TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(textConfirmNode, pickerTheme);
+    TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(textConfirmNode, pickerTheme, buttonConfirmNode);
 
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
@@ -776,6 +778,8 @@ HWTEST_F(TextPickerColumnExtendTestNg, UpdateCancelButtonTextLayoutProperty001, 
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
 
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -787,7 +791,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, UpdateCancelButtonTextLayoutProperty001, 
     pipeline->fontScale_ = 2.0f;
     pipeline->SetMaxAppFontScale(2.0f);
 
-    TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelNode, pickerTheme);
+    TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelNode, pickerTheme, buttonCancelNode);
 
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textCancelLayoutProperty, nullptr);

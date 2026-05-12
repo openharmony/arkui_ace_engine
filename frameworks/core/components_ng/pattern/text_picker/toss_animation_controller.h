@@ -23,6 +23,10 @@
 #include "frameworks/base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class TextPickerColumnPattern;
 
 class TextPickerTossAnimationController : public virtual AceType {
@@ -30,7 +34,7 @@ class TextPickerTossAnimationController : public virtual AceType {
 
 public:
     TextPickerTossAnimationController() = default;
-    ~TextPickerTossAnimationController() = default;
+    ~TextPickerTossAnimationController();
 
     void SetColumn(const WeakPtr<TextPickerColumnPattern>& value)
     {
@@ -48,10 +52,7 @@ public:
 
     bool Play();
 
-    RefPtr<NodeAnimatablePropertyFloat> GetTossNodeAnimation() const
-    {
-        return property_;
-    }
+    RefPtr<NodeAnimatablePropertyFloat> GetTossNodeAnimation() const;
 
     void StartSpringMotion();
 

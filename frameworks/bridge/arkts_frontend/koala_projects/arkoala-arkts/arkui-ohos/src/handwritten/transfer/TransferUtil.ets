@@ -63,31 +63,31 @@ export class TransferUtil {
     }
 
     // 通用工具函数
-    private static invokeModuleFunction(moduleId: string, functionName: string, input: Object): ESValue | undefined {
+    private static invokeModuleFunction(moduleId: string, functionName: string, input: Any): ESValue | undefined {
         const module = ESValue.load(moduleId).getProperty('default');
         const func = module.getProperty(functionName);
-        const result = func.invoke(input);
+        const result = func.invoke(ESValue.wrap(input));
         return result.isUndefined() || result.isNull() ? undefined : result;
     }
 
     // get node deref
-    static nodeDeref(input: Object): Object | undefined {
+    static nodeDeref(input: Any): Any {
         let objVal = TransferUtil.invokeModuleFunction('@ohos.arkui.node', 'nodeDeref', input);
-        return objVal?.unwrap() as Object | undefined;
+        return objVal?.unwrap();
     }
     // get nodePtr Value on arkts1.1
-    static getNodePtrValue(input: Object): KPointer {
+    static getNodePtrValue(input: Any): KPointer {
         const result = TransferUtil.invokeModuleFunction('@ohos.arkui.node', 'getNodePtrValue', input);
         return result ? Double.toLong(result.unwrap() as number) : 0;
     }
 
     // get nativeRef on arkts1.1. 
-    static getPropNativeRef(inVal: ESValue, name: string): Object {
+    static getPropNativeRef(inVal: ESValue, name: string): Any {
         const refVal = inVal.getProperty(name);
         if (refVal.isNull() || refVal.isUndefined()) {
             throw new Error('nativeRef is null, transfer error.');
         }
-        return refVal.unwrap() as Object;
+        return refVal.unwrap();
     }
 
     // nodeId: -> 1.2(int)
@@ -394,7 +394,7 @@ export class TransferUtil {
         if (propVal === null || propVal === undefined) {
             return ;
         }
-        outJs.setProperty(name, propVal! as Object);
+        outJs.setProperty(name, ESValue.wrap(propVal));
     }
 
     static setPropShapeClip(name: string, inVal: ShapeClip, outJs: ESValue) {
@@ -402,6 +402,6 @@ export class TransferUtil {
         if (propVal === null || propVal === undefined) {
             return ;
         }
-        outJs.setProperty(name, propVal! as Object);
+        outJs.setProperty(name, ESValue.wrap(propVal));
     }
 }

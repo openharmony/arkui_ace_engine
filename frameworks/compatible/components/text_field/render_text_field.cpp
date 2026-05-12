@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/text_field/render_text_field.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
@@ -29,6 +30,7 @@
 #include "core/common/text_field_manager.h"
 #include "core/components/text/text_utils.h"
 #include "core/components/text_overlay/text_overlay_element.h"
+#include "core/components_v2/inspector/utils.h"
 #if defined(ENABLE_STANDARD_INPUT)
 #include "compatible/components/text_field/on_text_changed_listener_impl.h"
 #endif

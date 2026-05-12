@@ -19,10 +19,9 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 
 namespace OHOS::Ace::NG {
-
-class VerticalOverflowHandler;
 
 class ACE_FORCE_EXPORT StackPattern : public Pattern {
     DECLARE_ACE_TYPE(StackPattern, Pattern);
@@ -71,23 +70,9 @@ public:
         return true;
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
-    {
-        if (config.skipMeasure && config.skipLayout) {
-            return false;
-        }
-        auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-        CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-        auto stackLayoutAlgorithm = DynamicCast<StackLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-        CHECK_NULL_RETURN(stackLayoutAlgorithm, false);
-        if (stackLayoutAlgorithm->MeasureInNextFrame()) {
-            ACE_SCOPED_TRACE("Stack MeasureInNextFrame");
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, false);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
-        return true;
-    }
+    void PostAsyncLoadTask();
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/) override
@@ -107,6 +92,7 @@ public:
     }
 private:
     RefPtr<VerticalOverflowHandler> vOverflowHandler_;
+    bool prevMeasureBreak_ = false;
 };
 } // namespace OHOS::Ace::NG
 

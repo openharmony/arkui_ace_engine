@@ -358,4 +358,103 @@ HWTEST_F(PanEventTestNg, PanEventDumpVelocityInfoTest001, TestSize.Level1)
 
     EXPECT_NE(panEventActuator, nullptr);
 }
+
+/**
+ * @tc.name: PanEventSetCanCoexistWithScrollTest001
+ * @tc.desc: SetCanCoexistWithScroll stores the flag and immediately propagates it to panRecognizer_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanEventTestNg, PanEventSetCanCoexistWithScrollTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanEventActuator.
+     * @tc.expected: canCoexistWithScroll_ and recognizer flag both start false.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), PAN_EVENT_DIRECTION, DEFAULT_PAN_FINGER, DISTANCE);
+    EXPECT_FALSE(panEventActuator->canCoexistWithScroll_);
+    EXPECT_FALSE(panEventActuator->panRecognizer_->CanCoexistWithScroll());
+
+    /**
+     * @tc.steps: step2. Call SetCanCoexistWithScroll(true).
+     * @tc.expected: Both the actuator flag and the recognizer flag become true.
+     */
+    panEventActuator->SetCanCoexistWithScroll(true);
+    EXPECT_TRUE(panEventActuator->canCoexistWithScroll_);
+    EXPECT_TRUE(panEventActuator->panRecognizer_->CanCoexistWithScroll());
+
+    /**
+     * @tc.steps: step3. Call SetCanCoexistWithScroll(false).
+     * @tc.expected: Both flags revert to false.
+     */
+    panEventActuator->SetCanCoexistWithScroll(false);
+    EXPECT_FALSE(panEventActuator->canCoexistWithScroll_);
+    EXPECT_FALSE(panEventActuator->panRecognizer_->CanCoexistWithScroll());
+}
+
+/**
+ * @tc.name: PanEventOnCollectCoexistTest001
+ * @tc.desc: OnCollectTouchTarget propagates canCoexistWithScroll_=true to the underlying recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanEventTestNg, PanEventOnCollectCoexistTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanEventActuator with canCoexistWithScroll_ set to true directly.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), PAN_EVENT_DIRECTION, DEFAULT_PAN_FINGER, DISTANCE);
+    panEventActuator->canCoexistWithScroll_ = true;
+
+    /**
+     * @tc.steps: step2. Add a pan event and call OnCollectTouchTarget.
+     * @tc.expected: The recognizer's CanCoexistWithScroll() returns true after the call.
+     */
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    panEventActuator->AddPanEvent(panEvent);
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    panEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
+    EXPECT_TRUE(panEventActuator->panRecognizer_->CanCoexistWithScroll());
+}
+
+/**
+ * @tc.name: PanEventOnCollectCoexistTest002
+ * @tc.desc: OnCollectTouchTarget with canCoexistWithScroll_=false keeps the recognizer flag false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanEventTestNg, PanEventOnCollectCoexistTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanEventActuator (canCoexistWithScroll_ defaults to false).
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), PAN_EVENT_DIRECTION, DEFAULT_PAN_FINGER, DISTANCE);
+    EXPECT_FALSE(panEventActuator->canCoexistWithScroll_);
+
+    /**
+     * @tc.steps: step2. Add a pan event and call OnCollectTouchTarget.
+     * @tc.expected: The recognizer's CanCoexistWithScroll() remains false.
+     */
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    panEventActuator->AddPanEvent(panEvent);
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    panEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
+    EXPECT_FALSE(panEventActuator->panRecognizer_->CanCoexistWithScroll());
+}
 } // namespace OHOS::Ace::NG

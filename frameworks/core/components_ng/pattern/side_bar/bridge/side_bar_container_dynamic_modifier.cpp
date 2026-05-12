@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "ui/base/utils/utils.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -47,6 +48,7 @@ constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 const bool DEFAULT_SHOW_SIDE_BAR = true;
 const bool DEFAULT_SHOW_CONTROL_BUTTON = true;
 const bool DEFAULT_AUTO_HIDE = true;
+const bool DEFAULT_SHOW_SIDE_BAR_WITH_GESTURE = false;
 constexpr SideBarPosition DEFAULT_SIDE_BAR_POSITION = SideBarPosition::START;
 constexpr uint32_t DEFAULT_SIDE_BAR_DIVIDER_COLOR = 0x08000000;
 const Dimension DEFAULT_START_MARGIN(0.0, DimensionUnit::VP);
@@ -186,6 +188,20 @@ void ResetShowControlButton(ArkUINodeHandle node)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SideBarContainerModelNG::SetShowControlButton(frameNode, DEFAULT_SHOW_CONTROL_BUTTON);
+}
+
+void SetShowSideBarWithGesture(ArkUINodeHandle node, ArkUI_Bool isShow)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::SetShowSideBarWithGesture(frameNode, isShow);
+}
+
+void ResetShowSideBarWithGesture(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::SetShowSideBarWithGesture(frameNode, DEFAULT_SHOW_SIDE_BAR_WITH_GESTURE);
 }
 
 void SetAutoHide(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -993,6 +1009,8 @@ const ArkUISideBarContainerModifier* GetSideBarContainerDynamicModifier()
             .resetControlButtonIconInfo = ResetControlButtonIconInfoImpl,
             .resetControlButtonIconRes = ResetControlButtonIconResImpl,
             .setSideBarContainerMinContentWidthJs = SetSideBarContainerMinContentWidthJsImpl,
+            .setShowSideBarWithGesture = nullptr,
+            .resetShowSideBarWithGesture = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -1041,6 +1059,8 @@ const ArkUISideBarContainerModifier* GetSideBarContainerDynamicModifier()
         .resetControlButtonIconInfo = ResetControlButtonIconInfo,
         .resetControlButtonIconRes = ResetControlButtonIconRes,
         .setSideBarContainerMinContentWidthJs = SetSideBarContainerMinContentWidthJs,
+        .setShowSideBarWithGesture = SetShowSideBarWithGesture,
+        .resetShowSideBarWithGesture = ResetShowSideBarWithGesture,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1070,6 +1090,8 @@ const CJUISideBarContainerModifier* GetCJUISideBarContainerModifier()
         .resetShowSideBar = ResetShowSideBar,
         .setSideBarContainerDivider = SetSideBarContainerDivider,
         .resetSideBarContainerDivider = ResetSideBarContainerDivider,
+        .setShowSideBarWithGesture = SetShowSideBarWithGesture,
+        .resetShowSideBarWithGesture = ResetShowSideBarWithGesture,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

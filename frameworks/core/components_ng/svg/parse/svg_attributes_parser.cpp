@@ -14,6 +14,9 @@
  */
 
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
+
+#include <regex>
+
 #include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/svg_utils.h"
 

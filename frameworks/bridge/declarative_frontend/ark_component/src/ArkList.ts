@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,20 @@ class ListEditModeModifier extends ModifierWithKey<boolean> {
       getUINativeModule().list.resetEditMode(node);
     } else {
       getUINativeModule().list.setEditMode(node, this.value!);
+    }
+  }
+}
+
+class ListEnableEditModeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableEditMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetEnableEditMode(node);
+    } else {
+      getUINativeModule().list.setEnableEditMode(node, this.value!);
     }
   }
 }
@@ -280,8 +294,8 @@ class ListScrollBarModifier extends ModifierWithKey<number> {
   }
 }
 
-class ListScrollBarWidthModifier extends ModifierWithKey<string | number> {
-  constructor(value: string | number) {
+class ListScrollBarWidthModifier extends ModifierWithKey<string | number | Resource> {
+  constructor(value: string | number | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('listScrollBarWidth');
@@ -624,6 +638,21 @@ class ListSpaceModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class ListSpaceWidthModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listSpaceWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetSpace(node);
+    }
+    else {
+      getUINativeModule().list.setSpaceWidth(node, this.value);
+    }
+  }
+}
+
 class ListInitialIndexModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -682,16 +711,17 @@ class ListSupportEmptyBranchInLazyLoading  extends ModifierWithKey<boolean> {
   }
 }
 
-class ListBackPressCloseSwipeActionModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class ListBackPressBehaviorModifier extends ModifierWithKey<ListBackPressBehavior | undefined> {
+  constructor(value: ListBackPressBehavior | undefined) {
     super(value);
   }
-  static identity: Symbol = Symbol('listBackPressCloseSwipeAction');
+  static identity: Symbol = Symbol('listBackPressBehavior');
   applyPeer(node: KNode, reset: boolean): void {
+    const closeSwipeAction = this.value?.closeSwipeAction ?? true;
     if (reset) {
-      getUINativeModule().list.setBackPressCloseSwipeAction(node, true);
+      getUINativeModule().list.setBackPressBehavior(node, true);
     } else {
-      getUINativeModule().list.setBackPressCloseSwipeAction(node, this.value);
+      getUINativeModule().list.setBackPressBehavior(node, closeSwipeAction);
     }
   }
 }
@@ -699,6 +729,7 @@ class ListBackPressCloseSwipeActionModifier extends ModifierWithKey<boolean> {
 interface ListParam {
   initialIndex?: number;
   space?: number | string;
+  spaceWidth?: Dimension;
   scroller?: Scroller;
 }
 
@@ -711,7 +742,9 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
       if ((value[0] as ListParam).initialIndex !== undefined) {
         modifierWithKey(this._modifiersWithKeys, ListInitialIndexModifier.identity, ListInitialIndexModifier, (value[0] as ListParam).initialIndex);
       }
-      if ((value[0] as ListParam).space !== undefined) {
+      if ((value[0] as ListParam).spaceWidth !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListSpaceWidthModifier.identity, ListSpaceWidthModifier, (value[0] as ListParam).spaceWidth);
+      } else if ((value[0] as ListParam).space !== undefined) {
         modifierWithKey(this._modifiersWithKeys, ListSpaceModifier.identity, ListSpaceModifier, (value[0] as ListParam).space);
       }
       if ((value[0] as ListParam).scroller !== undefined) {
@@ -758,7 +791,7 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     modifierWithKey(this._modifiersWithKeys, ListScrollBarModifier.identity, ListScrollBarModifier, value);
     return this;
   }
-  scrollBarWidth(value: string | number): this {
+  scrollBarWidth(value: string | number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, ListScrollBarWidthModifier.identity, ListScrollBarWidthModifier, value);
     return this;
   }
@@ -776,6 +809,10 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   editMode(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ListEditModeModifier.identity, ListEditModeModifier, value);
+    return this;
+  }
+  enableEditMode(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ListEnableEditModeModifier.identity, ListEnableEditModeModifier, value);
     return this;
   }
   multiSelectable(value: boolean): this {
@@ -916,9 +953,9 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
     return this;
   }
-  backPressCloseSwipeAction(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, ListBackPressCloseSwipeActionModifier.identity,
-      ListBackPressCloseSwipeActionModifier, value);
+  backPressBehavior(value: ListBackPressBehavior | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, ListBackPressBehaviorModifier.identity,
+      ListBackPressBehaviorModifier, value);
     return this;
   }
 }

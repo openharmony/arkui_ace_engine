@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,6 +126,7 @@ interface SegmentButtonThemeInterface {
   CAPSULE_SELECTED_FONT_COLOR: ResourceColor,
   FONT_SIZE: DimensionNoPercentage,
   SELECTED_FONT_SIZE: DimensionNoPercentage,
+  ADAPTIVE_ITEM_FONT_SIZE: DimensionNoPercentage,
   BACKGROUND_COLOR: ResourceColor,
   TAB_SELECTED_BACKGROUND_COLOR: ResourceColor,
   CAPSULE_SELECTED_BACKGROUND_COLOR: ResourceColor,
@@ -147,6 +148,7 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   CAPSULE_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
   FONT_SIZE: $r('sys.float.segment_button_unselected_text_size'),
   SELECTED_FONT_SIZE: $r('sys.float.segment_button_checked_text_size'),
+  ADAPTIVE_ITEM_FONT_SIZE: $r('sys.float.Caption_M'),
   BACKGROUND_COLOR: $r('sys.color.segment_button_backboard_color'),
   TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.segment_button_checked_foreground_color'),
   CAPSULE_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_emphasize'),
@@ -612,7 +614,7 @@ export class SegmentButtonOptions {
     } else {
       this.showText = true;
     }
-    let themePadding: number = LengthMetrics.resource($r('sys.float.padding_level2')).value;
+    let themePadding: number = LengthMetrics.resource($r('sys.float.padding_level1')).value;
     this.componentPadding = this.multiply ? 0.0 : themePadding;
     this.backgroundSystemMaterial = options.backgroundSystemMaterial;
     if (options instanceof TabSegmentButtonOptions) {
@@ -792,7 +794,7 @@ struct MultiSelectItemArray {
 
   onOptionsChange(a: string) {
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i as int] as int;
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
@@ -802,10 +804,10 @@ struct MultiSelectItemArray {
 
   onSelectedChange(a: string) {
     for (let i: number = 0.0; i < MAX_ITEM_COUNT; i++) {
-      this.multiColor[i as int] = Color.Transparent;
+      this.multiColor[i.toInt()] = Color.Transparent;
     }
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i as int] as int;
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
@@ -815,7 +817,7 @@ struct MultiSelectItemArray {
 
   aboutToAppear() {
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
-      const selectedIndex = this.selectedIndexes[i as int] as int;
+      const selectedIndex = this.selectedIndexes[i.toInt()] as int;
       if (selectedIndex >= 0 && selectedIndex < this.multiColor.length) {
         this.multiColor[selectedIndex] = this.options.selectedBackgroundColor ??
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
@@ -844,14 +846,14 @@ struct MultiSelectItemArray {
 }
 
 export class EnvironmentCallbackEntry implements EnvironmentCallback {
-  private segmentButtonItem: SegmentButtonItem;
+  private segmentButton: SegmentButton;
 
-  constructor(segmentButtonItem: SegmentButtonItem) {
-    this.segmentButtonItem = segmentButtonItem;
+  constructor(segmentButton: SegmentButton) {
+    this.segmentButton = segmentButton;
   }
 
   onConfigurationUpdated(config: Configuration) {
-    this.segmentButtonItem.updateLanguageLineHeight();
+    this.segmentButton.updateLanguageLineHeight();
   }
 
   onMemoryLevel(level: AbilityConstant.MemoryLevel) {}
@@ -872,48 +874,16 @@ struct SegmentButtonItem {
   @State isSegmentFocusStyleCustomized: boolean = false;
   @State isTextInMarqueeCondition: boolean = false;
   @State isButtonTextFadeout?: boolean = false;
+  @Consume useAdaptiveLineHeight: boolean;
   private groupId: string = '';
   @State @Watch('onFocusIndex') hover: boolean = false;
   @Consume buttonItemsSize: SizeOptions[];
   @Consume buttonItemsPosition: LocalizedEdges[];
   @Link buttonItemsRealHeight: number[];
   public onCalculateBorderRadius?: () => void
-  @State useAdaptiveLineHeight: boolean = false;
-  private environmentCallbackID?: int;
-  private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
-
-  updateLanguageLineHeight(): void {
-    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-    if (!resourceManager) {
-      console.error(`[SegmentButton] failed to get resourceManager`);
-      return;
-    }
-    try {
-      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
-    } catch (e) {
-      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
-    }
-  }
 
   aboutToAppear(): void {
     this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
-    if (deviceInfo.sdkApiVersion >= 26) {
-      this.updateLanguageLineHeight();
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
-      }
-    }
-  }
-
-  aboutToDisappear(): void {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
-      }
-      this.environmentCallbackID = undefined;
-    }
   }
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
@@ -1636,7 +1606,10 @@ export struct SegmentButton {
   private isGestureInProgress: boolean = false;
   @PropRef enableStateAnimation: boolean = false;
   @Provide openSelectedItemSystemMaterial?: boolean = false;
-  @Provide selectedItemScale?: ScaleOptions = undefined
+  @Provide selectedItemScale?: ScaleOptions = undefined;
+  @Provide useAdaptiveLineHeight: boolean = false;
+  private environmentCallbackID?: int;
+  private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
 
   onItemsPositionChange(a: string) {
     if (this.options === undefined || this.options.buttons === undefined) {
@@ -1734,6 +1707,36 @@ export struct SegmentButton {
     this.updateSelectedIndexes();
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
+      }
+      this.environmentCallbackID = undefined;
+    }
+  }
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
   }
 
   private isMouseWheelScroll(event: GestureEvent) {
@@ -1750,8 +1753,8 @@ export struct SegmentButton {
     }
     // 获取系统语言
     try {
-      let systemLanguage: string = I18n.System.getSystemLanguage();
-      if (I18n.isRTL(systemLanguage) && this.options.direction != Direction.Ltr) {
+      let appPreferredLanguage: string = I18n.System.getAppPreferredLanguage();
+      if (I18n.isRTL(appPreferredLanguage) && this.options.direction != Direction.Ltr) {
         return true;
       }
     } catch (error) {
@@ -1770,7 +1773,7 @@ export struct SegmentButton {
           })
         } else {
           Stack() {
-            if (this.options.buttons !== undefined && this!.options!.buttons!.length as number > 1.0) {
+            if (this.options.buttons !== undefined && this!.options!.buttons!.length.toDouble() > 1.0) {
               PressAndHoverEffectArray({
                 options: this.options,
                 buttons: this.options.buttons!,
@@ -1808,7 +1811,6 @@ export struct SegmentButton {
         .size(this.componentSize)
         .animation({ duration: 0 })
         .borderRadius(this.getBackgroundBorderRadius())
-        .clip(true)
 
         SegmentButtonItemArrayComponent({
           pressArray: this.pressArray,
@@ -1868,7 +1870,7 @@ export struct SegmentButton {
             let selectedInfo: number = fingerInfo!.localX ?? 0;
 
             let buttonLength: number =
-              Math.min(this!.options!.buttons!.length as number, this!.buttonItemsSize!.length as number);
+              Math.min(this!.options!.buttons!.length.toDouble(), this!.buttonItemsSize!.length.toDouble());
 
             // 安全检查
             if (!this.buttonItemsSize || buttonLength <= 0) {
@@ -1881,7 +1883,7 @@ export struct SegmentButton {
                 break;
               }
 
-              let buttonSize = this.buttonItemsSize[i as int];
+              let buttonSize = this.buttonItemsSize[i.toInt()];
               if (!buttonSize) {
                 break;
               }
@@ -1896,8 +1898,8 @@ export struct SegmentButton {
               // 安全检查：确保 selectedIndexes 不为空
               this.doSelectedChangeAnimate =
                 (this.selectedIndexes.length > 0 &&
-                  this.selectedIndexes[0] > Math.min(this!.options!.buttons!.length as number,
-                    this!.buttonItemsSize!.length as number)) ? false : true;
+                  this.selectedIndexes[0] > Math.min(this!.options!.buttons!.length.toDouble(),
+                    this!.buttonItemsSize!.length.toDouble())) ? false : true;
 
               let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i;
               if (this.onItemClicked) {
@@ -1905,7 +1907,7 @@ export struct SegmentButton {
               }
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
 
-                let selectedIndex: int = this.selectedIndexes.indexOf(realClickIndex as int, 0)
+                let selectedIndex: int = this.selectedIndexes.indexOf(realClickIndex.toInt(), 0)
                 if (selectedIndex === -1.0) {
                   this.selectedIndexes.push(realClickIndex.toInt());
                 } else {
@@ -2082,11 +2084,15 @@ export struct SegmentButton {
               this.isPanGestureMoved = true;
             }
             if (this.isBackgroundSystemMaterialEnabled()) {
-              let nowX = fingerInfo.globalX - this.panGestureStartPoint.x +
-                (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
-              nowX = Math.max(this.buttonItemsPosition[0].start?.value as number, nowX);
-              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length) as int;
-              nowX = Math.min(this.buttonItemsPosition[buttonLength - 1].start?.value as number, nowX);
+              const startX = this.buttonItemsPosition[0].start?.value as number;
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
+              const endX = this.buttonItemsPosition[buttonLength - 1].start?.value as number;
+
+              const offset = this.isShouldMirror() ? this.panGestureStartPoint.x - fingerInfo.globalX :
+                fingerInfo.globalX - this.panGestureStartPoint.x
+              let nowX =  offset + (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
+              nowX = Math.max(startX, nowX);
+              nowX = Math.min(endX, nowX);
 
               this.selectedItemPosition = {
                 start: LengthMetrics.vp(nowX),
@@ -2095,7 +2101,7 @@ export struct SegmentButton {
                 bottom: this.selectedItemPosition.bottom
               }
             } else {
-              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length) as int;
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
               for (let i = 0; i < buttonLength; i++) {
                 selectedInfo = selectedInfo - ((this.buttonItemsSize[i].width ?? 0) as number)
                 if (selectedInfo < 0.0) {
@@ -2145,7 +2151,7 @@ export struct SegmentButton {
 
             if (this.isBackgroundSystemMaterialEnabled()) {
               let selectedInfo = fingerInfo.localX
-              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length) as int;
+              let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
               let realIndex: int = -1;
               for (let i = 0; i < buttonLength; i++) {
                 selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
@@ -2218,7 +2224,7 @@ export struct SegmentButton {
       this.getUIContext().animateTo({
         curve: curves.interpolatingSpring(0, 1, 195, 14),
       }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
         this.openSelectedItemSystemMaterial = true;
       })
     }
@@ -2227,7 +2233,7 @@ export struct SegmentButton {
   finishSelectMaterialAnimation() {
     if (this.openSelectedItemSystemMaterial) {
       this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 };
+        this.selectedItemScale = { x: 1.05, y: 1.18 };
       })
       this.getUIContext()
         .animateTo({
@@ -2328,8 +2334,13 @@ export struct SegmentButton {
     }
 
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ??
-        segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE;
+      const selectedFontSize = this.options.selectedFontSize ?? 
+        (this.useAdaptiveLineHeight ? 
+          segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : 
+          segmentButtonTheme.SELECTED_FONT_SIZE);
+      const normalFontSize = this.options.fontSize ?? 
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
+      this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight =
         selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
           this.options.fontWeight ?? FontWeight.Regular;

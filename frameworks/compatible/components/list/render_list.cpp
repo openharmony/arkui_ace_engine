@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/list/render_list.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "compatible/components/list/grid_layout_manager.h"
 #include "compatible/components/list/list_watch_layout_manager.h"

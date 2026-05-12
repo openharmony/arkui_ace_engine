@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,9 @@ class OverlayManager : public AceType {
 public:
     // dialogs
     virtual void CloseDialog(RefPtr<FrameNode>& dialogNode) = 0;
+
+    // rootNode
+    virtual WeakPtr<FrameNode> GetRootNode() const = 0;
 
     // menus
     virtual void ShowMenu(const int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode>& menu) = 0;

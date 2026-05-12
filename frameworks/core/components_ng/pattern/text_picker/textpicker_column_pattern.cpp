@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
+#include "core/components_ng/base/modifier.h"
 
 #include <cstdint>
 #include <cstdlib>
@@ -57,6 +58,13 @@ const double CURVE_MOVE_THRESHOLD = 0.5;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 const uint32_t NEXT_COLOUM_DIFF = 1;
 } // namespace
+
+TextPickerColumnPattern::~TextPickerColumnPattern()
+{
+    if (circleUtils_) {
+        delete circleUtils_;
+    }
+}
 
 void TextPickerColumnPattern::OnAttachToFrameNode()
 {
@@ -416,7 +424,9 @@ RefPtr<ClickEvent> TextPickerColumnPattern::CreateItemClickEventListener(RefPtr<
     ACE_UINODE_TRACE(host);
     auto clickEventHandler = [param, weak = WeakClaim(this)](const GestureEvent& /* info */) {
         auto pattern = weak.Upgrade();
-        pattern->OnAroundButtonClick(param);
+        if (pattern) {
+            pattern->OnAroundButtonClick(param);
+        }
     };
 
     auto listener = AceType::MakeRefPtr<NG::ClickEvent>(clickEventHandler);

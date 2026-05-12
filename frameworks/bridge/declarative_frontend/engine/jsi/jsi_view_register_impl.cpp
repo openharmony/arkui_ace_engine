@@ -52,6 +52,7 @@
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_distortion_component.h"
+#include "bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
@@ -112,6 +113,7 @@
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
+#include "bridge/declarative_frontend/jsview/js_with_env.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
@@ -582,6 +584,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
     { "UIPickerComponent", JSContainerPicker::JSBind },
+    { "DepthComponent", JSDepthComponent::JSBind },
 #ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
 #endif
@@ -762,6 +765,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TouchRecognizer", JSTouchRecognizer::JSBind },
     { "UnionEffectContainer", JSUnionEffectContainer::JSBind },
     { "DistortionComponent", JSDistortionComponent::JSBind },
+    { "WithEnv", JSWithEnv::JSBind },
 };
 
 void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)
@@ -838,6 +842,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSCircleShape::JSBind(globalObj);
     JSEllipseShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
+    JSWithEnv::JSBind(globalObj);
 
     RegisterBindFuncs(globalObj, isCustomEnvSupported);
     RegisterExtraViews(globalObj);
@@ -1015,6 +1020,7 @@ void JsBindFormViews(
         JSCircleShape::JSBind(globalObj);
         JSEllipseShape::JSBind(globalObj);
         JSPathShape::JSBind(globalObj);
+        JSWithEnv::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {

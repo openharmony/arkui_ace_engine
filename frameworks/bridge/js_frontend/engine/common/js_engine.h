@@ -17,11 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_H
 
 #include <functional>
+#include <map>
 #include <set>
 #include <string>
 #include <memory>
 #include <unordered_map>
 
+#include "base/json/json_util.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/frontend.h"

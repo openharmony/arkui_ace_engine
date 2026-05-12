@@ -62,6 +62,7 @@
 #include "core/event/touch_event.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;

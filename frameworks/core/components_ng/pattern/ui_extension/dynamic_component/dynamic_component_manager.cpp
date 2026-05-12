@@ -15,6 +15,7 @@
 
 #include "dynamic_component_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "adapter/ohos/entrance/utils.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"

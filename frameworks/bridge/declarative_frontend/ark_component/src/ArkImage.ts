@@ -560,6 +560,21 @@ class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | Drawable
   }
 }
 
+class ImageReloadKeyModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('reloadKey');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.setReloadKey(node, "");
+    }
+    else {
+      getUINativeModule().image.setReloadKey(node, this.value);
+    }
+  }
+}
+
 class ImageEnableAnalyzerModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -771,6 +786,22 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   initialize(value: Object[]): this {
     modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
+    if (value.length >= 2) {
+      if (typeof value[1] === 'string') {
+        // Overload: (src, reloadKey?)
+        modifierWithKey(this._modifiersWithKeys, ImageReloadKeyModifier.identity, ImageReloadKeyModifier, value[1]);
+      } else if (value[1] !== undefined && value[1] !== null) {
+        // Overload: (src, imageAIOptions?) or (src, imageAIOptions?, reloadKey?)
+        modifierWithKey(this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value[1]);
+        if (value.length >= 3) {
+          let reloadKeyValue = (typeof value[2] === 'string') ? value[2] : '';
+          modifierWithKey(this._modifiersWithKeys, ImageReloadKeyModifier.identity, ImageReloadKeyModifier, reloadKeyValue);
+        }
+      } else {
+        // value[1] is undefined/null, reset reloadKey to empty string
+        modifierWithKey(this._modifiersWithKeys, ImageReloadKeyModifier.identity, ImageReloadKeyModifier, '');
+      }
+    }
     return this;
   }
   allowChildCount(): number {

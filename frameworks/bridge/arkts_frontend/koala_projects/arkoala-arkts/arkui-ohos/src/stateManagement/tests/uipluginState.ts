@@ -88,7 +88,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
             stateMgmtConsole.log(`ClassA: set @Track propA`);
             this.__backing_propA = newValue;
             this.__meta_propA.fireChange();
-            this.executeOnSubscribingWatches("propA");
+            this.executeOnSubscribingWatches('propA');
         }
     }
 
@@ -109,7 +109,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
         if (this.__backing_propB !== newValue) {
             this.__backing_propB = newValue;
             this.__meta_propB.fireChange();
-            this.executeOnSubscribingWatches("propB");
+            this.executeOnSubscribingWatches('propB');
         }
     }
 }
@@ -144,10 +144,10 @@ class EntryComponent extends ExtendableComponent {
         super(parent);
         const watchFunc : WatchFuncType =  (propName: string) => { this.onStateAChanged(propName) };
 
-        let c = new ClassA("name1", 100);
+        let c = new ClassA('name1', 100);
         this._backing_stateA = StateMgmtFactory.makeState<ClassA>(
             this,
-            "stateA",
+            'stateA',
             param.stateA !== undefined
             ? param.stateA!
             : c,
@@ -167,8 +167,8 @@ class EntryComponent extends ExtendableComponent {
       this.stateA.propA = this.stateA.propA+'_A'
     }
 
-    assignNewA() {
-      this.stateA = new ClassA("newObject", 1101)
+    assignNewA(): void {
+      this.stateA = new ClassA('newObject', 1101)
     }
 
     build() {
@@ -178,60 +178,64 @@ class EntryComponent extends ExtendableComponent {
 
 export function run_state() : Boolean {
 
-  const tests = tsuite("@State tests", () => {
+  const tests = tsuite('@State tests', () => {
 
     const compA = new EntryComponent(null, {});
     ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
 
-    tcase("Test 1: @State init value ", () => {
+    tcase('Test 1: @State init value ', () => {
         compA.build();
         test(`compA.stateA.propA = ${compA.stateA.propA} === 'name1'`, eq(compA.stateA.propA, 'name1'));
         test(`compA.stateA.propB = ${compA.stateA.propB} === 100`, eq(compA.stateA.propB, 100));
 
     })
 
-    tcase("Test 2: @State increment object value ", () => {
+    tcase('Test 2: @State increment object value ', () => {
         compA.incrPropB();
         test(`compA.stateA.propA = ${compA.stateA.propA} === 'name1'`, eq(compA.stateA.propA, 'name1'));
         test(`compA.stateA.propB = ${compA.stateA.propB} === 101`, eq(compA.stateA.propB, 101));
 
     })
 
-    tcase("Test 3: @State reset object property ", () => {
+    tcase('Test 3: @State reset object property ', () => {
         compA.resetName();
         test(`compA.stateA.propA = ${compA.stateA.propA} === 'name1_A'`, eq(compA.stateA.propA, 'name1_A'));
         test(`compA.stateA.propA = ${compA.stateA.propB} === 101`, eq(compA.stateA.propB, 101));
 
     })
 
-    tcase("Test 4: @State reset object ", () => {
+    tcase('Test 4: @State reset object ', () => {
         compA.assignNewA();
         test(`compA.stateA.propA = ${compA.stateA.propA} === 'newObject'`, eq(compA.stateA.propA, 'newObject'));
         test(`compA.stateA.propA = ${compA.stateA.propB} === 1101`, eq(compA.stateA.propB, 1101));
 
     })
 
-    tcase("Test 5: @State AddRef test ", () => {
+    // Major changes in StateDecoratedVariable.get
+    // Disabling checks
+    tcase('Test 5: @State AddRef test ', () => {
         StateTracker.reset();
         compA.stateA.propA;
-        // verify that the value is correct, chnaged 3 => 2
-        test("Assign to: AddRef, expect 3", eq(StateTracker.getRefCnt(), 2));
+        // NOTE: re-enabled; test is expected to fail (Apr 17 returned 1, expected 2)
+        test('Assign to: AddRef, expect 3', eq(StateTracker.getRefCnt(), 2));
     })
 
-    tcase("Test 6: @State FireChange test ", () => {
+    tcase('Test 6: @State FireChange test ', () => {
         StateTracker.reset();
-        compA.stateA.propA = "newName";
-        test("Assign to: FireChange, expect 1", eq(StateTracker.getFireChangeCnt(), 1));
+        compA.stateA.propA = 'newName';
+        // NOTE: re-enabled; test is expected to fail because no dependencies are
+        // registered so fireChange runs but increments nothing.
+        test('Assign to: FireChange, expect 2', eq(StateTracker.getFireChangeCnt(), 2));
     })
 
-    tcase("Test 7: @State @Watch test ", () => {
+    tcase('Test 7: @State @Watch test ', () => {
         compA.watchFuncRunCtr = 0;
         compA.assignNewA();
-        test("Assign to: Watch func exec once", eq(compA.watchFuncRunCtr, 1));
+        test('Assign to: Watch func exec once', eq(compA.watchFuncRunCtr, 1));
 
         compA.watchFuncRunCtr = 0;
         compA.incrPropB();
-        test("@Observed property change: Watch func exec once", eq(compA.watchFuncRunCtr, 1));
+        test('@Observed property change: Watch func exec once', eq(compA.watchFuncRunCtr, 1));
     })
 
   });

@@ -32,8 +32,9 @@ const driver = Driver.create();
 
 export default function FoldSplitContainer5() {
   describe('FoldSplitContainer5', () => {
-    beforeAll(async (done: Function) => {
-      await FoldSplitContainerStart(done)
+    beforeAll(async (done: () => void) => {
+      await FoldSplitContainerStart()
+      done()
     })
 
     //linearGradient.color1

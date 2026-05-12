@@ -419,3 +419,71 @@ const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
     });
   };
 };
+
+
+/**
+ * @CustomEnv Custom environment property decorator.
+ * Returns the current custom environment value corresponding to the specified `envKey`.
+ *
+ * @partof SDK
+ * @since 26
+ */
+const CustomEnv = (envKey: string): PropertyDecorator => {
+  if (typeof envKey !== 'string') {
+    const message = `@CustomEnv decorator requires a string key, but received: ${typeof envKey}`;
+    stateMgmtConsole.applicationError(message);
+    throw new BusinessError(UNSUPPORTED_KEY_IN_ENV, message);
+  }
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@CustomEnv`, envKey);
+
+  return (proto: object, varName: string): void => {
+    const storeProp = ObserveV2.OB_PREFIX + varName;
+    const localValueProp = `__custom_env_local_${varName}`;
+    const meta = proto['__custom_env_deco_meta__'] ??= {
+      varToKey: {},
+      keyToVars: {},
+    };
+    // Fast marker for native-side check: this component declares at least one @CustomEnv.
+    (proto as Record<string, unknown>)['__hasCustomEnvValue__'] = true;
+    meta.varToKey[varName] = envKey;
+    (meta.keyToVars[envKey] ??= []).push(varName);
+    Reflect.defineProperty(proto, varName, {
+      get() {
+        if (!(this instanceof ViewPU || this instanceof ViewV2)) {
+          const message = `@CustomEnv can only be declared inside @Component or @ComponentV2.`;
+          stateMgmtConsole.applicationError(message);
+          throw new Error(message);
+        }
+        ObserveV2.getObserve().addRef(this, varName);
+        const envValue = this.findCustomValueByKey(envKey);
+        const resolvedValue = envValue !== undefined ? envValue : this[localValueProp];
+        if (this[storeProp] !== resolvedValue) {
+          this[storeProp] = resolvedValue;
+        }
+        return ObserveV2.autoProxyObject(this, storeProp);
+      },
+      set(value) {
+        if (!(this instanceof ViewPU || this instanceof ViewV2)) {
+          const message = `@CustomEnv can only be declared inside @Component or @ComponentV2.`;
+          stateMgmtConsole.applicationError(message);
+          throw new Error(message);
+        }
+        if (!this.__isCustomEnvConstructionFinalized__Internal) {
+          if (InteropConfigureStateMgmt.needsInterop() && value && typeof value === 'object' && isStaticProxy(value)) {
+            value = InteropExtractorModule.getV2InteropObservedObject(value, this, varName, '__localStaticWatch_');
+          }
+          this[localValueProp] = value;
+          if (this.findCustomValueByKey(envKey) === undefined) {
+            this[storeProp] = value;
+          }
+          return;
+        }
+        const message = `@CustomEnv(${envKey}) is read-only and cannot assign value for it.`;
+        stateMgmtConsole.applicationError(message);
+        throw new Error(message);
+      },
+      enumerable: true
+    });
+  };
+};
+

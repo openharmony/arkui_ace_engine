@@ -16,8 +16,10 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -781,7 +783,7 @@ void RepeatVirtualScroll2Node::SetItemDragHandler(std::function<void(int32_t)>&&
     }
 }
 
-void RepeatVirtualScroll2Node::MoveData(int32_t from, int32_t to)
+void RepeatVirtualScroll2Node::MoveData(int32_t from, int32_t to, bool isNeedUpdate)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "MoveData from: %{public}d to: %{public}d.", from, to);
     caches_.UpdateMoveFromTo(from, to);
@@ -790,6 +792,11 @@ void RepeatVirtualScroll2Node::MoveData(int32_t from, int32_t to)
     PostIdleTask();
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    if (isNeedUpdate) {
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(std::min(from, to));
+        }
+    }
 }
 
 void RepeatVirtualScroll2Node::FireOnMove(int32_t from, int32_t to)
@@ -807,19 +814,25 @@ void RepeatVirtualScroll2Node::InitDragManager(const RefPtr<FrameNode>& child)
     CHECK_NULL_VOID(child);
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
-    auto pattern = child->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->InitDragManager(AceType::Claim(this));
+    if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+        auto pattern = child->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+        auto pattern = child->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitDragManager(AceType::Claim(this));
+    }
 }
 
 void RepeatVirtualScroll2Node::InitAllChildrenDragManager(bool init)
 {
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG && parentNode->GetTag() != V2::GRID_ETS_TAG) {
         return;
     }
     const auto& children = GetChildren();
@@ -828,19 +841,31 @@ void RepeatVirtualScroll2Node::InitAllChildrenDragManager(bool init)
             continue;
         }
         auto childNode = child->GetFrameChildByIndex(0, false);
-        auto listItem = AceType::DynamicCast<FrameNode>(childNode);
-        if (!listItem) {
+        auto item = AceType::DynamicCast<FrameNode>(childNode);
+        if (!item) {
             continue;
         }
 
-        auto pattern = listItem->GetPattern<ListItemPattern>();
-        if (!pattern) {
-            continue;
-        }
-        if (init) {
-            pattern->InitDragManager(AceType::Claim(this));
-        } else {
-            pattern->DeInitDragManager();
+        if (parentNode->GetTag() == V2::LIST_ETS_TAG) {
+            auto pattern = item->GetPattern<ListItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
+        } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
+            auto pattern = item->GetPattern<GridItemPattern>();
+            if (!pattern) {
+                continue;
+            }
+            if (init) {
+                pattern->InitDragManager(AceType::Claim(this));
+            } else {
+                pattern->DeInitDragManager();
+            }
         }
     }
 }

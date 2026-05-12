@@ -184,7 +184,7 @@ function dumpTree(node: IncrementalNode, indent: int32 = 0) {
 
 function errorInfo(crash: Object): string {
     let msg = crash.toString() + "\n"
-    if (Object.hasOwn(crash, "stack")) msg += (crash as Error).stack
+    if (crash instanceof Error) msg += (crash as Error).stack
     return msg
 }
 
@@ -372,11 +372,13 @@ export class Application {
     }
 
     private updateState() {
-        if (!this.rootState) {
-            InteropNativeModule._NativeLog('Invalid rootState')
-        }
-        if (!this.manager) {
-            InteropNativeModule._NativeLog('Invalid manager')
+        if (this.withLog) {
+            if (!this.rootState) {
+                InteropNativeModule._NativeLog('Invalid rootState')
+            }
+            if (!this.manager) {
+                InteropNativeModule._NativeLog('Invalid manager')
+            }
         }
         let rootState: ComputableState<IncrementalNode> | undefined = undefined;
         let preState: ComputableState<IncrementalNode> | undefined = undefined;
@@ -398,9 +400,11 @@ export class Application {
             ObserveSingleton.instance.makeDelayedMutableStateChanges();
         }
         // Here we request to draw a frame and call custom components callbacks.
-
-        // Here we request to draw a frame and call custom components callbacks.
-        rootState!.value;
+        if (rootState) {
+            rootState!.value;
+        } else {
+            return;
+        }
         if (preState) {
             preState!.value;
         }

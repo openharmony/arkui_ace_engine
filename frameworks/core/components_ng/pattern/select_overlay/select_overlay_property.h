@@ -26,6 +26,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/event/ace_events.h"
+#include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/manager/safe_area/safe_area_manager.h"

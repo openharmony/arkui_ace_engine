@@ -22,10 +22,10 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_foldable_window.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/window/mock_foldable_window.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/rect.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -56,6 +56,19 @@ void SheetPresentationTestEightNg::SetUpTestCase()
     MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+            sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
+            sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
+            sheetTheme->sheetCloseIconTitleSpaceNew_ = SHEET_CLOSE_ICON_TITLE_SPACE_NEW;
+            sheetTheme->sheetHeightPercentMax_ = 0.95f;
+            sheetTheme->bigWindowMinHeight_ = Dimension(320.0_vp);
+            return sheetTheme;
+        } else {
+            return nullptr;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
             auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
             sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
@@ -149,7 +162,8 @@ HWTEST_F(SheetPresentationTestEightNg, CalcMaxHeightMinusDoubleStatusBarHeight00
     layoutAlgorithm->CalcMaxHeightMinusDoubleStatusBarHeight(
         Referenced::RawPtr(layoutWrapper), maxHeight, sheetMaxHeight);
 
-    EXPECT_EQ(maxHeight, 800.0f);
+    double expectedMaxHeight = std::min(800.0f, 1000.0f - 50.0f * 2);
+    EXPECT_EQ(maxHeight, expectedMaxHeight);
 
     SheetPresentationTestEightNg::TearDownTestCase();
 }
@@ -179,8 +193,7 @@ HWTEST_F(SheetPresentationTestEightNg, CalcMaxHeightMinusDoubleStatusBarHeight00
     layoutAlgorithm->CalcMaxHeightMinusDoubleStatusBarHeight(
         Referenced::RawPtr(layoutWrapper), maxHeight, sheetMaxHeight);
 
-    double expectedMaxHeight = std::min(800.0f, 1000.0f - 50.0f * 2);
-    EXPECT_EQ(maxHeight, expectedMaxHeight);
+    EXPECT_EQ(maxHeight, 800.0f);
 
     SheetPresentationTestEightNg::TearDownTestCase();
 }

@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline/pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
 #include <cstdlib>
 #include "base/utils/utils.h"
 
@@ -31,6 +32,7 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/ressched/ressched_report.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"

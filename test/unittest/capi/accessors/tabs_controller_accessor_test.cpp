@@ -151,20 +151,20 @@ HWTEST_F(TabsControllerAccessorTest, DISABLED_preloadItemsTest, TestSize.Level1)
 
     // check of the simulated finish cases
     EXPECT_FALSE(promiseFinished);
-    fireFinish(ERROR_CODE_NO_ERROR, {}); // the good case
+    fireFinish(ARKUI_ERROR_CODE_NO_ERROR, {}); // the good case
     EXPECT_TRUE(AsyncWorkTestHelper::HasResolved());
     EXPECT_TRUE(promiseFinished);
     AsyncWorkTestHelper::Reset();
     promiseFinished = false;
     EXPECT_FALSE(arrayResultStr.has_value());
 
-    fireFinish(ERROR_CODE_PARAM_INVALID, expectedErrStr); // the bad case
+    fireFinish(ARKUI_ERROR_CODE_PARAM_INVALID, expectedErrStr); // the bad case
     EXPECT_TRUE(AsyncWorkTestHelper::HasRejected());
     EXPECT_TRUE(promiseFinished);
     AsyncWorkTestHelper::Reset();
     ASSERT_TRUE(arrayResultStr.has_value());
     ASSERT_EQ(arrayResultStr->size(), 2);
-    EXPECT_EQ(arrayResultStr->at(0), std::to_string(ERROR_CODE_PARAM_INVALID));
+    EXPECT_EQ(arrayResultStr->at(0), std::to_string(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_EQ(arrayResultStr->at(1), expectedErrStr);
 
     // the mandatory complete

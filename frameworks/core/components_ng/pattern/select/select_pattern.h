@@ -23,9 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -33,6 +31,8 @@
 #include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
+#include "interfaces/inner_api/ui_session/ui_session_json_util.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -162,6 +162,8 @@ public:
     // set props of menu background
     void SetMenuBackgroundColor(const Color& color);
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
+    void SetMenuBackgroundBlurStyleOptions(const std::optional<BlurStyleOption>& blurStyleOption);
+    void SetMenuBackgroundEffect(const std::optional<EffectOption>& effectOption);
     bool IsValidIndex(int32_t index);
     void GetSelectedValue(int32_t index, std::string& value);
     void ShowOptions(int32_t index);
@@ -172,6 +174,16 @@ public:
     bool ReportOnSelectEvent(int32_t index, const std::string& value);
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
+
+    const std::vector<RefPtr<FrameNode>>& GetBuilderOptions()
+    {
+        return builderOptions_;
+    }
+    void AddBuilderOptionNode(const RefPtr<FrameNode>& option)
+    {
+        CHECK_NULL_VOID(option);
+        builderOptions_.push_back(option);
+    }
 
     FocusPattern GetFocusPattern() const override;
 
@@ -215,6 +227,31 @@ public:
     RefPtr<UiMaterial> GetMenuSystemMaterial() const
     {
         return menuSystemMaterial_;
+    }
+
+    BlurStyleOption GetMenuBackgroundBlurStyle() const
+    {
+        return blurStyleOption_;
+    }
+
+    void SetMenuDistortionMode(std::optional<DistortionMode> mode)
+    {
+        menuDistortionMode_ = mode;
+    }
+
+    std::optional<DistortionMode> GetMenuDistortionMode() const
+    {
+        return menuDistortionMode_;
+    }
+
+    void SetMenuEdgeLightMode(std::optional<EdgeLightMode> mode)
+    {
+        menuEdgeLightMode_ = mode;
+    }
+
+    std::optional<EdgeLightMode> GetMenuEdgeLightMode() const
+    {
+        return menuEdgeLightMode_;
     }
 
     void SetShowInSubWindow(bool isShowInSubWindow);
@@ -395,6 +432,7 @@ private:
     void ShowScrollBar();
     void UpdateMenuBorderStyle(const RefPtr<FrameNode>& menu);
     std::vector<RefPtr<FrameNode>> options_;
+    std::vector<RefPtr<FrameNode>> builderOptions_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
     RefPtr<FrameNode> text_ = nullptr;
     RefPtr<FrameNode> spinner_ = nullptr;
@@ -417,6 +455,8 @@ private:
     std::optional<Color> optionBgColor_;
     std::optional<Color> fontColor_;
     RefPtr<UiMaterial> menuSystemMaterial_ = nullptr;
+    std::optional<DistortionMode> menuDistortionMode_;
+    std::optional<EdgeLightMode> menuEdgeLightMode_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -454,6 +494,7 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
     std::optional<Color> menuBackgroundColor_;
+    BlurStyleOption blurStyleOption_;
     SelectDivider divider_;
     std::optional<DividerMode> dividerMode_;
 };

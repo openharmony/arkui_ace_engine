@@ -26,6 +26,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -837,5 +838,41 @@ HWTEST_F(CounterTestNg, CounterPatternUpdateTextColorTest001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_TRUE(textLayoutProperty->HasTextColor());
     EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::BLACK), testColor);
+}
+
+/**
+ * @tc.name: CounterPatternUpdateButtonTextColorTest001
+ * @tc.desc: Test UpdateButtonTextColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterPatternUpdateButtonTextColorTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    const Color testColor = Color::RED;
+
+    pattern_->UpdateButtonTextColor(frameNode_, pattern_->GetSubId(), testColor);
+    auto subNode = AceType::DynamicCast<FrameNode>(
+        frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetSubId())));
+    ASSERT_NE(subNode, nullptr);
+    auto subTextNode = AceType::DynamicCast<FrameNode>(subNode->GetChildren().front());
+    ASSERT_NE(subTextNode, nullptr);
+    auto subTextLayoutProperty = subTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(subTextLayoutProperty, nullptr);
+    EXPECT_TRUE(subTextLayoutProperty->HasTextColor());
+    EXPECT_EQ(subTextLayoutProperty->GetTextColorValue(Color::BLACK), testColor);
+
+    const Color anotherTestColor = Color::BLUE;
+    pattern_->UpdateButtonTextColor(frameNode_, pattern_->GetAddId(), anotherTestColor);
+    auto addNode = AceType::DynamicCast<FrameNode>(
+        frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetAddId())));
+    ASSERT_NE(addNode, nullptr);
+    auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetChildren().front());
+    ASSERT_NE(addTextNode, nullptr);
+    auto addTextLayoutProperty = addTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(addTextLayoutProperty, nullptr);
+    EXPECT_TRUE(addTextLayoutProperty->HasTextColor());
+    EXPECT_EQ(addTextLayoutProperty->GetTextColorValue(Color::BLACK), anotherTestColor);
 }
 } // namespace OHOS::Ace::NG

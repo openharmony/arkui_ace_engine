@@ -30,7 +30,7 @@ interface EnvTypeMap {
   'system.window.avoidarea.px': WindowAvoidAreaPxEnv;
   'system.window.focused': WindowFocusedEnv;
   'system.window.highlighted': WindowHighlightedEnv;
-  'system.window.systemdensity': SystemDensityEnv;
+  'system.window.density.system': SystemDensityEnv;
   'system.window.displayid': DisplayIdEnv;
 }
 
@@ -114,7 +114,7 @@ const envFactoryMap: {
     stateMgmtConsole.debug(`create WindowHighlightedEnv.`);
     return new WindowHighlightedEnv(context);
   },
-  'system.window.systemdensity': (context: UIContext) => {
+  'system.window.density.system': (context: UIContext) => {
     const SystemDensityEnv = requireNapi('window.systemdensityenv').SystemDensityEnv;
     if (typeof SystemDensityEnv !== 'function') {
       // internal error
@@ -133,3 +133,37 @@ const envFactoryMap: {
     return new DisplayIdEnv(context);
   },
 };
+
+
+type SimpleEnvValueType = 'number' | 'boolean';
+
+interface SimpleEnvMetaItem<K extends keyof EnvTypeMap> {
+  prop: keyof EnvTypeMap[K];
+  type: SimpleEnvValueType;
+}
+
+type SimpleEnvMeta = Partial<{
+  [K in keyof EnvTypeMap]: SimpleEnvMetaItem<K>;
+}>;
+
+// add env key and property name and type here
+const simpleEnvMetaMap = {
+  'system.window.density.system': {
+    prop: 'systemDensity',
+    type: 'number',
+  },
+  'system.window.displayid': {
+    prop: 'displayId',
+    type: 'number',
+  },
+  'system.window.focused': {
+    prop: 'isFocused',
+    type: 'boolean',
+  },
+  'system.window.highlighted': {
+    prop: 'isHighlighted',
+    type: 'boolean',
+  },
+} as const satisfies SimpleEnvMeta;
+
+type SimpleTypeEnvKey = keyof typeof simpleEnvMetaMap;

@@ -94,31 +94,8 @@ public:
             ParsePatternColor(themeConstants, theme);
         }
 
-        void ParsePatternColor(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
-        {
-            CHECK_NULL_VOID(theme);
-            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RICH_EDITOR);
-            CHECK_NULL_VOID(pattern);
-            auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
-            if (Container::CurrentColorMode() == ColorMode::DARK) {
-                dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
-            }
-            theme->dragBackgroundColor_ = dragBackgroundColor;
-            theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
-            theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
-            theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
-            theme->previewUnderlineColor_ = pattern->GetAttr<Color>("preview_underline_color", Color(0xff007dff));
-            theme->popIconColor_ = pattern->GetAttr<Color>("pop_icon_color", Color(0x99000000));
-            theme->menuTitleColor_ = pattern->GetAttr<Color>("menu_title_color", Color(0x99000000));
-            theme->menuTextColor_ = pattern->GetAttr<Color>("menu_text_color", Color(0x99000000));
-            theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", Color(0x99000000));
-            theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
-            auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
-            theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
-            theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x0C182431));
-            theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
-            theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::WHITE);
-        }
+        void ParsePatternColor(
+            const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const;
     };
 
     ~RichEditorTheme() override = default;

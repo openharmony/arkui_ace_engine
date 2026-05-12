@@ -172,6 +172,30 @@ ArkUINativeModuleValue ListBridge::ResetEditMode(ArkUIRuntimeCallInfo* runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> arg_enableEditMode = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    bool enableEditMode = arg_enableEditMode->ToBoolean(vm)->Value();
+    GetArkUINodeModifiers()->getListModifier()->setListEnableEditMode(nativeNode, enableEditMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 	 
+ArkUINativeModuleValue ListBridge::ResetEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetListEnableEditMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::SetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -578,6 +602,14 @@ ArkUINativeModuleValue ListBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runt
                 };
             options.getPreviewBadge = std::move(onGetPreviewBadge);
         }
+        auto useDefaultStyle = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "useDefaultMultiSelectStyle"));
+        if (useDefaultStyle->IsBoolean()) {
+            options.useDefaultMultiSelectStyle = useDefaultStyle->ToBoolean(vm)->Value();
+        }
+        auto fingerSelect = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableFingerMultiSelect"));
+        if (fingerSelect->IsBoolean()) {
+            options.enableFingerMultiSelect = fingerSelect->ToBoolean(vm)->Value();
+        }
     }
     ListModelNG::SetEditModeOptions(frameNode, options);
     return panda::JSValueRef::Undefined(vm);
@@ -674,13 +706,14 @@ ArkUINativeModuleValue ListBridge::SetListScrollBarWidth(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension scrollBarWidth;
-    if (!ArkTSUtils::ParseJsDimension(vm, scrollBarArg, scrollBarWidth, DimensionUnit::VP) || scrollBarArg->IsNull() ||
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, scrollBarArg, scrollBarWidth, resObj, false) || scrollBarArg->IsNull() ||
         scrollBarArg->IsUndefined() || (scrollBarArg->IsString(vm) && scrollBarWidth.ToString().empty()) ||
         LessNotEqual(scrollBarWidth.Value(), 0.0) || scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getListModifier()->resetListScrollBarWidth(nativeNode);
     } else {
         GetArkUINodeModifiers()->getListModifier()->setListScrollBarWidth(
-            nativeNode, scrollBarWidth.ToString().c_str());
+            nativeNode, scrollBarWidth.ToString().c_str(), resObj.GetRawPtr());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1024,6 +1057,24 @@ ArkUINativeModuleValue ListBridge::ResetSpace(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetListSpace(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::SetSpaceWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CalcDimension calc;
+    RefPtr<ResourceObject> resObj;
+    if (ArkTSUtils::ParseJsDimension(vm, secondArg, calc, DimensionUnit::VP)) {
+        GetArkUINodeModifiers()->getListModifier()->setListSpaceWidth(
+            nativeNode, static_cast<float>(calc.Value()), static_cast<int32_t>(calc.Unit()), resObj.GetRawPtr());
+    } else {
+        GetArkUINodeModifiers()->getListModifier()->resetListSpaceWidth(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1796,7 +1847,7 @@ ArkUINativeModuleValue ListBridge::SetSupportEmptyBranchInLazyLoading(ArkUIRunti
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ListBridge::SetBackPressCloseSwipeAction(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue ListBridge::SetBackPressBehavior(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));

@@ -14,6 +14,10 @@
  */
 
 #include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/ui_material.h"
 
 namespace OHOS::Ace::Framework {
 void MenuModelImpl::Create() {}

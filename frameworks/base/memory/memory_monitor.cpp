@@ -36,6 +36,7 @@ void PurgeMallocCache()
 #endif
 }
 
+#ifdef ACE_DEBUG
 bool MemoryMonitor::isEnable_ = SystemProperties::GetIsUseMemoryMonitor();
 
 class MemoryMonitorImpl : public MemoryMonitor {
@@ -128,5 +129,5 @@ MemoryMonitor& MemoryMonitor::GetInstance()
     static MemoryMonitorImpl instance;
     return instance;
 }
-
+#endif // ACE_DEBUG
 } // namespace OHOS::Ace

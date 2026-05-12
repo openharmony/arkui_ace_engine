@@ -31,6 +31,7 @@
 #include "core/components/theme/theme_attributes.h"
 #include "base/geometry/ng/offset_t.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "core/components/common/properties/placement.h"
 
 using namespace testing;
 using namespace testing::ext;

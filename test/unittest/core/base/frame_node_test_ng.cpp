@@ -18,6 +18,7 @@
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
@@ -1229,6 +1230,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving0029, TestSize.Level1)
      */
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     FRAME_NODE2->AddChild(FRAME_NODE3);
+    auto context = PipelineContext::GetCurrentContext();
+    context->onShow_ = true;
     FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
     auto mark = FRAME_NODE2->MarkRemoving();
     FRAME_NODE2->Clean();

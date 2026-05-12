@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"
+#include "core/common/container.h"
 
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
@@ -298,6 +300,7 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     MeasureRealSideBarWidth(parentWidth);
 
     auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(sideBarContainerPattern);
     sideBarContainerPattern->SetMinSideBarWidth(minSideBarWidth_);
     sideBarContainerPattern->SetMaxSideBarWidth(maxSideBarWidth_);
     sideBarContainerPattern->SetMinContentWidth(minContentWidth_);
@@ -569,11 +572,23 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
 
     if (type_ == SideBarContainerType::EMBED) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
-            contentWidth -= (realSideBarWidth_ + realDividerWidth_);
+            if (sideBarInDragGesture_) {
+                contentWidth -= (sideBarPosition == SideBarPosition::START)
+                                ? (realSideBarWidth_ + realDividerWidth_ + currentContentDragOffset_)
+                                : (realSideBarWidth_ + realDividerWidth_ - currentContentDragOffset_);
+            } else {
+                contentWidth -= (realSideBarWidth_ + realDividerWidth_);
+            }
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
             contentWidth = (sideBarPosition == SideBarPosition::START)
                                ? (contentWidth - realSideBarWidth_ - realDividerWidth_ - currentOffset_)
                                : (contentWidth - realDividerWidth_ + currentOffset_);
+        } else if (sideBarStatus_ == SideBarStatus::HIDDEN) {
+            if (sideBarInDragGesture_) {
+                contentWidth = (sideBarPosition == SideBarPosition::START)
+                                ? contentWidth - currentContentDragOffset_
+                                : contentWidth + currentContentDragOffset_;
+            }
         }
     }
     contentWidth = std::max(contentWidth, minContentWidth_);
@@ -709,26 +724,35 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     buttonLayoutWrapper->Layout();
 }
 
-void SideBarContainerLayoutAlgorithm::LayoutSideBar(
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper)
+float SideBarContainerLayoutAlgorithm::GetSideBarOffsetX(float sideBarOffsetX, float parentWidth,
+    const PaddingPropertyF& padding, const SideBarPosition& sideBarPosition)
 {
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-
-    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode());
-    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
-    const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    float sideBarOffsetX = padding.left.value_or(0);
-    float sideBarOffsetY = padding.top.value_or(0);
-
     switch (sideBarStatus_) {
         case SideBarStatus::SHOW:
+            if (sideBarInDragGesture_) {
+                if (sideBarPosition == SideBarPosition::START) {
+                    sideBarOffsetX = sideBarOffsetX + currentContentDragOffset_;
+                } else {
+                    sideBarOffsetX =
+                        parentWidth - realSideBarWidth_ - padding.right.value_or(0) + currentContentDragOffset_;
+                }
+                break;
+            }
             if (sideBarPosition == SideBarPosition::END) {
                 sideBarOffsetX = parentWidth - realSideBarWidth_ - padding.right.value_or(0);
             }
             break;
         case SideBarStatus::HIDDEN:
+            if (sideBarInDragGesture_) {
+                if (sideBarPosition == SideBarPosition::START) {
+                    sideBarOffsetX =
+                        - realSideBarWidth_ - realDividerWidth_ + currentContentDragOffset_ + padding.left.value_or(0);
+                } else {
+                    sideBarOffsetX =
+                        currentContentDragOffset_ + parentWidth - padding.right.value_or(0) + currentOffset_;
+                }
+                break;
+            }
             if (sideBarPosition == SideBarPosition::START) {
                 sideBarOffsetX = -(realSideBarWidth_ + realDividerWidth_ - padding.left.value_or(0));
             } else {
@@ -745,7 +769,23 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
         default:
             break;
     }
+    return sideBarOffsetX;
+}
 
+void SideBarContainerLayoutAlgorithm::LayoutSideBar(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+
+    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode());
+    auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    float sideBarOffsetX = padding.left.value_or(0);
+    float sideBarOffsetY = padding.top.value_or(0);
+
+    sideBarOffsetX = GetSideBarOffsetX(sideBarOffsetX, parentWidth, padding, sideBarPosition);
     auto decorBarHeight = 0.0f;
     auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
     if (sideBarContainerPattern) {
@@ -773,11 +813,34 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     float contentOffsetX = padding.left.value_or(0);
     float contentOffsetY = padding.top.value_or(0);
 
-    if (type_ == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
+    if ((type_ == SideBarContainerType::EMBED || type_ == SideBarContainerType::DISPLACE) &&
+        sideBarPosition == SideBarPosition::START) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
-            contentOffsetX = realSideBarWidth_ + realDividerWidth_ + padding.left.value_or(0);
+            if (sideBarInDragGesture_) {
+                contentOffsetX =
+                    realSideBarWidth_ + realDividerWidth_ + padding.left.value_or(0) + currentContentDragOffset_;
+            } else {
+                contentOffsetX = realSideBarWidth_ + realDividerWidth_ + padding.left.value_or(0);
+            }
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
             contentOffsetX = realSideBarWidth_ + realDividerWidth_ + currentOffset_ + padding.left.value_or(0);
+        } else if (sideBarInDragGesture_ && sideBarStatus_ == SideBarStatus::HIDDEN) {
+            contentOffsetX = currentContentDragOffset_ + padding.left.value_or(0);
+        }
+    }
+
+    if (type_ == SideBarContainerType::DISPLACE && sideBarPosition == SideBarPosition::END) {
+        if (sideBarStatus_ == SideBarStatus::SHOW) {
+            if (sideBarInDragGesture_) {
+                contentOffsetX =
+                    -(realSideBarWidth_ + realDividerWidth_) + padding.left.value_or(0) + currentContentDragOffset_;
+            } else {
+                contentOffsetX = -(realSideBarWidth_ + realDividerWidth_) + padding.left.value_or(0);
+            }
+        } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
+            contentOffsetX = currentOffset_ - realDividerWidth_ + padding.left.value_or(0);
+        } else if (sideBarInDragGesture_ && sideBarStatus_ == SideBarStatus::HIDDEN) {
+            contentOffsetX = currentContentDragOffset_ + padding.left.value_or(0);
         }
     }
 
@@ -787,6 +850,54 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     
     contentLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(contentOffset);
     contentLayoutWrapper->Layout();
+}
+
+float SideBarContainerLayoutAlgorithm::GetDividerOffsetX(float dividerOffsetX, float parentWidth,
+    const PaddingPropertyF& padding, const SideBarPosition& sideBarPosition)
+{
+    switch (sideBarStatus_) {
+        case SideBarStatus::SHOW:
+            if (sideBarInDragGesture_) {
+                if (sideBarPosition == SideBarPosition::START) {
+                    dividerOffsetX = currentContentDragOffset_ + realSideBarWidth_ + padding.left.value_or(0);
+                } else {
+                    dividerOffsetX = currentContentDragOffset_ + parentWidth - realSideBarWidth_ - realDividerWidth_ -
+                        padding.right.value_or(0);
+                }
+                break;
+            }
+            if (sideBarPosition == SideBarPosition::START) {
+                dividerOffsetX = realSideBarWidth_ + padding.left.value_or(0);
+            } else {
+                dividerOffsetX = parentWidth - realSideBarWidth_ - realDividerWidth_ - padding.right.value_or(0);
+            }
+            break;
+        case SideBarStatus::HIDDEN:
+            if (sideBarInDragGesture_) {
+                if (sideBarPosition == SideBarPosition::START) {
+                    dividerOffsetX = currentContentDragOffset_ + padding.left.value_or(0);
+                } else {
+                    dividerOffsetX = currentContentDragOffset_  + parentWidth - padding.right.value_or(0);
+                }
+                break;
+            }
+            if (sideBarPosition == SideBarPosition::START) {
+                dividerOffsetX = -realDividerWidth_ + padding.left.value_or(0);
+            } else {
+                dividerOffsetX = parentWidth - padding.right.value_or(0);
+            }
+            break;
+        case SideBarStatus::CHANGING:
+            if (sideBarPosition == SideBarPosition::START) {
+                dividerOffsetX = realSideBarWidth_ + currentOffset_ + padding.left.value_or(0);
+            } else {
+                dividerOffsetX = parentWidth - realDividerWidth_ + currentOffset_ - padding.right.value_or(0);
+            }
+            break;
+        default:
+            break;
+    }
+    return dividerOffsetX;
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutDivider(
@@ -811,32 +922,7 @@ void SideBarContainerLayoutAlgorithm::LayoutDivider(
     float dividerOffsetX = padding.left.value_or(0);
     float dividerOffsetY = padding.top.value_or(0);
 
-    switch (sideBarStatus_) {
-        case SideBarStatus::SHOW:
-            if (sideBarPosition == SideBarPosition::START) {
-                dividerOffsetX = realSideBarWidth_ + padding.left.value_or(0);
-            } else {
-                dividerOffsetX = parentWidth - realSideBarWidth_ - realDividerWidth_ - padding.right.value_or(0);
-            }
-            break;
-        case SideBarStatus::HIDDEN:
-            if (sideBarPosition == SideBarPosition::START) {
-                dividerOffsetX = -realDividerWidth_ + padding.left.value_or(0);
-            } else {
-                dividerOffsetX = parentWidth - padding.right.value_or(0);
-            }
-            break;
-        case SideBarStatus::CHANGING:
-            if (sideBarPosition == SideBarPosition::START) {
-                dividerOffsetX = realSideBarWidth_ + currentOffset_ + padding.left.value_or(0);
-            } else {
-                dividerOffsetX = parentWidth - realDividerWidth_ + currentOffset_ - padding.right.value_or(0);
-            }
-            break;
-        default:
-            break;
-    }
-
+    dividerOffsetX = GetDividerOffsetX(dividerOffsetX, parentWidth, padding, sideBarPosition);
     auto dividerOffset = OffsetF(dividerOffsetX, dividerStartMarginPx + dividerOffsetY);
     CHECK_NULL_VOID(dividerLayoutWrapper->GetGeometryNode());
     dividerLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);

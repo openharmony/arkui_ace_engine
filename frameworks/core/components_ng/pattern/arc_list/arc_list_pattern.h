@@ -51,6 +51,8 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
+    std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
 
     void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) override;
 
@@ -107,7 +109,7 @@ private:
     bool OnScrollCallback(float offset, int32_t source) override;
 
     bool GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, float& snapPos);
-    int32_t GetMidIndex();
+    int32_t GetMidIndex() const;
     ListItemInfo GetItemDisplayInfo(int32_t index);
     bool GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo);
 

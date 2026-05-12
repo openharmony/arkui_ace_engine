@@ -19,6 +19,7 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
@@ -28,7 +29,6 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -357,10 +357,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        auto prepareDragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
-        CHECK_NULL_VOID(prepareDragFrameNode);
-        if (DragDropGlobalController::GetInstance().GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
-            (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode &&
+        auto& dragDropGlobalController = DragDropGlobalController::GetInstance();
+        if (dragDropGlobalController.GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
+            (frameNode->GetContextRefPtr() == pipeline &&
+            frameNode != dragDropGlobalController.GetPrepareDragFrameNode().Upgrade() &&
             info.GetSourceDevice() != SourceType::MOUSE && !actuator->isForDragDrop_)) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Drag preview is landing finished, stop dragging.");
             return;
@@ -655,7 +655,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto longPressUpdateValue = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                     GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
-        InteractionInterface::GetInstance()->SetDraggableState(true);
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();

@@ -22,10 +22,18 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "ui/base/utils/utils.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 500;
+constexpr int32_t SCROLL_EFFECT_TITLEBAR_ZINDEX = 2;
+constexpr Dimension COMMON_BLUR_OFFSET = 8.0_vp;
+constexpr Dimension GRADUAL_BLUR_OFFSET = 56.0_vp;
 
 void ResetForceSplitTouchTargets(const RefPtr<NavigationPattern>& navPattern)
 {
@@ -559,6 +567,348 @@ void NavDestinationPatternBase::RemoveOnTouchEvent(FrameNode* frameNode)
     auto eventManager = context->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->UnRegisterHitTestFrameNodeListener(frameNode->GetId());
+}
+
+void NavDestinationPatternBase::UpdateTitleBarOptions(float currentOffset)
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto titlebarOptions = titleBarPattern->GetTitleBarOptions();
+    if (!titlebarOptions.bgOptions.scrollEffectOptions.has_value()) {
+        return;
+    }
+
+    auto startOffset = titleBarPattern->GetParseStartOffset().has_value()
+                           ? titleBarPattern->GetParseStartOffset().value().ConvertToPx()
+                           : 0.0f;
+    auto endOffset = titleBarPattern->GetParseEndOffset().has_value()
+                         ? titleBarPattern->GetParseEndOffset().value().ConvertToPx()
+                         : 0.0f;
+
+    if (GreatNotEqual(currentOffset, startOffset) && LessNotEqual(currentOffset, endOffset)) {
+        auto scrollScale =
+            NearZero(endOffset - startOffset) ? 1.0 : (currentOffset - startOffset) / (endOffset - startOffset);
+        titleBarPattern->SetScrollScale(scrollScale);
+        SetTitleBarOptions(titleBarPattern, titleBarPattern->GetCurrentTitleBarBgStyle());
+        return;
+    }
+    if (LessOrEqual(currentOffset, startOffset) && !titleBarPattern->IsTitleBarStyleStartUpdate()) {
+        titleBarPattern->SetScrollScale(0.0);
+        UpdateTitleBarStartOptions(titleBarPattern);
+        SetTitleBarOptions(titleBarPattern, titleBarPattern->GetOriginalTitleBarBgStyle());
+        return;
+    }
+    if (GreatOrEqual(currentOffset, endOffset) && !titleBarPattern->IsTitleBarStyleEndUpdate()) {
+        titleBarPattern->SetScrollScale(1.0);
+        UpdateTitleBarEndOptions(titleBarPattern);
+        SetTitleBarOptions(titleBarPattern, titleBarPattern->GetScrollEffectTitleBarBgStyle());
+        return;
+    }
+}
+
+void NavDestinationPatternBase::UpdateTitleBarGradientOptions(
+    const RefPtr<TitleBarPattern>& titleBarPattern, float currentOffset, float startOffset, float endOffset)
+{
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetIsTitleBarStyleStartUpdate(false);
+    titleBarPattern->SetIsTitleBarStyleEndUpdate(false);
+    if (titleBarPattern->IsHidden()) {
+        return;
+    }
+}
+
+void NavDestinationPatternBase::SetTitleBarOptions(
+    const RefPtr<TitleBarPattern>& titleBarPattern, const NavigationTitleBarStyle& titleBarBgStyle)
+{
+    CHECK_NULL_VOID(titleBarPattern);
+    if (titleBarPattern->IsHidden()) {
+        return;
+    }
+    titleBarPattern->SetCurrentTitleBarBgStyle(titleBarBgStyle);
+    UpdateBackgroundBlurStyle(titleBarPattern);
+}
+
+void NavDestinationPatternBase::UpdateBackgroundBlurStyle(const RefPtr<TitleBarPattern>& titleBarPattern)
+{
+    CHECK_NULL_VOID(titleBarPattern);
+    auto titleBarBgStyle = titleBarPattern->GetCurrentTitleBarBgStyle();
+    auto bgStyle = titleBarBgStyle.backgroundStyle;
+
+    auto scrollScale = titleBarPattern->GetScrollScale();
+    auto startOpacity = titleBarPattern->GetOriginalTitleBarBgStyle().backgroundStyle.opacity;
+    auto endOpacity = titleBarPattern->GetScrollEffectTitleBarBgStyle().backgroundStyle.opacity;
+    auto opacity = startOpacity + scrollScale * (endOpacity - startOpacity);
+
+    if (isScrollEffectEnabled_) {
+        auto maskNode = GetTitleBarMaskFrameNode();
+        CHECK_NULL_VOID(maskNode);
+        auto maskRenderContext = maskNode->GetRenderContext();
+        CHECK_NULL_VOID(maskRenderContext);
+        maskRenderContext->UpdateBackgroundColor(bgStyle.backgroundColor.ChangeOpacity(opacity));
+        if (bgStyle.linearGradientBlur.has_value()) {
+            auto gradientBlurPara = bgStyle.linearGradientBlur.value();
+            auto startBlurRadius = titleBarPattern->GetOriginalTitleBarBgStyle()
+                                       .backgroundStyle.linearGradientBlur.value_or(gradientBlurPara)
+                                       .blurRadius_;
+            auto endBlurRadius = titleBarPattern->GetScrollEffectTitleBarBgStyle()
+                                     .backgroundStyle.linearGradientBlur.value_or(gradientBlurPara)
+                                     .blurRadius_;
+            auto blurRadius = startBlurRadius.Value() + scrollScale * (endBlurRadius.Value() - startBlurRadius.Value());
+            gradientBlurPara.blurRadius_ = Dimension(blurRadius, DimensionUnit::VP);
+            maskRenderContext->UpdateLinearGradientBlur(gradientBlurPara);
+        }
+    }
+}
+
+void NavDestinationPatternBase::UpdateTitleBarStartOptions(const RefPtr<TitleBarPattern>& titleBarPattern)
+{
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetIsTitleBarStyleStartUpdate(true);
+    titleBarPattern->SetIsTitleBarStyleEndUpdate(false);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarPattern->GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto bgStyle = titleBarPattern->GetOriginalTitleBarBgStyle();
+    auto mainTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    if (mainTitleNode) {
+        TitleBarPattern::SetTextColor(mainTitleNode, bgStyle.titleColor);
+    }
+    auto subtitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (subtitleNode) {
+        TitleBarPattern::SetTextColor(subtitleNode, bgStyle.subTitleColor);
+    }
+    TitleBarPattern::SetBackButtonIconColor(titleBarNode, bgStyle.iconColor);
+    TitleBarPattern::SetMenuItemsStyle(titleBarNode, bgStyle.iconColor, bgStyle.titleColor);
+    if (bgStyle.titleShadow.has_value() && mainTitleNode) {
+        TitleBarPattern::SetTextShadow(mainTitleNode, bgStyle.titleShadow.value());
+    }
+    if (bgStyle.subTitleShadow.has_value() && subtitleNode) {
+        TitleBarPattern::SetTextShadow(subtitleNode, bgStyle.subTitleShadow.value());
+    }
+}
+
+void NavDestinationPatternBase::UpdateTitleBarEndOptions(const RefPtr<TitleBarPattern>& titleBarPattern)
+{
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetIsTitleBarStyleEndUpdate(true);
+    titleBarPattern->SetIsTitleBarStyleStartUpdate(false);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarPattern->GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto bgStyle = titleBarPattern->GetScrollEffectTitleBarBgStyle();
+    auto mainTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    if (mainTitleNode) {
+        TitleBarPattern::SetTextColor(mainTitleNode, bgStyle.titleColor);
+    }
+    auto subtitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (subtitleNode) {
+        TitleBarPattern::SetTextColor(subtitleNode, bgStyle.subTitleColor);
+    }
+    TitleBarPattern::SetBackButtonIconColor(titleBarNode, bgStyle.iconColor);
+    TitleBarPattern::SetMenuItemsStyle(titleBarNode, bgStyle.iconColor, bgStyle.titleColor);
+    if (bgStyle.titleShadow.has_value() && mainTitleNode) {
+        TitleBarPattern::SetTextShadow(mainTitleNode, bgStyle.titleShadow.value());
+    }
+    if (bgStyle.subTitleShadow.has_value() && subtitleNode) {
+        TitleBarPattern::SetTextShadow(subtitleNode, bgStyle.subTitleShadow.value());
+    }
+}
+
+void NavDestinationPatternBase::InitScrollEffectOptions()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto titlebarOptions = titleBarPattern->GetTitleBarOptions();
+
+    auto scrollEffectOptionsOpt = titlebarOptions.bgOptions.scrollEffectOptions;
+    if (!scrollEffectOptionsOpt.has_value()) {
+        auto maskNode = hostNode->GetTitleBarMaskNode();
+        if (maskNode) {
+            hostNode->RemoveChild(maskNode);
+            hostNode->SetTitleBarMaskNode(nullptr);
+            maskNode->MountToParent(nullptr);
+        }
+        isScrollEffectEnabled_ = false;
+        return;
+    }
+    auto scrollEffectOptions = scrollEffectOptionsOpt.value();
+    auto scrollEffectType = scrollEffectOptions.scrollEffectType;
+
+    ParseScrollOffsetValue(titleBarNode);
+
+    isScrollEffectEnabled_ = true;
+    titleBarPattern->SetIsTitleBarStyleStartUpdate(false);
+    titleBarPattern->SetIsTitleBarStyleEndUpdate(false);
+
+    if (!hostNode->GetTitleBarMaskNode()) {
+        auto maskNode = FrameNode::CreateFrameNode(
+            "TitleBarMask", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        ViewAbstract::SetHitTestMode(AceType::RawPtr(maskNode), HitTestMode::HTMNONE);
+        maskNode->GetRenderContext()->UpdateZIndex(SCROLL_EFFECT_TITLEBAR_ZINDEX - 1);
+        hostNode->SetTitleBarMaskNode(maskNode);
+        hostNode->AddChild(maskNode);
+    }
+
+    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto themeScopeId = hostNode->GetThemeScopeId();
+    auto tokenTheme = TokenThemeStorage::GetInstance()->GetTheme(themeScopeId);
+    if (!tokenTheme) {
+        tokenTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    }
+    CHECK_NULL_VOID(tokenTheme);
+    auto tokenColors = tokenTheme->Colors();
+    CHECK_NULL_VOID(tokenColors);
+
+    auto shadowBlurRadius = static_cast<double>(Dimension(40.0, DimensionUnit::VP).ConvertToPx());
+    auto shadowSpreadRadius = static_cast<double>(Dimension(0.0, DimensionUnit::VP).ConvertToPx());
+    auto shadowOffsetY = static_cast<float>(Dimension(4.0, DimensionUnit::VP).ConvertToPx());
+
+    auto pipelineContext = hostNode->GetContext();
+    bool isDarkMode = pipelineContext && pipelineContext->GetColorMode() == ColorMode::DARK;
+
+    std::vector<std::pair<float, float>> linearGradientBlurFractionStops;
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+        linearGradientBlurFractionStops = {
+            {1.0f, 0.0f}, {0.99764f, 0.450f}, {0.99010f, 0.478f}, {0.97627f, 0.508f},
+            {0.95574f, 0.536f}, {0.92808f, 0.566f}, {0.89108f, 0.594f}, {0.84375f, 0.624f},
+            {0.78547f, 0.652f}, {0.71344f, 0.682f}, {0.63048f, 0.710f}, {0.53513f, 0.740f},
+            {0.43280f, 0.768f}, {0.33021f, 0.798f}, {0.23699f, 0.826f}, {0.15625f, 0.854f},
+            {0.09588f, 0.884f}, {0.05096f, 0.914f}, {0.02089f, 0.942f}, {0.00491f, 0.972f},
+            {0.0f, 1.0f}
+        };
+    } else {
+        linearGradientBlurFractionStops = {
+            {1.0f, 0.0f}, {1.0f, 0.3f}, {0.99764f, 0.335f}, {0.99010f, 0.370f},
+            {0.97627f, 0.405f}, {0.95574f, 0.440f}, {0.92808f, 0.475f},
+            {0.89108f, 0.510f}, {0.84375f, 0.545f}, {0.78547f, 0.580f},
+            {0.71344f, 0.615f}, {0.63048f, 0.650f}, {0.53513f, 0.685f},
+            {0.43280f, 0.720f}, {0.33021f, 0.755f}, {0.23699f, 0.790f},
+            {0.15625f, 0.825f}, {0.09588f, 0.860f}, {0.05096f, 0.895f},
+            {0.02089f, 0.930f}, {0.00491f, 0.965f}, {0.0f, 1.0f}
+        };
+    }
+    auto originalGradientBlurPara = LinearGradientBlurPara(
+        Dimension(0.0, DimensionUnit::VP), linearGradientBlurFractionStops, GradientDirection::BOTTOM);
+    auto scrollEffectGradientBlurPara = LinearGradientBlurPara(
+        Dimension(12.0, DimensionUnit::VP), linearGradientBlurFractionStops, GradientDirection::BOTTOM);
+
+    if (scrollEffectType == ScrollEffectType::COMMON_BLUR ||
+        scrollEffectType == ScrollEffectType::GRADUAL_BLUR) {
+        NavigationTitleBarStyle originalBgStyle {
+            .titleColor = scrollEffectType == ScrollEffectType::GRADUAL_BLUR
+                ? tokenColors->FontOnPrimary() : tokenColors->FontPrimary(),
+            .buttonTextColor = tokenColors->FontPrimary(),
+            .subTitleColor = scrollEffectType == ScrollEffectType::GRADUAL_BLUR
+                ? tokenColors->FontOnSecondary() : tokenColors->FontSecondary(),
+            .iconColor = scrollEffectType == ScrollEffectType::GRADUAL_BLUR
+                ? tokenColors->IconOnPrimary() : tokenColors->IconPrimary(),
+            .iconBackgroundStyle {
+                .backgroundColor = tokenColors->CompBackgroundTertiary(),
+                .opacity = 1.0,
+            },
+            .backgroundStyle {
+                .backgroundColor = tokenColors->CompBackgroundGray(),
+                .brightness = 0,
+                .blurRadius = Dimension(0.0),
+                .opacity = 0.0,
+                .offset = scrollEffectType == ScrollEffectType::GRADUAL_BLUR
+                    ? Dimension(56.0, DimensionUnit::VP) : Dimension::FromString("8vp"),
+                .linearGradientBlur = originalGradientBlurPara
+            },
+            .titleShadow = std::vector<Shadow>{ Shadow(
+                  shadowBlurRadius, shadowSpreadRadius, Offset(0, shadowOffsetY),
+                  tokenColors->CompBackgroundGray().ChangeOpacity(
+                      scrollEffectType == ScrollEffectType::COMMON_BLUR ? 0.0f
+                      : (isDarkMode ? 0.2f : 0.8f))) },
+            .subTitleShadow = std::vector<Shadow>{ Shadow(
+                  shadowBlurRadius, shadowSpreadRadius, Offset(0, shadowOffsetY),
+                  tokenColors->CompBackgroundGray().ChangeOpacity(
+                      scrollEffectType == ScrollEffectType::COMMON_BLUR ? 0.0f
+                      : (isDarkMode ? 0.2f : 0.8f))) }
+        };
+        titleBarPattern->SetOriginalTitleBarBgStyle(originalBgStyle);
+        NavigationTitleBarStyle scrollEffectBgStyle {
+            .titleColor = tokenColors->FontPrimary(),
+            .buttonTextColor = tokenColors->FontPrimary(),
+            .subTitleColor = tokenColors->FontSecondary(),
+            .iconColor = tokenColors->IconPrimary(),
+            .iconBackgroundStyle {
+                .backgroundColor = tokenColors->CompBackgroundTertiary(),
+                .opacity = 1.0,
+            },
+            .backgroundStyle {
+                .backgroundColor = tokenColors->CompBackgroundGray(),
+                .brightness = 0,
+                .blurRadius = Dimension(12.0, DimensionUnit::VP),
+                .opacity = isDarkMode ? 0.4 : 0.8,
+                .offset = Dimension::FromString("8vp"),
+                .linearGradientBlur = scrollEffectGradientBlurPara
+            },
+            .titleShadow = std::vector<Shadow>{ Shadow(
+                  shadowBlurRadius, shadowSpreadRadius, Offset(0, shadowOffsetY),
+                  tokenColors->CompBackgroundGray().ChangeOpacity(isDarkMode ? 0.2f : 0.8f)) },
+            .subTitleShadow = std::vector<Shadow>{ Shadow(
+                  shadowBlurRadius, shadowSpreadRadius, Offset(0, shadowOffsetY),
+                  tokenColors->CompBackgroundGray().ChangeOpacity(isDarkMode ? 0.2f : 0.8f)) }
+        };
+        titleBarPattern->SetScrollEffectTitleBarBgStyle(scrollEffectBgStyle);
+    }
+    UpdateTitleBarOptions(currentScrollOffset_);
+}
+
+void NavDestinationPatternBase::ParseScrollOffsetValue(const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto titlebarOptions = titleBarPattern->GetTitleBarOptions();
+    auto scrollEffectOptionsOpt = titlebarOptions.bgOptions.scrollEffectOptions;
+    if (!scrollEffectOptionsOpt.has_value()) {
+        return;
+    }
+
+    float startOffset = scrollEffectOptionsOpt->blurEffectiveStartOffset.has_value()
+                            ? scrollEffectOptionsOpt->blurEffectiveStartOffset->ConvertToPx()
+                            : 0.0f;
+    float endOffset = scrollEffectOptionsOpt->blurEffectiveEndOffset.has_value()
+                          ? scrollEffectOptionsOpt->blurEffectiveEndOffset->ConvertToPx()
+                          : 0.0f;
+
+    AdjustScrollOffsetForTitleMode(titleBarNode, startOffset, endOffset);
+
+    if (!scrollEffectOptionsOpt->blurEffectiveEndOffset.has_value() || LessNotEqual(endOffset, startOffset)) {
+        auto scrollEffectType = scrollEffectOptionsOpt.value().scrollEffectType;
+        if (scrollEffectType == ScrollEffectType::COMMON_BLUR) {
+            endOffset = startOffset + static_cast<float>(COMMON_BLUR_OFFSET.ConvertToPx());
+        } else {
+            endOffset = startOffset + static_cast<float>(GRADUAL_BLUR_OFFSET.ConvertToPx());
+        }
+    }
+
+    titleBarPattern->SetParseStartOffset(Dimension(startOffset, DimensionUnit::PX));
+    titleBarPattern->SetParseEndOffset(Dimension(endOffset, DimensionUnit::PX));
+}
+
+RefPtr<FrameNode> NavDestinationPatternBase::GetTitleBarMaskFrameNode()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_RETURN(hostNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(hostNode->GetTitleBarMaskNode());
+}
+
+void NavDestinationPatternBase::OnContentScrollUpdate(double offset, double currentOffset)
+{
+    currentScrollOffset_ = currentOffset;
+    UpdateTitleBarOptions(static_cast<float>(currentScrollOffset_));
 }
 
 } // namespace OHOS::Ace::NG

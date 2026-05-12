@@ -66,6 +66,7 @@ public:
         value->propControlButtonStyle_ = CloneControlButtonStyle();
         value->propDividerStyle_ = CloneDividerStyle();
         value->propMinContentWidth_ = CloneMinContentWidth();
+        value->propShowSideBarWithGesture_ = CloneShowSideBarWithGesture();
         return value;
     }
 
@@ -83,6 +84,7 @@ public:
         ResetControlButtonStyle();
         ResetDividerStyle();
         ResetMinContentWidth();
+        ResetShowSideBarWithGesture();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -120,8 +122,13 @@ public:
         auto maxSideBarWidth = propMaxSideBarWidth_.value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
         auto sideBarPosition = propSideBarPosition_.value_or(SideBarPosition::START);
         auto minContentWidth = propMinContentWidth_.value_or(DEFAULT_MIN_CONTENT_WIDTH);
-        json->PutExtAttr("type", type == SideBarContainerType::EMBED ?
-            "SideBarContainerType.Embed" : "SideBarContainerType.OVERLAY", filter);
+        if (type == SideBarContainerType::EMBED) {
+            json->PutExtAttr("type", "SideBarContainerType.Embed", filter);
+        } else if (type == SideBarContainerType::DISPLACE) {
+            json->PutExtAttr("type", "SideBarContainerType.DISPLACE", filter);
+        } else {
+            json->PutExtAttr("type", "SideBarContainerType.OVERLAY", filter);
+        }
         json->PutExtAttr("showSideBar", propShowSideBar_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("showControlButton", propShowControlButton_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("sideBarWidth", std::to_string(sideBarWidth.Value()).c_str(), filter);
@@ -131,6 +138,8 @@ public:
         json->PutExtAttr("sideBarPosition",
             sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End", filter);
         json->PutExtAttr("minContentWidth", std::to_string(minContentWidth.Value()).c_str(), filter);
+        json->PutExtAttr("showSideBarWithGesture",
+            propShowSideBarWithGesture_.value_or(true) ? "true" : "false", filter);
 
         // divider
         Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
@@ -184,6 +193,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoHide, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideBarPosition, SideBarPosition, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinContentWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowSideBarWithGesture, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(ControlButtonStyle, ControlButtonStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ControlButtonStyle, ControlButtonWidth, Dimension, PROPERTY_UPDATE_MEASURE);

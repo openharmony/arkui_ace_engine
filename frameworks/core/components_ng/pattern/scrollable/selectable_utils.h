@@ -22,11 +22,13 @@
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT SelectableUtils final : public Singleton<SelectableUtils> {
 public:
+    static RefPtr<FrameNode> FindItemParentNode(const RefPtr<FrameNode>& frameNode);
     static bool IsSelectableItem(const RefPtr<FrameNode>& frameNode);
     static bool IsSelectedItemNode(const RefPtr<FrameNode>& frameNode);
     static std::optional<int32_t> GetBadgeNumber(const RefPtr<FrameNode>& frameNode);
     static std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems(const RefPtr<FrameNode>& frameNode);
     static bool IsGatherSelectedItemsAnimationEnabled(const RefPtr<FrameNode>& frameNode);
+    static bool IsDefaultMultiSelectStyleEnabled(const RefPtr<FrameNode>& frameNode);
     static void BindContextMenu(FrameNode* frameNode);
 
     ACE_FORCE_EXPORT void PublishMenuStatus(bool isShowing, const RefPtr<FrameNode>& menuNode);

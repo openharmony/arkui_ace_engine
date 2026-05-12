@@ -67,6 +67,7 @@ public:
     void GetVelocityY(const JSCallbackInfo& args);
     void GetModifierKeyState(const JSCallbackInfo& args);
     void ExecuteDropAnimation(const JSCallbackInfo& args);
+    void ExecuteFollowHandMorphDropAnimation(const JSCallbackInfo& args);
     void GetVelocity(const JSCallbackInfo& args);
     void SetData(const JSCallbackInfo& args);
     void GetData(const JSCallbackInfo& args);
@@ -76,6 +77,8 @@ public:
     void GetPreviewRect(const JSCallbackInfo& args);
     void SetUseCustomDropAnimation(const JSCallbackInfo& args);
     void GetUseCustomDropAnimation(const JSCallbackInfo& args);
+    void SetDragAnimationType(const JSCallbackInfo& args);
+    void GetDragAnimationType(const JSCallbackInfo& args);
     void SetDragInfo(const JSCallbackInfo& args);
     void GetDragInfo(const JSCallbackInfo& args);
     void SetDragBehavior(const JSCallbackInfo& args);

@@ -99,6 +99,11 @@ constexpr int32_t TEST_END_YEAR = 2030;
 constexpr int32_t TEST_END_MONTH = 12;
 constexpr int32_t TEST_END_DAY = 31;
 constexpr int32_t TEST_NODE_ID = 1;
+constexpr int32_t SHIFT_DISTANCE_FOR_COLUMN_JUMP = 30;
+constexpr double PREVIOUS_Y_LAST_FOR_UPWARD_DRAG = 50.0;
+constexpr double OFFSET_Y_FOR_UPWARD_DRAG_END = 0.0;
+constexpr int32_t INDEX_ONE_FOR_MIN_BOUNDARY_SCROLL = 1;
+constexpr int32_t DRAG_OFFSET_FOR_MIN_BOUNDARY_JUMP = 50;
 
 RefPtr<UINode> FindNodeByTag(const RefPtr<UINode>& uiNode, const std::string& tag)
 {
@@ -1613,6 +1618,138 @@ HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateColumnChildPositionHapticStopMinBound001
+ * @tc.desc: When jump scroll leaves a non-zero remainder at the minimum index and further move is invalid,
+ *             haptic controller Stop should be invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionHapticStopMinBound001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode_->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto rowLayout = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(rowLayout, nullptr);
+    rowLayout->UpdateCanLoop(false);
+
+    const uint32_t showCount = columnPattern_->GetShowCount();
+    ASSERT_GE(showCount, 1U);
+    const uint32_t midIndex = showCount / 2U;
+    uint32_t fillCount = showCount;
+    if (midIndex + 1U > fillCount) {
+        fillCount = midIndex + 1U;
+    }
+    columnPattern_->optionProperties_.clear();
+    for (uint32_t i = 0; i < fillCount; ++i) {
+        PickerOptionProperty opt;
+        opt.prevDistance = static_cast<float>(SHIFT_DISTANCE_FOR_COLUMN_JUMP);
+        opt.nextDistance = static_cast<float>(SHIFT_DISTANCE_FOR_COLUMN_JUMP);
+        columnPattern_->optionProperties_.emplace_back(opt);
+    }
+    ASSERT_GT(columnPattern_->optionProperties_.size(), midIndex);
+
+    columnPattern_->SetCurrentIndex(INDEX_ONE_FOR_MIN_BOUNDARY_SCROLL);
+    columnPattern_->yLast_ = 0.0;
+    columnPattern_->yOffset_ = 0.0;
+    auto mockHaptic = std::make_shared<MockPickerAudioHapticImpl>();
+    columnPattern_->hapticController_ = mockHaptic;
+
+    columnPattern_->UpdateColumnChildPosition(static_cast<double>(DRAG_OFFSET_FOR_MIN_BOUNDARY_JUMP));
+
+    EXPECT_GE(mockHaptic->stopCallCount_, 1);
+}
+
+/**
+ * @tc.name: UpdateColumnChildPositionHapticStopMaxBound001
+ * @tc.desc: When jump scroll leaves a non-zero remainder at the maximum index and further move is invalid,
+ *             haptic controller Stop should be invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionHapticStopMaxBound001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode_->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto rowLayout = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(rowLayout, nullptr);
+    rowLayout->UpdateCanLoop(false);
+
+    const uint32_t totalOptions = columnPattern_->GetOptionCount();
+    ASSERT_GE(totalOptions, 3U);
+    const uint32_t nearMaxIndex = totalOptions - 2U;
+    const uint32_t showCount = columnPattern_->GetShowCount();
+    ASSERT_GE(showCount, 1U);
+    const uint32_t midIndex = showCount / 2U;
+    uint32_t fillCount = showCount;
+    if (midIndex + 1U > fillCount) {
+        fillCount = midIndex + 1U;
+    }
+    columnPattern_->optionProperties_.clear();
+    for (uint32_t i = 0; i < fillCount; ++i) {
+        PickerOptionProperty opt;
+        opt.prevDistance = static_cast<float>(SHIFT_DISTANCE_FOR_COLUMN_JUMP);
+        opt.nextDistance = static_cast<float>(SHIFT_DISTANCE_FOR_COLUMN_JUMP);
+        columnPattern_->optionProperties_.emplace_back(opt);
+    }
+    ASSERT_GT(columnPattern_->optionProperties_.size(), midIndex);
+
+    columnPattern_->SetCurrentIndex(static_cast<int32_t>(nearMaxIndex));
+    columnPattern_->yLast_ = PREVIOUS_Y_LAST_FOR_UPWARD_DRAG;
+    columnPattern_->yOffset_ = 0.0;
+    auto mockHaptic = std::make_shared<MockPickerAudioHapticImpl>();
+    columnPattern_->hapticController_ = mockHaptic;
+
+    columnPattern_->UpdateColumnChildPosition(OFFSET_Y_FOR_UPWARD_DRAG_END);
+
+    EXPECT_GE(mockHaptic->stopCallCount_, 1);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest003
+ * @tc.desc: When haptic feedback is disabled while a haptic controller exists, Stop should be invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, InitHapticControllerTest003, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode_->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    auto mockHaptic = std::make_shared<MockPickerAudioHapticImpl>();
+    columnPattern_->hapticController_ = mockHaptic;
+    datePickerPattern->isEnableHaptic_ = false;
+    columnPattern_->InitHapticController(columnNode_);
+
+    EXPECT_GE(mockHaptic->stopCallCount_, 1);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: DatePickerDialogViewTest002
  * @tc.desc: Test DatePickerDialogView::Show for api16.
  * @tc.type: FUNC
@@ -1857,6 +1994,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest002, Tes
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
     EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":0,"month":6,"day":15})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1884,6 +2026,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest003, Tes
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
     EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":2024,"month":0,"day":15})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1910,6 +2057,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest004, Tes
     int32_t day = 0;
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
+    EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":2024,"month":6,"day":0})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
     EXPECT_FALSE(result);
 }
 

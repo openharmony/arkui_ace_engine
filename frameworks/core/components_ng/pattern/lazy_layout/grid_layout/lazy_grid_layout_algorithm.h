@@ -66,8 +66,6 @@ public:
     int32_t LanesFloor(int32_t index) const;
     int32_t LanesCeil(int32_t index) const;
 
-    static std::optional<ViewPosReference> GetReferencePos(RefPtr<FrameNode> frameNode);
-
     // DynamicLayout 支持
     void SetDynamicLayout(bool isDynamic) { isDynamicLayout_ = isDynamic; }
 

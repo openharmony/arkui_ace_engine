@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "interfaces/native/native_error_message_macros.h"
 #include "native_interface.h"
 #include "node/animate_impl.h"
 #include "node/dialog_model.h"
@@ -218,6 +219,11 @@ ArkUI_NativeGestureAPI_2 gestureImpl_2 = {
     OHOS::Ace::GestureModel::SetGestureInterrupterToNodeWithUserData,  
 };
 
+ArkUI_NativeGestureAPI_3 gestureImpl_3 = {
+    &gestureImpl_2,
+    OHOS::Ace::GestureModel::SetGestureParallelTo,
+};
+
 ArkUI_NativeAnimateAPI_1 animateImpl_1 = {
     OHOS::Ace::AnimateModel::AnimateTo,
     OHOS::Ace::AnimateModel::KeyframeAnimateTo,
@@ -276,6 +282,8 @@ void* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t ver
                     return &gestureImpl_1;
                 case 2:
                     return &gestureImpl_2;
+                case 3:
+                    return &gestureImpl_3;
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "fail to get gesture api family, version is incorrect: %{public}d", version);
@@ -302,6 +310,7 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
     if (!OHOS::Ace::NodeModel::InitialFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family, impl library is not found", type);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl library is not found");
         return nullptr;
     }
     switch (type) {
@@ -329,6 +338,8 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
                 return &gestureImpl_1;
             } else if (strcmp(structName, "ArkUI_NativeGestureAPI_2") == 0) {
                 return &gestureImpl_2;
+            } else if (strcmp(structName, "ArkUI_NativeGestureAPI_3") == 0) {
+                return &gestureImpl_3;
             }
             break;
         case ARKUI_NATIVE_ANIMATE:

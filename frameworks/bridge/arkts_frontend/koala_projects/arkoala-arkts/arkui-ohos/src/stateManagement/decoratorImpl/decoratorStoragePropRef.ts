@@ -31,7 +31,7 @@ import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { getObservedObject, isDynamicObject } from '../../component/interop';
+import { getObservedObject, isDynamicObject } from '@component/interop';
 import { ObservedObjectRegistry, StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 export class StoragePropRefDecoratedVariable<T>
@@ -84,7 +84,6 @@ export class StoragePropRefDecoratedVariable<T>
         const shouldAddRef = this.shouldAddRef();
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
-            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
             uiUtils.builtinContainersAddRefAnyKey(value);
             this.selfTrack();
             ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();
@@ -118,13 +117,13 @@ export class StoragePropRefDecoratedVariable<T>
 
     removePrivateWatchSubscription(): void {
         const value = this.backing_.get(false);
-        if (!(value && typeof value === 'object')) {
+        if (!(value instanceof Object)) {
             return;
         }
         // @Observed/WrappedArray/Map/Set/Date
         if (StateMgmtTool.isIObservedObject(value as NullableObject) && value instanceof IWatchSubscriberRegister) {
             (value as Object as IWatchSubscriberRegister).removeWatchSubscriber(this.storageWatchFunc_!.id());
-        } else if (UIUtilsImpl.isProxied(value)) {
+        } else if (UIUtilsImpl.isProxied(value as Object)) {
             const handler = StateMgmtTool.tryGetHandler(value as Object);
             (handler as IWatchSubscriberRegister).removeWatchSubscriber(this.storageWatchFunc_!.id());
         }
@@ -132,13 +131,13 @@ export class StoragePropRefDecoratedVariable<T>
 
     addPrivateWatchSubscription(): void {
         const value = this.backing_.get(false);
-        if (!(value && typeof value === 'object')) {
+        if (!(value instanceof Object)) {
             return;
         }
         // @Observed/WrappedArray/Map/Set/Date
         if (StateMgmtTool.isIObservedObject(value as NullableObject) && value instanceof IWatchSubscriberRegister) {
             (value as Object as IWatchSubscriberRegister).addWatchSubscriber(this.storageWatchFunc_!.id());
-        } else if (UIUtilsImpl.isProxied(value)) {
+        } else if (UIUtilsImpl.isProxied(value as Object)) {
             const handler = StateMgmtTool.tryGetHandler(value as Object);
             (handler as IWatchSubscriberRegister).addWatchSubscriber(this.storageWatchFunc_!.id());
         }

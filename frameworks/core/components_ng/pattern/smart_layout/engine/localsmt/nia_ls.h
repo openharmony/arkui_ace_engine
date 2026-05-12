@@ -176,6 +176,21 @@ struct TmpInfo {
     std::vector<RationNum> presetValuesInfo;
     bool currentBuildUnsat = true;
 };
+struct VectorHash {
+    int numLit;
+    explicit VectorHash(int n) : numLit(n) {}
+    size_t operator()(const std::vector<int>& v) const noexcept
+    {
+        size_t h = v.size();
+
+        for (int x : v) {
+            size_t mapped = static_cast<size_t>(x + numLit);
+            h = h * 91138233u + mapped;
+        }
+
+        return h;
+    }
+};
 
 class LsSolver {
 public:
@@ -233,7 +248,7 @@ public:
     double cutoff;
     std::mt19937 mt;
     const uint64_t additionalLen;
-    std::map<std::string, uint64_t> name2var; // map the name of a variable to its index
+    std::unordered_map<std::string, uint64_t> name2var; // map the name of a variable to its index
     std::vector<RationNum> preValue1; // the 1st pre-set value of a var, if the var is in the form of (a==0 OR a==1)
     std::vector<RationNum> preValue2;
     bool useSwapFromFromSmallWeight;
@@ -262,18 +277,18 @@ public:
     void SplitString(std::string& inString, std::vector<std::string>& strVec, std::string pattern);
     void BuildLits(std::string& inString);
     void BuildInstanceOriginal(const std::vector<std::string>& unitLits = {});
-    void BuildInstanceNewWidth(int bcWidth, int bcHight = 0, int radius = 0);
+    void BuildInstanceNewWidth(int bcWidth, int bcHeight = 0, int radius = 0);
     void FindBound(bool& modified);
-    void PrepareClauseForResolution(const std::vector<std::vector<int>> clauseVec);
+    void PrepareClauseForResolution(const std::vector<std::vector<int>>& clauseVec);
     void FindUnitEqualLits(std::vector<int>& unitEqualLitsAll);
     void ConvertInequalToEqual(bool& modified);
     void PrepareFaCoffs();
     void PrepareClsLitIdxForVars();
-    void PreprocessOnSize(RationNum bcWidth = RationNum(0), RationNum bcHight = RationNum(0),
+    void PreprocessOnSize(RationNum bcWidth = RationNum(0), RationNum bcHeight = RationNum(0),
         RationNum radius = RationNum(0)); // find out the equalilty among vars, and reset the vars and lits
-    void FixValue(RationNum& bcWidth, RationNum& bcHight, RationNum& radius);
+    void FixValue(RationNum& bcWidth, RationNum& bcHeight, RationNum& radius);
     int bcWidthIdx = 0;
-    int bcHightIdx = 0;
+    int bcHeightIdx = 0;
     int bcXIdx = 0;
     int bcYIdx = 0;
     bool HasSameCoffVars(const Lit* l1, const Lit* l2);
@@ -458,7 +473,7 @@ public:
     ~LsSolver();
     // update increment
     bool UpdatePresetValue(uint64_t varIdx, RationNum newPreVal);
-    bool UpdateWidthHight(RationNum newPreValWidth, RationNum newPreValHight);
+    bool UpdateWidthHeight(RationNum newPreValWidth, RationNum newPreValHeight);
 
 private:
     void ClearPreparedClauseLitVarState();
@@ -468,6 +483,10 @@ private:
     void DeduplicateClauseIdxs(Variable& currentVar);
     void BuildPreparedVarLitRelations();
     void CollectUniqueLiteralIdxs(Variable& currentVar);
+    void CollectLitAppearInfo(std::vector<int>& appearCount,
+        std::vector<int>& appearClauseIdx, std::vector<char>& hasNegativeAppear);
+    void ConvertSingleAppearIneqToEq(const std::vector<int>& appearCount,
+        const std::vector<int>& appearClauseIdx, const std::vector<char>& hasNegativeAppear, bool& modified);
 };
 } // namespace niaOverall
 

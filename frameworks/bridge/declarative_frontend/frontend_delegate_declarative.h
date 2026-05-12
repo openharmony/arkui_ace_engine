@@ -425,6 +425,8 @@ public:
 
     std::string GetPagePathByUrl(const std::string& url) const;
 
+    bool IsPageInStack(const RefPtr<NG::FrameNode>& page) const;
+
     void* CreateDynamicPage(int32_t pageId, const std::string& url, const std::string& params, bool recoverable);
 
 protected:

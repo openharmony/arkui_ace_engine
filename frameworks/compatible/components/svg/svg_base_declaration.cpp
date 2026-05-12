@@ -15,6 +15,8 @@
 
 #include "compatible/components/svg/svg_base_declaration.h"
 
+#include <regex>
+
 #include "base/utils/string_utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 

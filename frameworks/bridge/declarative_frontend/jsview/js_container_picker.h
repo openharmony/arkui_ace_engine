@@ -31,6 +31,8 @@ public:
     static void OnChange(const JSCallbackInfo& info);
     static void OnScrollStop(const JSCallbackInfo& info);
     static void SetSelectionIndicator(const JSCallbackInfo& info);
+    static void SetDisplayedItemCount(const JSCallbackInfo& info);
+    static void SetItemHeight(const JSCallbackInfo& info);
 
 private:
     static JSRef<JSVal> ParseSelectedIndex(const JSCallbackInfo& info);

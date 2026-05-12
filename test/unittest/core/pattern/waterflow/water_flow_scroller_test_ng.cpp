@@ -16,7 +16,9 @@
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
 
+#include "core/animation/velocity_motion.h"
 #include "core/components/common/layout/constants.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
@@ -790,6 +792,33 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Focus003
+ * @tc.desc: Test GetScrollOffsetAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, Focus003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    auto scrollOffsetAbility = pattern_->GetScrollOffsetAbility(true);
+    ASSERT_TRUE(scrollOffsetAbility.scrollFunc);
+    EXPECT_EQ(scrollOffsetAbility.axis, Axis::VERTICAL);
+    EXPECT_EQ(scrollOffsetAbility.contentStartOffset, pattern_->layoutInfo_->contentStartOffset_);
+    EXPECT_EQ(scrollOffsetAbility.contentEndOffset, pattern_->layoutInfo_->contentEndOffset_);
+
+    EXPECT_TRUE(scrollOffsetAbility.scrollFunc(-ITEM_MAIN_SIZE));
+    FlushUITasks();
+    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+
+    EXPECT_TRUE(scrollOffsetAbility.scrollFunc(ITEM_MAIN_SIZE));
+    FlushUITasks();
+    EXPECT_TRUE(Position(0));
+}
+
+/**
  * @tc.name: ReachStart001
  * @tc.desc: Test ReachStart
  * @tc.type: FUNC
@@ -837,8 +866,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollPage002, TestSize.Level1)
 
     MockAnimationManager::GetInstance().SetTicks(1);
     pattern_->ScrollPage(false, true);
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
+    TickToFinish();
     const auto& info = pattern_->layoutInfo_;
     EXPECT_EQ(info->Offset(), -800.0f);
 
@@ -848,17 +876,15 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollPage002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 29), 600.0f);
 
     pattern_->ScrollPage(true, true, AccessibilityScrollType::SCROLL_HALF);
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
+    TickToFinish();
     EXPECT_EQ(GetChildY(frameNode_, 25), 400.0f);
 
     ScrollableController controller;
     controller.SetScrollPattern(pattern_);
     controller.ScrollPage(true, true);
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(info->startIndex_, 17);
-    EXPECT_EQ(info->endIndex_, 21);
+    TickToFinish();
+    EXPECT_EQ(info->startIndex_, 22);
+    EXPECT_EQ(info->endIndex_, 27);
 }
 
 /**

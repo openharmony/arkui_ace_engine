@@ -157,6 +157,11 @@ public:
         pickerItemHeight_ = height;
     }
 
+    void SetDisplayedItemCount(int32_t count)
+    {
+        displayedItemCount_ = count;
+    }
+
     float GetTopPadding() const
     {
         return topPadding_;
@@ -230,6 +235,7 @@ private:
     float pickerItemHeight_ = 0.0f;
     float pickerDefaultHeight_ = 0.0f;
     float pickerHeightBeforeRotate_ = 0.0f;
+    int32_t displayedItemCount_ = 7;
 
     bool crossMatchChild_ = false;
     bool measured_ = false;

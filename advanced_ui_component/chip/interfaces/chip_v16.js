@@ -21,7 +21,6 @@ const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const mediaquery = requireNapi('mediaquery');
 const deviceInfo = requireNapi('deviceInfo');
-
 export var ChipSize;
 (function (ChipSize) {
   ChipSize['NORMAL'] = 'NORMAL';
@@ -123,7 +122,7 @@ export function Chip(options, parent = null) {
             undefined,
             elmtId,
             () => {},
-            { page: 'components/src/main/ets/components/Chip.ets', line: 283, col: 3 }
+            { page: 'components/src/main/ets/components/Chip.ets', line: 284, col: 3 }
           );
           ViewPU.create(componentCall);
           let paramsLambda = () => {
@@ -271,6 +270,13 @@ export class ChipComponent extends ViewPU {
           id: -1,
           type: 10002,
           params: ['sys.float.chip_small_font_size'],
+          bundleName: '__harDefaultBundleName__',
+          moduleName: '__harDefaultModuleName__',
+        },
+        adaptiveItemFontSize: {
+          id: -1,
+          type: 10002,
+          params: ['sys.float.Caption_M'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
@@ -1246,7 +1252,6 @@ export class ChipComponent extends ViewPU {
       Button.direction(this.chipDirection);
       Button.backgroundColor(this.getChipBackgroundColor());
       Button.systemMaterial(this.getBackgroundSystemMaterial());
-      Button.useEffect(this.inGroup ? true : undefined);
       Button.borderWidth(this.getChipNodeBorderWidth());
       Button.borderColor(this.getChipNodeBorderColor());
       Button.borderRadius(this.getChipBorderRadius());
@@ -1949,9 +1954,9 @@ export class ChipComponent extends ViewPU {
       return this.chipFontSize;
     }
     if (this.isSmallChipSize()) {
-      return this.theme.label.smallFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.smallFontSize;
     }
-    return this.theme.label.normalFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.normalFontSize;
   }
   getChipText() {
     return this.label?.text ?? '';
@@ -2032,7 +2037,7 @@ export class ChipComponent extends ViewPU {
       : this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
   }
   getBackgroundSystemMaterial() {
-    if (deviceInfo.sdkApiVersion < 26 || this.inGroup) {
+    if (deviceInfo.sdkApiVersion < 26) {
       return undefined;
     }
     if (this.isChipActivated()) {

@@ -33,6 +33,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -1232,7 +1234,8 @@ HWTEST_F(NavigationGroupNodeTestNg, UpdateLastStandardIndexTest001, TestSize.Lev
     ASSERT_NE(stack, nullptr);
     stack->Add("test", navDestination);
 
-    navigation->UpdateLastStandardIndex();
+    bool hasFullScreenOverlay = false;
+    navigation->UpdateLastStandardIndex(hasFullScreenOverlay);
     EXPECT_EQ(navigation->GetLastStandardIndex(), 0);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
@@ -1264,7 +1267,7 @@ HWTEST_F(NavigationGroupNodeTestNg, CleanHideNodesTest001, TestSize.Level1)
 
 /*
  * @tc.name: SetUseHomeDestinatoinTest001
- * @tc.desc: Test SetUseHomeDestinatoin and GetUseHomeDestination
+ * @tc.desc: Test SetUseHomeDestination and GetUseHomeDestination
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationGroupNodeTestNg, SetUseHomeDestinatoinTest001, TestSize.Level1)
@@ -1277,12 +1280,12 @@ HWTEST_F(NavigationGroupNodeTestNg, SetUseHomeDestinatoinTest001, TestSize.Level
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigation, nullptr);
 
-    navigation->SetUseHomeDestinatoin(true);
+    navigation->SetUseHomeDestination(true);
     auto useHomeDestination = navigation->GetUseHomeDestination();
     ASSERT_TRUE(useHomeDestination.has_value());
     EXPECT_TRUE(useHomeDestination.value());
 
-    navigation->SetUseHomeDestinatoin(false);
+    navigation->SetUseHomeDestination(false);
     useHomeDestination = navigation->GetUseHomeDestination();
     ASSERT_TRUE(useHomeDestination.has_value());
     EXPECT_FALSE(useHomeDestination.value());

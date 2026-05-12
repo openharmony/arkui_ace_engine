@@ -590,6 +590,39 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MeasureOnJumpLastItemWithEmptyMargins001
+ * @tc.desc: Test SegmentedLayout::MeasureOnJump LAST_ITEM when margins_ is cleared after section change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, MeasureOnJumpLastItemWithEmptyMargins001, TestSize.Level1)
+{
+    SetUpConfig2();
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
+    auto& info = algo->info_;
+
+    info->footerIndex_ = 0;
+    info->align_ = ScrollAlign::END;
+    info->jumpIndex_ = 100;
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    ASSERT_FALSE(info->endPosArray_.empty());
+    ASSERT_FALSE(info->itemInfos_.empty());
+    
+
+    // Simulate the transient state after InitSegments clears margins_ and before layout reinitializes it.
+    info->margins_.clear();
+    ASSERT_TRUE(info->margins_.empty());
+
+    info->currentOffset_ = 0.0f;
+    info->align_ = ScrollAlign::END;
+    info->jumpIndex_ = LAST_ITEM;
+    algo->MeasureOnJump(LAST_ITEM);
+
+    EXPECT_LT(info->currentOffset_, 0.0f);
+}
+
+/**
  * @tc.name: Reset001
  * @tc.desc: Test SegmentedLayout::CheckReset.
  * @tc.type: FUNC
@@ -1692,6 +1725,24 @@ HWTEST_F(WaterFlowSegmentTest, EstimateTotalHeight001, TestSize.Level1)
     childCnt = static_cast<int32_t>(info->itemInfos_.size());
     EXPECT_EQ(info->endIndex_, 59);
     EXPECT_EQ(info->EstimateTotalHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
+}
+
+/**
+ * @tc.name: GetMaxMainHeightWithEmptyMargins001
+ * @tc.desc: Test GetMaxMainHeight when endPosArray_ remains valid but margins_ is cleared after section change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, GetMaxMainHeightWithEmptyMargins001, TestSize.Level1)
+{
+    auto info = AceType::MakeRefPtr<WaterFlowLayoutInfo>();
+    info->axis_ = Axis::VERTICAL;
+    info->endPosArray_.emplace_back(200.0f, 1);
+
+    // Simulate a retained cached end position while section margins are waiting to be rebuilt.
+    ASSERT_FALSE(info->endPosArray_.empty());
+    ASSERT_TRUE(info->margins_.empty());
+
+    EXPECT_FLOAT_EQ(info->GetMaxMainHeight(), 200.0f);
 }
 
 /**

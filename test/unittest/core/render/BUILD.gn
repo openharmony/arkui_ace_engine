@@ -19,6 +19,7 @@ ace_unittest("painter_test") {
 
   sources = [
     "border_image_painter_test_ng.cpp",
+    "circle_painter_hdr_runtime_test_ng.cpp",
     "circle_painter_test_ng.cpp",
     "drawing_prop_convertor_test_ng.cpp",
     "ellipse_painter_test_ng.cpp",

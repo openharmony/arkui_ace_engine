@@ -233,6 +233,10 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 {
     CHECK_NULL_VOID(imageObj);
     imageObj_ = imageObj->Clone();
+    // Sync isSvg state from ImageObject's content-based detection back to context's src_
+    if (imageObj->GetSourceInfo().IsSvg() && !src_.IsSvg()) {
+        src_.SetIsSvgByContent(true);
+    }
     if (measureFinish_) {
         OnDataReadyOnCompleteCallBack();
     } else {

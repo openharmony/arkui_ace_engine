@@ -25,6 +25,7 @@
 #define private public
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -2137,5 +2138,337 @@ HWTEST_F(ButtonFunctionTestTwoNg, HandleShadowStyle002, TestSize.Level1)
     ASSERT_NE(buttonTheme, nullptr);
     EXPECT_NO_FATAL_FAILURE(
         pattern->HandleShadowStyle(ButtonStyleMode::NORMAL, ShadowStyle::OuterDefaultLG, renderContext, buttonTheme));
+}
+
+/**
+ * @tc.name: SetFontColor001
+ * @tc.desc: Test ButtonModelNG::SetFontColor sets correct properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetFontColor001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode, nullptr);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    Color testColor = Color::RED;
+    buttonModelNG.SetFontColor(testColor);
+    auto fontColor = layoutProperty->GetFontColor();
+    EXPECT_TRUE(fontColor.has_value());
+    EXPECT_EQ(fontColor.value(), testColor);
+    auto fontColorFlagByUser = layoutProperty->GetFontColorFlagByUser();
+    EXPECT_TRUE(fontColorFlagByUser.has_value());
+    EXPECT_TRUE(fontColorFlagByUser.value());
+    auto foregroundColor = renderContext->GetForegroundColor();
+    EXPECT_EQ(foregroundColor, testColor);
+}
+
+/**
+ * @tc.name: SetFontColorDefault001
+ * @tc.desc: Test ButtonModelNG::SetFontColorDefault sets correct properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetFontColorDefault001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode, nullptr);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    Color testColor = Color::BLUE;
+    buttonModelNG.SetFontColorDefault(testColor);
+    auto fontColor = layoutProperty->GetFontColor();
+    EXPECT_TRUE(fontColor.has_value());
+    EXPECT_EQ(fontColor.value(), testColor);
+    auto fontColorFlagByUser = layoutProperty->GetFontColorFlagByUser();
+    EXPECT_TRUE(fontColorFlagByUser.has_value());
+    EXPECT_FALSE(fontColorFlagByUser.value());
+    auto foregroundColor = renderContext->GetForegroundColor();
+    EXPECT_EQ(foregroundColor, testColor);
+}
+
+/**
+ * @tc.name: SetFontColorDefault002
+ * @tc.desc: Test ButtonModelNG::SetFontColorDefault vs SetFontColor for FontColorFlagByUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetFontColorDefault002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG1;
+    buttonModelNG1.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode1, nullptr);
+    auto layoutProperty1 = buttonNode1->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty1, nullptr);
+    buttonModelNG1.SetFontColor(Color::RED);
+    EXPECT_TRUE(layoutProperty1->GetFontColorFlagByUser().value_or(false));
+
+    ButtonModelNG buttonModelNG2;
+    buttonModelNG2.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode2 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode2, nullptr);
+    auto layoutProperty2 = buttonNode2->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty2, nullptr);
+    buttonModelNG2.SetFontColorDefault(Color::BLUE);
+    EXPECT_FALSE(layoutProperty2->GetFontColorFlagByUser().value_or(true));
+}
+
+/**
+ * @tc.name: BackgroundColor001
+ * @tc.desc: Test ButtonModelNG::BackgroundColor sets correct properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, BackgroundColor001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode, nullptr);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    Color testColor = Color::GREEN;
+    buttonModelNG.BackgroundColor(testColor, true);
+
+    EXPECT_TRUE(layoutProperty->GetIsUserSetBackgroundColor());
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_EQ(bgColor, testColor);
+}
+
+/**
+ * @tc.name: BackgroundColor002
+ * @tc.desc: Test ButtonModelNG::BackgroundColor vs BackgroundColorDefault
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, BackgroundColor002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG1;
+    buttonModelNG1.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode1, nullptr);
+    auto layoutProperty1 = buttonNode1->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty1, nullptr);
+    buttonModelNG1.BackgroundColor(Color::RED, true);
+    EXPECT_TRUE(layoutProperty1->GetIsUserSetBackgroundColor());
+
+    ButtonModelNG buttonModelNG2;
+    buttonModelNG2.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode2 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode2, nullptr);
+    auto layoutProperty2 = buttonNode2->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty2, nullptr);
+    buttonModelNG2.BackgroundColorDefault(Color::BLUE);
+    EXPECT_FALSE(layoutProperty2->GetIsUserSetBackgroundColor());
+}
+
+/**
+ * @tc.name: UpdateBackgroundColorFlagByUser001
+ * @tc.desc: Test ButtonLayoutProperty::UpdateBackgroundColorFlagByUser when value changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, UpdateBackgroundColorFlagByUser001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode, nullptr);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    EXPECT_FALSE(layoutProperty->GetIsUserSetBackgroundColor());
+
+    layoutProperty->UpdateBackgroundColorFlagByUser(true);
+    EXPECT_TRUE(layoutProperty->GetIsUserSetBackgroundColor());
+
+    layoutProperty->UpdateBackgroundColorFlagByUser(false);
+    EXPECT_FALSE(layoutProperty->GetIsUserSetBackgroundColor());
+}
+
+/**
+ * @tc.name: UpdateBackgroundColorFlagByUser002
+ * @tc.desc: Test ButtonLayoutProperty::UpdateBackgroundColorFlagByUser when value remains the same
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, UpdateBackgroundColorFlagByUser002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto buttonNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonNode, nullptr);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    EXPECT_FALSE(layoutProperty->GetIsUserSetBackgroundColor());
+
+    layoutProperty->UpdateBackgroundColorFlagByUser(false);
+    EXPECT_FALSE(layoutProperty->GetIsUserSetBackgroundColor());
+
+    layoutProperty->UpdateBackgroundColorFlagByUser(true);
+    EXPECT_TRUE(layoutProperty->GetIsUserSetBackgroundColor());
+
+    layoutProperty->UpdateBackgroundColorFlagByUser(true);
+    EXPECT_TRUE(layoutProperty->GetIsUserSetBackgroundColor());
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: Test ButtonPattern::OnThemeScopeUpdate when FontColorFlagByUser is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create button frame node.
+     * @tc.expected: step1. Button node is not null.
+     */
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. Call OnThemeScopeUpdate.
+     * @tc.expected: step3. OnThemeScopeUpdate returns true because FontColorFlagByUser is false.
+     */
+    auto result = pattern->OnThemeScopeUpdate(0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate002
+ * @tc.desc: Test ButtonPattern::OnThemeScopeUpdate when FontColorFlagByUser is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create button frame node and set FontColor by user.
+     * @tc.expected: step1. Button node is not null.
+     */
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    buttonModelNG.SetFontColor(Color::RED);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. Get layout property and verify FontColorFlagByUser is true.
+     * @tc.expected: step2. FontColorFlagByUser is true.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetFontColorFlagByUser().value_or(false));
+
+    /**
+     * @tc.steps: step3. Call OnThemeScopeUpdate.
+     * @tc.expected: step3. OnThemeScopeUpdate returns true because IsUserSetBackgroundColor is false.
+     */
+    auto result = pattern->OnThemeScopeUpdate(0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate003
+ * @tc.desc: Test ButtonPattern::OnThemeScopeUpdate updates text color when FontColorFlagByUser is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create button frame node with label.
+     * @tc.expected: step1. Button node is not null.
+     */
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. Get text node and its properties.
+     * @tc.expected: step2. Text node and properties are not null.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnThemeScopeUpdate.
+     * @tc.expected: step3. OnThemeScopeUpdate returns true and updates text color.
+     */
+    auto result = pattern->OnThemeScopeUpdate(0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate004
+ * @tc.desc: Test ButtonPattern::OnThemeScopeUpdate does not update text color when FontColorFlagByUser is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create button frame node and set FontColor by user.
+     * @tc.expected: step1. Button node is not null.
+     */
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    Color userColor = Color::RED;
+    buttonModelNG.SetFontColor(userColor);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. Get text node and its render context.
+     * @tc.expected: step2. Text node and render context are not null.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. Record current foreground color.
+     * @tc.expected: step3. Foreground color is user color.
+     */
+    auto foregroundColorBefore = textRenderContext->GetForegroundColor();
+    EXPECT_EQ(foregroundColorBefore, userColor);
+
+    /**
+     * @tc.steps: step4. Call OnThemeScopeUpdate.
+     * @tc.expected: step4. OnThemeScopeUpdate returns true.
+     */
+    auto result = pattern->OnThemeScopeUpdate(0);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step5. Verify text color is not changed (still user color).
+     * @tc.expected: step5. Foreground color remains user color.
+     */
+    auto foregroundColorAfter = textRenderContext->GetForegroundColor();
+    EXPECT_EQ(foregroundColorAfter, userColor);
 }
 } // namespace OHOS::Ace::NG

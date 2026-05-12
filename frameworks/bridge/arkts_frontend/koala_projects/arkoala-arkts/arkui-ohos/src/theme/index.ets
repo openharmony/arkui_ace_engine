@@ -299,11 +299,13 @@ export class BrandColors {
 
 export function makeRecordfromObj(obj: Object): Record<string, Any> {
     let record: Record<string, Any> = {};
-    const keys = Object.keys(obj);
-    const values = Object.values(obj);
-    keys.forEach((key: string, index: int) => {
-        record[key] = values[index];
-    })
+    const cls = Class.of(obj);
+    for (let field of reflect.getInstanceFieldsRecursive(cls)) {
+        record[field.getName()] = field.getValue(obj);
+    }
+    for (let getter of reflect.getInstanceGettersRecursive(cls)) {
+        record[getter.getName().substring('%%get-'.length)] = getter.invoke(obj);
+    }
     return record;
 }
 

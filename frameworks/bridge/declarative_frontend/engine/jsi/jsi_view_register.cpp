@@ -58,6 +58,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
+#include "core/components/common/properties/placement.h"
 namespace OHOS::Ace::Framework {
 namespace {
 static constexpr uint32_t PARAM_SIZE_ONE   = 1;
@@ -598,7 +599,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     if (secondArg->IsArray(vm)) {
         auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);
-        auto len = arrayVal->Length(vm);
+        auto len = NG::ArkTSUtils::GetArrayLength(vm, arrayVal);
         std::vector<std::string> arrayResult;
         for (auto i = 0U; i < len; i++) {
             auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
@@ -756,7 +757,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
             return panda::StringRef::NewFromUtf8(vm, "");
         }
         auto arrayVal = panda::Local<panda::ArrayRef>(firstArg);
-        auto len = arrayVal->Length(vm);
+        auto len = NG::ArkTSUtils::GetArrayLength(vm, arrayVal);
         for (auto i = 0U; i < len; i++) {
             auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
             if (!subItemVal->IsString(vm)) {
@@ -828,7 +829,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
             return panda::StringRef::NewFromUtf8(vm, "");
         }
         auto arrayVal = panda::Local<panda::ArrayRef>(thirdArg);
-        auto len = arrayVal->Length(vm);
+        auto len = NG::ArkTSUtils::GetArrayLength(vm, arrayVal);
         for (auto i = 0U; i < len; i++) {
             auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
             if (!subItemVal->IsString(vm)) {

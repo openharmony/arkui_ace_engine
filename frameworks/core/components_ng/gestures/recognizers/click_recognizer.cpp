@@ -17,6 +17,7 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
@@ -154,9 +155,19 @@ ClickInfo ClickRecognizer::GetClickInfo()
     }
     ClickInfo info(touchPoint.id);
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = touchPoint.GetOffset();
     TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = touchPoint.postEventNodeId,
+                                           globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalDisplayLocation(touchPoint.GetGlobalDisplayOffset());
@@ -258,6 +269,8 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
+        : static_cast<int32_t>(MouseAction::PRESS);
     extraInfo_ = "ETF: " + std::to_string(equalsToFingers_) + " CFP: " + std::to_string(currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -358,6 +371,8 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
+        : static_cast<int32_t>(MouseAction::RELEASE);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
         --currentTouchPointsNum_;
@@ -412,6 +427,8 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::MOVE)
+        : static_cast<int32_t>(MouseAction::MOVE);
     if (currentFingers_ < fingers_) {
         return;
     }
@@ -436,6 +453,8 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
+        : static_cast<int32_t>(MouseAction::CANCEL);
     extraInfo_ += "cancel received.";
     if (IsRefereeFinished()) {
         return;
@@ -576,6 +595,9 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayY(touchPoint.screenY);
 #endif
     info.SetPointerEvent(lastPointEvent_);
+    if (!lastPointEvent_) {
+        info.SetLastAction(lastAction_);
+    }
     info.SetClickPointerEvent(touchPoint.GetTouchEventPointerEvent());
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     info.SetInputEventType(inputEventType_);
@@ -604,7 +626,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
     }
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::TAP);
+#endif
 }
 
 void ClickRecognizer::PlayClickSoundEffect()

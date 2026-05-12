@@ -31,6 +31,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model_static.h"
 #include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
@@ -139,6 +140,14 @@ public:
 
 private:
     std::vector<std::pair<Color, Color>> color;
+};
+
+class EmptyDataPanelThemeWrapper : public DataPanelThemeWrapper {
+    DECLARE_ACE_TYPE(EmptyDataPanelThemeWrapper, DataPanelThemeWrapper);
+
+public:
+    EmptyDataPanelThemeWrapper() = default;
+    ~EmptyDataPanelThemeWrapper() override = default;
 };
 
 void DataPanelTestNg::SetUpTestCase()
@@ -2786,11 +2795,11 @@ HWTEST_F(DataPanelTestNg, DataPanelModelNGTest026, TestSize.Level0)
 
     /**
      * @tc.steps: step2. Set ConfigChangePerform to false, then call SetTrackBackgroundSetByUser(false).
-     * @tc.expected: step2. TrackBackgroundSetByUser remains true (no change).
+     * @tc.expected: step2. TrackBackgroundSetByUser is updated to false.
      */
     OHOS::Ace::g_isConfigChangePerform = false;
     dataPanel.SetTrackBackgroundSetByUser(false);
-    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), true);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), false);
 }
 
 /**
@@ -2904,11 +2913,11 @@ HWTEST_F(DataPanelTestNg, DataPanelModelNGTest029, TestSize.Level0)
     /**
      * @tc.steps: step3. Set ConfigChangePerform to false, then call static SetTrackBackgroundSetByUser with frameNode
      * and false.
-     * @tc.expected: step3. TrackBackgroundSetByUser remains true (no change).
+     * @tc.expected: step3. TrackBackgroundSetByUser is updated to false.
      */
     OHOS::Ace::g_isConfigChangePerform = false;
     DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, false);
-    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), true);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), false);
 
     /**
      * @tc.steps: step4. Call static SetTrackBackgroundSetByUser with nullptr frameNode.
@@ -2917,7 +2926,87 @@ HWTEST_F(DataPanelTestNg, DataPanelModelNGTest029, TestSize.Level0)
     OHOS::Ace::g_isConfigChangePerform = true;
     DataPanelModelNG::SetTrackBackgroundSetByUser(nullptr, true);
     // Just verify no crash
-    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), true);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), false);
+}
+
+/**
+ * @tc.name: DataPanelPaintPropertyTrackBackgroundSetByUser001
+ * @tc.desc: Test TrackBackgroundSetByUser is preserved by Clone and cleared by Reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTrackBackgroundSetByUser001, TestSize.Level0)
+{
+    auto paintProperty = AceType::MakeRefPtr<DataPanelPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    paintProperty->UpdateTrackBackground(TRUE_COLOR);
+    paintProperty->UpdateTrackBackgroundSetByUser(true);
+
+    auto cloned = AceType::DynamicCast<DataPanelPaintProperty>(paintProperty->Clone());
+    ASSERT_NE(cloned, nullptr);
+    EXPECT_EQ(cloned->GetTrackBackgroundValue(), TRUE_COLOR);
+    EXPECT_TRUE(cloned->GetTrackBackgroundSetByUser().value_or(false));
+
+    paintProperty->Reset();
+    EXPECT_FALSE(paintProperty->GetTrackBackground().has_value());
+    EXPECT_FALSE(paintProperty->GetTrackBackgroundSetByUser().has_value());
+}
+
+/**
+ * @tc.name: DataPanelModelStaticTrackBackgroundSetByUser001
+ * @tc.desc: Test static data panel track background updates TrackBackgroundSetByUser together.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelModelStaticTrackBackgroundSetByUser001, TestSize.Level0)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    DataPanelModelStatic dataPanel;
+    auto frameNode = dataPanel.CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    dataPanel.SetTrackBackground(AceType::RawPtr(frameNode), TRUE_COLOR);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundValue(), TRUE_COLOR);
+    EXPECT_TRUE(paintProperty->GetTrackBackgroundSetByUser().value_or(false));
+
+    dataPanel.SetTrackBackground(AceType::RawPtr(frameNode), std::nullopt);
+    EXPECT_FALSE(paintProperty->GetTrackBackground().has_value());
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), false);
+}
+
+/**
+ * @tc.name: DataPanelModifierThemeColorFallback001
+ * @tc.desc: Test DataPanelModifier falls back to progress color when theme percentage colors are empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelModifierThemeColorFallback001, TestSize.Level0)
+{
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(26);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<EmptyDataPanelThemeWrapper>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(dataPanelTheme));
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "data-panel", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DataPanelPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->AttachContext(MockPipelineContext::GetCurrent().GetRawPtr());
+
+    DataPanelModifier dataPanelModifier(pattern);
+    dataPanelModifier.SetMax(20.0f);
+    dataPanelModifier.SetValues(SINGLE_VALUES);
+    EXPECT_EQ(dataPanelModifier.GetValuesCount(), 1.0f);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

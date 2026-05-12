@@ -36,17 +36,17 @@ void SheetWrapperPattern::RegisterSheetMaskColorRes(const RefPtr<FrameNode>& mas
             // If parse failed, use the default value in sheetTheme.
             Color maskColor;
             bool result = ResourceParseUtils::ParseResColor(resObj, maskColor);
+            auto sheetNode = sheetNodeWK.Upgrade();
+            CHECK_NULL_VOID(sheetNode);
             if (!result) {
                 auto pipeline = PipelineBase::GetCurrentContext();
                 CHECK_NULL_VOID(pipeline);
-                auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+                auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
                 CHECK_NULL_VOID(sheetTheme);
                 maskColor = sheetTheme->GetMaskColor();
             }
 
             // Update sheetStyle.
-            auto sheetNode = sheetNodeWK.Upgrade();
-            CHECK_NULL_VOID(sheetNode);
             auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
             auto sheetStyle = layoutProperty->GetSheetStyleValue();
             NG::SheetStyle sheetStyleVal = sheetStyle;

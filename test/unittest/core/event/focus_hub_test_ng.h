@@ -33,6 +33,7 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/event/focus_event_handler.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"

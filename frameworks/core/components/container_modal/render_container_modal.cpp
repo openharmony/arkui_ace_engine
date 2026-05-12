@@ -14,6 +14,7 @@
  */
 
 #include "core/components/container_modal/render_container_modal.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include "base/log/event_report.h"
 #include "core/components/common/layout/grid_system_manager.h"

@@ -62,6 +62,8 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/common/ace_engine.h"
+#include "core/components/theme/icon_theme.h"
+#include "core/components/common/properties/placement.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -19,37 +19,31 @@
 #include <functional>
 #include <list>
 #include <mutex>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
+#include "ui/base/modifier_property.h"
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
-#include "base/utils/macros.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "base/view_data/ace_auto_fill_type.h"
-#include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/event/input_event_hub.h"
-#include "core/components_ng/event/target_component.h"
+#include "core/components_ng/event/gesture_event_hub_types.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/render/render_context.h"
+#include "core/components_ng/render/opinc_type.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/accessibility/accessibility_utils.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -62,6 +56,34 @@ class FrameNode;
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+enum class DragEventAction;
+enum class AceAutoFillType : int32_t;
+enum class AceAutoFillTriggerType : int32_t;
+struct MouseEvent;
+struct TouchEvent;
+class TouchEventInfo;
+
+namespace NG {
+class FrameNode;
+}
+
+template<>
+inline NG::FrameNode* AceType::DynamicCast<NG::FrameNode, NG::UINode>(NG::UINode* rawPtr)
+{
+    if (rawPtr && rawPtr->GetNodeType() == NG::UINodeType::FRAME_NODE) {
+        return reinterpret_cast<NG::FrameNode*>(rawPtr);
+    }
+    return nullptr;
+}
+
+template<>
+inline const NG::FrameNode* AceType::DynamicCast<NG::FrameNode, NG::UINode>(const NG::UINode* rawPtr)
+{
+    if (rawPtr && rawPtr->GetNodeType() == NG::UINodeType::FRAME_NODE) {
+        return reinterpret_cast<const NG::FrameNode*>(rawPtr);
+    }
+    return nullptr;
+}
 }
 
 namespace OHOS::Ace::Recorder {
@@ -78,8 +100,20 @@ struct DirtySwapConfig;
 class DragDropRelatedConfigurations;
 class ExtensionHandler;
 class PaintWrapper;
+class GestureEventHub;
+class InputEventHub;
+class TargetComponent;
+struct DragPreviewOption;
+struct OptionsAfterApplied;
 class SamplerManager;
+class SmartGestureProperty;
 class AccessibilityProperty;
+class SamplerManager;
+class RenderContext;
+class DrawModifier;
+class NodeAnimatablePropertyBase;
+class CustomAnimatableArithmetic;
+class ContentModifier;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -106,6 +140,41 @@ enum {
 
 enum class LpxAttribute {
     LPX_FONT_SIZE = 0,
+    LPX_ICON_SIZE,
+    LPX_ICON_BORDER_RADIUS,
+    LPX_TOP_LEFT_BORDER_RADIUS,
+    LPX_TOP_RIGHT_BORDER_RADIUS,
+    LPX_BOTTOM_LEFT_BORDER_RADIUS,
+    LPX_BOTTOM_RIGHT_BORDER_RADIUS,
+    LPX_SYMBOL_ICON_SIZE,
+    LPX_BACKGROUND_BORDER_WIDTH,
+    LPX_BACKGROUND_BORDER_RADIUS,
+    LPX_LEFT_BACKGROUND_PADDING,
+    LPX_RIGHT_BACKGROUND_PADDING,
+    LPX_TOP_BACKGROUND_PADDING,
+    LPX_BOTTOM_BACKGROUND_PADDING,
+    LPX_BACKGROUND_PADDING,
+    LPX_TEXT_ICON_SPACE,
+    LPX_ADAPT_MAX_FONT_SIZE,
+    LPX_ADAPT_MIN_FONT_SIZE,
+    LPX_RESPONSE_REGION_WIDTH,
+    LPX_RESPONSE_REGION_HEIGHT,
+    LPX_RESPONSE_REGION_X,
+    LPX_RESPONSE_REGION_Y,
+    LPX_RESPONSE_REGION_LIST_WIDTH,
+    LPX_RESPONSE_REGION_LIST_HEIGHT,
+    LPX_RESPONSE_REGION_LIST_X,
+    LPX_RESPONSE_REGION_LIST_Y,
+    LPX_MOUSE_RESPONSE_REGION_WIDTH,
+    LPX_MOUSE_RESPONSE_REGION_HEIGHT,
+    LPX_MOUSE_RESPONSE_REGION_X,
+    LPX_MOUSE_RESPONSE_REGION_Y,
+    LPX_FOCUS_BOX_MARGIN,
+    LPX_FOCUS_BOX_STROKE,
+    LPX_BORDER_IMAGE_LEFT,
+    LPX_BORDER_IMAGE_RIGHT,
+    LPX_BORDER_IMAGE_TOP,
+    LPX_BORDER_IMAGE_BOTTOM,
     ALWAYS
 };
 
@@ -191,16 +260,7 @@ public:
     void UpdateGeometryTransition() override;
 
     struct ZIndexComparator {
-        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
-        {
-            auto left = weakLeft.Upgrade();
-            auto right = weakRight.Upgrade();
-            if (left && right) {
-                return left->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE) <
-                       right->GetRenderContext()->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
-            }
-            return false;
-        }
+        bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const;
     };
 
     const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& GetFrameChildren() const
@@ -333,10 +393,16 @@ public:
     template<typename T>
     T* GetPatternPtr() const
     {
-        if (ACE_UNLIKELY(pattern_ && SystemProperties::DetectAceObjTypeConvertion() && !DynamicCast<T>(pattern_))) {
+        if (ACE_UNLIKELY(pattern_ && ShouldDetectAceObjTypeConvertion() && !DynamicCast<T>(pattern_))) {
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]", GetPatternTypeName(), T::TypeName());
         }
         return reinterpret_cast<T*>(RawPtr(pattern_));
+    }
+
+    template<typename T>
+    T* GetRawPattern() const
+    {
+        return DynamicCast<T>(pattern_.GetRawPtr());
     }
 
     template<typename T>
@@ -346,15 +412,17 @@ public:
     }
 
     template<typename T>
-    RefPtr<T> GetAccessibilityProperty() const
-    {
-        return DynamicCast<T>(const_cast<FrameNode*>(this)->GetOrCreateAccessibilityProperty());
-    }
+    ACE_FORCE_EXPORT
+    RefPtr<T> GetAccessibilityProperty() const;
+
+    RefPtr<SmartGestureProperty> GetOrCreateSmartGestureProperty();
+
+    RefPtr<SmartGestureProperty> GetSmartGestureProperty() const;
 
     template<typename T>
     T* GetLayoutPropertyPtr() const
     {
-        if (ACE_UNLIKELY(layoutProperty_ && SystemProperties::DetectAceObjTypeConvertion() &&
+        if (ACE_UNLIKELY(layoutProperty_ && ShouldDetectAceObjTypeConvertion() &&
                          !DynamicCast<T>(layoutProperty_))) {
             LOGF_ABORT(
                 "bad type conversion: from [%{public}s] to [%{public}s]", GetLayoutPropertyTypeName(), T::TypeName());
@@ -372,7 +440,7 @@ public:
     T* GetPaintPropertyPtr() const
     {
         if (ACE_UNLIKELY(
-                paintProperty_ && SystemProperties::DetectAceObjTypeConvertion() && !DynamicCast<T>(paintProperty_))) {
+                paintProperty_ && ShouldDetectAceObjTypeConvertion() && !DynamicCast<T>(paintProperty_))) {
             LOGF_ABORT(
                 "bad type conversion: from [%{public}s] to [%{public}s]", GetPaintPropertyTypeName(), T::TypeName());
         }
@@ -393,18 +461,15 @@ public:
         return DynamicCast<T>(eventHub_);
     }
 
-    RefPtr<GestureEventHub> GetOrCreateGestureEventHub()
+    template<typename T>
+    RefPtr<T> GetEventHubOnly()
     {
-        CreateEventHubInner();
-        CHECK_NULL_RETURN(eventHub_, nullptr);
-        return eventHub_->GetOrCreateGestureEventHub();
+        return DynamicCast<T>(eventHub_);
     }
 
-    RefPtr<InputEventHub> GetOrCreateInputEventHub()
-    {
-        CreateEventHubInner();
-        return eventHub_->GetOrCreateInputEventHub();
-    }
+    RefPtr<GestureEventHub> GetOrCreateGestureEventHub();
+
+    RefPtr<InputEventHub> GetOrCreateInputEventHub();
 
     RefPtr<FocusHub> GetOrCreateFocusHub();
     const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
@@ -670,12 +735,7 @@ public:
         isLayoutDirtyMarked_ = marked;
     }
 
-    bool HasPositionProp() const
-    {
-        CHECK_NULL_RETURN(renderContext_, false);
-        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
-               renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
-    }
+    bool HasPositionProp() const;
 
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
@@ -986,10 +1046,7 @@ public:
         accessibilityVisible_ = accessibilityVisible;
     }
 
-    bool IsOutOfLayout() const override
-    {
-        return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
-    }
+    bool IsOutOfLayout() const override;
     void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
@@ -1041,7 +1098,9 @@ public:
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler);
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap,
-        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType);
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap,
+        AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false);
 
     int32_t GetUiExtensionId();
@@ -1450,12 +1509,7 @@ public:
     }
     bool IsVerticalScrollable() const;
 
-    void UpdateOcclusionCullingStatus(bool enable)
-    {
-        if (renderContext_) {
-            renderContext_->UpdateOcclusionCullingStatus(enable);
-        }
-    }
+    void UpdateOcclusionCullingStatus(bool enable);
 
     const RefPtr<FrameNode>& GetCornerMarkNode() const
     {
@@ -1498,6 +1552,7 @@ protected:
     void OnCollectRemoved() override;
 
 private:
+    static bool ShouldDetectAceObjTypeConvertion();
     void DispatchAreaChangeWithThrottle(const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
     void GetCurrentAreaChangeInfo(
         uint64_t nanoTimestamp, int32_t areaChangeMinDepth, RectF& currFrameRect, OffsetF& currParentOffsetToWindow);
@@ -1530,6 +1585,7 @@ private:
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
+    void UpdateSmartGestureSelectedState();
 
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
@@ -1636,9 +1692,9 @@ private:
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
 
-    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
+    const CacheVisibleRectResult& GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
-    CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
+    const CacheVisibleRectResult& CalculateCacheVisibleRect(const CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
         uint64_t timestamp);
 
@@ -1691,10 +1747,11 @@ private:
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
+    RefPtr<SmartGestureProperty> smartGestureProperty_;
     bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
-    RefPtr<RenderContext> renderContext_ = RenderContext::Create();
+    RefPtr<RenderContext> renderContext_;
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
     RefPtr<FocusHub> focusHub_;
@@ -1856,6 +1913,156 @@ private:
     std::unordered_set<LpxAttribute> lpxAttributes_;
     uint64_t ownedTid_ = 0;
 };
+
+class BadgeAccessibilityProperty;
+class BubbleAccessibilityProperty;
+class CheckBoxAccessibilityProperty;
+class CheckBoxGroupAccessibilityProperty;
+class ContainerModalAccessibilityProperty;
+class DatePickerAccessibilityProperty;
+class DatePickerColumnAccessibilityProperty;
+class DialogAccessibilityProperty;
+class GaugeAccessibilityProperty;
+class GridAccessibilityProperty;
+class GridItemAccessibilityProperty;
+class IndexerAccessibilityProperty;
+class ListAccessibilityProperty;
+class ListItemAccessibilityProperty;
+class ListItemGroupAccessibilityProperty;
+class MarqueeAccessibilityProperty;
+class MenuAccessibilityProperty;
+class MenuItemAccessibilityProperty;
+class MenuItemGroupAccessibilityProperty;
+class ProgressAccessibilityProperty;
+class RadioAccessibilityProperty;
+class RatingAccessibilityProperty;
+class RefreshAccessibilityProperty;
+class RichEditorAccessibilityProperty;
+class ScrollAccessibilityProperty;
+class ScrollBarAccessibilityProperty;
+class SecurityComponentAccessibilityProperty;
+class SelectAccessibilityProperty;
+class SliderAccessibilityProperty;
+class StepperAccessibilityProperty;
+class SwiperAccessibilityProperty;
+class SwiperIndicatorAccessibilityProperty;
+class SwitchAccessibilityProperty;
+class TabBarAccessibilityProperty;
+class TabBarItemAccessibilityProperty;
+class TextAccessibilityProperty;
+class TextClockAccessibilityProperty;
+class TextFieldAccessibilityProperty;
+class TextPickerAccessibilityProperty;
+class TextPickerRowAccessibilityProperty;
+class TextTimerAccessibilityProperty;
+class TimePickerColumnAccessibilityProperty;
+class TimePickerRowAccessibilityProperty;
+class TitleBarAccessibilityProperty;
+class ToastAccessibilityProperty;
+class ToggleButtonAccessibilityProperty;
+class VideoAccessibilityProperty;
+class WaterFlowAccessibilityProperty;
+class WebAccessibilityProperty;
+// Remove this template method later and return the base class directly.
+// Expand the DynamicCast call at each call site.
+extern template RefPtr<AccessibilityProperty> FrameNode::GetAccessibilityProperty<AccessibilityProperty>() const;
+extern template RefPtr<BadgeAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<BadgeAccessibilityProperty>() const;
+extern template RefPtr<BubbleAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<BubbleAccessibilityProperty>() const;
+extern template RefPtr<CheckBoxAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<CheckBoxAccessibilityProperty>() const;
+extern template RefPtr<CheckBoxGroupAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>() const;
+extern template RefPtr<ContainerModalAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ContainerModalAccessibilityProperty>() const;
+extern template RefPtr<DatePickerAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<DatePickerAccessibilityProperty>() const;
+extern template RefPtr<DatePickerColumnAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>() const;
+extern template RefPtr<DialogAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
+extern template RefPtr<GaugeAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
+extern template RefPtr<GridAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
+extern template RefPtr<GridItemAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;
+extern template RefPtr<IndexerAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<IndexerAccessibilityProperty>() const;
+extern template RefPtr<ListAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ListAccessibilityProperty>() const;
+extern template RefPtr<ListItemAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ListItemAccessibilityProperty>() const;
+extern template RefPtr<ListItemGroupAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ListItemGroupAccessibilityProperty>() const;
+extern template RefPtr<MarqueeAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<MarqueeAccessibilityProperty>() const;
+extern template RefPtr<MenuAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<MenuAccessibilityProperty>() const;
+extern template RefPtr<MenuItemAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<MenuItemAccessibilityProperty>() const;
+extern template RefPtr<MenuItemGroupAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<MenuItemGroupAccessibilityProperty>() const;
+extern template RefPtr<ProgressAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ProgressAccessibilityProperty>() const;
+extern template RefPtr<RadioAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<RadioAccessibilityProperty>() const;
+extern template RefPtr<RatingAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<RatingAccessibilityProperty>() const;
+extern template RefPtr<RefreshAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
+extern template RefPtr<RichEditorAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<RichEditorAccessibilityProperty>() const;
+extern template RefPtr<ScrollAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ScrollAccessibilityProperty>() const;
+extern template RefPtr<ScrollBarAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ScrollBarAccessibilityProperty>() const;
+extern template RefPtr<SecurityComponentAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SecurityComponentAccessibilityProperty>() const;
+extern template RefPtr<SelectAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SelectAccessibilityProperty>() const;
+extern template RefPtr<SliderAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SliderAccessibilityProperty>() const;
+extern template RefPtr<StepperAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<StepperAccessibilityProperty>() const;
+extern template RefPtr<SwiperAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SwiperAccessibilityProperty>() const;
+extern template RefPtr<SwiperIndicatorAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>() const;
+extern template RefPtr<SwitchAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SwitchAccessibilityProperty>() const;
+extern template RefPtr<TabBarAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TabBarAccessibilityProperty>() const;
+extern template RefPtr<TabBarItemAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TabBarItemAccessibilityProperty>() const;
+extern template RefPtr<TextAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextAccessibilityProperty>() const;
+extern template RefPtr<TextClockAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextClockAccessibilityProperty>() const;
+extern template RefPtr<TextFieldAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextFieldAccessibilityProperty>() const;
+extern template RefPtr<TextPickerAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextPickerAccessibilityProperty>() const;
+extern template RefPtr<TextPickerRowAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextPickerRowAccessibilityProperty>() const;
+extern template RefPtr<TextTimerAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TextTimerAccessibilityProperty>() const;
+extern template RefPtr<TimePickerColumnAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>() const;
+extern template RefPtr<TimePickerRowAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TimePickerRowAccessibilityProperty>() const;
+extern template RefPtr<TitleBarAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<TitleBarAccessibilityProperty>() const;
+extern template RefPtr<ToastAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ToastAccessibilityProperty>() const;
+extern template RefPtr<ToggleButtonAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<ToggleButtonAccessibilityProperty>() const;
+extern template RefPtr<VideoAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<VideoAccessibilityProperty>() const;
+extern template RefPtr<WaterFlowAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<WaterFlowAccessibilityProperty>() const;
+extern template RefPtr<WebAccessibilityProperty> FrameNode::GetAccessibilityProperty<WebAccessibilityProperty>() const;
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H

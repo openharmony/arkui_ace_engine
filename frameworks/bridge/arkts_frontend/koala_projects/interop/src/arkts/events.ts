@@ -7,7 +7,7 @@ import { wrapSystemCallback } from "./callback"
 import { KBuffer } from "./NativeBuffer"
 
 const API_KIND_MAX = 100
-const apiEventHandlers = new Array<EventHandler | undefined>(API_KIND_MAX).fill(undefined)
+const apiEventHandlers = Array.create<EventHandler | undefined>(API_KIND_MAX, undefined)
 export type EventHandler = (deserializer: DeserializerBase) => void
 export function registerApiEventHandler(apiKind: int32, handler: EventHandler): void {
     if (apiKind < 0 || apiKind > API_KIND_MAX) {

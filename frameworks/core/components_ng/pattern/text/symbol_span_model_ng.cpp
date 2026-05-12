@@ -24,6 +24,14 @@
         spanNode->Update##name(value);                                                                           \
     } while (false)
 
+#define ACE_RESET_SYMBOL_SPAN_PROPERTY(name)                                                                     \
+    do {                                                                                                         \
+        auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode()); \
+        CHECK_NULL_VOID(spanNode);                                                                               \
+        spanNode->Reset##name();                                                                                 \
+        spanNode->RequestTextFlushDirty();                                                                       \
+    } while (false)
+
 #define ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(name, value, frameNode)                                             \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
@@ -87,6 +95,36 @@ void SymbolSpanModelNG::SetSymbolEffect(const uint32_t effectStrategy)
     ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy);
 }
 
+void SymbolSpanModelNG::SetVariableFontWeight(int32_t value)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(VariableFontWeight, value);
+}
+
+void SymbolSpanModelNG::ResetVariableFontWeight()
+{
+    ACE_RESET_SYMBOL_SPAN_PROPERTY(VariableFontWeight);
+}
+
+void SymbolSpanModelNG::SetEnableVariableFontWeight(bool value)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(EnableVariableFontWeight, value);
+}
+
+void SymbolSpanModelNG::ResetEnableVariableFontWeight()
+{
+    ACE_RESET_SYMBOL_SPAN_PROPERTY(EnableVariableFontWeight);
+}
+
+void SymbolSpanModelNG::SetEnableDeviceFontWeightCategory(bool value)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(EnableDeviceFontWeightCategory, value);
+}
+
+void SymbolSpanModelNG::ResetEnableDeviceFontWeightCategory()
+{
+    ACE_RESET_SYMBOL_SPAN_PROPERTY(EnableDeviceFontWeightCategory);
+}
+
 void SymbolSpanModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
@@ -99,6 +137,48 @@ void SymbolSpanModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateFontWeight(value);
+}
+
+void SymbolSpanModelNG::SetVariableFontWeight(FrameNode* frameNode, int32_t value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateVariableFontWeight(value);
+}
+
+void SymbolSpanModelNG::ResetVariableFontWeight(FrameNode* frameNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->ResetVariableFontWeight();
+}
+
+void SymbolSpanModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateEnableVariableFontWeight(value);
+}
+
+void SymbolSpanModelNG::ResetEnableVariableFontWeight(FrameNode* frameNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->ResetEnableVariableFontWeight();
+}
+
+void SymbolSpanModelNG::SetEnableDeviceFontWeightCategory(FrameNode* frameNode, bool value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateEnableDeviceFontWeightCategory(value);
+}
+
+void SymbolSpanModelNG::ResetEnableDeviceFontWeightCategory(FrameNode* frameNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->ResetEnableDeviceFontWeightCategory();
 }
 
 void SymbolSpanModelNG::SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor)

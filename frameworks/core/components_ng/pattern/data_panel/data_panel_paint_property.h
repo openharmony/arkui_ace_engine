@@ -109,6 +109,7 @@ public:
         paintProperty->propTrackBackground_ = CloneTrackBackground();
         paintProperty->propStrokeWidth_ = CloneStrokeWidth();
         paintProperty->propShadowOption_ = CloneShadowOption();
+        paintProperty->propTrackBackgroundSetByUser_ = CloneTrackBackgroundSetByUser();
         return paintProperty;
     }
 
@@ -123,6 +124,7 @@ public:
         ResetTrackBackground();
         ResetStrokeWidth();
         ResetShadowOption();
+        ResetTrackBackgroundSetByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override

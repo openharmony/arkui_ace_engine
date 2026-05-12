@@ -15,6 +15,8 @@
 
 #include "core/components/indexer/indexer_element.h"
 
+#include "core/event/key_event.h"
+
 namespace OHOS::Ace {
 
 void IndexerElement::PerformBuild()

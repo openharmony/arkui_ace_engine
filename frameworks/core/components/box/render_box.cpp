@@ -14,6 +14,9 @@
  */
 
 #include "core/components/box/render_box.h"
+#include "core/pipeline/container_window_manager.h"
+
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/event_report.h"
 #include "core/components/box/box_component_helper.h"

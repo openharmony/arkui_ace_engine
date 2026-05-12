@@ -14,6 +14,7 @@
  */
 
 #include "core/components/web/web_element.h"
+#include "core/event/key_event.h"
 
 #include "core/components/web/render_web.h"
 #include "core/components/web/web_component.h"

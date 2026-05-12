@@ -29,6 +29,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"

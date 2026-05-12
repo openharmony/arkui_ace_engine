@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_controller.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components/swiper/swiper_controller.h"

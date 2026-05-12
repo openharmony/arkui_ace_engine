@@ -77,6 +77,8 @@ const char JS_REPEAT_ETS_TAG[] = "Repeat";
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
 // js with theme node
 const char JS_WITH_THEME_ETS_TAG[] = "WithTheme";
+// js with env node
+const char JS_WITH_ENV_ETS_TAG[] = "WithEnv";
 // js node slot
 const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
 
@@ -123,6 +125,7 @@ const char INDICATOR_ETS_TAG[] = "IndicatorComponent";
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
 const char TABS_ETS_TAG[] = "Tabs";
+const char TABS_BACKGROUND_MASK_ETS_TAG[] = "BackgroundMask";
 
 // tab content item
 const char TAB_CONTENT_ITEM_COMPONENT_TAG[] = "TabContentItemComponent";
@@ -138,6 +141,7 @@ const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
 const char BAR_ITEM_ETS_TAG[] = "BarItem";
 const char TITLE_BAR_ETS_TAG[] = "TitleBar";
 const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
+const char NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG[] = "NavigationFullScreenOverlay";
 const char TOOL_BAR_ETS_TAG[] = "ToolBar";
 const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
@@ -451,6 +455,9 @@ const char GRID_COL_ETS_TAG[] = "GridCol";
 const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
 const char GRID_ROW_ETS_TAG[] = "GridRow";
 
+// containerReader
+const char CONTAINER_READER_COMPONENT_TAG[] = "ContainerReaderComponent";
+const char CONTAINER_READER_ETS_TAG[] = "ContainerReader";
 // relativeContainer
 const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
 const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
@@ -681,6 +688,9 @@ const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 // UIPickerComponent
 const char CONTAINER_PICKER_ETS_TAG[] = "UIPickerComponent";
 
+// DepthComponent
+const char DEPTH_COMPONENT_ETS_TAG[] = "DepthComponent";
+
 // UndefinedNode
 const char UNDEFINED_NODE_ETS_TAG[] = "";
 
@@ -689,4 +699,10 @@ const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
 
 // Custom
 const char CUSTOM_ETS_TAG[] = "Custom";
+
+// LazyColumnLayout
+const char LAZY_COLUMN_LAYOUT_ETS_TAG[] = "LazyColumnLayout";
+
+// LazyVWaterFlowLayout
+const char LAZY_V_WATERFLOW_LAYOUT_ETS_TAG[] = "LazyVWaterFlowLayout";
 } // namespace OHOS::Ace::V2

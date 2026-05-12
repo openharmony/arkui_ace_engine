@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_surface.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -93,7 +94,7 @@ const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
 const uint32_t TRANSFORM_HINT = 90;
 const uint64_t SURFACE_ID_UINT = 2430951489577;
-TestProperty testProperty;
+TestProperty g_testProperty;
 } // namespace
 
 class XComponentPropertyTestNg : public testing::Test {
@@ -108,9 +109,9 @@ protected:
 void XComponentPropertyTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
-    testProperty.xcId = XCOMPONENT_ID;
-    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
-    testProperty.soPath = XCOMPONENT_SO_PATH;
+    g_testProperty.xcId = XCOMPONENT_ID;
+    g_testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    g_testProperty.soPath = XCOMPONENT_SO_PATH;
 }
 
 void XComponentPropertyTestNg::TearDownTestSuite()
@@ -123,8 +124,8 @@ RefPtr<FrameNode> XComponentPropertyTestNg::CreateXComponentNode(TestProperty& t
     auto xcId = testProperty.xcId;
     auto xcType = testProperty.xcType.value();
     auto libraryName = testProperty.libraryName;
-    auto xcomponentController = std::make_shared<XComponentControllerNG>();
-    XComponentModelNG().Create(xcId, xcType, libraryName, xcomponentController);
+    auto xcomponentControllerNG = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG().Create(xcId, xcType, libraryName, xcomponentControllerNG);
 
     if (testProperty.soPath.has_value()) {
         XComponentModelNG().SetSoPath(testProperty.soPath.value());

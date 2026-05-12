@@ -19,7 +19,7 @@ import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
-export const enum AreaMode {
+export enum AreaMode {
     EL1 = 0,
     EL2 = 1,
     EL3 = 2,
@@ -231,12 +231,6 @@ export class PersistentStorage {
             isSimpleType = true;
         }
         try {
-            if (!isSimpleType && (!toJson || !fromJson)) {
-                StateMgmtConsole.log(
-                    `Object Types for key ${key} requires toJson and fromJson functions to be defined`
-                );
-                return false;
-            }
             const apOpt = PersistentStorage.getOrCreate().map_.get(key, ttype);
             if (apOpt !== undefined) {
                 // persisted property already
@@ -258,9 +252,10 @@ export class PersistentStorage {
                 PersistentStorage.getOrCreate().__readFromDiskSetAndPersist<T>(
                     key,
                     ttype,
+                    defaultValue,
                     isSimpleType,
                     isSimpleType ? undefined : fromJson,
-                    isSimpleType ? undefined : toJson
+                    isSimpleType ? undefined : toJson,
                 )
             ) {
                 return true;
@@ -340,9 +335,10 @@ export class PersistentStorage {
     private __readFromDiskSetAndPersist<T>(
         key: string,
         ttype: Class,
+        defaultValue: T,
         isSimpleType: boolean,
         fromJson?: FromJSONType<T>,
-        toJson?: ToJSONType<T>
+        toJson?: ToJSONType<T>,
     ): boolean {
         // Step 1: Read JSON string from storage
         const jsonString = PersistentStorage.getOrCreate().storage_.get(key);
@@ -360,7 +356,7 @@ export class PersistentStorage {
 
                 // Step 4: persist the property
                 return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, isSimpleType, toJson); // returns true on success
-            } else {
+            } else if (fromJson !== undefined) {
                 // Step 2: Parse JSON string into JsonElement
                 const jsonElement = JSON.parseJsonElement(jsonString);
 
@@ -374,6 +370,12 @@ export class PersistentStorage {
                 AppStorage.setOrCreate(key, value);
 
                 // Step 5: persist the property
+                return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, isSimpleType, toJson); // returns true on success
+            } else {
+                // JSON.parseUpdate attempts to parse the jsonString and merge it with the defaultValue,
+                // providing a fallback to the default value if parsing fails or partial data exists.
+                const value = JSON.parseUpdate<T>(jsonString, defaultValue);
+                AppStorage.setOrCreate(key, value);
                 return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, isSimpleType, toJson); // returns true on success
             }
         } catch (error) {
@@ -405,12 +407,15 @@ export class PersistentStorage {
                     const jsonString = JSON.stringify(newValue);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 } else {
+                    let jsonString: string = '';
                     if (!toJson) {
                         StateMgmtConsole.log(`Object Types for key ${key} requires toJson functions to be defined`);
+                        jsonString = JSON.stringify(newValue);
+                    } else {
+                        const jsonElement = toJson!(newValue);
+                        // convert JsonElement to jsonString
+                        jsonString = JSON.stringifyJsonElement(jsonElement);
                     }
-                    const jsonElement = toJson!(newValue);
-                    // convert JsonElement to jsonString
-                    const jsonString = JSON.stringifyJsonElement(jsonElement);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 }
             } catch (error) {

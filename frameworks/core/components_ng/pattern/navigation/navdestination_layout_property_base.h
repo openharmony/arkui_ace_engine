@@ -77,6 +77,7 @@ public:
         copy->propHideToolBar_ = CloneHideToolBar();
         copy->propIsAnimatedToolBar_ = CloneIsAnimatedToolBar();
         copy->propToolBarTranslateState_ = CloneToolBarTranslateState();
+        copy->propFullScreenOverlay_ = CloneFullScreenOverlay();
         return copy;
     }
 
@@ -90,6 +91,7 @@ public:
         ResetHideToolBar();
         ResetIsAnimatedToolBar();
         ResetToolBarTranslateState();
+        ResetFullScreenOverlay();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
@@ -100,6 +102,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedToolBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarTranslateState, BarTranslateState, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ToolBarTranslateState, BarTranslateState, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FullScreenOverlay, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void UpdateBaseLayoutProperty(const NavDestinationLayoutPropertyBase* layoutProperty)
@@ -113,6 +116,7 @@ protected:
         propHideToolBar_ = layoutProperty->GetHideToolBar();
         propIsAnimatedToolBar_ = layoutProperty->GetIsAnimatedToolBar();
         propToolBarTranslateState_ = layoutProperty->GetToolBarTranslateState();
+        propFullScreenOverlay_ = layoutProperty->GetFullScreenOverlay();
     }
 };
 

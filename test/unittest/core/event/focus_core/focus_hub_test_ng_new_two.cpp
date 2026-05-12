@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/event/focus_hub_test_ng.h"
 #include "core/common/event_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;

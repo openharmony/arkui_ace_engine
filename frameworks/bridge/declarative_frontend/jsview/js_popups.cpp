@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components/popup/popup_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -1431,6 +1432,38 @@ void JSViewPopups::ParseMenuSystemMaterial(const JSRef<JSObject>& menuOptions, N
     }
 }
 
+void JSViewPopups::ParseMenuDistortionMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto distortionValue = menuOptions->GetProperty("distortionMode");
+    if (!distortionValue->IsNumber()) {
+        return;
+    }
+    auto distortionMode = distortionValue->ToNumber<int32_t>();
+    if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_AUTO)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_AUTO;
+    } else if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_ENABLED)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_ENABLED;
+    } else if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_DISABLED)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_DISABLED;
+    }
+}
+
+void JSViewPopups::ParseMenuEdgeLightMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto edgeLightValue = menuOptions->GetProperty("edgeLightMode");
+    if (!edgeLightValue->IsNumber()) {
+        return;
+    }
+    auto edgeLightMode = edgeLightValue->ToNumber<int32_t>();
+    if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_AUTO)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_AUTO;
+    } else if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_ENABLED)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_ENABLED;
+    } else if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_DISABLED)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_DISABLED;
+    }
+}
+
 void JSViewPopups::ParseMenuAboutToAppearLifeCycleParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1683,6 +1716,18 @@ void JSViewPopups::ParseMenuAnchoredColorMode(const JSRef<JSObject>& menuOptions
     }
 }
 
+void JSViewPopups::ParseMenuTargetSpace(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto targetSpaceProperty = menuOptions->GetProperty("targetSpace");
+    if (targetSpaceProperty->IsObject()) {
+        CalcDimension value;
+        if (JSViewAbstract::ParseLengthMetricsToPositiveDimension(targetSpaceProperty, value) &&
+            value.IsNonNegative() && value.Unit() != DimensionUnit::PERCENT) {
+            menuParam.targetSpace = value;
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1723,11 +1768,14 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
     JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
     JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
+    JSViewPopups::ParseMenuDistortionMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuEdgeLightMode(menuOptions, menuParam);
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuScrollBar(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
     JSViewPopups::ParseMenuMaxHeight(menuOptions, menuParam);
     JSViewPopups::ParseMenuAnchoredColorMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuTargetSpace(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseMenuLifeCycleParam(
@@ -2382,6 +2430,18 @@ NG::SheetEffectEdge JSViewAbstract::ParseSheetEffectEdge(const JSRef<JSObject>& 
     return static_cast<NG::SheetEffectEdge>(sheetEffectEdge);
 }
 
+void JSViewPopups::ParseSheetEdgeLightMode(const JSRef<JSVal>& edgeLightMode, NG::SheetStyle& sheetStyle)
+{
+    sheetStyle.sheetEdgeLightMode.reset();
+    if (edgeLightMode->IsNumber()) {
+        auto sheetEdgeLightMode = edgeLightMode->ToNumber<int32_t>();
+        if (sheetEdgeLightMode >= static_cast<int>(EdgeLightMode::EDGELIGHT_AUTO) &&
+            sheetEdgeLightMode <= static_cast<int>(EdgeLightMode::EDGELIGHT_DISABLED)) {
+            sheetStyle.sheetEdgeLightMode = static_cast<EdgeLightMode>(sheetEdgeLightMode);
+        }
+    }
+}
+
 void JSViewAbstract::ParseSheetStyle(
     const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
@@ -2401,11 +2461,14 @@ void JSViewAbstract::ParseSheetStyle(
     auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
     auto systemMaterialObj = paramObj->GetProperty("systemMaterial");
+    auto edgeLightMode = paramObj->GetProperty("edgeLightMode");
     if (systemMaterialObj->IsObject()) {
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
         sheetStyle.systemMaterial = material->Copy();
     }
-    
+
+    JSViewPopups::ParseSheetEdgeLightMode(edgeLightMode, sheetStyle);
+
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
         auto prop = obj->GetProperty("instanceId_");

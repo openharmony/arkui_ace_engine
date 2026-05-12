@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/key_event.h"
 #ifdef CROSS_PLATFORM
 #include "core/common/ime/text_input_client.h"
 #include "core/common/ime/text_input_configuration.h"

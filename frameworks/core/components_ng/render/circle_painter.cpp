@@ -78,6 +78,63 @@ bool SetCirclePen(RSPen& pen, const ShapePaintProperty& shapePaintProperty)
     UpdateCircleStrokeColorIfNeeded(pen, shapePaintProperty);
     return true;
 }
+
+std::shared_ptr<RSColorSpace> GetCircleFillColorSpace(const Color& color)
+{
+    if (color.GetColorSpace() == ColorSpace::BT2020) {
+        return RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::REC2020);
+    }
+    return RSColorSpace::CreateSRGB();
+}
+
+bool NeedUseHdrFillColor(const Color& color)
+{
+    return color.GetHeadRoomColor().has_value();
+}
+
+bool NeedUseBt2020FillColor(const Color& color)
+{
+    return color.GetColorSpace() == ColorSpace::BT2020;
+}
+
+RSColor4f GetCircleFillColor4f(const Color& color, double fillOpacity)
+{
+    return { static_cast<RSScalar>(color.GetRed() / 255.0 * fillOpacity),
+        static_cast<RSScalar>(color.GetGreen() / 255.0 * fillOpacity),
+        static_cast<RSScalar>(color.GetBlue() / 255.0 * fillOpacity),
+        static_cast<RSScalar>(color.GetAlpha() / 255.0 * fillOpacity) };
+}
+
+void UpdateCircleFillColorIfNeeded(RSBrush& brush, const ShapePaintProperty& shapePaintProperty)
+{
+    Color fillColor = Color::BLACK;
+    if (shapePaintProperty.HasFill()) {
+        fillColor = shapePaintProperty.GetFillValue();
+    }
+    if (!NeedUseHdrFillColor(fillColor) && !NeedUseBt2020FillColor(fillColor)) {
+        return;
+    }
+
+    double fillOpacity = 1.0;
+    if (shapePaintProperty.HasFillOpacity()) {
+        fillOpacity = shapePaintProperty.GetFillOpacityValue();
+    }
+
+    if (NeedUseHdrFillColor(fillColor)) {
+        const auto hdr = fillColor.GetHeadRoomColor().value();
+        RSUIColor uiColor(hdr.red * fillOpacity, hdr.green * fillOpacity, hdr.blue * fillOpacity,
+            hdr.alpha * fillOpacity, hdr.headRoom);
+        brush.SetUIColor(uiColor, GetCircleFillColorSpace(fillColor));
+        return;
+    }
+    brush.SetColor(GetCircleFillColor4f(fillColor, fillOpacity), GetCircleFillColorSpace(fillColor));
+}
+
+void SetCircleBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty)
+{
+    ShapePainter::SetBrush(brush, shapePaintProperty);
+    UpdateCircleFillColorIfNeeded(brush, shapePaintProperty);
+}
 } // namespace
 
 void CirclePainter::DrawCircle(
@@ -88,7 +145,7 @@ void CirclePainter::DrawCircle(
     if (SetCirclePen(pen, shapePaintProperty)) {
         canvas.AttachPen(pen);
     }
-    ShapePainter::SetBrush(brush, shapePaintProperty);
+    SetCircleBrush(brush, shapePaintProperty);
     canvas.AttachBrush(brush);
     PointF centerPoint = PointF(radius + offset.GetX(), radius + offset.GetY());
     canvas.DrawCircle(ToRSPoint(centerPoint), radius);

@@ -26,7 +26,8 @@
         "LengthMetrics",
         "ColorMetrics",
         "CustomSpan",
-        "TouchEvent"
+        "TouchEvent",
+        "PanGestureOptions"
     ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
@@ -69,6 +70,10 @@
         {
             "from": "arkui.component.common.TouchEvent",
             "to": "arkui.component.idlize.TouchEventProxy"
+        },
+        {
+            "from": "arkui.component.gesture.PanGestureOptions",
+            "to": "arkui.component.idlize.PanGestureOptionsProxy"
         }
     ],
     "forceMaterialized": [
@@ -514,7 +519,9 @@
         "PinchGestureHandler",
         "TapGestureHandler",
         "RotationGestureHandler",
-        "SwipeGestureHandler"
+        "SwipeGestureHandler",
+        "CustomColors",
+        "CustomDarkColors"
     ],
     "boundProperties": {
         "Checkbox": [
@@ -701,7 +708,11 @@
             "SaveButton",
             "PasteButton",
             "CustomSpan",
-            "TouchEvent"
+            "TouchEvent",
+            "ContentSlot",
+            "ContentSlotAttribute",
+            "ContentSlotInterface",
+            "PanGestureOptions"
         ],
         "ignoreEntry": [
             "Optional",
@@ -1113,6 +1124,26 @@
                 "replaceImplementation": true
             }
         },
+        "TextInputModifier": {
+            "caretColor": {
+                "hookName": "hookTextInputModifierCaretColor",
+                "replaceImplementation": false
+            },
+            "caretStyle": {
+                "hookName": "hookTextInputModifierCaretStyle",
+                "replaceImplementation": false
+            }
+        },
+        "TextModifier": {
+            "font": {
+                "hookName": "hookTextModifierFont",
+                "replaceImplementation": false
+            },
+            "fontWeight": {
+                "hookName": "hookTextModifierFontWeight",
+                "replaceImplementation": false
+            }
+        },
         "WebAttribute": {
             "javaScriptProxy": {
                 "hookName": "hookJavaScriptProxy",
@@ -1207,6 +1238,7 @@
         "arkui.component.navigation.NavigationAttribute.menus",
         "arkui.component.navigation.NavigationAttribute.toolbarConfiguration",
         "arkui.component.navigation.NavigationAttribute.setNavigationOptions",
+        "arkui.component.navigation.NavigationInterface.invoke",
         "arkui.component.navigation.NavPathStack.pushPath",
         "arkui.component.navigation.NavPathStack.pushDestination",
         "arkui.component.navigation.NavPathStack.pushPathByName",
@@ -1231,7 +1263,8 @@
         "arkui.component.scroll.Scroller.isAtEnd",
         "arkui.component.scroll.Scroller.getItemRect",
         "arkui.component.scroll.Scroller.getItemIndex",
-        "arkui.component.scroll.Scroller.contentSize"
+        "arkui.component.scroll.Scroller.contentSize",
+        "arkui.component.grid.GridInterface.invoke"
     ],
     "constants": {
         "TouchTestInfo.rect": "{ x: 0, y: 0, width: 0, height: 0 }",

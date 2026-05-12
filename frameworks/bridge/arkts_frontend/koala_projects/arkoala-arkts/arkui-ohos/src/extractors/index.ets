@@ -27,6 +27,7 @@ import { default as drawing } from "@ohos.graphics.drawing";
 import { default as uiEffect } from "@ohos.graphics.uiEffect";
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel";
 import { default as webview } from "@ohos.web.webview";
+import { RecordData } from "@ohos.base";
 import { default as Want } from "@ohos.app.ability.Want";
 import { Configuration } from "@ohos.app.ability.Configuration";
 import { default as window } from "@ohos.window";
@@ -110,6 +111,8 @@ import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInterna
 import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMeasureInfoProxy } from "#generated";
 import { CustomSpanWrapper } from "#generated";
 import { default as text } from '@ohos.graphics.text'
+import { PanGestureOptions } from '../component/gesture'
+import { PanGestureOptionsProxy } from '../component/idlize'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -121,6 +124,10 @@ export namespace extractors {
 
   export function toInputMethodExtraConfigPtr(config: InputMethodExtraConfig): KPointer {
     return ArkUIAniModule._Extractors_ToInputMethodExtraConfigPtr(config);
+  }
+
+  export function fromInputMethodExtraConfigPtr(config: KPointer): InputMethodExtraConfig {
+    throw new Error('fromInputMethodExtraConfigPtr is not implemented in ANI')
   }
 
   export function toTextParagraphPtr(paragraph: text.Paragraph): KPointer {
@@ -156,6 +163,14 @@ export namespace extractors {
   export function fromLengthMetricsPtr(ptr: KPointer): LengthMetrics {
     const x: Object = {};
     return x as LengthMetrics;
+  }
+
+  export function toDrawingTypefacePtr(ptr: drawing.Typeface): KPointer {
+    return 123;
+  }
+  export function fromDrawingTypefacePtr(ptr: KPointer): drawing.Typeface {
+    const x: Object = {};
+    return x as drawing.Typeface;
   }
 
   export function toNodeControllerPtr(value: NodeController): KPointer {
@@ -685,6 +700,11 @@ export namespace extractors {
     colorMetricsExt.alpha = colorMetrics.alpha
     colorMetricsExt.resourceId = colorMetrics.getResourceId()
     colorMetricsExt.colorSpace = colorMetrics.getColorSpace()
+    colorMetricsExt.redValue = colorMetrics.redValue
+    colorMetricsExt.greenValue = colorMetrics.greenValue
+    colorMetricsExt.blueValue = colorMetrics.blueValue
+    colorMetricsExt.headRoom = colorMetrics.headRoom
+    colorMetricsExt.isHDR = colorMetrics.isHDR();
     return colorMetricsExt
   }
 
@@ -696,7 +716,10 @@ export namespace extractors {
       colorMetricsExt.blue,
       colorMetricsExt.alpha
     )
+    colorMetrics.setColorWithHeadRoom(colorMetricsExt.redValue, colorMetricsExt.greenValue, colorMetricsExt.blueValue,
+      colorMetricsExt.headRoom = colorMetrics.headRoom);
     colorMetrics.setResourceId(colorMetricsExt.resourceId)
+    colorMetrics.setIsHDR(colorMetricsExt.isHDR);
     return colorMetrics
   }
 
@@ -828,5 +851,21 @@ export namespace extractors {
         throw new Error("Invalid managed object type in CustomSpanWrapper");
       }
       return value.managed as CustomSpan
+  }
+  export function transform_Ark_RecordData_to_Opt_Object(value: RecordData): Object | undefined {
+      return value as Object
+  }
+  export function transform_Opt_Object_to_Ark_RecordData(value: Object | undefined): RecordData {
+      return value as RecordData
+  }
+  export function transform_Ark_PanGestureOptionsProxy_to_Ark_PanGestureOptions(
+    value: PanGestureOptionsProxy,
+  ): PanGestureOptions {
+    return new PanGestureOptions(value)
+  }
+  export function transform_Ark_PanGestureOptions_to_Ark_PanGestureOptionsProxy(
+    value: PanGestureOptions,
+  ): PanGestureOptionsProxy {
+    return value.proxy;
   }
 }

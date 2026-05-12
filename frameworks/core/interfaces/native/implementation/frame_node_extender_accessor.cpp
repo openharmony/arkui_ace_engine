@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include <optional>
 #include "base/error/error_code.h"
 #include "core/components_ng/property/calc_length.h"
@@ -44,6 +45,12 @@ enum class ExpandMode : uint32_t {
     NOT_EXPAND = 0,
     EXPAND,
     LAZY_EXPAND,
+    LAZY_NOT_EXPAND,
+};
+enum class ChildrenCountMode : uint32_t {
+    ALL_EXPAND = 0,
+    ONLY_EXPANDED,
+    ALL_NOT_EXPAND,
 };
 // same as inner defines in property.h
 typedef enum {
@@ -304,6 +311,13 @@ FrameNode* GetChildNode(RefPtr<FrameNode> nodeRef, int32_t index, int32_t expand
     }
     if (expandModeResult == ExpandMode::EXPAND || expandModeResult == ExpandMode::NOT_EXPAND) {
         return nodeRef->GetFrameNodeChildByIndex(index, false, expandModeResult == ExpandMode::EXPAND);
+    } else if (expandModeResult == ExpandMode::LAZY_NOT_EXPAND) {
+        auto child = nodeRef->GetFrameNodeChildByIndex(index, false, true);
+        if (child == nullptr) {
+            return GetChildNode(nodeRef, index, 1);
+        } else {
+            return child;
+        }
     } else {
         auto child = nodeRef->GetFrameNodeChildByIndexWithoutBuild(index);
         if (child == nullptr) {
@@ -398,13 +412,23 @@ Ark_NativePointer GetParentImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(parent, nullptr);
     return FrameNodePeer::Create(parent);
 }
-Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
+Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer,
+                               const Ark_Number* childrenCountMode)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, 0);
 
     // Thread validation for multithread support
     CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), 0);
+    auto childrenCountModeInt = Converter::Convert<int32_t>(*childrenCountMode);
+    auto childrenCountModeResult = static_cast<ChildrenCountMode>(childrenCountModeInt);
+    if (childrenCountModeResult == ChildrenCountMode::ALL_EXPAND) {
+        return peerNode->GetAllChildrenWithBuild(false).size();
+    } else if (childrenCountModeResult == ChildrenCountMode::ONLY_EXPANDED) {
+        return peerNode->GetTotalChildCountWithoutExpanded();
+    } else if (childrenCountModeResult == ChildrenCountMode::ALL_NOT_EXPAND) {
+        return peerNode->GetTotalChildCount();
+    }
     return peerNode->GetAllChildrenWithBuild(false).size();
 }
 void DisposeImpl(Ark_FrameNode peer)
@@ -1494,51 +1518,6 @@ Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
     auto isOnMainTree = frameNode->IsOnMainTree();
     return isOnMainTree;
 }
-Array_Pointer CreateFrameNodesImpl(Ark_Int32 count)
-{
-    std::vector<Ark_NativePointer> empty;
-    auto invalid = Converter::ArkValue<Array_Pointer>(empty, Converter::FC);
-    auto countVal = Converter::Convert<int32_t>(count);
-    std::vector<Ark_NativePointer> frameNodes;
-    for (int32_t i = 0; i < countVal; i++) {
-        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-        CHECK_NULL_RETURN(node, invalid);
-        node->SetExclusiveEventForChild(true);
-        node->SetIsArkTsFrameNode(true);
-        auto peer = FrameNodePeer::Create(node);
-        frameNodes.emplace_back(peer);
-    }
-    return Converter::ArkValue<Array_Pointer>(frameNodes, Converter::FC);
-}
-Array_Pointer GetRenderNodesByFrameNodesImpl(const Array_Pointer* ptrs)
-{
-    std::vector<Ark_NativePointer> empty;
-    auto invalid = Converter::ArkValue<Array_Pointer>(empty, Converter::FC);
-    auto frameNodeVec = Converter::Convert<std::vector<Ark_NativePointer>>(*ptrs);
-    std::vector<Ark_NativePointer> renderNodes;
-    for (size_t i = 0; i < frameNodeVec.size(); i++) {
-        auto node = reinterpret_cast<FrameNodePeer*>(frameNodeVec[i]);
-        CHECK_NULL_RETURN(node, invalid);
-        renderNodes.emplace_back(node->GetRenderNodePeer());
-    }
-    return Converter::ArkValue<Array_Pointer>(renderNodes, Converter::FC);
-}
-Array_I32 GetIdsByFrameNodesImpl(const Array_Pointer* ptrs)
-{
-    std::vector<int32_t> empty;
-    auto invalid = Converter::ArkValue<Array_I32>(empty, Converter::FC);
-    auto frameNodeVec = Converter::Convert<std::vector<Ark_NativePointer>>(*ptrs);
-    std::vector<int32_t> ids;
-    for (size_t i = 0; i < frameNodeVec.size(); i ++) {
-        auto node = reinterpret_cast<FrameNodePeer*>(frameNodeVec[i]);
-        CHECK_NULL_RETURN(node, invalid);
-        auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
-        CHECK_NULL_RETURN(frameNode, invalid);
-        ids.emplace_back(frameNode->GetId());
-    }
-    return Converter::ArkValue<Array_I32>(ids, Converter::FC);
-}
 Ark_NativePointer GetFrameNodeById1Impl(Ark_FrameNode peer,
                                         const Ark_String* id)
 {
@@ -1558,6 +1537,30 @@ Ark_NativePointer GetFrameNodeByUniqueId1Impl(Ark_FrameNode peer,
     auto node = frameNode->GetFrameNodeByUniqueIdInSubTree(valueId);
     CHECK_NULL_RETURN(node, nullptr);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
+}
+Array_FrameNodeCreateInfo GetFrameNodeCreateInfoArrayImpl(Ark_Int32 count)
+{
+    std::vector<Ark_FrameNodeCreateInfo> empty;
+    auto invalid = Converter::ArkValue<Array_FrameNodeCreateInfo>(empty, Converter::FC);
+    auto countVal = Converter::Convert<int32_t>(count);
+    std::vector<Ark_FrameNodeCreateInfo> frameNodeCreateInfoArray;
+    for (int32_t i = 0; i < countVal; i++) {
+        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+        CHECK_NULL_RETURN(node, invalid);
+        node->SetExclusiveEventForChild(true);
+        node->SetIsArkTsFrameNode(true);
+        auto frameNodePeer = FrameNodePeer::Create(node);
+        CHECK_NULL_RETURN(frameNodePeer, invalid);
+        auto renderNodePeer = frameNodePeer->GetRenderNodePeer();
+        auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+        CHECK_NULL_RETURN(frameNode, invalid);
+        auto id = frameNode->GetId();
+        Ark_FrameNodeCreateInfo frameNodeCreateInfo { frameNodePeer, renderNodePeer,
+            Converter::ArkValue<Ark_Int32>(id) };
+        frameNodeCreateInfoArray.emplace_back(frameNodeCreateInfo);
+    }
+    return Converter::ArkValue<Array_FrameNodeCreateInfo>(frameNodeCreateInfoArray, Converter::FC);
 }
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
@@ -1640,11 +1643,9 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
         FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
         FrameNodeExtenderAccessor::ApplyAttributesFinishImpl,
-        FrameNodeExtenderAccessor::CreateFrameNodesImpl,
-        FrameNodeExtenderAccessor::GetRenderNodesByFrameNodesImpl,
-        FrameNodeExtenderAccessor::GetIdsByFrameNodesImpl,
         FrameNodeExtenderAccessor::GetFrameNodeById1Impl,
         FrameNodeExtenderAccessor::GetFrameNodeByUniqueId1Impl,
+        FrameNodeExtenderAccessor::GetFrameNodeCreateInfoArrayImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

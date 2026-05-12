@@ -23,7 +23,6 @@
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/base/frame_scene_status.h"
-#include "frameworks/core/components_ng/pattern/list/list_layout_property.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_animation_state.h"
@@ -37,13 +36,17 @@
 #include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 
 class RefreshPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(RefreshPattern, NestableScrollContainer);
 
 public:
     RefreshPattern() = default;
-    ~RefreshPattern() override = default;
+    ~RefreshPattern() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {

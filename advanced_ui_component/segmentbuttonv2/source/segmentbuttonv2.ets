@@ -50,6 +50,7 @@ export type OnSelectedIndexesChange = (selectedIndexes: number[]) => void;
 interface SegmentButtonV2ContentTheme {
   itemSpace: LengthMetrics;
   itemFontSize: Dimension;
+  adaptiveItemFontSize: Dimension;
   itemFontColor: ResourceColor;
   itemFontWeight: FontWeight;
   itemSelectedFontWeight: FontWeight;
@@ -97,11 +98,12 @@ const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
   buttonBorderRadius: $r('sys.float.segment_button_v2_background_corner_radius'),
   buttonMinHeight: $r('sys.float.segment_button_v2_singleline_background_height'),
   hybridButtonMinHeight: $r('sys.float.segment_button_v2_doubleline_background_height'),
-  buttonPadding: $r('sys.float.padding_level2'),
+  buttonPadding: $r('sys.float.padding_level1'),
   itemSelectedBackgroundColor: $r('sys.color.segment_button_v2_tab_selected_item_background'),
   itemBorderRadius: $r('sys.float.segment_button_v2_selected_corner_radius'),
   itemSpace: LengthMetrics.vp(0),
   itemFontSize: $r('sys.float.ohos_id_text_size_button2'),
+  adaptiveItemFontSize: $r('sys.float.Caption_M'),
   itemFontColor: $r('sys.color.font_secondary'),
   itemSelectedFontColor: $r('sys.color.font_primary'),
   itemFontWeight: FontWeight.Medium,
@@ -133,11 +135,12 @@ const capsuleSimpleTheme: SimpleSegmentButtonV2Theme = {
   buttonBorderRadius: $r('sys.float.segment_button_v2_background_corner_radius'),
   buttonMinHeight: $r('sys.float.segment_button_v2_singleline_background_height'),
   hybridButtonMinHeight: $r('sys.float.segment_button_v2_doubleline_background_height'),
-  buttonPadding: $r('sys.float.padding_level2'),
+  buttonPadding: $r('sys.float.padding_level1'),
   itemSelectedBackgroundColor: $r('sys.color.comp_background_emphasize'),
   itemBorderRadius: $r('sys.float.segment_button_v2_selected_corner_radius'),
   itemSpace: LengthMetrics.vp(0),
   itemFontSize: $r('sys.float.ohos_id_text_size_button2'),
+  adaptiveItemFontSize: $r('sys.float.Caption_M'),
   itemFontColor: $r('sys.color.font_secondary'),
   itemSelectedFontColor: $r('sys.color.font_on_primary'),
   itemFontWeight: FontWeight.Medium,
@@ -654,6 +657,10 @@ struct SimpleSegmentButtonV2 {
           .gesture(
             TapGesture().onAction(() => {
               this.onItemClicked?.(repeatItem.index);
+              this.backplatePosition = {
+                x: this.selectedItemRect?.position.x,
+                y: this.selectedItemRect?.position.y
+              }
               this.updateSelectedIndex(repeatItem.index);
             })
           )
@@ -792,9 +799,15 @@ struct SimpleSegmentButtonV2 {
             return;
           }
           if (this.isBackgroundSystemMaterialEnabled()) {
-            let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect!.position.x as number
-            nowX = Math.max(this.itemRects[0]!.position.x as number, nowX);
-            nowX = Math.min(this.itemRects[this.items.length - 1]!.position.x as number, nowX);
+            let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect!.position.x as number;
+            let startX = this.itemRects[0]!.position.x as number;
+            let endX = this.itemRects[this.items.length - 1]!.position.x as number;
+            if (this.isRTL()) {
+              startX = this.itemRects[this.items.length - 1]!.position.x as number;
+              endX = this.itemRects[0]!.position.x as number
+            }
+            nowX = Math.max(startX, nowX);
+            nowX = Math.min(endX, nowX);
 
             this.backplatePosition = {
               x: nowX,
@@ -924,7 +937,7 @@ struct SimpleSegmentButtonV2 {
       this.getUIContext().animateTo({
         curve: curves.interpolatingSpring(0, 1, 195, 14),
       }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
         this.openSelectedItemSystemMaterial = true;
       })
     }
@@ -934,7 +947,7 @@ struct SimpleSegmentButtonV2 {
     if (this.openSelectedItemSystemMaterial) {
       this.tempDisableAnimation = true;
       this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
       })
       this.getUIContext()
         .animateTo({
@@ -1117,7 +1130,7 @@ struct SimpleSegmentButtonV2 {
   }
 
   private isRTL(): boolean {
-    if (this.languageDirection || this.languageDirection === Direction.Auto) {
+    if (!this.languageDirection || this.languageDirection === Direction.Auto) {
       return i18n.isRTL(i18n.System.getSystemLanguage());
     }
     return this.languageDirection === Direction.Rtl;
@@ -1277,6 +1290,7 @@ const multiplyCapsuleTheme: MultiplySegmentButtonV2Theme = {
   itemSymbolFontColor: $r('sys.color.font_secondary'),
   itemSelectedSymbolFontColor: $r('sys.color.font_on_primary'),
   itemFontSize: $r('sys.float.ohos_id_text_size_button2'),
+  adaptiveItemFontSize: $r('sys.float.Caption_M'),
   itemIconSize: 24,
   itemSymbolFontSize: 20,
   itemPadding: {
@@ -1760,13 +1774,13 @@ struct SegmentButtonV2ItemContent {
         this.itemSelectedFontSize.unit !== LengthUnit.PERCENT) {
         return LengthMetricsUtils.getInstance().stringify(this.itemSelectedFontSize);
       }
-      return this.theme.itemFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.adaptiveItemFontSize : this.theme.itemFontSize;
     }
     if (this.itemFontSize && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemFontSize) &&
       this.itemFontSize.unit !== LengthUnit.PERCENT) {
       return LengthMetricsUtils.getInstance().stringify(this.itemFontSize);
     }
-    return this.theme.itemFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.adaptiveItemFontSize : this.theme.itemFontSize;
   }
 
   private getItemIconHeight(): Length {

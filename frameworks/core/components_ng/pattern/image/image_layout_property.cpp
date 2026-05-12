@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/common/container.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -88,6 +89,8 @@ void ImageLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
         VERTICALALIGNVALUE[static_cast<int32_t>(propVerticalAlign_.value_or(VerticalAlign::BOTTOM))], filter);
     json->PutFixedAttr("src", src.c_str(), filter, FIXED_ATTR_SRC);
     json->PutExtAttr("rawSrc", propImageSourceInfo_->GetSrc().c_str(), filter);
+    auto reloadKey = propImageSourceInfo_->GetReloadKey();
+    json->PutExtAttr("reloadKey", reloadKey.value_or("").c_str(), filter);
     json->PutExtAttr("moduleName", propImageSourceInfo_->GetModuleName().c_str(), filter);
     json->PutExtAttr("baselineOffset", GetBaselineOffsetValue(Dimension(0)).Value(), filter);
     auto host = GetHost();

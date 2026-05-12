@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"
 
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 
 namespace OHOS::Ace::NG {

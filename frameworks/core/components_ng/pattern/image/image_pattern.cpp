@@ -46,6 +46,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/drawable/animated_drawable_descriptor.h"
+#include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -1161,6 +1162,10 @@ void ImagePattern::LoadImageDataIfNeed()
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageReloadNeeded_ || isOrientationChange_) {
         loadFailed_ = false;
+        // When only reloadKey changes (same URL), skip cache read to force reload from source
+        if (loadingCtx_ && loadingCtx_->GetSourceInfo().IsReloadKeyChanged(src)) {
+            src.SetSkipCacheRead(true);
+        }
         bool needLayout = host->CheckNeedForceMeasureAndLayout() &&
                           imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE;
         LoadImage(src, needLayout);
@@ -1606,6 +1611,15 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     return;
 }
 
+void ImagePattern::SetIsBackground(bool isBackground)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->SetIsBackground(isBackground);
+}
+
 // when recycle image component, release the pixelmap resource
 void ImagePattern::OnRecycle()
 {
@@ -2016,6 +2030,8 @@ void ImagePattern::DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutPr
         std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
     DumpLog::GetInstance().AddDesc(
         std::string("LocalColorMode: ").append(std::to_string(static_cast<int32_t>(src.GetLocalColorMode()))));
+    DumpLog::GetInstance().AddDesc(
+        std::string("reloadKey: ").append(src.GetReloadKey().value_or("N/A")));
 }
 
 inline void ImagePattern::DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)

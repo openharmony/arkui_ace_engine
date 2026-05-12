@@ -14,7 +14,9 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/axis_event_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -73,7 +75,13 @@ Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
 }
 Ark_Float64 GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    AxisInfo* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+
+    double value = event->GetPinchAxisScale();
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
                         Ark_AxisType axisType)
@@ -85,7 +93,14 @@ Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
 }
 Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_AxisEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Coordinate2D>(Offset{});
+    CHECK_NULL_RETURN(peer, errValue);
+    const auto* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    const auto& localLocation = info->GetCurrentLocalLocation();
+    const auto x = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+    const auto y = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+    return Converter::ArkValue<Ark_Coordinate2D>(Offset{x, y});
 }
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
 {

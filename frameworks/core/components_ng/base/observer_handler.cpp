@@ -487,7 +487,8 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(c
         CHECK_NULL_CONTINUE(parent);
         const auto& parentTag = parent->GetTag();
         // NavDestination in stack or home NavDestination in forceSplit mode.
-        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG ||
+            parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
             break;
         }
         if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {
@@ -497,6 +498,13 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(c
         CHECK_NULL_CONTINUE(destNode);
         // related NavDestination in forceSplit mode.
         if (destNode->GetNavDestinationType() == NavDestinationType::RELATED) {
+            break;
+        }
+        auto parentNav = AceType::DynamicCast<NavigationGroupNode>(parent);
+        CHECK_NULL_CONTINUE(parentNav);
+        const auto& useHome = parentNav->GetUseHomeDestination();
+        const auto& homeDest = parentNav->GetHomeDestinationNode();
+        if (useHome.has_value() && useHome.value() && current == homeDest) {
             break;
         }
     }
@@ -516,7 +524,8 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(c
         CHECK_NULL_CONTINUE(parent);
         const auto& parentTag = parent->GetTag();
         // NavDestination in stack or home NavDestination in forceSplit mode.
-        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG ||
+            parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
             break;
         }
         if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {
@@ -526,6 +535,13 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(c
         CHECK_NULL_CONTINUE(destNode);
         // related NavDestination in forceSplit mode.
         if (destNode->GetNavDestinationType() == NavDestinationType::RELATED) {
+            break;
+        }
+        auto parentNav = AceType::DynamicCast<NavigationGroupNode>(parent);
+        CHECK_NULL_CONTINUE(parentNav);
+        const auto& useHome = parentNav->GetUseHomeDestination();
+        const auto& homeDest = parentNav->GetHomeDestinationNode();
+        if (useHome.has_value() && useHome.value() && current == homeDest) {
             break;
         }
     }

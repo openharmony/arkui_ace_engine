@@ -284,6 +284,24 @@ Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
     CHECK_EQUAL_RETURN(caretRect->IsValid(), false, invalidValue);
     return Converter::ArkValue<Opt_RectResult>(*caretRect);
 }
+
+void ScrollToVisibleImpl(Ark_RichEditorBaseController peer, const Opt_TextRange* range)
+{
+    CHECK_NULL_VOID(peer);
+    std::optional<int32_t> start = std::nullopt;
+    std::optional<int32_t> end = std::nullopt;
+    if (range && range->tag != INTEROP_TAG_UNDEFINED) {
+        Ark_TextRange arkRange = range->value;
+        if (arkRange.start.tag != INTEROP_TAG_UNDEFINED) {
+            start = arkRange.start.value;
+        }
+        if (arkRange.end.tag != INTEROP_TAG_UNDEFINED) {
+            end = arkRange.end.value;
+        }
+    }
+    peer->ScrollToVisible(start, end);
+}
+
 void DeleteBackwardImpl(Ark_RichEditorBaseController peer)
 {
     CHECK_NULL_VOID(peer);
@@ -316,6 +334,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
         RichEditorBaseControllerAccessor::GetPreviewTextImpl,
         RichEditorBaseControllerAccessor::GetCaretRectImpl,
+        RichEditorBaseControllerAccessor::ScrollToVisibleImpl,
         RichEditorBaseControllerAccessor::DeleteBackwardImpl,
         RichEditorBaseControllerAccessor::SetStyledPlaceholderImpl,
     };

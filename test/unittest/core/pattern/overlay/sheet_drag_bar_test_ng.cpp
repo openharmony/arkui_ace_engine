@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <mutex>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 
@@ -43,6 +44,13 @@ void SheetDragBarTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
             return AceType::MakeRefPtr<SheetTheme>();
         } else {

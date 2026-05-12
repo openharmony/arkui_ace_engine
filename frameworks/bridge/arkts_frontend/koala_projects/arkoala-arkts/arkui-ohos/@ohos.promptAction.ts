@@ -19,11 +19,11 @@ import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
     BorderRadiuses } from 'arkui/framework'
 import { Callback } from '@ohos.base';
 import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, TransitionEffect, KeyboardAvoidMode,
-    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui/framework'
+    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions, DistortionMode, EdgeLightMode } from 'arkui/framework'
 import { CustomBuilder } from 'arkui/framework'
 import { DialogAlignment } from 'arkui/framework'
 import { DismissDialogAction, LevelOrderExtender } from 'arkui/framework'
-import { BorderStyle, Alignment } from 'arkui/framework'
+import { BorderStyle, Alignment, DialogDisplayMode } from 'arkui/framework'
 import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
 import { AsyncCallback } from 'arkui/base';
@@ -124,6 +124,8 @@ declare namespace promptAction {
         immersiveMode?: ImmersiveMode;
         levelOrder?: LevelOrder;
         systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface ShowDialogOptionsInternal {
@@ -158,6 +160,8 @@ declare namespace promptAction {
         onWillAppear?: (() => void);
         onWillDisappear?: (() => void);
         systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface ActionMenuOptionsInternal {
@@ -174,6 +178,7 @@ declare namespace promptAction {
         offset?: Offset;
         showInSubWindow?: boolean;
         isModal?: boolean;
+        displayModeInSubWindow?: DialogDisplayMode;
         autoCancel?: boolean;
         transition?: TransitionEffect;
         dialogTransition?: TransitionEffect;
@@ -196,6 +201,8 @@ declare namespace promptAction {
         levelOrder?: LevelOrder;
         focusable?: boolean;
         systemMaterial?: uiMaterial.Material;
+        distortionMode?: DistortionMode;
+        edgeLightMode?: EdgeLightMode;
     }
 
     export interface DialogOptionsInternal {

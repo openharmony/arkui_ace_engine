@@ -308,11 +308,11 @@ HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToSpanNodeTest001, TestSiz
      */
     g_isConfigChangePerform = false;
     StyleManager::UpdateSymbolColorResource(spanNode, textStyle);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 3);
+    EXPECT_EQ(spanNode->spanItem_->symbolStyle->resMap_.size(), 3);
 
     g_isConfigChangePerform = true;
     StyleManager::UpdateSymbolColorResource(spanNode, textStyle);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 3);
+    EXPECT_EQ(spanNode->spanItem_->symbolStyle->resMap_.size(), 3);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, ResUpdaterTest001, TestSize.Level0) {

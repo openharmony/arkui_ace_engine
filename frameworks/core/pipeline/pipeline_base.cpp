@@ -20,8 +20,10 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/event_manager.h"
@@ -33,7 +35,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/container_window_manager.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -267,6 +271,15 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
     std::shared_lock<std::shared_mutex> lock(imageMtx_);
     return imageCache_;
+}
+
+const RefPtr<SharedImageManager>& PipelineBase::GetOrCreateSharedImageManager()
+{
+    std::scoped_lock<std::shared_mutex> lock(imageMtx_);
+    if (!sharedImageManager_) {
+        sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
+    }
+    return sharedImageManager_;
 }
 
 void PipelineBase::SetRootSize(double density, float width, float height)
@@ -547,7 +560,9 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     }
     // the first param is the key word of dump.
     if (params[0] == "-memory") {
+#ifdef ACE_DEBUG
         MemoryMonitor::GetInstance().Dump();
+#endif
         DumpUIExt();
         return true;
     }
@@ -914,6 +929,13 @@ void PipelineBase::InitGetGlobalWindowRectCallback(std::function<Rect()>&& callb
 
 void PipelineBase::ContainerModalUnFocus() {}
 
+void PipelineBase::SendUpdateVirtualNodeFocusEvent()
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->UpdateVirtualNodeFocus();
+}
+
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     if (window_) {
@@ -1030,7 +1052,7 @@ void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId ev
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         ACE_SCOPED_TRACE("AccessibilityCallbackEvent event[%u]", static_cast<uint32_t>(event));
-        accessibilityEvents_.insert(AccessibilityCallbackEvent(event, parameter));
+        accessibilityEvents_.emplace(static_cast<uint32_t>(event), parameter);
     }
 }
 
@@ -1042,7 +1064,7 @@ void PipelineBase::FireAccessibilityEvents()
     decltype(accessibilityEvents_) events;
     std::swap(accessibilityEvents_, events);
     for (auto& event : events) {
-        FireAccessibilityEventInner(static_cast<uint32_t>(event.eventId), event.parameter);
+        FireAccessibilityEventInner(event.first, event.second);
     }
 }
 

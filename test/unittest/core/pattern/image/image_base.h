@@ -41,7 +41,6 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
-#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"

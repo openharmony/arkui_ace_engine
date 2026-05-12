@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/frame_node.h"
 #include "frameworks/core/common/event_manager.h"
 #include "frameworks/core/common/input_event_monitor_manager.h"
 

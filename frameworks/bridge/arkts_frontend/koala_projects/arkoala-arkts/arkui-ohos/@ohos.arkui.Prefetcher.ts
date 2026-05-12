@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -963,7 +963,7 @@ class PrefetchRangeRatio {
 
 class PrefetchCount {
   private readonly MAX_SCREENS: float32 = 4;
-  private readonly speedCoef: float32 = 2.5;
+  private readonly speedCoef: float32 = 2.5f;
   private maxItems: int32 = 0;
   private prefetchCountValueInternal: int32 = 0;
   private currentMaxItemsInternal: int32 = 0;

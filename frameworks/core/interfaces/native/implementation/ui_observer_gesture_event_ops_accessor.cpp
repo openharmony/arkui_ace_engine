@@ -13,20 +13,24 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
+
+#include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/node_render_status_monitor.h"
+#include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/gestures/pan_gesture.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/gestures/gesture_event.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_trigger_info_peer.h"
 #include "core/interfaces/native/implementation/pan_recognizer_peer.h"
-#include "arkoala_api_generated.h"
-#include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/gestures/pan_gesture.h"
-#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "core/gestures/gesture_event.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
@@ -118,6 +122,44 @@ Ark_Int32 SetOnAfterPanEndImpl(Ark_Int32 instanceId, const UIObserver_PanListene
     int32_t resourceId = static_cast<int32_t>((*callback).resource.resourceId);
     NG::UIObserverHandler::AddAfterPanEndListenerCallback(
         static_cast<int32_t>(instanceId), resourceId, std::move(handleFunc));
+    return resourceId;
+}
+Ark_Int32 SetOnNodeRenderStateImpl(
+    Ark_Int32 instanceId, const Ark_Union_String_I32* nodeIdentity, const NodeRenderStateChangeCallback* callback)
+{
+    if (!callback) {
+        return 0;
+    }
+    auto container = AceEngine::Get().GetContainer(static_cast<int32_t>(instanceId));
+    CHECK_NULL_RETURN(container, 0);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, 0);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    auto monitor = pipelineContext->GetNodeRenderStatusMonitor();
+    CHECK_NULL_RETURN(monitor, 0);
+    RefPtr<NG::UINode> node = nullptr;
+    if (nodeIdentity->selector == 0) {
+        std::string key = Converter::Convert<std::string>(nodeIdentity->value0);
+        node = NG::Inspector::GetInspectorByKey(pipelineContext->GetRootElement(), key);
+    } else {
+        node = OHOS::Ace::ElementRegister::GetInstance()->GetUINodeById(nodeIdentity->value1);
+    }
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto frameNodePtr = AceType::RawPtr(frameNode);
+
+    auto handleFunc = [event = CallbackHelper(*callback)](
+                          NG::FrameNode* frameNode, NG::NodeRenderState state, NG::RenderMonitorReason reason) {
+        Ark_NodeRenderState arkState = static_cast<Ark_NodeRenderState>(static_cast<int32_t>(state));
+        Ark_FrameNode arkFrameNode = FrameNodePeer::Create(frameNode ? frameNode : nullptr);
+        auto optValue = Converter::ArkValue<Opt_FrameNode>(arkFrameNode);
+        event.InvokeSync(arkState, optValue);
+    };
+
+    int32_t resourceId = static_cast<int32_t>((*callback).resource.resourceId);
+    monitor->RegisterNodeRenderStatusListener(
+        frameNodePtr, std::move(handleFunc), NG::MonitorSourceType::OBSERVER, resourceId);
     return resourceId;
 }
 Ark_Int32 SetOnWillClickImpl(Ark_Int32 instanceId, const UIObserver_ClickEventListenerCallback* callback)
@@ -255,6 +297,7 @@ const GENERATED_ArkUIUIObserverGestureEventOpsAccessor* GetUIObserverGestureEven
         UIObserverGestureEventOpsAccessor::SetOnBeforePanEndImpl,
         UIObserverGestureEventOpsAccessor::SetOnAfterPanStartImpl,
         UIObserverGestureEventOpsAccessor::SetOnAfterPanEndImpl,
+        UIObserverGestureEventOpsAccessor::SetOnNodeRenderStateImpl,
         UIObserverGestureEventOpsAccessor::SetOnWillClickImpl,
         UIObserverGestureEventOpsAccessor::SetOnDidClickImpl,
         UIObserverGestureEventOpsAccessor::SetOnWillTapImpl,

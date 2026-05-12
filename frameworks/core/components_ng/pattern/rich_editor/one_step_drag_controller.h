@@ -76,7 +76,7 @@ public:
 
 class OneStepDragController {
 public:
-    OneStepDragController(const WeakPtr<RichEditorPattern>& pattern) : pattern_(pattern) {}
+    OneStepDragController(const WeakPtr<TextPattern>& pattern) : pattern_(pattern) {}
     static std::string GetJsonRange(TextSpanType spanType, const RefPtr<FrameNode>& frameNode);
     bool SetMenuParam(TextSpanType spanType, const Builder& builder, const SelectMenuParam& menuParam);
     void EnableOneStepDrag(TextSpanType spanType, const RefPtr<FrameNode>& frameNode);
@@ -95,7 +95,7 @@ private:
 
 private:
     const std::unique_ptr<OneStepDragParam> invalidParam = nullptr;
-    WeakPtr<RichEditorPattern> pattern_;
+    WeakPtr<TextPattern> pattern_;
     std::unique_ptr<OneStepDragParam> imageDragParam_ = nullptr;
     std::unique_ptr<OneStepDragParam> placeholderDragParam_ = nullptr;
 };

@@ -18,8 +18,8 @@
 #include <utility>
 
 #include "frameworks/base/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/compatible/components/refresh/refresh_component.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -38,11 +38,6 @@ RefPtr<RefreshComponent> RefreshModelImpl::GetComponent()
     }
     auto component = AceType::DynamicCast<RefreshComponent>(stack->GetMainComponent());
     return component;
-}
-
-void RefreshModelImpl::Pop()
-{
-    JSContainerBase::Pop();
 }
 
 void RefreshModelImpl::SetRefreshing(bool isRefreshing)

@@ -29,8 +29,11 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+
+namespace OHOS::Ace {
+class TextLayoutProperty;
+}
 
 namespace OHOS::Ace::NG {
 // TextLayoutAlgorithm acts as the underlying text layout.
@@ -73,19 +76,7 @@ protected:
     ACE_FORCE_EXPORT OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
     ACE_FORCE_EXPORT virtual void SetAdaptFontSizeStepToTextStyle(
         TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep);
-    std::string SpansToString()
-    {
-        std::stringstream ss;
-        for (auto& list : spans_) {
-            ss << "[";
-            for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
-                ss << "[" << item->interval.first << "," << item->interval.second << ":"
-                   << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
-            });
-            ss << "], ";
-        }
-        return ss.str();
-    }
+    std::string SpansToString();
 
     virtual RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
         const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) {

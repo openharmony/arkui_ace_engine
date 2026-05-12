@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #define private public
 #define protected public

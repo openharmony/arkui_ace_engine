@@ -21,13 +21,14 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/common/resource/resource_object.h"
+#include "ui/properties/blur_style_option.h"
 #include "ui/properties/ui_material.h"
 
 #define ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(name)                                   \
@@ -213,6 +214,7 @@ struct SheetStyle {
     std::optional<ModalTransition> modalTransition;
     std::optional<RenderStrategy> radiusRenderStrategy;
     RefPtr<UiMaterial> systemMaterial;
+    std::optional<EdgeLightMode> sheetEdgeLightMode;
 
     SheetStyle() = default;
     // constructor for image generator dialog
@@ -240,7 +242,8 @@ struct SheetStyle {
                 detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge &&
                 placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget &&
                 showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition &&
-                radiusRenderStrategy == sheetStyle.radiusRenderStrategy && systemMaterial == sheetStyle.systemMaterial);
+                radiusRenderStrategy == sheetStyle.radiusRenderStrategy &&
+                systemMaterial == sheetStyle.systemMaterial && sheetEdgeLightMode == sheetStyle.sheetEdgeLightMode);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -290,6 +293,7 @@ struct SheetStyle {
         radiusRenderStrategy =
             sheetStyle.radiusRenderStrategy.has_value() ? sheetStyle.radiusRenderStrategy : radiusRenderStrategy;
         systemMaterial = sheetStyle.systemMaterial ? sheetStyle.systemMaterial : systemMaterial;
+        sheetEdgeLightMode = sheetStyle.sheetEdgeLightMode ? sheetStyle.sheetEdgeLightMode : sheetEdgeLightMode;
     }
 
     // Register the set/get method of the resource.

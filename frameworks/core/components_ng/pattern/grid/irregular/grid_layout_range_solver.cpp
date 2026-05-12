@@ -161,6 +161,25 @@ int32_t FindItemStartRow(const GridLayoutInfo& info, int32_t startRow, int32_t c
 }
 }
 
+void GridLayoutRangeSolver::UpdateStartItemForMultiRow(const std::map<int32_t, int32_t>& row,
+    int32_t colIdx, const std::map<int32_t, int32_t>::const_iterator& colIt, int32_t currentRowIdx,
+    int32_t& startLine, int32_t& startItem) const
+{
+    auto currentColIt = row.find(std::max(colIdx - 1, 0));
+    bool isCurrentRow = (currentColIt != row.end() && currentColIt->second == -colIt->second);
+    if (isCurrentRow) {
+        // current row contain startItem
+        startItem = -colIt->second;
+        return;
+    }
+
+    int32_t firstRow = FindItemStartRow(*info_, currentRowIdx, colIdx);
+    if (firstRow < startLine) {
+        startLine = firstRow;
+        startItem = -colIt->second;
+    }
+}
+
 std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t idx)
 {
     auto rowIt = info_->gridMatrix_.find(idx);
@@ -183,14 +202,10 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t i
         }
 
         if (colIt->second < 0) {
-            int32_t firstRow = FindItemStartRow(*info_, idx, c);
-            if (firstRow < startLine) {
-                startLine = firstRow;
-                startItem = -colIt->second;
-            }
+            UpdateStartItemForMultiRow(row, c, colIt, idx, startLine, startItem);
         }
 
-        const int32_t itemIdx = std::abs(colIt->second);
+        const int32_t itemIdx = info_->GetOriginalIndex(std::abs(colIt->second));
         if (opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
             if (opts_->getSizeByIndex) {
                 auto size = opts_->getSizeByIndex(itemIdx);

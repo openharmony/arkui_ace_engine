@@ -225,6 +225,7 @@ bool WaterFlowLayoutAlgorithm::MeasureToTarget(
                 .referencePos = position.startMainPos + layoutInfo_->currentOffset_,
                 .referenceEdge = ReferenceEdge::START,
                 .axis = axis_,
+                .deadline = cacheDeadline,
             };
             itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
                 { itemCrossSize->second, mainSize_, axis_ }, ref, layoutProperty, itemWrapper));
@@ -309,7 +310,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             const bool inRange = item.first >= layoutInfo_->startIndex_ && item.first <= layoutInfo_->endIndex_;
             const bool isCache = !showCache && !inRange;
-            auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first), isCache);
+            auto wrapper = WaterFlowLayoutUtils::GetWaterFlowItemByIndex(
+                layoutWrapper, GetChildIndexWithFooter(item.first), isCache);
             if (!wrapper) {
                 continue;
             }

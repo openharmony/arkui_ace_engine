@@ -21,6 +21,8 @@
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
 
+#include <bitset>
+
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"

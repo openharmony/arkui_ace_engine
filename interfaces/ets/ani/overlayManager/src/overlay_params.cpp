@@ -105,7 +105,7 @@ std::function<void(int32_t)> GetOpenOrderOverlayPromise(std::shared_ptr<OverlayA
                     TAG_LOGW(AceLogTag::ACE_OVERLAY, "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
                 }
             } else {
-                std::string errorMsg = AniUtils::GetErrorMsg(errorCode);
+                std::string errorMsg = AniUtils::ErrorToMessage(errorCode);
                 ani_error error = AniUtils::GetErrorObject(env, errorMsg, errorCode);
                 status = env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {

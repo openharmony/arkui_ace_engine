@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/common/container.h"
 
 #include "effect/color_filter.h"
 
@@ -1405,6 +1406,14 @@ void SetImageFillSetByUser(ArkUINodeHandle node, ArkUI_Bool value)
     ImageModelNG::SetImageFillSetByUser(frameNode, static_cast<bool>(value));
 }
 
+void SetReloadKey(ArkUINodeHandle node, ArkUI_CharPtr reloadKey)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string key(reloadKey ? reloadKey : "");
+    ImageModelNG::SetReloadKey(frameNode, key);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -1536,6 +1545,7 @@ const ArkUIImageModifier* GetImageModifier()
         .resetAntiAlias = ResetAntiAlias,
         .getAntiAlias = GetAntiAlias,
         .setImageFillSetByUser = SetImageFillSetByUser,
+        .setReloadKey = SetReloadKey,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

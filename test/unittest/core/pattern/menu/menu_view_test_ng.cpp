@@ -28,6 +28,7 @@
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -67,6 +68,7 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1831,5 +1833,53 @@ HWTEST_F(MenuViewTestNg, Create004, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: UpdateNodeThemeScopeId001
+ * @tc.desc: Verify UpdateNodeThemeScopeId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateNodeThemeScopeId001, TestSize.Level1)
+{
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    targetNode->UpdateThemeScopeId(1);
+
+    auto node1 = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<Pattern>()); // missing target version
+    node1->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+    EXPECT_EQ(MenuView::UpdateNodeThemeScopeId(node1, targetNode->GetId(), V2::TEXT_ETS_TAG, true), 0);
+
+    auto node2 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<Pattern>());
+    node2->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    EXPECT_EQ(MenuView::UpdateNodeThemeScopeId(node2, targetNode->GetId(), V2::TEXT_ETS_TAG, false), 0);
+
+    auto node3 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<Pattern>());
+    node3->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    EXPECT_EQ(MenuView::UpdateNodeThemeScopeId(node3, targetNode->GetId(), V2::TEXT_ETS_TAG, true), 1);
+}
+
+/**
+ * @tc.name: CreateCustomNodeThemeScopeId001
+ * @tc.desc: Verify MenuView::Create with custom node for ThemeScopeId branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, CreateCustomNodeThemeScopeId001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    targetNode->UpdateThemeScopeId(123);
+    auto customNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<Pattern>());
+
+    MenuParam menuParam;
+    menuParam.type = MenuType::SUB_MENU;
+    menuParam.isColorModeFollowTarget = true;
+
+    auto container = Container::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, false, nullptr);
+
+    ASSERT_NE(menuNode, nullptr);
+    EXPECT_EQ(menuNode->GetThemeScopeId(), 123);
 }
 } // namespace OHOS::Ace::NG

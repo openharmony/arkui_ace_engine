@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "base/memory/ace_type.h"
+#include "core/common/window.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/size.h"

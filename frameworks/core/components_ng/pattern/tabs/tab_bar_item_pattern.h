@@ -18,7 +18,9 @@
 
 #include "core/components/focus_animation/focus_animation_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_item_accessibility_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 const auto TWO = 2;
@@ -50,6 +52,17 @@ public:
         FocusPaintParam focusPaintParam;
         focusPaintParam.SetPaintWidth(tabTheme->GetActiveIndicatorWidth());
         focusPaintParam.SetPaintColor(focusTheme->GetColor());
+        FocusPattern focus = { FocusType::SCOPE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
+
+        auto tabBar = host->GetAncestorNodeOfFrame(false);
+        CHECK_NULL_RETURN(tabBar, focus);
+        auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+        CHECK_NULL_RETURN(tabBarPattern, focus);
+        auto useNewMaterial = tabBarPattern->IsNewMaterial();
+        if (useNewMaterial) {
+            focusPaintParam.SetPaintWidth(tabTheme->GetOutlineExtraLarger());
+            focusPaintParam.SetPaintColor(tabTheme->GetInteractiveFocusColor());
+        }
         return { FocusType::SCOPE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
     }
 

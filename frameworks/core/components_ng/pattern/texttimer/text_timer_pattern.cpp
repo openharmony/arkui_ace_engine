@@ -21,6 +21,10 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/texttimer/text_timer_accessibility_property.h"
+#include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
+#include "core/components_ng/pattern/texttimer/text_timer_layout_algorithm.h"
+#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
@@ -35,6 +39,26 @@ constexpr double DEFAULT_COUNT = 60000.0;
 constexpr int32_t DEFAULT_START_TIME = 0;
 const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 } // namespace
+
+RefPtr<LayoutProperty> TextTimerPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<TextTimerLayoutProperty>();
+}
+
+RefPtr<LayoutAlgorithm> TextTimerPattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<TextTimerLayoutAlgorithm>();
+}
+
+RefPtr<AccessibilityProperty> TextTimerPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<TextTimerAccessibilityProperty>();
+}
+
+RefPtr<EventHub> TextTimerPattern::CreateEventHub()
+{
+    return MakeRefPtr<TextTimerEventHub>();
+}
 
 TextTimerPattern::TextTimerPattern()
 {

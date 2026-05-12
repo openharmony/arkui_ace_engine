@@ -14,6 +14,7 @@
  */
 
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_static.h"

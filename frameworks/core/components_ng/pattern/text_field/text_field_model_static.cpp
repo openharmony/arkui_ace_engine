@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/common/container.h"
 
 #include <cstddef>
 
@@ -647,6 +648,16 @@ void TextFieldModelStatic::SetTextDecorationStyle(FrameNode* frameNode,
         TextFieldModelNG::SetTextDecorationStyle(frameNode, valueOpt.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetLineThicknessScale(FrameNode* frameNode, const std::optional<float>& valueOpt)
+{
+    if (valueOpt) {
+        auto lineThicknessScale = valueOpt.value() < 0 ? DEFAULT_LINE_THICKNESS_SCALE : valueOpt.value();
+        TextFieldModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineThicknessScale, frameNode);
     }
 }
 

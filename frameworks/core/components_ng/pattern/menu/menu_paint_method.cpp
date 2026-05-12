@@ -14,8 +14,11 @@
  */
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 
+#include "base/geometry/shape.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
+#include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

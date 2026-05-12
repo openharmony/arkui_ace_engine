@@ -25,7 +25,7 @@
 namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
 
-JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info)
+JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchInfo)
 {
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
     objectTemplate->SetInternalFieldCount(1);
@@ -56,7 +56,7 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     touchInfoObj->SetProperty<int32_t>("hand", touchInfo.GetOperatingHand());
     touchInfoObj->SetPropertyObject("getCurrentLocalPosition",
         JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
-    touchInfoObj->Wrap<TouchEventInfo>(&info);
+    touchInfoObj->Wrap<TouchLocationInfo>(const_cast<TouchLocationInfo*>(&touchInfo));
     return touchInfoObj;
 }
 
@@ -83,7 +83,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     const std::list<TouchLocationInfo>& touchList = info.GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {
-        JSRef<JSObject> element = CreateTouchInfo(location, info);
+        JSRef<JSObject> element = CreateTouchInfo(location);
         touchArr->SetValueAt(idx++, element);
     }
     eventObj->SetPropertyObject("touches", touchArr);
@@ -91,7 +91,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     idx = 0; // reset index counter
     const std::list<TouchLocationInfo>& changeTouch = info.GetChangedTouches();
     for (const TouchLocationInfo& change : changeTouch) {
-        JSRef<JSObject> element = CreateTouchInfo(change, info);
+        JSRef<JSObject> element = CreateTouchInfo(change);
         changeTouchArr->SetValueAt(idx++, element);
     }
     if (changeTouch.size() > 0) {

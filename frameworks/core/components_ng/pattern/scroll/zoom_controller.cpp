@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 
+#include "core/animation/spring_curve.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"

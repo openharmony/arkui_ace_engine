@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -22,6 +23,7 @@
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 #include "napi/native_node_hybrid_api.h"
+#include "core/components/navigator/navigator_type.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1417,6 +1419,13 @@ std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
         return "";
     }
     return delegate_->GetPagePathByUrl(url);
+}
+
+bool DeclarativeFrontend::IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+{
+    CHECK_NULL_RETURN(page, false);
+    CHECK_NULL_RETURN(delegate_, false);
+    return delegate_->IsPageInStack(page);
 }
 
 void* DeclarativeFrontend::CreateDynamicPage(

@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/arkts_frontend/arkts_frontend.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/base/utils/utils.h"

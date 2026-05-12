@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_LAYOUT_PROPERTY_H
 
-#include "base/geometry/axis.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_request_data.h"

@@ -23,6 +23,10 @@ void SetPanListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_int instanceId, ani_int resourceId, ani_string tag, ani_fn_object fnObj);
 void RemovePanListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_int instanceId, ani_string tag, ani_fn_object fnObj);
+void SetOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int instanceId, ani_int resourceId,
+    ani_object nodeIdentity, ani_fn_object fnObj);
+void RemoveOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int instanceId,
+    ani_object nodeIdentity, ani_fn_object fnObj);
 void SetClickListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_int instanceId, ani_int resourceId, ani_string tag, ani_fn_object fnObj);
 void RemoveClickListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
