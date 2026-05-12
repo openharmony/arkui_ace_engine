@@ -1306,6 +1306,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/picker_data.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/picker_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/particle/particle_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker_utils/picker_column_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker_utils/picker_column_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker_utils/toss_animation_controller.cpp",
@@ -1720,6 +1721,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_radio_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_slider_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_water_flow_modifier.cpp",
+    "$ace_root/test/unittest/core/pattern/particle/mock/mock_rosen_particle_context.cpp",
   ]
   if (ace_engine_feature_enable_split_mode) {
     sources += [

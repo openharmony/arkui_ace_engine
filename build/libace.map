@@ -1339,6 +1339,7 @@
       "OHOS::Ace::NG::ImageLoadingContext::MoveCanvasImage()";
       "OHOS::Ace::NG::ImagePainter::DrawImage(OHOS::Rosen::Drawing::Canvas&, OHOS::Ace::NG::OffsetT<float> const&, OHOS::Ace::NG::SizeT<float> const&) const";
       "OHOS::Ace::NG::ImagePattern::ImagePattern()";
+      "OHOS::Ace::NG::ParticlePattern::ParticlePattern(unsigned int)";
       "OHOS::Ace::NG::ImageSpanItem::SetImageSpanOptions(OHOS::Ace::ImageSpanOptions const&)";
       "OHOS::Ace::NG::ImageSpanItem::UpdateLpxUnitFlag()";
       "OHOS::Ace::NG::InputEventActuator::InputEventActuator(OHOS::Ace::WeakPtr<OHOS::Ace::NG::InputEventHub> const&)";
@@ -3163,6 +3164,7 @@
       "OHOS::Ace::V2::PatternLockComponent::SetSideLength(OHOS::Ace::Dimension const&)";
       "OHOS::Ace::V2::PatternLockComponent::SetStrokeWidth(OHOS::Ace::Dimension const&)";
       "OHOS::Ace::V2::PLACEHOLDER_SPAN_ETS_TAG";
+      "OHOS::Ace::V2::PARTICLE_ETS_TAG";
       "OHOS::Ace::V2::RICH_EDITOR_CONTENT_ETS_TAG";
       "OHOS::Ace::V2::RICH_EDITOR_ETS_TAG";
       "OHOS::Ace::V2::ROW_ETS_TAG";
@@ -4045,6 +4047,7 @@
       vtable?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::OnTextChangedListenerImpl;
       vtable?for?OHOS::Ace::NG::PagePattern;
+      vtable?for?OHOS::Ace::NG::ParticlePattern;
       vtable?for?OHOS::Ace::NG::PanGesture;
       vtable?for?OHOS::Ace::NG::ParallelPagePattern;
       vtable?for?OHOS::Ace::NG::ParallelRecognizer;
@@ -4180,6 +4183,7 @@
       VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OnTextChangedListenerImpl;
       VTT?for?OHOS::Ace::NG::PagePattern;
+      VTT?for?OHOS::Ace::NG::ParticlePattern;
       VTT?for?OHOS::Ace::NG::PanGesture;
       VTT?for?OHOS::Ace::NG::ParallelPagePattern;
       VTT?for?OHOS::Ace::NG::ParallelRecognizer;

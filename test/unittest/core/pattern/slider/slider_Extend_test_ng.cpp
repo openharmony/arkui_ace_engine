@@ -803,8 +803,8 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier->sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::INSET));
     EXPECT_EQ(sliderContentModifier->directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
     auto rect1 = sliderContentModifier->GetBoundsRect();
-    EXPECT_EQ(rect1->Width(), 130.0f);
-    EXPECT_EQ(rect1->Height(), 60.0f);
+    EXPECT_EQ(rect1->Width(), 370.0f);
+    EXPECT_EQ(rect1->Height(), 180.0f);
     sliderPaintProperty->UpdateSliderMode(SliderModelNG::SliderMode::OUTSET);
     sliderPaintProperty->UpdateDirection(Axis::VERTICAL);
     auto paintWrapper2 = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, sliderPaintProperty);
@@ -812,8 +812,8 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier->sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
     EXPECT_EQ(sliderContentModifier->directionAxis_->Get(), static_cast<int>(Axis::VERTICAL));
     auto rect2 = sliderContentModifier->GetBoundsRect();
-    EXPECT_EQ(rect2->Width(), 40.0f);
-    EXPECT_EQ(rect2->Height(), 100.0f);
+    EXPECT_EQ(rect2->Width(), 120.0f);
+    EXPECT_EQ(rect2->Height(), 260.0f);
 }
 
 /**

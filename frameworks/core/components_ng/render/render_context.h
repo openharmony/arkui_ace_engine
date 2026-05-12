@@ -65,6 +65,7 @@ struct SharedTransitionOption;
 class UiMaterial;
 struct UiMaterialInfo;
 struct ImmersiveMaterialConfig;
+struct FrostedGlassParam;
 enum class MaterialType;
 enum class UiMaterialFilterQuality;
 class RenderEdgeLightModifier;
@@ -377,6 +378,11 @@ public:
     virtual void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) {}
 
     void SetSystemMaterial(const RefPtr<UiMaterial>& material);
+    virtual std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
+        const FrostedGlassParam& param, float dipScale)
+    {
+        return nullptr;
+    }
     virtual void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
     {}

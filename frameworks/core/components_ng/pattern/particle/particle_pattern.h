@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
   
-class ACE_EXPORT ParticlePattern : public Pattern {
+class ACE_FORCE_EXPORT ParticlePattern : public Pattern {
     DECLARE_ACE_TYPE(ParticlePattern, Pattern);
 
 public:
