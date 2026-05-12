@@ -234,6 +234,26 @@ public:
         return blurStyleOption_;
     }
 
+    void SetMenuDistortionMode(std::optional<DistortionMode> mode)
+    {
+        menuDistortionMode_ = mode;
+    }
+
+    std::optional<DistortionMode> GetMenuDistortionMode() const
+    {
+        return menuDistortionMode_;
+    }
+
+    void SetMenuEdgeLightMode(std::optional<EdgeLightMode> mode)
+    {
+        menuEdgeLightMode_ = mode;
+    }
+
+    std::optional<EdgeLightMode> GetMenuEdgeLightMode() const
+    {
+        return menuEdgeLightMode_;
+    }
+
     void SetShowInSubWindow(bool isShowInSubWindow);
     void ResetShowInSubWindow();
     void SetShowDefaultSelectedIcon(bool show);
@@ -435,6 +455,8 @@ private:
     std::optional<Color> optionBgColor_;
     std::optional<Color> fontColor_;
     RefPtr<UiMaterial> menuSystemMaterial_ = nullptr;
+    std::optional<DistortionMode> menuDistortionMode_;
+    std::optional<EdgeLightMode> menuEdgeLightMode_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

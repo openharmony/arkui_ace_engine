@@ -33,6 +33,7 @@
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -6245,6 +6246,21 @@ void NavigationPattern::UpdateNavigationStatus()
     auto frameWidth = GetNavigationFrameSize().Width();
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
     SetNavigationWidthToolBarManager(initNavBarWidth_, frameWidth - initNavBarWidth_ - dividerWidth, dividerWidth);
+}
+
+void NavigationPattern::InitToolBarManager()
+{
+    if (!toolbarManager_) {
+        auto pipeline = GetHost()->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        toolbarManager_ = pipeline->GetToolbarManager();
+        UpdateNavigationStatus();
+    }
+}
+
+RefPtr<ToolbarManager> NavigationPattern::GetToolBarManager()
+{
+    return toolbarManager_;
 }
 
 SizeF NavigationPattern::GetNavigationFrameSize()

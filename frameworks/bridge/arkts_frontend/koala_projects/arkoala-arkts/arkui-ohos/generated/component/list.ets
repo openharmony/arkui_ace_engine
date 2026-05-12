@@ -19,7 +19,7 @@
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister, Finalizable, MaterializedBaseTag } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { EditModeOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { EditModeOptions_serializer, Bindable_Boolean_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, EditModeOptions, Bindable, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
 import { LengthConstrain_serializer, ItemFillPolicy_serializer, CacheCountInfo_serializer, Resource as arkui_component_units_Resource, LengthConstrain, ItemFillPolicy, Dimension, CacheCountInfo, Length, ResponsiveFillType, ResourceColor } from './units'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
@@ -250,6 +250,26 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         EditModeOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._ListAttribute_setEditModeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableEditModeAttribute(value: boolean | Bindable<boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as boolean
+                thisSerializer.writeBoolean(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Bindable) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setEnableEditMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFocusWrapModeAttribute(value: FocusWrapMode | undefined): void {
@@ -621,6 +641,9 @@ export interface ListAttribute extends ScrollableCommonMethod {
     editModeOptions(value: EditModeOptions): this {
         throw new Error('Unimplemented method editModeOptions')
     }
+    enableEditMode(value: boolean | Bindable<boolean> | undefined): this {
+        throw new Error('Unimplemented method enableEditMode')
+    }
     focusWrapMode(value: FocusWrapMode | undefined): this {
         throw new Error('Unimplemented method focusWrapMode')
     }
@@ -764,6 +787,11 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     public editModeOptions(value: EditModeOptions): this {
         const value_casted = value as (EditModeOptions)
         this.getPeer()?.setEditModeOptionsAttribute(value_casted)
+        return this
+    }
+    public enableEditMode(value: boolean | Bindable<boolean> | undefined): this {
+        const value_casted = value as (boolean | Bindable<boolean> | undefined)
+        this.getPeer()?.setEnableEditModeAttribute(value_casted)
         return this
     }
     public focusWrapMode(value: FocusWrapMode | undefined): this {

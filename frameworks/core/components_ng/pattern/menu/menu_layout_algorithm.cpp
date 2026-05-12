@@ -3994,6 +3994,9 @@ void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetSDFShape(menuSDFShape);
+        if (!menuPattern->IsUseDistortionAnimation()) {
+            renderContext->UpdateSubmenuDistortionParam();
+        }
     }
 #endif
 }

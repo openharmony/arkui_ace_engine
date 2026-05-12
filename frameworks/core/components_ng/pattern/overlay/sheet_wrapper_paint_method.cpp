@@ -192,8 +192,9 @@ bool SheetWrapperPaintMethod::IsDrawBorder(PaintWrapper* paintWrapper)
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    // In pc condition, SHEET_POPUP without material need Shadow
     if (sheetTheme->IsOuterBorderEnable() && sheetType == SheetType::SHEET_POPUP &&
-        !sheetStyle.borderWidth.has_value() && !sheetStyle.systemMaterial) {
+        !sheetStyle.borderWidth.has_value()) {
         return true;
     }
     return false;

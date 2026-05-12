@@ -24,6 +24,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
@@ -1675,6 +1676,13 @@ void GestureEventHub::RemovePanEvent(const RefPtr<PanEvent>& panEvent)
     }
     panEventActuator_->RemovePanEvent(panEvent);
 }
+
+void GestureEventHub::SetPanEventTag(const std::string& tag)
+{
+    CHECK_NULL_VOID(panEventActuator_);
+    panEventActuator_->SetPanEventTag(tag);
+}
+
 
 void GestureEventHub::SetPanEventType(GestureTypeName typeName)
 {

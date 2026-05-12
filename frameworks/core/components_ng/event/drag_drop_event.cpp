@@ -29,6 +29,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_handler.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

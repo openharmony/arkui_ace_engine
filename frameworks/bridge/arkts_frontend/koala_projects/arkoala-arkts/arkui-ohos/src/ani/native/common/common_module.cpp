@@ -1964,4 +1964,16 @@ ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
     }
     return resultArray;
 }
+
+void DumpLogPrint(ani_env* env, [[maybe_unused]] ani_object obj, ani_int depth, ani_string content)
+{
+    std::string contentStr = AniUtils::ANIStringToStdString(env, content);
+    auto* modifier = GetNodeAniModifier();
+    if (modifier) {
+        auto* common = modifier->getCommonAniModifier();
+        if (common && common->dumpLogPrint) {
+            common->dumpLogPrint(depth, contentStr.c_str());
+        }
+    }
+}
 } // namespace OHOS::Ace::Ani

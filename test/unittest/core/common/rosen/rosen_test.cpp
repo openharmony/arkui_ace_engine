@@ -21,6 +21,7 @@
 #include "core/common/rosen/rosen_convert_helper.h"
 #include "core/common/rosen/rosen_enums.h"
 #include "core/common/rosen/rosen_window.h"
+#include "core/components_ng/base/frame_node.h"
 #undef private
 #undef protected
 #include "mock_rosen.h"

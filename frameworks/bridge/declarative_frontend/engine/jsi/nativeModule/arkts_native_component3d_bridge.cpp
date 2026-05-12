@@ -40,7 +40,7 @@ ArkUINativeModuleValue Component3DBridge::SetShaderInputBuffer(ArkUIRuntimeCallI
     }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto array = Local<panda::ArrayRef>(secondArg);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
 
     std::vector<ArkUI_Float32> bufferArray;
     for (uint32_t index = 0; index < length; index++) {

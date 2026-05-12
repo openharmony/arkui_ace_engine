@@ -34,6 +34,7 @@
 #include "form_ashmem.h"
 #include "pointer_event.h"
 
+#include "base/resource/shared_image_manager.h"
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "core/image/image_cache.h"
@@ -72,6 +73,7 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/pipeline/container_window_manager.h"

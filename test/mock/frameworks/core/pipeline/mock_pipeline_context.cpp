@@ -22,6 +22,7 @@
 #include "core/common/clipboard/clipboard.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
@@ -35,12 +36,22 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
@@ -1156,6 +1167,11 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
     return false;
 }
 
+bool PipelineContext::SetIsFocusActive(bool isFocusActive, bool autoFocusInactive)
+{
+    return false;
+}
+
 bool PipelineContext::NeedSoftKeyboard()
 {
     return false;
@@ -1918,6 +1934,20 @@ bool WindowManager::GetPageViewportConfig(
 // WindowManager ===============================================================
 
 namespace OHOS::Ace::NG {
+bool PipelineContext::GetIsFocusActive() const
+{
+    return false;
+}
+
+RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() const
+{
+    return privacySensitiveManager_;
+}
+
+void PipelineContext::ChangeSensitiveNodes(bool flag)
+{
+}
+
 void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
 {
 }

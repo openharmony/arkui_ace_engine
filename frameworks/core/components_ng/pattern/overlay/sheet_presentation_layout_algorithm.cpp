@@ -203,7 +203,7 @@ void SheetPresentationLayoutAlgorithm::CalcMaxHeightMinusDoubleStatusBarHeight(
     CHECK_NULL_VOID(host);
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
         if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
             maxHeight = std::min(static_cast<float>(maxHeight), sheetMaxHeight - sheetTopSafeArea * DOUBLE_SIZE);

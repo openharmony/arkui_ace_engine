@@ -24,6 +24,8 @@
 #include "core/animation/page_transition_common.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/manager/focus/focus_view.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"

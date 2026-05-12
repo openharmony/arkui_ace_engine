@@ -40,6 +40,10 @@
 #include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Rosen {
+class RSNGShapeBase;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace::NG {
 class AnimatablePropertyFloat;
 template<typename T, typename S>
@@ -332,6 +336,8 @@ public:
     void HandleFocusEvent();
     void HandleBlurEvent();
 
+    void RemoveSDFShape();
+
     void HandleDragStart();
 
     void HandleDragUpdate(const GestureEvent& info);
@@ -355,6 +361,9 @@ public:
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
     void SetSheetBorderWidth(bool isPartialUpdate = false);
+
+    void ClearSheetRenderMaterial();
+    void SetSheetRenderMaterial();
 
     void SetCurrentOffset(float currentOffset)
     {
@@ -1054,6 +1063,10 @@ public:
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ResetClipShape();
     std::string GetPopupStyleSheetClipPath(const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
+#ifdef ENABLE_ROSEN_BACKEND
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetPopupStyleSheetClipPathSDF(
+        const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
+#endif
     void SheetTransitionForOverlay(bool isTransitionIn, bool isFirstTransition);
     void OnLanguageConfigurationUpdate() override;
     bool AvoidKeyboardBeforeTranslate();
@@ -1110,6 +1123,18 @@ public:
     bool GetNeedDoubleAvoidAfterLayout() const
     {
         return needDoubleAvoidAfterLayout_;
+    }
+
+    void SetSheetEdgeLightMode(const SheetStyle& sheetStyle)
+    {
+        if (sheetStyle.sheetEdgeLightMode.has_value()) {
+            sheetEdgeLightMode_ = sheetStyle.sheetEdgeLightMode.value();
+        }
+    }
+
+    EdgeLightMode GetSheetEdgeLightMode()
+    {
+        return sheetEdgeLightMode_;
     }
 
     void SetEnableDragControl(bool enable)
@@ -1259,6 +1284,8 @@ private:
     bool isOnDisappearing_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
     SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
+
+    EdgeLightMode sheetEdgeLightMode_ = EdgeLightMode::EDGELIGHT_DISABLED;
 
     //record sheet sored detent index
     uint32_t detentsIndex_ = 0;

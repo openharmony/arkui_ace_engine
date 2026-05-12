@@ -162,7 +162,8 @@ HWTEST_F(SheetPresentationTestEightNg, CalcMaxHeightMinusDoubleStatusBarHeight00
     layoutAlgorithm->CalcMaxHeightMinusDoubleStatusBarHeight(
         Referenced::RawPtr(layoutWrapper), maxHeight, sheetMaxHeight);
 
-    EXPECT_EQ(maxHeight, 800.0f);
+    double expectedMaxHeight = std::min(800.0f, 1000.0f - 50.0f * 2);
+    EXPECT_EQ(maxHeight, expectedMaxHeight);
 
     SheetPresentationTestEightNg::TearDownTestCase();
 }
@@ -192,8 +193,7 @@ HWTEST_F(SheetPresentationTestEightNg, CalcMaxHeightMinusDoubleStatusBarHeight00
     layoutAlgorithm->CalcMaxHeightMinusDoubleStatusBarHeight(
         Referenced::RawPtr(layoutWrapper), maxHeight, sheetMaxHeight);
 
-    double expectedMaxHeight = std::min(800.0f, 1000.0f - 50.0f * 2);
-    EXPECT_EQ(maxHeight, expectedMaxHeight);
+    EXPECT_EQ(maxHeight, 800.0f);
 
     SheetPresentationTestEightNg::TearDownTestCase();
 }

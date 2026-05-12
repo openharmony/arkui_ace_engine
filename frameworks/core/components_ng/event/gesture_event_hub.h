@@ -31,7 +31,6 @@
 #include "core/components_ng/event/gesture_event_hub_types.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
-#include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -52,6 +51,10 @@ class DragEvent;
 }
 
 namespace OHOS::Ace::NG {
+class ScrollableActuator;
+class ScrollableEvent;
+class ScrollEdgeEffect;
+
 using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
 using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
@@ -271,6 +274,7 @@ public:
     void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
         const PanDistanceMapDimension& distanceMap, double angle = DEFAULT_PAN_ANGLE);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
+    void SetPanEventTag(const std::string& tag);
     void SetPanEventType(GestureTypeName typeName);
     void SetPanCanCoexistWithScroll(bool value);
     void SetLongPressEventType(GestureTypeName typeName);

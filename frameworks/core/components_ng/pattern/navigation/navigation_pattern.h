@@ -537,20 +537,9 @@ public:
     void OnFinishOneTransitionAnimation();
     bool HandleIntent(bool needTransition);
 
-    void InitToolBarManager()
-    {
-        if (!toolbarManager_) {
-            auto pipeline = GetHost()->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            toolbarManager_ = pipeline->GetToolbarManager();
-            UpdateNavigationStatus();
-        }
-    }
+    void InitToolBarManager();
 
-    RefPtr<ToolbarManager> GetToolBarManager()
-    {
-        return toolbarManager_;
-    }
+    RefPtr<ToolbarManager> GetToolBarManager();
 
     bool IsForceSplitSuccess() const
     {

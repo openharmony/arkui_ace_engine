@@ -28,6 +28,11 @@ constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
 constexpr int32_t NUM_3 = 3;
 constexpr float HALF_FLOAT = 0.5f;
+constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
+constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
+constexpr int32_t OVERLONG_SMALL_COUNT = 2;
+constexpr float SECOND_SMALLEST_POINT_RATIO = 0.5f;
+constexpr float SMALLEST_POINT_RATIO = 0.25f;
 } // namespace
 
 void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -44,6 +49,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
+    bool useSystemMaterial = dotIndicatorModifier_->GetUseSystemMaterial();
     dotIndicatorModifier_->SetIsLoop(isLoop_);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
@@ -51,7 +57,8 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     dotIndicatorModifier_->SetRealItemCount(realItemCount_);
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
-    dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
+    dotIndicatorModifier_->SetIndicatorMask(
+        useSystemMaterial ? false : paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
     dotIndicatorModifier_->SetAnimationStartIndex(animationStartIndex_);
@@ -63,6 +70,14 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     dotIndicatorModifier_->SetIndicatorDotItemSpace(paintProperty->GetSpaceValue(
         swiperTheme->GetIndicatorDotItemSpace()));
     
+    dotIndicatorModifier_->SetTurnPageRate(turnPageRate_);
+    dotIndicatorModifier_->SetGestureState(gestureState_);
+    dotIndicatorModifier_->SetIsCustomSizeValue(IsCustomSizeValue_);
+    dotIndicatorModifier_->SetTouchBottomTypeLoop(touchBottomTypeLoop_);
+    const auto [blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate] = GetMoveRate();
+    dotIndicatorModifier_->SetBlackPointCenterMoveRate(blackPointCenterMoveRate);
+    dotIndicatorModifier_->SetLongPointLeftCenterMoveRate(longPointLeftCenterMoveRate);
+    dotIndicatorModifier_->SetLongPointRightCenterMoveRate(longPointRightCenterMoveRate);
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * HALF_FLOAT;
     dotIndicatorModifier_->SetCenterY(centerY_);
@@ -71,11 +86,108 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
         dotIndicatorModifier_->InitOverlongStatus(currentIndex_);
     }
 
+    if (touchBottomType_ != TouchBottomType::NONE) {
+        if (!dotIndicatorModifier_->GetIsPressed()) {
+            PaintPressIndicator(paintWrapper);
+            dotIndicatorModifier_->SetIsPressed(true);
+        }
+        UpdateBackground(paintWrapper);
+    } else if (isPressed_) {
+        PaintPressIndicator(paintWrapper);
+        dotIndicatorModifier_->SetIsPressed(true);
+    }
+
     if (touchBottomType_ == TouchBottomType::NONE && !isPressed_ && !isHover_) {
         PaintNormalIndicator(paintWrapper);
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
     }
+}
+
+void OverlengthDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    auto indicatorTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(indicatorTheme);
+
+    auto itemWidth = static_cast<float>(paintProperty->GetItemWidthValue(indicatorTheme->GetSize()).ConvertToPx());
+    auto itemHeight = static_cast<float>(paintProperty->GetItemHeightValue(indicatorTheme->GetSize()).ConvertToPx());
+    auto selectedItemWidth =
+        static_cast<float>(paintProperty->GetSelectedItemWidthValue(indicatorTheme->GetSize()).ConvertToPx());
+    auto selectedItemHeight =
+        static_cast<float>(paintProperty->GetSelectedItemHeightValue(indicatorTheme->GetSize()).ConvertToPx());
+
+    LinearVector<float> itemHalfSizes;
+    float indicatorScale = indicatorTheme->GetIndicatorScale();
+    itemHalfSizes.emplace_back(itemWidth * HALF_FLOAT * indicatorScale);
+    itemHalfSizes.emplace_back(itemHeight * HALF_FLOAT * indicatorScale);
+    itemHalfSizes.emplace_back(selectedItemWidth * HALF_FLOAT * indicatorScale);
+    itemHalfSizes.emplace_back(selectedItemHeight * HALF_FLOAT * indicatorScale);
+
+    if (touchBottomType_ != TouchBottomType::NONE) {
+        Dimension indicatorDotItemSpace = paintProperty->GetSpaceValue(indicatorTheme->GetIndicatorDotItemSpace());
+        float allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
+        if (IsCustomSizeValue_) {
+            allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
+        }
+        float allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (itemCount_ - 1);
+
+        int32_t displayCount = itemCount_;
+        if (maxDisplayCount_ > 0) {
+            displayCount = maxDisplayCount_;
+            allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (displayCount - 1);
+            allPointDiameterSum = itemWidth * (displayCount - OVERLONG_SMALL_COUNT - 1) + selectedItemWidth +
+                                  itemWidth * SECOND_SMALLEST_POINT_RATIO + itemWidth * SMALLEST_POINT_RATIO;
+        }
+
+        Dimension paddingSide = indicatorTheme->GetIndicatorPaddingDot();
+        float padding = static_cast<float>(paddingSide.ConvertToPx());
+        float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
+        float newRectWidth =
+            rectWidth * (TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE - TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE * displayCount);
+        auto changeValue = (newRectWidth - rectWidth) * touchBottomRate_;
+
+        float space = static_cast<float>(indicatorDotItemSpace.ConvertToPx());
+        if (displayCount > 1) {
+            space = (rectWidth + changeValue - padding * NUM_2 - allPointDiameterSum) / (displayCount - 1);
+        }
+        longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(), padding, space, currentIndex_);
+        if (touchBottomType_ == TouchBottomType::START) {
+            for (size_t index = 0; index < vectorBlackPointCenterX_.size(); index++) {
+                vectorBlackPointCenterX_[index] = vectorBlackPointCenterX_[index] - changeValue;
+            }
+            if (maxDisplayCount_ > NUM_2 && maxDisplayCount_ <= static_cast<int32_t>(vectorBlackPointCenterX_.size())) {
+                float actualItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
+                vectorBlackPointCenterX_[maxDisplayCount_ - NUM_2] -= actualItemWidth * 0.25f;
+                vectorBlackPointCenterX_[maxDisplayCount_ - NUM_1] -= actualItemWidth * 0.875f;
+            }
+            longPointCenterX_.first = longPointCenterX_.first - changeValue;
+            longPointCenterX_.second = longPointCenterX_.second - changeValue;
+        } else if (touchBottomType_ == TouchBottomType::END && maxDisplayCount_ > 0 && itemCount_ > maxDisplayCount_) {
+            float actualItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
+            float overlongShrinkOffset = actualItemWidth * 1.125f;
+            float actualOffset = (itemCount_ - maxDisplayCount_) * (actualItemWidth + space) + overlongShrinkOffset;
+
+            int32_t startIndex = itemCount_ - maxDisplayCount_;
+            for (int32_t i = 0; i < maxDisplayCount_; i++) {
+                if (startIndex + i < static_cast<int32_t>(vectorBlackPointCenterX_.size())) {
+                    vectorBlackPointCenterX_[i] = vectorBlackPointCenterX_[startIndex + i] - actualOffset;
+                }
+            }
+            if (maxDisplayCount_ > NUM_2 && vectorBlackPointCenterX_.size() >= NUM_2) {
+                vectorBlackPointCenterX_[0] += actualItemWidth * 0.875f;
+                vectorBlackPointCenterX_[1] += actualItemWidth * 0.25f;
+            }
+
+            longPointCenterX_.first = longPointCenterX_.first - actualOffset;
+            longPointCenterX_.second = longPointCenterX_.second - actualOffset;
+        }
+    }
+    dotIndicatorModifier_->UpdateTouchBottomAnimation(
+        touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_, touchBottomRate_);
 }
 
 void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
@@ -97,6 +209,38 @@ void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
         dotIndicatorModifier_->SetLongPointLeftCenterMoveRate(longPointLeftCenterMoveRate);
         dotIndicatorModifier_->SetLongPointRightCenterMoveRate(longPointRightCenterMoveRate);
         dotIndicatorModifier_->UpdateNormalPaintProperty(normalMargin_, itemHalfSizes, overlongSelectedCenterX_);
+    }
+}
+
+void OverlengthDotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+
+    float indicatorScale = swiperTheme->GetIndicatorScale();
+    auto [longPointCenterX, itemHalfSizesTemp] = CalculateLongPointCenterX(paintWrapper);
+    LinearVector<float> itemHalfSizes;
+    for (const auto& item : itemHalfSizesTemp) {
+        itemHalfSizes.emplace_back(item * indicatorScale);
+    }
+    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
+    Dimension indicatorDotItemSpace = paintProperty->GetSpaceValue(swiperTheme->GetIndicatorDotItemSpace());
+    longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(),
+        static_cast<float>(paddingSide.ConvertToPx()),
+        static_cast<float>(indicatorDotItemSpace.ConvertToPx()), currentIndex_);
+
+    if (dotIndicatorModifier_->GetIsPressed()) {
+        dotIndicatorModifier_->UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
+    } else if (dotIndicatorModifier_->GetIsHover()) {
+        dotIndicatorModifier_->SetIsPressed(true);
+        dotIndicatorModifier_->UpdateHoverAndPressConversionPaintProperty();
+    } else {
+        dotIndicatorModifier_->UpdateNormalToPressPaintProperty(
+            itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
     }
 }
 

@@ -55,6 +55,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components/theme/ui_material_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -386,6 +387,31 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
     bool isReadFirstNode)
 {
+    CHECK_NULL_VOID(node);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
+    auto isTopOrder = IsTopOrder(levelOrder);
+    bool isNeedFocus = isTopOrder && dialogProps.focusable;
+    
+    if (dialogPattern->NeedDistortion()) {
+        auto onFinishEvent = [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), isNeedFocus] {
+            auto overlayManager = weak.Upgrade();
+            auto node = nodeWK.Upgrade();
+            CHECK_NULL_VOID(overlayManager && node);
+            if (isNeedFocus) {
+                overlayManager->FocusOverlayNode(node);
+            }
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            dialogPattern->CallDialogDidAppearCallback();
+            overlayManager->ContentChangeReport(node, true);
+        };
+        dialogPattern->RegisterOnFinishEvent(onFinishEvent);
+        if (isTopOrder && isReadFirstNode) {
+            SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
+        }
+        return;
+    }
     auto pipeline = GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
@@ -396,15 +422,10 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
     option.SetCurve(Curves::SHARP);
     option.SetDuration(theme->GetOpacityAnimationDurIn());
     option.SetFillMode(FillMode::FORWARDS);
-    auto dialogPattern = node->GetPattern<DialogPattern>();
-    CHECK_NULL_VOID(dialogPattern);
     option = dialogPattern->GetOpenAnimation().value_or(option);
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
     auto onFinish = option.GetOnFinishEvent();
-    auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
-    auto isTopOrder = IsTopOrder(levelOrder);
-    bool isNeedFocus = isTopOrder && dialogProps.focusable;
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), onFinish, isNeedFocus] {
             if (onFinish) {
@@ -4874,12 +4895,14 @@ void OverlayManager::UpdateSheetRender(
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = sheetPageNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+
+    sheetNodePattern->ClearSheetRenderMaterial();
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
     }
-    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetNodePattern);
     sheetNodePattern->SetSheetBorderWidth();
     if (sheetStyle.borderStyle.has_value()) {
         sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
@@ -4899,17 +4922,7 @@ void OverlayManager::UpdateSheetRender(
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 
-    if (sheetStyle.systemMaterial) {
-        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
-        if (!MaterialUtils::CallSetMaterial(
-            AceType::RawPtr(sheetPageNode), AceType::RawPtr(sheetStyle.systemMaterial))) {
-            ViewAbstract::SetSystemMaterialImmediate(
-                AceType::RawPtr(sheetPageNode), AceType::RawPtr(sheetStyle.systemMaterial));
-        }
-    } else {
-        sheetRenderContext->SetSystemMaterial(nullptr);
-        sheetNodePattern->RemoveResObj("sheet.uiMaterial");
-    }
+    sheetNodePattern->SetSheetRenderMaterial();
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -4944,6 +4957,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     if (isStartByUIContext) {
         currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->SetSheetEdgeLightMode(currentStyle);
         sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
         UpdateSheetRenderProperty(sheetNode, currentStyle, isPartialUpdate);
         sheetNodePattern->UpdateDragBarStatus();
@@ -4963,6 +4977,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
         auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         layoutProperty->UpdateSheetStyle(sheetStyle);
         sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->SetSheetEdgeLightMode(sheetStyle);
         sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
         UpdateSheetRenderProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
@@ -4999,6 +5014,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     layoutProperty->UpdateSheetStyle(sheetStyle);
     sheetNodePattern->UpdateSheetType();
+    sheetNodePattern->SetSheetEdgeLightMode(sheetStyle);
     sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
     UpdateSheetRenderProperty(sheetNode, sheetStyle, false);
     sheetNodePattern->SetBottomOffset(sheetStyle);

@@ -21,7 +21,7 @@ import { ContextMenuOptions, CustomPopupOptions, DragEvent, DragInteractionOptio
 import { CustomBuilder } from '../framework';
 import { DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions } from '../component/common';
 import { GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent } from '../component/common';
-import { LinearGradientBlurOptions, BackgroundOptions } from '../component/common';
+import { LinearGradientBlurOptions, BackgroundOptions, SmartGestureShortcutOptions } from '../component/common';
 import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions } from '../component/common';
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../component/common';
 import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, RotateAngleOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
@@ -792,5 +792,9 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     size(value: SizeOptions | undefined): this {
         this.getPeer().setSizeAttribute(value);
         return this;
+    }
+    smartGestureShortcut(value: SmartGestureShortcutOptions): this {
+        this.getPeer()?.setSmartGestureShortcutAttribute(value as SmartGestureShortcutOptions)
+        return this
     }
 }

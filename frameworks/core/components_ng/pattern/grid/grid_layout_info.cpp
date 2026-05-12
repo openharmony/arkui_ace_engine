@@ -98,6 +98,9 @@ void GridLayoutInfo::ClearOnMoveDragState()
 {
     dragOriginalIndexMap_.clear();
     isOnMoveDragUpdate_ = false;
+    isOnMoveGridChange_ = false;
+    fromDragIndex_ = -1;
+    toDragIndex_ = -1;
 }
 
 void GridLayoutInfo::MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex)

@@ -299,7 +299,7 @@ ArkUINativeModuleValue ParticleBridge::SetDisturbanceField(ArkUIRuntimeCallInfo*
         return panda::JSValueRef::Undefined(vm);
     }
     auto array = panda::Local<panda::ArrayRef>(jsValueRef);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     std::vector<ArkUIInt32orFloat32> dataVector;
     dataVector.resize(length);
     for (uint32_t index = 0; index < length / DISTURBANCE_FIELD_SIZE; index++) {
@@ -373,7 +373,7 @@ ArkUINativeModuleValue ParticleBridge::SetRippleField(ArkUIRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     auto array = panda::Local<panda::ArrayRef>(jsValueRef);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     std::vector<ArkRippleFieldOptions> dataVector;
 
     for (uint32_t i = 0; i < length; i++) {
@@ -418,7 +418,7 @@ ArkUINativeModuleValue ParticleBridge::SetVelocityField(ArkUIRuntimeCallInfo* ru
         return panda::JSValueRef::Undefined(vm);
     }
     auto array = panda::Local<panda::ArrayRef>(jsValueRef);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     std::vector<ArkVelocityFieldOptions> dataVector;
 
     for (uint32_t i = 0; i < length; i++) {
@@ -479,7 +479,7 @@ ArkUINativeModuleValue ParticleBridge::SetEmitter(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     auto array = panda::Local<panda::ArrayRef>(jsValueRef);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     std::vector<ArkEmitterPropertyOptions> dataVector;
     dataVector.resize(length);
 

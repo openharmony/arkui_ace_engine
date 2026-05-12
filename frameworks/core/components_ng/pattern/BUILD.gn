@@ -482,6 +482,7 @@ build_component_ng("pattern_ng") {
     "sheet/minimize/sheet_presentation_minimize_layout_algorithm.cpp",
     "sheet/sheet_mask_accessibility_property.cpp",
     "sheet/sheet_object.cpp",
+    "sheet/sheet_edge_light.cpp",
     "sheet/sheet_wrapper_accessibility_property.cpp",
     "sheet/side/sheet_presentation_side_layout_algorithm.cpp",
     "sheet/side/sheet_side_object.cpp",
@@ -712,6 +713,7 @@ build_component_ng("pattern_ng") {
     }
   } else if (is_arkui_x) {
     deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
+    sources += [ "$ace_root/frameworks/core/components/dialog/dialog_properties.cpp" ]
   }
 
   if (defined(global_parts_info.graphic_graphic_3d) && !build_ohos_sdk) {

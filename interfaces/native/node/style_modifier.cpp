@@ -8684,6 +8684,69 @@ const ArkUI_AttributeItem* GetListBackPressCloseSwipeAction(ArkUI_NodeHandle nod
     return &g_attributeItem;
 }
 
+int32_t SetListEnableEditMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Bool enableEditMode = item->value[0].i32;
+    GetFullImpl()->getNodeModifiers()->getListModifier()->setListEnableEditMode(node->uiNodeHandle, enableEditMode);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListEnableEditMode(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getListModifier()->resetListEnableEditMode(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListEnableEditMode(ArkUI_NodeHandle node)
+{
+    ArkUI_Bool value = GetFullImpl()->getNodeModifiers()->getListModifier()->getListEnableEditMode(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
+int32_t SetListEditModeOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr || item->size < NUM_1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 useDefaultMultiSelectStyle = NUM_1;
+    if (item->size >= NUM_1) {
+        if (!InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        useDefaultMultiSelectStyle = item->value[NUM_0].i32;
+    }
+    ArkUI_Int32 enableFingerMultiSelect = NUM_1;
+    if (item->size >= NUM_2) {
+        if (!InRegion(NUM_0, NUM_1, item->value[NUM_1].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        enableFingerMultiSelect = item->value[NUM_1].i32;
+    }
+    ArkUI_EditModeOptions options;
+    options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle;
+    options.enableFingerMultiSelect = enableFingerMultiSelect;
+    GetFullImpl()->getNodeModifiers()->getListModifier()->setEditModeOptions(node->uiNodeHandle, &options);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListEditModeOptions(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getListModifier()->resetEditModeOptions(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListEditModeOptions(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 values[3] = { 0 };
+    GetFullImpl()->getNodeModifiers()->getListModifier()->getEditModeOptions(node->uiNodeHandle, &values);
+    g_numberValues[0].i32 = values[1];
+    g_numberValues[1].i32 = values[2];
+    g_attributeItem.size = NUM_2;
+    return &g_attributeItem;
+}
+
 // TextArea
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -21810,7 +21873,8 @@ int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize, SetListInitialIndex, SetListDivider,
         SetListScrollToItemInGroup, SetListLanes, SetListScrollSnapAlign, SetListMaintainVisibleContentPosition,
         SetListStackFromEnd, SetListFocusWrapMode, SetListSyncLoad, SetListScrollAnimationSpeed,
-        SetListItemFillPolicy, SetListSupportEmptyBranchInLazyLoading, SetListBackPressCloseSwipeAction };
+        SetListItemFillPolicy, SetListSupportEmptyBranchInLazyLoading, SetListBackPressCloseSwipeAction,
+        SetListEnableEditMode, SetListEditModeOptions };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -21824,7 +21888,7 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
         nullptr, GetListAlignListItem, nullptr, GetListInitialIndex, GetListDivider, nullptr, GetListLanes,
         GetListScrollSnapAlign, GetListMaintainVisibleContentPosition, GetListStackFromEnd, GetListFocusWrapMode,
         GetListSyncLoad, GetListScrollAnimationSpeed, GetListItemFillPolicy, GetListSupportEmptyBranchInLazyLoading,
-        GetListBackPressCloseSwipeAction };
+        GetListBackPressCloseSwipeAction, GetListEnableEditMode, GetListEditModeOptions };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -21838,7 +21902,8 @@ void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize, ResetListInitialIndex,
         ResetListDivider, nullptr, ResetListLanes, ResetListScrollSnapAlign, ResetListMaintainVisibleContentPosition,
         ResetListStackFromEnd, ResetListFocusWrapMode, ResetListSyncLoad, ResetListScrollAnimationSpeed,
-        ResetListItemFillPolicy, ResetListSupportEmptyBranchInLazyLoading, ResetListBackPressCloseSwipeAction };
+        ResetListItemFillPolicy, ResetListSupportEmptyBranchInLazyLoading, ResetListBackPressCloseSwipeAction,
+        ResetListEnableEditMode, ResetListEditModeOptions};
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

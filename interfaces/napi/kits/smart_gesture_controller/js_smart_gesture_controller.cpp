@@ -567,6 +567,14 @@ class SmartGestureMonitorRegistry final {
 public:
     static bool Register(napi_env env, int32_t instanceId, napi_value callback)
     {
+        auto iter = states_.find(instanceId);
+        if (iter != states_.end()) {
+            for (const auto& state : iter->second) {
+                if (state && state->MatchesCallback(env, callback)) {
+                    return true;
+                }
+            }
+        }
         auto state = SmartGestureMonitorState::Create(env, instanceId, callback);
         if (!state) {
             return false;
@@ -649,7 +657,7 @@ public:
             return resolution;
         }
 
-        return CreateAcceptedResolution();
+        return CreateRejectedResolution();
     }
 
 private:
@@ -758,6 +766,10 @@ bool GetRequiredBooleanArgument(napi_env env, napi_callback_info info, bool& val
     if (!GetSingleParam(env, info, &arg, valueType)) {
         NapiThrow(env, INVALID_PARAM_COUNT_MESSAGE, ERROR_CODE_PARAM_INVALID);
         return false;
+    }
+    if (valueType == napi_undefined || valueType == napi_null) {
+        value = false;
+        return true;
     }
     if (valueType != napi_boolean) {
         NapiThrow(env, INVALID_ENABLED_TYPE_MESSAGE, ERROR_CODE_PARAM_INVALID);

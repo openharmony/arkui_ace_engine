@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
@@ -30,6 +31,7 @@ struct NodeKoalaInfo {
     std::function<void()> pageTransitionFunc;
     std::function<void()> onCleanupFunc;
     std::function<std::string()> onDumpInspectorFunc;
+    std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::string jsViewName;
 };
 

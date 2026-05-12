@@ -29,6 +29,8 @@ namespace OHOS::Ace::NG {
 ScrollableEvent::ScrollableEvent(Axis axis) : axis_(axis) {};
 ScrollableEvent::~ScrollableEvent() = default;
 
+ScrollableActuator::~ScrollableActuator() = default;
+
 ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
     : gestureEventHub_(gestureEventHub)
 {}

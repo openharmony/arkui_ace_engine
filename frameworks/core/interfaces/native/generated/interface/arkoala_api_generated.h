@@ -1853,6 +1853,8 @@ typedef struct NavExtender_PageMapNodeBuilder NavExtender_PageMapNodeBuilder;
 typedef struct Opt_NavExtender_PageMapNodeBuilder Opt_NavExtender_PageMapNodeBuilder;
 typedef struct NavExtender_PushDestinationInner NavExtender_PushDestinationInner;
 typedef struct Opt_NavExtender_PushDestinationInner Opt_NavExtender_PushDestinationInner;
+typedef struct NodeRenderStateChangeCallback NodeRenderStateChangeCallback;
+typedef struct Opt_NodeRenderStateChangeCallback Opt_NodeRenderStateChangeCallback;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
 typedef struct Opt_OnAdsBlockedCallback Opt_OnAdsBlockedCallback;
 typedef struct OnAISessionCallback OnAISessionCallback;
@@ -4682,6 +4684,15 @@ typedef struct Opt_DismissReason {
     Ark_Tag tag;
     Ark_DismissReason value;
 } Opt_DismissReason;
+typedef enum Ark_DistortionMode {
+    ARK_DISTORTION_MODE_DISTORTION_AUTO = 0,
+    ARK_DISTORTION_MODE_DISTORTION_ENABLED = 1,
+    ARK_DISTORTION_MODE_DISTORTION_DISABLED = 2,
+} Ark_DistortionMode;
+typedef struct Opt_DistortionMode {
+    Ark_Tag tag;
+    Ark_DistortionMode value;
+} Opt_DistortionMode;
 typedef enum Ark_DistributionType {
     ARK_DISTRIBUTION_TYPE_UNIFORM = 0,
     ARK_DISTRIBUTION_TYPE_GAUSSIAN = 1,
@@ -4802,6 +4813,15 @@ typedef struct Opt_EdgeEffect {
     Ark_Tag tag;
     Ark_EdgeEffect value;
 } Opt_EdgeEffect;
+typedef enum Ark_EdgeLightMode {
+    ARK_EDGE_LIGHT_MODE_EDGELIGHT_AUTO = 0,
+    ARK_EDGE_LIGHT_MODE_EDGELIGHT_ENABLED = 1,
+    ARK_EDGE_LIGHT_MODE_EDGELIGHT_DISABLED = 2,
+} Ark_EdgeLightMode;
+typedef struct Opt_EdgeLightMode {
+    Ark_Tag tag;
+    Ark_EdgeLightMode value;
+} Opt_EdgeLightMode;
 typedef enum Ark_EffectDirection {
     ARK_EFFECT_DIRECTION_DOWN = 0,
     ARK_EFFECT_DIRECTION_UP = 1,
@@ -6063,6 +6083,14 @@ typedef struct Opt_NestedScrollMode {
     Ark_Tag tag;
     Ark_NestedScrollMode value;
 } Opt_NestedScrollMode;
+typedef enum Ark_NodeRenderState {
+    ARK_NODE_RENDER_STATE_ABOUT_TO_RENDER_IN = 0,
+    ARK_NODE_RENDER_STATE_ABOUT_TO_RENDER_OUT = 1,
+} Ark_NodeRenderState;
+typedef struct Opt_NodeRenderState {
+    Ark_Tag tag;
+    Ark_NodeRenderState value;
+} Opt_NodeRenderState;
 typedef enum Ark_ObscuredReasons {
     ARK_OBSCURED_REASONS_PLACEHOLDER = 0,
 } Ark_ObscuredReasons;
@@ -13343,6 +13371,16 @@ typedef struct Opt_NavExtender_PushDestinationInner {
     Ark_Tag tag;
     NavExtender_PushDestinationInner value;
 } Opt_NavExtender_PushDestinationInner;
+typedef struct NodeRenderStateChangeCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_NodeRenderState state, const Opt_FrameNode node);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_NodeRenderState state, const Opt_FrameNode node);
+} NodeRenderStateChangeCallback;
+typedef struct Opt_NodeRenderStateChangeCallback {
+    Ark_Tag tag;
+    NodeRenderStateChangeCallback value;
+} Opt_NodeRenderStateChangeCallback;
 typedef struct OnAdsBlockedCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -22287,6 +22325,8 @@ typedef struct Ark_ActionSheetOptions {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_ActionSheetOptions;
 typedef struct Opt_ActionSheetOptions {
     Ark_Tag tag;
@@ -22330,6 +22370,8 @@ typedef struct Ark_AlertDialogParamWithButtons {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
     Ark_AlertDialogButtonBaseOptions primaryButton;
     Ark_AlertDialogButtonBaseOptions secondaryButton;
 } Ark_AlertDialogParamWithButtons;
@@ -22375,6 +22417,8 @@ typedef struct Ark_AlertDialogParamWithConfirm {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
     Opt_AlertDialogButtonBaseOptions confirm;
 } Ark_AlertDialogParamWithConfirm;
 typedef struct Opt_AlertDialogParamWithConfirm {
@@ -22419,6 +22463,8 @@ typedef struct Ark_AlertDialogParamWithOptions {
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
     Array_AlertDialogButtonOptions buttons;
     Opt_DialogButtonDirection buttonDirection;
 } Ark_AlertDialogParamWithOptions;
@@ -22609,6 +22655,8 @@ typedef struct Ark_CustomDialogControllerOptions {
     Opt_LevelOrder levelOrder;
     Opt_Boolean focusable;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
@@ -22656,6 +22704,8 @@ typedef struct Ark_CustomDialogControllerOptionsExtender {
     Opt_LevelOrderExtender levelOrderExtender;
     Opt_Boolean focusable;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_CustomDialogControllerOptionsExtender;
 typedef struct Opt_CustomDialogControllerOptionsExtender {
     Ark_Tag tag;
@@ -25152,6 +25202,8 @@ typedef struct GENERATED_ArkUIListModifier {
                             const Opt_Boolean* value);
     void (*setEditModeOptions)(Ark_NativePointer node,
                                const Ark_EditModeOptions* value);
+    void (*setEnableEditMode)(Ark_NativePointer node,
+                              const Opt_Union_Boolean_Bindable_Boolean* value);
     void (*setFocusWrapMode)(Ark_NativePointer node,
                              const Opt_FocusWrapMode* value);
     void (*setSyncLoad)(Ark_NativePointer node,
@@ -26253,6 +26305,10 @@ typedef struct GENERATED_ArkUISelectModifier {
                                               const Opt_BackgroundBlurStyleOptions* value);
     void (*setMenuBackgroundEffect)(Ark_NativePointer node,
                                     const Opt_BackgroundEffectOptions* value);
+    void (*setMenuDistortionMode)(Ark_NativePointer node,
+                                  const Opt_DistortionMode* value);
+    void (*setMenuEdgeLightMode)(Ark_NativePointer node,
+                                 const Opt_EdgeLightMode* value);
     void (*setMenuAlign)(Ark_NativePointer node,
                          const Opt_MenuAlignType* alignType,
                          const Opt_Offset* offset);
@@ -31680,6 +31736,9 @@ typedef struct GENERATED_ArkUIUIObserverGestureEventOpsAccessor {
                                     const UIObserver_PanListenerCallback* callback);
     Ark_Int32 (*setOnAfterPanEnd)(Ark_Int32 instanceId,
                                   const UIObserver_PanListenerCallback* callback);
+    Ark_Int32 (*setOnNodeRenderState)(Ark_Int32 instanceId,
+                                      const Ark_Union_String_I32* nodeIdentity,
+                                      const NodeRenderStateChangeCallback* callback);
     Ark_Int32 (*setOnWillClick)(Ark_Int32 instanceId,
                                 const UIObserver_ClickEventListenerCallback* callback);
     Ark_Int32 (*setOnDidClick)(Ark_Int32 instanceId,

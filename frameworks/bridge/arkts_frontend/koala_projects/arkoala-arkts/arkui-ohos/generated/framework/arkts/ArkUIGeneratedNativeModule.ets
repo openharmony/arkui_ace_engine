@@ -1200,6 +1200,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ListAttribute_setEditModeOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _ListAttribute_setEnableEditMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _ListAttribute_setFocusWrapMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ListAttribute_setSyncLoad(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2081,6 +2083,10 @@ export class ArkUIGeneratedNativeModule {
     native static _SelectAttribute_setMenuBackgroundBlurStyleOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SelectAttribute_setMenuBackgroundEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectAttribute_setMenuDistortionMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectAttribute_setMenuEdgeLightMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SelectAttribute_setMenuAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -7065,6 +7071,8 @@ export class ArkUIGeneratedNativeModule {
     native static _UIObserverGestureEventOps_setOnAfterPanStart(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInt
     @ani.unsafe.Direct
     native static _UIObserverGestureEventOps_setOnAfterPanEnd(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInt
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnNodeRenderState(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInt
     @ani.unsafe.Direct
     native static _UIObserverGestureEventOps_setOnWillClick(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInt
     @ani.unsafe.Direct

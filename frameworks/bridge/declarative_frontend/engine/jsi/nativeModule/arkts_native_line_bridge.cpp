@@ -30,7 +30,7 @@ ArkUINativeModuleValue LineBridge::SetStartPoint(ArkUIRuntimeCallInfo* runtimeCa
     }
 
     auto arrayVal = panda::Local<panda::ArrayRef>(jsValue);
-    auto length = arrayVal->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, arrayVal);
     if (length <= 0) {
         GetArkUINodeModifiers()->getLineModifier()->resetStartPoint(nativeNode);
         return panda::JSValueRef::Undefined(vm);
@@ -101,7 +101,7 @@ ArkUINativeModuleValue LineBridge::SetEndPoint(ArkUIRuntimeCallInfo* runtimeCall
     }
 
     auto arrayVal = panda::Local<panda::ArrayRef>(jsValue);
-    auto length = arrayVal->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, arrayVal);
     if (length <= 0) {
         GetArkUINodeModifiers()->getLineModifier()->resetEndPoint(nativeNode);
         return panda::JSValueRef::Undefined(vm);

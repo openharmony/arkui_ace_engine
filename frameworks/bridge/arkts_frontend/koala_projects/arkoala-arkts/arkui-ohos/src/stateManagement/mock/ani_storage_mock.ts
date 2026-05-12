@@ -26,21 +26,21 @@ export interface IAniStorage {
 
 export class AniStorage implements IAniStorage {
     get(key: string, areaMode: Int | undefined): string | undefined {
-        console.log(`AniStorage.get key ${key}`)
+        stateMgmtConsole.log(`AniStorage.get key ${key}`)
         return undefined;
     }
     set(key: string, val: string, areaMode: Int | undefined): void {
-        console.log(`AniStorage.set key ${key} jsonValue ${val}`)
+        stateMgmtConsole.log(`AniStorage.set key ${key} jsonValue ${val}`)
     }
     has(key: string, areaMode: Int | undefined): boolean {
-        console.log(`AniStorage.has key ${key}`)
+        stateMgmtConsole.log(`AniStorage.has key ${key}`)
         return false;
     }
     clear(): void {
-        console.log(`AniStorage.clear`)
+        stateMgmtConsole.log(`AniStorage.clear`)
     }
     delete(key: string, areaMode: Int | undefined): void {
-        console.log(`AniStorage.delete key ${key}`)
+        stateMgmtConsole.log(`AniStorage.delete key ${key}`)
     }
 }
 

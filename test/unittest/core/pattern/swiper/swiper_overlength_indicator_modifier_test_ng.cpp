@@ -170,8 +170,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     dotIndicatorModifier.animationStartCenterX_ = animationStartCenterX;
     LinearVector<float> normalItemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
     dotIndicatorModifier.UpdateSelectedCenterXOnDrag(normalItemHalfSizes);
-    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.first, 1.4f);
-    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.second, 1.6f);
+    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.first, 1.6f);
+    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.second, 1.4f);
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
 
     dotIndicatorModifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
@@ -193,7 +193,7 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     dotIndicatorModifier.animationStartCenterX_ = animationStartCenterX;
     dotIndicatorModifier.UpdateUnselectedCenterXOnDrag();
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
-    EXPECT_EQ(dotIndicatorModifier.animationEndCenterX_[0], 13.0f);
+    EXPECT_EQ(dotIndicatorModifier.animationEndCenterX_[0], 17.0f);
     EXPECT_EQ(dotIndicatorModifier.animationEndCenterX_[1], 25.f);
 }
 
@@ -216,11 +216,11 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
 
     dotIndicatorModifier.animationStartIndex_ = 1;
     animationEndIndex = dotIndicatorModifier.CalcTargetIndexOnDrag();
-    EXPECT_EQ(animationEndIndex, 1);
+    EXPECT_EQ(animationEndIndex, 0);
 
     dotIndicatorModifier.realItemCount_ = 3;
     animationEndIndex = dotIndicatorModifier.CalcTargetIndexOnDrag();
-    EXPECT_EQ(animationEndIndex, 2);
+    EXPECT_EQ(animationEndIndex, 0);
 }
 
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier006, TestSize.Level1)
@@ -972,6 +972,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateContentModifier001, Test
     paintMethod->isPressed_ = true;
     paintMethod->dotIndicatorModifier_->SetIsHover(true);
     paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->UpdateBackground(&paintWrapper);
+    paintMethod->PaintPressIndicator(&paintWrapper);
     paintMethod->UpdateContentModifier(&paintWrapper);
     auto ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
     auto overLengthModifier = AceType::DynamicCast<OverlengthDotIndicatorModifier>(ptrModifier);
@@ -1009,6 +1011,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateContentModifier002, Test
     paintMethod->isPressed_ = true;
     paintMethod->dotIndicatorModifier_->SetIsHover(true);
     paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->UpdateBackground(&paintWrapper);
+    paintMethod->PaintPressIndicator(&paintWrapper);
     paintMethod->UpdateContentModifier(&paintWrapper);
     auto ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
     auto overLengthModifier = AceType::DynamicCast<OverlengthDotIndicatorModifier>(ptrModifier);
@@ -1046,6 +1050,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateContentModifier003, Test
     paintMethod->isPressed_ = false;
     paintMethod->dotIndicatorModifier_->SetIsHover(true);
     paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->UpdateBackground(&paintWrapper);
+    paintMethod->PaintPressIndicator(&paintWrapper);
     paintMethod->UpdateContentModifier(&paintWrapper);
     auto ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
     auto overLengthModifier = AceType::DynamicCast<OverlengthDotIndicatorModifier>(ptrModifier);

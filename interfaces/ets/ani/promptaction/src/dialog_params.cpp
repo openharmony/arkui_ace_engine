@@ -343,6 +343,26 @@ bool GetDisplayModeInSubWindow(ani_env* env, ani_object object, OHOS::Ace::Dialo
     return true;
 }
 
+bool GetDistortionMode(ani_env* env, ani_object object, std::optional<OHOS::Ace::DistortionMode>& result)
+{
+    ani_int resultInt;
+    if (!GetEnumInt(env, object, "distortionMode", "arkui.component.common.DistortionMode", resultInt)) {
+        return false;
+    }
+    result = static_cast<OHOS::Ace::DistortionMode>(resultInt);
+    return true;
+}
+
+bool GetEdgeLightMode(ani_env* env, ani_object object, std::optional<OHOS::Ace::EdgeLightMode>& result)
+{
+    ani_int resultInt;
+    if (!GetEnumInt(env, object, "edgeLightMode", "arkui.component.common.EdgeLightMode", resultInt)) {
+        return false;
+    }
+    result = static_cast<OHOS::Ace::EdgeLightMode>(resultInt);
+    return true;
+}
+
 void UpdateDialogAlignment(OHOS::Ace::DialogAlignment& alignment)
 {
     bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -445,6 +465,8 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     dialogProps.dialogLevelUniqueId = -1;
     GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
+    GetDistortionMode(env, object, dialogProps.distortionMode);
+    GetEdgeLightMode(env, object, dialogProps.edgeLightMode);
     GetOnLanguageChange(dialogProps);
     return true;
 }
@@ -708,6 +730,8 @@ bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetFunctionParam(env, object, "onDidDisappear", dialogProps.onDidDisappear);
     GetFunctionParam(env, object, "onWillAppear", dialogProps.onWillAppear);
     GetFunctionParam(env, object, "onWillDisappear", dialogProps.onWillDisappear);
+    GetDistortionMode(env, object, dialogProps.distortionMode);
+    GetEdgeLightMode(env, object, dialogProps.edgeLightMode);
     return true;
 }
 
@@ -1029,6 +1053,8 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     GetBoolParam(env, object, "focusable", dialogProps.focusable);
+    GetDistortionMode(env, object, dialogProps.distortionMode);
+    GetEdgeLightMode(env, object, dialogProps.edgeLightMode);
     return true;
 }
 

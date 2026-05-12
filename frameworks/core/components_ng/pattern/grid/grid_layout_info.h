@@ -443,8 +443,12 @@ struct GridLayoutInfo {
 
     int32_t times_ = 0;
 
-    std::map<int32_t, int32_t> dragOriginalIndexMap_;
-    bool isOnMoveDragUpdate_ = false;
+    // onMove drag state
+    std::map<int32_t, int32_t> dragOriginalIndexMap_; // original index before drag swap
+    bool isOnMoveDragUpdate_ = false;                 // true during active onMove drag
+    bool isOnMoveGridChange_ = false;                 // grid properties changed during drag
+    int32_t fromDragIndex_ = -1;                      // global index of drag source item
+    int32_t toDragIndex_ = -1;                        // global index of current swap target
 
     void UpdateDragOriginalIndex(int32_t from, int32_t to);
     int32_t GetOriginalIndex(int32_t currentIndex) const;

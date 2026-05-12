@@ -22,10 +22,19 @@
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
-#include "core/components_ng/manager/form_visible/form_visible_manager.h"
-#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/event/key_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -47,6 +56,7 @@
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
@@ -76,13 +86,16 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -2055,6 +2068,11 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
     return focusManager_;
 }
 
+bool PipelineContext::GetIsFocusActive() const
+{
+    return focusManager_ ? focusManager_->GetIsFocusActive() : false;
+}
+
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
@@ -3519,6 +3537,11 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
     return focusManager->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
 }
 
+bool PipelineContext::SetIsFocusActive(bool isFocusActive, bool autoFocusInactive)
+{
+    return SetIsFocusActive(isFocusActive, FocusActiveReason::DEFAULT, autoFocusInactive);
+}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     OnTouchEvent(point, rootNode_, isSubPipe);
@@ -3645,9 +3668,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+#ifdef SMART_GESTURE_SUPPORTED
         if (eventManager_) {
             eventManager_->ClearSmartGestureSelected();
         }
+#endif // SMART_GESTURE_SUPPORTED
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -4801,9 +4826,11 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+#ifdef SMART_GESTURE_SUPPORTED
         if (eventManager_) {
             eventManager_->ClearSmartGestureSelected();
         }
+#endif
     }
 
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
@@ -8016,11 +8043,16 @@ bool PipelineContext::FreeMouseStyleHoldNode()
 
 void PipelineContext::InitManagers()
 {
+    avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
+    memoryMgr_ = MakeRefPtr<MemoryManager>();
     navigationMgr_ = MakeRefPtr<NavigationManager>();
+    frameRateManager_ = MakeRefPtr<FrameRateManager>();
+    privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    toolbarManager_ = MakeRefPtr<ToolbarManager>();
     environmentManager_ = MakeRefPtr<EnvironmentManager>();
     recycleManager_ = std::make_unique<RecycleManager>();
 }
@@ -8050,6 +8082,11 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
     return recycleManager_;
 }
 
+RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() const
+{
+    return privacySensitiveManager_;
+}
+
 void PipelineContext::RegisterTouchTimingCallback(
     const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>&&
         callback)
@@ -8069,6 +8106,12 @@ void PipelineContext::ProcessCommand(const std::string& command)
     CHECK_NULL_VOID(eventManager_);
     eventManager_->ProcessCommand(command, [this]() { RequestFrame(); });
 #endif
+}
+
+void PipelineContext::ChangeSensitiveNodes(bool flag)
+{
+    CHECK_NULL_VOID(privacySensitiveManager_);
+    privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
 }
 
 void PipelineContext::FlushRelaxedInteraction()

@@ -2232,7 +2232,7 @@ NG::SmartGestureShortcutConfig Convert(const Ark_SmartGestureShortcutOptions& sr
     NG::SmartGestureShortcutConfig config;
     config.action = NG::SmartGestureShortcutAction::PRIMARY;
     config.enabled = Converter::OptConvert<bool>(src.enabled).value_or(false);
-    config.selectable = Converter::OptConvert<bool>(src.selectable).value_or(false);
+    config.selectable = Converter::OptConvert<bool>(src.selectable).value_or(config.enabled);
     auto arkAction = Converter::OptConvert<Ark_GestureShortcut>(src.action);
     if (arkAction.has_value()) {
         switch (arkAction.value()) {
@@ -5066,7 +5066,6 @@ void SetAccessibilityNextFocusIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
         return;
     }
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);
@@ -5598,11 +5597,18 @@ void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
 void SetSmartGestureShortcutImpl(Ark_NativePointer node,
                                  const Ark_SmartGestureShortcutOptions* value)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    auto optAction = Converter::OptConvert<Ark_GestureShortcut>(value->action);
+    if (!optAction.has_value() || optAction.value() != ARK_GESTURE_SHORTCUT_PRIMARY) {
+        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
+        return;
+    }
     NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
     ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
+#endif
 }
 void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
                                const Opt_OnNeedSoftkeyboardCallback* value)
@@ -6636,12 +6642,7 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
             CHECK_NULL_VOID(frameNode);
             PipelineContext::SetCallBackNode(weak);
             auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-            auto finalNode = CreateProxyNode(builderNode);
-#else
-            auto finalNode = builderNode;
-#endif
-            ViewStackProcessor::GetInstance()->Push(finalNode);
+            ViewStackProcessor::GetInstance()->Push(builderNode);
         };
         ContentCoverParam contentCoverParam;
         ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc), modalStyle,
@@ -6693,12 +6694,7 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
             CHECK_NULL_VOID(frameNode);
             PipelineContext::SetCallBackNode(weak);
             auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-            auto finalNode = CreateProxyNode(builderNode);
-#else
-            auto finalNode = builderNode;
-#endif
-            ViewStackProcessor::GetInstance()->Push(finalNode);
+            ViewStackProcessor::GetInstance()->Push(builderNode);
         };
         ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
             modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
@@ -6761,12 +6757,7 @@ void SetBindSheetImpl(Ark_NativePointer node,
         CHECK_NULL_VOID(frameNode);
         PipelineContext::SetCallBackNode(weak);
         auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-        auto finalNode = CreateProxyNode(builderNode);
-#else
-        auto finalNode = builderNode;
-#endif
-        ViewStackProcessor::GetInstance()->Push(finalNode);
+        ViewStackProcessor::GetInstance()->Push(builderNode);
     };
     ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
         std::move(cbs.titleBuilder), sheetStyle, std::move(cbs.onAppear), std::move(cbs.onDisappear),

@@ -56,6 +56,10 @@ public:
 
     void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const std::pair<float, float>& longPointCenterX);
+    void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX) override;
+    void UpdatePressPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX) override;
     void SetRealItemCount(int32_t realItemCount)
     {
         realItemCount_ = realItemCount;
@@ -77,6 +81,14 @@ public:
     void SetAnimationStartCenterX(const LinearVector<float>& animationStartCenterX)
     {
         animationStartCenterX_ = animationStartCenterX;
+    }
+
+    std::pair<float, float> GetVisualBounds() const
+    {
+        auto left = overlongSelectedStartCenterX_.first;
+        auto right = overlongSelectedStartCenterX_.second;
+        auto boundsRectOrigin = boundsRectF_.GetX();
+        return { boundsRectOrigin + left, boundsRectOrigin + right };
     }
 
     void SetAnimationEndCenterX(const LinearVector<float>& animationEndCenterX)

@@ -436,7 +436,7 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxResponseRegion(ArkUIRuntimeCal
         length = lengthArg->Uint32Value(vm);
     } else if (isJsView && secondArg->IsArray(vm)) {
         auto transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-        length = DIMENSION_LENGTH * transArray->Length(vm);
+        length = DIMENSION_LENGTH * ArkTSUtils::GetArrayLength(vm, transArray);
     }
 
     ArkUI_Float32 regionArray[length];

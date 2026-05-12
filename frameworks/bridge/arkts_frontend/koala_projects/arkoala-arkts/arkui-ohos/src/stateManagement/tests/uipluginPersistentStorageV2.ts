@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { PersistenceV2, PersistenceV2Impl, ConnectOptions, StorageDefaultCreator } from '../storage/persistenceV2'
+import { PersistenceV2, PersistenceV2Impl, ConnectOptions, BaseConnectOptions, StorageDefaultCreator, ToJSONType, FromJSONType } from '../storage/persistenceV2'
 import { tsuite, tcase, test, eq, not_eq } from './lib/testFramework'
 import { IMutableStateMeta } from '../decorator'
 import { IObservedObject, RenderIdType } from '../decorator'
@@ -45,6 +45,9 @@ class ConnectOptionsInst<T extends object> implements ConnectOptions<T> {
     key?: string;
     defaultCreator?: StorageDefaultCreator<T>;
     areaMode?: contextConstant.AreaMode;
+    toJson?: ToJSONType<T>;
+    fromJson?: FromJSONType<T>;
+    enableAutoSave?: boolean;
     constructor(ttype: Class) {
         this.type = ttype;
     }
@@ -180,23 +183,20 @@ export function run_persistent_storage_v2(): Boolean {
         let userFromStorage1 = PersistenceV2.connect<User>(
             UserTypeValue,
             'userKey',
-            toJsonUser,
-            fromJsonUser,
-            () => { return new User('defaultByCreator'); })
+            () => { return new User('defaultByCreator'); },
+            { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>)
 
         let userFromStorage2 = PersistenceV2.connect<User>(
             UserTypeValue,
             'userKey',
-            toJsonUser,
-            fromJsonUser,
-            () => { return new User('defaultCreator'); })
+            () => { return new User('defaultCreator'); },
+            { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>)
 
         let userFromStorageKey2 = PersistenceV2.connect<User>(
             UserTypeValue,
             'userKey2',
-            toJsonUser,
-            fromJsonUser,
-            () => { return new User('defaultCreator'); })
+            () => { return new User('defaultCreator'); },
+            { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>)
 
         // Trigger writing to the back store before the start deleting
         ObserveSingleton.instance.updateDirty();
@@ -222,9 +222,8 @@ export function run_persistent_storage_v2(): Boolean {
         let userFromStorage1 = PersistenceV2.connect<User>(
             UserTypeValue,
             'userKey',
-            toJsonUser,
-            fromJsonUser,
-            () => { return new User('defaultByCreator'); })
+            () => { return new User('defaultByCreator'); },
+            { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>)
 
         // Trigger writing to the back store
         ObserveSingleton.instance.updateDirty();
@@ -251,9 +250,8 @@ export function run_persistent_storage_v2(): Boolean {
             let userFromStorage1 = PersistenceV2.connect<Map<string, string>>(
                 Class.from<Map<string, string>>(),
                 'userKey',
-                toJson,
-                fromJson,
-                () => { return new Map<string, string>(); })
+                () => { return new Map<string, string>(); },
+                { toJson: toJson, fromJson: fromJson } as BaseConnectOptions<Map<string, string>>)
         } catch (e) {
             errorTriggered = true;
         }
@@ -273,9 +271,8 @@ export function run_persistent_storage_v2(): Boolean {
             let userFromStorage1 = PersistenceV2.connect<Set<Number>>(
                 Class.from<Set<Number>>(),
                 'userKey',
-                toJson,
-                fromJson,
-                () => { return new Set<Number>() })
+                () => { return new Set<Number>() },
+                { toJson: toJson, fromJson: fromJson } as BaseConnectOptions<Set<Number>>)
         } catch (e) {
             errorTriggered = true;
         }
@@ -286,9 +283,8 @@ export function run_persistent_storage_v2(): Boolean {
         let userFromStorage = PersistenceV2.connect<User>(
             UserTypeValue,
             'userKey-',
-            toJsonUser,
-            fromJsonUser,
-            () => { return new User('defaultByCreator'); })
+            () => { return new User('defaultByCreator'); },
+            { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>)
         // Wrong key generates error message only
         test('Invalid key', not_eq(userFromStorage, undefined));
         // Trigger writing to the back store
@@ -300,9 +296,8 @@ export function run_persistent_storage_v2(): Boolean {
         let userFromStorage = PersistenceV2.connect<User>(
             UserTypeValue,
             '',
-            toJsonUser,
-            fromJsonUser,
-            () => { return new User('defaultByCreator'); })
+            () => { return new User('defaultByCreator'); },
+            { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>)
         test('Empty key', eq(userFromStorage, undefined));
     }
 
@@ -310,25 +305,15 @@ export function run_persistent_storage_v2(): Boolean {
         let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = 'userKey';
         options.defaultCreator = () => { return new User('defaultByCreator') };
+        options.toJson = toJsonUser;
+        options.fromJson = fromJsonUser;
 
-        let userFromStorage1 = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        let userFromStorage1 = PersistenceV2.globalConnect<User>(options)
 
-        let userFromStorage2 = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        let userFromStorage2 = PersistenceV2.globalConnect<User>(options)
 
         options.key = 'userKey2'
-        let userFromStorageKey2 = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser,
-        )
+        let userFromStorageKey2 = PersistenceV2.globalConnect<User>(options)
 
         test('Users the same ', eq(userFromStorage1, userFromStorage2));
         test('User name  the same ', eq(userFromStorage1!.username, userFromStorage2!.username));
@@ -359,19 +344,13 @@ export function run_persistent_storage_v2(): Boolean {
         options.key = userKeyEL1
         options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = () => { return new User('defaultByCreator') };
-        let userEL1 = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        options.toJson = toJsonUser;
+        options.fromJson = fromJsonUser;
+        let userEL1 = PersistenceV2.globalConnect<User>(options)
 
         options.key = userKeyEL5;
         options.areaMode = contextConstant.AreaMode.EL5;
-        let userEL5 = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        let userEL5 = PersistenceV2.globalConnect<User>(options)
         test('Object created', not_eq(userEL1, undefined));
         test('Object created ', not_eq(userEL5, undefined));
 
@@ -379,20 +358,12 @@ export function run_persistent_storage_v2(): Boolean {
         options.key = userKeyEL1
         options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = undefined;
-        let userEL1A = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        let userEL1A = PersistenceV2.globalConnect<User>(options)
 
         options.key = userKeyEL5;
         options.areaMode = contextConstant.AreaMode.EL5;
         options.defaultCreator = undefined;
-        let userEL5A = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        let userEL5A = PersistenceV2.globalConnect<User>(options)
 
         test('Object found', not_eq(userEL1A, undefined));
         test('Object found ', not_eq(userEL5A, undefined));
@@ -428,19 +399,13 @@ export function run_persistent_storage_v2(): Boolean {
         options.key = userKeyEL1
         options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = () => { return new User('defaultByCreator') };
-        let userEL1 = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        options.toJson = toJsonUser;
+        options.fromJson = fromJsonUser;
+        let userEL1 = PersistenceV2.globalConnect<User>(options)
 
         options.key = userKeyEL5;
         options.areaMode = contextConstant.AreaMode.EL5;
-        let userEL5 = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        let userEL5 = PersistenceV2.globalConnect<User>(options)
         test('Object created', not_eq(userEL1, undefined));
         test('Object created ', not_eq(userEL5, undefined));
 
@@ -458,20 +423,12 @@ export function run_persistent_storage_v2(): Boolean {
         options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = undefined;
 
-        let userEL1A = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        let userEL1A = PersistenceV2.globalConnect<User>(options)
 
         options.key = userKeyEL5;
         options.areaMode = contextConstant.AreaMode.EL5;
         options.defaultCreator = undefined;
-        let userEL5A = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        let userEL5A = PersistenceV2.globalConnect<User>(options)
         test('Object read ', not_eq(userEL1A, undefined));
         test('Object read ', not_eq(userEL5A, undefined));
         PersistenceV2.remove(userKeyEL1);
@@ -489,21 +446,18 @@ export function run_persistent_storage_v2(): Boolean {
         let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = userKey;
         options.defaultCreator = () => { return new User('defaultByCreator') };
+        options.toJson = toJsonUser;
+        options.fromJson = fromJsonUser;
 
-        let userGlobal = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        );
+        let userGlobal = PersistenceV2.globalConnect<User>(options);
 
         let errorTriggered = false;
         try {
             let userRegular = PersistenceV2.connect<User>(
                 UserTypeValue,
                 userKey,
-                toJsonUser,
-                fromJsonUser,
-                () => { return new User('defaultByCreator') }
+                () => { return new User('defaultByCreator') },
+                { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>
             );
         } catch (e) {
             errorTriggered = true;
@@ -526,9 +480,8 @@ export function run_persistent_storage_v2(): Boolean {
         let person = PersistenceV2.connect<NonObservedPerson>(
             NonObservedPersonType,
             key,
-            toJsonPerson,
-            fromJsonPerson,
-            () => new NonObservedPerson()
+            () => new NonObservedPerson(),
+            { toJson: toJsonPerson, fromJson: fromJsonPerson } as BaseConnectOptions<NonObservedPerson>
         )
         test('backendUpdateCount', eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
@@ -552,9 +505,8 @@ export function run_persistent_storage_v2(): Boolean {
         let person = PersistenceV2.connect<NonObservedPerson>(
             NonObservedPersonType,
             key,
-            toJsonPerson,
-            fromJsonPerson,
-            () => new NonObservedPerson()
+            () => new NonObservedPerson(),
+            { toJson: toJsonPerson, fromJson: fromJsonPerson } as BaseConnectOptions<NonObservedPerson>
         )
         test('backendUpdateCount', eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
@@ -578,8 +530,8 @@ export function run_persistent_storage_v2(): Boolean {
         let personB = PersistenceV2.connect<NonObservedPerson>(
             NonObservedPersonType,
             key,
-            toJsonPerson,
-            fromJsonPerson,
+            undefined,
+            { toJson: toJsonPerson, fromJson: fromJsonPerson } as BaseConnectOptions<NonObservedPerson>
         )
         test('backendUpdateCount - 0', eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
@@ -608,11 +560,9 @@ export function run_persistent_storage_v2(): Boolean {
         let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = userKey;
         options.defaultCreator = () => { return new User('defaultByCreator') };
-        let userGlobal = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        );
+        options.toJson = toJsonUser;
+        options.fromJson = fromJsonUser;
+        let userGlobal = PersistenceV2.globalConnect<User>(options);
 
         test('userGlobal created ', not_eq(userGlobal, undefined));
 
@@ -621,11 +571,9 @@ export function run_persistent_storage_v2(): Boolean {
         optionsPerson.defaultCreator = undefined;
         let errorTriggered = false;
         try {
-            let userGlobalBadType = PersistenceV2.globalConnect<User>(
-                optionsPerson,
-                toJsonUser,
-                fromJsonUser
-            );
+            optionsPerson.toJson = toJsonUser;
+            optionsPerson.fromJson = fromJsonUser;
+            let userGlobalBadType = PersistenceV2.globalConnect<User>(optionsPerson);
         } catch (e) {
             errorTriggered = true;
         }
@@ -651,9 +599,8 @@ export function run_persistent_storage_v2(): Boolean {
         let userLocal = PersistenceV2.connect<User>(
             UserTypeValue,
             userKey,
-            toJsonUser,
-            fromJsonUser,
-            () => new User('defaultByCreator')
+            () => new User('defaultByCreator'),
+            { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>
         );
 
         test('local created ', not_eq(userLocal, undefined));
@@ -663,8 +610,8 @@ export function run_persistent_storage_v2(): Boolean {
             let userLocalBadType = PersistenceV2.connect<NonObservedPerson>(
                 NonObservedPersonType,
                 userKey,
-                toJsonPerson,
-                fromJsonPerson
+                undefined,
+                { toJson: toJsonPerson, fromJson: fromJsonPerson } as BaseConnectOptions<NonObservedPerson>
             );
         } catch (e) {
             errorTriggered = true;
@@ -685,9 +632,8 @@ export function run_persistent_storage_v2(): Boolean {
         let personLocalBadType = PersistenceV2.connect<NonObservedPerson>(
             NonObservedPersonType,
             userKey,
-            toJsonPerson,
-            fromJsonPerson,
-            () => new NonObservedPerson()
+            () => new NonObservedPerson(),
+            { toJson: toJsonPerson, fromJson: fromJsonPerson } as BaseConnectOptions<NonObservedPerson>
         );
 
         // Trigger writing to the back store
@@ -704,9 +650,8 @@ export function run_persistent_storage_v2(): Boolean {
         let userFromStorage1 = PersistenceV2.connect<User>(
             UserTypeValue,
             'userKey',
-            toJsonUser,
-            fromJsonUser,
-            () => { return new User('defaultByCreator'); })
+            () => { return new User('defaultByCreator'); },
+            { toJson: toJsonUser, fromJson: fromJsonUser } as BaseConnectOptions<User>)
 
         test('backendUpdateCount 0 after connect', eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
         ObserveSingleton.instance.updateDirty();
@@ -721,19 +666,16 @@ export function run_persistent_storage_v2(): Boolean {
     }
 
     tcase('Persists non observed object literal and trigger saving on change') {
-
-        // Test case not valid anymore, we make object literals observable
-        // Ignoring
-        return;
-
+        // NOTE: re-enabled; test is expected to fail because object literals
+        // are now made observable, so backendUpdateCount expectations no
+        // longer match.
         PersistenceV2Impl.backendUpdateCountForTesting = 0;
         const key = 'MyInterfacePropObject';
         let obj = PersistenceV2.connect<NumberInterface>(
             NumberInterfaceType,
             key,
-            toJsonNumberInterface,
-            fromJsonNumberInterface,
-            () => { return { prop: 100. } as NumberInterface; })
+            () => { return { prop: 100. } as NumberInterface; },
+            { toJson: toJsonNumberInterface, fromJson: fromJsonNumberInterface } as BaseConnectOptions<NumberInterface>)
         test('obj created', not_eq(obj, undefined));
         test('backendUpdateCount 0 after update', eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
@@ -763,11 +705,9 @@ export function run_persistent_storage_v2(): Boolean {
         options.key = userKeyEL1
         options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = () => new User('defaultByCreator');
-        let userEL1 = PersistenceV2.globalConnect<User>(
-            options,
-            toJsonUser,
-            fromJsonUser
-        )
+        options.toJson = toJsonUser;
+        options.fromJson = fromJsonUser;
+        let userEL1 = PersistenceV2.globalConnect<User>(options)
 
         test('Object created', not_eq(userEL1, undefined));
 
@@ -787,11 +727,9 @@ export function run_persistent_storage_v2(): Boolean {
             optionsPerson.key = options.key;
             optionsPerson.areaMode = options.areaMode;
             optionsPerson.defaultCreator = undefined;
-            let userEL1A = PersistenceV2.globalConnect<NonObservedPerson>(
-                optionsPerson,
-                toJsonPerson,
-                fromJsonPerson
-            )
+            optionsPerson.toJson = toJsonPerson;
+            optionsPerson.fromJson = fromJsonPerson;
+            let userEL1A = PersistenceV2.globalConnect<NonObservedPerson>(optionsPerson)
         }
         catch (e) {
             errorTriggered = true;

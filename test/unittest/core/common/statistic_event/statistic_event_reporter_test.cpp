@@ -20,6 +20,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/common/statistic_event_reporter.h"
+#include "core/components_ng/base/frame_node.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 using namespace testing;

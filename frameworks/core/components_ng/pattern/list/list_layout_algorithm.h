@@ -533,6 +533,9 @@ public:
 
     void UpdateListItemEditModeCheckBoxSpace(const RefPtr<LayoutWrapper>& wrapper) const;
 
+    static bool NeedReserveEditModeCheckBoxSpaceForList(const RefPtr<FrameNode>& listNode);
+    static void UpdateListItemEditModeCheckBoxSpaceForPredictBuild(
+        const RefPtr<LayoutWrapper>& wrapper, const RefPtr<FrameNode>& listNode);
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);

@@ -275,6 +275,19 @@ public:
         return blockSize_->Get();
     }
 
+    float GetTrackBorderRadius() const
+    {
+        return trackBorderRadius_->Get();
+    }
+
+    float GetSelectedBorderRadius() const
+    {
+        return selectedBorderRadius_->Get();
+    }
+
+    RSRect GetSelectedTrackRect();
+    RSRect GetTrackRect();
+
     void SetVisible(bool isVisible)
     {
         CHECK_NULL_VOID(isVisible_ != isVisible);
@@ -350,9 +363,39 @@ public:
     {
         updateAccessibilityVirtualNode_ = std::move(callback);
     }
+
+    using MaterialNodePositionCallback = std::function<void(float centerX, float centerY, float blockRadius)>;
+    void SetMaterialNodePositionCallback(MaterialNodePositionCallback&& callback)
+    {
+        materialNodePositionCallback_ = std::move(callback);
+    }
+    
+    void SetBlockAlpha(float alpha)
+    {
+        if (blockAlpha_) {
+            blockAlpha_->Set(alpha);
+        }
+    }
+    
+    void SetBlockScale(float scale)
+    {
+        if (blockScale_) {
+            blockScale_->Set(scale);
+        }
+    }
+    
+    float GetBlockAlpha() const
+    {
+        return blockAlpha_ ? blockAlpha_->Get() : 1.0f;
+    }
+    
+    float GetBlockScale() const
+    {
+        return blockScale_ ? blockScale_->Get() : 1.0f;
+    }
+
 private:
     void InitializeShapeProperty();
-    RSRect GetTrackRect();
     RSRect GetBlockRect(float radius);
     RSRect GetShapeCircleBlockRect(const PointF& centerPoint, float drawRadius);
     RSRect GetShapeEllipseBlockRect(const RectF& drawRect);
@@ -416,6 +459,10 @@ private:
     RefPtr<AnimatablePropertyFloat> rectBottomLeftRadiusY_;
     RefPtr<AnimatablePropertyFloat> rectBottomRightRadiusX_;
     RefPtr<AnimatablePropertyFloat> rectBottomRightRadiusY_;
+    
+    RefPtr<AnimatablePropertyFloat> blockAlpha_;
+    RefPtr<AnimatablePropertyFloat> blockScale_;
+    
     // non-animatable property
     RefPtr<PropertyFloat> stepRatio_;
     RefPtr<PropertyInt> sliderMode_;
@@ -442,6 +489,8 @@ private:
     bool isVisible_ = true;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
+    
+    MaterialNodePositionCallback materialNodePositionCallback_;
     bool isEnlarge_ = false;
     float scaleValue_ = 1.0f;
     bool reverse_ = false;

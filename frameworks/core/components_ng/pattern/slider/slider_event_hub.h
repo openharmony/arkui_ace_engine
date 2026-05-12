@@ -47,9 +47,10 @@ public:
         if (onChangeEvent_) {
             onChangeEvent_(value);
         }
-        CHECK_NULL_VOID(changeEvent_);
-        auto changeEvent = changeEvent_;
-        changeEvent(value, mode);
+        if (changeEvent_) {
+            auto changeEvent = changeEvent_;
+            changeEvent(value, mode);
+        }
         if (mode > BEGIN_MODE) {
             value_ = value;
         }

@@ -34,7 +34,9 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #endif
@@ -82,6 +84,8 @@
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -6231,6 +6235,7 @@ void FrameNode::UpdateFocusState()
 
 void FrameNode::UpdateSmartGestureSelectedState()
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto eventManager = context->GetEventManager();
@@ -6238,6 +6243,7 @@ void FrameNode::UpdateSmartGestureSelectedState()
     auto smartGestureManager = eventManager->GetSmartGestureManager();
     CHECK_NULL_VOID(smartGestureManager);
     smartGestureManager->UpdateSelectedNodePaintIfNeeded(AceType::Claim(this));
+#endif
 }
 
 bool FrameNode::SelfOrParentExpansive()
@@ -7263,6 +7269,7 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
         eventHub_->OnAttachContext(context);
     }
     pattern_->OnAttachContext(context);
+#ifdef SMART_GESTURE_SUPPORTED
     if (smartGestureProperty_) {
         auto eventManager = context->GetEventManager();
         CHECK_NULL_VOID(eventManager);
@@ -7271,11 +7278,13 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
             manager->SyncPrimaryActionNode(AceType::Claim(this));
         }
     }
+#endif
 }
 
 void FrameNode::DetachContext(bool recursive)
 {
     CHECK_NULL_VOID(context_);
+#ifdef SMART_GESTURE_SUPPORTED
     if (smartGestureProperty_) {
         auto eventManager = context_->GetEventManager();
         CHECK_NULL_VOID(eventManager);
@@ -7284,6 +7293,7 @@ void FrameNode::DetachContext(bool recursive)
             manager->RemovePrimaryActionNode(GetId());
         }
     }
+#endif
     pattern_->OnDetachContext(context_);
     if (eventHub_) {
         eventHub_->OnDetachContext(context_);

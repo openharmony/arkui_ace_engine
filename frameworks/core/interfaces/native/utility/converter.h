@@ -70,6 +70,8 @@ enum class CancelButtonStyle;
 enum class ChainEdgeEffect;
 enum class CheckBoxStyle;
 enum class CleanNodeStyle;
+enum class DistortionMode;
+enum class EdgeLightMode;
 enum class EffectLayer;
 enum class GestureFocusMode;
 enum class ImageAnalyzerType;
@@ -673,6 +675,8 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
     template<> ACE_FORCE_EXPORT DimensionRect Convert(const Ark_Rectangle &src);
+    template<> DistortionMode Convert(const Ark_DistortionMode& options);
+    template<> EdgeLightMode Convert(const Ark_EdgeLightMode& options);
     template<> EdgesParam Convert(const Ark_Edges& src);
     template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
     template<> ACE_FORCE_EXPORT EffectOption Convert(const Ark_BackgroundEffectOptions& src);

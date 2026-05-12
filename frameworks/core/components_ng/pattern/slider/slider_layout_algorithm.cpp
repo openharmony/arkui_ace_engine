@@ -204,7 +204,6 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto layoutConstraint = layoutProperty->CreateChildConstraint();
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutProperty);
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto frameNode = layoutWrapper->GetHostNode();
@@ -212,38 +211,40 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
-    if (!pattern->UseContentModifier()) {
-        layoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
-    }
-    if (pattern->HasPrefix() || pattern->HasSuffix()) {
-        const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-        auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
-        auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
-        if (axis == Axis::HORIZONTAL) {
-            maxWidth = contentRect.Width() * langRatio;
-            maxHeight = maxWidth * shortRatio;
-        } else {
-            maxHeight = contentRect.Height() * langRatio;
-            maxWidth = maxHeight * shortRatio;
-        }
-        if (pattern->HasPrefix()) {
-            auto prefixChild = layoutWrapper->GetOrCreateChildByIndex(0);
-            CHECK_NULL_VOID(prefixChild);
-            SetChildConstraint(prefixChild, maxWidth, maxHeight);
-        }
-        if (pattern->HasSuffix()) {
-            auto suffixChild = layoutWrapper->GetOrCreateChildByIndex(0);
-            if (pattern->HasPrefix()) {
-                suffixChild = layoutWrapper->GetOrCreateChildByIndex(1);
+    auto childList = layoutWrapper->GetAllChildrenWithBuild();
+    if (pattern->UseContentModifier()) {
+        std::list<RefPtr<LayoutWrapper>> builderChildList;
+        for (const auto& child : childList) {
+            if (!pattern->IsContentModifierNode(child->GetHostNode())) {
+                child->GetGeometryNode()->Reset();
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                builderChildList.push_back(child);
             }
-            CHECK_NULL_VOID(suffixChild);
-            SetChildConstraint(suffixChild, maxWidth, maxHeight);
         }
-    } else {
-        if (layoutWrapper->GetTotalChildCount() != 0) {
-            auto child = layoutWrapper->GetOrCreateChildByIndex(0);
-            CHECK_NULL_VOID(child);
-            child->Measure(layoutConstraint);
+        BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
+    }
+    for (const auto& child : childList) {
+        if (pattern->IsImageBlockNode(child->GetHostNode())) {
+            auto childLayoutContraint = sliderLayoutProperty->CreateChildConstraint();
+            childLayoutContraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
+            child->Measure(childLayoutContraint);
+        } else if (pattern->IsMaterialNode(child->GetHostNode())) {
+            auto childLayoutContraint = sliderLayoutProperty->CreateChildConstraint();
+            child->Measure(childLayoutContraint);
+        } else if (pattern->IsPrefixOrSuffixNode(child->GetHostNode())) {
+            auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
+            auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+            if (axis == Axis::HORIZONTAL) {
+                maxWidth = contentRect.Width() * langRatio;
+                maxHeight = maxWidth * shortRatio;
+            } else {
+                maxHeight = contentRect.Height() * langRatio;
+                maxWidth = maxHeight * shortRatio;
+            }
+            SetChildConstraint(child, maxWidth, maxHeight);
         }
     }
     PerformMeasureSelf(layoutWrapper);
@@ -275,22 +276,33 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (children.empty()) {
         return;
     }
+    for (const auto& child : children) {
+        if (pattern->IsImageBlockNode(child->GetHostNode())) {
+            CalculateBlockOffset(layoutWrapper, child);
+        } else {
+            child->Layout();
+        }
+    }
+}
 
+void SliderLayoutAlgorithm::CalculateBlockOffset(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child)
+{
+    CHECK_NULL_VOID(child);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
     auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SliderTheme>();
+    auto theme = host->GetTheme<SliderTheme>(true);
     CHECK_NULL_VOID(theme);
 
     auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
     auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto paintReverse = sliderLayoutProperty->GetReverseValue(false);
-    auto direction = sliderLayoutProperty->GetLayoutDirection();
     if (axis == Axis::HORIZONTAL) {
-        auto isRTL = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
-                                                      : direction == TextDirection::RTL;
-        paintReverse = isRTL ? !paintReverse : paintReverse;
+        paintReverse =
+            sliderLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL ? !paintReverse : paintReverse;
     }
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     Dimension hotBlockShadowWidth = mode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetHotBlockShadowWidth()
@@ -302,71 +314,14 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto sliderLength = length >= borderBlank ? length - borderBlank : 1;
     borderBlank = (length - sliderLength) * HALF;
     auto selectOffset = borderBlank + pattern->GetValueRatio() * sliderLength;
-    auto insetModeOffset = borderBlank + blockSize * HALF;
 
-    CalculateBlockOffset(layoutWrapper, contentRect, selectOffset, axis, paintReverse);
-    if (pattern->HasPrefix()) {
-        CalculatePrefixOffset(layoutWrapper, contentRect, insetModeOffset, axis, paintReverse);
-    }
-    if (pattern->HasSuffix()) {
-        CalculateSuffixOffset(layoutWrapper, contentRect, insetModeOffset, axis, paintReverse);
-    }
-}
-
-void SliderLayoutAlgorithm::CalculatePrefixOffset(
-    LayoutWrapper* layoutWrapper, const RectF& contentRect, float borderBlank, Axis axis, bool reverse)
-{
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
-
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.size() < 1) {
-        return;
-    }
-    auto prefixIter = std::next(children.begin(), 0);
-    auto prefixChild = *prefixIter;
-    prefixChild->Layout();
-}
-
-void SliderLayoutAlgorithm::CalculateSuffixOffset(
-    LayoutWrapper* layoutWrapper, const RectF& contentRect, float borderBlank, Axis axis, bool reverse)
-{
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
-
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.size() < 1) {
-        return;
-    }
-    auto suffixIter = std::next(children.begin(), 0);
-    if (children.size() > 1) {
-        suffixIter = std::next(children.begin(), 1);
-    }
-    auto suffixChild = *suffixIter;
-    suffixChild->Layout();
-}
-
-void SliderLayoutAlgorithm::CalculateBlockOffset(
-    LayoutWrapper* layoutWrapper, const RectF& contentRect, float selectOffset, Axis axis, bool reverse)
-{
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
-
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    auto child = children.front();
-    auto childSize_ = child->GetGeometryNode()->GetMarginFrameSize();
+    auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
     OffsetF circleCenter;
     auto animatableBlockCenter = pattern->GetAnimatableBlockCenter();
     if (animatableBlockCenter.has_value()) {
         circleCenter = animatableBlockCenter.value();
     } else {
-        if (!reverse) {
+        if (!paintReverse) {
             if (axis == Axis::HORIZONTAL) {
                 circleCenter.SetX(selectOffset);
                 circleCenter.SetY(contentRect.Height() * HALF);
@@ -387,7 +342,7 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
     }
 
     OffsetF imageNodeOffset(
-        circleCenter.GetX() - childSize_.Width() * HALF, circleCenter.GetY() - childSize_.Height() * HALF);
+        circleCenter.GetX() - childSize.Width() * HALF, circleCenter.GetY() - childSize.Height() * HALF);
 
     child->GetGeometryNode()->SetMarginFrameOffset(imageNodeOffset);
     child->Layout();

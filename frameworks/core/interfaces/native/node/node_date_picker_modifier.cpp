@@ -171,11 +171,7 @@ void ResetSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<PickerTheme>();
+    auto theme = frameNode->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
@@ -264,11 +260,7 @@ void ResetDatePickerTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<PickerTheme>();
+    auto theme = frameNode->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
@@ -357,11 +349,7 @@ void ResetDisappearTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<PickerTheme>();
+    auto theme = frameNode->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;

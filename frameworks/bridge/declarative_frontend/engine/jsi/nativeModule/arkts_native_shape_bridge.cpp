@@ -91,7 +91,7 @@ ArkUINativeModuleValue ShapeBridge::SetMesh(ArkUIRuntimeCallInfo* runtimeCallInf
     std::vector<ArkUI_Float32> mesh;
     if (valueArrayArg->IsArray(vm)) {
         auto arrayVal = panda::Local<panda::ArrayRef>(valueArrayArg);
-        auto length = arrayVal->Length(vm);
+        auto length = ArkTSUtils::GetArrayLength(vm, arrayVal);
         if (length <= 0) {
             return panda::JSValueRef::Undefined(vm);
         }

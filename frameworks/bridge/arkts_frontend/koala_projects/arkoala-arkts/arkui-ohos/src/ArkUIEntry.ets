@@ -372,11 +372,13 @@ export class Application {
     }
 
     private updateState() {
-        if (!this.rootState) {
-            InteropNativeModule._NativeLog('Invalid rootState')
-        }
-        if (!this.manager) {
-            InteropNativeModule._NativeLog('Invalid manager')
+        if (this.withLog) {
+            if (!this.rootState) {
+                InteropNativeModule._NativeLog('Invalid rootState')
+            }
+            if (!this.manager) {
+                InteropNativeModule._NativeLog('Invalid manager')
+            }
         }
         let rootState: ComputableState<IncrementalNode> | undefined = undefined;
         let preState: ComputableState<IncrementalNode> | undefined = undefined;
@@ -398,10 +400,10 @@ export class Application {
             ObserveSingleton.instance.makeDelayedMutableStateChanges();
         }
         // Here we request to draw a frame and call custom components callbacks.
-
-        // Here we request to draw a frame and call custom components callbacks.
         if (rootState) {
             rootState!.value;
+        } else {
+            return;
         }
         if (preState) {
             preState!.value;

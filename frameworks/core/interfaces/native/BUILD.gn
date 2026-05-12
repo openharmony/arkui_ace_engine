@@ -313,6 +313,7 @@ template("ace_core_interfaces_native_node") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:libudmf" ]
+        external_deps += [ "ability_base:want" ]
       }
     }
     if (build_ohos_sdk) {

@@ -20,6 +20,7 @@
 
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {

@@ -634,7 +634,7 @@ void TimePickerModelNG::SetDisappearTextStyle(
             ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearColor, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearColor, value.textColor.value(), frameNode);
     } else {
         ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetDisappearTextStyle,
             &TimePickerLayoutProperty::UpdateDisappearColor, disappearStyle.GetTextColor());
@@ -668,7 +668,7 @@ void TimePickerModelNG::SetNormalTextStyle(
             ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, value.textColor.value(), frameNode);
     } else {
         ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetTextStyle,
             &TimePickerLayoutProperty::UpdateColor, normalStyle.GetTextColor());
@@ -701,7 +701,7 @@ void TimePickerModelNG::SetSelectedTextStyle(
             ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, value.textColor.value(), frameNode);
     } else {
         ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetSelectedTextStyle,
             &TimePickerLayoutProperty::UpdateSelectedColor, selectedStyle.GetTextColor());

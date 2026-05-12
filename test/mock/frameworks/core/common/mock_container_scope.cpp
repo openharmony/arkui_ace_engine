@@ -5,6 +5,10 @@
 
 #include "core/common/container_scope.h"
 
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+#include "base/utils/container_scope/container_scope_diagnostics.h"
+#endif
+
 namespace OHOS::Ace {
 int32_t ContainerScope::CurrentId()
 {
@@ -36,8 +40,9 @@ int32_t ContainerScope::RecentForegroundId()
     return 0;
 }
 
-std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
+std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason(bool checkThread)
 {
+    (void)checkThread;
     return { 0, InstanceIdGenReason::UNDEFINED };
 }
 
@@ -95,5 +100,114 @@ void ContainerScope::UpdateRecentActive(int32_t id)
 void ContainerScope::UpdateRecentForeground(int32_t id)
 {
     (void)id;
+}
+
+int32_t ContainerScope::SafelyId(bool checkThread)
+{
+    (void)checkThread;
+    return 0;
+}
+
+void ContainerScope::CheckIdChange(int32_t id)
+{
+    (void)id;
+}
+
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+
+uint64_t ContainerScope::PushCurrent(int32_t id, const char* fileId, int32_t line, int32_t sourceType)
+{
+    (void)id;
+    (void)fileId;
+    (void)line;
+    (void)sourceType;
+    return 0;
+}
+
+void ContainerScope::PopCurrent(uint64_t uid, int32_t restoreId, const char* fileId, int32_t line, int32_t sourceType)
+{
+    (void)uid;
+    (void)restoreId;
+    (void)fileId;
+    (void)line;
+    (void)sourceType;
+}
+
+std::vector<CurrentIdStackFrame> ContainerScope::GetStackHistory()
+{
+    return {};
+}
+
+std::vector<CurrentIdStackFrame> ContainerScope::GetActiveFrames()
+{
+    return {};
+}
+
+void ContainerScope::ClearHistory() {}
+
+void ContainerScope::EnableTracking(bool enable)
+{
+    (void)enable;
+}
+
+bool ContainerScope::IsTrackingEnabled()
+{
+    return false;
+}
+
+void ContainerScope::SetMaxHistorySize(size_t size)
+{
+    (void)size;
+}
+
+bool ContainerScope::IsStackBalanced()
+{
+    return true;
+}
+
+std::string ContainerScope::Diagnose()
+{
+    return {};
+}
+
+ContainerScope::ContainerScope(int32_t id, const char* fileId, int32_t line)
+    : restoreId_(CurrentId()), pushedUid_(0), pushed_(false)
+{
+    (void)fileId;
+    (void)line;
+    UpdateCurrent(id);
+}
+
+ContainerScope::ContainerScope(int32_t id, bool enable, const char* fileId, int32_t line)
+    : restoreId_(CurrentId()), pushedUid_(0), pushed_(false)
+{
+    (void)fileId;
+    (void)line;
+    if (enable) {
+        UpdateCurrent(id);
+    }
+}
+#endif // ENABLE_CONTAINER_SCOPE_TRACKING
+
+ContainerScope::ContainerScope(int32_t id)
+{
+    UpdateCurrent(id);
+}
+
+ContainerScope::ContainerScope(int32_t id, bool enable)
+{
+    if (enable) {
+        UpdateCurrent(id);
+    }
+}
+
+ContainerScope::~ContainerScope()
+{
+    UpdateCurrent(restoreId_);
+}
+
+void ContainerScope::RegisterThreadCheckFunc(CheckRunOnUIThreadFunc checkFunc)
+{
+    (void)checkFunc;
 }
 } // namespace OHOS::Ace

@@ -15,6 +15,7 @@
 
 #include "tabs_test_ng.h"
 
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 
 namespace OHOS::Ace::NG {

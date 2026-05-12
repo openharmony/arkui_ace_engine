@@ -34,8 +34,8 @@ ArkUINativeModuleValue PolygonBridge::SetPolygonPoints(ArkUIRuntimeCallInfo* run
 
     auto xPointArray = panda::Local<panda::ArrayRef>(xPoint);
     auto yPointArray = panda::Local<panda::ArrayRef>(yPoint);
-    auto xlength = xPointArray->Length(vm);
-    auto ylength = yPointArray->Length(vm);
+    auto xlength = ArkTSUtils::GetArrayLength(vm, xPointArray);
+    auto ylength = ArkTSUtils::GetArrayLength(vm, yPointArray);
     if (xlength <= 0 || xlength != ylength) {
         GetArkUINodeModifiers()->getPolygonModifier()->resetPolygonPoints(nativeNode);
         return panda::JSValueRef::Undefined(vm);

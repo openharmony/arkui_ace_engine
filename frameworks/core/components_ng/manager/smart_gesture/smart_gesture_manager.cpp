@@ -46,6 +46,25 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+ACE_FORCE_EXPORT
+SmartGestureProposal::SmartGestureProposal(
+    SmartGestureProposalType proposalType, SmartGestureOperateIntention intention, const RefPtr<FrameNode>& node)
+    : type(proposalType), operateIntention(intention), targetNode(node)
+{}
+
+ACE_FORCE_EXPORT
+SmartGestureProposal::SmartGestureProposal(SmartGestureProposalType proposalType,
+    SmartGestureOperateIntention intention, const RefPtr<FrameNode>& node, const ScrollingConfig& config)
+    : type(proposalType), operateIntention(intention), targetNode(node), scrollingConfig(config)
+{}
+
+ACE_FORCE_EXPORT
+RefPtr<FrameNode> SmartGestureProposal::GetTargetNode() const
+{
+    return targetNode.Upgrade();
+}
+
 namespace {
 constexpr double HALF_DIVISOR = 2.0;
 constexpr int32_t CENTER_HIT_TEST_TOUCH_ID = 0;
@@ -374,11 +393,17 @@ bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEv
         return false;
     }
 
-    auto proposal = ResolveProposal(defaultProposal.value_or(BuildNoneActionProposal(trigger)));
+    // Return value semantics: true only when smart gesture processing ends up executing
+    // a concrete action successfully; false means the gesture should be treated as unhandled,
+    // including monitor veto, invalid proposal, or a final NONE_ACTION proposal.
+    auto fallbackProposal = defaultProposal.value_or(BuildNoneActionProposal(trigger));
+    auto proposal = ResolveProposal(fallbackProposal);
+    bool executeResult = false;
     if (proposal.has_value()) {
-        return ExecuteProposal(proposal.value(), event);
+        executeResult = ExecuteProposal(proposal.value(), event);
     }
-    return false;
+    RecordExecutionSnapshot(trigger, static_cast<bool>(GetMonitorHandle()), fallbackProposal, proposal, executeResult);
+    return executeResult;
 }
 
 void SmartGestureManager::RequestSelected(const std::string& inspectorId)
@@ -569,7 +594,7 @@ std::vector<RefPtr<FrameNode>> SmartGestureManager::BuildSelectedAncestorPath(
     return ancestorPath;
 }
 
-std::optional<SmartGestureProposal> SmartGestureManager::BuildSlideForwardProposal(
+SmartGestureProposal SmartGestureManager::BuildSlideForwardProposal(
     const std::vector<RefPtr<FrameNode>>& visiblePrimaryNodes, const RefPtr<FrameNode>& selectedNode,
     const std::vector<RefPtr<FrameNode>>& centerHitPath) const
 {
@@ -581,7 +606,7 @@ std::optional<SmartGestureProposal> SmartGestureManager::BuildSlideForwardPropos
         }
         auto selectedAncestorPath = BuildSelectedAncestorPath(selectedNode);
         auto scrollProposal = SmartGestureDecider::BuildCenterHitProposal(selectedAncestorPath);
-        if (scrollProposal.has_value() && scrollProposal->type != SmartGestureProposalType::NONE_ACTION) {
+        if (scrollProposal.type != SmartGestureProposalType::NONE_ACTION) {
             return scrollProposal;
         }
         auto firstNode = SmartGestureDecider::GetFirstVisiblePrimaryNode(visiblePrimaryNodes);
@@ -591,14 +616,7 @@ std::optional<SmartGestureProposal> SmartGestureManager::BuildSlideForwardPropos
         }
         return SmartGestureProposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::SLIDE_FORWARD);
     }
-    auto centerHitProposal = SmartGestureDecider::BuildCenterHitProposal(centerHitPath);
-    if (!centerHitProposal.has_value()) {
-        TAG_LOGW(AceLogTag::ACE_GESTURE,
-            "smart gesture slide-forward no visible PA and no center-hit scroll, centerHitCount=%{public}zu",
-            centerHitPath.size());
-        return SmartGestureProposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::SLIDE_FORWARD);
-    }
-    return centerHitProposal;
+    return SmartGestureDecider::BuildCenterHitProposal(centerHitPath);
 }
 
 void SmartGestureManager::RevealSelectedNodeIfNeeded(const RefPtr<FrameNode>& node)
@@ -710,6 +728,33 @@ std::optional<SmartGestureProposal> SmartGestureManager::ResolveProposal(
     return resolution.selectedProposal;
 }
 
+void SmartGestureManager::RecordExecutionSnapshot(SmartGestureTrigger trigger, bool hasMonitor,
+    const SmartGestureProposal& defaultProposal, const std::optional<SmartGestureProposal>& resolvedProposal,
+    bool executeResult) const
+{
+    auto context = GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+
+    SmartGestureExecutionSnapshot snapshot;
+    snapshot.trigger = trigger;
+    snapshot.hasMonitor = hasMonitor;
+    snapshot.defaultProposalType = defaultProposal.type;
+    auto defaultNode = defaultProposal.GetTargetNode();
+    snapshot.defaultProposalNodeId = defaultNode ? defaultNode->GetId() : -1;
+    if (resolvedProposal.has_value()) {
+        snapshot.resolvedProposalType = resolvedProposal->type;
+        auto resolvedNode = resolvedProposal->GetTargetNode();
+        snapshot.resolvedProposalNodeId = resolvedNode ? resolvedNode->GetId() : -1;
+    } else {
+        snapshot.resolvedProposalType = SmartGestureProposalType::NONE_ACTION;
+        snapshot.resolvedProposalNodeId = -1;
+    }
+    snapshot.executeResult = executeResult;
+    eventManager->RecordSmartGestureExecution(std::move(snapshot));
+}
+
 bool SmartGestureManager::ValidateProposal(const SmartGestureProposal& proposal) const
 {
     switch (proposal.type) {
@@ -773,7 +818,7 @@ bool SmartGestureManager::ExecuteProposal(const SmartGestureProposal& proposal, 
     auto targetNode = proposal.GetTargetNode();
     switch (proposal.type) {
         case SmartGestureProposalType::NONE_ACTION:
-            return true;
+            return false;
         case SmartGestureProposalType::SELECT:
             UpdateSelectedNode(targetNode);
             return true;
@@ -823,14 +868,12 @@ bool SmartGestureManager::ExecuteScrollProposal(const SmartGestureProposal& prop
 
 void SmartGestureManager::ExecuteBackPressProposal()
 {
-#ifndef CROSS_PLATFORM
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     int32_t instanceId = context->GetInstanceId();
     auto uiContent = UIContent::GetUIContent(instanceId);
     CHECK_NULL_VOID(uiContent);
     uiContent->ProcessBackPressed();
-#endif
 }
 
 bool SmartGestureManager::IsPrimaryActionNodeActive(const RefPtr<FrameNode>& node) const

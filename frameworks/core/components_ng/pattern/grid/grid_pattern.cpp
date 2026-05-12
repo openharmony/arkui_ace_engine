@@ -21,6 +21,7 @@
 #include "base/utils/system_properties.h"
 #include "core/animation/curves.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
@@ -1203,7 +1204,7 @@ float GridPattern::GetEndOffset()
     const float totalHeight = GetTotalHeight();
     if (GetAlwaysEnabled() && LessNotEqual(totalHeight, contentHeight)) {
         // overScroll with contentHeight < viewport
-        if (irregular) {
+        if (userDefined_ || irregular) {
             return info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap) + info_.contentStartOffset_;
         }
         return totalHeight - heightInView - info_.contentEndOffset_;
@@ -1312,7 +1313,7 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
             offset.start = newStartPos;
         }
     }
-    if (UseIrregularLayout()) {
+    if (userDefined_ || UseIrregularLayout()) {
         if (info_.repeatDifference_ == 0) {
             GetEndOverScrollIrregular(offset, static_cast<float>(delta));
         }

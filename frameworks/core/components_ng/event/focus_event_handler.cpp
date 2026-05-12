@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"

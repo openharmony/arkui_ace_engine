@@ -129,6 +129,8 @@ public:
     void SetMenuSystemMaterial(const RefPtr<UiMaterial>& menuSystemMaterial) override;
     void SetMenuBackgroundBlurStyleOptions(const std::optional<BlurStyleOption>& blurStyleOption) override;
     void SetMenuBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void SetMenuDistortionMode(const std::optional<DistortionMode>& mode) override;
+    void SetMenuEdgeLightMode(const std::optional<EdgeLightMode>& mode) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
@@ -193,6 +195,8 @@ public:
     static void SetMenuBackgroundBlurStyleOptions(
         FrameNode* frameNode, const std::optional<BlurStyleOption>& blurStyleOption);
     static void SetMenuBackgroundEffect(FrameNode* frameNode, const std::optional<EffectOption>& effectOption);
+    static void SetMenuDistortionMode(FrameNode* frameNode, const std::optional<DistortionMode>& mode);
+    static void SetMenuEdgeLightMode(FrameNode* frameNode, const std::optional<EdgeLightMode>& mode);
     static void SetDividerPropertiesSetByUser(FrameNode* frameNode,
         bool strokeWidth = true, bool color = true, bool startMargin = true, bool endMargin = true);
 private:

@@ -22,7 +22,11 @@
 #include "core/common/event_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/manager/focus/focus_view.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/reporter/reporter.h"
@@ -66,6 +70,7 @@ RefPtr<DragDropManager> GetDragDropManager(int32_t instanceId)
     return pipeline->GetDragDropManager();
 }
 
+#ifdef SMART_GESTURE_SUPPORTED
 std::optional<SmartGestureTrigger> ResolveSmartGestureTrigger(
     const KeyEvent& event, const RefPtr<SmartGestureManager>& manager)
 {
@@ -105,6 +110,9 @@ bool DispatchSmartGesture(const KeyEvent& event, int32_t instanceId, std::option
     if (!trigger.has_value()) {
         return false;
     }
+    // Return value semantics: true only when the smart-gesture pipeline finishes with a
+    // successfully executed action; false means the recognized trigger remains unconsumed
+    // and should return the normal unhandled key-event result.
     if (!manager->HandleTrigger(trigger.value(), event)) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "smart gesture recognized but not handled, return unconsumed result. code=%{public}d trigger=%{public}d",
@@ -113,6 +121,7 @@ bool DispatchSmartGesture(const KeyEvent& event, int32_t instanceId, std::option
     }
     return true;
 }
+#endif
 } // namespace
 
 void KeyEventManager::AddKeyboardShortcutNode(const WeakPtr<FrameNode>& node)
@@ -581,6 +590,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
     ACE_BENCH_MARK_TRACE("OnKeyEvent_start type:%d", event.action);
     SetPressedKeyCodes(event.pressedCodes);
 
+#ifdef SMART_GESTURE_SUPPORTED
     // If the current key is identified as a smart gesture trigger, dispatch it through the smart-gesture
     // pipeline and return its consumed result directly without entering the legacy key chain here.
     auto eventManager = AceType::DynamicCast<EventManager>(Claim(this));
@@ -589,6 +599,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
     if (trigger.has_value()) {
         return DispatchSmartGesture(event, GetInstanceId(), trigger);
     }
+#endif
 
     // onKeyPreIme
     if (event.isPreIme) {

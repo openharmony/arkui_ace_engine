@@ -15,13 +15,16 @@
 
 #include "core/components_ng/event/focus_hub.h"
 
-#include "base/subwindow/subwindow_manager.h"
+#include "base/error/error_code.h"
 #include "base/log/dump_log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"

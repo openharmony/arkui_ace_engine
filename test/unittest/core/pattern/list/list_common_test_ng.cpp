@@ -21,6 +21,7 @@
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/list/list_theme.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"

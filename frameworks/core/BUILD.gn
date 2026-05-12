@@ -22,6 +22,11 @@ config("container_scope_config") {
     "$ace_root/frameworks",
     "$ace_root/interfaces/inner_api/ace_kit/include",
   ]
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    defines = [
+      "ENABLE_CONTAINER_SCOPE_TRACKING"
+    ]
+  }
 }
 
 ohos_shared_library("ace_container_scope") {
@@ -47,6 +52,11 @@ ohos_shared_library("ace_container_scope") {
       "-mno-fix-cortex-a53-843419" 
     ]
   }
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    external_deps = [
+      "bounds_checking_function:libsec_static"
+    ]
+  }
 }
 
 ohos_static_library("ace_container_scope_static") {
@@ -55,6 +65,12 @@ ohos_static_library("ace_container_scope_static") {
   configs = [ "$ace_root:ace_config" ]
 
   sources = [ "$ace_root/frameworks/core/common/container_scope.cpp" ]
+
+  if (ace_engine_feature_enable_container_scope_tracking) {
+    external_deps = [
+      "bounds_checking_function:libsec_static"
+    ]
+  }
 }
 
 # build core sources

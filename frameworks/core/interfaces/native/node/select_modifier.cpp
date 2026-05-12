@@ -1279,6 +1279,62 @@ void ResetMenuBackgroundEffect(ArkUINodeHandle node)
     SelectModelNG::SetMenuBackgroundEffect(frameNode, effectOption);
 }
 
+void SetMenuDistortionMode(ArkUINodeHandle node, ArkUI_Int32 modeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<DistortionMode> mode = std::nullopt;
+    switch (modeValue) {
+        case static_cast<ArkUI_Int32>(DistortionMode::DISTORTION_AUTO):
+            mode = DistortionMode::DISTORTION_AUTO;
+            break;
+        case static_cast<ArkUI_Int32>(DistortionMode::DISTORTION_ENABLED):
+            mode = DistortionMode::DISTORTION_ENABLED;
+            break;
+        case static_cast<ArkUI_Int32>(DistortionMode::DISTORTION_DISABLED):
+            mode = DistortionMode::DISTORTION_DISABLED;
+            break;
+        default:
+            break;
+    }
+    SelectModelNG::SetMenuDistortionMode(frameNode, mode);
+}
+
+void ResetMenuDistortionMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetMenuDistortionMode(frameNode, std::nullopt);
+}
+
+void SetMenuEdgeLightMode(ArkUINodeHandle node, ArkUI_Int32 modeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<EdgeLightMode> mode = std::nullopt;
+    switch (modeValue) {
+        case static_cast<ArkUI_Int32>(EdgeLightMode::EDGELIGHT_AUTO):
+            mode = EdgeLightMode::EDGELIGHT_AUTO;
+            break;
+        case static_cast<ArkUI_Int32>(EdgeLightMode::EDGELIGHT_ENABLED):
+            mode = EdgeLightMode::EDGELIGHT_ENABLED;
+            break;
+        case static_cast<ArkUI_Int32>(EdgeLightMode::EDGELIGHT_DISABLED):
+            mode = EdgeLightMode::EDGELIGHT_DISABLED;
+            break;
+        default:
+            break;
+    }
+    SelectModelNG::SetMenuEdgeLightMode(frameNode, mode);
+}
+
+void ResetMenuEdgeLightMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetMenuEdgeLightMode(frameNode, std::nullopt);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -1366,6 +1422,10 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetMenuBgBlurStyleWithOption = ResetMenuBgBlurStyleWithOption,
         .setMenuBackgroundEffect = SetMenuBackgroundEffect,
         .resetMenuBackgroundEffect = ResetMenuBackgroundEffect,
+        .setMenuDistortionMode = SetMenuDistortionMode,
+        .resetMenuDistortionMode = ResetMenuDistortionMode,
+        .setMenuEdgeLightMode = SetMenuEdgeLightMode,
+        .resetMenuEdgeLightMode = ResetMenuEdgeLightMode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -150,7 +150,7 @@ ArkUINativeModuleValue LazyColumnLayoutBridge::ResetAlignItems(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     auto nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
     if (IsStackNodeArg(vm, nodeArg)) {
-        LazyColumnLayoutModel::SetAlignItems(HorizontalAlign::START);
+        LazyColumnLayoutModel::SetAlignItems(HorizontalAlign::CENTER);
     } else {
         auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
         GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->resetAlignItems(nativeNode);

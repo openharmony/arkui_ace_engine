@@ -44,6 +44,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/event/overflow_scroll_event_hub.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -5860,6 +5861,24 @@ void ResetAccessibilityNextFocusId(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
 }
 
+void SetAccessibilityNextFocusParams(ArkUINodeHandle node, ArkUI_Bool descendantMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::AccessibilityNextFocusParams params;
+    params.descendantMode = descendantMode;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode, params);
+}
+
+void ResetAccessibilityNextFocusParams(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityNextFocusParams();
+}
+
 void SetAccessibilityDefaultFocus(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11557,6 +11576,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityGroup = ResetAccessibilityGroup,
         .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
         .resetAccessibilityNextFocusId = ResetAccessibilityNextFocusId,
+        .setAccessibilityNextFocusParams = SetAccessibilityNextFocusParams,
+        .resetAccessibilityNextFocusParams = ResetAccessibilityNextFocusParams,
         .setAccessibilityDefaultFocus = SetAccessibilityDefaultFocus,
         .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
         .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,

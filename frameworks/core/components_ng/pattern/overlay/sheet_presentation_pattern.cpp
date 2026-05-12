@@ -31,6 +31,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/touch_event.h"
@@ -60,7 +61,11 @@
 #include "core/components_ng/property/property.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/pattern/sheet/sheet_edge_light.h"
+#include "core/components_ng/render/sheet_popup_shape.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #endif
+
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -68,6 +73,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 #include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
@@ -565,6 +571,43 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
 }
 
+void SheetPresentationPattern::SetSheetRenderMaterial()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.systemMaterial) {
+        auto sheetRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(sheetRenderContext);
+        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
+        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial))) {
+            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
+        }
+    }
+}
+
+void SheetPresentationPattern::ClearSheetRenderMaterial()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (!sheetStyle.systemMaterial) {
+        auto sheetRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(sheetRenderContext);
+        sheetRenderContext->SetSystemMaterial(nullptr);
+        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), nullptr)) {
+            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), nullptr);
+        }
+        RemoveResObj("sheet.uiMaterial"); // check
+    }
+}
+
 // initial drag gesture event
 void SheetPresentationPattern::InitPanEvent()
 {
@@ -630,6 +673,26 @@ void SheetPresentationPattern::RemovePanEvent()
     CHECK_NULL_VOID(gestureHub);
     gestureHub->RemovePanEvent(panEvent_);
     panEvent_.Reset();
+}
+
+void SheetPresentationPattern::RemoveSDFShape()
+{
+    // RemoveSDFShape from SHEET_POPUP with newMaterial to other status
+    CHECK_NULL_VOID(sheetObject_);
+    RefPtr<SheetObject> sheetObject = sheetObject_;
+    if (sheetObject->GetSheetType() == SheetType::SHEET_POPUP) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+        if (sheetStyle.systemMaterial) {
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->SetSDFShape(nullptr);
+            renderContext->ResetShadowPath();
+        }
+    }
 }
 
 void SheetPresentationPattern::InitOnkeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -1235,6 +1298,20 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
         option.GetOnFinishEvent(), nullptr, pipeline);
     SetBottomStyleHotAreaInSubwindow();
+
+#ifdef ENABLE_ROSEN_BACKEND
+    // edge light animation
+    auto sheetType = GetSheetTypeNoProcess();
+    auto sheetEdgeLightMode = GetSheetEdgeLightMode();
+    if (SheetEdgeLightBase::CheckIfNeedShowEdgeLight(sheetEdgeLightMode, sheetType) && isTransitionIn &&
+        isFirstTransition) {
+        SheetEdgeLightBase::SetSheetEdgeLightTransitionPreShow(host);
+        AnimationOption optionEdgeLight = SheetEdgeLightBase::GetSheetEdgeLightAnimatePreShowOption();
+        const std::function<void()> event = SheetEdgeLightBase::GetSheetEdgeLightAnimateEvent(host);
+        const std::function<void()> finishEvent = SheetEdgeLightBase::GetSheetEdgeLightAnimateFinishEvent(host);
+        AnimationUtils::Animate(optionEdgeLight, event, finishEvent, nullptr, pipeline);
+    }
+#endif
 }
 
 void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity)
@@ -1844,6 +1921,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 MarkSheetPageNeedRender();
             }
             SetSheetBorderWidth();
+            SetSheetRenderMaterial();
         }
         if (sheetType_ == SheetType::SHEET_POPUP) {
             PopupSheetChanged();
@@ -3495,6 +3573,7 @@ void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
         UpdateSheetObject(sheetType_);
         typeChanged_ = true;
         SetSheetBorderWidth();
+        SetSheetRenderMaterial();
     }
 }
 
@@ -3719,6 +3798,15 @@ std::string SheetPresentationPattern::GetPopupStyleSheetClipPathNew(
     }
     return drawPath;
 }
+
+#ifdef ENABLE_ROSEN_BACKEND
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> SheetPresentationPattern::GetPopupStyleSheetClipPathSDF(
+    const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius)
+{
+    return SheetPopupShape::GetPopupStyleSheetClipPathSDF(
+        sheetSize, sheetRadius, finalPlacement_, arrowPosition_, arrowOffset_);
+}
+#endif
 
 std::string SheetPresentationPattern::DrawClipPathBottom(const SizeF& sheetSize,
     const BorderRadiusProperty& sheetRadius)
@@ -4271,6 +4359,7 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
     if (sheetObject->GetSheetType() == newType) {
         return;
     }
+    RemoveSDFShape();
     if (!sheetObject->CheckIfUpdateObject(newType)) {
         sheetObject->UpdateSheetType(newType);
         // need delete after popup object

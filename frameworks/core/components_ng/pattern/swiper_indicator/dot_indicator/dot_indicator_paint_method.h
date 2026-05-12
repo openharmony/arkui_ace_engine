@@ -49,7 +49,7 @@ public:
     void PaintHoverIndicator(const PaintWrapper* paintWrapper);
     void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide,
         const Dimension& indicatorDotItemSpace);
-    void PaintPressIndicator(const PaintWrapper* paintWrapper);
+    virtual void PaintPressIndicator(const PaintWrapper* paintWrapper);
     virtual void CalculateNormalMargin(
         const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount,
         const Dimension& indicatorDotItemSpace, bool ignoreSize);
@@ -59,7 +59,7 @@ public:
     bool isHoverPoint(const PointF& hoverPoint, const OffsetF& leftCenter,
         const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
 
-    void UpdateBackground(const PaintWrapper* paintWrapper);
+    virtual void UpdateBackground(const PaintWrapper* paintWrapper);
     void SetCurrentIndex(int32_t index)
     {
         currentIndex_ = index;

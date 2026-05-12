@@ -18,6 +18,7 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 #include <vector>
 
 #include "accessibility_config.h"
@@ -414,7 +415,10 @@ public:
     AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
     void UpdateAccessibilityNextFocusIdMap(int32_t containerId,
                                            const std::string& nextFocusInspectorKey,
-                                           int64_t preAccessibilityId) override;
+                                           int64_t preAccessibilityId,
+                                           bool descendantMode = false) override;
+
+    bool GetNextFocusDescendantMode(int32_t containerId, const std::string& inspectorId);
 
     void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
@@ -971,7 +975,7 @@ private:
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
     std::unordered_map<int32_t, std::optional<AccessibilityEvent>> pageIdEventMap_;
-    std::map<int32_t, std::map<std::string, int64_t>> nextFocusMapWithSubWindow_;
+    NG::NextFocusRelationController nextFocusRelationController_;
     std::vector<uint32_t> eventWhiteList_;
 
     AccessibilityParentRectInfo uecRectInfo_;

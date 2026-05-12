@@ -600,6 +600,10 @@ template("declarative_js_engine") {
       external_deps += [ "webview:libarkweb_utils" ]
     }
 
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [
@@ -1077,6 +1081,10 @@ template("declarative_js_engine_ng") {
       external_deps += [ "webview:libarkweb_utils" ]
     }
 
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+    }
+
     if (defined(config.remote_window_support) && config.remote_window_support) {
       sources += [ "jsview/js_remote_window.cpp" ]
     }
@@ -1148,6 +1156,7 @@ template("declarative_js_engine_ng") {
         "jsview/js_paste_button.cpp",
         "jsview/js_save_button.cpp",
         "jsview/js_sec_button_base.cpp",
+        "jsview/js_with_env.cpp",
         "jsview/text_menu/js_text_menu.cpp",
       ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]

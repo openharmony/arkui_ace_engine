@@ -244,6 +244,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/embeddedComponent.ets",
   "arkui-preprocessed/arkui/component/enums.ets",
   "arkui-preprocessed/arkui/component/extendableComponent.ets",
+  "arkui-preprocessed/arkui/component/extendableComponentDFX.ets",
   "arkui-preprocessed/arkui/component/flex.ets",
   "arkui-preprocessed/arkui/component/flowItem.ets",
   "arkui-preprocessed/arkui/component/focus.ets",
@@ -681,3 +682,10 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/base/AceTrace.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
 ]
+
+if (defined(ace_engine_feature_enable_smart_gesture) &&
+    !ace_engine_feature_enable_smart_gesture) {
+  arkui_files -= [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
+  arkui_names -= [ "@ohos/arkui/smartGestureController" ]
+  arkui_path_values -= [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
+}

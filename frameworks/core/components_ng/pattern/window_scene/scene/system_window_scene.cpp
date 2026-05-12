@@ -22,6 +22,7 @@
 #include "session/host/include/session.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/property/accessibility_property.h"
@@ -44,6 +45,33 @@ SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : sess
 }
 
 SystemWindowScene::~SystemWindowScene() = default;
+
+void SystemWindowScene::CreateOverlayManager(bool isShow, const RefPtr<FrameNode>& target)
+{
+    auto targetId = target->GetId();
+    auto it = targetOverlayMap_.find(targetId);
+    if (it == targetOverlayMap_.end() && isShow) {
+        targetOverlayMap_[targetId] = MakeRefPtr<OverlayManager>(target);
+        targetOverlayMap_[targetId]->SetIsAttachToCustomNode(true);
+    }
+}
+
+RefPtr<OverlayManager> SystemWindowScene::GetOverlayManager(int32_t targetId)
+{
+    auto it = targetOverlayMap_.find(targetId);
+    if (it != targetOverlayMap_.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+void SystemWindowScene::DeleteOverlayManager(int32_t targetId)
+{
+    auto it = targetOverlayMap_.find(targetId);
+    if (it != targetOverlayMap_.end()) {
+        targetOverlayMap_.erase(it);
+    }
+}
 
 sptr<Rosen::Session> SystemWindowScene::GetSession()
 {

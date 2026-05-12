@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "base/log/dump_log.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline_ng/pipeline_context.h"

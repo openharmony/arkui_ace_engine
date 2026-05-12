@@ -172,6 +172,30 @@ ArkUINativeModuleValue ListBridge::ResetEditMode(ArkUIRuntimeCallInfo* runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> arg_enableEditMode = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    bool enableEditMode = arg_enableEditMode->ToBoolean(vm)->Value();
+    GetArkUINodeModifiers()->getListModifier()->setListEnableEditMode(nativeNode, enableEditMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 	 
+ArkUINativeModuleValue ListBridge::ResetEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetListEnableEditMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::SetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -577,6 +601,14 @@ ArkUINativeModuleValue ListBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runt
                     return badge;
                 };
             options.getPreviewBadge = std::move(onGetPreviewBadge);
+        }
+        auto useDefaultStyle = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "useDefaultMultiSelectStyle"));
+        if (useDefaultStyle->IsBoolean()) {
+            options.useDefaultMultiSelectStyle = useDefaultStyle->ToBoolean(vm)->Value();
+        }
+        auto fingerSelect = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableFingerMultiSelect"));
+        if (fingerSelect->IsBoolean()) {
+            options.enableFingerMultiSelect = fingerSelect->ToBoolean(vm)->Value();
         }
     }
     ListModelNG::SetEditModeOptions(frameNode, options);

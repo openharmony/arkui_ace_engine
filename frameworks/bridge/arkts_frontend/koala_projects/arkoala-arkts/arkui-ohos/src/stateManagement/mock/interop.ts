@@ -34,7 +34,7 @@ export function getObservedObject<T>(value: T): T {
 }
 
 export class InteropNativeModule {
-    public static _NativeLog(txt: string) {
+    public static _NativeLog(txt: string): void {
         console.log(txt)
     }
 }

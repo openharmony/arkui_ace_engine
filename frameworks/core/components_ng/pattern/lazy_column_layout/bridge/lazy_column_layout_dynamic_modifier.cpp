@@ -63,7 +63,7 @@ void ResetAlignItems(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LazyColumnLayoutModel::SetAlignItems(frameNode, HorizontalAlign::START);
+    LazyColumnLayoutModel::SetAlignItems(frameNode, HorizontalAlign::CENTER);
 }
 
 void SetOnVisibleIndexesChange(ArkUINodeHandle node, void* extraParam)

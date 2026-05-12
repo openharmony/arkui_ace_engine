@@ -28,8 +28,7 @@ public:
         const std::vector<RefPtr<FrameNode>>& visiblePrimaryNodes, const RefPtr<FrameNode>& selectedNode,
         const std::vector<RefPtr<FrameNode>>& centerHitPath);
 
-    static std::optional<SmartGestureProposal> BuildCenterHitProposal(
-        const std::vector<RefPtr<FrameNode>>& centerHitPath);
+    static SmartGestureProposal BuildCenterHitProposal(const std::vector<RefPtr<FrameNode>>& centerHitPath);
 
     static RefPtr<FrameNode> GetFirstVisiblePrimaryNode(const std::vector<RefPtr<FrameNode>>& visiblePrimaryNodes);
 

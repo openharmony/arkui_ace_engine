@@ -68,6 +68,7 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -115,6 +116,9 @@
 #include "web_util.h"
 #include "nweb_hisysevent.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+#include "histogram_plugin_macros.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -225,6 +229,13 @@ constexpr int32_t CHECK_PRE_SIZE = 5;
 constexpr int32_t ADJUST_RATIO = 10;
 constexpr int32_t DRAG_RESIZE_DELAY_TIME = 100;
 constexpr int32_t DRAG_RESIZE_NO_MOVE_CHECK_TIME = 200;
+
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+enum RequestPasswordAutoFillErrorCode {
+    INVALID = 1,
+    FAIL = 2,
+};
+#endif
 
 struct TranslateTextExtraData {
     bool needTranslate = false;
@@ -6190,12 +6201,26 @@ void WebPattern::RequestPasswordAutoFill(WebMenuType menuType)
     if (menuType == WebMenuType::TYPE_CONTEXTMENU) {
         if (!isEditableOnContextMenu_) {
             TAG_LOGE(AceLogTag::ACE_WEB, "web do not send autofill request.");
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+            HISTOGRAM_ENUMERATION("ArkWeb.InteractionEffect.requestPasswordAutoFillError",
+                static_cast<int32_t>(RequestPasswordAutoFillErrorCode::INVALID),
+                static_cast<int32_t>(RequestPasswordAutoFillErrorCode::FAIL));
+#endif
             return;
         }
     }
     autoFillMenuType_ = menuType;
     FakePageNodeInfo();
+#ifdef ACE_ENGINE_API_METRICS_EXT_ENABLE
+    bool is_autofill_suc = RequestAutoFill(GetFocusedType(), AceAutoFillTriggerType::MANUAL_REQUEST);
+    if (!is_autofill_suc) {
+        HISTOGRAM_ENUMERATION("ArkWeb.InteractionEffect.requestPasswordAutoFillError",
+            static_cast<int32_t>(RequestPasswordAutoFillErrorCode::FAIL),
+            static_cast<int32_t>(RequestPasswordAutoFillErrorCode::FAIL));
+    }
+#else
     RequestAutoFill(GetFocusedType(), AceAutoFillTriggerType::MANUAL_REQUEST);
+#endif
     isEditableOnContextMenu_ = false;
 }
 
@@ -6480,6 +6505,9 @@ bool WebPattern::OnCursorChange(
     const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo,
     bool useWebWindowID)
 {
+    if (ShouldBlockCursorChangeWhenInvisible(cursorType)) {
+        return true;
+    }
     auto [type, info] = GetAndUpdateCursorStyleInfo(cursorType, cursorInfo);
     if (mouseEventDeviceId_ == RESERVED_DEVICEID1 || mouseEventDeviceId_ == RESERVED_DEVICEID2) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
@@ -6522,6 +6550,23 @@ bool WebPattern::OnCursorChange(
             mouseStyle->SetPointerStyle(windowId, pointStyle);
         }
     }
+    return true;
+}
+
+bool WebPattern::ShouldBlockCursorChangeWhenInvisible(const OHOS::NWeb::CursorType& cursorType)
+{
+    if (isVisible_ || cursorType == OHOS::NWeb::CursorType::CT_POINTER) {
+        return false;
+    }
+    if (cursorType == OHOS::NWeb::CursorType::CT_LOCK) {
+        isMouseLocked_ = true;
+    } else if (cursorType == OHOS::NWeb::CursorType::CT_UNLOCK) {
+        isMouseLocked_ = false;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "Block cursor change when web invisible, webId: %{public}d, type: %{public}d, currentType: %{public}d, "
+        "isMouseLocked: %{public}d", GetWebId(), cursorType, cursorType_, isMouseLocked_);
+
     return true;
 }
 

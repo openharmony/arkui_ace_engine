@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"

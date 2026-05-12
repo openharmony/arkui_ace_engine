@@ -3348,6 +3348,8 @@ struct ArkUICommonModifier {
     void (*resetAccessibilityGroup)(ArkUINodeHandle node);
     void (*setAccessibilityNextFocusId)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetAccessibilityNextFocusId)(ArkUINodeHandle node);
+    void (*setAccessibilityNextFocusParams)(ArkUINodeHandle node, ArkUI_Bool descendantMode);
+    void (*resetAccessibilityNextFocusParams)(ArkUINodeHandle node);
     void (*setAccessibilityDefaultFocus)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAccessibilityDefaultFocus)(ArkUINodeHandle node);
     void (*setAccessibilityUseSamePage)(ArkUINodeHandle node, ArkUI_Bool isFullSilent);
@@ -4425,7 +4427,10 @@ struct ArkUIListModifier {
     ArkUI_Bool (*getListSyncLoad)(ArkUINodeHandle node);
     void (*setEditModeOptions)(ArkUINodeHandle node, ArkUIEditModeOptions options);
     void (*resetEditModeOptions)(ArkUINodeHandle node);
-    void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[1]);
+    void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
+    void (*setListEnableEditMode)(ArkUINodeHandle node, ArkUI_Bool enableEditMode);
+    void (*resetListEnableEditMode)(ArkUINodeHandle node);
+    ArkUI_Bool (*getListEnableEditMode)(ArkUINodeHandle node);
     void (*setListFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetListFadingEdge)(ArkUINodeHandle node);
@@ -8120,6 +8125,10 @@ struct ArkUISelectModifier {
         ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg,
         void* colorRawPtr, void* inactiveColorRawPtr);
     void (*resetMenuBackgroundEffect)(ArkUINodeHandle node);
+    void (*setMenuDistortionMode)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
+    void (*resetMenuDistortionMode)(ArkUINodeHandle node);
+    void (*setMenuEdgeLightMode)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
+    void (*resetMenuEdgeLightMode)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

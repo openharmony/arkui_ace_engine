@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "interfaces/native/native_type.h"
 
 #define private public
 #define protected public
@@ -1563,7 +1564,7 @@ HWTEST_F(RosenRenderContextTest, GetWithRange001, TestSize.Level1)
     ComponentSnapshot snapshot;
     snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
     ASSERT_NE(callback, nullptr);
-    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_INTERNAL_ERROR);
 }
 
 /**
@@ -1595,7 +1596,7 @@ HWTEST_F(RosenRenderContextTest, GetWithRange002, TestSize.Level1)
     ComponentSnapshot snapshot;
     snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
     ASSERT_NE(callback, nullptr);
-    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_INTERNAL_ERROR);
 }
 
 /**
@@ -1627,7 +1628,7 @@ HWTEST_F(RosenRenderContextTest, GetWithRange003, TestSize.Level1)
     ComponentSnapshot snapshot;
     snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
     ASSERT_NE(callback, nullptr);
-    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_INTERNAL_ERROR);
 }
 
 /**
@@ -1659,7 +1660,7 @@ HWTEST_F(RosenRenderContextTest, GetWithRange004, TestSize.Level1)
     ComponentSnapshot snapshot;
     snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
     ASSERT_NE(callback, nullptr);
-    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_INTERNAL_ERROR);
 }
 
 /**
@@ -1693,7 +1694,7 @@ HWTEST_F(RosenRenderContextTest, GetWithRange005, TestSize.Level1)
     ComponentSnapshot snapshot;
     snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
     ASSERT_NE(callback, nullptr);
-    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_INTERNAL_ERROR);
 }
 
 /**
@@ -1726,13 +1727,13 @@ HWTEST_F(RosenRenderContextTest, GetWithRange006, TestSize.Level1)
     endID.first = "endNode";
     ComponentSnapshot snapshot;
     snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
-    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_INTERNAL_ERROR);
 
     errorCode = -1;
     startID.first = "startNode";
     endID.first = "0";
     snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
-    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_INTERNAL_ERROR);
 }
 
 /**

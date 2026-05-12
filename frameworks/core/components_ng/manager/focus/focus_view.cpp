@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/focus/focus_view.h"
 
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
