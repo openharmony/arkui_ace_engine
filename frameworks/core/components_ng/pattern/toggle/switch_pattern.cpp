@@ -31,6 +31,9 @@
 #include "core/components_ng/render/adapter/rosen_effect_converter.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "ui/properties/ui_material_structs.h"
+#ifndef ACE_UNITTEST
+#include "ui_effect/effect/include/brightness_blender.h"
+#endif
 #include "core/animation/curve.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -63,6 +66,7 @@ constexpr float LOW_GRADE_SPRING_DAMPING = 12.0f;
 
 constexpr int32_t LONG_PRESS_DELAY_MS = 400;
 
+constexpr float LIGHT_POSITION_Z_SCALE = 1.5f;
 constexpr int32_t  HOTZONE_SPACE = 2;
 const std::string INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
 const std::string COMPONENT_IN_READONLY = "The component is in read-only state.";
@@ -1045,7 +1049,7 @@ void SwitchPattern::CreateDragFrameNode()
             CalcDimension(pointDiameter, DimensionUnit::PX), CalcDimension(pointDiameter, DimensionUnit::PX),
             CalcDimension(pointDiameter, DimensionUnit::PX));
         ViewAbstract::SetLightColor(AceType::RawPtr(dragFrameNode_), paintProperty->GetSwitchPointColor().value());
-        ViewAbstract::SetLightIntensity(AceType::RawPtr(dragFrameNode_), 0.5f);
+        ViewAbstract::SetLightIntensity(AceType::RawPtr(dragFrameNode_), 1.5f);
         ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragFrameNode_), 2u);
     }
 }
@@ -1086,9 +1090,9 @@ void SwitchPattern::CreateDragPointNode()
     if (paintProperty->HasSwitchPointColor()) {
         ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
             CalcDimension(initialLightX, DimensionUnit::PX), CalcDimension(halfHeight, DimensionUnit::PX),
-            CalcDimension(pointRadius, DimensionUnit::PX));
+            CalcDimension(pointRadius * LIGHT_POSITION_Z_SCALE, DimensionUnit::PX));
         ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), paintProperty->GetSwitchPointColor().value());
-        ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 6.0f);
+        ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 10.0f);
         ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragPointNode_), 2u);
     }
 }
@@ -1124,15 +1128,6 @@ void SwitchPattern::CreateBlurCoverNode()
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(frameSize / NUMBER_TWO, DimensionUnit::PX));
     renderContext->UpdateBorderRadius(borderRadius);
-
-    if (paintProperty->HasSwitchPointColor()) {
-        ViewAbstract::SetLightPosition(AceType::RawPtr(blurCoverNode_),
-            CalcDimension(pointDiameter, DimensionUnit::PX), CalcDimension(pointDiameter, DimensionUnit::PX),
-            CalcDimension(pointDiameter, DimensionUnit::PX));
-        ViewAbstract::SetLightColor(AceType::RawPtr(blurCoverNode_), paintProperty->GetSwitchPointColor().value());
-        ViewAbstract::SetLightIntensity(AceType::RawPtr(blurCoverNode_), 1.5f);
-        ViewAbstract::SetLightIlluminated(AceType::RawPtr(blurCoverNode_), 2u);
-    }
 }
 
 void SwitchPattern::UpdateMaterialNodePosition(float centerX, float centerY, float pointRadius)
@@ -1168,7 +1163,7 @@ void SwitchPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
                 float lightY = centerY - offset_.GetY();
                 ViewAbstract::SetLightPosition(AceType::RawPtr(dragPointNode_),
                     CalcDimension(lightX, DimensionUnit::PX), CalcDimension(lightY, DimensionUnit::PX),
-                    CalcDimension(pointRadius, DimensionUnit::PX));
+                    CalcDimension(pointRadius * LIGHT_POSITION_Z_SCALE, DimensionUnit::PX));
             }
         }
     }
@@ -1352,20 +1347,18 @@ void SwitchPattern::ApplyDragFrameNodeSystemMaterial()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-
-    static const FrostedGlassParam dragFrameMaterialParam {
-        .blurParams = { 2.0f, 1.0f },
+    FrostedGlassParam dragFrameMaterialParam {
+        .blurParams = { 1.0f, 50.0f },
         .weightsEmboss = { 0.8f, 0.8f },
         .weightsEdl = { 1.0f, 0.7f },
         .bgRates = { 0.1789f, -0.6972f },
         .bgKBS = { 1.4384f, 0.0718f, 1.2f },
         .bgPos = { 0.3f, 0.5f, 1.0f },
         .bgNeg = { 0.5f, 0.5f, 1.0f },
-        .refractParams = { -0.06f, 0.16f, 0.22f },
+        .refractParams = { -0.008f, 0.15f, 0.22f },
         .edLightParams = { 0.62f, 0.92f },
         .edLightAngles = { 75.0f, 120.0f },
         .edLightDir = { 0.0f, -1.0f },
-        .edLightRates = {},
         .edLightKBS = { 1.0f, 0.1568f, 1.2f },
         .edLightPos = { 1.0f, 1.5f, 2.0f },
         .edLightNeg = { 1.7f, 3.0f, 1.0f },
@@ -1378,19 +1371,51 @@ void SwitchPattern::ApplyDragFrameNodeSystemMaterial()
         .darkModeEdLightAngles = { 75.0f, 120.0f },
         .darkModeEdLightKBS = { 1.0f, 0.2268f, 1.2f },
     };
-
+    constexpr float MIN_POINT_SIZE = 32.0f;
+    constexpr float MAX_POINT_SIZE = 56.0f;
+    float pointDiameter = GetPointRadius() * NUMBER_TWO;
+    float t = std::clamp((pointDiameter - MIN_POINT_SIZE) / (MAX_POINT_SIZE - MIN_POINT_SIZE), 0.0f, 1.0f);
+    dragFrameMaterialParam.refractParams[0] = -0.008f + t * (-0.01f - (-0.008f));
+    dragFrameMaterialParam.refractParams[1] = 0.15f + t * (0.13f - 0.15f);
     float dipScale = static_cast<float>(pipeline->GetDipScale());
     auto filter = RosenEffectConverter::ConvertToFrostedGlassFilter(dragFrameMaterialParam, dipScale);
     if (filter) {
         auto renderContext = dragFrameNode_->GetRenderContext();
         if (renderContext) {
             renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
+            renderContext->UpdateBackShadow(MaterialUtils::GetImmersiveShadow(dipScale));
         }
     }
     ResetHostMaterialEffects();
+#ifndef ACE_UNITTEST
+    ApplyDragFrameNodeBlendMode();
+#endif
 }
 
-// Set the default hot zone for the component.
+#ifndef ACE_UNITTEST
+void SwitchPattern::ApplyDragFrameNodeBlendMode()
+{
+    CHECK_NULL_VOID(dragFrameNode_);
+    static const auto brightnessBlender = CreateBrightnessBlender();
+    ViewAbstract::SetBlender(AceType::RawPtr(dragFrameNode_), brightnessBlender.get());
+    ViewAbstract::SetBlendApplyType(AceType::RawPtr(dragFrameNode_), BlendApplyType::OFFSCREEN);
+}
+
+std::shared_ptr<Rosen::BrightnessBlender> SwitchPattern::CreateBrightnessBlender()
+{
+    auto blender = std::make_shared<Rosen::BrightnessBlender>();
+    blender->SetCubicRate(0.0f);
+    blender->SetQuadRate(0.0f);
+    blender->SetLinearRate(1.048f);
+    blender->SetDegree(0.37647f);
+    blender->SetSaturation(1.5f);
+    blender->SetPositiveCoeff(Rosen::Vector3f(3.5f, 4.0f, 1.0f));
+    blender->SetNegativeCoeff(Rosen::Vector3f(1.0f, 2.0f, 2.0f));
+    blender->SetFraction(0.0f);
+    return blender;
+}
+#endif
+
 void SwitchPattern::AddHotZoneRect()
 {
     hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalSize_.ConvertToPx());
