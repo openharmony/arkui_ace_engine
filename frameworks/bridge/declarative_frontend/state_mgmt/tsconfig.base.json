@@ -95,6 +95,7 @@
     "src/lib/common/sendable_type.ts",
 
     "src/lib/v2/v2_env.ts",
+    "src/lib/env_base/customEnv_key.ts",
     "src/lib/env_base/env_factory.ts",
     "src/lib/env_base/i_env_value.ts",
     "src/lib/env_base/i_env_breakpoint.ts",

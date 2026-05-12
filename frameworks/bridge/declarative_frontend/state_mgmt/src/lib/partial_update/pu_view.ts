@@ -279,7 +279,6 @@ abstract class ViewPU extends PUV2ViewBase
       this.myReusePool__ = this.getReusePoolInternal(this.constructor as new (...args: PUV2ViewBase[]) => PUV2ViewBase);
     }
     this.__customComponentExecuteInit__Internal();
-    this.__isCustomEnvConstructionFinalized__Internal = true;
   }
 
   // inform the subscribed property
