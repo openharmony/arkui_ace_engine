@@ -63,17 +63,10 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
-        widthLayoutPolicy_ = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        heightLayoutPolicy_ = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-
-        // When the width or height parameter is MATCH_PARENT, set its value to the parent's value.
-        if (widthLayoutPolicy_ == LayoutCalPolicy::MATCH_PARENT
-            || heightLayoutPolicy_ == LayoutCalPolicy::MATCH_PARENT) {
-            auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(constraint.value(),
-            widthLayoutPolicy_, heightLayoutPolicy_, axis);
-            tabsIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
-        }
+        widthLayoutPolicy_ = layoutPolicy->GetLayoutPolicy(true).value_or(LayoutCalPolicy::NO_MATCH);
+        heightLayoutPolicy_ = layoutPolicy->GetLayoutPolicy(false).value_or(LayoutCalPolicy::NO_MATCH);
     }
+    ApplyMatchParentIdealSizeByLayoutPolicy(tabsIdealSize, constraint.value(), layoutPolicy, axis, true, true);
     auto idealSize = tabsIdealSize.ConvertToSizeT();
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         geometryNode->SetFrameSize(SizeF());

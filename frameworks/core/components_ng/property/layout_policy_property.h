@@ -16,7 +16,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_LAYOUT_POLICY_PROPERTY_H
 
 #include <optional>
+#include <string>
 
+#include "base/geometry/axis.h"
+#include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -25,34 +28,9 @@ struct LayoutPolicyProperty {
 
     ~LayoutPolicyProperty() = default;
 
-    std::string LayoutCalPolicyToString(LayoutCalPolicy layoutPolicy)
-    {
-        switch (layoutPolicy) {
-            case LayoutCalPolicy::NO_MATCH:
-                return "NA";
-            case LayoutCalPolicy::MATCH_PARENT:
-                return "MATCH";
-            case LayoutCalPolicy::WRAP_CONTENT:
-                return "WRAP";
-            case LayoutCalPolicy::FIX_AT_IDEAL_SIZE:
-                return "FIXED";
-            default:
-                return "Unknown";
-        }
-    }
+    std::string LayoutCalPolicyToString(LayoutCalPolicy layoutPolicy) const;
 
-    std::string ToString()
-    {
-        std::string layoutPolicyStr = "";
-        if (widthLayoutPolicy_.has_value()) {
-            layoutPolicyStr.append("WidthLayoutPolicy: ").append(LayoutCalPolicyToString(widthLayoutPolicy_.value()));
-        }
-        if (heightLayoutPolicy_.has_value()) {
-            layoutPolicyStr.append(layoutPolicyStr.length() == 0 ? "HeightLayoutPolicy: " : " HeightLayoutPolicy: ")
-                .append(LayoutCalPolicyToString(heightLayoutPolicy_.value()));
-        }
-        return layoutPolicyStr;
-    }
+    std::string ToString() const;
 
     std::optional<LayoutCalPolicy> widthLayoutPolicy_;
     std::optional<LayoutCalPolicy> heightLayoutPolicy_;
@@ -133,6 +111,56 @@ struct LayoutPolicyProperty {
         return heightLayoutPolicy_;
     }
 };
+
+struct AxisLayoutPolicy {
+    LayoutCalPolicy mainAxisPolicy = LayoutCalPolicy::NO_MATCH;
+    LayoutCalPolicy crossAxisPolicy = LayoutCalPolicy::NO_MATCH;
+
+    bool IsMainAxisMatch() const
+    {
+        return mainAxisPolicy == LayoutCalPolicy::MATCH_PARENT;
+    }
+
+    bool IsCrossAxisMatch() const
+    {
+        return crossAxisPolicy == LayoutCalPolicy::MATCH_PARENT;
+    }
+
+    bool IsMainAxisWrap() const
+    {
+        return mainAxisPolicy == LayoutCalPolicy::WRAP_CONTENT;
+    }
+
+    bool IsCrossAxisWrap() const
+    {
+        return crossAxisPolicy == LayoutCalPolicy::WRAP_CONTENT;
+    }
+
+    bool IsMainAxisFix() const
+    {
+        return mainAxisPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    }
+
+    bool IsCrossAxisFix() const
+    {
+        return crossAxisPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    }
+
+    bool HasMainAxisPolicy() const
+    {
+        return mainAxisPolicy != LayoutCalPolicy::NO_MATCH;
+    }
+
+    bool HasCrossAxisPolicy() const
+    {
+        return crossAxisPolicy != LayoutCalPolicy::NO_MATCH;
+    }
+};
+
+AxisLayoutPolicy CreateAxisLayoutPolicy(const LayoutPolicyProperty& layoutPolicy, Axis axis);
+
+ACE_FORCE_EXPORT AxisLayoutPolicy CreateAxisLayoutPolicy(
+    const std::optional<LayoutPolicyProperty>& layoutPolicy, Axis axis);
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_LAYOUT_POLICY_PROPERTY_H

@@ -669,29 +669,6 @@ OptionalSizeF CreateIdealSizeByPercentRef(
     return idealSize;
 }
 
-OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
-    LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy, Axis axis)
-{
-    bool isHorizontal = axis == Axis::HORIZONTAL;
-    bool mainAxisMatchParent = (isHorizontal ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
-    bool crossAxisMatchParent =
-        (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
-    OptionalSizeF idealSize;
-    if (mainAxisMatchParent) {
-        auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
-        if (parentMainSize) {
-            SetMainAxisSize(parentMainSize.value(), axis, idealSize);
-        }
-    }
-    if (crossAxisMatchParent) {
-        auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
-        if (parentCrossSize) {
-            SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
-        }
-    }
-    return idealSize;
-}
-
 OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyProperty>& childLayoutPolicy,
     const std::unique_ptr<MeasureProperty>& childCalcLayoutConstraint,
     const std::optional<LayoutConstraintF>& parentConstraint, const MagicItemProperty& magicItemProperty)

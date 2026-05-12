@@ -53,28 +53,30 @@ public:
     {
         auto layoutPolicy = property->GetLayoutPolicyProperty();
         auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
-        if (layoutPolicy.has_value()) {
-            auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-            auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-            // crosss axis set maxSize and reset IdealSize'cross width/heigth, when layoutPolicy is matchParent
-            if (axis == Axis::HORIZONTAL && heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-                auto heightOpt = childSelfIdealSize.Height();
-                if (heightOpt) {
-                    layoutConstraint.maxSize.SetHeight(heightOpt.value());
-                }
-                auto width = childSelfIdealSize.Width();
-                childSelfIdealSize.Reset();
-                childSelfIdealSize.SetWidth(width);
-            } else if (axis == Axis::VERTICAL && widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-                auto widthOpt = childSelfIdealSize.Width();
-                if (widthOpt) {
-                    layoutConstraint.maxSize.SetWidth(widthOpt.value());
-                }
-                auto height = childSelfIdealSize.Height();
-                childSelfIdealSize.Reset();
-                childSelfIdealSize.SetHeight(height);
-            }
+        if (!layoutPolicy.has_value() || !CreateAxisLayoutPolicy(layoutPolicy, axis).IsCrossAxisMatch()) {
+            layoutConstraint.selfIdealSize = childSelfIdealSize;
+            return layoutConstraint;
         }
+
+        // crosss axis set maxSize and reset IdealSize'cross width/heigth, when layoutPolicy is matchParent
+        if (axis == Axis::HORIZONTAL) {
+            auto heightOpt = childSelfIdealSize.Height();
+            if (heightOpt) {
+                layoutConstraint.maxSize.SetHeight(heightOpt.value());
+            }
+            auto width = childSelfIdealSize.Width();
+            childSelfIdealSize.Reset();
+            childSelfIdealSize.SetWidth(width);
+        } else {
+            auto widthOpt = childSelfIdealSize.Width();
+            if (widthOpt) {
+                layoutConstraint.maxSize.SetWidth(widthOpt.value());
+            }
+            auto height = childSelfIdealSize.Height();
+            childSelfIdealSize.Reset();
+            childSelfIdealSize.SetHeight(height);
+        }
+
         layoutConstraint.selfIdealSize = childSelfIdealSize;
         return layoutConstraint;
     }

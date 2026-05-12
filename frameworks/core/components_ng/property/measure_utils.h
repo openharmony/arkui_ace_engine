@@ -195,6 +195,20 @@ ACE_FORCE_EXPORT OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstrain
 ACE_FORCE_EXPORT OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
     LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy, Axis axis);
 
+ACE_FORCE_EXPORT OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
+    const std::optional<LayoutPolicyProperty>& layoutPolicy, Axis axis);
+
+ACE_FORCE_EXPORT void ApplyMainAxisExtentByLayoutPolicy(OptionalSizeF& contentIdealSize,
+    const LayoutConstraintF& layoutConstraint, const std::optional<LayoutPolicyProperty>& layoutPolicy, Axis axis,
+    float mainAxisExtent);
+
+ACE_FORCE_EXPORT bool ShouldMatchChildrenByLayoutPolicy(
+    float mainAxisSize, const std::optional<LayoutPolicyProperty>& layoutPolicy, Axis axis);
+
+ACE_FORCE_EXPORT void ApplyMatchParentIdealSizeByLayoutPolicy(OptionalSizeF& contentIdealSize,
+    const LayoutConstraintF& layoutConstraint, const std::optional<LayoutPolicyProperty>& layoutPolicy, Axis axis,
+    bool includeMainAxis, bool includeCrossAxis);
+
 /**
  * @brief Create max size for children which is parent's max size minus margin and padding.
  *

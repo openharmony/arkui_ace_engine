@@ -45,13 +45,10 @@ void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& par
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
         const auto& layoutConstraint = layoutProperty->GetLayoutConstraint().value();
-        auto isVertical = axis == Axis::VERTICAL;
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto isCrossWrap = (isVertical ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
-        auto isCrossFix = (isVertical ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
-        auto layoutPolicySize =
-            ConstrainIdealSizeByLayoutPolicy(layoutConstraint, widthLayoutPolicy, heightLayoutPolicy, axis);
+        auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis);
+        auto isCrossWrap = axisLayoutPolicy.IsCrossAxisWrap();
+        auto isCrossFix = axisLayoutPolicy.IsCrossAxisFix();
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint, layoutPolicy, axis);
         idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
         if (isCrossWrap) {
             idealSize.SetCrossSize(std::min(childSize.CrossSize(axis), layoutConstraint.maxSize.CrossSize(axis)), axis);

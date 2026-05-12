@@ -124,26 +124,9 @@ void LazyGridLayoutAlgorithm::SetFrameSize(LayoutWrapper* layoutWrapper, Optiona
         return;
     }
 
-    auto layoutPolicy = property->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value()) {
-        auto isVertical = axis_ == Axis::VERTICAL;
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
-            property->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis_);
-        contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
-        auto isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
-        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
-                         (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::NO_MATCH;
-        if (isMainWrap) {
-            contentIdealSize.SetMainSize(totalMainSize_, axis_);
-            contentIdealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-        } else if (isMainFix) {
-            contentIdealSize.SetMainSize(totalMainSize_, axis_);
-        }
-    } else {
-        contentIdealSize.SetMainSize(totalMainSize_, axis_);
-    }
+    ApplyMainAxisExtentByLayoutPolicy(
+        contentIdealSize, property->GetLayoutConstraint().value(), property->GetLayoutPolicyProperty(), axis_,
+        totalMainSize_);
 
     AddPaddingToSize(padding, contentIdealSize);
     frameSize.UpdateIllegalSizeWithCheck(contentIdealSize);
