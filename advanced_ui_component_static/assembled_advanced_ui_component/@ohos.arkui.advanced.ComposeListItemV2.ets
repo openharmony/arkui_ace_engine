@@ -1053,7 +1053,7 @@ function getAccessibilityText(resource: ResourceStr): string {
     } else {
       let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
       if (uiContent) {
-        (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long);
+        resourceString = (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long);
       }
     }
     return resourceString;
@@ -1332,7 +1332,8 @@ export struct ComposeListItemV2 {
     if (this.containerDirection === FlexDirection.Row) {
       return LengthMetrics.vp(0);
     }
-    let iconSize: number = ICON_SIZE_MAP.get(this.contentItemV2?.iconStyle! as number) as number;
+    let iconStyleVal: number | undefined = this.contentItemV2?.iconStyle;
+    let iconSize: number = iconStyleVal !== undefined ? (ICON_SIZE_MAP.get(iconStyleVal) as number ?? 0) : 0;
     if (this.contentItemV2?.icon && iconSize && (iconSize as number) <= HEADSCULPTURE_SIZE) {
       return LengthMetrics.vp(iconSize + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
     }
