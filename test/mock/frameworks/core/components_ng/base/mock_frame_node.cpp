@@ -962,12 +962,15 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
 
 RefPtr<SmartGestureProperty> FrameNode::GetOrCreateSmartGestureProperty()
 {
-    return nullptr;
+    if (!smartGestureProperty_) {
+        smartGestureProperty_ = AceType::MakeRefPtr<SmartGestureProperty>();
+    }
+    return smartGestureProperty_;
 }
 
 RefPtr<SmartGestureProperty> FrameNode::GetSmartGestureProperty() const
 {
-    return nullptr;
+    return smartGestureProperty_;
 }
 #pragma clang diagnostic pop
 } // namespace OHOS::Ace::NG

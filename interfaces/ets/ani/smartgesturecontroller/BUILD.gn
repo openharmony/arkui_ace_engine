@@ -14,39 +14,48 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/ohos/build/common.gni")
 
-ohos_shared_library("smartGestureController_ani") {
-  shlib_type = "ani"
-  deps = [ "$ace_root/build:libace_compatible" ]
-  include_dirs = [ "./include" ]
-  sources = [
-    "${ace_root}/frameworks/core/common/container_scope.cpp",
-    "./src/smartGestureController.cpp",
-  ]
-  external_deps = [
-    "napi:ace_napi",
-    "runtime_core:ani",
-  ]
-  if (ace_engine_feature_enable_container_scope_tracking) {
-    external_deps += [ "bounds_checking_function:libsec_static" ]
+if (defined(smart_gesture_support) && smart_gesture_support) {
+  ohos_shared_library("smartGestureController_ani") {
+    shlib_type = "ani"
+    deps = [ "$ace_root/build:libace_compatible" ]
+    include_dirs = [ "./include" ]
+    sources = [
+      "${ace_root}/frameworks/core/common/container_scope.cpp",
+      "./src/smartGestureController.cpp",
+    ]
+    external_deps = [
+      "napi:ace_napi",
+      "runtime_core:ani",
+    ]
+    if (ace_engine_feature_enable_container_scope_tracking) {
+      external_deps += [ "bounds_checking_function:libsec_static" ]
+    }
+    configs = [ "$ace_root:ace_config" ]
+    part_name = "ace_engine"
+    subsystem_name = "arkui"
+    output_extension = "so"
   }
-  configs = [ "$ace_root:ace_config" ]
-  part_name = "ace_engine"
-  subsystem_name = "arkui"
-  output_extension = "so"
-}
 
-generate_static_abc("smartGestureController") {
-  base_url = "./ets"
-  files = [ "./ets/@ohos.arkui.smartGestureController.ets" ]
-  is_boot_abc = "True"
-  device_dst_file = "/system/framework/smartGestureController.abc"
-}
+  generate_static_abc("smartGestureController") {
+    base_url = "./ets"
+    files = [ "./ets/@ohos.arkui.smartGestureController.ets" ]
+    is_boot_abc = "True"
+    device_dst_file = "/system/framework/smartGestureController.abc"
+  }
 
-ohos_prebuilt_etc("smartGestureController_etc") {
-  source = "$target_out_dir/smartGestureController.abc"
-  module_install_dir = "framework"
-  part_name = "ace_engine"
-  subsystem_name = "arkui"
-  deps = [ ":smartGestureController" ]
+  ohos_prebuilt_etc("smartGestureController_etc") {
+    source = "$target_out_dir/smartGestureController.abc"
+    module_install_dir = "framework"
+    part_name = "ace_engine"
+    subsystem_name = "arkui"
+    deps = [ ":smartGestureController" ]
+  }
+} else {
+  group("smartGestureController_ani") {
+  }
+
+  group("smartGestureController_etc") {
+  }
 }

@@ -278,6 +278,8 @@ void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ar
         gestureHub->AddGesture(gesturePtr);
         GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
         if (clickEvent) {
+            auto commonClickEvent = clickEvent;
+            gestureHub->SetCommonClickEvent(std::move(commonClickEvent));
             auto focusHub = frameNode->GetOrCreateFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetFocusable(true, false);

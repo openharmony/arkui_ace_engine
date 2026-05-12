@@ -86,7 +86,9 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
@@ -3666,9 +3668,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+#ifdef SMART_GESTURE_SUPPORTED
         if (eventManager_) {
             eventManager_->ClearSmartGestureSelected();
         }
+#endif // SMART_GESTURE_SUPPORTED
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -4822,9 +4826,11 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+#ifdef SMART_GESTURE_SUPPORTED
         if (eventManager_) {
             eventManager_->ClearSmartGestureSelected();
         }
+#endif
     }
 
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||

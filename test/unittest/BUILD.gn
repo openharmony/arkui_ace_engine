@@ -271,6 +271,7 @@ ohos_source_set("ace_components_base") {
   deps = []
   configs = [ ":ace_unittest_config" ]
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
+  defines += [ "SMART_GESTURE_SUPPORTED" ]
   external_deps = [ "cJSON:cjson" ]
   if (current_os == "ohos") {
     external_deps += [ "c_utils:utils" ]
@@ -460,13 +461,17 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/smart_gesture/smart_gesture_decider.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/smart_gesture/smart_gesture_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/toolbar/toolbar_manager.cpp",
   ]
+  smart_gesture_sources = [
+    "$ace_root/frameworks/core/components_ng/manager/smart_gesture/smart_gesture_decider.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/smart_gesture/smart_gesture_manager.cpp",
+  ]
+  sources += smart_gesture_sources
   deps = []
   configs = [ ":ace_unittest_config" ]
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
+  defines += [ "SMART_GESTURE_SUPPORTED" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
   }
@@ -736,6 +741,7 @@ ohos_source_set("ace_core_extra") {
     "icu:static_icuuc",
   ]
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
+  defines += [ "SMART_GESTURE_SUPPORTED" ]
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps += [

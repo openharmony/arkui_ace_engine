@@ -1362,12 +1362,12 @@ export class CursorControllerImpl extends CursorController {
 
 export class SmartGestureControllerImpl extends SmartGestureController {
     instanceId_: int32;
-    private monitorWrapperMap_: Map<SmartGestureMonitorCallback, Array<smartGestureController.SmartGestureMonitorRawCallback>>;
+    private monitorWrapperMap_: Map<SmartGestureMonitorCallback, smartGestureController.SmartGestureMonitorRawCallback>;
 
     constructor(instanceId: int32) {
         super();
         this.instanceId_ = instanceId;
-        this.monitorWrapperMap_ = new Map<SmartGestureMonitorCallback, Array<smartGestureController.SmartGestureMonitorRawCallback>>();
+        this.monitorWrapperMap_ = new Map<SmartGestureMonitorCallback, smartGestureController.SmartGestureMonitorRawCallback>();
     }
 
     public enableSmartTapAndSlideGestures(enabled: boolean): void {
@@ -1377,31 +1377,24 @@ export class SmartGestureControllerImpl extends SmartGestureController {
     }
 
     public registerMonitor(monitorCallback: SmartGestureMonitorCallback): void {
+        if (this.monitorWrapperMap_.has(monitorCallback)) {
+            return;
+        }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const monitorWrapper = this.createMonitorWrapper(monitorCallback);
         smartGestureController.registerMonitor(monitorWrapper);
-        let monitorWrapperStack = this.monitorWrapperMap_.get(monitorCallback);
-        if (monitorWrapperStack === undefined) {
-            monitorWrapperStack = new Array<smartGestureController.SmartGestureMonitorRawCallback>();
-            this.monitorWrapperMap_.set(monitorCallback, monitorWrapperStack);
-        }
-        monitorWrapperStack.push(monitorWrapper);
+        this.monitorWrapperMap_.set(monitorCallback, monitorWrapper);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public unregisterMonitor(monitorCallback: SmartGestureMonitorCallback): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const monitorWrapperStack = this.monitorWrapperMap_.get(monitorCallback);
-        if (monitorWrapperStack === undefined || monitorWrapperStack.length === 0) {
-            ArkUIAniModule._Common_Restore_InstanceId();
+        const monitorWrapper = this.monitorWrapperMap_.get(monitorCallback);
+        if (monitorWrapper === undefined) {
             return;
         }
-        const monitorWrapper = monitorWrapperStack[monitorWrapperStack.length - 1];
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         smartGestureController.unregisterMonitor(monitorWrapper);
-        monitorWrapperStack.pop();
-        if (monitorWrapperStack.length === 0) {
-            this.monitorWrapperMap_.delete(monitorCallback);
-        }
+        this.monitorWrapperMap_.delete(monitorCallback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -1485,8 +1478,7 @@ export class SmartGestureControllerImpl extends SmartGestureController {
             }
             case SmartGestureAction.SCROLL_FORWARD: {
                 const node = this.fromRawNodePtr(raw.nodePtr);
-                const pageCount = raw.pageCount as int | undefined;
-                const proposal = new ScrollActionProposal(node, raw.distance ?? 0, pageCount);
+                const proposal = new ScrollActionProposal(node, raw.distance ?? 0);
                 proposal.operateIntention = operateIntention;
                 return proposal;
             }
@@ -1547,9 +1539,6 @@ export class SmartGestureControllerImpl extends SmartGestureController {
                 const scroll = selectedProposal as ScrollActionProposal;
                 rawProposal.nodePtr = this.toRawNodePtr(scroll.node);
                 rawProposal.distance = scroll.distance;
-                if (scroll.pageCount !== undefined) {
-                    rawProposal.pageCount = scroll.pageCount as int;
-                }
                 return rawProposal;
             }
             default:

@@ -56,7 +56,10 @@ template("napi_smartgesturecontroller_static") {
     cflags_cc += invoker.cflags_cc
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
-    sources = [ "js_smart_gesture_controller.cpp" ]
+    sources = []
+    if (defined(config.smart_gesture_support) && config.smart_gesture_support) {
+      sources += [ "js_smart_gesture_controller.cpp" ]
+    }
     deps = [
       ":gen_obj_src_smartgesturecontroller_abc",
       ":gen_obj_src_smartgesturecontroller_js",

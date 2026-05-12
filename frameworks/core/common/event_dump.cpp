@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr size_t MAX_EVENT_TREE_RECORD_CNT = 5;
+constexpr size_t MAX_SMART_GESTURE_EXECUTION_CNT = 5;
 constexpr size_t MAX_FRAME_NODE_CNT = 256;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_DOWN_CNT = 10;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_POINT_CNT = 20;
@@ -27,6 +28,36 @@ constexpr int32_t MAX_EVENT_TREE_AXIS_UPDATE_CNT = 20;
 constexpr int32_t MAX_EVENT_TREE_AXIS_CNT = 20;
 constexpr int32_t MAX_EVENT_TREE_GESTURE_CNT = 100;
 constexpr size_t MAX_HISTORY_TOUCH_INFO_SIZE = 2048;
+
+std::string DumpSmartGestureTrigger(SmartGestureTrigger trigger)
+{
+    switch (trigger) {
+        case SmartGestureTrigger::TAP:
+            return "TAP";
+        case SmartGestureTrigger::SLIDE_FORWARD:
+            return "SLIDE_FORWARD";
+        case SmartGestureTrigger::WRIST_BACK:
+            return "WRIST_BACK";
+    }
+    return "UNKNOWN";
+}
+
+std::string DumpSmartGestureProposalType(SmartGestureProposalType type)
+{
+    switch (type) {
+        case SmartGestureProposalType::NONE_ACTION:
+            return "NONE_ACTION";
+        case SmartGestureProposalType::CLICK:
+            return "CLICK";
+        case SmartGestureProposalType::SELECT:
+            return "SELECT";
+        case SmartGestureProposalType::SCROLL:
+            return "SCROLL";
+        case SmartGestureProposalType::BACK_PRESS:
+            return "BACK_PRESS";
+    }
+    return "UNKNOWN";
+}
 } // end of namespace
 
 void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
@@ -140,6 +171,19 @@ void AxisSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, in
         << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
         << "isInjected: " << isInjected;
 #endif
+    dumpList.emplace_back(std::make_pair(depth, oss.str()));
+}
+
+void SmartGestureExecutionSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
+{
+    std::stringstream oss;
+    oss << "trigger: " << DumpSmartGestureTrigger(trigger) << ", "
+        << "hasMonitor: " << hasMonitor << ", "
+        << "defaultProposal: " << DumpSmartGestureProposalType(defaultProposalType) << ", "
+        << "defaultNodeId: " << defaultProposalNodeId << ", "
+        << "resolvedProposal: " << DumpSmartGestureProposalType(resolvedProposalType) << ", "
+        << "resolvedNodeId: " << resolvedProposalNodeId << ", "
+        << "executeResult: " << executeResult;
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
 void EventTreeRecord::AddAxis(const AxisEvent& event)
@@ -275,6 +319,18 @@ void EventTreeRecord::AddGestureSnapshot(int32_t finger, RefPtr<GestureSnapshot>
     gestureTree[finger].emplace_back(gesture);
 }
 
+void EventTreeRecord::AddSmartGestureExecution(SmartGestureExecutionSnapshot&& snapshot)
+{
+    if (eventTreeList.empty()) {
+        return;
+    }
+    auto& executions = eventTreeList.back().smartGestureExecutions;
+    executions.emplace_back(std::move(snapshot));
+    while (executions.size() > MAX_SMART_GESTURE_EXECUTION_CNT) {
+        executions.pop_front();
+    }
+}
+
 void EventTreeRecord::AddGestureProcedure(uint64_t id, const std::string& procedure, const std::string& extraInfo,
     const std::string& state, const std::string& disposal, int64_t timestamp)
 {
@@ -373,6 +429,13 @@ void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
                 item->Dump(dumpList, detailDepth + 1);
             }
         }
+        dumpList.emplace_back(std::make_pair(listDepth, "smart gestures:"));
+        int32_t recordIndex = 0;
+        for (const auto& item : tree.smartGestureExecutions) {
+            dumpList.emplace_back(std::make_pair(detailDepth,
+                std::string("record:").append(std::to_string(recordIndex++))));
+            item.Dump(dumpList, detailDepth + 1);
+        }
         ++index;
     }
 }
@@ -431,6 +494,17 @@ void AxisSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
     json->Put("isInjected", isInjected);
 }
 
+void SmartGestureExecutionSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("trigger", DumpSmartGestureTrigger(trigger).c_str());
+    json->Put("hasMonitor", hasMonitor);
+    json->Put("defaultProposal", DumpSmartGestureProposalType(defaultProposalType).c_str());
+    json->Put("defaultNodeId", defaultProposalNodeId);
+    json->Put("resolvedProposal", DumpSmartGestureProposalType(resolvedProposalType).c_str());
+    json->Put("resolvedNodeId", resolvedProposalNodeId);
+    json->Put("executeResult", executeResult);
+}
+
 void EventTreeRecord::BuildTouchPoints(
     std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const
 {
@@ -453,6 +527,18 @@ void EventTreeRecord::BuildAxis(
         axisEvent->Put(child);
     }
     json->Put("axis", axisEvent);
+}
+
+void EventTreeRecord::BuildSmartGestureExecutions(
+    std::deque<SmartGestureExecutionSnapshot> smartGestureExecutions, std::unique_ptr<JsonValue>& json) const
+{
+    std::unique_ptr<JsonValue> smartGestures = JsonUtil::CreateArray(true);
+    for (const auto& item : smartGestureExecutions) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        item.Dump(child);
+        smartGestures->Put(child);
+    }
+    json->Put("smart gestures", smartGestures);
 }
 
 void EventTreeRecord::BuildHitTestTree(std::list<FrameNodeSnapshot> hitTestTree, std::unique_ptr<JsonValue>& json) const
@@ -526,6 +612,7 @@ void EventTreeRecord::Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int3
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
         BuildTouchPoints(tree.touchPoints, children);
         BuildAxis(tree.axis, children);
+        BuildSmartGestureExecutions(tree.smartGestureExecutions, children);
         BuildHitTestTree(tree.hitTestTree, children);
         BuildGestureTree(tree.gestureTree, children);
         std::string header = "event tree_" + std::to_string(index - startNumber);

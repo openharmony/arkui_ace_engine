@@ -2232,7 +2232,7 @@ NG::SmartGestureShortcutConfig Convert(const Ark_SmartGestureShortcutOptions& sr
     NG::SmartGestureShortcutConfig config;
     config.action = NG::SmartGestureShortcutAction::PRIMARY;
     config.enabled = Converter::OptConvert<bool>(src.enabled).value_or(false);
-    config.selectable = Converter::OptConvert<bool>(src.selectable).value_or(false);
+    config.selectable = Converter::OptConvert<bool>(src.selectable).value_or(config.enabled);
     auto arkAction = Converter::OptConvert<Ark_GestureShortcut>(src.action);
     if (arkAction.has_value()) {
         switch (arkAction.value()) {
@@ -5597,11 +5597,18 @@ void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
 void SetSmartGestureShortcutImpl(Ark_NativePointer node,
                                  const Ark_SmartGestureShortcutOptions* value)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    auto optAction = Converter::OptConvert<Ark_GestureShortcut>(value->action);
+    if (!optAction.has_value() || optAction.value() != ARK_GESTURE_SHORTCUT_PRIMARY) {
+        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
+        return;
+    }
     NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
     ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
+#endif
 }
 void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
                                const Opt_OnNeedSoftkeyboardCallback* value)

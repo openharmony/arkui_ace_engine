@@ -164,7 +164,9 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+#ifdef SMART_GESTURE_SUPPORTED
 constexpr int32_t SMART_GESTURE_SHORTCUT_PRIMARY = 0;
+#endif
 constexpr int32_t SECOND_INDEX = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
@@ -11935,6 +11937,7 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
 
 void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     if (info.Length() != PARAMETER_LENGTH_FIRST) {
         return;
     }
@@ -11945,6 +11948,7 @@ void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
         return;
     }
 
@@ -11952,20 +11956,23 @@ void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
     auto actionValue = options->GetProperty("action");
     auto enabledValue = options->GetProperty("enabled");
     if (!actionValue->IsNumber() || !enabledValue->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
         return;
     }
 
     int32_t action = actionValue->ToNumber<int32_t>();
     if (action != SMART_GESTURE_SHORTCUT_PRIMARY) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
         return;
     }
     bool enabled = enabledValue->ToBoolean();
-    bool selectable = false;
+    bool selectable = enabled;
     auto selectableValue = options->GetProperty("selectable");
     if (selectableValue->IsBoolean()) {
         selectable = selectableValue->ToBoolean();
     }
     ViewAbstractModel::GetInstance()->SetSmartGestureShortcut(action, enabled, selectable);
+#endif
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
