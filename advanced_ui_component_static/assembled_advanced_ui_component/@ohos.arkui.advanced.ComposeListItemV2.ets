@@ -1166,8 +1166,8 @@ export struct ComposeListItemV2 {
         const systemIconLineHeight =
           LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value as number;
         this.itemHeight =
-          (this.contentItemV2?.iconStyle as IconTypeV2) <= IconTypeV2.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT as number :
-            systemIconLineHeight as number;
+          (this.contentItemV2?.iconStyle as IconTypeV2) <= IconTypeV2.HEAD_SCULPTURE ?
+            ItemHeight.SECOND_HEIGHT as number : systemIconLineHeight as number;
       }
     } else if (this.contentItemV2?.description === undefined) {
       let iconStyle: IconTypeV2 = (this.contentItemV2?.iconStyle as IconTypeV2);
