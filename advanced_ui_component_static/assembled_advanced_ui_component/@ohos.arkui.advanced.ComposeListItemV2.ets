@@ -1053,7 +1053,8 @@ function getAccessibilityText(resource: ResourceStr): string {
     } else {
       let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
       if (uiContent) {
-        resourceString = (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long);
+        resourceString =
+          (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long);
       }
     }
     return resourceString;
