@@ -2516,7 +2516,6 @@ function updateParentChildNumHandler(parentNodeId: number, nodeIdNodeItemMap: Ma
   }
 }
 
-
 /**
  * delay sort nodeId list
  *
