@@ -808,6 +808,8 @@ HWTEST_F(ScrollNestedTestNg, NestTest011, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_EQ(nestStopCount, 1);
     EXPECT_EQ(stopCount, 1);
+    model.SetOnScrollStop(nullptr);
+    nestModel.SetOnScrollStop(nullptr);
 }
 
 /**
@@ -865,6 +867,8 @@ HWTEST_F(ScrollNestedTestNg, NestTest012, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(nestStopCount, 1);
     EXPECT_EQ(stopCount, 1);
+    model.SetOnScrollStop(nullptr);
+    nestModel.SetOnScrollStop(nullptr);
 }
 
 /**
@@ -910,6 +914,10 @@ HWTEST_F(ScrollNestedTestNg, NestTest013, TestSize.Level1)
     EXPECT_EQ(stopCount, 1);
     EXPECT_EQ(nestStartCount, 1);
     EXPECT_EQ(nestStopCount, 1);
+    model.SetOnScrollStop(nullptr);
+    model.SetOnScrollStart(nullptr);
+    nestModel.SetOnScrollStart(nullptr);
+    nestModel.SetOnScrollStop(nullptr);
 }
 
 /**
