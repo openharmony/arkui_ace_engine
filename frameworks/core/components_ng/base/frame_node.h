@@ -29,7 +29,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
-#include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_COMPONENT_H
 
-#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"

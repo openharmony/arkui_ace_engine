@@ -19,7 +19,6 @@
 #include <tuple>
 
 #include "base/geometry/dimension_offset.h"
-#include "base/geometry/matrix4.h"
 #include "base/json/json_util.h"
 #include "core/animation/animatable.h"
 #include "core/components/common/layout/grid_column_info.h"

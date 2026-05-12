@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/common/container.h"
+#include "core/common/statistic_event_reporter.h"
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"

@@ -27,7 +27,6 @@
 #include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"

@@ -28,7 +28,6 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
-#include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/color_inverter.h"
 #include "core/common/thp_extra_manager.h"

@@ -45,6 +45,7 @@
 #include "base/window/foldable_window.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"

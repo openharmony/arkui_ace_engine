@@ -29,7 +29,6 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/view_data/ace_auto_fill_error.h"
 #include "base/view_data/hint_to_type_wrap.h"
@@ -46,7 +45,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
-#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 
