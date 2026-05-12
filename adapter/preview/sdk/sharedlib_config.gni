@@ -121,6 +121,11 @@ common_bin = [
     part_name = "skia"
   },
   {
+    label = "//third_party/expat:expat"
+    subsystem_name = "thirdparty"
+    part_name = "expat"
+  },
+  {
     label = "//third_party/libpng:libpng"
     subsystem_name = "thirdparty"
     part_name = "libpng"
