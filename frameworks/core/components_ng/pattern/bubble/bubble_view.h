@@ -95,11 +95,41 @@ private:
         const RefPtr<PopupTheme>& theme,
         const RefPtr<PopupParam>& param,
         const RefPtr<BubblePattern>& pattern,
-        bool isUserSetMaterial);
+        bool isUserSetMaterial,
+        const RefPtr<FrameNode>& popupNode = nullptr);
     static void UpdateBubbleShadow(
         const RefPtr<RenderContext>& renderContext,
         const RefPtr<PopupParam>& param,
         const RefPtr<FrameNode>& popupNode);
+    static void UpdateLegacyBackground(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<BubbleRenderProperty>& paintProp,
+        const RefPtr<PopupTheme>& theme);
+    static void UpdateModernBackgroundAndBlur(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<BubbleRenderProperty>& paintProp,
+        const RefPtr<PopupTheme>& theme,
+        const RefPtr<PopupParam>& param,
+        const RefPtr<BubblePattern>& pattern,
+        const RefPtr<FrameNode>& popupNode);
+    static BlurStyleOption CreateBlurStyleOption(
+        const RefPtr<PopupParam>& param,
+        const RefPtr<BubblePattern>& pattern);
+    static void UpdateBlurStyleOption(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<PopupParam>& param,
+        const BlurStyleOption& styleOption,
+        PipelineContext* pipelineContext,
+        const RefPtr<FrameNode>& popupNode);
+    static void UpdateEffectOption(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<PopupParam>& param,
+        PipelineContext* pipelineContext,
+        const RefPtr<FrameNode>& popupNode);
+    static void UpdateWindowFocusCallback(
+        PipelineContext* pipelineContext,
+        const RefPtr<FrameNode>& popupNode,
+        BlurStyleActivePolicy policy);
 };
 } // namespace OHOS::Ace::NG
 

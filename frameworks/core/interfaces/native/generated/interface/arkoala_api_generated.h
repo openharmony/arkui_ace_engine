@@ -22744,6 +22744,8 @@ typedef struct Ark_CustomPopupOptions {
     Opt_PopupBorderLinearGradient borderLinearGradient;
     Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
     Opt_VoidCallback onDidAppear;
     Opt_VoidCallback onWillDisappear;
     Opt_VoidCallback onDidDisappear;
@@ -23017,6 +23019,8 @@ typedef struct Ark_PopupCommonOptions {
     Opt_PopupBorderLinearGradient borderLinearGradient;
     Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
     Opt_VoidCallback onDidDisappear;
     Opt_VoidCallback onWillDisappear;
     Opt_VoidCallback onWillAppear;
@@ -23486,6 +23490,8 @@ typedef struct Ark_PopupOptions {
     Opt_PopupBorderLinearGradient borderLinearGradient;
     Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
     Opt_VoidCallback onWillDisappear;
     Opt_VoidCallback onDidAppear;
     Opt_VoidCallback onWillAppear;

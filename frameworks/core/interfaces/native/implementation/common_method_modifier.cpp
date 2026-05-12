@@ -493,6 +493,14 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (keyboardAvoidMode.has_value()) {
         popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
     }
+    auto effectOptionOpt = Converter::OptConvert<EffectOption>(src.backgroundEffect);
+    if (effectOptionOpt.has_value()) {
+        popupParam->SetEffectOption(effectOptionOpt.value());
+    }
+    auto blurStyleOption = Converter::OptConvert<BlurStyleOption>(src.backgroundBlurStyleOptions);
+    if (blurStyleOption.has_value()) {
+        popupParam->SetBlurStyleOption(blurStyleOption.value());
+    }
 
     // Parse lifecycle callbacks
     auto arkOnWillAppear = GetOpt(src.onWillAppear);

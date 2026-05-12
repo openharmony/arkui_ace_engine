@@ -38,6 +38,9 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components/common/properties/popup_param.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/blur_style_option.h"
+#include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -1637,5 +1640,83 @@ HWTEST_F(BubbleTestTwoNg, BubbleViewShouldUpdateShadowTest007, TestSize.Level0)
      */
     auto result = BubbleView::ShouldUpdateShadow(popupParam);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: BubbleViewBackgroundEffectTest001
+ * @tc.desc: Test PopupParam SetBlurStyleOption and GetBlurStyleOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewBackgroundEffectTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopupParam and set BlurStyleOption with test values
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    blurStyleOption.adaptiveColor = AdaptiveColor::AVERAGE;
+    blurStyleOption.scale = 1.5;
+    blurStyleOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    blurStyleOption.blurType = BlurType::WITHIN_WINDOW;
+
+    /**
+     * @tc.steps: step2. Call SetBlurStyleOption
+     */
+    popupParam->SetBlurStyleOption(blurStyleOption);
+
+    /**
+     * @tc.steps: step3. Verify GetBlurStyleOption returns the set value
+     * @tc.expected: GetBlurStyleOption returns the same BlurStyleOption that was set
+     */
+    auto result = popupParam->GetBlurStyleOption();
+    EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(result->blurStyle, BlurStyle::COMPONENT_REGULAR);
+    EXPECT_EQ(result->colorMode, ThemeColorMode::LIGHT);
+    EXPECT_EQ(result->adaptiveColor, AdaptiveColor::AVERAGE);
+    EXPECT_DOUBLE_EQ(result->scale, 1.5);
+    EXPECT_EQ(result->policy, BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    EXPECT_EQ(result->blurType, BlurType::WITHIN_WINDOW);
+}
+
+/**
+ * @tc.name: BubbleViewBackgroundEffectTest002
+ * @tc.desc: Test PopupParam SetEffectOption and GetEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubbleViewBackgroundEffectTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopupParam and set EffectOption with test values
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    EffectOption effectOption;
+    effectOption.radius = Dimension(20.0f, DimensionUnit::VP);
+    effectOption.saturation = 1.5;
+    effectOption.brightness = 0.8;
+    effectOption.color = Color(0xFFFF0000);
+    effectOption.adaptiveColor = AdaptiveColor::AVERAGE;
+    effectOption.blurType = BlurType::BEHIND_WINDOW;
+    effectOption.policy = BlurStyleActivePolicy::ALWAYS_INACTIVE;
+
+    /**
+     * @tc.steps: step2. Call SetEffectOption
+     */
+    popupParam->SetEffectOption(effectOption);
+
+    /**
+     * @tc.steps: step3. Verify GetEffectOption returns the set value
+     * @tc.expected: GetEffectOption returns the same EffectOption that was set
+     */
+    auto result = popupParam->GetEffectOption();
+    EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(result->radius, Dimension(20.0f, DimensionUnit::VP));
+    EXPECT_DOUBLE_EQ(result->saturation, 1.5);
+    EXPECT_DOUBLE_EQ(result->brightness, 0.8);
+    EXPECT_EQ(result->color, Color(0xFFFF0000));
+    EXPECT_EQ(result->adaptiveColor, AdaptiveColor::AVERAGE);
+    EXPECT_EQ(result->blurType, BlurType::BEHIND_WINDOW);
+    EXPECT_EQ(result->policy, BlurStyleActivePolicy::ALWAYS_INACTIVE);
 }
 } // namespace OHOS::Ace::NG
