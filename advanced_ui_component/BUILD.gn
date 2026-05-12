@@ -71,6 +71,7 @@ group("advanced_ui_component") {
   deps = []
   deps += [
     ":dialog",
+    ":datepickercomponent",
     "arcbutton/interfaces:arcbutton",
     "arcslider/interfaces:arcslider",
     "counter/interfaces:counter",
