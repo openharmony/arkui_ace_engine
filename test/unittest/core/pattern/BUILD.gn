@@ -64,6 +64,7 @@ group("core_pattern_unittest") {
     "image:image_test_ng",
     "image_animator:image_animator_test_ng",
     "indexer:indexer_test_ng",
+    "lazy_layout:lazy_column_layout_test",
     "lazy_layout:lazy_grid_layout_test",
     "lazy_layout:dynamiclayout_grid_test_ng",
     "linear_indicator:linear_indicator_test_ng",
