@@ -38,6 +38,7 @@
 #include "res_sched_client.h"
 #include "res_type.h"
 #include "resource_manager.h"
+#include "listener/ressched_event_listener.h"
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
@@ -52,7 +53,6 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/module_buffer_reader.h"
@@ -2168,6 +2168,15 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     static std::once_flag onceFlag;
     std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
     AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    ResschedEventListener::GetInstance()->AddContainerId(focusWindowId, instanceId_);
+    static std::once_flag registerFlag;
+    std::call_once(registerFlag, []() {
+        ResourceSchedule::ResSchedClient::GetInstance().RegisterEventListener(
+            ResschedEventListener::GetInstance(),
+            ResourceSchedule::ResType::EventType::EVENT_COMPONENT_PREMAKE);
+    });
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     AceNewPipeJudgement::InitAceNewPipeConfig();
     NG::XComponentResolutionConfig::GetInstance().GetApsSdrRatio(context->GetBundleName(),
         static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE));
@@ -6158,7 +6167,6 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterSelectTextCallback(taskExecutor);
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
-    SaveNotifyComponentPreMakeFunction(taskExecutor);
 }
 
 void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6812,22 +6820,5 @@ const std::shared_ptr<const OHOS::MMI::PointerEvent> UIContentImpl::GetPointerEv
         return touchEventInfo->GetPointerEvent();
     }
     return nullptr;
-}
-
-void UIContentImpl::SaveNotifyComponentPreMakeFunction(const WeakPtr<TaskExecutor>& taskExecutor)
-{
-    auto&& componentPreMakeFunc = [weakTaskExecutor = taskExecutor](int32_t componentType, const std::string& params) {
-        auto taskExecutor = weakTaskExecutor.Upgrade();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [componentType, params]() {
-                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-                CHECK_NULL_VOID(pipeline);
-                CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
-                pipeline->GetTaihangOptimizer()->ComponentPreMake(componentType, params);
-            },
-            TaskExecutor::TaskType::UI, "ArkUINotifyComponentPreMake");
-    };
-    UiSessionManager::GetInstance()->SaveNotifyComponentPreMakeFunction(componentPreMakeFunc);
 }
 } // namespace OHOS::Ace

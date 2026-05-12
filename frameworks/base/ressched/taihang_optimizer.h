@@ -33,8 +33,8 @@ public:
     void SetEnable(bool value);
     bool IsEnable();
     bool CheckSwiperPathValid(const std::string& bundleName, const std::string& pageNames);
-    void ComponentPreMake(int32_t componentType, const std::string& params);
-    void HandleSwiperPreMake(const std::string& params);
+    void ComponentPreMake(const std::unordered_map<std::string, std::string> extInfo);
+    void HandleSwiperPreMake(const std::unordered_map<std::string, std::string> extInfo);
     void PostSwiperPreMakeTask(RefPtr<NG::FrameNode>& node, int32_t index);
 private:
     TaihangOptimizer(const TaihangOptimizer&) = delete;

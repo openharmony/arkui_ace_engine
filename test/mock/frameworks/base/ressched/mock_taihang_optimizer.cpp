@@ -39,11 +39,11 @@ bool TaihangOptimizer::CheckSwiperPathValid(const std::string& bundleName, const
     return true;
 }
 
-void TaihangOptimizer::ComponentPreMake(int32_t componentType, const std::string& params)
+void TaihangOptimizer::ComponentPreMake(const std::unordered_map<std::string, std::string> extInfo)
 {
 }
 
-void TaihangOptimizer::HandleSwiperPreMake(const std::string& params)
+void TaihangOptimizer::HandleSwiperPreMake(const std::unordered_map<std::string, std::string> extInfo)
 {
 }
 

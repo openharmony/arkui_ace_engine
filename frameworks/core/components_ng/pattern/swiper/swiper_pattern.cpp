@@ -111,6 +111,7 @@ constexpr char SWIPER_SCROLL_DIRECTION_FORWARD[] = "forward";
 constexpr char SWIPER_SCROLL_DIRECTION_BACKWARD[] = "backward";
 constexpr char SWIPER_SCROLL_DIRECTION_BIDIRECTIONAL[] = "bidirectional";
 constexpr int32_t COMPONENT_SWIPER = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
 
 MoveStep GetKeyMoveStep(const KeyEvent& event, Axis axis, bool isRtl)
 {
@@ -8372,6 +8373,9 @@ void SwiperPattern::CheckOffsetAfterLyout(float offset)
 
 void SwiperPattern::OnNotifyMemoryLevel(int32_t level)
 {
+    if (level != MEMORY_LEVEL_CRITICAL) {
+        return;
+    }
     if (premakeItems_.empty()) {
         return;
     }

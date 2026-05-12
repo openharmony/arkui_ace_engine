@@ -72,7 +72,6 @@ private:
     int32_t UnregisterContentChangeCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetStateMgmtInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetWebInfoByRequestInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
-    int32_t ExeComponentPreMakeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     bool IsSACalling() const;
 };

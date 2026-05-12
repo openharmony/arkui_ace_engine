@@ -1435,6 +1435,7 @@ private:
 
     void HandleColorModeChange();
 
+    virtual void ResetNode() {};
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;

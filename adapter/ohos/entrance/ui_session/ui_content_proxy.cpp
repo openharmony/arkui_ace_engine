@@ -979,33 +979,6 @@ int32_t UIContentServiceProxy::GetImagesById(
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::ExeAppComponentPreMake(int32_t componentType, const std::string& params)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    LOGD("UIContentServiceProxy::ExeAppComponentPreMake enter");
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LOGW("ExeAppComponentPreMake write interface token failed");
-        return FAILED;
-    }
-    if (!data.WriteInt32(componentType)) {
-        LOGW("ExeAppComponentPreMake write componentType failed");
-        return FAILED;
-    }
-    if (!data.WriteString(params)) {
-        LOGW("ExeAppComponentPreMake write params failed");
-        return FAILED;
-    }
-
-    int32_t sendRequestErrorCode = Remote()->SendRequest(EXE_COMPONENT_PREMAKE, data, reply, option);
-    if (sendRequestErrorCode != ERR_NONE) {
-        LOGW("ExeAppComponentPreMake send request failed, errorCode is %{public}d", sendRequestErrorCode);
-        return REPLY_ERROR;
-    }
-    return NO_ERROR;
-}
-
 int32_t UIContentServiceProxy::ExeAppAIFunction(
     const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
 {

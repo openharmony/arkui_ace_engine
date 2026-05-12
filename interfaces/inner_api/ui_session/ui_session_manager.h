@@ -53,7 +53,6 @@ public:
         std::function<void(const std::vector<int32_t>&, const std::map<int32_t, std::vector<int32_t>>&)>;
 
     using GetWebInfoByRequestFunction = std::function<void(int32_t, const std::string&)>;
-    using NotifyComponentPreMakeFunction = std::function<void(int32_t, const std::string&)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -217,10 +216,6 @@ public:
     virtual void GetWebInfoByRequest(int32_t webId, const std::string& request) {};
     virtual void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) {};
-
-    virtual void SaveNotifyComponentPreMakeFunction(NotifyComponentPreMakeFunction&& function) {};
-    virtual void ExeAppComponentPreMake(int32_t componentType, const std::string& params) {};
-
     virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
     virtual void SendArkUIImagesById(int32_t windowId,
         const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
@@ -276,8 +271,6 @@ protected:
     std::mutex getHitTestInfoFunctionMutex_;
     GetImagesByIdFunction getImagesByIdFunction_ = 0;
     std::mutex getImagesByIdFunctionMutex_;
-    NotifyComponentPreMakeFunction notifyComponentPreMakeFunction_ = 0;
-    std::mutex notifyComponentPreMakeFunctionMutex_;
     NotifySendCommandFunction notifySendCommandFunction_ = 0;
     std::mutex notifySendCommandFunctionMutex_;
     NotifySendCommandAsyncFunction notifySendCommandAsyncFunction_ = 0;

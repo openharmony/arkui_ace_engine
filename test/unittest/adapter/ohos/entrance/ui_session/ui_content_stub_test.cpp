@@ -1248,33 +1248,4 @@ HWTEST_F(UIContentStubTest, UIContentStubTest042, TestSize.Level1)
     res = ptr->OnRemoteRequest(IUiContentService::REQUEST_STATE_MGMT_INFO, data, reply, option);
     EXPECT_EQ(res, 0);
 }
-
-/**
- * @tc.name: UIContentStubTest043
- * @tc.desc: Test EXE_COMPONENT_PREMAKE
- * @tc.type: FUNC
- */
-HWTEST_F(UIContentStubTest, UIContentStubTest043, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
-     * @tc.expected: step1. call UIContentServiceStubImpl OnRemoteRequest return -1 because of AccessToken check failed.
-     */
-    sptr<UIContentServiceStubImpl> ptr = std::make_shared<UIContentServiceStubImpl>();
-    MessageParcel data = MessageParcel();
-    MessageParcel reply = MessageParcel();
-    MessageOption option = MessageOption();
-
-    auto res = ptr->OnRemoteRequest(0, data, reply, option);
-    EXPECT_EQ(res, -1);
-
-    /**
-     * @tc.steps: step2. simulate AccessToken check success.
-     * @tc.expected: step2. call UIContentServiceStubImpl OnRemoteRequest return success.
-     */
-    Security::AccessToken::AccessTokenKit::mockTokenTypeFlag_ = Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE;
-    data.WriteInterfaceToken(u"ohos.ace.UIContentService");
-    res = ptr->OnRemoteRequest(IUiContentService::EXE_COMPONENT_PREMAKE, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
 }

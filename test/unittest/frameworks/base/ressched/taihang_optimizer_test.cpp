@@ -179,29 +179,38 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest010, TestSize.Level1)
 
 HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest001, TestSize.Level1)
 {
-    std::string params = R"({"path":"test","index":0})";
-    optimizer_->ComponentPreMake(1, params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["path"] = "test";
+    extInfo["index"] = "0";
+    optimizer_->ComponentPreMake(extInfo);
     EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
 }
 
 HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest002, TestSize.Level1)
 {
-    std::string params = R"({"path":"test","index":0})";
-    optimizer_->ComponentPreMake(0, params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "0";
+    extInfo["path"] = "test";
+    extInfo["index"] = "0";
+    optimizer_->ComponentPreMake(extInfo);
     EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
 }
 
 HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest003, TestSize.Level1)
 {
-    std::string params = R"({"path":"test","index":0})";
-    optimizer_->ComponentPreMake(2, params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "2";
+    extInfo["path"] = "test";
+    extInfo["index"] = "0";
+    optimizer_->ComponentPreMake(extInfo);
     EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
 }
 
 HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest004, TestSize.Level1)
 {
-    std::string params = "";
-    optimizer_->ComponentPreMake(1, params);
+    std::unordered_map<std::string, std::string> extInfo;
+    optimizer_->ComponentPreMake(extInfo);
     EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
 }
 
@@ -262,27 +271,26 @@ HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest004, TestSize.Level1)
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest001, TestSize.Level1)
 {
-    optimizer_->HandleSwiperPreMake("");
-    EXPECT_TRUE(true);
-}
-
-HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest002, TestSize.Level1)
-{
-    optimizer_->HandleSwiperPreMake("invalid_json");
+    std::unordered_map<std::string, std::string> extInfo;
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest003, TestSize.Level1)
 {
-    std::string params = R"({"path":"","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest004, TestSize.Level1)
 {
-    std::string params = R"({"path":"test","index":-1})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test";
+    extInfo["index"] = "-1";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -298,8 +306,10 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath001, TestSize.Lev
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"/root/swiper[0]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "/root/swiper[0]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -315,8 +325,10 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath002, TestSize.Lev
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"/root/other[0]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "/root/swiper[0]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -329,8 +341,10 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath003, TestSize.Lev
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"/root/other[0]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "/root/other[0]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -340,22 +354,28 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNullRoot001, TestSize.Leve
     ASSERT_NE(context, nullptr);
     context->rootNode_ = nullptr;
 
-    std::string params = R"({"path":"test[0]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test[0]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNegativeIndex001, TestSize.Level1)
 {
-    std::string params = R"({"path":"test[0]","index":-5})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test[0]";
+    extInfo["index"] = "-5";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithEmptyPath001, TestSize.Level1)
 {
-    std::string params = R"({"path":"","index":10})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "";
+    extInfo["index"] = "10";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -368,8 +388,10 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket001, TestS
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"test[","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test[";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -382,8 +404,10 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket002, TestS
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"test[0","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test[0";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -396,8 +420,10 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket003, TestS
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"test[]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test[]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -410,8 +436,10 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket004, TestS
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"test[ ]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test[ ]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -424,8 +452,10 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithInvalidIndex001, TestSize.
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"test[abc]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test[abc]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -438,49 +468,45 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithInvalidIndex002, TestSize.
     ASSERT_NE(context, nullptr);
     context->rootNode_ = rootNode;
 
-    std::string params = R"({"path":"test[-1]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test[-1]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidJson001, TestSize.Level1)
 {
-    std::string params = R"({"path":"validPath","index":5})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "validPath";
+    extInfo["index"] = "5";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidJson002, TestSize.Level1)
 {
-    std::string params = R"({"path":"/root/child[0]","index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "/root/child[0]";
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
-HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNullJson001, TestSize.Level1)
-{
-    optimizer_->HandleSwiperPreMake("null");
-    EXPECT_TRUE(true);
-}
-
-HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithEmptyJsonObject001, TestSize.Level1)
-{
-    std::string params = R"({})";
-    optimizer_->HandleSwiperPreMake(params);
-    EXPECT_TRUE(true);
-}
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMissingPathKey001, TestSize.Level1)
 {
-    std::string params = R"({"index":0})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["index"] = "0";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMissingIndexKey001, TestSize.Level1)
 {
-    std::string params = R"({"path":"test"})";
-    optimizer_->HandleSwiperPreMake(params);
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["path"] = "test";
+    optimizer_->HandleSwiperPreMake(extInfo);
     EXPECT_TRUE(true);
 }
 
@@ -546,38 +572,6 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithWhitespace001, TestSize.L
     optimizer_->bundleNameToPages_["com.example.app"] = {"page1"};
     bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix, page1");
     EXPECT_FALSE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithEmptyParams001, TestSize.Level1)
-{
-    optimizer_->ComponentPreMake(1, "");
-    EXPECT_TRUE(true);
-}
-
-HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithWhitespaceParams001, TestSize.Level1)
-{
-    optimizer_->ComponentPreMake(1, "   ");
-    EXPECT_TRUE(true);
-}
-
-HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithNullParams001, TestSize.Level1)
-{
-    optimizer_->ComponentPreMake(1, "null");
-    EXPECT_TRUE(true);
-}
-
-HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithInvalidComponentType001, TestSize.Level1)
-{
-    std::string params = R"({"path":"test","index":0})";
-    optimizer_->ComponentPreMake(-1, params);
-    EXPECT_TRUE(true);
-}
-
-HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithInvalidComponentType002, TestSize.Level1)
-{
-    std::string params = R"({"path":"test","index":0})";
-    optimizer_->ComponentPreMake(999, params);
-    EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, ConstructorTest001, TestSize.Level1)

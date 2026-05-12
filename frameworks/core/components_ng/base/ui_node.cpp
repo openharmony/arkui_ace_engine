@@ -2853,10 +2853,7 @@ void UINode::DetachFromMainTreeByPreloadFlag()
     std::list<RefPtr<UINode>> children = GetChildren();
     for (const auto& child : children) {
         if (child->IsPreloadMemoryLevel()) {
-            auto customNode = DynamicCast<CustomNode>(this);
-            if (customNode) {
-                customNode->FlushReload(false);
-            }
+            ResetNode();
         } else {
             child->DetachFromMainTreeByPreloadFlag();
         }

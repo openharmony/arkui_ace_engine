@@ -60,22 +60,6 @@ void GetReplyBundleNameAndPages(const std::unordered_map<std::string, std::strin
         }
     }
 }
-
-void GetPreMakePathAndIndex(const std::string& params, std::string& path, int32_t& index)
-{
-    CHECK_EQUAL_VOID(params.empty(), true);
-    auto paramJson = JsonUtil::ParseJsonString(params);
-    if (!paramJson || !paramJson->IsValid()) {
-        return;
-    }
-    auto pathValue = paramJson->GetValue("path");
-    auto indexValue = paramJson->GetValue("index");
-    if (!pathValue || !indexValue) {
-        return;
-    }
-    path = pathValue->GetString();
-    index = indexValue->GetInt();
-}
 } // namespace
 
 void TaihangOptimizer::Init()
@@ -140,26 +124,29 @@ bool TaihangOptimizer::CheckSwiperPathValid(const std::string& bundleName, const
     return false;
 }
 
-void TaihangOptimizer::ComponentPreMake(int32_t componentType, const std::string& params)
+void TaihangOptimizer::ComponentPreMake(const std::unordered_map<std::string, std::string> extInfo)
 {
+    auto iter = extInfo.find("componentType");
+    CHECK_EQUAL_VOID(iter, extInfo.end());
+    auto componentType = StringUtils::StringToInt(iter->second);
     switch (componentType) {
         case SWIPER:
-            HandleSwiperPreMake(params);
+            HandleSwiperPreMake(extInfo);
             break;
         default:
             break;
     }
 }
 
-void TaihangOptimizer::HandleSwiperPreMake(const std::string& params)
+void TaihangOptimizer::HandleSwiperPreMake(const std::unordered_map<std::string, std::string> extInfo)
 {
     ACE_SCOPED_TRACE("TaihangOptimizer::HandleSwiperPreMake");
-    std::string path = "";
-    int32_t index = -1;
-    GetPreMakePathAndIndex(params, path, index);
-    if (path.empty() || index < 0) {
-        return;
-    }
+    auto iter = extInfo.find("path");
+    CHECK_EQUAL_VOID(iter, extInfo.end());
+    std::string path = extInfo["path"];
+    auto indexIter = extInfo.find("index");
+    CHECK_EQUAL_VOID(indexIter, extInfo.end());
+    auto index = StringUtils::StringToInt(indexIter->second);
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto root = pipeline->GetRootElement();
