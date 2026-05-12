@@ -3459,11 +3459,11 @@ export interface WebKeyboardCallbackInfo {
 }
 export type WebKeyboardCallback = (keyboardCallbackInfo: WebKeyboardCallbackInfo) => WebKeyboardOptions;
 export enum MessageLevel {
-    DEBUG = 0,
-    ERROR = 1,
+    DEBUG = 1,
     INFO = 2,
-    LOG = 3,
-    WARN = 4
+    WARN = 3,
+    ERROR = 4,
+    LOG = 5
 }
 export enum ConsoleMessageSource {
     XML = 0,

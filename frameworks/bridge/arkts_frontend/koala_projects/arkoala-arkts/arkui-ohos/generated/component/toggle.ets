@@ -23,12 +23,12 @@ import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
-import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, Callback as arkui_component_common_Callback, Bindable, ArkCommonMethodComponent, Bindable_Boolean_serializer } from './common'
+import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, Callback as arkui_component_common_Callback, Bindable, ExtendableCommonMethod, ArkCommonMethodComponent, Bindable_Boolean_serializer } from './common'
 import { ContentModifier, AttributeModifier, hookToggleContentModifier, hookSetToggleOptions, hookToggleAttributeModifier, AttributeUpdater } from '#handwritten'
 import { ResourceColor, Resource as arkui_component_units_Resource } from './units'
 import { Color as arkui_component_enums_Color } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { CustomBuilder } from './builder'
+import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -157,25 +157,136 @@ export interface ToggleOptions {
 }
 export interface ToggleAttribute extends CommonMethod {
     setToggleOptions(options: ToggleOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ToggleAttribute).setToggleOptions(options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Toggle attribute setToggleOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setToggleOptions')
     }
     onChange(value: ((isSelected: boolean) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ToggleAttribute).onChange(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Toggle attribute onChange can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onChange')
     }
     contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ToggleAttribute).contentModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Toggle attribute contentModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method contentModifier')
     }
     selectedColor(value: ResourceColor | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ToggleAttribute).selectedColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Toggle attribute selectedColor can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method selectedColor')
     }
     switchPointColor(value: ResourceColor | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ToggleAttribute).switchPointColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Toggle attribute switchPointColor can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method switchPointColor')
     }
     switchStyle(value: SwitchStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ToggleAttribute).switchStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Toggle attribute switchStyle can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method switchStyle')
     }
     attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ToggleAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Toggle attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableToggle extends ExtendableCommonMethod implements ToggleAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableToggle>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T,
+        @memo @memo_skip
+        _content: CustomBuilder): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: ToggleAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        ToggleImpl(
+            cb,
+            _content
+        );
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableToggle>(factory: () => T, options: ToggleOptions, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setToggleOptions(options: ToggleOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ToggleAttribute).setToggleOptions(options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Toggle attribute 'setToggleOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setToggleOptions')
     }
 }
 

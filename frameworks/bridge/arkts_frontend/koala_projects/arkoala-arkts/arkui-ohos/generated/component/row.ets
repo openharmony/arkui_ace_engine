@@ -18,14 +18,14 @@
 
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
-import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent } from './common'
+import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ExtendableCommonMethod, ArkCommonMethodComponent } from './common'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { VerticalAlign, FlexAlign } from './enums'
 import { AttributeModifier, hookRowAttributeModifier, AttributeUpdater } from '#handwritten'
-import { CustomBuilder } from './builder'
+import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -123,22 +123,124 @@ export interface RowOptionsV2 {
 }
 export interface RowAttribute extends CommonMethod {
     setRowOptions(options?: RowOptions | RowOptionsV2): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RowAttribute).setRowOptions(options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Row attribute setRowOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setRowOptions')
     }
     alignItems(value: VerticalAlign | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RowAttribute).alignItems(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Row attribute alignItems can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method alignItems')
     }
     justifyContent(value: FlexAlign | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RowAttribute).justifyContent(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Row attribute justifyContent can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method justifyContent')
     }
     pointLight(value: PointLightStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RowAttribute).pointLight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Row attribute pointLight can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method pointLight')
     }
     reverse(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RowAttribute).reverse(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Row attribute reverse can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method reverse')
     }
     attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RowAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Row attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableRow extends ExtendableCommonMethod implements RowAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableRow>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T,
+        @memo @memo_skip
+        _content: CustomBuilder): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: RowAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        RowImpl(
+            cb,
+            _content
+        );
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableRow>(factory: () => T, options?: RowOptions | RowOptionsV2, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setRowOptions(options?: RowOptions | RowOptionsV2): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as RowAttribute).setRowOptions(options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Row attribute 'setRowOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setRowOptions')
     }
 }
 

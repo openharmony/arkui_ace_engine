@@ -18,13 +18,13 @@
 
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
-import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent } from './common'
+import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ExtendableCommonMethod, ArkCommonMethodComponent } from './common'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { AttributeModifier, hookGridItemAttributeModifier, AttributeUpdater } from '#handwritten'
-import { CustomBuilder } from './builder'
+import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -159,31 +159,160 @@ export interface GridItemOptions {
 }
 export interface GridItemAttribute extends CommonMethod {
     setGridItemOptions(value?: GridItemOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).setGridItemOptions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute setGridItemOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setGridItemOptions')
     }
     rowStart(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).rowStart(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute rowStart can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method rowStart')
     }
     rowEnd(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).rowEnd(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute rowEnd can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method rowEnd')
     }
     columnStart(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).columnStart(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute columnStart can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method columnStart')
     }
     columnEnd(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).columnEnd(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute columnEnd can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method columnEnd')
     }
     selectable(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).selectable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute selectable can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method selectable')
     }
     selected(value: boolean | Bindable<boolean> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).selected(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute selected can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method selected')
     }
     onSelect(value: ((isSelected: boolean) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).onSelect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute onSelect can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onSelect')
     }
     attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridItemAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('GridItem attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableGridItem extends ExtendableCommonMethod implements GridItemAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableGridItem>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T,
+        @memo @memo_skip
+        _content: CustomBuilder): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: GridItemAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        GridItemImpl(
+            cb,
+            _content
+        );
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableGridItem>(factory: () => T, value?: GridItemOptions, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setGridItemOptions(value?: GridItemOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as GridItemAttribute).setGridItemOptions(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("GridItem attribute 'setGridItemOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setGridItemOptions')
     }
 }
 

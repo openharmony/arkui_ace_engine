@@ -24,3 +24,4 @@ export type CustomBuilder = @Builder () => void;
 export type CustomBuilderT<T> = @Builder (t: T) => void;
 export type PageMapBuilder = @Builder (name: string, param: Object | null | undefined) => void;
 export type BuilderParameterCallback = () => object;
+export type ConstructorT<T> = () => T;
