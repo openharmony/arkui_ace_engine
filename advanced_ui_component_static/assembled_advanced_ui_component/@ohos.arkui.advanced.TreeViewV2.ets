@@ -35,7 +35,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import resourceManager from '@ohos.resourceManager';
-import accessibility from '@ohos.accessibility'
+import accessibility from '@ohos.accessibility';
 import { UIContext, Context } from "@ohos.arkui.UIContext";
 
 const IMAGE_NODE_HEIGHT: number = 24;
