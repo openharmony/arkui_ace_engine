@@ -174,10 +174,6 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
 {
     CHECK_NULL_VOID(pointerEvent);
     static bool isFirstMove = false;
-    PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
-    if (pMonitor == nullptr) {
-        return;
-    }
     uint64_t inputTime = pointerEvent->GetSensorInputTime() * US_TO_MS;
     if (inputTime <= 0) {
         inputTime = pointerEvent->GetActionTime() * US_TO_MS;
@@ -214,6 +210,26 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
         || pointerAction == MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE)) {
         inputType = FIRST_MOVE;
         isFirstMove = false;
+    }
+    RecordInputEventWithPos(pointerEvent, inputType, sourceType, inputTime);
+}
+ 
+void AceViewOhos::RecordInputEventWithPos(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const PerfActionType inputType, const PerfSourceType sourceType, uint64_t inputTime)
+{
+    PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
+    if (pMonitor == nullptr) {
+        return;
+    }
+    if (!SystemProperties::GetAceCommercialLogEnabled()) {
+        auto id = pointerEvent->GetPointerId();
+        MMI::PointerEvent::PointerItem item;
+        if (pointerEvent->GetPointerItem(id, item)) {
+            int32_t xPos = item.GetDisplayX();
+            int32_t yPos = item.GetDisplayY();
+            pMonitor->RecordInputEvent(inputType, sourceType, inputTime, xPos, yPos);
+            return;
+        }
     }
     pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
 }

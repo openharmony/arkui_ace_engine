@@ -64,7 +64,9 @@ public:
     static bool DispatchRotationEvent(const RefPtr<AceViewOhos>& view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-
+    static void RecordInputEventWithPos(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const PerfActionType inputType, const PerfSourceType sourceType, uint64_t inputTime);
+        
     static uint32_t GetBackgroundColor();
 
     void RegisterTouchEventCallback(TouchEventCallback&& callback) override;

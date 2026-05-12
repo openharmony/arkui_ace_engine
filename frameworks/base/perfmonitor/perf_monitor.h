@@ -57,6 +57,7 @@ public:
     void StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note);
     void EndCommercial(const std::string& sceneId, bool isRsRender);
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
+    void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time, int32_t xPos, int32_t yPos);
     int64_t GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note);
     void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName);
     void SetSubHealthInfo(const std::string& info, const std::string& reason, const int32_t duration);
