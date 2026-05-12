@@ -37,6 +37,7 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     bool isAsyncLoadAvailable = IsAsyncLoadAvailable(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (isAsyncLoadAvailable && layoutWrapper->ReachResponseDeadline()) {
+            ACE_SCOPED_TRACE("isAsyncLoadAvailable&&ReachResponseDeadline");
             measureInNextFrame_ = true;
             break;
         }
