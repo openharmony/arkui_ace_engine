@@ -42,6 +42,7 @@ constexpr int32_t DEFAULT_RESTORE_ID0 = 100;
 constexpr int32_t DEFAULT_RESTORE_ID1 = 101;
 constexpr int32_t DEFAULT_RESTORE_ID2 = 102;
 constexpr int32_t NOT_REGISTER_ID = 307;
+constexpr uint32_t DEFAULT_SIZE0 = 0;
 constexpr uint32_t DEFAULT_SIZE1 = 1;
 constexpr uint32_t DEFAULT_SIZE2 = 2;
 constexpr uint32_t DEFAULT_SIZE3 = 3;
