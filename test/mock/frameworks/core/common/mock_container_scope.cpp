@@ -40,8 +40,9 @@ int32_t ContainerScope::RecentForegroundId()
     return 0;
 }
 
-std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
+std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason(bool checkThread)
 {
+    (void)checkThread;
     return { 0, InstanceIdGenReason::UNDEFINED };
 }
 
@@ -101,8 +102,9 @@ void ContainerScope::UpdateRecentForeground(int32_t id)
     (void)id;
 }
 
-int32_t ContainerScope::SafelyId()
+int32_t ContainerScope::SafelyId(bool checkThread)
 {
+    (void)checkThread;
     return 0;
 }
 
@@ -202,5 +204,10 @@ ContainerScope::ContainerScope(int32_t id, bool enable)
 ContainerScope::~ContainerScope()
 {
     UpdateCurrent(restoreId_);
+}
+
+void ContainerScope::RegisterThreadCheckFunc(CheckRunOnUIThreadFunc checkFunc)
+{
+    (void)checkFunc;
 }
 } // namespace OHOS::Ace
