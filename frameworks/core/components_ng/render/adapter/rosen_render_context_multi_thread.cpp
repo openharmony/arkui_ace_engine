@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/common/window.h"

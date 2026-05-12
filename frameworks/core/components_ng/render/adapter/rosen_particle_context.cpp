@@ -14,9 +14,20 @@
  */
 
 #include "frameworks/core/components_ng/render/adapter/rosen_particle_context.h"
+#include "core/components_ng/property/particle_property.h"
 
 #include "animation/rs_particle_field_collection.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+
+namespace OHOS::Ace {
+struct EmitterProperty {
+    uint32_t index = 0;
+    std::optional<NG::VectorF> position;
+    std::optional<NG::VectorF> size;
+    std::optional<uint32_t> emitRate;
+    std::optional<NG::ParticleAnnulusRegion> annulusRegion;
+};
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 class RosenRenderContext;

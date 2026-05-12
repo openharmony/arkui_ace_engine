@@ -23,7 +23,12 @@
 #include "base/geometry/ng/vector.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/property/particle_property.h"
+
+namespace OHOS::Ace::NG {
+struct ParticleOption;
+struct ParticleAnnulusRegion;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 
 enum class ParticleDisturbanceShapeType :uint32_t {
@@ -95,13 +100,7 @@ struct ParticleDisturbance {
     }
 };
 
-struct EmitterProperty {
-    uint32_t index = 0;
-    std::optional<NG::VectorF> position;
-    std::optional<NG::VectorF> size;
-    std::optional<uint32_t> emitRate;
-    std::optional<NG::ParticleAnnulusRegion> annulusRegion;
-};
+struct EmitterProperty;
 
 class ACE_FORCE_EXPORT ParticleModel {
 public:

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/render_context.h"
 
+#include "core/components_ng/property/particle_property.h"
+
 #include "base/utils/multi_thread.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/border_image.h"
@@ -24,7 +26,6 @@
 namespace OHOS::Ace::NG {
 
 RenderContext::RenderContext() = default;
-RenderContext::~RenderContext() = default;
 
 namespace {
 std::string RenderFitToString(RenderFit renderFit)
@@ -345,5 +346,75 @@ void RenderContext::UpdateBorderImage(const RefPtr<BorderImage>& value)
     }
     groupProperty->UpdateBorderImage(value);
     OnBorderImageUpdate(value);
+}
+
+} // namespace OHOS::Ace::NG
+
+struct ParticleOptionArrayStorage {
+    std::optional<std::list<OHOS::Ace::NG::ParticleOption>> value;
+};
+
+namespace OHOS::Ace::NG {
+
+const std::optional<std::list<ParticleOption>>& RenderContext::GetParticleOptionArray() const
+{
+    static const std::optional<std::list<ParticleOption>> empty;
+    if (!propParticleOptionArrayStorage_) {
+        return empty;
+    }
+    return propParticleOptionArrayStorage_->value;
+}
+
+bool RenderContext::HasParticleOptionArray() const
+{
+    return propParticleOptionArrayStorage_ && propParticleOptionArrayStorage_->value.has_value();
+}
+
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue() const
+{
+    return propParticleOptionArrayStorage_->value.value();
+}
+
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue(
+    const std::list<ParticleOption>& defaultValue) const
+{
+    if (!HasParticleOptionArray()) {
+        return defaultValue;
+    }
+    return propParticleOptionArrayStorage_->value.value();
+}
+
+std::optional<std::list<ParticleOption>> RenderContext::CloneParticleOptionArray() const
+{
+    if (!propParticleOptionArrayStorage_) {
+        return std::nullopt;
+    }
+    return propParticleOptionArrayStorage_->value;
+}
+
+void RenderContext::ResetParticleOptionArray()
+{
+    if (propParticleOptionArrayStorage_) {
+        propParticleOptionArrayStorage_->value.reset();
+    }
+}
+
+void RenderContext::UpdateParticleOptionArray(const std::list<ParticleOption>& value)
+{
+    if (!propParticleOptionArrayStorage_) {
+        propParticleOptionArrayStorage_ = new ParticleOptionArrayStorage();
+    }
+    if (propParticleOptionArrayStorage_->value.has_value()) {
+        if (NearEqual(propParticleOptionArrayStorage_->value.value(), value)) {
+            return;
+        }
+    }
+    propParticleOptionArrayStorage_->value = value;
+    OnParticleOptionArrayUpdate(value);
+}
+
+RenderContext::~RenderContext()
+{
+    delete propParticleOptionArrayStorage_;
 }
 } // namespace OHOS::Ace::NG

@@ -35,8 +35,6 @@
 #include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
-#include "core/components_ng/property/particle_property.h"
-#include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
@@ -78,6 +76,7 @@ class Modifier;
 namespace OHOS::Ace::NG {
 
 struct ShapeMaskProperty;
+struct ParticleOption;
 
 class GeometryNode;
 class RenderPropertyNode;
@@ -607,7 +606,14 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SpatialEffect, SpatialEffectParams);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
+    // ParticleOptionArray: non-inline to avoid including particle_property.h
+    const std::optional<std::list<ParticleOption>>& GetParticleOptionArray() const;
+    bool HasParticleOptionArray() const;
+    const std::list<ParticleOption>& GetParticleOptionArrayValue() const;
+    const std::list<ParticleOption>& GetParticleOptionArrayValue(const std::list<ParticleOption>& defaultValue) const;
+    std::optional<std::list<ParticleOption>> CloneParticleOptionArray() const;
+    void ResetParticleOptionArray();
+    void UpdateParticleOptionArray(const std::list<ParticleOption>& value);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false, bool isOffline = true)
     {
@@ -952,6 +958,7 @@ public:
 protected:
     RenderContext();
     std::unique_ptr<BorderImageProperty> propBdImage_;
+    ParticleOptionArrayStorage* propParticleOptionArrayStorage_ = nullptr;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     std::shared_ptr<UiMaterialInfo> uiMaterial_;
     ShareId shareId_;
