@@ -25,8 +25,10 @@ generate_static_abc("assembled_advanced_ets_abc") {
     files += [
       "./@ohos.arkui.advanced.ComposeListItem.ets",
       "./@ohos.arkui.advanced.ComposeTitleBar.ets",
+      "./@ohos.arkui.advanced.ComposeTitleBarV2.ets",
       "./@ohos.arkui.advanced.EditableTitleBar.ets",
       "./@ohos.arkui.advanced.ExceptionPrompt.ets",
+      "./@ohos.arkui.advanced.ExceptionPromptV2.ets",
       "./@ohos.arkui.advanced.Filter.ets",
       "./@ohos.arkui.advanced.GridObjectSortComponent.ets",
       "./@ohos.arkui.advanced.ProgressButton.ets",
