@@ -203,18 +203,18 @@ void MenuLayoutAlgorithm::UpdatePropTargetSpace(
         props->GetMenuPlacement().has_value()) {
         propTargetSpace_ = props->GetMenuTargetSpace();
         propTargetOffset_ = props->GetTargetOffset();
-        proptargetSize_ = props->GetTargetMenuSize();
+        propTargetSize_ = props->GetTargetMenuSize();
     } else if (menuPattern->IsSubMenu() && props->GetMenuTargetSpace().has_value()) {
         propTargetSpace_ = props->GetMenuTargetSpace();
         propTargetOffset_ = props->GetTargetOffset();
-        proptargetSize_ = props->GetTargetMenuSize();
+        propTargetSize_ = props->GetTargetMenuSize();
     } else {
         props->ResetMenuTargetSpace();
         props->ResetTargetOffset();
         props->ResetTargetMenuSize();
         propTargetSpace_.reset();
         propTargetOffset_.reset();
-        proptargetSize_.reset();
+        propTargetSize_.reset();
     }
 }
 
@@ -250,7 +250,7 @@ void MenuLayoutAlgorithm::UpdateTargetSpaceScroll(LayoutWrapper* layoutWrapper, 
     float yMin = std::max(1.0f, static_cast<float>(wrapperRect_.Top()) + paddingTop_);
     float yMax = static_cast<float>(wrapperRect_.Bottom()) - paddingBottom_;
     float targetOffset = propTargetOffset_.has_value() ? propTargetOffset_.value().GetY() : targetOffset_.GetY();
-    float targetSize = proptargetSize_.has_value() ? proptargetSize_.value().Height() : targetSize_.Height();
+    float targetSize = propTargetSize_.has_value() ? propTargetSize_.value().Height() : targetSize_.Height();
     float topSpace = targetOffset - targetSpace - yMin;
     float bottomSpace = yMax - targetOffset - targetSpace - targetSize;
     if (parentPlacement == Placement::NONE) {
@@ -384,7 +384,7 @@ void MenuLayoutAlgorithm::UpdateStackHeight(
 void MenuLayoutAlgorithm::UpdateSideHeight(
     LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem)
 {
-    if (!propTargetOffset_.has_value() || !proptargetSize_.has_value()) {
+    if (!propTargetOffset_.has_value() || !propTargetSize_.has_value()) {
         return;
     }
     CHECK_NULL_VOID(parentItem);
@@ -530,7 +530,7 @@ float MenuLayoutAlgorithm::MenuVerticalPanHeight(
     }
     float targetSpace = propTargetSpace_.value().ConvertToPx();
     float topSpace = propTargetOffset_.value().GetY() - targetSpace - yMin;
-    float bottomSpace = yMax - propTargetOffset_.value().GetY() - targetSpace - proptargetSize_.value().Height();
+    float bottomSpace = yMax - propTargetOffset_.value().GetY() - targetSpace - propTargetSize_.value().Height();
     TargetSpaceReason reason = CheckHeightReason(position, size, parentItem);
     switch (reason) {
         case TargetSpaceReason::TOP:
@@ -561,7 +561,7 @@ TargetSpaceReason MenuLayoutAlgorithm::CheckHeightReason(
     auto menuPosition = parentMenu->GetPaintRectOffset(false, true);
     float targetSpace = propTargetSpace_.value().ConvertToPx();
     float targetTop = propTargetOffset_.value().GetY() - targetSpace;
-    float targetBottom = propTargetOffset_.value().GetY() + proptargetSize_.value().Height() + targetSpace;
+    float targetBottom = propTargetOffset_.value().GetY() + propTargetSize_.value().Height() + targetSpace;
     float menuTop = menuPosition.GetY();
     float menuBottom = menuPosition.GetY() + menuSize.Height();
     float subMenuTop = position.GetY();
@@ -587,7 +587,7 @@ bool MenuLayoutAlgorithm::CheckHorizontalRange(const OffsetF& position, const Si
 {
     float targetSpace = propTargetSpace_.value().ConvertToPx();
     float targetLeft = propTargetOffset_.value().GetX() - targetSpace;
-    float targetRight = propTargetOffset_.value().GetX() + proptargetSize_.value().Width() + targetSpace;
+    float targetRight = propTargetOffset_.value().GetX() + propTargetSize_.value().Width() + targetSpace;
     float itemLeft = position.GetX();
     float itemRight = position.GetX() + size.Width();
     if (itemLeft >= targetRight || itemRight <= targetLeft) {
@@ -600,7 +600,7 @@ bool MenuLayoutAlgorithm::CheckVerticalRange(const OffsetF& position, const Size
 {
     float targetSpace = propTargetSpace_.value().ConvertToPx();
     float targetTop = propTargetOffset_.value().GetY() - targetSpace;
-    float targetBottom = propTargetOffset_.value().GetY() + proptargetSize_.value().Height() + targetSpace;
+    float targetBottom = propTargetOffset_.value().GetY() + propTargetSize_.value().Height() + targetSpace;
     float itemTop = position.GetY();
     float itemBottom = position.GetY() + size.Height();
     if (itemTop >= targetBottom || itemBottom <= targetTop) {
@@ -612,7 +612,7 @@ bool MenuLayoutAlgorithm::CheckVerticalRange(const OffsetF& position, const Size
 float MenuLayoutAlgorithm::CalcSubMenuMaxHeightTargetSpace(
     LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem)
 {
-    if (!propTargetOffset_.has_value() || !proptargetSize_.has_value()) {
+    if (!propTargetOffset_.has_value() || !propTargetSize_.has_value()) {
         return 0.0f;
     }
     auto theme = parentItem->GetTheme<SelectTheme>(true);
@@ -624,7 +624,7 @@ float MenuLayoutAlgorithm::CalcSubMenuMaxHeightTargetSpace(
     float yMax = static_cast<float>(wrapperRect_.Bottom()) - paddingBottom_;
     float topY = propTargetOffset_.value().GetY() - targetSpace - minItemHeight.ConvertToPx();
     float bottomY =
-        propTargetOffset_.value().GetY() + proptargetSize_.value().Height() + targetSpace + minItemHeight.ConvertToPx();
+        propTargetOffset_.value().GetY() + propTargetSize_.value().Height() + targetSpace + minItemHeight.ConvertToPx();
     Placement parentPlacement = GetPlacementWithItem(parentItem);
     bool isTop = IsTopPosition(parentPlacement);
     if (isTop) {

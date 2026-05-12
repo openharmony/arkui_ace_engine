@@ -495,7 +495,7 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutTargetSpace(const RefPtr<FrameNode>& p
 OffsetF SubMenuLayoutAlgorithm::UpdateStackPosition(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
     SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper)
 {
-    if (!propTargetOffset_.has_value() || !proptargetSize_.has_value()) {
+    if (!propTargetOffset_.has_value() || !propTargetSize_.has_value()) {
         return NG::OffsetF(0.0f, 0.0f);
     }
     CHECK_NULL_RETURN(parentMenuItem, NG::OffsetF(0.0f, 0.0f));
@@ -522,7 +522,7 @@ OffsetF SubMenuLayoutAlgorithm::UpdateStackPosition(const RefPtr<FrameNode>& par
     float targetSpace = propTargetSpace_.value().ConvertToPx();
     float topY = propTargetOffset_.value().GetY() - targetSpace - size.Height() - minItemHeight.ConvertToPx();
     float bottomY =
-        propTargetOffset_.value().GetY() + proptargetSize_.value().Height() + targetSpace + minItemHeight.ConvertToPx();
+        propTargetOffset_.value().GetY() + propTargetSize_.value().Height() + targetSpace + minItemHeight.ConvertToPx();
     auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_RETURN(parentItemPattern, NG::OffsetF(0.0f, 0.0f));
     float y = 0.0f;
@@ -544,7 +544,7 @@ OffsetF SubMenuLayoutAlgorithm::UpdateStackPosition(const RefPtr<FrameNode>& par
 OffsetF SubMenuLayoutAlgorithm::UpdateSidePosition(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
     SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper)
 {
-    if (!propTargetOffset_.has_value() || !proptargetSize_.has_value()) {
+    if (!propTargetOffset_.has_value() || !propTargetSize_.has_value()) {
         return NG::OffsetF(0.0f, 0.0f);
     }
     CHECK_NULL_RETURN(parentMenuItem, NG::OffsetF(0.0f, 0.0f));
@@ -660,23 +660,28 @@ float SubMenuLayoutAlgorithm::MenuVerticalPan(
     }
     float targetSpace = propTargetSpace_.value().ConvertToPx();
     float topSpace = propTargetOffset_.value().GetY() - targetSpace - yMin;
-    float bottomSpace = yMax - propTargetOffset_.value().GetY() - targetSpace - proptargetSize_.value().Height();
+    float bottomSpace = yMax - propTargetOffset_.value().GetY() - targetSpace - propTargetSize_.value().Height();
     TargetSpaceReason reason = CheckHeightReason(position, size, parentMenuItem);
+    float targetSpaceTop = propTargetOffset_.value().GetY() - targetSpace;
+    float targetSpaceBottom = propTargetOffset_.value().GetY() + propTargetSize_.value().Height() + targetSpace;
     float positionY = 0.0f;
     switch (reason) {
         case TargetSpaceReason::TOP:
-            positionY = std::max(propTargetOffset_.value().GetY() - targetSpace - size.Height(), yMin);
+            positionY = std::max(targetSpaceTop - size.Height(), yMin);
             break;
         case TargetSpaceReason::MIDDLE:
             if (GreatOrEqual(topSpace, bottomSpace)) {
-                positionY = std::max(propTargetOffset_.value().GetY() - targetSpace - size.Height(), yMin);
+                positionY = std::max(targetSpaceTop - size.Height(), yMin);
             } else {
-                positionY = propTargetOffset_.value().GetY() + proptargetSize_.value().Height() + targetSpace;
+                positionY = targetSpaceBottom;
             }
             break;
         case TargetSpaceReason::BOTTOM:
-            positionY = std::max(yMax - size.Height(),
-                propTargetOffset_.value().GetY() + proptargetSize_.value().Height() + targetSpace);
+            if (GreatOrEqual(position.GetY(), targetSpaceBottom)) {
+                positionY = std::max(yMax - size.Height(), targetSpaceBottom);
+            } else {
+                positionY = targetSpaceBottom;
+            }
             break;
         default:
             break;
