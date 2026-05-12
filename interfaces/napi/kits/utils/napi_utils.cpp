@@ -969,8 +969,7 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             auto count = StringUtils::StringToInt(info.params[1]);
             pluralResults = resourceWrapper->GetPluralStringByName(info.params[0], count);
-            int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
-            ReplaceHolder(pluralResults, info.params, startIndex + 2); // plural holder in index 2
+            ReplaceHolder(pluralResults, info.params, 2); // plural holder in index 2
         } else {
             auto count = StringUtils::StringToInt(info.params[0]);
             pluralResults = resourceWrapper->GetPluralString(info.resId, count);
@@ -997,8 +996,7 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         std::string originStr;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             originStr = resourceWrapper->GetStringByName(info.params[0]);
-            int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
-            ReplaceHolder(originStr, info.params, startIndex + 1);
+            ReplaceHolder(originStr, info.params, 1);
         } else {
             originStr = resourceWrapper->GetString(info.resId);
             int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
