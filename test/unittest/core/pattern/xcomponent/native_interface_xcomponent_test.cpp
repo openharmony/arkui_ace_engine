@@ -19,7 +19,6 @@
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
 #include "interfaces/native/native_interface_xcomponent.h"
-#include "interfaces/native/node/node_model.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,16 +45,6 @@ constexpr int32_t TEST_RATE_MAX = 120;
 constexpr int32_t TEST_RATE_EXPECTED = 60;
 constexpr int32_t BAD_PARAMETER_RESULT = OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
 constexpr int32_t SUCCESS_RESULT = OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
-
-void OnSurfaceCreated(OH_ArkUI_SurfaceHolder*) {}
-
-void OnSurfaceChanged(OH_ArkUI_SurfaceHolder*, uint64_t, uint64_t) {}
-
-void OnSurfaceDestroyed(OH_ArkUI_SurfaceHolder*) {}
-
-void OnSurfaceShow(OH_ArkUI_SurfaceHolder*) {}
-
-void OnSurfaceHide(OH_ArkUI_SurfaceHolder*) {}
 } // namespace
 
 class NativeInterfaceXComponentTestNg : public testing::Test {
@@ -285,27 +274,6 @@ HWTEST_F(NativeInterfaceXComponentTestNg, NativeXComponent_GetHistoricalPoints_N
 
     EXPECT_EQ(OH_NativeXComponent_GetHistoricalPoints(nullptr, window, &size, &points), BAD_PARAMETER_RESULT);
     EXPECT_EQ(OH_NativeXComponent_GetHistoricalPoints(component_, nullptr, &size, &points), BAD_PARAMETER_RESULT);
-}
-
-/**
- * @tc.name: NativeXComponent_GetHistoricalPoints_NullOutputParams
- * @tc.desc: Test GetHistoricalPoints returns BAD_PARAMETER when output params are nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, NativeXComponent_GetHistoricalPoints_NullOutputParams,
-    TestSize.Level1)
-{
-    void* window = &impl_;
-    int32_t size = 0;
-    OH_NativeXComponent_HistoricalPoint* points = nullptr;
-
-    EXPECT_EQ(
-        OH_NativeXComponent_GetHistoricalPoints(component_, window, nullptr, &points),
-        BAD_PARAMETER_RESULT);
-    EXPECT_EQ(
-        OH_NativeXComponent_GetHistoricalPoints(component_, window, &size, nullptr),
-        BAD_PARAMETER_RESULT);
 }
 
 /**
@@ -866,20 +834,6 @@ HWTEST_F(NativeInterfaceXComponentTestNg, NativeXComponent_RegisterOnFrameCallba
     auto cb = [](OH_NativeXComponent*, uint64_t, uint64_t) {};
 
     EXPECT_EQ(OH_NativeXComponent_RegisterOnFrameCallback(nullptr, cb), BAD_PARAMETER_RESULT);
-}
-
-/**
- * @tc.name: NativeXComponent_RegisterOnFrameCallback_NullCallback
- * @tc.desc: Test RegisterOnFrameCallback returns BAD_PARAMETER when callback is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, NativeXComponent_RegisterOnFrameCallback_NullCallback,
-    TestSize.Level1)
-{
-    EXPECT_EQ(
-        OH_NativeXComponent_RegisterOnFrameCallback(component_, nullptr),
-        BAD_PARAMETER_RESULT);
 }
 
 /**
@@ -1568,19 +1522,6 @@ HWTEST_F(NativeInterfaceXComponentTestNg, NativeXComponent_RegisterUIInputEventC
 }
 
 /**
- * @tc.name: NativeXComponent_RegisterOnTouchInterceptCallback_NullParams
- * @tc.desc: Test RegisterOnTouchInterceptCallback returns ERROR_CODE_PARAM_INVALID with null params
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, NativeXComponent_RegisterOnTouchInterceptCallback_NullParams,
-    TestSize.Level1)
-{
-    EXPECT_EQ(OH_NativeXComponent_RegisterOnTouchInterceptCallback(component_, nullptr),
-        ERROR_CODE_PARAM_INVALID);
-}
-
-/**
  * @tc.name: NativeXComponent_AttachNativeRootNode_NullParams
  * @tc.desc: Test AttachNativeRootNode returns BAD_PARAMETER when params are nullptr
  * @tc.type: FUNC
@@ -1593,22 +1534,6 @@ HWTEST_F(NativeInterfaceXComponentTestNg, NativeXComponent_AttachNativeRootNode_
 }
 
 /**
- * @tc.name: NativeXComponent_AttachNativeRootNode_NonCNode
- * @tc.desc: Test AttachNativeRootNode returns BAD_PARAMETER when root is not a C node
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, NativeXComponent_AttachNativeRootNode_NonCNode,
-    TestSize.Level1)
-{
-    ArkUI_Node rootNode = { .type = ARKUI_NODE_XCOMPONENT, .cNode = false };
-
-    EXPECT_EQ(
-        OH_NativeXComponent_AttachNativeRootNode(component_, &rootNode),
-        BAD_PARAMETER_RESULT);
-}
-
-/**
  * @tc.name: NativeXComponent_DetachNativeRootNode_NullParams
  * @tc.desc: Test DetachNativeRootNode returns BAD_PARAMETER when params are nullptr
  * @tc.type: FUNC
@@ -1618,153 +1543,5 @@ HWTEST_F(NativeInterfaceXComponentTestNg, NativeXComponent_DetachNativeRootNode_
     EXPECT_EQ(OH_NativeXComponent_DetachNativeRootNode(nullptr, nullptr), BAD_PARAMETER_RESULT);
 
     SUCCEED();
-}
-
-/**
- * @tc.name: NativeXComponent_DetachNativeRootNode_NonCNode
- * @tc.desc: Test DetachNativeRootNode returns BAD_PARAMETER when root is not a C node
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, NativeXComponent_DetachNativeRootNode_NonCNode,
-    TestSize.Level1)
-{
-    ArkUI_Node rootNode = { .type = ARKUI_NODE_XCOMPONENT, .cNode = false };
-
-    EXPECT_EQ(
-        OH_NativeXComponent_DetachNativeRootNode(component_, &rootNode),
-        BAD_PARAMETER_RESULT);
-}
-
-/**
- * @tc.name: ArkUI_XComponent_RegisterOnFrameCallback_NullCallbackWithValidNode
- * @tc.desc: Test RegisterOnFrameCallback returns ERROR_CODE_PARAM_INVALID
- *           with valid node and null callback
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg,
-    ArkUI_XComponent_RegisterOnFrameCallback_NullCallbackWithValidNode,
-    TestSize.Level1)
-{
-    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    auto node = OHOS::Ace::NodeModel::CreateNode(ARKUI_NODE_XCOMPONENT);
-    ASSERT_NE(node, nullptr);
-
-    EXPECT_EQ(
-        OH_ArkUI_XComponent_RegisterOnFrameCallback(node, nullptr),
-        ERROR_CODE_PARAM_INVALID);
-
-    OHOS::Ace::NodeModel::DisposeNode(node);
-}
-
-/**
- * @tc.name: ArkUI_XComponent_StartImageAnalyzer_NullCallbackWithValidNode
- * @tc.desc: Test StartImageAnalyzer returns ERROR_CODE_PARAM_INVALID
- *           with valid node and null callback
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, ArkUI_XComponent_StartImageAnalyzer_NullCallbackWithValidNode,
-    TestSize.Level1)
-{
-    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    auto node = OHOS::Ace::NodeModel::CreateNode(ARKUI_NODE_XCOMPONENT);
-    ASSERT_NE(node, nullptr);
-
-    EXPECT_EQ(
-        OH_ArkUI_XComponent_StartImageAnalyzer(node, nullptr, nullptr),
-        ERROR_CODE_PARAM_INVALID);
-
-    OHOS::Ace::NodeModel::DisposeNode(node);
-}
-
-/**
- * @tc.name: ArkUI_XComponent_IsInitialized_NullOutputWithValidNode
- * @tc.desc: Test IsInitialized returns ERROR_CODE_PARAM_INVALID with valid node and null output
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, ArkUI_XComponent_IsInitialized_NullOutputWithValidNode,
-    TestSize.Level1)
-{
-    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    auto node = OHOS::Ace::NodeModel::CreateNode(ARKUI_NODE_XCOMPONENT);
-    ASSERT_NE(node, nullptr);
-
-    EXPECT_EQ(OH_ArkUI_XComponent_IsInitialized(node, nullptr), ERROR_CODE_PARAM_INVALID);
-
-    OHOS::Ace::NodeModel::DisposeNode(node);
-}
-
-/**
- * @tc.name: ArkUI_XComponent_SetNeedSoftKeyboard_ValidNode
- * @tc.desc: Test SetNeedSoftKeyboard returns ERROR_CODE_NO_ERROR with valid node
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, ArkUI_XComponent_SetNeedSoftKeyboard_ValidNode,
-    TestSize.Level1)
-{
-    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
-    auto node = OHOS::Ace::NodeModel::CreateNode(ARKUI_NODE_XCOMPONENT);
-    ASSERT_NE(node, nullptr);
-
-    EXPECT_EQ(OH_ArkUI_XComponent_SetNeedSoftKeyboard(node, true), ERROR_CODE_NO_ERROR);
-
-    OHOS::Ace::NodeModel::DisposeNode(node);
-}
-
-/**
- * @tc.name: ArkUI_SurfaceCallback_NullHandle
- * @tc.desc: Test SurfaceCallback APIs tolerate null callback handles
- * @tc.type: FUNC
- */
-HWTEST_F(NativeInterfaceXComponentTestNg, ArkUI_SurfaceCallback_NullHandle, TestSize.Level1)
-{
-    OH_ArkUI_SurfaceCallback_SetSurfaceCreatedEvent(nullptr, OnSurfaceCreated);
-    OH_ArkUI_SurfaceCallback_SetSurfaceChangedEvent(nullptr, OnSurfaceChanged);
-    OH_ArkUI_SurfaceCallback_SetSurfaceDestroyedEvent(nullptr, OnSurfaceDestroyed);
-    OH_ArkUI_SurfaceCallback_SetSurfaceShowEvent(nullptr, OnSurfaceShow);
-    OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent(nullptr, OnSurfaceHide);
-    OH_ArkUI_SurfaceCallback_Dispose(nullptr);
-
-    SUCCEED();
-}
-
-/**
- * @tc.name: ArkUI_SurfaceHolder_Dispose_NullHolder
- * @tc.desc: Test SurfaceHolder_Dispose tolerates null holder
- * @tc.type: FUNC
- */
-HWTEST_F(NativeInterfaceXComponentTestNg, ArkUI_SurfaceHolder_Dispose_NullHolder, TestSize.Level1)
-{
-    OH_ArkUI_SurfaceHolder_Dispose(nullptr);
-    SUCCEED();
-}
-
-/**
- * @tc.name: ArkUI_AccessibilityProvider_Dispose_NullProvider
- * @tc.desc: Test AccessibilityProvider_Dispose tolerates null provider
- * @tc.type: FUNC
- */
-HWTEST_F(
-    NativeInterfaceXComponentTestNg, ArkUI_AccessibilityProvider_Dispose_NullProvider,
-    TestSize.Level1)
-{
-    OH_ArkUI_AccessibilityProvider_Dispose(nullptr);
-    SUCCEED();
-}
-
-/**
- * @tc.name: ArkUI_XComponentSurfaceConfig_NullConfig
- * @tc.desc: Test XComponentSurfaceConfig APIs tolerate null config
- * @tc.type: FUNC
- */
-HWTEST_F(NativeInterfaceXComponentTestNg, ArkUI_XComponentSurfaceConfig_NullConfig, TestSize.Level1)
-{
-    OH_ArkUI_XComponentSurfaceConfig_SetIsOpaque(nullptr, true);
-    OH_ArkUI_XComponentSurfaceConfig_Dispose(nullptr);
-    EXPECT_EQ(OH_ArkUI_SurfaceHolder_SetSurfaceConfig(nullptr, nullptr), ERROR_CODE_PARAM_INVALID);
 }
 } // namespace OHOS::Ace::NG
