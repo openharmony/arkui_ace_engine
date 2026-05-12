@@ -199,6 +199,41 @@ HWTEST_F(ScrollEventTestNg, ScrollEvent003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScrollFrameBegin001
+ * @tc.desc: Test onScrollFrameBegin can rewrite the scroll delta during drag update
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, OnScrollFrameBegin001, TestSize.Level1)
+{
+    int32_t frameBeginCount = 0;
+    float frameBeginOffset = 0.0f;
+    ScrollState frameBeginState = ScrollState::IDLE;
+    auto frameBeginEvent = [&frameBeginCount, &frameBeginOffset, &frameBeginState](
+                               Dimension offset, ScrollState state) -> ScrollFrameResult {
+        ++frameBeginCount;
+        frameBeginOffset = offset.ConvertToPx();
+        frameBeginState = state;
+        ScrollFrameResult result;
+        result.offset = Dimension(4.0f, DimensionUnit::VP);
+        return result;
+    };
+    ScrollModelNG model = CreateScroll();
+    model.SetOnScrollFrameBegin(std::move(frameBeginEvent));
+    CreateContent();
+    CreateScrollDone();
+
+    DragStart(frameNode_, Offset());
+    DragUpdate(-10.0f);
+    EXPECT_EQ(frameBeginCount, 1);
+    EXPECT_EQ(frameBeginOffset, 10.0f);
+    EXPECT_EQ(frameBeginState, ScrollState::SCROLL);
+    EXPECT_TRUE(Position(-4.0f));
+
+    model.SetOnScrollFrameBegin(nullptr);
+    DragEnd(0.0f);
+}
+
+/**
  * @tc.name: onWillScrollAndOnDidScroll001
  * @tc.desc: Test attribute about onWillScroll and onDidScroll in VERTICAL Layout,
  * Event is triggered while scrolling
