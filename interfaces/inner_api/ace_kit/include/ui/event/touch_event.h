@@ -308,6 +308,11 @@ public:
     void SetTouchEventsEnd(bool isTouchEventsEnd);
     bool GetTouchEventsEnd() const;
     TouchEvent ConvertToTouchEvent() const;
+    size_t GetSize() const
+    {
+        static constexpr size_t TOUCH_EVENT_INFO_SIZE = 9880;
+        return TOUCH_EVENT_INFO_SIZE;
+    }
 
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;

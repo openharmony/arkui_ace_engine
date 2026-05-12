@@ -353,6 +353,12 @@ public:
         return action_;
     }
 
+    size_t GetSize() const
+    {
+        static constexpr size_t FOCUS_AXIS_EVENT_INFO_SIZE = 560;
+        return FOCUS_AXIS_EVENT_INFO_SIZE;
+    }
+
 private:
     float absXValue = 0.0f;
     float absYValue = 0.0f;
