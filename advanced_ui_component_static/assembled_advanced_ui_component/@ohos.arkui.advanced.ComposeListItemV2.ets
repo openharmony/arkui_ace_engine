@@ -1187,7 +1187,7 @@ export struct ComposeListItemV2 {
     }
     const iconStyle = this.contentItemV2?.iconStyle;
     if (iconStyle !== undefined) {
-      const iconSize = ICON_SIZE_MAP.get(iconStyle as number);
+      const iconSize = ICON_SIZE_MAP.get(iconStyle);
       if (iconSize !== undefined && iconSize >= this.itemHeight) {
         this.itemHeight = iconSize + SAFE_LIST_PADDING;
       }
