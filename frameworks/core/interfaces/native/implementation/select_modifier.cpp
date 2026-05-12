@@ -646,6 +646,8 @@ void SetMenuBackgroundEffectImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<EffectOption>(*value);
     SelectModelNG::SetMenuBackgroundEffect(frameNode, convValue);
 }
+void SetMenuDistortionModeImpl(Ark_NativePointer node, const Opt_DistortionMode* value) {}
+void SetMenuEdgeLightModeImpl(Ark_NativePointer node, const Opt_EdgeLightMode* value) {}
 void SetMenuAlignImpl(Ark_NativePointer node,
                       const Opt_MenuAlignType* alignType,
                       const Opt_Offset* offset)
@@ -701,6 +703,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::SetMenuSystemMaterialImpl,
         SelectAttributeModifier::SetMenuBackgroundBlurStyleOptionsImpl,
         SelectAttributeModifier::SetMenuBackgroundEffectImpl,
+        SelectAttributeModifier::SetMenuDistortionModeImpl,
+        SelectAttributeModifier::SetMenuEdgeLightModeImpl,
         SelectAttributeModifier::SetMenuAlignImpl,
     };
     return &ArkUISelectModifierImpl;
