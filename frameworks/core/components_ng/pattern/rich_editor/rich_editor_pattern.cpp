@@ -5570,7 +5570,7 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
     InsertValue(UtfUtils::Str8ToStr16(value->text), true);
 #else
     if (value->isDelete) {
-#ifdef IOS_PLATFORM
+#ifdef CROSS_PLATFORM
         if (value->compose.IsValid()) {
             EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
             if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
