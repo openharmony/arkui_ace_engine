@@ -646,8 +646,22 @@ void SetMenuBackgroundEffectImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<EffectOption>(*value);
     SelectModelNG::SetMenuBackgroundEffect(frameNode, convValue);
 }
-void SetMenuDistortionModeImpl(Ark_NativePointer node, const Opt_DistortionMode* value) {}
-void SetMenuEdgeLightModeImpl(Ark_NativePointer node, const Opt_EdgeLightMode* value) {}
+void SetMenuDistortionModeImpl(Ark_NativePointer node,
+                               const Opt_DistortionMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::OptConvertPtr<DistortionMode>(value);
+    SelectModelNG::SetMenuDistortionMode(frameNode, optValue.value_or(DistortionMode::DISTORTION_AUTO));
+}
+void SetMenuEdgeLightModeImpl(Ark_NativePointer node,
+                              const Opt_EdgeLightMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::OptConvertPtr<EdgeLightMode>(value);
+    SelectModelNG::SetMenuEdgeLightMode(frameNode, optValue.value_or(EdgeLightMode::EDGELIGHT_DISABLED));
+}
 void SetMenuAlignImpl(Ark_NativePointer node,
                       const Opt_MenuAlignType* alignType,
                       const Opt_Offset* offset)
