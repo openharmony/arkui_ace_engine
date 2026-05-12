@@ -2736,8 +2736,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperPreMakeItems001, TestSize.Level1)
      * @tc.steps: step2. Call PreMakeItems with empty set.
      * @tc.expected: No crash, premakeItems_ remains empty.
      */
-    std::set<int32_t> emptySet;
-    pattern_->PreMakeItems(emptySet);
+    pattern_->PreMakeItems({});
     EXPECT_TRUE(pattern_->premakeItems_.empty());
 }
 

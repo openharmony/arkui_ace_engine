@@ -23,13 +23,14 @@
 namespace OHOS::Ace {
 namespace {
 constexpr char WINDOWID[] = "windowId";
+constexpr char DEFAULT_WINDOWID = -1;
 }
 std::once_flag ResschedEventListener::createFlag_;
 sptr<ResschedEventListener> ResschedEventListener::instance_ = nullptr;
 
 sptr<ResschedEventListener> ResschedEventListener::GetInstance()
 {
-    std::call_once(createFlag_, [](){
+    std::call_once(createFlag_, []() {
         instance_ = sptr<ResschedEventListener>::MakeSptr();
     });
     return instance_;
@@ -47,8 +48,8 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
 {
     auto it = extInfo.find(WINDOWID);
     CHECK_EQUAL_VOID(it, extInfo.end());
-    int32_t windowId = StringUtils::StringToInt(it->second, -2);
-    CHECK_EQUAL_VOID(windowId, -2);
+    int32_t windowId = StringUtils::StringToInt(it->second, DEFAULT_WINDOWID);
+    CHECK_EQUAL_VOID(windowId, DEFAULT_WINDOWID);
     auto iter = containerMap_.find(windowId);
     CHECK_EQUAL_VOID(iter, containerMap_.end());
     auto instanceId = iter->second;
