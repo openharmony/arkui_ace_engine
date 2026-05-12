@@ -100,7 +100,8 @@ export class EditableTitleBarThemeV2 {
   @Trace public iconBackgroundColor: ResourceColor = $r('sys.color.titlebar_icon_background_color');
   @Trace public iconBackgroundPressedColor: ResourceColor = $r('sys.color.titlebar_icon_background_pressed_color');
   @Trace public iconBackgroundHoverColor: ResourceColor = $r('sys.color.titlebar_icon_background_hover_color');
-  @Trace public iconBackgroundFocusOutlineColor: ResourceColor = $r('sys.color.titlebar_icon_background_focus_outline_color');
+  @Trace public iconBackgroundFocusOutlineColor: ResourceColor =
+    $r('sys.color.titlebar_icon_background_focus_outline_color');
   @Trace public titleColor: ResourceColor = $r('sys.color.titlebar_title_tertiary_color');
   @Trace public subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
 }
@@ -119,7 +120,7 @@ class ButtonGestureModifierV2 implements GestureModifier {
   applyGesture(event: UIGestureEvent): void {
     if (this.fontSize >= ButtonGestureModifierV2.minFontSize) {
       event.addGesture(
-        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifierV2.longPressTime as int })
+        new LongPressGestureHandler({ repeat: false, duration: Double.toInt(ButtonGestureModifierV2.longPressTime)})
           .onAction(() => {
             if (event) {
               this.onDialogOpen();
