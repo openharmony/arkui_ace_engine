@@ -21,5 +21,3 @@ export interface ObserveWrappedKeyedMeta extends ObserveWrappedBase {
     addRefAnyKey(): void;
     addRefLength(): void;   
 }
-
-export interface ObservedBuiltIn {}
