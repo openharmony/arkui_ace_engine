@@ -22,18 +22,15 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr char WINDOWID[] = "windowId";
-constexpr char DEFAULT_WINDOWID = -1;
-}
-std::once_flag ResschedEventListener::createFlag_;
-sptr<ResschedEventListener> ResschedEventListener::instance_ = nullptr;
+constexpr char KEY_WINDOW_ID[] = "windowId";
+constexpr int32_t DEFAULT_WINDOW_ID = -1;
+constexpr int32_t DEFAULT_CONTAINER_ID = -1;
+} // namespace
 
 sptr<ResschedEventListener> ResschedEventListener::GetInstance()
 {
-    std::call_once(createFlag_, []() {
-        instance_ = sptr<ResschedEventListener>::MakeSptr();
-    });
-    return instance_;
+    static sptr<ResschedEventListener> instance = sptr<ResschedEventListener>::MakeSptr();
+    return instance;
 }
 
 void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
@@ -46,15 +43,17 @@ void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventVal
 
 void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, std::string> extInfo)
 {
-    auto it = extInfo.find(WINDOWID);
+    auto it = extInfo.find(KEY_WINDOW_ID);
     CHECK_EQUAL_VOID(it, extInfo.end());
-    int32_t windowId = StringUtils::StringToInt(it->second, DEFAULT_WINDOWID);
-    CHECK_EQUAL_VOID(windowId, DEFAULT_WINDOWID);
-    auto iter = containerMap_.find(windowId);
-    CHECK_EQUAL_VOID(iter, containerMap_.end());
-    auto instanceId = iter->second;
+    int32_t windowId = StringUtils::StringToInt(it->second, DEFAULT_WINDOW_ID);
+    CHECK_EQUAL_VOID(windowId, DEFAULT_WINDOW_ID);
+
+    auto instanceId = GetContainerId(windowId);
+    CHECK_EQUAL_VOID(instanceId, DEFAULT_CONTAINER_ID);
+
     auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
     CHECK_NULL_VOID(context);
+
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -63,13 +62,40 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
             CHECK_NULL_VOID(pipeline);
             CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
             pipeline->GetTaihangOptimizer()->ComponentPreMake(extInfo);
-        },
-        TaskExecutor::TaskType::UI, "ArkUINotifyComponentPreMake");
+        }, TaskExecutor::TaskType::UI, "ArkUINotifyComponentPreMake");
 }
 
-void ResschedEventListener::AddContainerId(int32_t windowId, int32_t instanceId)
+void ResschedEventListener::RegisterToRSS(int32_t windowId, int32_t instanceId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    auto beforeSize = containerMap_.size();
     containerMap_.emplace(windowId, instanceId);
+
+    if (beforeSize == 0 && containerMap_.size() != 0) {
+        ResourceSchedule::ResSchedClient::GetInstance().RegisterEventListener(
+            ResschedEventListener::GetInstance(),
+            ResourceSchedule::ResType::EventType::EVENT_COMPONENT_PREMAKE);
+    }
 }
+
+void ResschedEventListener::UnRegisterFromRSS(int32_t windowId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto beforeSize = containerMap_.size();
+    containerMap_.erase(windowId);
+
+    if (beforeSize != 0 && containerMap_.size() == 0) {
+        ResourceSchedule::ResSchedClient::GetInstance().UnRegisterEventListener(
+            ResschedEventListener::GetInstance(),
+            ResourceSchedule::ResType::EventType::EVENT_COMPONENT_PREMAKE);
+    }
 }
+
+int32_t ResschedEventListener::GetContainerId(int32_t windowId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = containerMap_.find(windowId);
+    CHECK_EQUAL_RETURN(iter, containerMap_.end(), DEFAULT_CONTAINER_ID);
+    return iter->second;
+}
+} // namespace OHOS::Ace

@@ -2401,13 +2401,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(&ApsMonitorImpl::GetInstance());
 #endif
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    ResschedEventListener::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
-    static std::once_flag registerFlag;
-    std::call_once(registerFlag, []() {
-        ResourceSchedule::ResSchedClient::GetInstance().RegisterEventListener(
-            ResschedEventListener::GetInstance(),
-            ResourceSchedule::ResType::EventType::EVENT_COMPONENT_PREMAKE);
-    });
+    ResschedEventListener::GetInstance()->RegisterToRSS(window->GetWindowId(), instanceId_);
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (vmType_ == VMType::ARK_NATIVE) {
@@ -3027,6 +3021,9 @@ void UIContentImpl::Destroy()
         if (windowRotationChangeListener_) {
             window_->UnregisterWindowRotationChangeListener(windowRotationChangeListener_);
         }
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+        ResschedEventListener::GetInstance()->UnRegisterFromRSS(window_->GetWindowId());
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     }
     taskTimeForComeIn_.lastTaskTime = 0;
     taskTimeForExit_.lastTaskTime = 0;

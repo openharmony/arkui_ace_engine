@@ -24,17 +24,22 @@
 namespace OHOS::Ace {
 class ResschedEventListener : public ResourceSchedule::ResSchedEventListener {
 public:
-    static sptr<ResschedEventListener> GetInstance();
     void OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
         std::unordered_map<std::string, std::string> extInfo) override;
-    void AddContainerId(int32_t windowId, int32_t instanceId);
+
+    void RegisterToRSS(int32_t windowId, int32_t instanceId);
+    void UnRegisterFromRSS(int32_t windowId);
+
+    static sptr<ResschedEventListener> GetInstance();
+
 private:
     void OnComponentPreMake(std::unordered_map<std::string, std::string> extInfo);
+
+    int32_t GetContainerId(int32_t windowId);
+
     std::mutex mutex_;
     std::unordered_map<int32_t, int32_t> containerMap_;
-    static std::once_flag createFlag_;
-    static sptr<ResschedEventListener> instance_;
 };
-}
+} // namespace OHOS::Ace
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_RESSCHED_EVENT_LISTENER_H
