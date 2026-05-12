@@ -52,6 +52,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -358,8 +359,8 @@ void SelectPattern::ConfigMenuParam()
     menuParam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
     menuParam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
     menuParam.systemMaterial = GetMenuSystemMaterial();
-    menuParam.distortionMode = DistortionMode::DISTORTION_DISABLED;
-    menuParam.edgeLightMode = EdgeLightMode::EDGELIGHT_DISABLED;
+    menuParam.distortionMode = GetMenuDistortionMode();
+    menuParam.edgeLightMode = GetMenuEdgeLightMode();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
         && MaterialUtils::IsMaterialEnabled() && !menuParam.systemMaterial) {
         menuParam.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
@@ -3117,5 +3118,4 @@ std::optional<DividerMode> SelectPattern::GetDividerMode() const
 {
     return dividerMode_;
 }
-
 } // namespace OHOS::Ace::NG
