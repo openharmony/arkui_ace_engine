@@ -19,7 +19,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_type.h"
 
 namespace OHOS::Ace {
 
