@@ -143,10 +143,11 @@ void TaihangOptimizer::HandleSwiperPreMake(const std::unordered_map<std::string,
     ACE_SCOPED_TRACE("TaihangOptimizer::HandleSwiperPreMake");
     auto iter = extInfo.find("path");
     CHECK_EQUAL_VOID(iter, extInfo.end());
-    std::string path = extInfo["path"];
+    std::string path = extInfo->second;
     auto indexIter = extInfo.find("index");
     CHECK_EQUAL_VOID(indexIter, extInfo.end());
-    auto index = StringUtils::StringToInt(indexIter->second);
+    auto index = StringUtils::StringToInt(indexIter->second, -1);
+    CHECK_EQUAL_VOID(index, -1);
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto root = pipeline->GetRootElement();
