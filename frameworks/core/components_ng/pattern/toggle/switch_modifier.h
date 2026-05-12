@@ -63,12 +63,11 @@ public:
         AnimationOption pointOption = AnimationOption();
         pointOption.SetDuration(pointAnimationDuration_);
         pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        auto callback = slideFinishedCallback_;
         std::function<void()> finishFunc = nullptr;
-        if (!isDragEvent_ && slideFinishedCallback_) {
-            finishFunc = [this]() {
-                if (slideFinishedCallback_) {
-                    slideFinishedCallback_();
-                }
+        if (!isDragEvent_ && callback) {
+            finishFunc = [callback]() {
+                callback();
             };
         }
         AnimationUtils::Animate(
