@@ -14,13 +14,12 @@
  */
 
 #include <cstdint>
-#include <new>
+
 #include "native_styled_string.h"
 #include "node_extened.h"
 #include "node_model.h"
 #include "styled_string.h"
 
-#include "base/error/error_code.h"
 #include "base/utils/utils.h"
 #include "interfaces/native/native_error_message_macros.h"
 
@@ -962,8 +961,8 @@ void OH_ArkUI_StyledString_PopTextStyle(ArkUI_StyledString* storage)
 
 OH_Drawing_Typography* OH_ArkUI_StyledString_CreateTypography(ArkUI_StyledString* storage)
 {
-    OH_Drawing_Typography* paragraph = OH_Drawing_CreateTypography(
-        reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
+    OH_Drawing_Typography* paragraph =
+        OH_Drawing_CreateTypography(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
     storage->paragraph = paragraph;
     return reinterpret_cast<OH_Drawing_Typography*>(paragraph);
 }
@@ -984,12 +983,7 @@ void OH_ArkUI_StyledString_AddPlaceholder(ArkUI_StyledString* storage, OH_Drawin
 
 ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create()
 {
-    ArkUI_AccessibilityState* state = new (std::nothrow) ArkUI_AccessibilityState;
-    if (state == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, __FUNCTION__,
-            "Failed to create accessibility state");
-        return nullptr;
-    }
+    ArkUI_AccessibilityState* state = new ArkUI_AccessibilityState;
     state->isDisabled = ArkUI_OptionalInt { 0, 0 };
     state->isSelected = ArkUI_OptionalInt { 0, 0 };
     state->checkedType = ArkUI_OptionalInt { 0, 0 };
@@ -998,78 +992,51 @@ ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create()
 
 void OH_ArkUI_AccessibilityState_Dispose(ArkUI_AccessibilityState* state)
 {
-    if (state == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
-        return;
-    }
     delete state;
 }
 
 void OH_ArkUI_AccessibilityState_SetDisabled(ArkUI_AccessibilityState* state, int32_t isDisabled)
 {
-    if (state == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
-        return;
-    }
+    CHECK_NULL_VOID(state);
     state->isDisabled.isSet = 1;
     state->isDisabled.value = isDisabled;
 }
 
 int32_t OH_ArkUI_AccessibilityState_IsDisabled(ArkUI_AccessibilityState* state)
 {
-    if (state == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
-        return 0;
-    }
+    CHECK_NULL_RETURN(state, 0);
     return state->isDisabled.value;
 }
 
 void OH_ArkUI_AccessibilityState_SetSelected(ArkUI_AccessibilityState* state, int32_t isSelected)
 {
-    if (state == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
-        return;
-    }
+    CHECK_NULL_VOID(state);
     state->isSelected.isSet = 1;
     state->isSelected.value = isSelected;
 }
 
 int32_t OH_ArkUI_AccessibilityState_IsSelected(ArkUI_AccessibilityState* state)
 {
-    if (state == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
-        return 0;
-    }
+    CHECK_NULL_RETURN(state, 0);
     return state->isSelected.value;
 }
 
 void OH_ArkUI_AccessibilityState_SetCheckedState(ArkUI_AccessibilityState* state, int32_t checkedState)
 {
-    if (state == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
-        return;
-    }
+    CHECK_NULL_VOID(state);
     state->checkedType.isSet = 1;
     state->checkedType.value = checkedState;
 }
 
 int32_t OH_ArkUI_AccessibilityState_GetCheckedState(ArkUI_AccessibilityState* state)
 {
-    if (state == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
-        return 0;
-    }
+    CHECK_NULL_RETURN(state, 0);
     return state->checkedType.value;
 }
 
 ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create()
 {
-    ArkUI_AccessibilityValue* value = new (std::nothrow) ArkUI_AccessibilityValue;
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, __FUNCTION__,
-            "Failed to create accessibility value");
-        return nullptr;
-    }
+    ArkUI_AccessibilityValue* value = new ArkUI_AccessibilityValue;
     value->min = ArkUI_OptionalInt { 0, -1 };
     value->max = ArkUI_OptionalInt { 0, -1 };
     value->current = ArkUI_OptionalInt { 0, -1 };
@@ -1082,147 +1049,97 @@ ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create()
 
 void OH_ArkUI_AccessibilityValue_Dispose(ArkUI_AccessibilityValue* value)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return;
-    }
     delete value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetMin(ArkUI_AccessibilityValue* value, int32_t min)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return;
-    }
+    CHECK_NULL_VOID(value);
     value->min.isSet = 1;
     value->min.value = min;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetMin(ArkUI_AccessibilityValue* value)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return -1;
-    }
+    CHECK_NULL_RETURN(value, -1);
     return value->min.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetMax(ArkUI_AccessibilityValue* value, int32_t max)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return;
-    }
+    CHECK_NULL_VOID(value);
     value->max.isSet = 1;
     value->max.value = max;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return -1;
-    }
+    CHECK_NULL_RETURN(value, -1);
     return value->max.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetCurrent(ArkUI_AccessibilityValue* value, int32_t current)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return;
-    }
+    CHECK_NULL_VOID(value);
     value->current.isSet = 1;
     value->current.value = current;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return -1;
-    }
+    CHECK_NULL_RETURN(value, -1);
     return value->current.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetRangeMin(ArkUI_AccessibilityValue* value, int32_t rangeMin)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return;
-    }
+    CHECK_NULL_VOID(value);
     value->rangeMin.isSet = 1;
     value->rangeMin.value = rangeMin;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetRangeMin(ArkUI_AccessibilityValue* value)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return -1;
-    }
+    CHECK_NULL_RETURN(value, -1);
     return value->rangeMin.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetRangeMax(ArkUI_AccessibilityValue* value, int32_t rangeMax)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return;
-    }
+    CHECK_NULL_VOID(value);
     value->rangeMax.isSet = 1;
     value->rangeMax.value = rangeMax;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetRangeMax(ArkUI_AccessibilityValue* value)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return -1;
-    }
+    CHECK_NULL_RETURN(value, -1);
     return value->rangeMax.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetRangeCurrent(ArkUI_AccessibilityValue* value, int32_t rangeCurrent)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return;
-    }
+    CHECK_NULL_VOID(value);
     value->rangeCurrent.isSet = 1;
     value->rangeCurrent.value = rangeCurrent;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetRangeCurrent(ArkUI_AccessibilityValue* value)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return -1;
-    }
+    CHECK_NULL_RETURN(value, -1);
     return value->rangeCurrent.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetText(ArkUI_AccessibilityValue* value, const char* text)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return;
-    }
-    if (text == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "text is null");
-        return;
-    }
+    CHECK_NULL_VOID(value);
     value->text.isSet = 1;
     value->text.value = text;
 }
 
 const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value)
 {
-    if (value == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
-        return "";
-    }
+    CHECK_NULL_RETURN(value, "");
     return value->text.value;
 }
 
@@ -1414,12 +1331,9 @@ int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value
 
 ArkUI_PixelRoundPolicy* OH_ArkUI_PixelRoundPolicy_Create()
 {
-    ArkUI_PixelRoundPolicy* policy = new ArkUI_PixelRoundPolicy {
-        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
-        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
-        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
-        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND }
-    };
+    ArkUI_PixelRoundPolicy* policy = new ArkUI_PixelRoundPolicy { { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
+        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND }, { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
+        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND } };
     return policy;
 }
 
@@ -1486,8 +1400,7 @@ void OH_ArkUI_PixelRoundPolicy_SetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_Pixe
 int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(
-        policy, ARKUI_ERROR_CODE_PARAM_INVALID,
-        "OH_ArkUI_PixelRoundPolicy_GetEnd", "Parameter policy is null");
+        policy, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PixelRoundPolicy_GetEnd", "Parameter policy is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(policy->end.isSet, ARKUI_ERROR_CODE_PARAM_INVALID,
         "OH_ArkUI_PixelRoundPolicy_GetEnd", "End PixelRoundPolicy is not set");
     *value = policy->end.value;
@@ -2058,8 +1971,8 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
-            fullImpl->getNodeModifiers()->getRichEditorModifier()->
-                getRichEditorCharacterPositionAtCoordinate(node->uiNodeHandle, dx, dy));
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorCharacterPositionAtCoordinate(
+                node->uiNodeHandle, dx, dy));
     } else {
         *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
             fullImpl->getNodeModifiers()->getTextModifier()->getCharacterPositionAtCoordinate(

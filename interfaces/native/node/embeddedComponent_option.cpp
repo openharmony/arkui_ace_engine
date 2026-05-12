@@ -13,15 +13,12 @@
  * limitations under the License.
  */
 
-#include <new>
-
 #include "embeddedComponent_option.h"
 
 #include "node_model.h"
 
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
-#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,40 +26,29 @@ extern "C" {
 
 ArkUI_EmbeddedComponentOption* OH_ArkUI_EmbeddedComponentOption_Create()
 {
-    ArkUI_EmbeddedComponentOption* option = new (std::nothrow) ArkUI_EmbeddedComponentOption { nullptr, nullptr };
-    if (option == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_INTERNAL_ERROR,
-            __FUNCTION__, "Failed to create embedded component option");
-    }
+    ArkUI_EmbeddedComponentOption* option =
+        new ArkUI_EmbeddedComponentOption { nullptr, nullptr };
     return option;
 }
 
 void OH_ArkUI_EmbeddedComponentOption_Dispose(ArkUI_EmbeddedComponentOption* option)
 {
-    if (option == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
-        return;
-    }
     delete option;
 }
 
 void OH_ArkUI_EmbeddedComponentOption_SetOnError(
     ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, const char* name, const char* message))
 {
-    if (option == nullptr || callback == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option or callback is null");
-        return;
-    }
+    CHECK_NULL_VOID(option);
+    CHECK_NULL_VOID(callback);
     option->onError = reinterpret_cast<void*>(callback);
 }
 
 void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
     ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want))
 {
-    if (option == nullptr || callback == nullptr) {
-        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option or callback is null");
-        return;
-    }
+    CHECK_NULL_VOID(option);
+    CHECK_NULL_VOID(callback);
     option->onTerminated = reinterpret_cast<void*>(callback);
 }
 
