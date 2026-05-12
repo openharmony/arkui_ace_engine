@@ -3954,7 +3954,7 @@ void SliderPattern::ApplyDragFrameNodeSystemMaterial()
     CHECK_NULL_VOID(pipeline);
     
     // Material effect temporarily disabled due to dependency issues
-    static const FrostedGlassParam dragFrameMaterialParam {
+    const FrostedGlassParam dragFrameMaterialParam {
         .blurParams = { 1.0f, 50.0f },
         .weightsEmboss = { 0.8f, 0.8f },
         .weightsEdl = { 1.0f, 0.7f },
