@@ -3882,35 +3882,35 @@ HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute004, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeIsPreMake001
- * @tc.desc: Test IsPreMake method default value
+ * @tc.name: FrameNodeHasPreMake001
+ * @tc.desc: Test HasPreMake method default value
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeIsPreMake001, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeHasPreMake001, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(
         "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
-    EXPECT_FALSE(frameNode->IsPreMake());
+    EXPECT_FALSE(frameNode->HasPreMake());
 }
 
 /**
- * @tc.name: FrameNodeIsPreMake002
- * @tc.desc: Test isPreMake_ flag can be set
+ * @tc.name: FrameNodeHasPreMake002
+ * @tc.desc: Test hasPreMake_ flag can be set
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeIsPreMake002, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeHasPreMake002, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(
         "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
-    frameNode->isPreMake_ = true;
-    EXPECT_TRUE(frameNode->IsPreMake());
+    frameNode->hasPreMake_ = true;
+    EXPECT_TRUE(frameNode->HasPreMake());
 
-    frameNode->isPreMake_ = false;
-    EXPECT_FALSE(frameNode->IsPreMake());
+    frameNode->hasPreMake_ = false;
+    EXPECT_FALSE(frameNode->HasPreMake());
 }
 
 /**
@@ -3924,7 +3924,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodePreMakeScopeTest001, TestSize.Level1)
         "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
-    EXPECT_FALSE(frameNode->IsPreMake());
+    EXPECT_FALSE(frameNode->HasPreMake());
 }
 
 /**
@@ -3939,15 +3939,15 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsPreMakeAndScroll001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     frameNode->isActive_ = false;
-    frameNode->isPreMake_ = false;
+    frameNode->hasPreMake_ = false;
     EXPECT_FALSE(frameNode->IsPreMakeAndScroll());
 
     frameNode->isActive_ = true;
-    frameNode->isPreMake_ = false;
+    frameNode->hasPreMake_ = false;
     EXPECT_FALSE(frameNode->IsPreMakeAndScroll());
 
     frameNode->isActive_ = false;
-    frameNode->isPreMake_ = true;
+    frameNode->hasPreMake_ = true;
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
     auto manager = context->GetContentChangeManager();

@@ -2287,47 +2287,47 @@ HWTEST_F(UINodeTestNg, UINodeTestGetPath004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UINodeTestIsPreloadMemoryLevel001
- * @tc.desc: Test IsPreloadMemoryLevel method default value
+ * @tc.name: UINodeTestIsPreMake001
+ * @tc.desc: Test IsPreMake method default value
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, UINodeTestIsPreloadMemoryLevel001, TestSize.Level1)
+HWTEST_F(UINodeTestNg, UINodeTestIsPreMake001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create node without PreMakeScope
-     * @tc.expected: isPreloadMemoryLevel_ is false by default
+     * @tc.expected: isPreMake_ is false by default
      */
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
-    EXPECT_FALSE(testNode->IsPreloadMemoryLevel());
+    EXPECT_FALSE(testNode->IsPreMake());
 }
 
 /**
- * @tc.name: UINodeTestIsPreloadMemoryLevel002
- * @tc.desc: Test SetPreloadMemoryLevel method
+ * @tc.name: UINodeTestIsPreMake002
+ * @tc.desc: Test SetPreMake method
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, UINodeTestIsPreloadMemoryLevel002, TestSize.Level1)
+HWTEST_F(UINodeTestNg, UINodeTestIsPreMake002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create node and set preload flag
      */
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
-    testNode->SetPreloadMemoryLevel(true);
-    EXPECT_TRUE(testNode->IsPreloadMemoryLevel());
+    testNode->SetPreMake(true);
+    EXPECT_TRUE(testNode->IsPreMake());
 
     /**
      * @tc.steps: step2. reset preload flag
      */
-    testNode->SetPreloadMemoryLevel(false);
-    EXPECT_FALSE(testNode->IsPreloadMemoryLevel());
+    testNode->SetPreMake(false);
+    EXPECT_FALSE(testNode->IsPreMake());
 }
 
 /**
- * @tc.name: UINodeTestDetachFromMainTreeByPreloadFlag001
- * @tc.desc: Test DetachFromMainTreeByPreloadFlag with no preload children
+ * @tc.name: UINodeTestDetachFromMainTreeByPreMakeFlag001
+ * @tc.desc: Test DetachFromMainTreeByPreMakeFlag with no preload children
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag001, TestSize.Level1)
+HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreMakeFlag001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create node with regular children (not preload)
@@ -2337,42 +2337,42 @@ HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag001, TestSize.Le
     parent->AddChild(child);
 
     /**
-     * @tc.steps: step2. call DetachFromMainTreeByPreloadFlag
+     * @tc.steps: step2. call DetachFromMainTreeByPreMakeFlag
      * @tc.expected: no crash, children still present
      */
-    parent->DetachFromMainTreeByPreloadFlag();
+    parent->DetachFromMainTreeByPreMakeFlag();
     EXPECT_EQ(parent->GetChildren().size(), 1);
 }
 
 /**
- * @tc.name: UINodeTestDetachFromMainTreeByPreloadFlag002
- * @tc.desc: Test DetachFromMainTreeByPreloadFlag with preload child
+ * @tc.name: UINodeTestDetachFromMainTreeByPreMakeFlag002
+ * @tc.desc: Test DetachFromMainTreeByPreMakeFlag with preload child
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag002, TestSize.Level1)
+HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreMakeFlag002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create node with preload child
      */
     auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
     auto child = TestNode::CreateTestNode(TEST_ID_TWO);
-    child->SetPreloadMemoryLevel(true);
+    child->SetPreMake(true);
     parent->AddChild(child);
 
     /**
-     * @tc.steps: step2. call DetachFromMainTreeByPreloadFlag
+     * @tc.steps: step2. call DetachFromMainTreeByPreMakeFlag
      * @tc.expected: method processes preload child correctly
      */
-    parent->DetachFromMainTreeByPreloadFlag();
+    parent->DetachFromMainTreeByPreMakeFlag();
     EXPECT_TRUE(parent->GetChildren().size() > 0);
 }
 
 /**
- * @tc.name: UINodeTestDetachFromMainTreeByPreloadFlag003
- * @tc.desc: Test DetachFromMainTreeByPreloadFlag with nested preload children
+ * @tc.name: UINodeTestDetachFromMainTreeByPreMakeFlag003
+ * @tc.desc: Test DetachFromMainTreeByPreMakeFlag with nested preload children
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag003, TestSize.Level1)
+HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreMakeFlag003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create nested hierarchy with preload flag on leaf
@@ -2380,25 +2380,25 @@ HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag003, TestSize.Le
     auto root = TestNode::CreateTestNode(TEST_ID_ONE);
     auto child = TestNode::CreateTestNode(TEST_ID_TWO);
     auto grandChild = TestNode::CreateTestNode(TEST_ID_THREE);
-    grandChild->SetPreloadMemoryLevel(true);
+    grandChild->SetPreMake(true);
 
     root->AddChild(child);
     child->AddChild(grandChild);
 
     /**
-     * @tc.steps: step2. call DetachFromMainTreeByPreloadFlag on root
+     * @tc.steps: step2. call DetachFromMainTreeByPreMakeFlag on root
      * @tc.expected: method traverses hierarchy correctly
      */
-    root->DetachFromMainTreeByPreloadFlag();
+    root->DetachFromMainTreeByPreMakeFlag();
     EXPECT_TRUE(root->GetChildren().size() > 0);
 }
 
 /**
- * @tc.name: UINodeTestDetachFromMainTreeByPreloadFlag004
- * @tc.desc: Test DetachFromMainTreeByPreloadFlag with empty children
+ * @tc.name: UINodeTestDetachFromMainTreeByPreMakeFlag004
+ * @tc.desc: Test DetachFromMainTreeByPreMakeFlag with empty children
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag004, TestSize.Level1)
+HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreMakeFlag004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create node without children
@@ -2406,10 +2406,10 @@ HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag004, TestSize.Le
     auto node = TestNode::CreateTestNode(TEST_ID_ONE);
 
     /**
-     * @tc.steps: step2. call DetachFromMainTreeByPreloadFlag
+     * @tc.steps: step2. call DetachFromMainTreeByPreMakeFlag
      * @tc.expected: no crash, method handles empty children correctly
      */
-    node->DetachFromMainTreeByPreloadFlag();
+    node->DetachFromMainTreeByPreMakeFlag();
     EXPECT_TRUE(node->GetChildren().empty());
 }
 } // namespace OHOS::Ace::NG
