@@ -151,6 +151,8 @@ export interface IObservedAnyProp {
     addRefAnyProp(): void;
 }
 
+export interface ObservedBuiltIn extends IObservedAnyProp {}
+
 export const OBSERVE: IObserve = ObserveSingleton.instance;
 
 export type RenderIdType = int32;
