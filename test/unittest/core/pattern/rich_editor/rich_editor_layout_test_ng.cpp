@@ -266,7 +266,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level2)
     layoutAlgorithm->paragraphManager_ = paragraphManager;
 
     ParagraphStyle testStyle = {};
-    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(testStyle));
+    paragraph->paraStyle_ = testStyle;
     layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
 
@@ -379,7 +379,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm004, TestSize.Level2)
     auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
     layoutAlgorithm->paragraphManager_ = paragraphManager;
     ParagraphStyle testStyle = {};
-    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(testStyle));
+    paragraph->paraStyle_ = testStyle;
     layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
 
     /**

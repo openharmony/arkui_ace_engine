@@ -107,6 +107,7 @@
 #ifdef CROSS_PLATFORM
 #include "core/common/ime/input_method_manager.h"
 #endif
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -256,6 +257,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     CHECK_NULL_VOID(host);
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(host);
+    StyledStringRegisterResource();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ForceTriggerAvoidOnCaretChange();
     undoManager_->RecordOperation(record);
@@ -1717,6 +1719,7 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
         spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
         spanNode->UpdateStrokeWidth(textStyle.GetStrokeWidth());
         spanNode->UpdateStrokeColor(textStyle.GetStrokeColor());
+        spanNode->UpdateStrokeJoinStyle(textStyle.GetStrokeJoinStyle());
         UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
         StyleManager::UpdateTextColorResource(spanNode, textStyle);
         StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
@@ -2225,11 +2228,12 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, StrokeWidth);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, StrokeColor);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, StrokeJoinStyle);
     target->GetSpanItem()->useThemeFontColor = source->GetSpanItem()->useThemeFontColor;
     target->GetSpanItem()->useThemeDecorationColor = source->GetSpanItem()->useThemeDecorationColor;
     target->GetSpanItem()->strokeColorFollowFontColor = source->GetSpanItem()->strokeColorFollowFontColor;
     UpdateTextBackgroundStyle(target, source->GetTextBackgroundStyle());
-    target->CopyResource(source);
+    target->CopyFontStyleResource(source);
 }
 
 void RichEditorPattern::CopyTextSpanLineStyle(
@@ -2243,6 +2247,8 @@ void RichEditorPattern::CopyTextSpanLineStyle(
     COPY_SPAN_STYLE_IF_PRESENT(source, target, ParagraphSpacing);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextVerticalAlign);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDirection);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, Gradient);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, ColorShaderStyle);
     if (source->HasLeadingMargin()) {
         auto leadingMargin = source->GetLeadingMarginValue({});
         if (!needLeadingMargin) {
@@ -2250,6 +2256,7 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         }
         target->UpdateLeadingMargin(leadingMargin);
     }
+    target->CopyTextLineStyleResource(source);
 }
 
 void RichEditorPattern::CopyTextSpanUrlStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
@@ -2659,6 +2666,22 @@ void RichEditorPattern::UpdateStrokeColor(
     StyleManager::UpdateStrokeColorResource(spanNode, textStyle);
 }
 
+void RichEditorPattern::UpdateTextStroke(
+    RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
+{
+    if (updateSpanStyle.updateStrokeWidth.has_value()) {
+       spanNode->UpdateStrokeWidth(textStyle.GetStrokeWidth());
+    }
+    if (updateSpanStyle.updateStrokeJoinStyle.has_value()) {
+       spanNode->UpdateStrokeJoinStyle(textStyle.GetStrokeJoinStyle());
+    }
+    UpdateStrokeColor(spanNode, updateSpanStyle, textStyle);
+    if (updateSpanStyle.updateTextColor.has_value()
+        && spanNode->GetStrokeWidthValue(Dimension()).Value() != DEFAULT_STROKE_WIDTH) {
+        spanNode->GetSpanItem()->needReLayout = true;
+    } 
+}
+
 void RichEditorPattern::UpdateTextStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
 {
@@ -2700,15 +2723,7 @@ void RichEditorPattern::UpdateTextStyle(
         UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
     }
     UpdateUrlStyle(spanNode, updateSpanStyle.updateUrlAddress);
-    if (updateSpanStyle.updateStrokeWidth.has_value()) {
-       spanNode->UpdateStrokeWidth(textStyle.GetStrokeWidth());
-    }
-    UpdateStrokeColor(spanNode, updateSpanStyle, textStyle);
-    if (updateSpanStyle.updateTextColor.has_value()
-        && spanNode->GetStrokeWidthValue(Dimension()).Value() != DEFAULT_STROKE_WIDTH) {
-        spanNode->GetSpanItem()->needReLayout = true;
-    }
-
+    UpdateTextStroke(spanNode, updateSpanStyle, textStyle);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
 }
@@ -3404,6 +3419,8 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
                 .textVerticalAlign = textVerticalAlignOpt,
                 .textDirection = textDirectionOpt,
                 .range = { paraStart, (*it)->GetSpanItem()->position },
+                .propGradient = GradientConvert::ToOptGradient((*it)->GetGradient()),
+                .colorShaderStyle = (*it)->GetColorShaderStyle(),
             });
             paraStart = (*it)->GetSpanItem()->position;
         }
@@ -3532,6 +3549,18 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     } else if (!NearEqual(paragraphSpacing->Value(), 0.0f) || paragraphSpacing->Unit() != DimensionUnit::PX) {
         spanNode->ResetParagraphSpacing();
     }
+    auto gradient = style.GetGradient();
+    if (gradient.has_value()) {
+        spanNode->UpdateGradient(GradientConvert::ToNGGradient(gradient));
+    } else {
+        spanNode->ResetGradient();
+    }
+     if (style.colorShaderStyle.has_value()) {
+        spanNode->UpdateColorShaderStyle(style.colorShaderStyle);
+    } else {
+        spanNode->ResetColorShaderStyle();
+    }
+    StyleManager::UpdateColorShaderStyleResource(spanNode, style);
     auto leadingMarginValue = spanNode->GetLeadingMarginValue({});
     if (style.leadingMargin.has_value() && !leadingMarginValue.CheckLeadingMargin(style.leadingMargin.value())) {
         spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
@@ -5095,6 +5124,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
         textStyle.letterSpacing = spanItem->fontStyle->GetLetterSpacing().value_or(Dimension()).ConvertToFp();
         textStyle.strokeWidth = spanItem->fontStyle->GetStrokeWidth().value_or(Dimension()).ConvertToVp();
         textStyle.strokeColor = spanItem->fontStyle->GetStrokeColor().value_or(style.GetTextColor()).ColorToString();
+        textStyle.strokeJoinStyle = spanItem->fontStyle->GetStrokeJoinStyle();
     }
     CopyTextLineStyleToTextStyleResult(spanItem, textStyle);
     textStyle.textBackgroundStyle = spanItem->backgroundStyle;
@@ -5119,6 +5149,8 @@ void RichEditorPattern::CopyTextLineStyleToTextStyleResult(const RefPtr<SpanItem
     textStyle.lineBreakStrategy =
         static_cast<int32_t>(spanItem->textLineStyle->GetLineBreakStrategy().value_or(LineBreakStrategy::GREEDY));
     textStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
+    textStyle.SetOptGradient(GradientConvert::ToGradient(spanItem->textLineStyle->GetGradient()));
+    textStyle.colorShaderStyle = spanItem->textLineStyle->GetColorShaderStyle();
     auto verticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
     IF_TRUE(verticalAlign.has_value(), textStyle.textVerticalAlign = static_cast<int32_t>(verticalAlign.value()));
     auto textDirection = spanItem->textLineStyle->GetTextDirection();
@@ -5507,6 +5539,11 @@ struct UpdateParagraphStyle RichEditorPattern::GetParagraphStyle(const RefPtr<Sp
     paraStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     paraStyle.textVerticalAlign = spanItem->textLineStyle->GetTextVerticalAlign();
     paraStyle.textDirection = spanItem->textLineStyle->GetTextDirection();
+    auto gradient = spanItem->textLineStyle->GetGradient();
+    if (gradient.has_value()) {
+        paraStyle.SetOptGradient(GradientConvert::ToGradient(gradient));
+    }
+    paraStyle.colorShaderStyle = spanItem->textLineStyle->GetColorShaderStyle();
     return paraStyle;
 }
 
@@ -6857,6 +6894,7 @@ TextStyle RichEditorPattern::CreateTextStyleByTypingStyle()
     IF_TRUE(updateSpanStyle.updateStrokeColor, ret.SetStrokeColor(textStyle.GetStrokeColor()));
     IF_TRUE(updateSpanStyle.strokeColorFollowFontColor && updateSpanStyle.updateTextColor,
         ret.SetStrokeColor(textStyle.GetStrokeColor()));
+    IF_TRUE(updateSpanStyle.updateStrokeJoinStyle, ret.SetStrokeJoinStyle(textStyle.GetStrokeJoinStyle()));
     ret.CopyResource(textStyle);
     return ret;
 }
@@ -12204,6 +12242,25 @@ TextInputAction RichEditorPattern::GetDefaultTextInputAction() const
     return TextInputAction::NEW_LINE;
 }
 
+void ParsespanParaStyle(std::optional<TextStyle>& spanTextStyle,
+    std::optional<struct UpdateParagraphStyle>& spanParaStyle,
+    const RefPtr<SpanNode>& spanNode, bool useTypingParaStyle)
+{
+    spanTextStyle = spanNode->GetSpanItem()->GetTextStyle();
+    CHECK_NULL_VOID(!useTypingParaStyle);
+    struct UpdateParagraphStyle paraStyle;
+    paraStyle.textAlign = spanNode->GetTextAlign();
+    paraStyle.leadingMargin = spanNode->GetLeadingMarginValue({});
+    paraStyle.wordBreak = spanNode->GetWordBreak();
+    paraStyle.lineBreakStrategy = spanNode->GetLineBreakStrategy();
+    paraStyle.paragraphSpacing = spanNode->GetParagraphSpacing();
+    paraStyle.textVerticalAlign = spanNode->GetTextVerticalAlign();
+    paraStyle.textDirection = spanNode->GetTextDirection();
+    paraStyle.SetOptGradient(GradientConvert::ToGradient(spanNode->GetGradient()));
+    paraStyle.colorShaderStyle = spanNode->GetColorShaderStyle();
+    spanParaStyle = paraStyle;
+}
+
 void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
     std::optional<struct UpdateParagraphStyle>& spanParaStyle, std::optional<std::u16string>& urlAddress,
     const RefPtr<SpanNode>& spanNode, int32_t spanIndex, bool useTypingParaStyle)
@@ -12239,21 +12296,15 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
             paraStyle.paragraphSpacing = (*it)->textLineStyle->GetParagraphSpacing();
             paraStyle.textVerticalAlign = (*it)->textLineStyle->GetTextVerticalAlign();
             paraStyle.textDirection = (*it)->textLineStyle->GetTextDirection();
+          auto gradient = (*it)->textLineStyle->GetGradient();
+            if (gradient.has_value()) {
+                paraStyle.SetOptGradient(GradientConvert::ToGradient(gradient));
+            }
+            paraStyle.colorShaderStyle = (*it)->textLineStyle->GetColorShaderStyle();
             spanParaStyle = paraStyle;
         }
     } else if (spanNode && spanNode->GetSpanItem()) {
-        spanTextStyle = spanNode->GetSpanItem()->GetTextStyle();
-        if (!useTypingParaStyle) {
-            struct UpdateParagraphStyle paraStyle;
-            paraStyle.textAlign = spanNode->GetTextAlign();
-            paraStyle.leadingMargin = spanNode->GetLeadingMarginValue({});
-            paraStyle.wordBreak = spanNode->GetWordBreak();
-            paraStyle.lineBreakStrategy = spanNode->GetLineBreakStrategy();
-            paraStyle.paragraphSpacing = spanNode->GetParagraphSpacing();
-            paraStyle.textVerticalAlign = spanNode->GetTextVerticalAlign();
-            paraStyle.textDirection = spanNode->GetTextDirection();
-            spanParaStyle = paraStyle;
-        }
+        ParsespanParaStyle(spanTextStyle, spanParaStyle, spanNode, useTypingParaStyle);
     }
 }
 
@@ -12434,6 +12485,7 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     textStyleResult.textBackgroundStyle = textStyle.GetTextBackgroundStyle();
     textStyleResult.strokeWidth = textStyle.GetStrokeWidth().ConvertToVp();
     textStyleResult.strokeColor = textStyle.GetStrokeColor().ColorToString();
+    textStyleResult.strokeJoinStyle = textStyle.GetStrokeJoinStyle();
     retInfo.SetTextStyle(textStyleResult);
     retInfo.SetLineHeight(textStyle.GetLineHeight().ConvertToVp());
     retInfo.SetHalfLeading(textStyle.GetHalfLeading());
@@ -12486,6 +12538,8 @@ void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
         static_cast<int32_t>(paraStyle->textVerticalAlign.value()));
     IF_TRUE(paraStyle->textDirection.has_value(), textStyleResult.textDirection =
         static_cast<int32_t>(paraStyle->textDirection.value()));
+    textStyleResult.SetOptGradient(paraStyle->GetGradient());
+    textStyleResult.colorShaderStyle = paraStyle->colorShaderStyle;
     retInfo.SetTextStyle(textStyleResult);
 }
 

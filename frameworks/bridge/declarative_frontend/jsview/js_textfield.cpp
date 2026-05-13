@@ -2526,6 +2526,65 @@ void JSTextField::SetEnableAutoSpacing(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSTextField::SetShaderStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TextFieldModel::GetInstance()->ResetGradientShaderStyle();
+        return;
+    }
+    NG::Gradient gradient;
+    CalcDimension value;
+    if (info.Length() < 1 || (info.Length() > 0 && !info[0]->IsObject())) {
+        TextFieldModel::GetInstance()->ResetGradientShaderStyle();
+        return;
+    }
+    auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
+    UnRegisterResource("ColorShaderStyle");
+    if (shaderStyleObj->HasProperty("options")) {
+        auto optionsValue = shaderStyleObj->GetProperty("options");
+        if (optionsValue->IsObject()) {
+            shaderStyleObj = JSRef<JSObject>::Cast(optionsValue);
+        }
+    }
+    if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
+        NewRadialGradient(shaderStyleObj, gradient);
+        TextFieldModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else if (shaderStyleObj->HasProperty("colors")) {
+        NewLinearGradient(shaderStyleObj, gradient);
+        TextFieldModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else if (shaderStyleObj->HasProperty("color")) {
+        Color textColor;
+        RefPtr<ResourceObject> resObj;
+        auto infoColor = shaderStyleObj->GetProperty("color");
+        if (!ParseJsColor(infoColor, textColor, resObj)) {
+            TextFieldModel::GetInstance()->ResetGradientShaderStyle();
+            return;
+        }
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<Color>("ColorShaderStyle", resObj, textColor);
+        }
+        TextFieldModel::GetInstance()->SetColorShaderStyle(textColor);
+    } else {
+        TextFieldModel::GetInstance()->ResetGradientShaderStyle();
+    }
+}
+ 
+void JSTextField::SetStrokeJoinStyle(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextFieldModel::GetInstance()->SetStrokeJoinStyle(StrokeJoinStyle::MITER_JOIN);
+        return;
+    }
+    int32_t index = args->ToNumber<int32_t>();
+    auto isNormalValue = index >= 0 && index < static_cast<int32_t>(STROKE_JOIN_STYLES.size());
+    if (!isNormalValue) {
+        TextFieldModel::GetInstance()->SetStrokeJoinStyle(StrokeJoinStyle::MITER_JOIN);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetStrokeJoinStyle(STROKE_JOIN_STYLES[index]);
+}
+
 void JSTextField::SetOrphanCharOptimization(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

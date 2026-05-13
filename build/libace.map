@@ -591,6 +591,10 @@
       "OHOS::Ace::GetSysTimestamp()";
       "OHOS::Ace::GetTimeOfNow(int)";
       "OHOS::Ace::Gradient::AddColor(OHOS::Ace::GradientColor const&)";
+      "OHOS::Ace::GradientConvert::ToNGGradient(std::__h::optional<OHOS::Ace::Gradient> const&)";
+      "OHOS::Ace::GradientConvert::ToOptGradient(std::__h::optional<OHOS::Ace::NG::Gradient> const&)";
+      "OHOS::Ace::GradientConvert::ParseGradientDirection(OHOS::Ace::NG::Gradient const&, OHOS::Ace::NG::GradientDirection&)";
+      "OHOS::Ace::GradientConvert::ParseGradientDirection(OHOS::Ace::NG::Gradient const&)";
       "OHOS::Ace::GridColumnInfo::GetWidth() const";
       "OHOS::Ace::GridColumnInfo::GetWidth(unsigned int) const";
       "OHOS::Ace::GridContainerInfo::BuildColumnWidth()";
@@ -815,6 +819,9 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseDragPreviewOptions(panda::JsiRuntimeCallInfo*, panda::ecmascript::EcmaVM const*)";
       "OHOS::Ace::NG::ArkTSUtils::ParseEdgeWidthsResObj(panda::ecmascript::EcmaVM*, panda::Local<panda::ObjectRef> const&, OHOS::Ace::NG::BorderWidthPropertyT<OHOS::Ace::Dimension>&, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseEffectOption(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::EffectOption&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseGradientCenter(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::vector<ArkUIInt32orFloat32, std::__h::allocator<ArkUIInt32orFloat32>>&, std::__h::vector<OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>>>&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseGradientAngle(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::vector<ArkUIInt32orFloat32, std::__h::allocator<ArkUIInt32orFloat32>>&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseGradientColorStops(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::vector<ArkUIInt32orFloat32, std::__h::allocator<ArkUIInt32orFloat32>>&, std::__h::vector<OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>>>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsAngle(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::optional<float>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColor(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColor(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&)";
@@ -986,6 +993,7 @@
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_SelectStatus&, int const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_ShadowOptions&, OHOS::Ace::Shadow const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_SliderChangeMode&, OHOS::Ace::SliderModel::SliderChangeMode const&)";
+      "OHOS::Ace::NG::Converter::AssignArkValue(Ark_StrokeJoinStyle&, OHOS::Ace::StrokeJoinStyle const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextBackgroundStyle&, OHOS::Ace::TextBackgroundStyle const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextChangeOptions&, OHOS::Ace::ChangeValueInfo const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextChangeReason&, OHOS::Ace::TextChangeReason const&)";
@@ -999,10 +1007,14 @@
       "OHOS::Ace::NG::Converter::AssignArkValue(double&, OHOS::Ace::Dimension const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(InteropString&, std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(long long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::Converter::AssignGradientColors(OHOS::Ace::NG::Gradient*, Array_Tuple_ResourceColor_F64 const*)";
+      "OHOS::Ace::NG::Converter::AssignLinearGradientDirection(std::__h::shared_ptr<OHOS::Ace::NG::LinearGradient>&, OHOS::Ace::NG::GradientDirection const&)";
       "OHOS::Ace::NG::Converter::CaretStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::CaretStyle, Ark_CaretStyle>(Ark_CaretStyle const&)";
       "OHOS::Ace::NG::Converter::ConvContext::Allocate(unsigned int)";
       "OHOS::Ace::NG::Converter::ConvContext::Store(std::__h::basic_string_view<char, std::__h::char_traits<char>> const&)";
+      "OHOS::Ace::NG::Converter::ConvertAngleWithDefault(Opt_Union_F64_String const&, std::__h::optional<float>&, float)";
       "OHOS::Ace::NG::Converter::FontFamilies OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontFamilies, InteropString>(InteropString const&)";
+      "OHOS::Ace::NG::Converter::ProcessLinearGradient(Opt_LinearGradientOptions const&, OHOS::Ace::NG::Gradient&)";
       "OHOS::Ace::NG::Converter::RadioStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::RadioStyle, Ark_RadioStyle>(Ark_RadioStyle const&)";
       "OHOS::Ace::NG::Converter::ResourceConverter::ResourceConverter(Ark_Resource const&)";
       "OHOS::Ace::NG::Converter::ResourceConverter::ToColor()";
@@ -1320,6 +1332,8 @@
       "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
       "OHOS::Ace::NG::Gradient::ClearColors()";
       "OHOS::Ace::NG::Gradient::CreateGradientWithType(OHOS::Ace::NG::GradientType)";
+      "OHOS::Ace::NG::Gradient OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Gradient, Ark_RadialGradientOptions>(Ark_RadialGradientOptions const&)";
+      "OHOS::Ace::GradientConvert::ToGradient(std::__h::optional<OHOS::Ace::NG::Gradient> const&)";
       "OHOS::Ace::NG::GroupManager::AddCheckBoxGroup(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::GroupManager::AddCheckBoxToGroup(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::GroupManager::AddRadioToGroup(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
@@ -1473,6 +1487,7 @@
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::Measure(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::MeasureChildren(OHOS::Ace::NG::LayoutConstraintT<float> const&, OHOS::Ace::NG::LayoutWrapper*, OHOS::Ace::TextStyle const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::ParagraphReLayout(OHOS::Ace::NG::LayoutConstraintT<float> const&)";
+      "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::RelayoutShaderStyle(OHOS::Ace::RefPtr<OHOS::Ace::NG::TextLayoutProperty> const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(OHOS::Ace::TextStyle&, std::__h::optional<OHOS::Ace::Dimension> const&)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::SetContentOffset(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(OHOS::Ace::RefPtr<OHOS::Ace::NG::CustomSpanItem>&, OHOS::Ace::RefPtr<OHOS::Ace::NG::Paragraph> const&, int&, OHOS::Ace::NG::CustomSpanPlaceholderInfo&)";
@@ -1544,6 +1559,7 @@
       "OHOS::Ace::NG::Paragraph::Create(OHOS::Ace::NG::ParagraphStyle const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FontCollection> const&)";
       "OHOS::Ace::NG::Paragraph::CreateRichEditorParagraph(OHOS::Ace::NG::ParagraphStyle const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FontCollection> const&, bool)";
       "OHOS::Ace::NG::ParagraphManager::GetLongestLineWithIndent() const";
+      "OHOS::Ace::NG::ParagraphStyle::GetGradient() const";
       "OHOS::Ace::NG::ParagraphUtil::GetParagraphStyle(OHOS::Ace::TextStyle const&)";
       "OHOS::Ace::NG::ParseTemplateArgs(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, double, double, int)";
       "OHOS::Ace::NG::PasteButtonModelNG::CreateNode(int, int, int, bool, unsigned int)";
@@ -1842,6 +1858,10 @@
       "OHOS::Ace::NG::SelectOverlayClient::StopListeningScrollableParent(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::SelectPattern::UpdateOptionFontFromPattern(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::SelectPattern::UpdateSelectedOptionFontFromPattern(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
+      "OHOS::Ace::NG::SetLinearGradientValues(OHOS::Ace::NG::Gradient&, ArkUIInt32orFloat32 const*, int)";
+      "OHOS::Ace::NG::SetLinearGradientColors(OHOS::Ace::NG::Gradient&, ArkUIInt32orFloat32 const*, int, void*, OHOS::Ace::NG::FrameNode*)";
+      "OHOS::Ace::NG::SetRadialGradientValues(OHOS::Ace::NG::Gradient&, ArkUIInt32orFloat32 const*, int, void*)";
+      "OHOS::Ace::NG::SetRadialGradientColors(OHOS::Ace::NG::Gradient&, ArkUIInt32orFloat32 const*, int, void*, OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::SpanItem::AddResObj(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)>&&)";
       "OHOS::Ace::NG::SpanItem::GetSpanContent()";
       "OHOS::Ace::NG::SpanItem::GetSpanContent(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, bool)";
@@ -1924,6 +1944,7 @@
       "OHOS::Ace::NG::TextFieldPattern::GetItalicFontStyle() const";
       "OHOS::Ace::NG::TextFieldPattern::GetPlaceHolder() const";
       "OHOS::Ace::NG::TextFieldPattern::GetSelectDetectEnable()";
+      "OHOS::Ace::NG::TextFieldPattern::GetShaderStyleInJson() const";
       "OHOS::Ace::NG::TextFieldPattern::GetTextAlign() const";
       "OHOS::Ace::NG::TextFieldPattern::GetTheme() const";
       "OHOS::Ace::NG::TextFieldPattern::HandleBlurEvent()";
@@ -1977,6 +1998,10 @@
       "OHOS::Ace::NG::TextLayoutProperty::OnEnableSmallLanguageTruncationUpdate(bool)";
       "OHOS::Ace::NG::TextLayoutProperty::UpdateEnableSmallLanguageTruncation(bool const&)";
       "OHOS::Ace::NG::TextLayoutProperty::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
+      "OHOS::Ace::NG::TextLineStyle::GetGradient() const";
+      "OHOS::Ace::NG::TextLineStyle::ReloadResources()";
+      "OHOS::Ace::NG::TextLineStyle::ResetGradient()";
+      "OHOS::Ace::NG::TextLineStyle::SetGradient(OHOS::Ace::NG::Gradient const&)";
       "OHOS::Ace::NG::TextModelNG::ResetTextColor(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::TextOverlayModifier::ClearSelectedForegroundColorAndRects()";
       "OHOS::Ace::NG::TextOverlayModifier::onDraw(OHOS::Ace::NG::DrawingContext&)";
@@ -2175,6 +2200,7 @@
       "OHOS::Ace::NG::TextPattern::ShowAIEntityPreviewMenuTimer()";
       "OHOS::Ace::NG::TextPattern::ShowShadow(OHOS::Ace::NG::PointT<float> const&, OHOS::Ace::Color const&)";
       "OHOS::Ace::NG::TextPattern::StartGestureSelection(int, int, OHOS::Ace::Offset const&)";
+      "OHOS::Ace::NG::TextPattern::StyledStringRegisterResource()";
       "OHOS::Ace::NG::TextPattern::TextPattern()";
       "OHOS::Ace::NG::TextPattern::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextPattern::ToTreeJson(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorConfig const&) const";
@@ -2370,7 +2396,13 @@
       "OHOS::Ace::NG::WrapOnMenuItemClickCallback(ArkUIEditOptionsParam*)";
       "OHOS::Ace::NG::WrapOnPrepareMenuCallback(ArkUIEditOptionsParam*)";
       "OHOS::Ace::NodeAdapter::GetNodeAdapterAPI()";
+      "OHOS::Ace::OptGradient::GetGradient()";
+      "OHOS::Ace::OptGradient::ResetGradient()";
+      "OHOS::Ace::OptGradient::SetGradient(std::__h::optional<OHOS::Ace::Gradient> const&)";
       "OHOS::Ace::OptionComponent::InitTheme(OHOS::Ace::RefPtr<OHOS::Ace::ThemeManager> const&)";
+      "OHOS::Ace::OptNGGradient::GetGradient()";
+      "OHOS::Ace::OptNGGradient::ResetGradient()";
+      "OHOS::Ace::OptNGGradient::SetGradient(std::__h::optional<OHOS::Ace::NG::Gradient> const&)";
       "OHOS::Ace::PageNodeInfoWrap::CreatePageNodeInfoWrap()";
       "OHOS::Ace::ParagraphStyleSpan::ParagraphStyleSpan(OHOS::Ace::SpanParagraphStyle, int, int)";
       "OHOS::Ace::ParseFontFeatureSettings(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -2806,6 +2838,7 @@
       "OHOS::Ace::SoleChildElement::PerformBuild()";
       "OHOS::Ace::SpanBase::GetEndIndex() const";
       "OHOS::Ace::SpanBase::GetStartIndex() const";
+      "OHOS::Ace::SpanParagraphStyle::SetOptGradient(std::__h::optional<OHOS::Ace::NG::Gradient> const&)";
       "OHOS::Ace::SpanString::~SpanString()";
       "OHOS::Ace::SpanString::AddCustomSpan()";
       "OHOS::Ace::SpanString::AddSpan(OHOS::Ace::RefPtr<OHOS::Ace::SpanBase> const&, bool, bool, bool)";
@@ -2886,6 +2919,7 @@
       "OHOS::Ace::StringUtils::ToWstring(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::StringUtils::TransformStrCase<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, int)";
       "OHOS::Ace::StringUtils::TrimStr(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, char)";
+      "OHOS::Ace::StrokeJoinStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::StrokeJoinStyle, Ark_StrokeJoinStyle>(Ark_StrokeJoinStyle const&)";
       "OHOS::Ace::StylusDetectorMgr::AddTextFieldFrameNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, OHOS::Ace::WeakPtr<OHOS::Ace::NG::LayoutInfoInterface> const&)";
       "OHOS::Ace::StylusDetectorMgr::GetInstance()";
       "OHOS::Ace::SubwindowManager::ClearMenu()";
@@ -3029,6 +3063,8 @@
       "OHOS::Ace::UIDisplaySync::UIDisplaySync(OHOS::Ace::UIObjectType)";
       "OHOS::Ace::UINodeTracer::UINodeTracer(char const*, OHOS::Ace::NG::UINode const*)";
       "OHOS::Ace::UnParseFontFeatureSetting(std::__h::list<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, int>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, int>>> const&)";
+      "OHOS::Ace::UpdateParagraphStyle::GetGradient() const";
+      "OHOS::Ace::UpdateParagraphStyle::SetOptGradient(std::__h::optional<OHOS::Ace::Gradient> const&)";
       "OHOS::Ace::UtfUtils::Str16DebugToStr8(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&)";
       "OHOS::Ace::UtfUtils::Str16ToStr8(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&)";
       "OHOS::Ace::UtfUtils::Str8DebugToStr16(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";

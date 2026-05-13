@@ -138,6 +138,8 @@ public:
     const std::string& GetMargin() const;
     void SetFontStyle(OHOS::Ace::FontStyle fontStyle);
     OHOS::Ace::FontStyle GetFontStyle() const;
+    void SetStrokeJoinStyle(StrokeJoinStyle style);
+    StrokeJoinStyle GetStrokeJoinStyle() const;
 
 private:
     TextStyleResult textStyle_;
@@ -176,6 +178,7 @@ private:
     std::string valueString_;
     SymbolSpanStyle symbolSpanStyle_;
     RefPtr<ResourceObject> valueResource_;
+    StrokeJoinStyle strokeJoinStyle_;
 };
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };

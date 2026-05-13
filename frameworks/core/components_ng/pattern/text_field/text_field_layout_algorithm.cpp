@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -68,6 +69,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    textStyle.SetTextStyleUid(frameNode->GetId() + 1);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
@@ -81,6 +83,8 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
+    UpdateStrokeJoinStyle(textFieldLayoutProperty, textStyle);
+    UpdateShaderStyle(textFieldLayoutProperty, textStyle);
     auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
@@ -1610,6 +1614,51 @@ bool TextFieldLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
         GreatNotEqual(paragraph->GetHeight(), maxSize.Height()) ||
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
         IsAdaptFontSizeExceedLineHeight(paragraph);
+}
+
+void TextFieldLayoutAlgorithm::UpdateShaderStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    TextStyle& textStyle)
+{
+    if (layoutProperty->HasGradientShaderStyle()) {
+        auto gradients = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+        auto gradient = GradientConvert::ToGradient(gradients);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+        textStyle.SetGradient(gradient);
+    } else if (layoutProperty->HasColorShaderStyle()) {
+        std::optional<Color> colors = layoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT);
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(colors);
+    } else {
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+    }
+}
+ 
+void TextFieldLayoutAlgorithm::UpdateStrokeJoinStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    TextStyle& textStyle)
+{
+    if (layoutProperty->HasStrokeJoinStyle()) {
+        auto style = layoutProperty->GetStrokeJoinStyle().value_or(StrokeJoinStyle::MITER_JOIN);
+        textStyle.SetStrokeJoinStyle(style);
+    } else {
+        textStyle.SetStrokeJoinStyle(std::nullopt);
+    }
+}
+ 
+void TextFieldLayoutAlgorithm::RelayoutShaderStyle(TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(textStyle.GetGradient().has_value());
+    CHECK_NULL_VOID(paragraph_ || inlineParagraph_);
+    auto txtStyle = textStyle;
+    txtStyle.ResetReCreateAndReLayoutBitmap();
+    txtStyle.SetForeGroundBrushBitMap();
+ 
+    if (paragraph_) {
+        paragraph_->ReLayoutForeground(txtStyle);
+    }
+    if (inlineParagraph_) {
+        inlineParagraph_->ReLayoutForeground(txtStyle);
+    }
 }
 
 bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)

@@ -1914,6 +1914,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("enterKeyType", searchTextFieldPattern->TextInputActionToString().c_str(), filter);
     json->PutExtAttr("selectionMenuHidden",
         textFieldLayoutProperty->GetSelectionMenuHidden().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("shaderStyle", textFieldPattern->GetShaderStyleInJson(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const

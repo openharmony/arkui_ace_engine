@@ -93,6 +93,9 @@ public:
     static void UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled, bool isTextColorByUser = true);
+    static void UpdateShaderStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle);
+    static void UpdateStrokeJoinStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle);
+    void RelayoutShaderStyle(TextStyle& textStyle);
     void CounterLayout(LayoutWrapper* layoutWrapper);
     void ErrorLayout(LayoutWrapper* layoutWrapper);
 

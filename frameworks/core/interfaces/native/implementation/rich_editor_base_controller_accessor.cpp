@@ -93,6 +93,9 @@ UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
     } else if (ret.updateTextColor.has_value()) {
         ret.strokeColorFollowFontColor = true;
     }
+    if (auto strokeJoinStyle = Converter::OptConvert<StrokeJoinStyle>(src.strokeJoinStyle); strokeJoinStyle) {
+        ret.updateStrokeJoinStyle = strokeJoinStyle;
+    }
     return ret;
 }
 
@@ -121,6 +124,7 @@ Ark_RichEditorTextStyle CreateEmptyArkTextStyle()
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(Ark_Empty());
     dst.strokeWidth = Converter::ArkUnion<Opt_Union_LengthMetrics_F64>(Ark_Empty());
     dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
+    dst.strokeJoinStyle = Converter::ArkUnion<Opt_StrokeJoinStyle>(Ark_Empty());
     return dst;
 }
 
@@ -157,6 +161,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
         ? Converter::ArkUnion<Opt_Union_LengthMetrics_F64, Ark_LengthMetrics>(src.updateStrokeWidth, ctx)
         : Converter::ArkUnion<Opt_Union_LengthMetrics_F64>(Ark_Empty());
     dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateStrokeColor, ctx);
+    dst.strokeJoinStyle = Converter::ArkValue<Opt_StrokeJoinStyle>(src.updateStrokeJoinStyle);
 }
 
 void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)

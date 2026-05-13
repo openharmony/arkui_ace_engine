@@ -296,6 +296,21 @@ struct OH_ArkUI_TextEditorSelectionMenuOptions  {
     OH_ArkUI_HapticFeedbackMode hapticFeedbackMode;
 };
 
+struct OH_ArkUI_LinearGradientOptions {
+    ArkUI_OptionalFloat angle = ArkUI_OptionalFloat { 0, 0.0f };
+    ArkUI_LinearGradientDirection direction = ArkUI_LinearGradientDirection::ARKUI_LINEAR_GRADIENT_DIRECTION_NONE;
+    bool repeating;
+    std::vector<std::pair<uint32_t, float>> colorStop;
+};
+ 
+struct OH_ArkUI_RadialGradientOptions {
+    ArkUI_OptionalFloat centerX = ArkUI_OptionalFloat { 0, 0.0f };
+    ArkUI_OptionalFloat centerY = ArkUI_OptionalFloat { 0, 0.0f };
+    ArkUI_OptionalFloat radius = ArkUI_OptionalFloat { 0, 0.0f };
+    bool repeating;
+    std::vector<std::pair<uint32_t, float>> colorStop;
+};
+
 #ifdef __cplusplus
 };
 #endif

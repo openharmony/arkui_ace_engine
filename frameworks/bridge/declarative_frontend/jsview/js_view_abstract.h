@@ -576,6 +576,12 @@ public:
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient);
     static void SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction);
+    static void ParseJsTextShaderStyle(std::optional<NG::Gradient>& gradientShaderStyle,
+        std::optional<Color>& colorShaderStyle, JSRef<JSObject>& obj, RefPtr<ResourceObject>& resObj);
+    static void ConvertJsTextShaderStyle(const std::optional<NG::Gradient>& gradientShaderStyle,
+        const std::optional<Color>& colorShaderStyle, JSRef<JSObject>& obj);
+    static void ParseRadialGradient(const NG::Gradient& gradient, JSRef<JSObject>& options);
+    static void ParseLinearGradient(const NG::Gradient& gradient, JSRef<JSObject>& options);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient);

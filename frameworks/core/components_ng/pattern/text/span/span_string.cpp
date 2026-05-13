@@ -1389,6 +1389,7 @@ RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, in
     font.enableVariableFontWeight = spanItem->fontStyle->GetEnableVariableFontWeight();
     font.enableDeviceFontWeightCategory = spanItem->fontStyle->GetEnableDeviceFontWeightCategory();
     font.fontSizeScale = spanItem->fontStyle->GetFontSizeScale();
+    font.strokeJoinStyle = spanItem->fontStyle->GetStrokeJoinStyle();
     return AceType::MakeRefPtr<FontSpan>(font, start, end);
 }
 
@@ -1468,6 +1469,8 @@ RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(
     paragraphStyle.textIndent = spanItem->textLineStyle->GetTextIndent();
     paragraphStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     paragraphStyle.textDirection = spanItem->textLineStyle->GetTextDirection();
+    paragraphStyle.SetOptGradient(spanItem->textLineStyle->GetGradient());
+    paragraphStyle.colorShaderStyle = spanItem->textLineStyle->GetColorShaderStyle();
     return AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle, start, end);
 }
 

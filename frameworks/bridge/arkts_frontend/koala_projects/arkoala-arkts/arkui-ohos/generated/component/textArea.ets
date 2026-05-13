@@ -20,11 +20,11 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable, MaterializedBaseTag } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Font as arkui_component_units_Font, Length, ResourceStr, Dimension, LengthMetrics as arkui_component_units_LengthMetrics, ColorMetrics as arkui_component_units_ColorMetrics } from './units'
-import { CaretStyle_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, VoiceButtonOptions_serializer, MaxLinesOptions_serializer, LineSpacingOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, IMEClient, SelectedDragPreviewStyle, TextDirection, VoiceButtonOptions, MaxLinesOptions, LineSpacingOptions, MaxLinesMode } from './textCommon'
+import { CaretStyle_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, VoiceButtonOptions_serializer, MaxLinesOptions_serializer, LineSpacingOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, IMEClient, SelectedDragPreviewStyle, TextDirection, VoiceButtonOptions, StrokeJoinStyle, MaxLinesOptions, LineSpacingOptions, MaxLinesMode } from './textCommon'
 import { TextDecorationOptions_serializer, InputCounterOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, TextDecorationOptions, InputCounterOptions, Bindable, ArkCommonMethodComponent, Bindable_ResourceStr_serializer, Bindable_Resource_serializer, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
-import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
-import { extractors, AttributeModifier, initializers, hookTextAreaAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
+import { extractors, AttributeModifier, ShaderStyle, initializers, hookTextAreaAttributeModifier, AttributeUpdater } from '#handwritten'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from './richEditor'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
@@ -1131,6 +1131,31 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setStrokeJoinStyleAttribute(value: StrokeJoinStyle | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as StrokeJoinStyle)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setStrokeJoinStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setShaderStyleAttribute(value: ShaderStyle | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            const valueTmpValueTransformed: ShaderStyleProxy = extractors.transform_Ark_ShaderStyle_to_Ark_ShaderStyleProxy(valueTmpValue)
+            ShaderStyleProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setShaderStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setInputFilterAttribute(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1477,6 +1502,12 @@ export interface TextAreaAttribute extends CommonMethod {
     }
     orphanCharOptimization(value: boolean | undefined): this {
         throw new Error('Unimplemented method orphanCharOptimization')
+    }
+    strokeJoinStyle(value: StrokeJoinStyle | undefined): this {
+        throw new Error('Unimplemented method strokeJoinStyle')
+    }
+    shaderStyle(value: ShaderStyle | undefined): this {
+        throw new Error('Unimplemented method shaderStyle')
     }
     inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {
         throw new Error('Unimplemented method inputFilter')
@@ -1866,6 +1897,16 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     public orphanCharOptimization(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
+        return this
+    }
+    public strokeJoinStyle(value: StrokeJoinStyle | undefined): this {
+        const value_casted = value as (StrokeJoinStyle | undefined)
+        this.getPeer()?.setStrokeJoinStyleAttribute(value_casted)
+        return this
+    }
+    public shaderStyle(value: ShaderStyle | undefined): this {
+        const value_casted = value as (ShaderStyle | undefined)
+        this.getPeer()?.setShaderStyleAttribute(value_casted)
         return this
     }
     public inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {

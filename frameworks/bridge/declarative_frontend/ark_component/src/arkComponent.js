@@ -8300,6 +8300,47 @@ class TextAreaSelectedDragPreviewStyleModifier extends ModifierWithKey {
 }
 TextAreaSelectedDragPreviewStyleModifier.identity = Symbol('textAreaSelectedDragPreviewStyle');
 
+class TextAreaStrokeJoinStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeJoinStyle(node);
+    }
+    else {
+      getUINativeModule().textArea.setStrokeJoinStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaStrokeJoinStyleModifier.identity = Symbol('textAreaStrokeJoinStyle');
+ 
+class TextAreaShaderStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetShaderStyle(node, this.value);
+    } else {
+      if (this.value.options) {
+        getUINativeModule().textArea.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+          this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+      } else {
+        getUINativeModule().textArea.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+          this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      }
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaShaderStyleModifier.identity = Symbol('textAreaShaderStyle');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8737,6 +8778,15 @@ class ArkTextAreaComponent extends ArkComponent {
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectedDragPreviewStyleModifier.identity,
       TextAreaSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  strokeJoinStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaStrokeJoinStyleModifier.identity,
+      TextAreaStrokeJoinStyleModifier, value);
+    return this;
+  }
+  shaderStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaShaderStyleModifier.identity, TextAreaShaderStyleModifier, value);
     return this;
   }
 }
@@ -10509,6 +10559,47 @@ class TextInputSelectedDragPreviewStyleModifier extends ModifierWithKey {
 }
 TextInputSelectedDragPreviewStyleModifier.identity = Symbol('textInputSelectedDragPreviewStyle');
 
+class TextInputStrokeJoinStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetStrokeJoinStyle(node);
+    }
+    else {
+      getUINativeModule().textInput.setStrokeJoinStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputStrokeJoinStyleModifier.identity = Symbol('textInputStrokeJoinStyle');
+ 
+class TextInputShaderStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetShaderStyle(node, this.value);
+    } else {
+      if (this.value.options) {
+        getUINativeModule().textInput.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+          this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+      } else {
+        getUINativeModule().textInput.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+          this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      }
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputShaderStyleModifier.identity = Symbol('textInputShaderStyle');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10992,6 +11083,15 @@ class ArkTextInputComponent extends ArkComponent {
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextInputSelectedDragPreviewStyleModifier.identity,
       TextInputSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  strokeJoinStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputStrokeJoinStyleModifier.identity,
+      TextInputStrokeJoinStyleModifier, value);
+    return this;
+  }
+  shaderStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputShaderStyleModifier.identity, TextInputShaderStyleModifier, value);
     return this;
   }
 }

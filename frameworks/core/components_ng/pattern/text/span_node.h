@@ -39,6 +39,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM_GET(name, type)                          \
 public:                                                                      \
@@ -463,6 +464,7 @@ public:
     bool UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle);
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle,
         const RefPtr<Paragraph>& builder, bool isDragging = false);
+    void UpdateShaderStyle(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, bool isMarquee = false);
     virtual bool UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
@@ -688,6 +690,14 @@ public:
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, TextLineStyle&)>&& updateFunc)
+    {
+        textLineStyle->AddResource(key, resObj, std::move(updateFunc));
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&, FontStyle&)>&& updateFunc)
     {
         fontStyle->AddResource(key, resObj, std::move(updateFunc));
@@ -713,7 +723,7 @@ public:
         return count;
     }
 
-    void CopyResource(const RefPtr<SpanItem>& source)
+    void CopyFontStyleResource(const RefPtr<SpanItem>& source)
     {
         fontStyle->CopyResource(source->fontStyle);
         if (source->symbolStyle) {
@@ -722,6 +732,11 @@ public:
             }
             symbolStyle->CopyResource(source->symbolStyle);
         }
+    }
+
+    void CopyTextLineStyleResource(const RefPtr<SpanItem>& source)
+    {
+        textLineStyle->CopyResource(source->textLineStyle);
     }
 
     void ReloadResources()
@@ -736,6 +751,7 @@ public:
         if (resourceMgr_) {
             resourceMgr_->ReloadResources();
         }
+        textLineStyle->ReloadResources();
     }
 
 private:
@@ -984,6 +1000,14 @@ public:
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, TextLineStyle&)>&& updateFunc)
+    {
+        spanItem_->AddResource(key, resObj, std::move(updateFunc));
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&, FontStyle&)>&& updateFunc)
     {
         spanItem_->AddResource(key, resObj, std::move(updateFunc));
@@ -1002,9 +1026,14 @@ public:
         return spanItem_->RemoveResource(key);
     }
 
-    void CopyResource(const RefPtr<SpanNode>& source)
+    void CopyFontStyleResource(const RefPtr<SpanNode>& source)
     {
-        spanItem_->CopyResource(source->GetSpanItem());
+        spanItem_->CopyFontStyleResource(source->GetSpanItem());
+    }
+ 
+    void CopyTextLineStyleResource(const RefPtr<SpanNode>& source)
+    {
+        spanItem_->CopyTextLineStyleResource(source->GetSpanItem());
     }
 
     void ReloadResources()
@@ -1042,6 +1071,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(EnableDeviceFontWeightCategory, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
     DEFINE_SPAN_SYMBOL_STYLE_ITEM_RECREATE(SymbolType, SymbolType, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(LineThicknessScale, float, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeJoinStyle, StrokeJoinStyle, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_LineHeight);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT,
         SpanItem::LPX_FLAG_BaselineOffset);
@@ -1062,6 +1092,52 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE,
         SpanItem::LPX_FLAG_ParagraphSpacing);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ColorShaderStyle, Color, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
+
+   std::optional<NG::Gradient> GetGradient()
+    {
+        if (spanItem_->textLineStyle) {
+            return spanItem_->textLineStyle->GetGradient();
+        }
+        return std::nullopt;
+    }
+ 
+    bool HasGradient() const
+    {
+        if (spanItem_->textLineStyle) {
+            return spanItem_->textLineStyle->GetGradient().has_value();
+        }
+        return false;
+    }
+ 
+    void UpdateGradient(const NG::Gradient& value)
+    {
+        if (!spanItem_->textLineStyle) {
+            spanItem_->textLineStyle = std::make_unique<TextLineStyle>();
+        }
+        auto gradient = spanItem_->textLineStyle->GetGradient();
+        if (gradient.has_value() && gradient.value() == value) {
+            return;
+        }
+        spanItem_->textLineStyle->SetGradient(value);
+        spanItem_->MarkDirty();
+        RequestTextFlushDirty();
+    }
+ 
+    void UpdateGradient(const std::optional<NG::Gradient>& value)
+    {
+        if (value.has_value()) {
+            UpdateGradient(value.value());
+        }
+    }
+ 
+    void ResetGradient()
+    {
+        if (spanItem_->textLineStyle) {
+            spanItem_->textLineStyle->ResetGradient();
+        }
+        spanItem_->MarkDirty();
+    }
 
     TextDecoration GetTextDecorationFirst() const
     {
