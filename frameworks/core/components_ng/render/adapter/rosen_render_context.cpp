@@ -15,7 +15,6 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 
 #include <memory>
@@ -953,10 +952,10 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
         PaintDebugBoundary(true);
     }
 
-    if (HasParticleOptionArray()) {
+    if (propParticleOptionArray_.has_value()) {
         if (!measureTriggered_ || particleAnimationPlaying_) {
             measureTriggered_ = true;
-            OnParticleOptionArrayUpdate(GetParticleOptionArrayValue());
+            OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
         }
     }
     OnEmitterPropertyUpdate();
@@ -2098,8 +2097,8 @@ void RosenRenderContext::OnParticleImageLoaded(const std::string& src, RefPtr<Ca
     if (particleImageContextMap_.find(src) != particleImageContextMap_.end()) {
         particleImageContextMap_.erase(src);
     }
-    if (particleImageContextMap_.empty() && HasParticleOptionArray()) {
-        OnParticleOptionArrayUpdate(GetParticleOptionArrayValue());
+    if (particleImageContextMap_.empty() && propParticleOptionArray_.has_value()) {
+        OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
     }
 }
 

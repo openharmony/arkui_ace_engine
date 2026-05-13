@@ -14,20 +14,9 @@
  */
 
 #include "core/components_ng/pattern/particle/particle_pattern.h"
-#include "core/components_ng/property/particle_property.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/rosen_particle_context.h"
-
-namespace OHOS::Ace {
-struct EmitterProperty {
-    uint32_t index = 0;
-    std::optional<NG::VectorF> position;
-    std::optional<NG::VectorF> size;
-    std::optional<uint32_t> emitRate;
-    std::optional<NG::ParticleAnnulusRegion> annulusRegion;
-};
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 namespace {

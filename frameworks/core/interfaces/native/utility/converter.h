@@ -101,10 +101,10 @@ namespace NG {
 enum class BindSheetDismissReason;
 enum class ContentClipMode;
 enum class DataPanelType;
-enum DistributionType : int;
-enum ParticleEmitterShape : int;
-enum ParticleType : int;
-enum UpdaterType : int;
+enum DistributionType;
+enum ParticleEmitterShape;
+enum ParticleType;
+enum UpdaterType;
 enum class KeyboardFluidLightMode;
 enum class KeyboardGradientMode;
 enum class LaunchMode;
