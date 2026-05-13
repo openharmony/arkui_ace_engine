@@ -498,7 +498,6 @@ void SelectableContainerPattern::InitSwipeSelectEvent()
     PanDirection panDirection = { .type = PanDirection::ALL };
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
         { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
-    gestureHub->SetPanCanCoexistWithScroll(true);
     gestureHub->AddPanEvent(swipeSelectPanEvent_, panDirection, 1, distanceMap);
     gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
     gestureHub->SetExcludedAxisForPanEvent(true);
