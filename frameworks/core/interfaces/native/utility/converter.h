@@ -52,7 +52,6 @@
 #include "generated/converter_generated.h"
 
 #include "patch.h"
-#include "core/components_ng/property/particle_property.h"
 
 #define OPT_CONVERT_FIELD(type, src, field) ((src).has_value() ? \
             Converter::OptConvert<type>((src)->field) : std::nullopt)
@@ -102,6 +101,10 @@ namespace NG {
 enum class BindSheetDismissReason;
 enum class ContentClipMode;
 enum class DataPanelType;
+enum DistributionType;
+enum ParticleEmitterShape;
+enum ParticleType;
+enum UpdaterType;
 enum class KeyboardFluidLightMode;
 enum class KeyboardGradientMode;
 enum class LaunchMode;
