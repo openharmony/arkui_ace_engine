@@ -410,6 +410,18 @@ export function TextTimerImpl(
     })
 }
 
+@memo
+export function TextTimer(
+    @memo @memo_skip
+    style: ((attributes: TextTimerAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkTextTimerComponent>((): ArkTextTimerComponent => {
+        return new ArkTextTimerComponent()
+    })
+    NodeAttach<ArkTextTimerPeer>((): ArkTextTimerPeer => ArkTextTimerPeer.create(receiver), (_: ArkTextTimerPeer): void => {
+        style?.(receiver)
+    })
+}
 export class TextTimerController_serializer {
     public static write(buffer: SerializerBase, value: TextTimerController): void {
         let valueSerializer: SerializerBase = buffer

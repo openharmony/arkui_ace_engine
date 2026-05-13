@@ -595,6 +595,18 @@ export function TextPickerImpl(
     })
 }
 
+@memo
+export function TextPicker(
+    @memo @memo_skip
+    style: ((attributes: TextPickerAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkTextPickerComponent>((): ArkTextPickerComponent => {
+        return new ArkTextPickerComponent()
+    })
+    NodeAttach<ArkTextPickerPeer>((): ArkTextPickerPeer => ArkTextPickerPeer.create(receiver), (_: ArkTextPickerPeer): void => {
+        style?.(receiver)
+    })
+}
 export class TextCascadePickerRangeContent_serializer {
     public static write(buffer: SerializerBase, value: TextCascadePickerRangeContent): void {
         let valueSerializer: SerializerBase = buffer

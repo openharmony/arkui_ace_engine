@@ -143,6 +143,21 @@ export function FlexImpl(
     })
 }
 
+@memo
+export function Flex(
+    @memo @memo_skip
+    style: ((attributes: FlexAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkFlexComponent>((): ArkFlexComponent => {
+        return new ArkFlexComponent()
+    })
+    NodeAttach<ArkFlexPeer>((): ArkFlexPeer => ArkFlexPeer.create(receiver), (_: ArkFlexPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class FlexSpaceOptions_serializer {
     public static write(buffer: SerializerBase, value: FlexSpaceOptions): void {
         let valueSerializer: SerializerBase = buffer

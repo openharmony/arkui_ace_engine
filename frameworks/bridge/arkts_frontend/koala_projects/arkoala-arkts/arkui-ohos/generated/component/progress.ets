@@ -295,6 +295,18 @@ export function ProgressImpl(
     })
 }
 
+@memo
+export function Progress(
+    @memo @memo_skip
+    style: ((attributes: ProgressAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkProgressComponent>((): ArkProgressComponent => {
+        return new ArkProgressComponent()
+    })
+    NodeAttach<ArkProgressPeer>((): ArkProgressPeer => ArkProgressPeer.create(receiver), (_: ArkProgressPeer): void => {
+        style?.(receiver)
+    })
+}
 export class ProgressConfiguration_serializer {
     public static write(buffer: SerializerBase, value: ProgressConfiguration): void {
         let valueSerializer: SerializerBase = buffer

@@ -115,6 +115,21 @@ export function MenuItemGroupImpl(
     })
 }
 
+@memo
+export function MenuItemGroup(
+    @memo @memo_skip
+    style: ((attributes: MenuItemGroupAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkMenuItemGroupComponent>((): ArkMenuItemGroupComponent => {
+        return new ArkMenuItemGroupComponent()
+    })
+    NodeAttach<ArkMenuItemGroupPeer>((): ArkMenuItemGroupPeer => ArkMenuItemGroupPeer.create(receiver), (_: ArkMenuItemGroupPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class MenuItemGroupOptions_serializer {
     public static write(buffer: SerializerBase, value: MenuItemGroupOptions): void {
         let valueSerializer: SerializerBase = buffer

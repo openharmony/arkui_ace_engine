@@ -1556,6 +1556,18 @@ export function SearchImpl(
     })
 }
 
+@memo
+export function Search(
+    @memo @memo_skip
+    style: ((attributes: SearchAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkSearchComponent>((): ArkSearchComponent => {
+        return new ArkSearchComponent()
+    })
+    NodeAttach<ArkSearchPeer>((): ArkSearchPeer => ArkSearchPeer.create(receiver), (_: ArkSearchPeer): void => {
+        style?.(receiver)
+    })
+}
 export class SearchController_serializer {
     public static write(buffer: SerializerBase, value: SearchController): void {
         let valueSerializer: SerializerBase = buffer

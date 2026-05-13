@@ -392,6 +392,21 @@ export function GridItemImpl(
     })
 }
 
+@memo
+export function GridItem(
+    @memo @memo_skip
+    style: ((attributes: GridItemAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkGridItemComponent>((): ArkGridItemComponent => {
+        return new ArkGridItemComponent()
+    })
+    NodeAttach<ArkGridItemPeer>((): ArkGridItemPeer => ArkGridItemPeer.create(receiver), (_: ArkGridItemPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class GridItemOptions_serializer {
     public static write(buffer: SerializerBase, value: GridItemOptions): void {
         let valueSerializer: SerializerBase = buffer

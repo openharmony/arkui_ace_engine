@@ -209,6 +209,18 @@ export function LineImpl(
     })
 }
 
+@memo
+export function Line(
+    @memo @memo_skip
+    style: ((attributes: LineAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkLineComponent>((): ArkLineComponent => {
+        return new ArkLineComponent()
+    })
+    NodeAttach<ArkLinePeer>((): ArkLinePeer => ArkLinePeer.create(receiver), (_: ArkLinePeer): void => {
+        style?.(receiver)
+    })
+}
 export class LineOptions_serializer {
     public static write(buffer: SerializerBase, value: LineOptions): void {
         let valueSerializer: SerializerBase = buffer

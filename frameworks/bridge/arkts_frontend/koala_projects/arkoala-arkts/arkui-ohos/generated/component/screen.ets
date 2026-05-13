@@ -99,3 +99,18 @@ export function ScreenImpl(
     })
 }
 
+@memo
+export function Screen(
+    @memo @memo_skip
+    style: ((attributes: ScreenAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkScreenComponent>((): ArkScreenComponent => {
+        return new ArkScreenComponent()
+    })
+    NodeAttach<ArkScreenPeer>((): ArkScreenPeer => ArkScreenPeer.create(receiver), (_: ArkScreenPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

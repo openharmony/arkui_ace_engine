@@ -296,6 +296,18 @@ export function IndicatorComponentImpl(
     })
 }
 
+@memo
+export function IndicatorComponent(
+    @memo @memo_skip
+    style: ((attributes: IndicatorComponentAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkIndicatorComponentComponent>((): ArkIndicatorComponentComponent => {
+        return new ArkIndicatorComponentComponent()
+    })
+    NodeAttach<ArkIndicatorComponentPeer>((): ArkIndicatorComponentPeer => ArkIndicatorComponentPeer.create(receiver), (_: ArkIndicatorComponentPeer): void => {
+        style?.(receiver)
+    })
+}
 export class IndicatorComponentController_serializer {
     public static write(buffer: SerializerBase, value: IndicatorComponentController): void {
         let valueSerializer: SerializerBase = buffer
