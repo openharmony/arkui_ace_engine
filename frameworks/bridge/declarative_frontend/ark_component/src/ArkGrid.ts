@@ -187,6 +187,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridEditModeOptionsModifier.identity, GridEditModeOptionsModifier, options);
     return this;
   }
+  onEditModeChange(callback: Callback<boolean> | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, GridOnEditModeChangeModifier.identity, GridOnEditModeChangeModifier, callback);
+    return this;
+  }
   onWillScroll(callback: (xOffset: number, yOffset: number,
     scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this {
     modifierWithKey(this._modifiersWithKeys, GridOnWillScrollModifier.identity, GridOnWillScrollModifier, callback);
@@ -824,6 +828,20 @@ class GridEditModeOptionsModifier extends ModifierWithKey<EditModeOptions | unde
       getUINativeModule().grid.resetEditModeOptions(node);
     } else {
       getUINativeModule().grid.setEditModeOptions(node, this.value);
+    }
+  }
+}
+
+class GridOnEditModeChangeModifier extends ModifierWithKey<Callback<boolean> | undefined> {
+  constructor(callback: Callback<boolean> | undefined) {
+    super(callback);
+  }
+  static identity: Symbol = Symbol('gridOnEditModeChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetOnEditModeChange(node);
+    } else {
+      getUINativeModule().grid.setOnEditModeChange(node, this.value);
     }
   }
 }

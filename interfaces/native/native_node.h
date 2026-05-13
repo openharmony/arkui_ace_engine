@@ -11094,6 +11094,26 @@ typedef enum {
     NODE_GRID_ON_ITEM_DROP = 1013008,
 
     /**
+     * @brief Defines the edit mode state change event of the <b>Grid</b> component.
+     *
+     * This event is triggered when the edit mode state changes, which occurs in the following cases:
+     * 1. The {@link NODE_GRID_ENABLE_EDIT_MODE} attribute is set to change the edit mode state.
+     * 2. When {@link NODE_GRID_EDIT_MODE_OPTIONS} has two-finger sliding multi-selection enabled,
+     * a two-finger sliding gesture triggers the change to multi-selection state.
+     * Registering this event callback is a prerequisite for entering multi-selection state via
+     * two-finger sliding. If this callback is not registered, two-finger sliding will not enter
+     * multi-selection state.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: edit mode state. <b>0</b>: not in edit mode. <b>1</b>: in edit mode. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_GRID_ON_EDIT_MODE_CHANGE = 1013009,
+
+    /**
      * @brief Defines the selected state change event of the <b>GridItem</b> component.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is

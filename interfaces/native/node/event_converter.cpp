@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -440,6 +440,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_GRID_ITEM_DRAG_LEAVE;
         case NODE_GRID_ON_ITEM_DROP:
             return ON_GRID_ITEM_DROP;
+        case NODE_GRID_ON_EDIT_MODE_CHANGE:
+            return ON_GRID_EDIT_MODE_CHANGE;
         case NODE_GRID_ITEM_ON_SELECT:
             return ON_GRID_ITEM_SELECT;
         case NODE_ON_COASTING_AXIS_EVENT:
@@ -786,6 +788,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_GRID_ON_ITEM_DRAG_LEAVE;
         case ON_GRID_ITEM_DROP:
             return NODE_GRID_ON_ITEM_DROP;
+        case ON_GRID_EDIT_MODE_CHANGE:
+            return NODE_GRID_ON_EDIT_MODE_CHANGE;
         case ON_GRID_ITEM_SELECT:
             return NODE_GRID_ITEM_ON_SELECT;
         case ON_COASTING_AXIS_EVENT:

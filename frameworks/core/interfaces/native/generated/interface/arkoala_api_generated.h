@@ -15684,6 +15684,7 @@ typedef struct Ark_EditModeOptions {
     Opt_Boolean enableGatherSelectedItemsAnimation;
     Opt_OnGetPreviewBadgeCallback onGetPreviewBadge;
     Opt_Boolean useDefaultMultiSelectStyle;
+    Opt_Boolean enableTwoFingerMultiSelect;
 } Ark_EditModeOptions;
 typedef struct Opt_EditModeOptions {
     Ark_Tag tag;
@@ -24941,6 +24942,8 @@ typedef struct GENERATED_ArkUIGridModifier {
                                const Ark_EditModeOptions* value);
     void (*setEnableEditMode)(Ark_NativePointer node,
                               const Opt_Union_Boolean_Bindable_Boolean* value);
+    void (*setOnEditModeChange)(Ark_NativePointer node,
+                                const Opt_arkui_component_common_Callback_Boolean_Void* value);
     void (*setFocusWrapMode)(Ark_NativePointer node,
                              const Opt_FocusWrapMode* value);
     void (*setSyncLoad)(Ark_NativePointer node,

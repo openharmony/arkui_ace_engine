@@ -173,11 +173,12 @@ void GridPattern::OnModifyDone()
         UninitMouseEvent();
     }
 
-    if (GetEnableEditMode() && !swipeSelectPanEvent_) {
+    bool needSwipeSelect = GetEnableEditMode() || ShouldEnableTwoFingerSelect();
+    if (needSwipeSelect && !swipeSelectPanEvent_) {
         InitSwipeSelectEvent();
     }
 
-    if (!GetEnableEditMode() && swipeSelectPanEvent_) {
+    if (!needSwipeSelect && swipeSelectPanEvent_) {
         UninitSwipeSelectEvent();
     }
 

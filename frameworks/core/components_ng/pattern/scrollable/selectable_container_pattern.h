@@ -91,11 +91,23 @@ public:
     {
         enableEditModeChangeEvent_ = std::move(event);
     }
+    void SetEnableEditModeBindingEvent(std::function<void(bool)>&& event)
+    {
+        enableEditModeBindingEvent_ = std::move(event);
+    }
     void FireEnableEditModeChangeEvent(bool enable) const
     {
         if (enableEditModeChangeEvent_) {
             enableEditModeChangeEvent_(enable);
         }
+        if (enableEditModeBindingEvent_) {
+            enableEditModeBindingEvent_(enable);
+        }
+    }
+    bool HasEnableEditModeBinding() const
+    {
+        return static_cast<bool>(enableEditModeBindingEvent_) ||
+               static_cast<bool>(enableEditModeChangeEvent_);
     }
     bool IsDefaultMultiSelectStyleEnabled() const
     {
@@ -104,6 +116,10 @@ public:
 
     void InitSwipeSelectEvent();
     void UninitSwipeSelectEvent();
+    bool ShouldEnableTwoFingerSelect() const;
+    void TryEnterEditModeForSwipeSelect();
+    GestureJudgeResult JudgeSwipeSelectGesture(const RefPtr<NG::GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& event);
     void HandleSwipeSelectStart(const GestureEvent& info);
     void HandleSwipeSelectUpdate(const GestureEvent& info);
     void HandleSwipeSelectEnd();
@@ -230,6 +246,7 @@ private:
     EditModeOptions editModeOptions_;
     bool enableEditMode_ = false;
     std::function<void(bool)> enableEditModeChangeEvent_;
+    std::function<void(bool)> enableEditModeBindingEvent_;
     enum class SwipeSelectState { INACTIVE, SELECTING, DESELECTING };
     SwipeSelectState swipeSelectState_ = SwipeSelectState::INACTIVE;
     SwipeSelectStateKey swipeStartStateKey_;

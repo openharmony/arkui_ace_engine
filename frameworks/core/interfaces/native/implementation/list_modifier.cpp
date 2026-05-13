@@ -407,6 +407,16 @@ void SetEditModeOptionsImpl(Ark_NativePointer node,
             };
             options.getPreviewBadge = modelCallback;
         }
+
+        auto useDefaultMultiSelectStyle = Converter::OptConvert<bool>(value->useDefaultMultiSelectStyle);
+        if (useDefaultMultiSelectStyle.has_value()) {
+            options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle.value();
+        }
+
+        auto enableTwoFingerMultiSelect = Converter::OptConvert<bool>(value->enableTwoFingerMultiSelect);
+        if (enableTwoFingerMultiSelect.has_value()) {
+            options.enableFingerMultiSelect = enableTwoFingerMultiSelect.value();
+        }
     }
     ListModelStatic::SetEditModeOptions(frameNode, options);
 }

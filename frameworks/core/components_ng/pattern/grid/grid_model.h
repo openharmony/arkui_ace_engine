@@ -98,6 +98,7 @@ public:
     virtual void SetEditModeOptions(NG::EditModeOptions& editModeOptions) {};
     virtual void SetEnableEditMode(bool enableEditMode) {};
     virtual void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) {};
+    virtual void SetEnableEditModeBindingEvent(std::function<void(bool)>&& bindingEvent) {};
     virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) {};

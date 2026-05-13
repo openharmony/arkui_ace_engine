@@ -73,6 +73,7 @@ public:
     void SetEditModeOptions(EditModeOptions& editModeOptions) override;
     void SetEnableEditMode(bool enableEditMode) override;
     void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) override;
+    void SetEnableEditModeBindingEvent(std::function<void(bool)>&& bindingEvent) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) override;
@@ -154,6 +155,7 @@ public:
     static void SetEnableEditMode(FrameNode* frameNode, bool enableEditMode);
     static bool GetEnableEditMode(FrameNode* frameNode);
     static void SetEnableEditModeChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& changeEvent);
+    static void SetEnableEditModeBindingEvent(FrameNode* frameNode, std::function<void(bool)>&& bindingEvent);
 
     static void SetGridItemTotalCount(FrameNode* frameNode, int totalCount);
 
