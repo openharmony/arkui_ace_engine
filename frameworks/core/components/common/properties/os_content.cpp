@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#if !defined(_WIN32) && !defined(PREVIEW) && defined(ENABLE_BACK_TO_TOP)
+#if !defined(_WIN32) && !defined(PREVIEW)
 #include <mutex>
 
 #include "base/log/log_wrapper.h"
@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-#if defined(_WIN32) || defined(PREVIEW) || !defined(ENABLE_BACK_TO_TOP)
+#if defined(_WIN32) || defined(PREVIEW)
 bool OsContent::CallSendAction(const std::string&, const std::string&, const std::string&)
 {
     return false;
@@ -55,7 +55,7 @@ FuncType GetOrCreateFunc()
     ErrCode errCode =
         extraModuleManager.GetCapability(OS_CONTENT_MODULE_NAME, FuncName, &funcPtr);
     if (errCode == ErrCode::SUCCESS) {
-        loadedFunc =  reinterpret_cast<FuncType>(funcPtr);
+        loadedFunc = reinterpret_cast<FuncType>(funcPtr);
     } else if (errCode == ErrCode::SYMBOL_NOT_FOUND) {
         extraModuleManager.UnloadModule(OS_CONTENT_MODULE_NAME);
         LOGE("Failed to load symbol: %{public}s from nodule %{public}s",
