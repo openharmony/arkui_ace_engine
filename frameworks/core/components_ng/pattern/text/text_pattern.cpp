@@ -1705,6 +1705,10 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
+        if (!pattern->oneStepDragController_) {
+            return;
+        }
+        pattern->SetEnableEventResponse();
     };
     textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
@@ -2691,7 +2695,7 @@ void TextPattern::RecoverCopyOption()
     copyOption_ = textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE
                       ? CopyOptions::None
                       : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
-
+    UnBindPreviewMenuByCopyOption();
     const auto& children = contentHost->GetChildren();
     if (children.empty() && IsSetObscured() && !isSpanStringMode_) {
         copyOption_ = CopyOptions::None;
@@ -3113,6 +3117,7 @@ void TextPattern::MarkDirtySelf()
 
 void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    UnBindPreviewMenuByCopyOption();
     DoGestureSelection(info);
     ResetOriginCaretPosition();
 }
@@ -4700,7 +4705,9 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
-    IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
+    if (oneStepDragController_) {
+        SetEnableEventResponse();
+    }
     ProcessOverlayAfterLayout();
     return true;
 }
@@ -4862,6 +4869,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (HasSpanOnHoverEvent()) {
         InitSpanMouseEvent();
     }
+    IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
 }
 
 bool TextPattern::ResetTextEffectBeforeLayout(bool onlyReset)
@@ -6345,13 +6353,34 @@ void TextPattern::BindPreviewMenu(TextSpanType spanType, std::function<void()>& 
         oneStepDragController_ = std::make_unique<OneStepDragController>(WeakClaim(this));
     }
     oneStepDragController_->SetMenuParam(spanType, menuBuilder, menuParam);
+    SetEnableEventResponse();
 }
 
 void TextPattern::UnBindPreviewMenu()
 {
     if (oneStepDragController_) {
         oneStepDragController_->SetMenuParam(TextSpanType::IMAGE, nullptr, {});
+        oneStepDragController_.reset();
     }
+}
+
+void TextPattern::UnBindPreviewMenuByCopyOption()
+{
+    if (!(oneStepDragController_ && copyOption_ == CopyOptions::None)) {
+        return;
+    }
+    const auto& childNodes = GetImageSpanNodeList();
+    for (const auto& child : childNodes) {
+        RefPtr<FrameNode> frameNode = child.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+        RefPtr<ImageSpanNode> imageNode = AceType::DynamicCast<ImageSpanNode>(frameNode);
+        if (imageNode) {
+            DisableDrag(imageNode);
+        }
+    }
+    UnBindPreviewMenu();
 }
 
 void TextPattern::CloseSelectionMenu()
@@ -8059,6 +8088,25 @@ bool TextPattern::SetFallbackLineSpacingAndIncludeFontPadding(bool flag)
     textLayoutProperty->UpdateIncludeFontPadding(flag);
     textLayoutProperty->UpdateFallbackLineSpacing(flag);
     return true;
+}
+
+void TextPattern::SetEnableEventResponse()
+{
+    std::list<WeakPtr<ImageSpanNode>> imageNodes;
+    std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
+    const auto& childNodes = GetImageSpanNodeList();
+    for (const auto& child : childNodes) {
+        RefPtr<FrameNode> frameNode = child.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+        RefPtr<ImageSpanNode> imageNode = AceType::DynamicCast<ImageSpanNode>(frameNode);
+        if (imageNode) {
+            imageNodes.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+        }
+    }
+    IF_PRESENT(oneStepDragController_,
+        SetEnableEventResponse(textSelector_, imageNodes, builderNodes));
 }
 
 RefPtr<FrameNode> TextPattern::GetContentHost() const

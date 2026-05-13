@@ -282,6 +282,8 @@ public:
         const SelectMenuParam& menuParam);
     void BindPreviewMenu(TextSpanType spanType, std::function<void()>& menuBuilder, const SelectMenuParam& menuParam);
     void UnBindPreviewMenu();
+    void UnBindPreviewMenuByCopyOption();
+    void SetEnableEventResponse();
     void HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode);
     void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
     void FillPreviewMenuInJsonOneStep(const std::unique_ptr<JsonValue>& jsonValue) const;
