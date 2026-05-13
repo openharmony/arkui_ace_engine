@@ -68,6 +68,7 @@ export interface IExtendableComponent {
     fireAboutToRecycle(): void;
     __getParentNode__Internal(): PeerNode | undefined;
     getInstance(): ExtendableComponent;
+    getCanUpdateStateVars(): boolean;
 }
 
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
@@ -417,6 +418,10 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
                 this.__inactiveFunc__Internal?.();
             });
         }
+    }
+
+    public __getCanUpdateStateVars__Internal(): boolean {
+        return this.delegate_!.getCanUpdateStateVars();
     }
 }
 
