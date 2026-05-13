@@ -1601,6 +1601,7 @@ HWTEST_F(ParallelStageTestThreeNg, ShouldCurrentPushPageToPrimary_NoHomePage001,
     RefPtr<ParallelStagePattern> stagePattern;
     auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
     ASSERT_NE(stageManager, nullptr);
+    
     auto oldPage = CreateRouterPage("old");
     MountRouterPage(stageNode, oldPage);
 
