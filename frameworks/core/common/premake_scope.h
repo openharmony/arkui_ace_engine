@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PREMAKE_SCOPE_H
 
 #include <cinttypes>
+#include <optional>
+
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/log/log_wrapper.h"
@@ -42,7 +44,7 @@ public:
 
     static bool IsPreMake();
     void SetPreMake(bool isPreMake);
-    static int32_t count();
+    static int32_t Count();
 private:
     std::optional<bool> isNodePreMake_;
     ACE_DISALLOW_COPY_AND_MOVE(PreMakeScope);

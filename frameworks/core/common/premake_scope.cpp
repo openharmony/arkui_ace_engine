@@ -37,7 +37,7 @@ void PreMakeScope::SetPreMake(bool isPreMake)
     --isPreMake_;
 }
 
-int32_t PreMakeScope::count()
+int32_t PreMakeScope::Count()
 {
     return isPreMake_;
 }

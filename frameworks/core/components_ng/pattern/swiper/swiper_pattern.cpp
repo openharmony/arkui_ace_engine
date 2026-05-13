@@ -8389,8 +8389,10 @@ void SwiperPattern::OnNotifyMemoryLevel(int32_t level)
         }
         for (auto index : premakeItems_) {
             auto childNode = forEachNode->GetChildAtIndex(index);
-            CHECK_NULL_VOID(childNode);
-            childNode->DetachFromMainTreeByPreloadFlag();
+            if (!childNode) {
+                continue;
+            }
+            childNode->DetachFromMainTreeByPreMakeFlag();
         }
     }
 }

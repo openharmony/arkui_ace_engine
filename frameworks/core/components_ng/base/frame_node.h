@@ -200,9 +200,9 @@ public:
 
     void OnDelete() override;
 
-    bool IsPreMake()
+    bool HasPreMake()
     {
-        return isPreMake_;
+        return hasPreMake_;
     }
 
     int32_t FrameCount() const override
@@ -1840,7 +1840,7 @@ private:
     bool isNeedRefreshBackgroundBuilder_ = false;
     int32_t refreshBackgroundBuilderId_ = 0;
 
-    bool isPreMake_ = false;
+    bool hasPreMake_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

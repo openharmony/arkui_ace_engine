@@ -45,7 +45,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
     ++count_;
-    isPreloadMemoryLevel_ = PreMakeScope::IsPreMake();
+    isPreMake_ = PreMakeScope::IsPreMake();
     if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
         isThreadSafeNode_ = true;
         SetIsFree(true);
@@ -2848,14 +2848,14 @@ void UINode::HandleColorModeChange()
 }
 
 
-void UINode::DetachFromMainTreeByPreloadFlag()
+void UINode::DetachFromMainTreeByPreMakeFlag()
 {
     std::list<RefPtr<UINode>> children = GetChildren();
     for (const auto& child : children) {
-        if (child->IsPreloadMemoryLevel()) {
+        if (child->IsPreMake()) {
             ResetNode();
         } else {
-            child->DetachFromMainTreeByPreloadFlag();
+            child->DetachFromMainTreeByPreMakeFlag();
         }
     }
 }

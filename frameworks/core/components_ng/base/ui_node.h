@@ -189,14 +189,14 @@ public:
         return isStaticNode_;
     }
 
-    bool IsPreloadMemoryLevel()
+    bool IsPreMake()
     {
-        return isPreloadMemoryLevel_;
+        return isPreMake_;
     }
 
-    void SetPreloadMemoryLevel(bool isPreloadMemoryLevel)
+    void SetPreMake(bool isPreMake)
     {
-        isPreloadMemoryLevel_ = isPreloadMemoryLevel;
+        isPreMake_ = isPreMake;
     }
 
     void NeedSetInActiveAfterTransitionOut(bool needSetInActive);
@@ -847,7 +847,7 @@ public:
     RefPtr<FrameNode> GetFrameNodeByUniqueIdInSubTree(int32_t uniqueId);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
     std::string GetPath();
-    void DetachFromMainTreeByPreloadFlag();
+    void DetachFromMainTreeByPreMakeFlag();
 
     virtual bool HasVirtualNodeAccessibilityProperty()
     {
@@ -1518,7 +1518,7 @@ private:
     bool isStaticNode_ = false;
     bool isAdopted_ = false;
     std::string inspectorLabel_;
-    bool isPreloadMemoryLevel_ = false;
+    bool isPreMake_ = false;
 };
 
 } // namespace OHOS::Ace::NG

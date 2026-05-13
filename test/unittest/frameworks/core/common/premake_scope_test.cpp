@@ -57,166 +57,166 @@ HWTEST_F(PreMakeScopeTest, IsPreMakeTest003, TestSize.Level1)
     {
         PreMakeScope scope1;
         EXPECT_TRUE(PreMakeScope::IsPreMake());
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         {
             PreMakeScope scope2;
             EXPECT_TRUE(PreMakeScope::IsPreMake());
-            EXPECT_EQ(PreMakeScope::count(), 2);
+            EXPECT_EQ(PreMakeScope::Count()(), 2);
         }
         EXPECT_TRUE(PreMakeScope::IsPreMake());
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
     EXPECT_FALSE(PreMakeScope::IsPreMake());
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, ConstructorDefaultTest001, TestSize.Level1)
 {
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
     {
         PreMakeScope scope;
         EXPECT_TRUE(PreMakeScope::IsPreMake());
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
     EXPECT_FALSE(PreMakeScope::IsPreMake());
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, ConstructorWithTrueTest001, TestSize.Level1)
 {
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
     {
         PreMakeScope scope(true);
         EXPECT_TRUE(PreMakeScope::IsPreMake());
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
     EXPECT_FALSE(PreMakeScope::IsPreMake());
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, ConstructorWithFalseTest001, TestSize.Level1)
 {
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
     {
         PreMakeScope scope(false);
         EXPECT_FALSE(PreMakeScope::IsPreMake());
-        EXPECT_EQ(PreMakeScope::count(), 0);
+        EXPECT_EQ(PreMakeScope::Count()(), 0);
     }
     EXPECT_FALSE(PreMakeScope::IsPreMake());
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, ConstructorWithFalseTest002, TestSize.Level1)
 {
     {
         PreMakeScope scope1;
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         {
             PreMakeScope scope2(false);
-            EXPECT_EQ(PreMakeScope::count(), 1);
+            EXPECT_EQ(PreMakeScope::Count()(), 1);
         }
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, NestedScopeTest001, TestSize.Level1)
 {
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
     {
         PreMakeScope scope1;
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         {
             PreMakeScope scope2;
-            EXPECT_EQ(PreMakeScope::count(), 2);
+            EXPECT_EQ(PreMakeScope::Count()(), 2);
             {
                 PreMakeScope scope3;
-                EXPECT_EQ(PreMakeScope::count(), 3);
+                EXPECT_EQ(PreMakeScope::Count()(), 3);
             }
-            EXPECT_EQ(PreMakeScope::count(), 2);
+            EXPECT_EQ(PreMakeScope::Count()(), 2);
         }
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, NestedScopeTest002, TestSize.Level1)
 {
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
     {
         PreMakeScope scope1(true);
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         {
             PreMakeScope scope2(true);
-            EXPECT_EQ(PreMakeScope::count(), 2);
+            EXPECT_EQ(PreMakeScope::Count()(), 2);
             {
                 PreMakeScope scope3(true);
-                EXPECT_EQ(PreMakeScope::count(), 3);
+                EXPECT_EQ(PreMakeScope::Count()(), 3);
             }
-            EXPECT_EQ(PreMakeScope::count(), 2);
+            EXPECT_EQ(PreMakeScope::Count()(), 2);
         }
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, MixedConstructorTest001, TestSize.Level1)
 {
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
     {
         PreMakeScope scope1;
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         {
             PreMakeScope scope2(true);
-            EXPECT_EQ(PreMakeScope::count(), 2);
+            EXPECT_EQ(PreMakeScope::Count()(), 2);
         }
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         {
             PreMakeScope scope3(false);
-            EXPECT_EQ(PreMakeScope::count(), 1);
+            EXPECT_EQ(PreMakeScope::Count()(), 1);
         }
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, CountTest001, TestSize.Level1)
 {
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, CountTest002, TestSize.Level1)
 {
     PreMakeScope scope1;
-    EXPECT_EQ(PreMakeScope::count(), 1);
+    EXPECT_EQ(PreMakeScope::Count()(), 1);
     PreMakeScope scope2;
-    EXPECT_EQ(PreMakeScope::count(), 2);
+    EXPECT_EQ(PreMakeScope::Count()(), 2);
     PreMakeScope scope3;
-    EXPECT_EQ(PreMakeScope::count(), 3);
+    EXPECT_EQ(PreMakeScope::Count()(), 3);
 }
 
 HWTEST_F(PreMakeScopeTest, DestructorTest001, TestSize.Level1)
 {
     PreMakeScope* scope = new PreMakeScope();
-    EXPECT_EQ(PreMakeScope::count(), 1);
+    EXPECT_EQ(PreMakeScope::Count()(), 1);
     delete scope;
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, DestructorTest002, TestSize.Level1)
 {
     PreMakeScope* scope = new PreMakeScope(true);
-    EXPECT_EQ(PreMakeScope::count(), 1);
+    EXPECT_EQ(PreMakeScope::Count()(), 1);
     delete scope;
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, DestructorTest003, TestSize.Level1)
 {
     PreMakeScope* scope = new PreMakeScope(false);
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
     delete scope;
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, MultipleCreateDestroyTest001, TestSize.Level1)
@@ -251,10 +251,10 @@ HWTEST_F(PreMakeScopeTest, IsPreMakeAndCountConsistencyTest001, TestSize.Level1)
     {
         PreMakeScope scope;
         EXPECT_TRUE(PreMakeScope::IsPreMake());
-        EXPECT_GT(PreMakeScope::count(), 0);
+        EXPECT_GT(PreMakeScope::Count()(), 0);
     }
     EXPECT_FALSE(PreMakeScope::IsPreMake());
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, IsPreMakeAndCountConsistencyTest002, TestSize.Level1)
@@ -264,36 +264,36 @@ HWTEST_F(PreMakeScopeTest, IsPreMakeAndCountConsistencyTest002, TestSize.Level1)
         PreMakeScope scope2;
         PreMakeScope scope3;
         EXPECT_TRUE(PreMakeScope::IsPreMake());
-        EXPECT_EQ(PreMakeScope::count(), 3);
+        EXPECT_EQ(PreMakeScope::Count()(), 3);
     }
     EXPECT_FALSE(PreMakeScope::IsPreMake());
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, EdgeCaseTest001, TestSize.Level1)
 {
     {
         PreMakeScope scope1;
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         PreMakeScope scope2(false);
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         PreMakeScope scope3(false);
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         PreMakeScope scope4(true);
-        EXPECT_EQ(PreMakeScope::count(), 2);
+        EXPECT_EQ(PreMakeScope::Count()(), 2);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, EdgeCaseTest002, TestSize.Level1)
 {
     {
         PreMakeScope scope1(false);
-        EXPECT_EQ(PreMakeScope::count(), 0);
+        EXPECT_EQ(PreMakeScope::Count()(), 0);
         PreMakeScope scope2;
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, StressTest001, TestSize.Level1)
@@ -301,13 +301,13 @@ HWTEST_F(PreMakeScopeTest, StressTest001, TestSize.Level1)
     std::vector<PreMakeScope*> scopes;
     for (int i = 0; i < 10; i++) {
         scopes.push_back(new PreMakeScope());
-        EXPECT_EQ(PreMakeScope::count(), i + 1);
+        EXPECT_EQ(PreMakeScope::Count()(), i + 1);
     }
     for (int i = 0; i < 10; i++) {
         delete scopes[i];
-        EXPECT_EQ(PreMakeScope::count(), 10 - i - 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 10 - i - 1);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, StressTest002, TestSize.Level1)
@@ -315,13 +315,13 @@ HWTEST_F(PreMakeScopeTest, StressTest002, TestSize.Level1)
     std::vector<PreMakeScope*> scopes;
     for (int i = 0; i < 10; i++) {
         scopes.push_back(new PreMakeScope(true));
-        EXPECT_EQ(PreMakeScope::count(), i + 1);
+        EXPECT_EQ(PreMakeScope::Count()(), i + 1);
     }
     for (int i = 0; i < 10; i++) {
         delete scopes[i];
-        EXPECT_EQ(PreMakeScope::count(), 10 - i - 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 10 - i - 1);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, StressTest003, TestSize.Level1)
@@ -329,12 +329,12 @@ HWTEST_F(PreMakeScopeTest, StressTest003, TestSize.Level1)
     std::vector<PreMakeScope*> scopes;
     for (int i = 0; i < 10; i++) {
         scopes.push_back(new PreMakeScope(false));
-        EXPECT_EQ(PreMakeScope::count(), 0);
+        EXPECT_EQ(PreMakeScope::Count()(), 0);
     }
     for (int i = 0; i < 10; i++) {
         delete scopes[i];
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 
 HWTEST_F(PreMakeScopeTest, ScopeLifetimeTest001, TestSize.Level1)
@@ -383,28 +383,28 @@ HWTEST_F(PreMakeScopeTest, ComplexNestedTest001, TestSize.Level1)
 {
     {
         PreMakeScope s1;
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
         {
             PreMakeScope s2(true);
-            EXPECT_EQ(PreMakeScope::count(), 2);
+            EXPECT_EQ(PreMakeScope::Count()(), 2);
             {
                 PreMakeScope s3;
-                EXPECT_EQ(PreMakeScope::count(), 3);
+                EXPECT_EQ(PreMakeScope::Count()(), 3);
                 {
                     PreMakeScope s4(false);
-                    EXPECT_EQ(PreMakeScope::count(), 3);
+                    EXPECT_EQ(PreMakeScope::Count()(), 3);
                     {
                         PreMakeScope s5(true);
-                        EXPECT_EQ(PreMakeScope::count(), 4);
+                        EXPECT_EQ(PreMakeScope::Count()(), 4);
                     }
-                    EXPECT_EQ(PreMakeScope::count(), 3);
+                    EXPECT_EQ(PreMakeScope::Count()(), 3);
                 }
-                EXPECT_EQ(PreMakeScope::count(), 3);
+                EXPECT_EQ(PreMakeScope::Count()(), 3);
             }
-            EXPECT_EQ(PreMakeScope::count(), 2);
+            EXPECT_EQ(PreMakeScope::Count()(), 2);
         }
-        EXPECT_EQ(PreMakeScope::count(), 1);
+        EXPECT_EQ(PreMakeScope::Count()(), 1);
     }
-    EXPECT_EQ(PreMakeScope::count(), 0);
+    EXPECT_EQ(PreMakeScope::Count()(), 0);
 }
 } // namespace OHOS::Ace

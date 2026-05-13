@@ -637,7 +637,7 @@ FrameNode::FrameNode(
     if (isRoot) {
         isPendingState_ = true;
     }
-    isPreMake_ = PreMakeScope::IsPreMake();
+    hasPreMake_ = PreMakeScope::IsPreMake();
     isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
     if (IsFree()) {
@@ -5942,7 +5942,7 @@ bool FrameNode::IsVerticalScrollable() const
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    PreMakeScope preMakeScope(isPreMake_);
+    PreMakeScope preMakeScope(hasPreMake_);
     if (GetIgnoreLayoutProcess() && EnsureDelayedMeasureBeingOnlyOnce()) {
         return;
     }
@@ -6095,7 +6095,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             GetGeometryNode()->GetFrameRect().ToString().c_str(),
             GetGeometryNode()->GetContentSize().ToString().c_str());
     }
-    isPreMake_ = false;
+    hasPreMake_ = false;
     ACE_LAYOUT_TRACE_END()
 }
 
@@ -8710,7 +8710,7 @@ void FrameNode::UnRegisterLpxAttribute(LpxAttribute attribute)
 bool FrameNode::IsPreMakeAndScroll()
 {
     // IsActive function is make sure active nodes can be draw when scrolling
-    if (IsActive() || !isPreMake_) {
+    if (IsActive() || !HasPreMake()) {
         return false;
     }
     auto pipeline = GetContext();
