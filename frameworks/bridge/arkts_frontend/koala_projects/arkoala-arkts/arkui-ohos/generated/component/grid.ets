@@ -21,7 +21,7 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from './scroll'
 import { ItemFillPolicy_serializer, ItemFillPolicy, Length, Resource as arkui_component_units_Resource } from './units'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { NestedScrollOptions_serializer, EditModeOptions_serializer, Bindable_Boolean_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, Bindable, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { NestedScrollOptions_serializer, EditModeOptions_serializer, Bindable_Boolean_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, Bindable, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ExtendableCommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -30,7 +30,7 @@ import { Resource as global_resource_Resource } from 'global.resource'
 import { Color as arkui_component_enums_Color, BarState, FocusWrapMode, ScrollSource, EdgeEffect } from './enums'
 import { ScrollState } from './list'
 import { AttributeModifier, hookGridAttributeModifier, AttributeUpdater } from '#handwritten'
-import { CustomBuilder } from './builder'
+import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -628,18 +628,63 @@ export interface ComputedBarAttribute {
 export type OnGridScrollIndexCallback = (first: int32, last: int32) => void;
 export interface GridAttribute extends ScrollableCommonMethod {
     setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).setGridOptions(scroller, layoutOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute setGridOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setGridOptions')
     }
     columnsTemplate(value: string | ItemFillPolicy | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).columnsTemplate(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute columnsTemplate can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method columnsTemplate')
     }
     rowsTemplate(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).rowsTemplate(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute rowsTemplate can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method rowsTemplate')
     }
     columnsGap(value: Length | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).columnsGap(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute columnsGap can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method columnsGap')
     }
     rowsGap(value: Length | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).rowsGap(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute rowsGap can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method rowsGap')
     }
     scrollBarWidth(value: double | string | undefined): this
@@ -647,88 +692,368 @@ export interface GridAttribute extends ScrollableCommonMethod {
     scrollBarColor(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): this
     scrollBar(value: BarState | undefined): this
     onScrollBarUpdate(value: ((index: int32,offset: double) => ComputedBarAttribute) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onScrollBarUpdate(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onScrollBarUpdate can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onScrollBarUpdate')
     }
     onScrollIndex(value: ((first: int32,last: int32) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onScrollIndex(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onScrollIndex can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onScrollIndex')
     }
     cachedCount(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).cachedCount(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute cachedCount can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method cachedCount')
     }
     editMode(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).editMode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute editMode can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method editMode')
     }
     multiSelectable(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).multiSelectable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute multiSelectable can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method multiSelectable')
     }
     maxCount(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).maxCount(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute maxCount can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method maxCount')
     }
     minCount(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).minCount(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute minCount can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method minCount')
     }
     cellLength(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).cellLength(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute cellLength can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method cellLength')
     }
     layoutDirection(value: GridDirection | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).layoutDirection(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute layoutDirection can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method layoutDirection')
     }
     supportAnimation(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).supportAnimation(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute supportAnimation can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method supportAnimation')
     }
     supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).supportEmptyBranchInLazyLoading(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute supportEmptyBranchInLazyLoading can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method supportEmptyBranchInLazyLoading')
     }
     onItemDragStart(value: OnItemDragStartCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onItemDragStart(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onItemDragStart can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDragStart')
     }
     onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onItemDragEnter(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onItemDragEnter can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDragEnter')
     }
     onItemDragMove(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onItemDragMove(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onItemDragMove can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDragMove')
     }
     onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onItemDragLeave(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onItemDragLeave can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDragLeave')
     }
     onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onItemDrop(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onItemDrop can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDrop')
     }
     nestedScroll(value: NestedScrollOptions | undefined): this
     enableScrollInteraction(value: boolean | undefined): this
     friction(value: double | arkui_component_units_Resource | undefined): this
     alignItems(value: GridItemAlignment | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).alignItems(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute alignItems can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method alignItems')
     }
     editModeOptions(value: EditModeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).editModeOptions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute editModeOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method editModeOptions')
     }
     enableEditMode(value: boolean | Bindable<boolean> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).enableEditMode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute enableEditMode can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method enableEditMode')
     }
     focusWrapMode(value: FocusWrapMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).focusWrapMode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute focusWrapMode can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method focusWrapMode')
     }
     syncLoad(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).syncLoad(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute syncLoad can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method syncLoad')
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onScrollFrameBegin(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onScrollFrameBegin can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onScrollFrameBegin')
     }
     onWillScroll(value: OnWillScrollCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onWillScroll(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onWillScroll can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onWillScroll')
     }
     onDidScroll(value: OnScrollCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onDidScroll(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onDidScroll can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onDidScroll')
     }
     cachedCount(count: int32 | undefined, show: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).cachedCount(count, show));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute cachedCount can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method cachedCount')
     }
-    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
-        throw new Error('Unimplemented method edgeEffect')
-    }
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
     attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableGrid extends ExtendableCommonMethod implements GridAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableGrid>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T,
+        @memo @memo_skip
+        _content: CustomBuilder): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: GridAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        GridImpl(
+            cb,
+            _content
+        );
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableGrid>(factory: () => T, scroller?: Scroller, layoutOptions?: GridLayoutOptions, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as GridAttribute).setGridOptions(scroller, layoutOptions)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Grid attribute 'setGridOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setGridOptions')
     }
 }
 

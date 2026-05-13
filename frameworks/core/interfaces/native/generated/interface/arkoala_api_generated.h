@@ -472,6 +472,9 @@ typedef struct Opt_drawing_ColorFilter Opt_drawing_ColorFilter;
 typedef struct drawing_LatticePeer drawing_LatticePeer;
 typedef struct drawing_LatticePeer* Ark_drawing_Lattice;
 typedef struct Opt_drawing_Lattice Opt_drawing_Lattice;
+typedef struct drawing_TypefacePeer drawing_TypefacePeer;
+typedef struct drawing_TypefacePeer* Ark_drawing_Typeface;
+typedef struct Opt_drawing_Typeface Opt_drawing_Typeface;
 typedef struct DrawingRenderingContextPeer DrawingRenderingContextPeer;
 typedef struct DrawingRenderingContextPeer* Ark_DrawingRenderingContext;
 typedef struct Opt_DrawingRenderingContext Opt_DrawingRenderingContext;
@@ -1213,6 +1216,8 @@ typedef struct Array_Dimension Array_Dimension;
 typedef struct Opt_Array_Dimension Opt_Array_Dimension;
 typedef struct Array_DisturbanceFieldOptionsInner Array_DisturbanceFieldOptionsInner;
 typedef struct Opt_Array_DisturbanceFieldOptionsInner Opt_Array_DisturbanceFieldOptionsInner;
+typedef struct Array_drawing_Typeface Array_drawing_Typeface;
+typedef struct Opt_Array_drawing_Typeface Opt_Array_drawing_Typeface;
 typedef struct Array_EmitterPropertyInner Array_EmitterPropertyInner;
 typedef struct Opt_Array_EmitterPropertyInner Opt_Array_EmitterPropertyInner;
 typedef struct Array_F64 Array_F64;
@@ -5885,11 +5890,11 @@ typedef struct Opt_MenuType {
     Ark_MenuType value;
 } Opt_MenuType;
 typedef enum Ark_MessageLevel {
-    ARK_MESSAGE_LEVEL_DEBUG = 0,
-    ARK_MESSAGE_LEVEL_ERROR = 1,
+    ARK_MESSAGE_LEVEL_DEBUG = 1,
     ARK_MESSAGE_LEVEL_INFO = 2,
-    ARK_MESSAGE_LEVEL_LOG = 3,
-    ARK_MESSAGE_LEVEL_WARN = 4,
+    ARK_MESSAGE_LEVEL_WARN = 3,
+    ARK_MESSAGE_LEVEL_ERROR = 4,
+    ARK_MESSAGE_LEVEL_LOG = 5,
 } Ark_MessageLevel;
 typedef struct Opt_MessageLevel {
     Ark_Tag tag;
@@ -8206,6 +8211,10 @@ typedef struct Opt_drawing_Lattice {
     Ark_Tag tag;
     Ark_drawing_Lattice value;
 } Opt_drawing_Lattice;
+typedef struct Opt_drawing_Typeface {
+    Ark_Tag tag;
+    Ark_drawing_Typeface value;
+} Opt_drawing_Typeface;
 typedef struct Opt_DrawingRenderingContext {
     Ark_Tag tag;
     Ark_DrawingRenderingContext value;
@@ -10264,6 +10273,15 @@ typedef struct Opt_Array_DisturbanceFieldOptionsInner {
     Ark_Tag tag;
     Array_DisturbanceFieldOptionsInner value;
 } Opt_Array_DisturbanceFieldOptionsInner;
+typedef struct Array_drawing_Typeface {
+    /* kind: ContainerType */
+    Ark_drawing_Typeface* array;
+    Ark_Int32 length;
+} Array_drawing_Typeface;
+typedef struct Opt_Array_drawing_Typeface {
+    Ark_Tag tag;
+    Array_drawing_Typeface value;
+} Opt_Array_drawing_Typeface;
 typedef struct Array_EmitterPropertyInner {
     /* kind: ContainerType */
     Ark_EmitterPropertyInner* array;
@@ -21640,6 +21658,7 @@ typedef struct Ark_text_TextStyle {
     Opt_text_TextBadgeType badgeType;
     Opt_text_FontWidth fontWidth;
     Opt_drawing_FontEdging fontEdging;
+    Opt_Array_drawing_Typeface fontTypefaces;
 } Ark_text_TextStyle;
 typedef struct Opt_text_TextStyle {
     Ark_Tag tag;
@@ -22628,6 +22647,7 @@ typedef struct Ark_CustomDialogControllerOptions {
     Opt_AnimateParam openAnimation;
     Opt_AnimateParam closeAnimation;
     Opt_Boolean showInSubWindow;
+    Opt_DialogDisplayMode displayModeInSubWindow;
     Opt_ResourceColor backgroundColor;
     Opt_Union_Dimension_BorderRadiuses cornerRadius;
     Opt_Boolean isModal;

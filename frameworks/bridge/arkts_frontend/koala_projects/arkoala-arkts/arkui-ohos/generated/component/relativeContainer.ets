@@ -22,9 +22,9 @@ import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { ArkCommonMethodPeer, CommonMethod, ExtendableCommonMethod, ArkCommonMethodComponent } from './common'
 import { AttributeModifier, hookRelativeContainerAttributeModifier, AttributeUpdater } from '#handwritten'
-import { CustomBuilder } from './builder'
+import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -138,16 +138,100 @@ export interface LocalizedBarrierStyle {
 }
 export interface RelativeContainerAttribute extends CommonMethod {
     setRelativeContainerOptions(): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RelativeContainerAttribute).setRelativeContainerOptions());
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('RelativeContainer attribute setRelativeContainerOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setRelativeContainerOptions')
     }
     guideLine(value: Array<GuideLineStyle> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RelativeContainerAttribute).guideLine(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('RelativeContainer attribute guideLine can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method guideLine')
     }
     barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RelativeContainerAttribute).barrier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('RelativeContainer attribute barrier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method barrier')
     }
     attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as RelativeContainerAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('RelativeContainer attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableRelativeContainer extends ExtendableCommonMethod implements RelativeContainerAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableRelativeContainer>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T,
+        @memo @memo_skip
+        _content: CustomBuilder): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: RelativeContainerAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        RelativeContainerImpl(
+            cb,
+            _content
+        );
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableRelativeContainer>(factory: () => T, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setRelativeContainerOptions(): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as RelativeContainerAttribute).setRelativeContainerOptions()
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("RelativeContainer attribute 'setRelativeContainerOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setRelativeContainerOptions')
     }
 }
 

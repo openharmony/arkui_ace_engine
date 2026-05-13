@@ -29,6 +29,20 @@
         "TouchEvent",
         "PanGestureOptions"
     ],
+    "extendableComponents": [
+        "arkui.component.button.ExtendableButton",
+        "arkui.component.column.ExtendableColumn",
+        "arkui.component.grid.ExtendableGrid",
+        "arkui.component.gridItem.ExtendableGridItem",
+        "arkui.component.image.ExtendableImage",
+        "arkui.component.list.ExtendableList",
+        "arkui.component.listItem.ExtendableListItem",
+        "arkui.component.relativeContainer.ExtendableRelativeContainer",
+        "arkui.component.row.ExtendableRow",
+        "arkui.component.stack.ExtendableStack",
+        "arkui.component.text.ExtendableText",
+        "arkui.component.toggle.ExtendableToggle"
+    ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
         "arkui.component.common.ContentModifier",

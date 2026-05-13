@@ -11433,6 +11433,16 @@ export interface CommonMethod {
         throw new Error('Unimplemented method debugLine')
     }
     applyAttributesFinish(): void {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.applyAttributesFinish());
+            return;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'applyAttributesFinish' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method applyAttributesFinish') 
     }
 }
 export type CommonAttribute = CommonMethod;
@@ -11553,88 +11563,382 @@ export enum ContentClipMode {
 }
 export interface ScrollableCommonMethod extends CommonMethod {
     scrollBar(value: BarState | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBar(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBar' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBar')
     }
     scrollBarColor(value: arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarColor(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarColor' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBarColor')
     }
     scrollBarWidth(value: double | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarWidth(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarWidth' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBarWidth')
     }
     scrollBarWidth(value: global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarWidth(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarWidth' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBarWidth')
     }
     scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarMargin(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarMargin' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBarMargin')
     }
     autoAdjustScrollBarMargin(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).autoAdjustScrollBarMargin(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'autoAdjustScrollBarMargin' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method autoAdjustScrollBarMargin')
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).nestedScroll(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'nestedScroll' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method nestedScroll')
     }
     enableScrollInteraction(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).enableScrollInteraction(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'enableScrollInteraction' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method enableScrollInteraction')
     }
     friction(value: double | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).friction(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'friction' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method friction')
     }
     contentStartOffset(value: double | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).contentStartOffset(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'contentStartOffset' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method contentStartOffset')
     }
     contentEndOffset(value: double | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).contentEndOffset(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'contentEndOffset' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method contentEndOffset')
     }
     onWillStartDragging(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onWillStartDragging(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onWillStartDragging' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onWillStartDragging')
     }
     onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onWillStopDragging(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onWillStopDragging' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onWillStopDragging')
     }
     onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onDidStopDragging(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onDidStopDragging' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onDidStopDragging')
     }
     onWillStartFling(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onWillStartFling(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onWillStartFling' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onWillStartFling')
     }
     onDidStopFling(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onDidStopFling(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onDidStopFling' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onDidStopFling')
     }
     enableScrollWithMouse(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).enableScrollWithMouse(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'enableScrollWithMouse' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method enableScrollWithMouse')
     }
     onReachStart(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onReachStart(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onReachStart' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onReachStart')
     }
     onReachEnd(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onReachEnd(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onReachEnd' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onReachEnd')
     }
     onScrollStart(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onScrollStart(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onScrollStart' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onScrollStart')
     }
     onScrollStop(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onScrollStop(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onScrollStop' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onScrollStop')
     }
     flingSpeedLimit(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).flingSpeedLimit(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'flingSpeedLimit' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method flingSpeedLimit')
     }
     clipContent(value: ContentClipMode | RectShape | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).clipContent(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'clipContent' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method clipContent')
     }
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).digitalCrownSensitivity(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'digitalCrownSensitivity' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method digitalCrownSensitivity')
     }
     backToTop(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).backToTop(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'backToTop' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method backToTop')
     }
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).edgeEffect(edgeEffect, options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'edgeEffect' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method edgeEffect')
     }
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).fadingEdge(enabled, options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'fadingEdge' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method fadingEdge')
-    }
-    attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export type OnWillScrollCallback = (scrollOffset: double, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult | undefined;

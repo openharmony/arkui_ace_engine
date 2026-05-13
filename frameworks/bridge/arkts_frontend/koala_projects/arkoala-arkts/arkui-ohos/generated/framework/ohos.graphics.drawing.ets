@@ -54,6 +54,17 @@ export class drawing_Lattice_serializer {
         return extractors.fromDrawingLatticePtr(ptr)
     }
 }
+export class drawing_Typeface_serializer {
+    public static write(buffer: SerializerBase, value: drawing.Typeface): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toDrawingTypefacePtr(value))
+    }
+    public static read(buffer: DeserializerBase): drawing.Typeface {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return extractors.fromDrawingTypefacePtr(ptr)
+    }
+}
 export class drawing_FontMetrics_serializer {
     public static write(buffer: SerializerBase, value: drawing.FontMetrics): void {
         let valueSerializer: SerializerBase = buffer

@@ -751,9 +751,7 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
     initialOffset(value: OffsetOptions | undefined): this {
         throw new Error('Unimplemented method initialOffset')
     }
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
-        throw new Error('Unimplemented method edgeEffect')
-    }
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
     attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }

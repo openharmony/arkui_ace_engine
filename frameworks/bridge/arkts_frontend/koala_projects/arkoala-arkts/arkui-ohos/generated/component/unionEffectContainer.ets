@@ -63,9 +63,25 @@ export class ArkUnionEffectContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._UnionEffectContainerAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setUnionModeAttribute(value: UnionMode | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as UnionMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UnionEffectContainerAttribute_setUnionMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface UnionEffectContainerOptions {
     spacing?: double;
+}
+export enum UnionMode {
+    SMOOTH_UNION = 0,
+    GRAVITY_UNION = 1
 }
 export interface UnionEffectContainerAttribute extends CommonMethod {
     setUnionEffectContainerOptions(options?: UnionEffectContainerOptions): this {
@@ -73,6 +89,9 @@ export interface UnionEffectContainerAttribute extends CommonMethod {
     }
     pointLight(value: PointLightStyle): this {
         throw new Error('Unimplemented method pointLight')
+    }
+    unionMode(value: UnionMode | undefined): this {
+        throw new Error('Unimplemented method unionMode')
     }
     attributeModifier(value: AttributeModifier<UnionEffectContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -92,6 +111,11 @@ export class ArkUnionEffectContainerComponent extends ArkCommonMethodComponent i
     public pointLight(value: PointLightStyle): this {
         const value_casted = value as (PointLightStyle)
         this.getPeer()?.setPointLightAttribute(value_casted)
+        return this
+    }
+    public unionMode(value: UnionMode | undefined): this {
+        const value_casted = value as (UnionMode | undefined)
+        this.getPeer()?.setUnionModeAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<UnionEffectContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
