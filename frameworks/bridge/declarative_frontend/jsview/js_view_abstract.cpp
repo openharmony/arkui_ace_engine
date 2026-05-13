@@ -4000,7 +4000,9 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
         }
         params.position = position;
     }
-
+    if (positionValue->IsNumber()) {
+        params.depth = positionValue->ToNumber<float>();
+    }
     auto occlusionWeightValue = jsObject->GetProperty("occlusionWeight");
     if (occlusionWeightValue->IsNumber()) {
         params.occlusionWeight = occlusionWeightValue->ToNumber<float>();

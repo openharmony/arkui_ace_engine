@@ -1679,19 +1679,25 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
 {
     FREE_RS_CONTEXT_CHECK(OnSpatialEffectUpdate, params);
     CHECK_NULL_VOID(rsNode_);
-    std::shared_ptr<Rosen::SpatialEffectPara> spatialEffect;
+    std::shared_ptr<Rosen::SpatialEffectVariantPara> variantPara =
+        std::make_shared<Rosen::SpatialEffectVariantPara>();
     if (params.position.has_value()) {
-        spatialEffect = std::make_shared<Rosen::SpatialEffectPara>();
         const auto& position = params.position.value();
-        spatialEffect->leftTop = Rosen::Vector3f { position.leftTop.x, position.leftTop.y, position.leftTop.z };
-        spatialEffect->rightTop = Rosen::Vector3f { position.rightTop.x, position.rightTop.y, position.rightTop.z };
-        spatialEffect->leftBottom =
+        Rosen::SpatialEffectPara::CornerPositions corners;
+        corners[Rosen::SpatialEffectPara::LEFT_TOP_INDEX] =
+            Rosen::Vector3f { position.leftTop.x, position.leftTop.y, position.leftTop.z };
+        corners[Rosen::SpatialEffectPara::RIGHT_TOP_INDEX] =
+            Rosen::Vector3f { position.rightTop.x, position.rightTop.y, position.rightTop.z };
+        corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] =
             Rosen::Vector3f { position.leftBottom.x, position.leftBottom.y, position.leftBottom.z };
-        spatialEffect->rightBottom =
+        corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] =
             Rosen::Vector3f { position.rightBottom.x, position.rightBottom.y, position.rightBottom.z };
-        spatialEffect->occlusionWeight = params.occlusionWeight;
+        variantPara->position = corners;
+    } else {
+        variantPara->position = params.depth;
     }
-    rsNode_->SetSpatialEffectPara(spatialEffect);
+    variantPara->occlusionWeight = params.occlusionWeight;
+    rsNode_->SetSpatialEffectPara(variantPara);
     RequestNextFrame();
 }
 
