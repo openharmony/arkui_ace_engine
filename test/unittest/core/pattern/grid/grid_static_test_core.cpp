@@ -49,4 +49,24 @@ public:
 };
 
 } // namespace
+
+/**
+ * @tc.name: GridLpxAttribute001
+ * @tc.desc: Verify columnsGap and rowsGap keep independent LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridStaticTestCore, GridLpxAttribute001, TestSize.Level1)
+{
+    auto frameNode = GridModelNG::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+
+    GridModelNG::SetColumnsGap(AceType::RawPtr(frameNode), Dimension(10.0, DimensionUnit::LPX));
+    GridModelNG::SetRowsGap(AceType::RawPtr(frameNode), Dimension(20.0, DimensionUnit::LPX));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_COLUMNS_GAP));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ROWS_GAP));
+
+    GridModelNG::SetColumnsGap(AceType::RawPtr(frameNode), Dimension(10.0, DimensionUnit::VP));
+    EXPECT_FALSE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_COLUMNS_GAP));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ROWS_GAP));
+}
 } // namespace OHOS::Ace::NG

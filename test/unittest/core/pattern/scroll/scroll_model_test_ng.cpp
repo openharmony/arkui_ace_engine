@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "scroll_test_ng.h"
 #include "ui/base/ace_type.h"
 
@@ -21,6 +23,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_static.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
@@ -1780,5 +1783,49 @@ HWTEST_F(ScrollModelNGTestNg, GetScrollSnapOptions, TestSize.Level1)
     EXPECT_EQ(snapOptions.snapAlign, 0);
     EXPECT_EQ(snapOptions.enableSnapToStart, 1);
     EXPECT_EQ(snapOptions.enableSnapToEnd, 1);
+}
+
+/**
+ * @tc.name: ScrollModelNGTestNgLpx001
+ * @tc.desc: Verify intervalSize and snapPaginations keep independent LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNgLpx001, TestSize.Level1)
+{
+    auto frameNode = ScrollModelNG::CreateFrameNode(10);
+    ASSERT_NE(frameNode, nullptr);
+
+    ScrollModelNG::SetScrollSnap(AceType::RawPtr(frameNode), ScrollSnapAlign::START,
+        Dimension(10.0, DimensionUnit::LPX), { Dimension(20.0, DimensionUnit::LPX) }, { true, true });
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SCROLL_INTERVAL_SIZE));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SCROLL_SNAP_PAGINATIONS));
+
+    ScrollModelNG::SetScrollSnap(AceType::RawPtr(frameNode), ScrollSnapAlign::START,
+        Dimension(10.0, DimensionUnit::VP), { Dimension(20.0, DimensionUnit::LPX) }, { true, true });
+    EXPECT_FALSE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SCROLL_INTERVAL_SIZE));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SCROLL_SNAP_PAGINATIONS));
+}
+
+/**
+ * @tc.name: ScrollModelNGTestNgLpx002
+ * @tc.desc: Verify scrollBarWidth and fadingEdgeLength keep independent LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNgLpx002, TestSize.Level1)
+{
+    auto frameNode = ScrollModelNG::CreateFrameNode(11);
+    ASSERT_NE(frameNode, nullptr);
+
+    ScrollableModelStatic::SetScrollBarWidth(
+        AceType::RawPtr(frameNode), std::make_optional(Dimension(4.0, DimensionUnit::LPX)));
+    ScrollableModelStatic::SetFadingEdge(AceType::RawPtr(frameNode), std::make_optional(true),
+        std::make_optional(Dimension(16.0, DimensionUnit::LPX)));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SCROLL_BAR_WIDTH));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FADING_EDGE_LENGTH));
+
+    ScrollableModelStatic::SetScrollBarWidth(
+        AceType::RawPtr(frameNode), std::make_optional(Dimension(4.0, DimensionUnit::VP)));
+    EXPECT_FALSE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SCROLL_BAR_WIDTH));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FADING_EDGE_LENGTH));
 }
 } // namespace OHOS::Ace::NG

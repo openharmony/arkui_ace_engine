@@ -28,8 +28,14 @@ void ListItemGroupModelStatic::SetDivider(
     CHECK_NULL_VOID(frameNode);
     if (divider.has_value()) {
         FREE_NODE_CHECK(frameNode, SetDivider, frameNode, divider, needGetThemeColor);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.value().strokeWidth, LpxAttribute::LPX_DIVIDER_STROKE_WIDTH, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.value().startMargin, LpxAttribute::LPX_DIVIDER_START_MARGIN, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.value().endMargin, LpxAttribute::LPX_DIVIDER_END_MARGIN, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider.value(), frameNode);
     } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_DIVIDER_STROKE_WIDTH);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_DIVIDER_START_MARGIN);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_DIVIDER_END_MARGIN);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListItemGroupLayoutProperty, Divider,
             PROPERTY_UPDATE_MEASURE, frameNode);
         auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
@@ -116,8 +122,11 @@ void ListItemGroupModelStatic::ResetListChildrenMainSize(FrameNode* frameNode)
 void ListItemGroupModelStatic::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
     if (space.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(space.value(), LpxAttribute::LPX_SPACE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             ListItemGroupLayoutProperty, Space, PROPERTY_UPDATE_MEASURE, frameNode);
     }
@@ -126,8 +135,11 @@ void ListItemGroupModelStatic::SetSpace(FrameNode* frameNode, const std::optiona
 void ListItemGroupModelStatic::SetSpaceWidth(FrameNode* frameNode, const std::optional<Dimension>& spaceWidth)
 {
     if (spaceWidth.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(spaceWidth.value(), LpxAttribute::LPX_SPACE_WIDTH, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, SpaceWidth, spaceWidth.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE_WIDTH);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             ListItemGroupLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE, frameNode);
     }

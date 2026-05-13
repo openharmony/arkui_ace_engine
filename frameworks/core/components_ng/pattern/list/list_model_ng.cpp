@@ -106,21 +106,29 @@ void ListModelNG::ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeTy
 
 void ListModelNG::SetSpace(const Dimension& space)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(space, LpxAttribute::LPX_SPACE);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
 }
 
 void ListModelNG::ResetListSpace()
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE);
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, Space, PROPERTY_UPDATE_MEASURE);
 }
 
 void ListModelNG::SetSpaceWidth(const Dimension& spaceWidth)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(spaceWidth, LpxAttribute::LPX_SPACE_WIDTH);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, SpaceWidth, spaceWidth);
 }
 
 void ListModelNG::ResetListSpaceWidth()
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE_WIDTH);
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE);
 }
 
@@ -190,6 +198,9 @@ void ListModelNG::SetEditMode(bool editMode)
 
 void ListModelNG::SetDivider(const V2::ItemDivider& divider)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(divider.strokeWidth, LpxAttribute::LPX_DIVIDER_STROKE_WIDTH);
+    ACE_CHECK_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::LPX_DIVIDER_START_MARGIN);
+    ACE_CHECK_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::LPX_DIVIDER_END_MARGIN);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
 }
 
@@ -208,6 +219,8 @@ void ListModelNG::SetChainAnimationOptions(const ChainAnimationOptions& options)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(options.minSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MIN_SPACE, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(options.maxSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MAX_SPACE, frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetChainAnimationOptions(options);
@@ -237,8 +250,12 @@ void ListModelNG::SetLaneConstrain(const Dimension& laneMinLength, const Dimensi
 void ListModelNG::SetLaneMinLength(const Dimension& laneMinLength)
 {
     if (laneMinLength.IsValid()) {
+        ACE_CHECK_LPX_ATTRIBUTE(laneMinLength, LpxAttribute::LPX_LANE_MIN_LENGTH);
         ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength);
     } else {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LANE_MIN_LENGTH);
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMinLength, PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -246,14 +263,19 @@ void ListModelNG::SetLaneMinLength(const Dimension& laneMinLength)
 void ListModelNG::SetLaneMaxLength(const Dimension& laneMaxLength)
 {
     if (laneMaxLength.IsValid()) {
+        ACE_CHECK_LPX_ATTRIBUTE(laneMaxLength, LpxAttribute::LPX_LANE_MAX_LENGTH);
         ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength);
     } else {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LANE_MAX_LENGTH);
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMaxLength, PROPERTY_UPDATE_MEASURE);
     }
 }
 
 void ListModelNG::SetLaneGutter(const Dimension& laneGutter)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(laneGutter, LpxAttribute::LPX_LANE_GUTTER);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter);
 }
 
@@ -942,8 +964,11 @@ void ListModelNG::SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMi
 void ListModelNG::SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength)
 {
     if (laneMinLength.IsValid()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(laneMinLength, LpxAttribute::LPX_LANE_MIN_LENGTH, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength, frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LANE_MIN_LENGTH);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMinLength, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
@@ -958,8 +983,11 @@ float ListModelNG::GetLaneMinLength(FrameNode* frameNode)
 void ListModelNG::SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength)
 {
     if (laneMaxLength.IsValid()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(laneMaxLength, LpxAttribute::LPX_LANE_MAX_LENGTH, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength, frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LANE_MAX_LENGTH);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMaxLength, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
@@ -973,6 +1001,7 @@ float ListModelNG::GetLaneMaxLength(FrameNode* frameNode)
 
 void ListModelNG::SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(laneGutter, LpxAttribute::LPX_LANE_GUTTER, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter, frameNode);
 }
 
@@ -1006,6 +1035,7 @@ float ListModelNG::GetListSpace(FrameNode* frameNode)
 
 void ListModelNG::SetListSpace(FrameNode* frameNode, const Dimension& space)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(space, LpxAttribute::LPX_SPACE, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space, frameNode);
 }
 
@@ -1148,12 +1178,17 @@ float ListModelNG::GetContentEndOffset(FrameNode* frameNode)
 
 void ListModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.strokeWidth, LpxAttribute::LPX_DIVIDER_STROKE_WIDTH, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::LPX_DIVIDER_START_MARGIN, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::LPX_DIVIDER_END_MARGIN, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
 }
 
 void ListModelNG::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(options.minSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MIN_SPACE, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(options.maxSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MAX_SPACE, frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetChainAnimationOptions(options);
@@ -1767,6 +1802,7 @@ void ListModelNG::CreateWithResourceObjSpace(FrameNode* frameNode, const RefPtr<
         CHECK_NULL_VOID(frameNode);
         CalcDimension result;
         ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_SPACE_WIDTH, AceType::RawPtr(frameNode));
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SpaceWidth, result, frameNode);
     };
     pattern->AddResObj("list.spaceWidth", resObj, std::move(updateFunc));

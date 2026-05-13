@@ -125,8 +125,11 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
         eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
         eventHub->SetStartOnStateChange(std::move(onStateChange));
         if (length) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(
+                length.value(), LpxAttribute::LPX_LIST_ITEM_START_DELETE_AREA_DISTANCE, frameNode);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length.value(), frameNode);
         } else {
+            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LIST_ITEM_START_DELETE_AREA_DISTANCE);
             ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, frameNode);
             auto listItemTheme = GetListItemTheme(frameNode);
             if (listItemTheme) {
@@ -143,8 +146,11 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
         eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
         eventHub->SetEndOnStateChange(std::move(onStateChange));
         if (length) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(
+                length.value(), LpxAttribute::LPX_LIST_ITEM_END_DELETE_AREA_DISTANCE, frameNode);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length.value(), frameNode);
         } else {
+            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LIST_ITEM_END_DELETE_AREA_DISTANCE);
             ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, frameNode);
             auto listItemTheme = GetListItemTheme(frameNode);
             if (listItemTheme) {

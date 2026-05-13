@@ -85,19 +85,26 @@ void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optio
 
 void ScrollableModelNG::SetScrollBarWidth(const std::string& value)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
+    auto scrollBarWidth = StringUtils::StringToDimensionWithUnit(value);
+    ACE_CHECK_LPX_ATTRIBUTE(scrollBarWidth, LpxAttribute::LPX_SCROLL_BAR_WIDTH);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth);
 }
 
 void ScrollableModelNG::ResetScrollBarWidth(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_BAR_WIDTH);
     ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_SCROLL_BAR_WIDTH, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, value.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_BAR_WIDTH);
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
     }
 }
@@ -298,12 +305,14 @@ void ScrollableModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFram
 
 void ScrollableModelNG::SetFadingEdge(bool fadingEdge, const Dimension& fadingEdgeLength)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(fadingEdgeLength, LpxAttribute::LPX_FADING_EDGE_LENGTH);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdge, fadingEdge);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength, fadingEdgeLength);
 }
 
 void ScrollableModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge, const Dimension& fadingEdgeLength)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(fadingEdgeLength, LpxAttribute::LPX_FADING_EDGE_LENGTH, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdge, fadingEdge, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength, fadingEdgeLength, frameNode);
 }
@@ -326,8 +335,9 @@ void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t displayNu
 
 void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,
-        StringUtils::StringToDimensionWithUnit(value), frameNode);
+    auto scrollBarWidth = StringUtils::StringToDimensionWithUnit(value);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(scrollBarWidth, LpxAttribute::LPX_SCROLL_BAR_WIDTH, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth, frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
@@ -568,12 +578,16 @@ void ScrollableModelNG::SetScrollBarMargin(const ScrollBarMargin& scrollBarMargi
 void ScrollableModelNG::SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(scrollBarMargin.start_, LpxAttribute::LPX_SCROLL_BAR_MARGIN_START, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(scrollBarMargin.end_, LpxAttribute::LPX_SCROLL_BAR_MARGIN_END, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMargin, scrollBarMargin, frameNode);
 }
 
 void ScrollableModelNG::ResetScrollBarMargin(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_BAR_MARGIN_START);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_BAR_MARGIN_END);
     ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMargin, frameNode);
 }
 
@@ -786,12 +800,9 @@ void ScrollableModelNG::CreateWithResourceObjScrollBarWidth(FrameNode* frameNode
             CHECK_NULL_VOID(theme);
             scrollBarWidth = theme->GetNormalWidth();
         }
-        auto tmpStr = scrollBarWidth.ToString();
-        if (!tmpStr.empty()) {
-            ACE_UPDATE_NODE_PAINT_PROPERTY(
-                ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(tmpStr), node);
-            node->MarkModifyDone();
-        }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(scrollBarWidth, LpxAttribute::LPX_SCROLL_BAR_WIDTH, AceType::RawPtr(node));
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth, node);
+        node->MarkModifyDone();
     };
     pattern->AddResObj("ScrollableScrollBarWidth", resObj, std::move(updateFunc));
 }

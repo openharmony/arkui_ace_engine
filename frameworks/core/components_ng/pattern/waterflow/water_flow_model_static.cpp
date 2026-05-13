@@ -178,8 +178,10 @@ void WaterFlowModelStatic::SetColumnsGap(FrameNode* frameNode, const std::option
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_COLUMNS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value.value(), frameNode);
     } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_COLUMNS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             WaterFlowLayoutProperty, ColumnsGap, PROPERTY_UPDATE_MEASURE, frameNode);
         auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
@@ -192,8 +194,10 @@ void WaterFlowModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_ROWS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value.value(), frameNode);
     } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ROWS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             WaterFlowLayoutProperty, RowsGap, PROPERTY_UPDATE_MEASURE, frameNode);
         auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
@@ -205,6 +209,11 @@ void WaterFlowModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<
 void WaterFlowModelStatic::SetItemMinWidth(FrameNode* frameNode, const std::optional<CalcLength>& minWidth)
 {
     CHECK_NULL_VOID(frameNode);
+    if (minWidth) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(minWidth->GetDimension(), LpxAttribute::LPX_ITEM_MIN_WIDTH, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MIN_WIDTH);
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMinSize(CalcSize(minWidth.value_or(DEFAULT_CONSTRAINT_SIZE), std::nullopt));
@@ -213,6 +222,11 @@ void WaterFlowModelStatic::SetItemMinWidth(FrameNode* frameNode, const std::opti
 void WaterFlowModelStatic::SetItemMinHeight(FrameNode* frameNode, const std::optional<CalcLength>& minHeight)
 {
     CHECK_NULL_VOID(frameNode);
+    if (minHeight) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(minHeight->GetDimension(), LpxAttribute::LPX_ITEM_MIN_HEIGHT, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MIN_HEIGHT);
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMinSize(CalcSize(std::nullopt, minHeight.value_or(DEFAULT_CONSTRAINT_SIZE)));
@@ -221,6 +235,11 @@ void WaterFlowModelStatic::SetItemMinHeight(FrameNode* frameNode, const std::opt
 void WaterFlowModelStatic::SetItemMaxWidth(FrameNode* frameNode, const std::optional<CalcLength>& maxWidth)
 {
     CHECK_NULL_VOID(frameNode);
+    if (maxWidth) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(maxWidth->GetDimension(), LpxAttribute::LPX_ITEM_MAX_WIDTH, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MAX_WIDTH);
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMaxSize(CalcSize(maxWidth.value_or(DEFAULT_CONSTRAINT_SIZE), std::nullopt));
@@ -229,6 +248,11 @@ void WaterFlowModelStatic::SetItemMaxWidth(FrameNode* frameNode, const std::opti
 void WaterFlowModelStatic::SetItemMaxHeight(FrameNode* frameNode, const std::optional<CalcLength>& maxHeight)
 {
     CHECK_NULL_VOID(frameNode);
+    if (maxHeight) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(maxHeight->GetDimension(), LpxAttribute::LPX_ITEM_MAX_HEIGHT, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MAX_HEIGHT);
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMaxSize(CalcSize(std::nullopt, maxHeight.value_or(DEFAULT_CONSTRAINT_SIZE)));
@@ -274,6 +298,10 @@ void WaterFlowModelStatic::SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMo
 void WaterFlowModelStatic::ResetItemLayoutConstraint(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MIN_WIDTH);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MIN_HEIGHT);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MAX_WIDTH);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MAX_HEIGHT);
     auto layout = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layout);
     layout->ResetItemLayoutConstraint();

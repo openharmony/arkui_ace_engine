@@ -61,26 +61,37 @@ RefPtr<FrameNode> ListItemGroupModelNG::CreateFrameNode(int32_t nodeId)
 
 void ListItemGroupModelNG::SetSpace(const Dimension& space)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(space, LpxAttribute::LPX_SPACE);
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space);
 }
 
 void ListItemGroupModelNG::SetSpaceWidth(const Dimension& spaceWidth)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(spaceWidth, LpxAttribute::LPX_SPACE_WIDTH);
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, SpaceWidth, spaceWidth);
 }
 
 void ListItemGroupModelNG::ResetSpace()
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE);
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListItemGroupLayoutProperty, Space, PROPERTY_UPDATE_MEASURE);
 }
 
 void ListItemGroupModelNG::ResetSpaceWidth()
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE_WIDTH);
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ListItemGroupLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE);
 }
 
 void ListItemGroupModelNG::SetDivider(const V2::ItemDivider& divider)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(divider.strokeWidth, LpxAttribute::LPX_DIVIDER_STROKE_WIDTH);
+    ACE_CHECK_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::LPX_DIVIDER_START_MARGIN);
+    ACE_CHECK_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::LPX_DIVIDER_END_MARGIN);
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider);
 }
 
@@ -122,6 +133,9 @@ void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
 
 void ListItemGroupModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.strokeWidth, LpxAttribute::LPX_DIVIDER_STROKE_WIDTH, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::LPX_DIVIDER_START_MARGIN, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::LPX_DIVIDER_END_MARGIN, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
 }
 
@@ -180,11 +194,13 @@ V2::ItemDivider ListItemGroupModelNG::GetDivider(FrameNode* frameNode)
 
 void ListItemGroupModelNG::SetSpace(FrameNode* frameNode, const Dimension& space)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(space, LpxAttribute::LPX_SPACE, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space, frameNode);
 }
 
 void ListItemGroupModelNG::SetSpaceWidth(FrameNode* frameNode, const Dimension& spaceWidth)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(spaceWidth, LpxAttribute::LPX_SPACE_WIDTH, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, SpaceWidth, spaceWidth, frameNode);
 }
 
@@ -504,6 +520,7 @@ void ListItemGroupModelNG::CreateWithResourceObjSpace(FrameNode* frameNode, cons
         if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || !result.IsNonNegative()) {
             result.Reset();
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_SPACE_WIDTH, AceType::RawPtr(frameNode));
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, SpaceWidth, result, frameNode);
     };
     pattern->AddResObj("listItemGroup.spaceWidth", resObj, std::move(updateFunc));
