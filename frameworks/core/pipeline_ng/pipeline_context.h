@@ -101,6 +101,7 @@ class DynamicComponentSafeManager;
 class EnvironmentManager;
 enum class FocusActiveReason : int32_t;
 
+constexpr char ENV_KEY_DIRECTION[] = "system.arkui.layout.direction";
 constexpr char ENV_KEY_FONT_SCALE[] = "system.arkui.fontScale";
 
 enum class MockFlushEventType : int32_t {
@@ -1265,7 +1266,14 @@ public:
     {
         rotationEndCallbackMap_.erase(callbackId);
     }
-
+    void SetUseEnvManager(bool isEnable)
+    {
+        isUseEnvManager_ = isEnable;
+    }
+    bool GetUseEnvManager()
+    {
+        return isUseEnvManager_;
+    }
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
     void NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void NotifyDragMouseEvent(const MouseEvent& event);
@@ -1641,6 +1649,7 @@ private:
     bool isDensityChanged_ = false;
     bool isNeedReloadDensity_ = false;
     bool isBeforeDragHandleAxis_ = false;
+    bool isUseEnvManager_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool isWindowSizeDragging_ = false;

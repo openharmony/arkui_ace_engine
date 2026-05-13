@@ -30,6 +30,7 @@ public:
     virtual ~WithEnvModel() = default;
 
     virtual void Create() = 0;
+    virtual void RemoveEnvProperty(const std::string& key) = 0;
     virtual void SetEnvProperty(const std::string& key, const std::string& value) = 0;
     virtual void SetEnvProperty(const std::string& key, double value) = 0;
     virtual void SetEnvProperty(const std::string& key, bool value) = 0;

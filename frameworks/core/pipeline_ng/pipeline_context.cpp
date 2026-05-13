@@ -8122,6 +8122,32 @@ void PipelineContext::FlushRelaxedInteraction()
 #endif
 }
 
+std::optional<TextDirection> PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto envManager = GetEnvironmentManager();
+    CHECK_NULL_RETURN(envManager, std::nullopt);
+
+    EnvironmentQueryResult result;
+    if (!envManager->FindValueByKey(
+        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_DIRECTION, result)) {
+        return std::nullopt;
+    }
+
+    if (result.type == EnvironmentValueType::STRING) {
+        if (result.stringValue == "Ltr") {
+            return TextDirection::LTR;
+        }
+        if (result.stringValue == "Rtl") {
+            return TextDirection::RTL;
+        }
+        if (result.stringValue == "Auto") {
+            return TextDirection::AUTO;
+        }
+    }
+    return std::nullopt;
+}
+
 std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_RETURN(host, std::nullopt);

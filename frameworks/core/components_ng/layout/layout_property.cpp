@@ -1379,6 +1379,26 @@ void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
 }
 
+TextDirection LayoutProperty::GetLayoutDirection() const
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, TextDirection::AUTO);
+    if (!pipeline->GetUseEnvManager()) {
+        return layoutDirection_.value_or(TextDirection::AUTO);
+    }
+    if (layoutDirection_.has_value()) {
+        return layoutDirection_.value();
+    }
+    auto host = GetHost();
+    if (host && pipeline) {
+        auto envDirection = pipeline->ResolveDirectionFromEnv(host);
+        if (envDirection.has_value()) {
+            return envDirection.value();
+        }
+    }
+    return TextDirection::AUTO;
+}
+
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
 {
     auto direction = layoutDirection_.value_or(TextDirection::AUTO);
