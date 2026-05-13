@@ -36,6 +36,7 @@ sptr<ResschedEventListener> ResschedEventListener::GetInstance()
 void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
     std::unordered_map<std::string, std::string> extInfo)
 {
+    LOGD("ResschedEventListener::OnReceiveEvent eventType: %{public}d", eventType);
     if (eventType == ResourceSchedule::ResType::EventType::EVENT_COMPONENT_PREMAKE) {
         OnComponentPreMake(extInfo);
     }

@@ -2898,7 +2898,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperNotifyScrollStateEvent002, TestSize.Level1)
      */
     pattern_->scrollState_ = ScrollState::IDLE;
     pattern_->NotifyScrollStateEvent(ScrollState::SCROLL);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
 }
 
 /**
@@ -2921,7 +2921,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperNotifyScrollStateEvent003, TestSize.Level1)
      */
     pattern_->scrollState_ = ScrollState::SCROLL;
     pattern_->NotifyScrollStateEvent(ScrollState::IDLE);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::SCROLL);
 }
 
 /**
@@ -2944,7 +2944,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperNotifyScrollStateEvent004, TestSize.Level1)
      */
     pattern_->scrollState_ = ScrollState::SCROLL;
     pattern_->NotifyScrollStateEvent(ScrollState::SCROLL);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::SCROLL);
 }
 
 /**
@@ -2967,7 +2967,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent001, TestSize.Level
      */
     pattern_->isInAutoPlay_ = false;
     pattern_->ReportSwiperChangeContent(0);
-    EXPECT_TRUE(true);
+    EXPECT_FALSE(pattern_->isInAutoPlay_);
 }
 
 /**
@@ -2990,7 +2990,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent002, TestSize.Level
      */
     pattern_->isInAutoPlay_ = true;
     pattern_->ReportSwiperChangeContent(1);
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(pattern_->isInAutoPlay_);
 }
 
 /**
@@ -3037,7 +3037,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel002, TestSize.Level1)
     pattern_->premakeItems_.emplace(0);
     pattern_->premakeItems_.emplace(1);
     pattern_->OnNotifyMemoryLevel(1);
-    EXPECT_TRUE(true);
+    EXPECT_FALSE(pattern_->premakeItems_.empty());
 }
 
 /**

@@ -665,7 +665,7 @@ HWTEST_F(SwiperHelperTestNg, SwiperHelperInitSwiperControllerPreMakeItems001, Te
     SwiperHelper::InitSwiperController(controller, pattern_);
 
     controller->PreMakeItems({0, 1});
-    EXPECT_TRUE(true);
+    EXPECT_NE(controller->preloadItemsImpl_, nullptr);
 }
 
 /**
@@ -686,7 +686,7 @@ HWTEST_F(SwiperHelperTestNg, SwiperHelperInitSwiperControllerPreMakeItems002, Te
 
     std::set<int32_t> emptySet;
     controller->PreMakeItems(emptySet);
-    EXPECT_TRUE(true);
+    EXPECT_NE(controller->preloadItemsImpl_, nullptr);
 }
 
 /**
@@ -706,7 +706,7 @@ HWTEST_F(SwiperHelperTestNg, SwiperHelperInitSwiperControllerPreMakeItems003, Te
     SwiperHelper::InitSwiperController(controller, pattern_);
 
     controller->PreMakeItems({-1, 100});
-    EXPECT_TRUE(true);
+    EXPECT_NE(controller->preloadItemsImpl_, nullptr);
 }
 
 /**
@@ -741,7 +741,7 @@ HWTEST_F(SwiperHelperTestNg, SwiperHelperSetPreMakeItemsImpl002, TestSize.Level1
     controller->SetPreMakeItemsImpl(nullptr);
 
     controller->PreMakeItems({0});
-    EXPECT_TRUE(true);
+    EXPECT_EQ(controller->preloadItemsImpl_, nullptr);
 }
 
 /**

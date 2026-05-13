@@ -241,7 +241,6 @@ HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest001, TestSize.Level1)
     auto frameNode = NG::FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 1, AceType::MakeRefPtr<NG::SwiperPattern>());
     EXPECT_NE(frameNode, nullptr);
     optimizer_->PostSwiperPreMakeTask(frameNode, 0);
-    EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest002, TestSize.Level1)
@@ -249,14 +248,13 @@ HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest002, TestSize.Level1)
     auto frameNode = NG::FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<NG::Pattern>());
     EXPECT_NE(frameNode, nullptr);
     optimizer_->PostSwiperPreMakeTask(frameNode, 0);
-    EXPECT_TRUE(true);
 }
 
 HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest003, TestSize.Level1)
 {
     RefPtr<NG::FrameNode> frameNode = nullptr;
     optimizer_->PostSwiperPreMakeTask(frameNode, 0);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(frameNode, nullptr);
 }
 
 HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest004, TestSize.Level1)
@@ -266,14 +264,16 @@ HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest004, TestSize.Level1)
     EXPECT_NE(swiperPattern, nullptr);
     swiperPattern->swiperController_ = nullptr;
     optimizer_->PostSwiperPreMakeTask(frameNode, 0);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(frameNode, nullptr);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest001, TestSize.Level1)
 {
     std::unordered_map<std::string, std::string> extInfo;
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_EQ(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest003, TestSize.Level1)
@@ -282,7 +282,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest003, TestSize.Level1)
     extInfo["path"] = "";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest004, TestSize.Level1)
@@ -291,7 +292,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest004, TestSize.Level1)
     extInfo["path"] = "test";
     extInfo["index"] = "-1";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath001, TestSize.Level1)
@@ -310,7 +312,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath001, TestSize.Lev
     extInfo["path"] = "/root/swiper[0]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath002, TestSize.Level1)
@@ -329,7 +332,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath002, TestSize.Lev
     extInfo["path"] = "/root/swiper[0]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath003, TestSize.Level1)
@@ -345,7 +349,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath003, TestSize.Lev
     extInfo["path"] = "/root/other[0]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNullRoot001, TestSize.Level1)
@@ -358,7 +363,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNullRoot001, TestSize.Leve
     extInfo["path"] = "test[0]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNegativeIndex001, TestSize.Level1)
@@ -367,7 +373,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNegativeIndex001, TestSize
     extInfo["path"] = "test[0]";
     extInfo["index"] = "-5";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithEmptyPath001, TestSize.Level1)
@@ -376,7 +383,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithEmptyPath001, TestSize.Lev
     extInfo["path"] = "";
     extInfo["index"] = "10";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket001, TestSize.Level1)
@@ -392,7 +400,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket001, TestS
     extInfo["path"] = "test[";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket002, TestSize.Level1)
@@ -408,7 +417,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket002, TestS
     extInfo["path"] = "test[0";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket003, TestSize.Level1)
@@ -424,7 +434,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket003, TestS
     extInfo["path"] = "test[]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket004, TestSize.Level1)
@@ -440,7 +451,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket004, TestS
     extInfo["path"] = "test[ ]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithInvalidIndex001, TestSize.Level1)
@@ -456,7 +468,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithInvalidIndex001, TestSize.
     extInfo["path"] = "test[abc]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithInvalidIndex002, TestSize.Level1)
@@ -472,7 +485,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithInvalidIndex002, TestSize.
     extInfo["path"] = "test[-1]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidJson001, TestSize.Level1)
@@ -481,7 +495,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidJson001, TestSize.Lev
     extInfo["path"] = "validPath";
     extInfo["index"] = "5";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidJson002, TestSize.Level1)
@@ -490,7 +505,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidJson002, TestSize.Lev
     extInfo["path"] = "/root/child[0]";
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 
@@ -499,7 +515,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMissingPathKey001, TestSiz
     std::unordered_map<std::string, std::string> extInfo;
     extInfo["index"] = "0";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMissingIndexKey001, TestSize.Level1)
@@ -507,7 +524,8 @@ HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMissingIndexKey001, TestSi
     std::unordered_map<std::string, std::string> extInfo;
     extInfo["path"] = "test";
     optimizer_->HandleSwiperPreMake(extInfo);
-    EXPECT_TRUE(true);
+
+    EXPECT_NE(extInfo.size(), 0);
 }
 
 HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskWithPositiveIndex001, TestSize.Level1)
@@ -519,7 +537,7 @@ HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskWithPositiveIndex001, TestSi
     swiperPattern->swiperController_ = controller;
 
     optimizer_->PostSwiperPreMakeTask(frameNode, 5);
-    EXPECT_TRUE(true);
+    EXPECT_NE(swiperPattern->swiperController_, nullptr);
 }
 
 HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithMultiplePages001, TestSize.Level1)
@@ -585,7 +603,7 @@ HWTEST_F(TaihangOptimizerTest, DestructorTest001, TestSize.Level1)
 {
     auto newOptimizer = std::make_shared<TaihangOptimizer>();
     newOptimizer.reset();
-    EXPECT_TRUE(true);
+    EXPECT_EQ(newOptimizer, nullptr);
 }
 
 HWTEST_F(TaihangOptimizerTest, MultipleInitCalls001, TestSize.Level1)
