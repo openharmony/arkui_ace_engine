@@ -42,6 +42,7 @@ export interface IVariableOwner {
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
     __getCustomComponentContext__Internal(): CustomComponentContext;
     __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
+    __getCanUpdateStateVars__Internal(): boolean;
 }
 
 export interface IDecoratedVariable {

@@ -589,6 +589,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     getName(): string {
         return transferTypeName(Class.of(this.instance).getName());
     }
+
+    getCanUpdateStateVars(): boolean {
+        return this.canUpdateStateVars_;
+    }
 }
 
 function createInstance<T extends ExtendableComponent, T_Options>(

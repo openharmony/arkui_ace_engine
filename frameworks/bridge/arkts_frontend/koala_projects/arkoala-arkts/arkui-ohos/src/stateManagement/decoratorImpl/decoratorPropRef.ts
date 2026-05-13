@@ -93,6 +93,9 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     update(newValue: T): void {
         const sourceValue = this.sourceValue;
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`PropRef ${sourceValue === newValue} ${this.updateTraceInfo()}`);
+        if (!this.owningComponent_!.__getCanUpdateStateVars__Internal()) {
+            return;
+        }
         if (sourceValue !== newValue || this.isForceRender) {
             this.isForceRender = false;
             let value = newValue;
