@@ -242,6 +242,8 @@ public:
 
     float GetFontScaleFromEnv(const RefPtr<FrameNode>& host = nullptr);
 
+    std::optional<TextDirection> ResolveDirectionFromEnv(const RefPtr<FrameNode>& host);
+
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
