@@ -16,8 +16,12 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("view_context_test_ng") {
   module_name = "TextSet-Text"
   type = "new"
-
-  sources = [ "view_context_test_ng.cpp" ]
+  cflags = [ "-fno-access-control" ]
+  sources = [
+    "view_context_integration_test.cpp",
+    "view_context_model_ng_test.cpp",
+    "view_context_test_ng.cpp",
+  ]
 
   if (!ace_enable_full_test_suite) {
     sources = []
