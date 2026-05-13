@@ -640,11 +640,11 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (selectOverlay_ && selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     }
-
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && textForDisplay_.length() != 0) {
-        StartVibratorByLongPress();
+    if (oneStepDragController_ && info.GetSourceDevice() == SourceType::TOUCH && !isTouchPressed_) {
+        return;
     }
+
+    IfStartVibratorByLongPress();
 
     if (IsDraggable(localOffset)) {
         // prevent long press event from being triggered when dragging
@@ -671,6 +671,14 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
     StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd(), localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::IfStartVibratorByLongPress()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && textForDisplay_.length() != 0) {
+        StartVibratorByLongPress();
+    }
 }
 
 void TextPattern::InitSelectionOnLongPress(const Offset& localOffset)
@@ -3117,6 +3125,15 @@ void TextPattern::MarkDirtySelf()
 
 void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    if (!info.GetChangedTouches().empty() && oneStepDragController_) {
+        const auto& changed = info.GetChangedTouches().front();
+        auto touchType = changed.GetTouchType();
+        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+            isTouchPressed_ = false;
+        } else {
+            isTouchPressed_ = true;
+        }
+    }
     UnBindPreviewMenuByCopyOption();
     DoGestureSelection(info);
     ResetOriginCaretPosition();
