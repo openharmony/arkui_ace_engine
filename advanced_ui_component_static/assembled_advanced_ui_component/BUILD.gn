@@ -51,6 +51,7 @@ generate_static_abc("assembled_advanced_ets_abc") {
       "./@ohos.arkui.advanced.Chip.ets",
       "./@ohos.arkui.advanced.ChipGroup.ets",
       "./@ohos.arkui.advanced.Counter.ets",
+      "./@ohos.arkui.advanced.CounterV2.ets",
       "./@ohos.arkui.advanced.FoldSplitContainer.ets",
       "./@ohos.arkui.advanced.MultiNavigation.ets",
       "./@ohos.arkui.advanced.Popup.ets",

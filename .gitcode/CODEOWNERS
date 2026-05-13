@@ -279,6 +279,7 @@ advanced_ui_component_static/assembled_advanced_ui_component/ @arkuiadvancedcomp
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.Chip.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.ChipGroup.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.Counter.ets @arkuitoolchain
+advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.CounterV2.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.SegmentButton.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.SegmentButtonV2.ets @arkuitoolchain
 
