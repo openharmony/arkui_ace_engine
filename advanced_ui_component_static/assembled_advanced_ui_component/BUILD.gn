@@ -24,9 +24,11 @@ generate_static_abc("assembled_advanced_ets_abc") {
   if (!ace_engine_feature_wearable) {
     files += [
       "./@ohos.arkui.advanced.ComposeListItem.ets",
+      "./@ohos.arkui.advanced.ComposeListItemV2.ets",
       "./@ohos.arkui.advanced.ComposeTitleBar.ets",
       "./@ohos.arkui.advanced.ComposeTitleBarV2.ets",
       "./@ohos.arkui.advanced.EditableTitleBar.ets",
+      "./@ohos.arkui.advanced.EditableTitleBarV2.ets",
       "./@ohos.arkui.advanced.ExceptionPrompt.ets",
       "./@ohos.arkui.advanced.ExceptionPromptV2.ets",
       "./@ohos.arkui.advanced.Filter.ets",
