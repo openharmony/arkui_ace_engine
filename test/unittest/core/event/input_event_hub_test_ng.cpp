@@ -945,4 +945,150 @@ HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuTest055, TestSize.Leve
     inputEventActuator->OnCollectCoastingAxisEvent(result);
     EXPECT_EQ(result.size(), 0);
 }
+
+/**
+ * @tc.name: InputEventHubHasCoastingAxisEventTest001
+ * @tc.desc: Test HasCoastingAxisEvent with and without actuator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubHasCoastingAxisEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub without coasting axis.
+     * @tc.expected: HasCoastingAxisEvent returns false.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_FALSE(inputEventHub->HasCoastingAxisEvent());
+
+    /**
+     * @tc.steps: step2. SetCoastingAxisEvent.
+     * @tc.expected: HasCoastingAxisEvent returns true.
+     */
+    OnCoastingAxisEventFunc onCoasting = [](CoastingAxisInfo& info) {};
+    inputEventHub->SetCoastingAxisEvent(std::move(onCoasting));
+    EXPECT_NE(inputEventHub->coastingAxisEventActuator_, nullptr);
+    EXPECT_TRUE(inputEventHub->HasCoastingAxisEvent());
+
+    /**
+     * @tc.steps: step3. Clear user callback.
+     * @tc.expected: HasCoastingAxisEvent returns false.
+     */
+    inputEventHub->ClearUserOnCoastingAxisEvent();
+    EXPECT_FALSE(inputEventHub->HasCoastingAxisEvent());
+}
+
+/**
+ * @tc.name: InputEventHubProcessAxisTestHitCoasting001
+ * @tc.desc: Test ProcessAxisTestHit with isCoastingAxis=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubProcessAxisTestHitCoasting001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub with null eventHub.
+     * @tc.expected: ProcessAxisTestHit returns false.
+     */
+    auto inputEventHub2 = AceType::MakeRefPtr<InputEventHub>(nullptr);
+    AxisTestResult result;
+    EXPECT_FALSE(inputEventHub2->ProcessAxisTestHit(COORDINATE_OFFSET, result, true));
+
+    /**
+     * @tc.steps: step2. Create normal hub, set up coasting axis event via public API.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    OnCoastingAxisEventFunc onCoasting = [](CoastingAxisInfo& info) {};
+    inputEventHub->SetCoastingAxisEvent(std::move(onCoasting));
+    EXPECT_NE(inputEventHub->coastingAxisEventActuator_, nullptr);
+    EXPECT_TRUE(inputEventHub->coastingAxisEventActuator_->HasUserCallback());
+
+    /**
+     * @tc.steps: step3. Call ProcessAxisTestHit with isCoastingAxis=true.
+     * @tc.expected: Returns false, result size equals AXIS_RESULT_SIZE.
+     */
+    EXPECT_FALSE(inputEventHub->ProcessAxisTestHit(COORDINATE_OFFSET, result, true));
+    EXPECT_EQ(result.size(), AXIS_RESULT_SIZE);
+}
+
+/**
+ * @tc.name: InputEventHubBindContextMenuReplace001
+ * @tc.desc: Test BindContextMenu with existing showMenu_ replacement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuReplace001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+
+    /**
+     * @tc.steps: step2. First BindContextMenu.
+     * @tc.expected: mouseEventActuator_ created, inputEvents_ size 1.
+     */
+    int32_t firstCallCount = 0;
+    int32_t secondCallCount = 0;
+    OnMouseEventFunc onMouse1 = [&firstCallCount](MouseInfo& info) { firstCallCount++; };
+    inputEventHub->BindContextMenu(std::move(onMouse1));
+    EXPECT_NE(inputEventHub->mouseEventActuator_, nullptr);
+    EXPECT_NE(inputEventHub->showMenu_, nullptr);
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
+    auto firstMenu = inputEventHub->showMenu_;
+
+    /**
+     * @tc.steps: step3. Second BindContextMenu replaces old one.
+     * @tc.expected: Old menu removed from inputEvents_, new menu replaces showMenu_, inputEvents_ size still 1.
+     */
+    OnMouseEventFunc onMouse2 = [&secondCallCount](MouseInfo& info) { secondCallCount++; };
+    inputEventHub->BindContextMenu(std::move(onMouse2));
+    EXPECT_NE(inputEventHub->showMenu_, nullptr);
+    EXPECT_NE(inputEventHub->showMenu_, firstMenu);
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
+
+    /**
+     * @tc.steps: step4. Trigger mouse event callback to verify new callback is invoked.
+     * @tc.expected: secondCallCount is 1, firstCallCount is 0.
+     */
+    MouseInfo mouseInfo;
+    (*inputEventHub->showMenu_)(mouseInfo);
+    EXPECT_EQ(secondCallCount, 1);
+    EXPECT_EQ(firstCallCount, 0);
+}
+
+/**
+ * @tc.name: InputEventHubProcessMouseTestHitHostNull001
+ * @tc.desc: Test ProcessMouseTestHit when host (GetFrameNode) returns null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTestHitHostNull001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub without attaching FrameNode to EventHub.
+     * @tc.expected: GetFrameNode returns nullptr.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_EQ(inputEventHub->GetFrameNode(), nullptr);
+
+    /**
+     * @tc.steps: step2. Set up actuators and call ProcessMouseTestHit.
+     * @tc.expected: Returns false due to CHECK_NULL_RETURN(host, false).
+     */
+    inputEventHub->mouseEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    OnMouseEventFunc onMouse = [](MouseInfo& info) {};
+    inputEventHub->mouseEventActuator_->userCallback_ =
+        AceType::MakeRefPtr<InputEvent>(std::move(onMouse));
+
+    TouchTestResult result;
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, result));
+}
 } // namespace OHOS::Ace::NG

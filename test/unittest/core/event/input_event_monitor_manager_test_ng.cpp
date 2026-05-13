@@ -487,4 +487,560 @@ HWTEST_F(InputEventMonitorManagerTestNg, EventManagerInputMonitorInterceptTest00
     up.action = KeyAction::UP;
     EXPECT_FALSE(eventManager->OnNonPointerEvent(up));
 }
+
+/**
+ * @tc.name: InteractionTrackerDirectTest001
+ * @tc.desc: Direct test of InteractionTracker methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, InteractionTrackerDirectTest001, TestSize.Level1)
+{
+    InteractionTracker tracker;
+    constexpr uint64_t key1 = 100;
+    constexpr uint64_t key2 = 200;
+
+    /**
+     * @tc.steps: step1. Initially no interactions.
+     * @tc.expected: IsDownEventDelivered and IsDownEventBlocked return false.
+     */
+    EXPECT_FALSE(tracker.IsDownEventDelivered(key1));
+    EXPECT_FALSE(tracker.IsDownEventBlocked(key1));
+
+    /**
+     * @tc.steps: step2. OnDownEvent and verify.
+     * @tc.expected: IsDownEventDelivered true, IsDownEventBlocked false.
+     */
+    tracker.OnDownEvent(key1);
+    EXPECT_TRUE(tracker.IsDownEventDelivered(key1));
+    EXPECT_FALSE(tracker.IsDownEventBlocked(key1));
+
+    /**
+     * @tc.steps: step3. OnDownEventBlocked and verify.
+     * @tc.expected: IsDownEventBlocked true, IsDownEventDelivered false.
+     */
+    tracker.OnDownEventBlocked(key2);
+    EXPECT_TRUE(tracker.IsDownEventBlocked(key2));
+    EXPECT_FALSE(tracker.IsDownEventDelivered(key2));
+
+    /**
+     * @tc.steps: step4. EndInteraction and verify cleanup.
+     * @tc.expected: Both return false after EndInteraction.
+     */
+    tracker.EndInteraction(key1);
+    EXPECT_FALSE(tracker.IsDownEventDelivered(key1));
+    EXPECT_FALSE(tracker.IsDownEventBlocked(key1));
+
+    tracker.EndInteraction(key2);
+    EXPECT_FALSE(tracker.IsDownEventDelivered(key2));
+    EXPECT_FALSE(tracker.IsDownEventBlocked(key2));
+
+    /**
+     * @tc.steps: step5. EndInteraction on non-existent key.
+     * @tc.expected: No state change, IsDownEventDelivered and IsDownEventBlocked still return false.
+     */
+    tracker.EndInteraction(999);
+    EXPECT_FALSE(tracker.IsDownEventDelivered(999));
+    EXPECT_FALSE(tracker.IsDownEventBlocked(999));
+    EXPECT_FALSE(tracker.IsDownEventDelivered(key1));
+    EXPECT_FALSE(tracker.IsDownEventBlocked(key1));
+}
+
+/**
+ * @tc.name: GetSubTypeMaskMouseFullTest001
+ * @tc.desc: Cover all MouseEvent GetSubTypeMask branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, GetSubTypeMaskMouseFullTest001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step1. RIGHT_MOUSE_DOWN.
+     */
+    MouseEvent rightPress;
+    rightPress.action = MouseAction::PRESS;
+    rightPress.button = MouseButton::RIGHT_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(rightPress), InputEventSubTypeMask::RIGHT_MOUSE_DOWN);
+
+    /**
+     * @tc.steps: step2. MIDDLE_MOUSE_DOWN.
+     */
+    MouseEvent middlePress;
+    middlePress.action = MouseAction::PRESS;
+    middlePress.button = MouseButton::MIDDLE_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(middlePress), InputEventSubTypeMask::MIDDLE_MOUSE_DOWN);
+
+    /**
+     * @tc.steps: step3. RIGHT_MOUSE_UP.
+     */
+    MouseEvent rightRelease;
+    rightRelease.action = MouseAction::RELEASE;
+    rightRelease.button = MouseButton::RIGHT_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(rightRelease), InputEventSubTypeMask::RIGHT_MOUSE_UP);
+
+    /**
+     * @tc.steps: step4. MIDDLE_MOUSE_UP.
+     */
+    MouseEvent middleRelease;
+    middleRelease.action = MouseAction::RELEASE;
+    middleRelease.button = MouseButton::MIDDLE_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(middleRelease), InputEventSubTypeMask::MIDDLE_MOUSE_UP);
+
+    /**
+     * @tc.steps: step5. LEFT_MOUSE_DRAGGING.
+     */
+    MouseEvent leftMove;
+    leftMove.action = MouseAction::MOVE;
+    leftMove.button = MouseButton::LEFT_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(leftMove), InputEventSubTypeMask::LEFT_MOUSE_DRAGGING);
+
+    /**
+     * @tc.steps: step6. MIDDLE_MOUSE_DRAGGING.
+     */
+    MouseEvent middleMove;
+    middleMove.action = MouseAction::MOVE;
+    middleMove.button = MouseButton::MIDDLE_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(middleMove), InputEventSubTypeMask::MIDDLE_MOUSE_DRAGGING);
+
+    /**
+     * @tc.steps: step7. PRESS with NONE_BUTTON returns NONE.
+     */
+    MouseEvent nonePress;
+    nonePress.action = MouseAction::PRESS;
+    nonePress.button = MouseButton::NONE_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(nonePress), InputEventSubTypeMask::NONE);
+
+    /**
+     * @tc.steps: step8. RELEASE with NONE_BUTTON returns NONE.
+     */
+    MouseEvent noneRelease;
+    noneRelease.action = MouseAction::RELEASE;
+    noneRelease.button = MouseButton::NONE_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(noneRelease), InputEventSubTypeMask::NONE);
+
+    /**
+     * @tc.steps: step9. Unknown action returns NONE.
+     */
+    MouseEvent unknownAction;
+    unknownAction.action = MouseAction::WINDOW_LEAVE;
+    unknownAction.button = MouseButton::LEFT_BUTTON;
+    EXPECT_EQ(manager->GetSubTypeMask(unknownAction), InputEventSubTypeMask::NONE);
+}
+
+/**
+ * @tc.name: GetSubTypeMaskTouchKeyDefaultTest001
+ * @tc.desc: Cover TouchEvent and KeyEvent GetSubTypeMask default branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, GetSubTypeMaskTouchKeyDefaultTest001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step1. TouchEvent MOVE returns NONE.
+     */
+    TouchEvent moveEvent;
+    moveEvent.type = TouchType::MOVE;
+    EXPECT_EQ(manager->GetSubTypeMask(moveEvent), InputEventSubTypeMask::NONE);
+
+    /**
+     * @tc.steps: step2. TouchEvent CANCEL returns NONE.
+     */
+    TouchEvent cancelTouch;
+    cancelTouch.type = TouchType::CANCEL;
+    EXPECT_EQ(manager->GetSubTypeMask(cancelTouch), InputEventSubTypeMask::NONE);
+
+    /**
+     * @tc.steps: step3. KeyEvent LONG_PRESS returns NONE.
+     */
+    KeyEvent longPress;
+    longPress.action = KeyAction::LONG_PRESS;
+    EXPECT_EQ(manager->GetSubTypeMask(longPress), InputEventSubTypeMask::NONE);
+
+    /**
+     * @tc.steps: step4. KeyEvent CANCEL returns NONE.
+     */
+    KeyEvent cancelKey;
+    cancelKey.action = KeyAction::CANCEL;
+    EXPECT_EQ(manager->GetSubTypeMask(cancelKey), InputEventSubTypeMask::NONE);
+}
+
+/**
+ * @tc.name: InteractionIdTest001
+ * @tc.desc: Test GetMouseInteractionId, GetTouchInteractionId, GetKeyInteractionId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, InteractionIdTest001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step1. GetMouseInteractionId with same deviceId/button gives same id.
+     */
+    MouseEvent mouse1;
+    mouse1.deviceId = 42;
+    mouse1.button = MouseButton::LEFT_BUTTON;
+    auto id1 = manager->GetMouseInteractionId(mouse1);
+
+    MouseEvent mouse2;
+    mouse2.deviceId = 42;
+    mouse2.button = MouseButton::LEFT_BUTTON;
+    auto id2 = manager->GetMouseInteractionId(mouse2);
+    EXPECT_EQ(id1, id2);
+
+    /**
+     * @tc.steps: step2. Different button gives different id.
+     */
+    mouse2.button = MouseButton::RIGHT_BUTTON;
+    auto id3 = manager->GetMouseInteractionId(mouse2);
+    EXPECT_NE(id1, id3);
+
+    /**
+     * @tc.steps: step3. GetTouchInteractionId with same deviceId/id gives same id.
+     */
+    TouchEvent touch1;
+    touch1.deviceId = 10;
+    touch1.id = 5;
+    auto touchId1 = manager->GetTouchInteractionId(touch1);
+
+    TouchEvent touch2;
+    touch2.deviceId = 10;
+    touch2.id = 5;
+    auto touchId2 = manager->GetTouchInteractionId(touch2);
+    EXPECT_EQ(touchId1, touchId2);
+
+    /**
+     * @tc.steps: step4. GetKeyInteractionId with same deviceId/code gives same id.
+     */
+    KeyEvent key1;
+    key1.deviceId = 7;
+    key1.code = KeyCode::KEY_A;
+    auto keyId1 = manager->GetKeyInteractionId(key1);
+
+    KeyEvent key2;
+    key2.deviceId = 7;
+    key2.code = KeyCode::KEY_A;
+    auto keyId2 = manager->GetKeyInteractionId(key2);
+    EXPECT_EQ(keyId1, keyId2);
+}
+
+/**
+ * @tc.name: IsValidEventMaskTest001
+ * @tc.desc: Test IsValidEventMask with various inputs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, IsValidEventMaskTest001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step1. NONE mask is invalid.
+     */
+    EXPECT_FALSE(manager->IsValidEventMask(static_cast<uint32_t>(InputEventSubTypeMask::NONE)));
+
+    /**
+     * @tc.steps: step2. Valid single mask.
+     */
+    EXPECT_TRUE(manager->IsValidEventMask(
+        static_cast<uint32_t>(InputEventSubTypeMask::LEFT_MOUSE_DOWN)));
+
+    /**
+     * @tc.steps: step3. Valid combined mask.
+     */
+    EXPECT_TRUE(manager->IsValidEventMask(
+        static_cast<uint32_t>(InputEventSubTypeMask::KEY_DOWN) |
+        static_cast<uint32_t>(InputEventSubTypeMask::KEY_UP)));
+
+    /**
+     * @tc.steps: step4. Mask with bits outside valid set is invalid.
+     */
+    EXPECT_FALSE(manager->IsValidEventMask(INVALID_MASK));
+}
+
+/**
+ * @tc.name: RunMonitorChainTest001
+ * @tc.desc: Test RunMonitorChain directly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, RunMonitorChainTest001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step1. RunMonitorChain with NONE sub-type.
+     * @tc.expected: Returns CONTINUE (invalid mask).
+     */
+    MouseEvent mouseEvent;
+    mouseEvent.action = MouseAction::PRESS;
+    mouseEvent.button = MouseButton::LEFT_BUTTON;
+    RawInputEventWrapper wrapper(mouseEvent);
+    EXPECT_EQ(manager->RunMonitorChain(InputEventSubTypeMask::NONE, wrapper),
+        InputEventInterceptAction::CONTINUE);
+
+    /**
+     * @tc.steps: step2. Add a CONTINUE monitor, verify chain returns CONTINUE.
+     */
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::LEFT_MOUSE_DOWN), g_continueHandler), nullptr);
+    EXPECT_EQ(manager->RunMonitorChain(InputEventSubTypeMask::LEFT_MOUSE_DOWN, wrapper),
+        InputEventInterceptAction::CONTINUE);
+
+    /**
+     * @tc.steps: step3. Add a BLOCK monitor for the same mask.
+     * @tc.expected: Chain returns BLOCK (BLOCK takes priority).
+     */
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::LEFT_MOUSE_DOWN), g_blockHandler), nullptr);
+    EXPECT_EQ(manager->RunMonitorChain(InputEventSubTypeMask::LEFT_MOUSE_DOWN, wrapper),
+        InputEventInterceptAction::BLOCK);
+}
+
+/**
+ * @tc.name: ProcessMouseEventRightMiddleDownBlock001
+ * @tc.desc: Test ProcessMouseEvent with RIGHT_MOUSE_DOWN and MIDDLE_MOUSE_DOWN block.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, ProcessMouseEventRightMiddleDownBlock001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up monitor for RIGHT_MOUSE_DOWN block.
+     */
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::RIGHT_MOUSE_DOWN), g_blockHandler), nullptr);
+
+    /**
+     * @tc.steps: step2. RIGHT_MOUSE_DOWN is blocked.
+     * @tc.expected: Returns true.
+     */
+    MouseEvent rightPress;
+    rightPress.action = MouseAction::PRESS;
+    rightPress.button = MouseButton::RIGHT_BUTTON;
+    rightPress.deviceId = 81;
+    EXPECT_TRUE(manager->ProcessMouseEvent(rightPress));
+
+    /**
+     * @tc.steps: step3. Set up monitor for MIDDLE_MOUSE_DOWN block.
+     */
+    auto manager2 = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager2, nullptr);
+    ASSERT_NE(manager2->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::MIDDLE_MOUSE_DOWN), g_blockHandler), nullptr);
+
+    /**
+     * @tc.steps: step4. MIDDLE_MOUSE_DOWN is blocked.
+     */
+    MouseEvent middlePress;
+    middlePress.action = MouseAction::PRESS;
+    middlePress.button = MouseButton::MIDDLE_BUTTON;
+    middlePress.deviceId = 82;
+    EXPECT_TRUE(manager2->ProcessMouseEvent(middlePress));
+}
+
+/**
+ * @tc.name: ProcessMouseEventRightUpWithDown001
+ * @tc.desc: Test RIGHT_MOUSE_UP block when DOWN was delivered (falsify cancel).
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, ProcessMouseEventRightUpWithDown001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::RIGHT_MOUSE_UP), g_blockHandler), nullptr);
+
+    /**
+     * @tc.steps: step1. Deliver RIGHT_MOUSE_DOWN first (no block for DOWN).
+     */
+    MouseEvent rightPress;
+    rightPress.action = MouseAction::PRESS;
+    rightPress.button = MouseButton::RIGHT_BUTTON;
+    rightPress.deviceId = 91;
+    EXPECT_FALSE(manager->ProcessMouseEvent(rightPress));
+
+    /**
+     * @tc.steps: step2. RIGHT_MOUSE_UP is blocked, DOWN was delivered.
+     * @tc.expected: event.action becomes CANCEL, isFalsifyCancel becomes true.
+     */
+    MouseEvent rightRelease = rightPress;
+    rightRelease.action = MouseAction::RELEASE;
+    EXPECT_TRUE(manager->ProcessMouseEvent(rightRelease));
+    EXPECT_EQ(rightRelease.action, MouseAction::CANCEL);
+    EXPECT_TRUE(rightRelease.isFalsifyCancel);
+}
+
+/**
+ * @tc.name: ProcessMouseEventCancelTest001
+ * @tc.desc: Test ProcessMouseEvent with CANCEL action.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, ProcessMouseEventCancelTest001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::LEFT_MOUSE_DOWN), g_continueHandler), nullptr);
+
+    /**
+     * @tc.steps: step1. Deliver DOWN first.
+     */
+    MouseEvent press;
+    press.action = MouseAction::PRESS;
+    press.button = MouseButton::LEFT_BUTTON;
+    press.deviceId = 101;
+    EXPECT_FALSE(manager->ProcessMouseEvent(press));
+    auto mouseKey = manager->GetMouseInteractionId(press);
+    EXPECT_TRUE(manager->mouseTracker_.IsDownEventDelivered(mouseKey));
+
+    /**
+     * @tc.steps: step2. Send CANCEL event.
+     * @tc.expected: Returns false, interaction ended.
+     */
+    MouseEvent cancelEvent = press;
+    cancelEvent.action = MouseAction::CANCEL;
+    EXPECT_FALSE(manager->ProcessMouseEvent(cancelEvent));
+    EXPECT_FALSE(manager->mouseTracker_.IsDownEventDelivered(mouseKey));
+}
+
+/**
+ * @tc.name: ProcessKeyEventLongPressAndCancel001
+ * @tc.desc: Test ProcessKeyEvent with LONG_PRESS and CANCEL actions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, ProcessKeyEventLongPressAndCancel001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::KEY_DOWN), g_continueHandler), nullptr);
+
+    /**
+     * @tc.steps: step1. LONG_PRESS key event is not intercepted.
+     * @tc.expected: Returns false.
+     */
+    KeyEvent longPressEvent;
+    longPressEvent.code = KeyCode::KEY_H;
+    longPressEvent.action = KeyAction::LONG_PRESS;
+    longPressEvent.deviceId = 111;
+    EXPECT_FALSE(manager->ProcessKeyEvent(longPressEvent));
+
+    /**
+     * @tc.steps: step2. Deliver DOWN then send CANCEL.
+     * @tc.expected: Returns false, interaction ended.
+     */
+    KeyEvent downEvent;
+    downEvent.code = KeyCode::KEY_I;
+    downEvent.action = KeyAction::DOWN;
+    downEvent.deviceId = 112;
+    EXPECT_FALSE(manager->ProcessKeyEvent(downEvent));
+    auto key = manager->GetKeyInteractionId(downEvent);
+    EXPECT_TRUE(manager->keyTracker_.IsDownEventDelivered(key));
+
+    KeyEvent cancelEvent = downEvent;
+    cancelEvent.action = KeyAction::CANCEL;
+    EXPECT_FALSE(manager->ProcessKeyEvent(cancelEvent));
+    EXPECT_FALSE(manager->keyTracker_.IsDownEventDelivered(key));
+}
+
+/**
+ * @tc.name: ProcessKeyEventUpContinueWithDown001
+ * @tc.desc: Test KEY_UP continue when DOWN was delivered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, ProcessKeyEventUpContinueWithDown001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::KEY_UP), g_continueHandler), nullptr);
+
+    /**
+     * @tc.steps: step1. Deliver KEY_DOWN first.
+     */
+    KeyEvent downEvent;
+    downEvent.code = KeyCode::KEY_J;
+    downEvent.action = KeyAction::DOWN;
+    downEvent.deviceId = 121;
+    EXPECT_FALSE(manager->ProcessKeyEvent(downEvent));
+
+    /**
+     * @tc.steps: step2. KEY_UP continues, DOWN was delivered.
+     * @tc.expected: Returns false, interaction ended.
+     */
+    KeyEvent upEvent = downEvent;
+    upEvent.action = KeyAction::UP;
+    EXPECT_FALSE(manager->ProcessKeyEvent(upEvent));
+    auto key = manager->GetKeyInteractionId(downEvent);
+    EXPECT_FALSE(manager->keyTracker_.IsDownEventDelivered(key));
+}
+
+/**
+ * @tc.name: ProcessKeyEventUpBlockIsPreIme001
+ * @tc.desc: Test KEY_UP block resets isPreIme to false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, ProcessKeyEventUpBlockIsPreIme001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::KEY_UP), g_blockHandler), nullptr);
+
+    /**
+     * @tc.steps: step1. Deliver KEY_DOWN first, then KEY_UP with isPreIme=true.
+     * @tc.expected: After block, isPreIme becomes false.
+     */
+    KeyEvent downEvent;
+    downEvent.code = KeyCode::KEY_K;
+    downEvent.action = KeyAction::DOWN;
+    downEvent.deviceId = 131;
+    EXPECT_FALSE(manager->ProcessKeyEvent(downEvent));
+
+    KeyEvent upEvent = downEvent;
+    upEvent.action = KeyAction::UP;
+    upEvent.isPreIme = true;
+    EXPECT_TRUE(manager->ProcessKeyEvent(upEvent));
+    EXPECT_FALSE(upEvent.isPreIme);
+    EXPECT_EQ(upEvent.action, KeyAction::CANCEL);
+    EXPECT_TRUE(upEvent.isFalsifyCancel);
+}
+
+/**
+ * @tc.name: ProcessTouchEventCancelEndInteraction001
+ * @tc.desc: Test ProcessTouchEvent CANCEL ends interaction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventMonitorManagerTestNg, ProcessTouchEventCancelEndInteraction001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<InputEventMonitorManager>();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(manager->AddLocalInputMonitor(
+        static_cast<uint32_t>(InputEventSubTypeMask::TOUCH_DOWN), g_continueHandler), nullptr);
+
+    /**
+     * @tc.steps: step1. Deliver TOUCH_DOWN.
+     */
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.deviceId = 141;
+    downEvent.id = 14;
+    EXPECT_FALSE(manager->ProcessTouchEvent(downEvent));
+    auto touchKey = manager->GetTouchInteractionId(downEvent);
+    EXPECT_TRUE(manager->touchTracker_.IsDownEventDelivered(touchKey));
+
+    /**
+     * @tc.steps: step2. Send CANCEL.
+     * @tc.expected: Returns false, interaction ended.
+     */
+    TouchEvent cancelEvent = downEvent;
+    cancelEvent.type = TouchType::CANCEL;
+    EXPECT_FALSE(manager->ProcessTouchEvent(cancelEvent));
+    EXPECT_FALSE(manager->touchTracker_.IsDownEventDelivered(touchKey));
+}
 } // namespace OHOS::Ace::NG
