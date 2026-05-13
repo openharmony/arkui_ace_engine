@@ -7754,6 +7754,7 @@ void WebPattern::OnActive()
 
 void WebPattern::UpdateScrollbarLayout()
 {
+    RETURN_IF_CALLING_FROM_M132();
     TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::UpdateScrollbarLayout");
     CHECK_NULL_VOID(delegate_);
     if (scrollbarLayoutPolicyChanged_ || ScrollbarLayoutPolicy::CONTENT != scrollbarLayoutPolicy_) {
