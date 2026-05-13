@@ -17,9 +17,15 @@
 #include "core/pipeline/container_window_manager.h"
 
 #include <algorithm>
-#include <optional>
+#include <codecvt>
+#include <iterator>
+#include <regex>
+#include <string>
 
 #include "base/utils/utils.h"
+#include "core/common/ai/text_translation_adapter.h"
+#include "core/common/share/text_share_adapter.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -27,8 +33,15 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+using EditFlags = NWeb::NWebContextMenuParams::ContextMenuEditStateFlags;
+using CopyOption = NWeb::NWebPreference::CopyOptionMode;
+
+const std::string ASK_CELIA_TAG = "askCelia";
+const size_t MAX_TRANSLATE_SIZE = 5000;
+
 std::unordered_set<std::string> SUPPORT_MENU_ITEM = { OH_DEFAULT_CUT, OH_DEFAULT_COPY, OH_DEFAULT_PASTE,
-    OH_DEFAULT_SELECT_ALL };
+    OH_DEFAULT_SELECT_ALL, OH_DEFAULT_TRANSLATE, OH_DEFAULT_SEARCH, OH_DEFAULT_SHARE, OH_DEFAULT_AI_WRITE,
+    OH_DEFAULT_ASK_CELIA };
 }
 
 bool WebContextMenuOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -53,21 +66,17 @@ bool WebContextMenuOverlay::CheckHandleVisible(const RectF& paintRect)
 
 std::optional<SelectHandleInfo> WebContextMenuOverlay::GetFirstHandleInfo()
 {
-    auto pattern = GetPattern<WebPattern>();
-    CHECK_NULL_RETURN(pattern, std::nullopt);
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = {};
-    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+    handleInfo.isShow = false;
     return handleInfo;
 }
 
 std::optional<SelectHandleInfo> WebContextMenuOverlay::GetSecondHandleInfo()
 {
-    auto pattern = GetPattern<WebPattern>();
-    CHECK_NULL_RETURN(pattern, std::nullopt);
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = {};
-    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+    handleInfo.isShow = false;
     return handleInfo;
 }
 
@@ -85,27 +94,22 @@ void WebContextMenuOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOve
     TAG_LOGI(AceLogTag::ACE_WEB,
         "OnUpdateMenuInfo hasText:%{public}d, isImage_:%{public}d isEdit_:%{public}d flags:%{public}d", hasText_,
         isImage_, isEdit_, flags);
-    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_CUT) && isEdit_ && hasText_) {
-        menuInfo.showCut = true;
-    } else {
-        menuInfo.showCut = false;
-    }
-    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_COPY) && hasText_) {
-        menuInfo.showCopy = true;
-    } else {
-        menuInfo.showCopy = false;
-    }
-    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_PASTE) && isEdit_) {
-        menuInfo.showPaste = true;
-    } else {
-        menuInfo.showPaste = false;
-    }
-    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_SELECT_ALL) || !isEdit_) {
-        menuInfo.showCopyAll = true;
-    } else {
-        menuInfo.showCopyAll = false;
-    }
-    menuInfo.showCopy = menuInfo.showCopy || isImage_;
+    menuInfo.showCut = (flags & EditFlags::CM_ES_CAN_CUT) && isEdit_ && hasText_;
+    menuInfo.showCopy = ((flags & EditFlags::CM_ES_CAN_COPY) && hasText_) || isImage_;
+    menuInfo.showPaste = (flags & EditFlags::CM_ES_CAN_PASTE) && isEdit_;
+    menuInfo.showCopyAll = (flags & EditFlags::CM_ES_CAN_SELECT_ALL) || !isEdit_;
+    auto value = pattern->contextMenuParam_->GetSelectionText();
+    auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    bool hasQueryWord = !queryWord.empty();
+    auto delegate = pattern->delegate_;
+    auto copyOption = delegate ? delegate->GetCopyOptionMode() : CopyOption::NONE;
+    bool canCopyOut = copyOption != CopyOption::NONE && copyOption != CopyOption::IN_APP;
+    menuInfo.showSearch = canCopyOut && hasQueryWord;
+    menuInfo.showTranslate = canCopyOut && hasQueryWord;
+    menuInfo.showShare = hasQueryWord && canCopyOut && IsNeedMenuShareForWeb() && IsSupportMenuShare();
+    menuInfo.showAIWrite = pattern->IsShowAIWrite() && canCopyOut && isEdit_;
+    canShowAIMenu_ = canCopyOut && !isEdit_ && hasQueryWord;
+    menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     menuInfo.menuType = OptionMenuType::MOUSE_MENU;
     menuInfo.menuIsShow = IsShowMenu();
     menuInfo.showCameraInput = false;
@@ -113,17 +117,44 @@ void WebContextMenuOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOve
 
 RectF WebContextMenuOverlay::GetSelectArea()
 {
-    auto pattern = GetPattern<WebPattern>();
-    CHECK_NULL_RETURN(pattern, {});
-    return pattern->selectArea_;
+    return RectF(rightClickOffset_.GetX(), rightClickOffset_.GetY(), 0.0f, 0.0f);
 }
 
 std::string WebContextMenuOverlay::GetSelectedText()
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_RETURN(pattern, "");
-    CHECK_NULL_RETURN(pattern->contextMenuParam_, "");
-    return pattern->contextMenuParam_->GetSelectionText();
+    return pattern->GetSelectInfo();
+}
+
+void WebContextMenuOverlay::CloseAndCancel(const RefPtr<WebPattern>& pattern)
+{
+    CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->contextMenuResult_);
+    pattern->contextMenuResult_->Cancel();
+}
+
+void WebContextMenuOverlay::HandleOnAskCelia(const RefPtr<WebPattern>& pattern)
+{
+    CHECK_NULL_VOID(pattern);
+    auto it = pattern->textDetectResult_.menuOptionAndAction.find(ASK_CELIA_TAG);
+    if (it == pattern->textDetectResult_.menuOptionAndAction.end() || it->second.empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed no askCelia option.");
+        return;
+    }
+    auto& funcVariant = it->second.begin()->second;
+    if (!std::holds_alternative<std::function<void(int, std::string)>>(funcVariant)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed option type error.");
+        return;
+    }
+    auto func = std::get<std::function<void(int, std::string)>>(funcVariant);
+    if (!func) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed option is null.");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "HandleOnAskCelia execute.");
+    func(true, GetSelectedText());
 }
 
 void WebContextMenuOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
@@ -153,11 +184,27 @@ void WebContextMenuOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuTy
             pattern->contextMenuResult_->SelectAll();
             CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
             break;
+        case OptionMenuActionId::TRANSLATE:
+            HandleOnWebTranslate();
+            break;
+        case OptionMenuActionId::SEARCH:
+            HandleOnSearch();
+            break;
+        case OptionMenuActionId::SHARE:
+            HandleOnShare();
+            break;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->HandleOnAIWrite();
+            CloseAndCancel(pattern);
+            break;
+        case OptionMenuActionId::ASK_CELIA:
+            HandleOnAskCelia(pattern);
+            CloseAndCancel(pattern);
+            break;
         case OptionMenuActionId::DISAPPEAR:
             pattern->contextMenuResult_->Cancel();
             break;
         default:
-            TAG_LOGI(AceLogTag::ACE_WEB, "Unsupported menu option id %{public}d", id);
             break;
     }
 }
@@ -211,21 +258,21 @@ void WebContextMenuOverlay::CalculateMenuOffset(SelectOverlayInfo& selectInfo)
     auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
     selectInfo.rightClickOffset =
         offset + OffsetF(pattern->contextMenuParam_->GetXCoord(), pattern->contextMenuParam_->GetYCoord());
+    rightClickOffset_ = selectInfo.rightClickOffset;
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     // Check whether the current window is in container modal mode and floating state, and whether the page offset
     // relative to the window needs to be added.
-    auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    if (!isContainerModal) {
+    if (pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+        windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         auto stageManager = pipeline->GetStageManager();
         CHECK_NULL_VOID(stageManager);
         auto page = stageManager->GetLastPage();
         CHECK_NULL_VOID(page);
         auto pageOffset = page->GetOffsetRelativeToWindow();
         selectInfo.rightClickOffset = selectInfo.rightClickOffset + pageOffset;
-        TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "CreateMenuNode pageOffset:%{public}s", pageOffset.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_WEB, "CalculateMenuOffset pageOffset:%{public}s", pageOffset.ToString().c_str());
     }
 }
 
@@ -233,11 +280,8 @@ std::vector<NG::MenuItemParam> WebContextMenuOverlay::FilterSupportedMenuItems(
     const std::vector<NG::MenuItemParam>& menuItemList)
 {
     std::vector<NG::MenuItemParam> supportMenuItems;
-    for (const auto& item : menuItemList) {
-        if (SUPPORT_MENU_ITEM.find(item.menuOptionsParam.id) != SUPPORT_MENU_ITEM.end()) {
-            supportMenuItems.push_back(item);
-        }
-    }
+    std::copy_if(menuItemList.begin(), menuItemList.end(), std::back_inserter(supportMenuItems),
+        [](const auto& item) { return SUPPORT_MENU_ITEM.count(item.menuOptionsParam.id); });
     return supportMenuItems;
 }
 
@@ -292,5 +336,44 @@ void WebContextMenuOverlay::OnHandleGlobalEvent(
             CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
         }
     }
+}
+
+bool WebContextMenuOverlay::IsNeedMenuShareForWeb()
+{
+    const auto& shareContent = GetSelectedText();
+    std::string_view sv(shareContent);
+    // whitespace characters to trim (same as \s in regex for ASCII whitespace)
+    constexpr auto ws = " \t\n\r\f\v";
+    const auto start = sv.find_first_not_of(ws);
+    if (start == std::string_view::npos) {
+        return false;
+    }
+    const auto end = sv.find_last_not_of(ws);
+    const auto trimmedLen = end - start + 1;
+    const auto maxShareLength = static_cast<size_t>(TextShareAdapter::GetMaxTextShareLength());
+    return trimmedLen <= maxShareLength;
+}
+
+void WebContextMenuOverlay::HandleOnWebTranslate()
+{
+    HideMenu(true);
+    auto value = GetSelectedText();
+    auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (queryWord.empty()) {
+        return;
+    }
+    RectF rect = GetSelectArea();
+    EdgeF rectLeftTop = GetSelectAreaStartLeftTop();
+    EdgeF rectRightBottom = GetSelectAreaEndRightBottom();
+    rect = ConvertWindowToScreenDomain(rect);
+    rectLeftTop = ConvertWindowToScreenDomain(rectLeftTop);
+    rectRightBottom = ConvertWindowToScreenDomain(rectRightBottom);
+    if (queryWord.size() > MAX_TRANSLATE_SIZE) {
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+        std::wstring wQueryWord = converter.from_bytes(queryWord);
+        queryWord = converter.to_bytes(wQueryWord.substr(0, MAX_TRANSLATE_SIZE));
+    }
+    TextTranslationAdapter::StartAITextTranslationTask(
+        queryWord, GetTranslateParamRectStr(rect, rectLeftTop, rectRightBottom));
 }
 } // namespace OHOS::Ace::NG

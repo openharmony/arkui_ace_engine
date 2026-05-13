@@ -27,6 +27,8 @@
 
 namespace OHOS::Ace::NG {
 
+class WebPattern;
+
 class WebContextMenuOverlay : public BaseTextSelectOverlay {
     DECLARE_ACE_TYPE(WebContextMenuOverlay, BaseTextSelectOverlay);
 
@@ -67,11 +69,19 @@ public:
     void CalculateMenuOffset(SelectOverlayInfo& menuInfo);
 
 private:
+    void HandleOnAskCelia(const RefPtr<WebPattern>& pattern);
+    void CloseAndCancel(const RefPtr<WebPattern>& pattern);
+    bool IsNeedMenuShareForWeb();
+    void HandleOnWebTranslate();
+
     bool hasText_ = false;
     bool isImage_ = false;
     bool isEdit_ = false;
+    // It is currently only used to ask Celia;
+    bool canShowAIMenu_ = false;
     WebElementType elementType_ = WebElementType::NONE;
     ResponseType responseType_ = ResponseType::RIGHT_CLICK;
+    OffsetF rightClickOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebContextMenuOverlay);
 };
