@@ -262,13 +262,15 @@ void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper, s
     }
     forwardLayout_ = posRef.value().referenceEdge == ReferenceEdge::START;
     referencePos_ = posRef.value().referencePos;
+    viewExtStart_ = posRef.value().viewExtStart;
+    viewExtEnd_ = posRef.value().viewExtEnd;
     if (forwardLayout_) {
-        startPos_ = posRef.value().viewPosStart - referencePos_;
-        endPos_ = posRef.value().viewPosEnd - referencePos_;
+        startPos_ = posRef.value().viewPosStart - viewExtStart_ - referencePos_;
+        endPos_ = posRef.value().viewPosEnd + viewExtEnd_ - referencePos_;
     } else {
         referencePos_ += totalMainSize_ - realMainSize_;
-        startPos_ = posRef.value().viewPosStart - (referencePos_ - totalMainSize_);
-        endPos_ = posRef.value().viewPosEnd - (referencePos_ - totalMainSize_);
+        startPos_ = posRef.value().viewPosStart - viewExtStart_ - (referencePos_ - totalMainSize_);
+        endPos_ = posRef.value().viewPosEnd + viewExtEnd_ - (referencePos_ - totalMainSize_);
     }
     float viewSize = posRef.value().viewPosEnd - posRef.value().viewPosStart;
     cacheStartPos_ = startPos_ - viewSize * cacheSize_;
@@ -306,6 +308,8 @@ void LazyGridLayoutAlgorithm::MeasureGridItemAll(LayoutWrapper* layoutWrapper)
     totalSize -= spaceWidth_;
     layoutInfo_->startIndex_ = 0;
     layoutInfo_->endIndex_ = totalItemCount_ - 1;
+    layoutInfo_->visibleStartIndex_ = 0;
+    layoutInfo_->visibleEndIndex_ = totalItemCount_ - 1;
     layoutInfo_->totalMainSize_ = totalSize;
     layoutInfo_->totalItemCount_ = totalItemCount_;
     totalMainSize_ = totalSize;
@@ -349,6 +353,8 @@ void LazyGridLayoutAlgorithm::MeasureGridItemLazy(LayoutWrapper* layoutWrapper)
     cacheStartPos_ += delta;
     cacheEndPos_ += delta;
     totalMainSize_ = layoutInfo_->totalMainSize_;
+    CalculateVisibleStartIndex();
+    CalculateVisibleEndIndex();
 }
 
 void LazyGridLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
@@ -456,6 +462,54 @@ void LazyGridLayoutAlgorithm::CheckRecycle()
         } else {
             break;
         }
+    }
+}
+
+void LazyGridLayoutAlgorithm::CalculateVisibleStartIndex()
+{
+    if (LessOrEqual(viewExtStart_, 0.0f)) {
+        layoutInfo_->visibleStartIndex_ = layoutInfo_->startIndex_;
+        return;
+    }
+
+    float visibleStartPos = startPos_ + viewExtStart_;
+    layoutInfo_->visibleStartIndex_ = layoutInfo_->startIndex_;
+    
+    auto iter = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
+    if (iter == layoutInfo_->posMap_.end()) {
+        return;
+    }
+
+    while (iter != layoutInfo_->posMap_.end()) {
+        if (GreatOrEqual(iter->second.endPos, visibleStartPos)) {
+            layoutInfo_->visibleStartIndex_ = iter->first;
+            break;
+        }
+        ++iter;
+    }
+}
+
+void LazyGridLayoutAlgorithm::CalculateVisibleEndIndex()
+{
+    if (LessOrEqual(viewExtEnd_, 0.0f)) {
+        layoutInfo_->visibleEndIndex_ = layoutInfo_->endIndex_;
+        return;
+    }
+
+    float visibleEndPos = endPos_ - viewExtEnd_;
+    layoutInfo_->visibleEndIndex_ = layoutInfo_->endIndex_;
+
+    auto iter = layoutInfo_->posMap_.find(layoutInfo_->endIndex_);
+    if (iter == layoutInfo_->posMap_.end()) {
+        return;
+    }
+
+    while (iter != layoutInfo_->posMap_.begin()) {
+        if (LessOrEqual(iter->second.startPos, visibleEndPos)) {
+            layoutInfo_->visibleEndIndex_ = iter->first;
+            break;
+        }
+        --iter;
     }
 }
 
