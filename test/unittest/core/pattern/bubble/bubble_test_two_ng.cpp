@@ -292,7 +292,7 @@ RefPtr<FrameNode> BubbleTestTwoNg::CreateBubbleNode(const TestProperty& testProp
  * @tc.desc: Test InitWrapperRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, InitWrapperRect001, TestSize.Level0)
+HWTEST_F(BubbleTestTwoNg, InitWrapperRectTest001, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<BubblePattern>());
     ASSERT_NE(frameNode, nullptr);
@@ -334,7 +334,7 @@ HWTEST_F(BubbleTestTwoNg, InitWrapperRect001, TestSize.Level0)
  * @tc.desc: Test UpdateBubbleMaxSize.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level0)
+HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSizeTest001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -377,7 +377,7 @@ HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level0)
  * @tc.desc: Test CreateBubbleNode
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, CreateBubbleNode001, TestSize.Level0)
+HWTEST_F(BubbleTestTwoNg, CreateBubbleNodeTest001, TestSize.Level0)
 {
     auto param = AceType::MakeRefPtr<PopupParam>();
     ASSERT_NE(param, nullptr);
@@ -396,7 +396,7 @@ HWTEST_F(BubbleTestTwoNg, CreateBubbleNode001, TestSize.Level0)
  * @tc.desc: Test InitTargetSizeAndPosition.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition, TestSize.Level0)
+HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPositionTest001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -428,7 +428,7 @@ HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition, TestSize.Level0)
  * @tc.desc: Test AdjustAvoidPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition001, TestSize.Level0)
+HWTEST_F(BubbleTestTwoNg, AdjustAvoidPositionTest001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
@@ -1403,7 +1403,7 @@ HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level0)
  * @tc.desc: Test BubblePattern::UpdateBubbleGradient
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, UpdateBubbleGradient001, TestSize.Level0)
+HWTEST_F(BubbleTestTwoNg, UpdateBubbleGradientTest001, TestSize.Level0)
 {
      /**
      * @tc.steps: step1. create targetNode and get frameNode.

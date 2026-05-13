@@ -1044,9 +1044,7 @@ void BubblePaintMethod::ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode)
     path->SetBasicShapeType(BasicShapeType::PATH);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (IsUserSetMaterial()) {
-        renderContext->SetShadowPath(clipPath_);
-    } else {
+    if (!IsUserSetMaterial()) {
         renderContext->UpdateClipShape(path);
     }
 }
