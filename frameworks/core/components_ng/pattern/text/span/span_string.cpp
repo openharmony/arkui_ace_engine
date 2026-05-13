@@ -177,8 +177,9 @@ PlaceholderRun GetImageSpanItemPlaceholderRun(const RefPtr<NG::SpanItem>& child,
     auto geometryNode = imageNode->GetGeometryNode();
     run.width = geometryNode->GetMarginFrameSize().Width();
     run.height = geometryNode->GetMarginFrameSize().Height();
-    auto base = baselineOffset.ConvertToPxDistribute(
-        spanTextStyle.GetMinFontScale(), spanTextStyle.GetMaxFontScale(), spanTextStyle.IsAllowScale());
+    auto base = baselineOffset.ConvertToPxDistributeWithEnv(
+        spanTextStyle.GetMinFontScale(), spanTextStyle.GetMaxFontScale(),
+        spanTextStyle.IsAllowScale(), spanTextStyle.GetEnvFontScale());
     if (!NearZero(base)) {
         run.baseline_offset = base;
         run.alignment = PlaceholderAlignment::BASELINE;
@@ -193,7 +194,7 @@ void AddSpanItemToParagraph(RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::S
     std::optional<double>& maxWidth)
 {
     CHECK_NULL_VOID(child);
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto context = NG::PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -217,7 +218,7 @@ void AddSpanItemToParagraph(RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::S
     } else if (child->spanItemType == SpanItemType::CustomSpan) {
         auto customSpanItem = AceType::DynamicCast<NG::CustomSpanItem>(child);
         CHECK_NULL_VOID(customSpanItem);
-        auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
+        auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScaleFromEnv(nullptr);
         if (customSpanItem->onMeasure.has_value()) {
             auto onMeasure = customSpanItem->onMeasure.value();
             auto customSpanMeasureInfo = CustomSpanMeasureInfo { .fontSize = fontSize };
@@ -226,8 +227,8 @@ void AddSpanItemToParagraph(RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::S
             }
             CustomSpanMetrics customSpanMetrics = onMeasure(customSpanMeasureInfo);
             run.width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
-            run.height = static_cast<float>(
-                customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
+            run.height = static_cast<float>(customSpanMetrics.height.value_or(fontSize /
+                context->GetFontScaleFromEnv(nullptr)) * context->GetDipScale());
         }
     }
     TextStyle spanTextStyle;
@@ -260,8 +261,8 @@ std::vector<RefPtr<NG::Paragraph>> SpanString::GetLayoutInfo(const RefPtr<SpanSt
     TextStyle textStyle;
     std::vector<RefPtr<NG::Paragraph>> paraVec;
     auto paraStyle = NG::ParagraphUtil::GetParagraphStyle(textStyle);
-    paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     paraStyle.leadingMarginAlign = Alignment::CENTER;
 
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
@@ -279,8 +280,9 @@ std::vector<RefPtr<NG::Paragraph>> SpanString::GetLayoutInfo(const RefPtr<SpanSt
             // unable to get text direction because no layoutwrapper
             NG::ParagraphUtil::GetSpanParagraphStyle(nullptr, paraStyleSpanItem, spanParagraphStyle, group);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
-                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
-                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue()
+                    .ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
             }
             spanParagraphStyle.isEndAddParagraphSpacing = paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&
                 Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) &&

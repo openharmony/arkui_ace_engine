@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace {
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
@@ -61,21 +62,22 @@ void UpdateSymbolTextStyleWithTheme(const std::unique_ptr<SymbolStyle>& symbolSt
 } // namespace
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol)
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol,
+    const RefPtr<Pattern>& pattern)
 {
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
 #ifndef OHOS_STANDARD_SYSTEM
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(defaultFontFamily);
 #endif
-    UseSelfStyle(fontStyle, textLineStyle, textStyle, isSymbol);
+    UseSelfStyle(fontStyle, textLineStyle, textStyle, isSymbol, nullptr, pattern);
     return textStyle;
 }
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol)
+    TextStyle& textStyle, bool isSymbol, const RefPtr<Pattern>& pattern)
 {
-    UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol);
+    UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol, pattern);
 }
 
 void UpdateFontSizeWithPxUnit(
@@ -88,13 +90,14 @@ void UpdateFontSizeWithPxUnit(
     } else {
         fontSize = textTheme->GetTextStyle().GetFontSize();
     }
-    auto fontSizePx = fontSize.ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto fontSizePx = fontSize.ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     textStyle.SetFontSize(Dimension(fontSizePx, DimensionUnit::PX));
 }
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol)
+    const RefPtr<TextTheme>& textTheme, bool isSymbol, const RefPtr<Pattern>& pattern)
 {
     CHECK_NULL_VOID(textTheme);
     auto& fontStyle = property->GetFontStyle();
@@ -105,6 +108,10 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, AllowScale, AllowScale);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
+
+    if (pattern) {
+        textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+    }
 
     if (property->IsNewMaterial()) {
         UpdateFontSizeWithPxUnit(property, textStyle, textTheme);
@@ -160,7 +167,8 @@ void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLin
 }
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
-    TextStyle& textStyle, bool isSymbol, const std::unique_ptr<SymbolStyle>& symbolStyle)
+    TextStyle& textStyle, bool isSymbol, const std::unique_ptr<SymbolStyle>& symbolStyle,
+    const RefPtr<Pattern>& pattern)
 {
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, AllowScale, SetAllowScale);
@@ -168,6 +176,10 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
     if (fontStyle) {
         UPDATE_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
+
+        if (pattern) {
+            textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+        }
 
         UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
         if (fontStyle->propFontSizeScale.has_value()) {

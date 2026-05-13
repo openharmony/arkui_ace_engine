@@ -138,8 +138,9 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(
 
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
-    float fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    float fontSizeValue = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
@@ -149,8 +150,9 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
 
     adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -162,8 +164,9 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
 
     adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -251,8 +254,9 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     float baselineOffset = textStyle.GetBaselineOffset().Value();
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -264,8 +268,9 @@ void TextContentModifier::SetDefaultLineHeight(const TextStyle& textStyle)
     float lineHeight = textStyle.GetLineHeight().Value();
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        lineHeight = textStyle.GetLineHeight().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
 
     lineHeightFloat_ = MakeRefPtr<AnimatablePropertyFloat>(lineHeight);
@@ -1199,7 +1204,8 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 void TextContentModifier::SetFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
     auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        value.ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     if (!isReset) {
         fontSize_ = Dimension(fontSizeValue);
     } else {
@@ -1212,7 +1218,8 @@ void TextContentModifier::SetFontSize(const Dimension& value, const TextStyle& t
 void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
     auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        value.ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     if (!isReset) {
         adaptMinFontSize_ = Dimension(fontSizeValue);
     } else {
@@ -1225,7 +1232,8 @@ void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, const Text
 void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
     auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        value.ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     if (!isReset) {
         adaptMaxFontSize_ = Dimension(fontSizeValue);
     } else {
@@ -1353,8 +1361,9 @@ void TextContentModifier::SetBaselineOffset(const Dimension& value, const TextSt
 {
     float baselineOffsetValue = 0.0f;
     if (!isReset) {
-        baselineOffsetValue = value.ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        baselineOffsetValue = value.ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         baselineOffset_ = Dimension(baselineOffsetValue);
     } else {
         baselineOffset_ = std::nullopt;
@@ -1367,8 +1376,9 @@ void TextContentModifier::SetLineHeight(const Dimension& value, const TextStyle&
 {
     float lineHeightValue = 0.0f;
     if (!isReset) {
-        lineHeightValue = value.ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        lineHeightValue = value.ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         lineHeight_ = Dimension(lineHeightValue);
     } else {
         lineHeight_ = std::nullopt;

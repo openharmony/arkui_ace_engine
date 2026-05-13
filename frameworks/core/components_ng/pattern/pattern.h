@@ -251,6 +251,23 @@ public:
         PropagateForegroundColorToChildren();
     }
 
+    virtual bool NeedReadFontScaleFromEnv()
+    {
+        return false;
+    }
+
+    void ReadFontScaleFromEnv();
+
+    std::optional<float> GetEnvFontScale() const
+    {
+        return envFontScale_;
+    }
+
+    void SetEnvFontScale(const std::optional<float>& fontScale)
+    {
+        envFontScale_ = fontScale;
+    }
+
     void PropagateForegroundColorToChildren()
     {
         auto frameNode = GetHost();
@@ -878,6 +895,7 @@ protected:
 
     WeakPtr<FrameNode> frameNode_;
     RefPtr<PatternResourceManager> resourceMgr_;
+    std::optional<float> envFontScale_;
 
     std::function<bool()> onNeedSoftkeyboardCallback_;
 private:

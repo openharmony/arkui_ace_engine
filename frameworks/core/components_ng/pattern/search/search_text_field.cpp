@@ -192,7 +192,7 @@ float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension &fontSize)
         } else {
             maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
         }
-        return fontSize.ConvertToPxDistribute(0, maxFontScale);
+        return fontSize.ConvertToPxDistributeWithEnv(0, maxFontScale, true, GetEnvFontScale());
     } else {
         return fontSize.ConvertToPx();
     }

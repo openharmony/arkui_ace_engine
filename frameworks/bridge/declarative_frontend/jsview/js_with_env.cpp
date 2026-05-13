@@ -18,12 +18,17 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/syntax/with_env_model.h"
 
 namespace OHOS::Ace::Framework {
 
 constexpr int NUM_SECOND = 2;
+
+namespace {
+    constexpr char ENV_KEY_FONT_SCALE[] = "system.arkui.fontScale";
+}
 
 void JSWithEnv::Create(const JSCallbackInfo& info)
 {
@@ -67,6 +72,21 @@ void JSWithEnv::SetCustomEnvProperty(const JSCallbackInfo& info)
     // customEnv<T>(key: string, value: T) — value is generic, handle by JS type
     WithEnvModel::GetInstance()->SetCustomEnvProperty(key, std::any(info[1]));
 }
+
+void JSWithEnv::SetFontScaleEnvProperty(const JSCallbackInfo& info)
+{
+    double envFontScale;
+    RefPtr<ResourceObject> resourceObject;
+    if (info.Length() < 1 || !JSViewAbstract::ParseJsDouble(info[0], envFontScale, resourceObject)) {
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "JSWithEnv::SetFontScaleEnvProperty invalid args");
+        return;
+    }
+    if (envFontScale <= 0.0) {
+        TAG_LOGW(AceLogTag::ACE_FOREACH, "JSWithEnv::SetFontScaleEnvProperty fontScale must be positive");
+        return;
+    }
+    WithEnvModel::GetInstance()->SetEnvProperty(ENV_KEY_FONT_SCALE, envFontScale);
+}
     
 void JSWithEnv::JSBind(BindingTarget globalObj)
 {
@@ -75,6 +95,7 @@ void JSWithEnv::JSBind(BindingTarget globalObj)
     JSClass<JSWithEnv>::StaticMethod("pop", &JSWithEnv::Pop);
     JSClass<JSWithEnv>::StaticMethod("env", &JSWithEnv::SetEnvProperty);
     JSClass<JSWithEnv>::StaticMethod("customEnv", &JSWithEnv::SetCustomEnvProperty);
+    JSClass<JSWithEnv>::StaticMethod("fontScaleEnv", &JSWithEnv::SetFontScaleEnvProperty);
     JSClass<JSWithEnv>::Bind<>(globalObj);
 }
 

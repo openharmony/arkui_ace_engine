@@ -14,10 +14,12 @@
  */
 enum WritableSystemProperties {
     Layout_Direction = 'system.arkui.layout.direction',
+    ENV_KEY_FONT_SCALE = 'system.arkui.fontscale'
 }
 
 interface WritableEnvProperties {
     [WritableSystemProperties.Layout_Direction]: boolean,
+    [WritableSystemProperties.ENV_KEY_FONT_SCALE]: number,
 }
 
 class WithEnvAttribute {
@@ -28,6 +30,11 @@ class WithEnvAttribute {
 
     customEnv(key: string, value: any): WithEnvAttribute {
         globalThis.WithEnv.setCustomEnvProperty(key, value);
+        return this;
+    }
+
+    fontScaleEnv(value: number): WithEnvAttribute {
+        globalThis.WithEnv.setEnvProperty(WritableSystemProperties.ENV_KEY_FONT_SCALE, value);
         return this;
     }
 }

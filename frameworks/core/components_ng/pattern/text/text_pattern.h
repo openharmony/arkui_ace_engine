@@ -130,6 +130,12 @@ public:
     void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
+
+    bool NeedReadFontScaleFromEnv() override
+    {
+        return true;
+    }
+
     void DumpParagraphsInfo();
     TextSelector GetTextSelector() const;
     const std::u16string& GetTextForDisplay() const;

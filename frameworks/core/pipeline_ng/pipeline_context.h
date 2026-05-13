@@ -101,6 +101,8 @@ class DynamicComponentSafeManager;
 class EnvironmentManager;
 enum class FocusActiveReason : int32_t;
 
+constexpr char ENV_KEY_FONT_SCALE[] = "system.arkui.fontScale";
+
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
     NONE = 0,
@@ -234,6 +236,10 @@ public:
     void DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
+    std::optional<float> ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host);
+
+    float GetFontScaleFromEnv(const RefPtr<FrameNode>& host = nullptr);
 
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;

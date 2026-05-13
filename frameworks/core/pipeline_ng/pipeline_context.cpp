@@ -8121,6 +8121,34 @@ void PipelineContext::FlushRelaxedInteraction()
     eventManager_->FlushRelaxedInteraction([this]() { RequestFrame(); });
 #endif
 }
+
+std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto envManager = GetEnvironmentManager();
+    CHECK_NULL_RETURN(envManager, std::nullopt);
+
+    EnvironmentQueryResult result;
+    if (!envManager->FindValueByKey(
+        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_FONT_SCALE, result)) {
+        return std::nullopt;
+    }
+
+    if (result.type == EnvironmentValueType::NUMBER) {
+        return static_cast<float>(result.numberValue);
+    }
+    return std::nullopt;
+}
+
+float PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, GetFontScale());
+    auto pattern = host->GetPattern();
+    CHECK_NULL_RETURN(pattern, GetFontScale());
+    auto envFontScale = pattern->GetEnvFontScale();
+    return envFontScale.has_value() ? envFontScale.value() : GetFontScale();
+}
+
 void PipelineContext::SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager)
 {
     dynamicComponentSafeManager_ = manager;

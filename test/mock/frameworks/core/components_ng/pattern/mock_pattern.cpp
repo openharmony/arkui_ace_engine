@@ -65,6 +65,9 @@ RefPtr<EventHub> Pattern::CreateEventHub()
     return nullptr;
 }
 
+void Pattern::ReadFontScaleFromEnv()
+{}
+
 void Pattern::CheckLocalized()
 {}
 

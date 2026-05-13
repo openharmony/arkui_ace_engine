@@ -296,8 +296,9 @@ void ParagraphUtil::ApplyIndent(
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         if (indentValue.Unit() != DimensionUnit::PERCENT) {
-            value = indentValue.ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            value = indentValue.ConvertToPxDistributeWithEnv(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         } else {
             value = static_cast<float>(indentMaxWidth * indentValue.Value());
             paragraphStyle.indent = Dimension(value);
@@ -307,11 +308,13 @@ void ParagraphUtil::ApplyIndent(
     auto leadingMarginValue = 0.0f;
     std::vector<float> indents;
     if (paragraphStyle.drawableLeadingMargin.has_value()) {
-        leadingMarginValue = paragraphStyle.drawableLeadingMargin->size.Width().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        leadingMarginValue = paragraphStyle.drawableLeadingMargin->size.Width().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     } else if (paragraphStyle.leadingMargin.has_value()) {
-        leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
     indents.emplace_back(indent + leadingMarginValue);
     indents.emplace_back(leadingMarginValue);

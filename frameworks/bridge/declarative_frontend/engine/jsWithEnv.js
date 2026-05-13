@@ -14,10 +14,12 @@
  */
 const WritableSystemProperties = {
     Layout_Direction: 'system.arkui.layout.direction', 
+    ENV_KEY_FONT_SCALE: 'system.arkui.fontscale'
 };
 
 const WritableEnvProperties = {
-[WritableSystemProperties.Layout_Direction]: false 
+[WritableSystemProperties.Layout_Direction]: false,
+[WritableSystemProperties.ENV_KEY_FONT_SCALE]: 1.0,
 };
 
 class WithEnvAttribute {
@@ -28,6 +30,11 @@ class WithEnvAttribute {
 
     customEnv(key, value) {
         globalThis.WithEnv.setCustomEnvProperty(key, value);
+        return this;
+    }
+
+    fontScaleEnv(value) {
+        globalThis.WithEnv.setEnvProperty(WritableSystemProperties.ENV_KEY_FONT_SCALE, value);
         return this;
     }
 }

@@ -134,7 +134,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
-    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme,
+        textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG, pattern);
     textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
     if (textLayoutProperty->HasFontForegroudGradiantColor()) {
         textStyle.SetFontForegroudGradiantColor(textLayoutProperty->GetFontForegroudGradiantColor());
@@ -689,8 +690,9 @@ bool MultipleParagraphLayoutAlgorithm::ImageSpanMeasure(const RefPtr<ImageSpanIt
     CHECK_NULL_RETURN(geometryNode, true);
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
-    placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     return imageSpanItem->UpdatePlaceholderRun(placeholderStyle);
 }
 
@@ -708,11 +710,11 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
     CHECK_NULL_RETURN(theme, false);
     auto width = 0.0f;
     auto height = 0.0f;
-    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
+    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScaleFromEnv(frameNode);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
     auto fontSizeOpt = textLayoutProperty->GetFontSize();
     if (fontSizeOpt.has_value()) {
-        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScale();
+        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScaleFromEnv(frameNode);
     }
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
@@ -726,7 +728,7 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
         CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize, maxWidth, layoutPolicy });
         width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
         height = static_cast<float>(
-            customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
+        customSpanMetrics.height.value_or(fontSize / context->GetFontScaleFromEnv(frameNode)) * context->GetDipScale());
     }
     PlaceholderStyle placeholderStyle;
     placeholderStyle.width = width;
@@ -864,8 +866,10 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
         if (paraStyleSpanItem) {
             ParagraphUtil::GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle, group);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
-                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
-                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+                spanParagraphStyle.fontSize =
+                    paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistributeWithEnv(
+                        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
             }
             spanParagraphStyle.isEndAddParagraphSpacing =
                 paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&

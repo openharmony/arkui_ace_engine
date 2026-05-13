@@ -61,6 +61,36 @@ void WithEnvNode::SetCustomEnvProperty(const std::string& key, std::any value)
     customEnvObjProperties_[key] = std::move(value);
 }
 
+bool WithEnvNode::GetEnvProperty(const std::string& key, std::string& value) const
+{
+    auto it = envPropertiesStringType_.find(key);
+    if (it == envPropertiesStringType_.end()) {
+        return false;
+    }
+    value = it->second;
+    return true;
+}
+
+bool WithEnvNode::GetEnvProperty(const std::string& key, double& value) const
+{
+    auto it = envPropertiesDoubleType_.find(key);
+    if (it == envPropertiesDoubleType_.end()) {
+        return false;
+    }
+    value = it->second;
+    return true;
+}
+
+bool WithEnvNode::GetEnvProperty(const std::string& key, bool& value) const
+{
+    auto it = envPropertiesBoolType_.find(key);
+    if (it == envPropertiesBoolType_.end()) {
+        return false;
+    }
+    value = it->second;
+    return true;
+}
+
 const std::any* WithEnvNode::GetCustomEnvPropertyAny(const std::string& key) const
 {
     auto it = customEnvObjProperties_.find(key);
