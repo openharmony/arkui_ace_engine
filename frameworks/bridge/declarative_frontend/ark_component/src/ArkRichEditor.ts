@@ -524,6 +524,20 @@ class RichEditorCompressLeadingPunctuationModifier extends ModifierWithKey<Optio
   }
 }
 
+class RichEditorPunctuationOverflowModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorPunctuationOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetPunctuationOverflow(node);
+    } else {
+      getUINativeModule().richEditor.setPunctuationOverflow(node, this.value);
+    }
+  }
+}
+
 class RichEditorUndoStyleModifier extends ModifierWithKey<Optional<UndoStyle>> {
   constructor(value: Optional<UndoStyle>) {
     super(value);
@@ -771,6 +785,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   compressLeadingPunctuation(enable: Optional<boolean>): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorCompressLeadingPunctuationModifier.identity, RichEditorCompressLeadingPunctuationModifier, enable);
+    return this;
+  }
+  punctuationOverflow(enable: Optional<boolean>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorPunctuationOverflowModifier.identity, RichEditorPunctuationOverflowModifier, enable);
     return this;
   }
   undoStyle(style: Optional<UndoStyle>): RichEditorAttribute {

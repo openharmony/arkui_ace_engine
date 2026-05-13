@@ -42,6 +42,7 @@ ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
         .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .punctuationOverflow = textStyle.GetPunctuationOverflow(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
         };

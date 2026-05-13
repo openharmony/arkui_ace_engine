@@ -1058,6 +1058,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OptimizeTrailingSpace, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OrphanCharOptimization, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(CompressLeadingPunctuation, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(PunctuationOverflow, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT, SpanItem::LPX_FLAG_NONE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE,
         SpanItem::LPX_FLAG_ParagraphSpacing);

@@ -8432,6 +8432,9 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Int32 (*getRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node);
     void (*resetRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node);
+    void (*setRichEditorPunctuationOverflow)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorPunctuationOverflow)(ArkUINodeHandle node);
+    void (*resetRichEditorPunctuationOverflow)(ArkUINodeHandle node);
     void (*setRichEditorIncludeFontPadding)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Int32 (*getRichEditorIncludeFontPadding)(ArkUINodeHandle node);
     void (*resetRichEditorIncludeFontPadding)(ArkUINodeHandle node);

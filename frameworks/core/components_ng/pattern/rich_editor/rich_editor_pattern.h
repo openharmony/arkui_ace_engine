@@ -358,6 +358,8 @@ public:
     bool IsOrphanCharOptimization();
     void SetCompressLeadingPunctuation(bool enabled);
     bool IsCompressLeadingPunctuation();
+    void SetPunctuationOverflow(bool enabled);
+    bool IsPunctuationOverflow();
     BlurReason GetBlurReason();
     uint32_t GetSCBSystemWindowId();
     void OnAttachToMainTree() override;
@@ -1420,6 +1422,7 @@ private:
     bool isEnableAutoSpacing_ = false;
     bool isOrphanCharOptimization_ = false;
     bool isCompressLeadingPunctuation_ = false;
+    bool isPunctuationOverflow_ = false;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;

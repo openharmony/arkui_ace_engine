@@ -183,6 +183,16 @@ void RichEditorModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, 
     pattern->SetCompressLeadingPunctuation(enabled.value_or(false));
 }
 
+void RichEditorModelStatic::SetPunctuationOverflow(FrameNode* frameNode, const std::optional<bool>& enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty,
+        PunctuationOverflow, enabled.value_or(false), frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPunctuationOverflow(enabled.value_or(false));
+}
+
 void RichEditorModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
 {
     if (color.has_value()) {

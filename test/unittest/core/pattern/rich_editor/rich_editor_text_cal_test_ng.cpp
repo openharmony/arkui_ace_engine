@@ -833,6 +833,7 @@ HWTEST_F(RichEditorTextCalTestNg, RichEditorToJsonValue001, TestSize.Level0)
     richEditorPattern->SetSupportPreviewText(false);
     richEditorPattern->SetEnableAutoSpacing(true);
     richEditorPattern->SetCompressLeadingPunctuation(true);
+    richEditorPattern->SetPunctuationOverflow(true);
     richEditorPattern->ToJsonValue(jsonObject, filter);
     EXPECT_EQ(jsonObject->GetString("enableKeyboardOnFocus"), "true");
     EXPECT_EQ(jsonObject->GetInt("undoStyle"), 1);
@@ -840,6 +841,7 @@ HWTEST_F(RichEditorTextCalTestNg, RichEditorToJsonValue001, TestSize.Level0)
     EXPECT_EQ(jsonObject->GetString("enablePreviewText"), "false");
     EXPECT_EQ(jsonObject->GetString("enableAutoSpacing"), "true");
     EXPECT_EQ(jsonObject->GetString("compressLeadingPunctuation"), "true");
+    EXPECT_EQ(jsonObject->GetString("punctuationOverflow"), "true");
 
     filter.filterFixed = 10;
     EXPECT_TRUE(filter.IsFastFilter());

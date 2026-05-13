@@ -963,6 +963,14 @@ void SetHorizontalScrollingImpl(Ark_NativePointer node, const Opt_Boolean* value
     RichEditorModelNG::SetHorizontalScrolling(frameNode, convValue.value_or(false));
 }
 
+void SetPunctuationOverflowImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelNG::SetPunctuationOverflow(frameNode, convValue.value_or(false));
+}
+
 } // RichEditorAttributeModifier
 const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
 {
@@ -1011,6 +1019,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
         RichEditorAttributeModifier::SetSelectedDragPreviewStyleImpl,
         RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
         RichEditorAttributeModifier::SetHorizontalScrollingImpl,
+        RichEditorAttributeModifier::SetPunctuationOverflowImpl,
         RichEditorAttributeModifier::SetBindSelectionMenuImpl,
         RichEditorAttributeModifier::SetCustomKeyboardImpl,
         RichEditorAttributeModifier::SetPlaceholderImpl,

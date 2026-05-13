@@ -6639,6 +6639,20 @@ typedef enum {
     NODE_TEXT_EDITOR_HORIZONTAL_SCROLLING,
 
     /**
+     * @brief Sets whether to enable punctuation overflow at the end of a line.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable punctuation overflow, the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable punctuation overflow.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *

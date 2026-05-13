@@ -198,6 +198,7 @@ struct ParagraphStyle {
     bool enableAutoSpacing = false;
     bool orphanCharOptimization = false;
     bool compressLeadingPunctuation = false;
+    bool punctuationOverflow = false;
     bool includeFontPadding = false;
     bool fallbackLineSpacing = false;
 
@@ -213,6 +214,7 @@ struct ParagraphStyle {
                enableAutoSpacing == others.enableAutoSpacing &&
                orphanCharOptimization == others.orphanCharOptimization &&
                compressLeadingPunctuation == others.compressLeadingPunctuation &&
+               punctuationOverflow == others.punctuationOverflow &&
                includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing;
     }
 

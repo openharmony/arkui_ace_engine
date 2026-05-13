@@ -164,6 +164,7 @@ void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLin
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, PunctuationOverflow, PunctuationOverflow);
 }
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
@@ -238,6 +239,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, SetOptimizeTrailingSpace);
         UPDATE_TEXT_STYLE(textLineStyle, OrphanCharOptimization, SetOrphanCharOptimization);
         UPDATE_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, SetCompressLeadingPunctuation);
+        UPDATE_TEXT_STYLE(textLineStyle, PunctuationOverflow, SetPunctuationOverflow);
     }
 }
 
