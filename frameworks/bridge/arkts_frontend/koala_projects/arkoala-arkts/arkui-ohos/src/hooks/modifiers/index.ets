@@ -57,6 +57,7 @@ import { DatePickerModifier } from "./../../DatePickerModifier"
 import { ArkDividerComponent, DividerAttribute } from "./../../component/divider"
 import { DividerModifier } from "./../../DividerModifier"
 import { ArkEffectComponentComponent, EffectComponentAttribute } from "./../../component/effectComponent"
+import { ArkDistortionComponentComponent, DistortionComponentAttribute } from "./../../component/distortionComponent"
 import { EffectComponentModifier } from "./../../EffectComponentModifier"
 import { ArkEllipseComponent, EllipseAttribute, EllipseOptions, ArkEllipsePeer } from './../../component/ellipse';
 import { EllipseModifier } from "./../../EllipseModifier"
@@ -423,6 +424,7 @@ export function hookComponent3DAttributeModifier(component: ArkComponent3DCompon
 }
 
 export function hookEffectComponentAttributeModifier(componenet: ArkEffectComponentComponent, value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookDistortionComponentAttributeModifier(componenet: ArkDistortionComponentComponent, value: AttributeModifier<DistortionComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookEllipseAttributeModifier(component: ArkEllipseComponent, modifier: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
       if (modifier === undefined) {
         return;

@@ -97,6 +97,7 @@ generated_sources = [
   "implementation/dismiss_dialog_action_accessor.cpp",
   "implementation/dismiss_popup_action_accessor.cpp",
   "implementation/dismiss_sheet_action_accessor.cpp",
+  "implementation/distortion_component_modifier.cpp",
   "implementation/divider_modifier.cpp",
   "implementation/dot_indicator_accessor.cpp",
   "implementation/drag_event_accessor.cpp",

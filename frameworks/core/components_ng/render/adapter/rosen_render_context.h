@@ -21,9 +21,11 @@
 #include <optional>
 #include <utility>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
+#endif
 #include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/modifier_ng/appearance/rs_alpha_modifier.h"
 #include "render_service_client/core/modifier_ng/appearance/rs_behind_window_filter_modifier.h"
