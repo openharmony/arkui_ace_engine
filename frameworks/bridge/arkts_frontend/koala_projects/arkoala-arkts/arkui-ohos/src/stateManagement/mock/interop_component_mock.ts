@@ -27,13 +27,31 @@ export function getV2ObservedObject<T>(value: T): T {
     return value;
 }
 
+// Test-only: most recent onPropertyChange lambda captured by
+// staticStateBindObservedObject. Tests that need to drive the interop
+// "observed object property changed" path call __invokeLastCapturedOnPropertyChange()
+// to fire the lambda directly. Production path is unaffected — this is the
+// MOCK file used only by unit tests.
+let __lastOnPropertyChange: (() => void) | undefined = undefined;
+
 export function staticStateBindObservedObject<T>(
     value: T,
     onPropertyChange?: () => void,
     onTrackPropertyRead?: (readPropName: string, isTracked: boolean) => void,
     onTrackPropertyChange?: (readPropName: string) => void
 ): T {
+    __lastOnPropertyChange = onPropertyChange;
     return value;
+}
+
+export function __invokeLastCapturedOnPropertyChange(): void {
+    if (__lastOnPropertyChange) {
+        __lastOnPropertyChange!();
+    }
+}
+
+export function __resetCapturedOnPropertyChange(): void {
+    __lastOnPropertyChange = undefined;
 }
 
 export function enableCompatibleObservedV2ForStaticMeta<T>(value: T): T {

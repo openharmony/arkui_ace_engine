@@ -567,9 +567,10 @@ function doMonitorOnArrayIndexShiftUnshiftRestoresRef(isSync: boolean): void {
     const a0 = new ClassA_ObserveAnyProp_NoAnyMeta();
     const origA1 = new ClassA_ObserveAnyProp_NoAnyMeta();
     const a2 = new ClassA_ObserveAnyProp_NoAnyMeta();
+    const a3 = new ClassA_ObserveAnyProp_NoAnyMeta();
     const newHead = new ClassA_ObserveAnyProp_NoAnyMeta();
     const arrayComp = new ComponentWithArrayOfA(null,
-        new MyArray<ClassA_ObserveAnyProp_NoAnyMeta>(a0, origA1, a2));
+        new MyArray<ClassA_ObserveAnyProp_NoAnyMeta>(a0, origA1, a2, a3));
 
     let count: int = 0;
     let lastDirty: Array<string> = new Array<string>();
@@ -629,6 +630,24 @@ function doMonitorOnArrayIndexShiftUnshiftRestoresRef(isSync: boolean): void {
 
     // Sanity check: arr[1] really is the original reference.
     test(`[${tag}] arr.1 final reference is origA1`, eq(arrayComp.arr[1] === origA1, true));
+
+    // Step 3: reverse — arr is [newHead, origA1, a2, a3] →
+    // [a3, a2, origA1, newHead]. arr[1] is now a2 (was origA1).
+    // WrappedArray.reverse() fires only OB_ARRAY_ANY_KEY, but $_get also
+    // addRef's ANY_KEY, so the monitor is dirtied. Re-eval sees
+    // before=origA1, now=a2 → fires.
+    arrayComp.arr.reverse();
+    if (!isSync) { ObserveSingleton.instance.updateDirty(); }
+    if (isSync) {
+        test(`[${tag}] arr.1 reverse: count=${count} === 3`, eq(count, 3));
+        test(`[${tag}] arr.1 reverse: m.value.before === origA1`,
+            eq(lastBeforeIsOrig, true));
+        test(`[${tag}] arr.1 reverse: m.value.now === a2`,
+            eq(lastNowIsA2, true));
+    } else {
+        test(`[${tag}] arr.1 reverse: count=${count} === 1`, eq(count, 1));
+    }
+    test(`[${tag}] arr.1 after reverse is a2`, eq(arrayComp.arr[1] === a2, true));
 }
 
 // === Test bodies (async-monitor migrated, parameterized) ===================

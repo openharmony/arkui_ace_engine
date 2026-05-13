@@ -17,7 +17,7 @@ import { IMutableKeyedStateMeta, IMutableStateMeta, IObservedObject } from '../d
 import { IFactoryInternal } from './iFactoryInternal';
 import { IBackingValue } from './iBackingValue';
 import { DecoratorBackingValue } from './backingValue';
-import { MutableKeyedStateMeta, MutableStateMeta } from './mutableStateMeta';
+import { MutableKeyedStateMeta, MutableStateMeta, MonitorTarget } from './mutableStateMeta';
 import { StateMgmtTool, InterfaceProxyHandler } from '#stateMgmtTool';
 import { InteropDecoratorBackingValue, InteropV2DecoratorBackingValue} from '../interop/interopBackingValue';
 
@@ -25,13 +25,12 @@ export class FactoryInternalImpl implements IFactoryInternal {
     public mkDecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
         return new DecoratorBackingValue<T>(info, initValue);
     }
-    public mkMutableStateMeta(info: string): IMutableStateMeta {
-        return new MutableStateMeta(info);
+    public mkMutableStateMeta(info: string, target?: MonitorTarget): IMutableStateMeta {
+        return new MutableStateMeta(info, target);
     }
-    public mkMutableKeyedStateMeta(info: string): IMutableKeyedStateMeta {
-        return new MutableKeyedStateMeta(info);
-    }
-    public mkMutableKeyedStateMeta(info: string, observed: IObservedObject): IMutableKeyedStateMeta {
+    public mkMutableKeyedStateMeta(
+        info: string, observed?: IObservedObject
+    ): IMutableKeyedStateMeta {
         return new MutableKeyedStateMeta(info, observed);
     }
     public mkObservedInterfaceProxy<T extends Object>(x: T): T {

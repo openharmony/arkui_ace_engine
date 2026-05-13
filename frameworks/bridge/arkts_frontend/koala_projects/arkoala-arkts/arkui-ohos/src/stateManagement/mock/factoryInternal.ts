@@ -14,12 +14,12 @@
  */
 
 import { IFactoryInternal } from '../base/iFactoryInternal';
-import { TrackedMutableStateMeta } from '../base/mutableStateMeta';
-import { IMutableKeyedStateMeta, IMutableStateMeta } from '../decorator';
+import { TrackedMutableStateMeta } from './trackedMutableStateMeta';
+import { IMutableKeyedStateMeta, IMutableStateMeta, IObservedObject } from '../decorator';
+import { MonitorTarget } from '../base/mutableStateMeta';
 import { IBackingValue } from '../base/iBackingValue';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { DecoratorBackingValue } from '../base/backingValue';
-import { MutableKeyedStateMeta, MutableStateMeta } from '../base/mutableStateMeta';
 import { TestMutableKeyedStateMeta } from '../tests/lib/testAddRefFireChange';
 
 // FactoryInternalImpl contains implementation needed by unit test framework tracking
@@ -27,14 +27,13 @@ export class FactoryInternalImpl implements IFactoryInternal {
     public mkDecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
         return new DecoratorBackingValue<T>(info, initValue);
     }
-    public mkMutableStateMeta(info: string): IMutableStateMeta {
-        return new TrackedMutableStateMeta(info);
+    public mkMutableStateMeta(info: string, target?: MonitorTarget): IMutableStateMeta {
+        return new TrackedMutableStateMeta(info, target);
     }
-    public mkMutableKeyedStateMeta(info: string): IMutableKeyedStateMeta {
-        return new TestMutableKeyedStateMeta(info);
-    }
-    public mkMutableKeyedStateMeta(info: string, observed: Object): IMutableKeyedStateMeta {
-        return new MutableKeyedStateMeta(info);
+    public mkMutableKeyedStateMeta(
+        info: string, observed?: IObservedObject
+    ): IMutableKeyedStateMeta {
+        return new TestMutableKeyedStateMeta(info, observed);
     }
     public mkObservedInterfaceProxy<T extends Object>(x: T): T {
         return StateMgmtTool.createProxy<T>(x);

@@ -16,7 +16,9 @@
 import { DecoratedV1VariableBase } from './decoratorBase';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
-import { IObservedObject, IPropDecoratedVariable, IVariableOwner } from '../decorator';
+import {
+    IObservedObject, IPropDecoratedVariable, IVariableOwner,
+} from '../decorator';
 import { WatchFuncType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { DecoratorBackingValue } from '../base/backingValue';

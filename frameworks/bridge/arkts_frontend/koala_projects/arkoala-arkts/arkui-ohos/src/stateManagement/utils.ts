@@ -101,6 +101,17 @@ export class UIUtils {
     private static readonly DEFAULT_INDEX = 0;
     private static currentIndex_ = UIUtils.DEFAULT_INDEX;
 
+    // Strong-ref store for monitors created without an `owner`. The framework
+    // only holds WeakRef<MonitorValueInternal> on the meta side
+    // (MutableStateMeta.bindingRefs_), so a monitor whose caller doesn't keep
+    // a strong reference gets eagerly reclaimed by the Panda VM GC mid-flight
+    // — bindings vanish before any state mutation can trigger them. When an
+    // owner is provided, the owner's __registerStateVariables__Internal list
+    // holds the monitor strongly; when not provided, we hold it here. The
+    // caller must call UIUtils.clearMonitor to release the retention. Lazily
+    // allocated — apps that always pass an owner never pay the Set header.
+    private static unownedMonitors_?: Set<IMonitorDecoratedVariable>;
+
     static addMonitor(valueCallback: (() => Any) | Array<() => Any>, monitorCallback: (m: IMonitor) => void, options?: MonitorOptions): IMonitorDecoratedVariable {
         if (options?.owner && !(options?.owner instanceof CustomComponentV2)) {
             const errorCode: Int = 130000;
@@ -112,11 +123,20 @@ export class UIUtils {
         const pathArray = UIUtils.pathToArray(options?.path);
 
         const pathLambda = UIUtils.generatePathLambda(callbackArray, pathArray, options?.isSynchronous);
-        return new MonitorFunctionDecorator(pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+        const monitor = new MonitorFunctionDecorator(
+            pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+        if (!options?.owner) {
+            if (!UIUtils.unownedMonitors_) {
+                UIUtils.unownedMonitors_ = new Set<IMonitorDecoratedVariable>();
+            }
+            UIUtils.unownedMonitors_!.add(monitor);
+        }
+        return monitor;
     }
 
     static clearMonitor(monitor: IMonitorDecoratedVariable): void {
         (monitor as MonitorFunctionDecorator).unbindAllInternalValues();
+        UIUtils.unownedMonitors_?.delete(monitor);
     }
 
     /**
@@ -180,8 +200,7 @@ export class UIUtils {
         });
     }
 
-    private static createPathInfoArray(valueInfo: MonitorValueInfo | Array<MonitorValueInfo>,
-        isSynchronous?: boolean): IMonitorPathInfo[] {
+    private static createPathInfoArray(valueInfo: MonitorValueInfo | Array<MonitorValueInfo>): IMonitorPathInfo[] {
         // We ignore paths passed in options if any, assume path passed only as a part of MonitorValueInfo
         // Single value
         if(valueInfo instanceof MonitorValueInfo) {
@@ -206,8 +225,16 @@ export class UIUtils {
         monitorCallback: (m: IMonitor) => void,
         options?: MonitorBaseOptions): IMonitorDecoratedVariable {
 
-        const pathLambda = UIUtils.createPathInfoArray(valueInfo, options?.isSynchronous);
-        return new MonitorFunctionDecorator(pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+        const pathLambda = UIUtils.createPathInfoArray(valueInfo);
+        const monitor = new MonitorFunctionDecorator(
+            pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+        if (!options?.owner) {
+            if (!UIUtils.unownedMonitors_) {
+                UIUtils.unownedMonitors_ = new Set<IMonitorDecoratedVariable>();
+            }
+            UIUtils.unownedMonitors_!.add(monitor);
+        }
+        return monitor;
     }
 
 }

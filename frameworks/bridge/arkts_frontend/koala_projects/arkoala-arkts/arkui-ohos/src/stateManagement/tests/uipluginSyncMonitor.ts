@@ -904,13 +904,12 @@ export function run_sync_monitor(): boolean {
         testWildcardOnArray();
     }
 
-    // TODO: proxy fails for current version of the framework
-    // node_modules-62220
+    // proxy fails for current version of the framework
     tcase('### makeSyncMonitor non-wildcard path on UIUtils.makeObserved(class instance)') {
         testPathOnMakeObservedClass();
     }
 
-    // TODO: proxy fails in sdk
+    // NOTE: proxy fails in sdk
     tcase('### makeSyncMonitor non-wildcard path on UIUtils.makeObserved(object literal)') {
         testPathOnMakeObservedInterface();
     }

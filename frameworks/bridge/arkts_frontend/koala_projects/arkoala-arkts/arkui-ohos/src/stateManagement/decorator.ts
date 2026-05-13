@@ -136,10 +136,6 @@ export interface IMutableKeyedStateMeta {
     // OB_ARRAY_ANY_KEY) fire ONCE total instead of once per key. Each key
     // still goes through the per-key fireChange, so non-overlapping bindings
     // still see their own notification.
-    // ReadonlyArray<string> at the boundary so callers can pass hoisted
-    // immutable batches (e.g. WrappedArray.LENGTH_AND_ANY_KEY) without
-    // worrying about a future mutation slipping in. Array<string> still
-    // satisfies the type since Array implements ReadonlyArray.
     fireChangeBatch(keys: ReadonlyArray<string>): void;
 }
 
