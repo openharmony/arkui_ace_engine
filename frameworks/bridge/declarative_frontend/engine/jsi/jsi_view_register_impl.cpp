@@ -177,6 +177,7 @@
 #ifdef VIDEO_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_video.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
+#include "bridge/declarative_frontend/jsview/js_video_controller_async.h"
 #endif
 #endif
 #endif
@@ -679,6 +680,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },
+    { "VideoControllerAsync", JSVideoControllerAsync::JSBind },
 #endif
 #endif
     { "Select", JSSelect::JSBind },
@@ -818,6 +820,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     JSVideoController::JSBind(globalObj);
+    JSVideoControllerAsync::JSBind(globalObj);
 #endif
 #endif
     JSTextInputController::JSBind(globalObj);
@@ -939,6 +942,7 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
         JSVideoController::JSBind(globalObj);
+        JSVideoControllerAsync::JSBind(globalObj);
 #endif
 #endif
     } else if ((*func).first == "Grid") {

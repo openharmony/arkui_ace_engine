@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
+#include "bridge/declarative_frontend/jsview/js_video_controller_async.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -72,16 +73,37 @@ void JSVideo::Create(const JSCallbackInfo& info)
     JSRef<JSVal> previewUriValue = videoObj->GetProperty("previewUri");
     JSRef<JSVal> currentProgressRateValue = videoObj->GetProperty("currentProgressRate");
 
-    auto controllerObj = videoObj->GetProperty("controller");
+    // Parse controllerAsync first. If set, use VideoControllerAsync and ignore controller field.
     RefPtr<VideoControllerV2> videoController = nullptr;
-    if (controllerObj->IsObject()) {
-        auto* jsVideoController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSVideoController>();
-        if (jsVideoController) {
-            jsVideoController->SetInstanceId(Container::CurrentId());
-            videoController = jsVideoController->GetController();
+    RefPtr<VideoControllerAsync> videoControllerAsync = nullptr;
+
+    auto controllerAsyncObj = videoObj->GetProperty("controllerAsync");
+    if (controllerAsyncObj->IsObject()) {
+        auto controllerAsyncRef = JSRef<JSObject>::Cast(controllerAsyncObj);
+        auto* jsVideoControllerAsync = controllerAsyncRef->Unwrap<JSVideoControllerAsync>();
+        if (jsVideoControllerAsync) {
+            jsVideoControllerAsync->SetInstanceId(Container::CurrentId());
+            videoControllerAsync = jsVideoControllerAsync->GetController();
         }
     }
-    VideoModel::GetInstance()->Create(videoController);
+
+    if (!videoControllerAsync) {
+        auto controllerObj = videoObj->GetProperty("controller");
+        if (controllerObj->IsObject()) {
+            auto controllerRef = JSRef<JSObject>::Cast(controllerObj);
+            auto* jsVideoController = controllerRef->Unwrap<JSVideoController>();
+            if (jsVideoController) {
+                jsVideoController->SetInstanceId(Container::CurrentId());
+                videoController = jsVideoController->GetController();
+            }
+        }
+    }
+
+    if (videoControllerAsync) {
+        VideoModel::GetInstance()->Create(videoControllerAsync);
+    } else {
+        VideoModel::GetInstance()->Create(videoController);
+    }
 
     // Parse the src, if it is invalid, use the empty string.
     std::string bundleNameSrc;

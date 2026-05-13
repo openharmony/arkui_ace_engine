@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
+#include "core/components_ng/pattern/video/video_state_machine_full_screen_pattern.h"
 
 namespace OHOS::Ace::NG {
 void VideoFullScreenNode::InitVideoFullScreenNode(const RefPtr<VideoNode>& video)
@@ -39,9 +40,15 @@ void VideoFullScreenNode::InitVideoFullScreenNode(const RefPtr<VideoNode>& video
     }
     if (video->HasControllerRowNode()) {
         int32_t controlRowId = GetControllerRowId();
-        auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(GetPattern());
-        CHECK_NULL_VOID(fullScreenPattern);
-        auto controlRowNode = fullScreenPattern->CreateControlBar(controlRowId);
+        RefPtr<FrameNode> controlRowNode;
+        auto videoFullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(GetPattern());
+        if (videoFullScreenPattern) {
+            controlRowNode = videoFullScreenPattern->CreateControlBar(controlRowId);
+        } else {
+            auto stateMachineFullScreenPattern = AceType::DynamicCast<VideoStateMachineFullScreenPattern>(GetPattern());
+            CHECK_NULL_VOID(stateMachineFullScreenPattern);
+            controlRowNode = stateMachineFullScreenPattern->CreateControlBar(controlRowId);
+        }
         CHECK_NULL_VOID(controlRowNode);
         AddChild(controlRowNode);
     }

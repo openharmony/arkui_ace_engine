@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 
 #include "core/components_ng/pattern/video/video_pattern.h"
+#include "core/components_ng/pattern/video/video_state_machine_pattern.h"
 
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -104,6 +105,10 @@ bool FullScreenManager::OnBackPressed()
     if (frameNode->GetTag() == V2::VIDEO_ETS_TAG) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_RETURN(pattern, false);
+        auto stateMachinePattern = AceType::DynamicCast<VideoStateMachinePattern>(pattern);
+        if (stateMachinePattern) {
+            return stateMachinePattern->OnBackPressed();
+        }
         auto videoPattern = AceType::DynamicCast<VideoPattern>(pattern);
         CHECK_NULL_RETURN(videoPattern, false);
         return videoPattern->OnBackPressed();

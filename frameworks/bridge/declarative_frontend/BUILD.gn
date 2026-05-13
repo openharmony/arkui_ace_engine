@@ -541,6 +541,7 @@ template("declarative_js_engine") {
         sources += [
           "jsview/js_video.cpp",
           "jsview/js_video_controller.cpp",
+          "jsview/js_video_controller_async.cpp",
         ]
       }
       if (defined(config.video_support_jsstack) &&
@@ -1017,6 +1018,7 @@ template("declarative_js_engine_ng") {
       sources += [
         "jsview/js_video.cpp",
         "jsview/js_video_controller.cpp",
+        "jsview/js_video_controller_async.cpp",
       ]
       if (defined(config.video_support_jsstack) &&
           config.video_support_jsstack) {

@@ -424,8 +424,8 @@ private:
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void* GetNativeWindow(int32_t instanceId, int64_t textureId);
-    void UpdatePreparedVideoSize(const RefPtr<FrameNode>& host);
 #endif
+    void UpdatePreparedVideoSize(const RefPtr<FrameNode>& host);
 
     void RegisterRenderContextCallBack();
     void ChangePlayerStatus(const PlaybackStatus& status);
