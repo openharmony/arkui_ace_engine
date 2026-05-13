@@ -34,7 +34,6 @@
  * @property {WritableSystemEnvKey} FONT_SCALE
  */
 
-
 class WithEnvAttribute {
     env(key, value) {
         globalThis.WithEnv.setEnvProperty(key, value);
