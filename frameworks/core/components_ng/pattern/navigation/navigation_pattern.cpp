@@ -6351,9 +6351,9 @@ bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
     CHECK_NULL_RETURN(curTopDest, false);
     if (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
             curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
-        // In navigation displace mode, treat dialog destinations as transPages by default even
-        // when developers do not configure them explicitly. This prevents dialog push/pop from
-        // being misidentified as secondary-push-primary transitions.
+        // In both navigation mode and displace mode, treat dialog destinations as transPages
+        // by default even when developers do not configure them explicitly. This prevents
+        // dialog push/pop from being misidentified as secondary-push-primary transitions.
         return false;
     }
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
