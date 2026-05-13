@@ -8484,12 +8484,12 @@ void CommonBridge::SetGestureDistanceMap(ArkUIRuntimeCallInfo* runtimeCallInfo, 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
+    PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
     Local<JSValueRef> gestureDistanceMap = runtimeCallInfo->GetCallArgRef(argNumber);
     if (!gestureDistanceMap.IsNull() && !gestureDistanceMap->IsUndefined() && gestureDistanceMap->IsMap(vm)) {
         Local<panda::MapRef> distanceMapRef(gestureDistanceMap);
         int32_t distanceMapSize = distanceMapRef->GetSize(vm);
-        PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE },
-            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
         for (int32_t i = 0; i < distanceMapSize; i++) {
             SourceTool sourceTool = static_cast<SourceTool>(distanceMapRef->GetKey(vm, i)->ToNumber(vm)->Value());
             double distance = static_cast<double>(distanceMapRef->GetValue(vm, i)->ToNumber(vm)->Value());
@@ -8498,6 +8498,12 @@ void CommonBridge::SetGestureDistanceMap(ArkUIRuntimeCallInfo* runtimeCallInfo, 
                 distanceMap[sourceTool] = Dimension(distance, DimensionUnit::VP);
             }
         }
+        auto gesturePtr = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
+        gesturePtr->SetDistanceMap(distanceMap);
+        return;
+    }
+    Local<JSValueRef> distanceArg = runtimeCallInfo->GetCallArgRef(argNumber - 2);
+    if (distanceArg.IsNull() || distanceArg->IsUndefined()) {
         auto gesturePtr = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
         gesturePtr->SetDistanceMap(distanceMap);
     }
