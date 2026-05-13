@@ -49,5 +49,5 @@ if (globalThis.WithEnv !== undefined) {
 }
 
 
-export default { WithEnv, WithEnvAttribute SystemEnvKey, WritableSystemEnvKey, ReadonlySystemEnvKey, WritableEnvKey };
+export default { WithEnv, WithEnvAttribute, SystemEnvKey, WritableSystemEnvKey, ReadonlySystemEnvKey, WritableEnvKey };
 
