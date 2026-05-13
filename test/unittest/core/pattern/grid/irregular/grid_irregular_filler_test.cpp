@@ -1078,4 +1078,189 @@ HWTEST_F(GridIrregularFillerTest, FillAndMeasureUntilLine002, TestSize.Level1)
     // Verify correct number of rows measured (row 0 and row 1)
     EXPECT_EQ(info.lineHeightMap_.size(), 2);
 }
+/**
+ * @tc.name: IrregularFiller::FindNextItem003
+ * @tc.desc: Test FindNextItem when current row has a gap and target is after the gap in the same row
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FindNextItem003, TestSize.Level1)
+{
+    // 4 columns, row0 has a gap at col1 (no entry)
+    // row0: col0=item1, col1=EMPTY, col2=item2, col3=item3
+    // row1: col0=item4
+    // When AdvancePos starts at col0 and finds item1, it advances to col1.
+    // col1 has no entry in gridMatrix, so AdvancePos returns false.
+    // Without fix: skips to row1, missing item2/item3 on row0.
+    // With fix: scans remaining cols on row0, finds target.
+    GridLayoutInfo info;
+    info.crossCount_ = 4;
+
+    info.gridMatrix_[0][0] = 1;
+    // col1 deliberately missing (gap)
+    info.gridMatrix_[0][2] = 2;
+    info.gridMatrix_[0][3] = 3;
+    info.gridMatrix_[1][0] = 4;
+
+    {
+        GridIrregularFiller filler(&info, nullptr);
+        // FindNextItem(1) should find item1 at row0,col0
+        EXPECT_TRUE(filler.FindNextItem(1));
+        EXPECT_EQ(filler.posX_, 0);
+        EXPECT_EQ(filler.posY_, 0);
+
+        // FindNextItem(2): AdvancePos goes col0->col1, col1 is gap, returns false.
+        // Fix: scan current row remaining cols (col >= 1), finds item2 at col2
+        EXPECT_TRUE(filler.FindNextItem(2));
+        EXPECT_EQ(filler.posX_, 2);
+        EXPECT_EQ(filler.posY_, 0);
+    }
+}
+
+/**
+ * @tc.name: IrregularFiller::FindNextItem004
+ * @tc.desc: Test FindNextItem with multiple gaps in current row and target at last column
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FindNextItem004, TestSize.Level1)
+{
+    // 5 columns, row0 has gaps at col1 and col3
+    // row0: col0=item1, col1=EMPTY, col2=item2, col3=EMPTY, col4=item5
+    // row1: col0=item6
+    GridLayoutInfo info;
+    info.crossCount_ = 5;
+
+    info.gridMatrix_[0][0] = 1;
+    // col1 gap
+    info.gridMatrix_[0][2] = 2;
+    // col3 gap
+    info.gridMatrix_[0][4] = 5;
+    info.gridMatrix_[1][0] = 6;
+
+    {
+        GridIrregularFiller filler(&info, nullptr);
+
+        // Find item1 at col0
+        EXPECT_TRUE(filler.FindNextItem(1));
+        EXPECT_EQ(filler.posX_, 0);
+        EXPECT_EQ(filler.posY_, 0);
+
+        // AdvancePos stops at col1 (gap). Fix scans remaining cols, finds item2 at col2
+        EXPECT_TRUE(filler.FindNextItem(2));
+        EXPECT_EQ(filler.posX_, 2);
+        EXPECT_EQ(filler.posY_, 0);
+
+        // AdvancePos from col2: col3 is gap, stops. Fix scans remaining cols, finds item5 at col4
+        EXPECT_TRUE(filler.FindNextItem(5));
+        EXPECT_EQ(filler.posX_, 4);
+        EXPECT_EQ(filler.posY_, 0);
+    }
+}
+
+/**
+ * @tc.name: IrregularFiller::FindNextItem005
+ * @tc.desc: Test FindNextItem when gap exists but target is in next row (original behavior preserved)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FindNextItem005, TestSize.Level1)
+{
+    // 3 columns, row0 has item at col0, then gap at col1
+    // row0: col0=item1, col1=EMPTY, col2=EMPTY
+    // row1: col0=item2
+    // Target item2 is NOT in row0 remaining cols, so should be found in row1
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+
+    info.gridMatrix_[0][0] = 1;
+    // col1 and col2 missing
+    info.gridMatrix_[1][0] = 2;
+
+    {
+        GridIrregularFiller filler(&info, nullptr);
+
+        EXPECT_TRUE(filler.FindNextItem(1));
+        EXPECT_EQ(filler.posX_, 0);
+        EXPECT_EQ(filler.posY_, 0);
+
+        // AdvancePos stops at col1 (gap). Fix scans row0 remaining cols (col1, col2) - no target.
+        // Falls through to next row search, finds item2 at row1,col0
+        EXPECT_TRUE(filler.FindNextItem(2));
+        EXPECT_EQ(filler.posX_, 0);
+        EXPECT_EQ(filler.posY_, 1);
+    }
+}
+
+/**
+ * @tc.name: IrregularFiller::FindNextItem006
+ * @tc.desc: Test FindNextItem when first column of current row is a gap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FindNextItem006, TestSize.Level1)
+{
+    // 3 columns, row0 starts with gap at col0
+    // row0: col0=EMPTY, col1=item1, col2=item2
+    // AdvancePos sets posX_=0, row.find(0) not found, returns false immediately
+    // Fix: scan current row remaining cols, finds item1 at col1
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+
+    // col0 missing
+    info.gridMatrix_[0][1] = 1;
+    info.gridMatrix_[0][2] = 2;
+
+    {
+        GridIrregularFiller filler(&info, nullptr);
+
+        EXPECT_TRUE(filler.FindNextItem(1));
+        EXPECT_EQ(filler.posX_, 1);
+        EXPECT_EQ(filler.posY_, 0);
+
+        EXPECT_TRUE(filler.FindNextItem(2));
+        EXPECT_EQ(filler.posX_, 2);
+        EXPECT_EQ(filler.posY_, 0);
+    }
+}
+
+/**
+ * @tc.name: IrregularFiller::FindNextItem007
+ * @tc.desc: Test FindNextItem with irregular item creating gap, target in same row after gap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FindNextItem007, TestSize.Level1)
+{
+    // 4 columns, simulating a 2x1 item spanning col0-col1 on row0
+    // row0: col0=item0, col1=-0(span), col2=item1, col3=item2
+    // row1: col0=item3, col1=item4, col2=item5, col3=item6
+    // After finding item0, AdvancePos goes col0->col1, col1 has -0 which != target(1).
+    // Then col1->col2, finds item1 at col2. This works via AdvancePos loop.
+    //
+    // The bug scenario: if col2 is also a negative marker (-0) and col3 = item1:
+    // row0: col0=item0, col1=EMPTY, col2=EMPTY, col3=item1
+    GridLayoutInfo info;
+    info.crossCount_ = 4;
+
+    info.gridMatrix_[0][0] = 0;
+    // col1 gap, col2 gap
+    info.gridMatrix_[0][3] = 1;
+    info.gridMatrix_[1][0] = 2;
+
+    {
+        GridIrregularFiller filler(&info, nullptr);
+
+        EXPECT_TRUE(filler.FindNextItem(0));
+        EXPECT_EQ(filler.posX_, 0);
+        EXPECT_EQ(filler.posY_, 0);
+
+        // AdvancePos: col0->col1, col1 missing => false
+        // Fix: scan row0 cols >= 1, finds item1 at col3
+        EXPECT_TRUE(filler.FindNextItem(1));
+        EXPECT_EQ(filler.posX_, 3);
+        EXPECT_EQ(filler.posY_, 0);
+
+        // item2 is in row1
+        EXPECT_TRUE(filler.FindNextItem(2));
+        EXPECT_EQ(filler.posX_, 0);
+        EXPECT_EQ(filler.posY_, 1);
+    }
+}
+
 } // namespace OHOS::Ace::NG
