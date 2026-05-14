@@ -390,6 +390,10 @@ Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer, Ark
         peer->viewNode_ = AceType::DynamicCast<NG::FrameNode>(peer->realNode_);
         peer->viewNode_->SetIsRootBuilderNode(true);
     }
+    if (peer->realNode_->GetTag() == "DetachedFreeRootProxy") {
+        peer->realNode_->SetIsRootBuilderNode(true);
+        return FrameNodePeer::Create(peer->realNode_);
+    }
     return FrameNodePeer::Create(peer->viewNode_);
 }
 } // namespace BuilderNodeOpsAccessor

@@ -27,9 +27,15 @@ export class ArkBuilderProxyNodePeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
-    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkBuilderProxyNodePeer {
+    public static create(
+        component: ComponentBase | undefined,
+        isWeak: boolean = true,
+        flags: int32 = 0
+    ): ArkBuilderProxyNodePeer {
         const peerId = PeerNode.nextId()
-        const _peerPtr = ArkUIAniModule._BuilderProxyNode_Construct(peerId)
+        const _peerPtr = isWeak
+            ? ArkUIAniModule._BuilderProxyNode_Mock_Construct(peerId)
+            : ArkUIAniModule._BuilderProxyNode_Construct(peerId)
         const _peer = new ArkBuilderProxyNodePeer(_peerPtr, peerId, "BuilderProxyNode", flags)
         component?.setPeer(_peer)
         return _peer

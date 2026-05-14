@@ -762,6 +762,17 @@ ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object ani
     return reinterpret_cast<ani_long>(builderProxyNode);
 }
 
+ani_long BuilderProxyNodeMockConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id)
+{
+    auto nodeId = reinterpret_cast<ArkUI_Int32>(id);
+    ani_long nativeObj {};
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, nativeObj);
+    auto mockNode = modifier->getCommonAniModifier()->builderProxyNodeMockConstruct(nodeId);
+    CHECK_NULL_RETURN(mockNode, nativeObj);
+    return reinterpret_cast<ani_long>(mockNode);
+}
+
 void RemoveComponentFromFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content)
 {
     const auto* modifier = GetNodeAniModifier();
