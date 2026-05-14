@@ -3525,7 +3525,7 @@ export class ListNodeDataSource extends BasicDataSource {
       if (currentNodeId !== undefined) {
         currentNodeLevel = (this.expandAndCollapseInfo.get(Number(currentNodeId + "")) === NodeStatus.EXPAND &&
           this.flag === Flag.DOWN_FLAG) ? (currentNodeLevel ? currentNodeLevel + 1 : undefined) : currentNodeLevel;
-        if (this.lastPassId !== (this.INITIAL_INVALID_VALUE as number) &&
+if (this.lastPassId !== this.INITIAL_INVALID_VALUE &&
           this.loadedNodeIdAndIndexMap.has(Number(this.lastPassId + ""))) {
           let lastIndex: number = this.loadedNodeIdAndIndexMap.get(Number(this.lastPassId + "")) ?? -1;
           this.listNode.forEach((value) => {
@@ -3682,7 +3682,7 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public hideLastLine(): void {
-    if (this.lastPassId !== (this.INITIAL_INVALID_VALUE as number) &&
+    if (this.lastPassId !== this.INITIAL_INVALID_VALUE &&
       this.loadedNodeIdAndIndexMap.has(Number(this.lastPassId + ''))) {
       this.listNode.forEach((value) => {
         if (value.getNodeCurrentNodeId() === this.lastPassId) {
