@@ -6026,6 +6026,12 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             ACE_LAYOUT_TRACE_END()
             return;
         }
+        if (CheckIfHasMeasured()) {
+            ACE_SCOPED_TRACE(
+                "SkipMeasure [%s][self:%d] reason:AlreadyMeasuredInCurrentFrame", tag_.c_str(), nodeId_);
+            ACE_LAYOUT_TRACE_END()
+            return;
+        }
     } else {
         contentConstraintChanges_.UpdateFlags(contentConstraint, layoutProperty_->GetContentLayoutConstraint());
         constraintChanges_.UpdateFlags(preConstraint, layoutProperty_->GetLayoutConstraint());
@@ -6079,7 +6085,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     PostTaskForIgnore();
 
-    layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    if (!(layoutProperty_->GetPropertyChangeFlag() & PROPERTY_UPDATE_LAYOUT)) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
+    }
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("MeasureFinish[frameRect:%s][contentSize:%s]",
             GetGeometryNode()->GetFrameRect().ToString().c_str(),
@@ -6297,6 +6305,8 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             context->AddDirtyLayoutNode(Claim(this));
         }
         layoutAlgorithm_.Reset();
+        PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
+        layoutProperty_->UpdatePropertyChangeFlag(flag & ~PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
         return false;
     }
     // update layout size.
@@ -6554,6 +6564,12 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 {
     PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+}
+
+bool FrameNode::CheckIfHasMeasured() const
+{
+    PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
+    return CheckHasMeasured(flag) && !CheckNeedMeasure(flag);
 }
 
 bool FrameNode::ReachResponseDeadline() const

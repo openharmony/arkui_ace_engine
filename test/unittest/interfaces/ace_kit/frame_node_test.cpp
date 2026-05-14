@@ -184,10 +184,12 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest005, TestSize.Level1)
     EXPECT_TRUE(NearEqual(layoutConstraint.value().maxSize.Height(), constraint.maxHeight));
 
     auto propertyChangeFlag = layoutProperty->GetPropertyChangeFlag();
-    EXPECT_EQ(propertyChangeFlag, NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT);
+    EXPECT_EQ(propertyChangeFlag,
+        NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT | NG::PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
     frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
-    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(),
-        NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT | NG::PROPERTY_UPDATE_MEASURE_SELF);
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT |
+                                                           NG::PROPERTY_UPDATE_MEASURE_SELF |
+                                                           NG::PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
 }
 
 /**
