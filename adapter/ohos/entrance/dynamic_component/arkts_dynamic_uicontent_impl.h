@@ -45,7 +45,8 @@ public:
     static std::shared_ptr<ArktsDynamicUIContentImpl> Create(OHOS::AbilityRuntime::Context* context,
         void* aniEnv, VMType vmType, const DcCreateParam& param);
 
-    void InitializeArktsDynamicUIContentImpl(const DynamicInitialConfig& config);
+    void InitializeArktsDynamicUIContentImpl(
+        const DynamicInitialConfig& config, sptr<IRemoteObject> connectorToRender = nullptr);
     UIContentErrorCode CommonInitializeDc(const std::string& contentInfo);
 
 private:
@@ -58,7 +59,7 @@ private:
     RefPtr<Platform::AceContainer> CreateAceContainer(
         const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info);
     void AfterContainerInitialize();
-    RefPtr<Platform::AceViewOhos> CreateAceView(float &density);
+    RefPtr<Platform::AceViewOhos> CreateAceView(float &density, sptr<IRemoteObject> connectorToRender = nullptr);
     void HandleCommonInitializeWindowFocus();
     void HandleSurfaceChanged(const RefPtr<Platform::AceViewOhos>& aceView,
         int32_t deviceWidth, int32_t deviceHeight, bool isModelJson);

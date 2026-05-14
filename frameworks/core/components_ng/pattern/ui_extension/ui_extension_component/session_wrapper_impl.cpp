@@ -742,6 +742,7 @@ void SessionWrapperImpl::setConnectToRenderInner(
     auto rsUIContext = rsUIDirector->GetRSUIContext();
     CHECK_NULL_VOID(rsUIContext);
     extensionSessionInfo.connectToRenderToken_  = rsUIContext->GetConnectToRender();
+    UIEXT_LOGI("SessionWrapperImpl get connectToRenderToken success.");
 }
 
 void SessionWrapperImpl::UpdateSessionConfig()
