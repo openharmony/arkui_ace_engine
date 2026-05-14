@@ -1610,15 +1610,6 @@ void VideoStateMachinePattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode();
 }
 
-bool VideoStateMachinePattern::NeedLift() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    return IsFullScreen() && renderContext->IsUniRenderEnabled();
-}
-
 RefPtr<FrameNode> VideoStateMachinePattern::CreateControlBar(int32_t nodeId)
 {
     ContainerScope scope(instanceId_);
@@ -1658,7 +1649,7 @@ RefPtr<FrameNode> VideoStateMachinePattern::CreateControlBar(int32_t nodeId)
     renderContext->UpdateBackgroundColor(videoTheme->GetBkgColor());
     auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
     controlBarLayoutProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-    if (NeedLift()) {
+    if (IsFullScreen()) {
         PaddingProperty padding;
         padding.bottom = CalcLength(LIFT_HEIGHT);
         controlBarLayoutProperty->UpdatePadding(padding);
