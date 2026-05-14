@@ -1415,8 +1415,10 @@ std::optional<SizeF> ImagePattern::GetImageSizeForMeasure()
 void ImagePattern::FinishMeasureForOnComplete()
 {
     CHECK_NULL_VOID(loadingCtx_);
-    loadingCtx_->FinishMeasure();
-    loadingCtx_->CallbackAfterMeasureIfNeed();
+    // hold an extra ref to keep loadingCtx alive during the callback chain
+    auto loadingCtx = loadingCtx_;
+    loadingCtx->FinishMeasure();
+    loadingCtx->CallbackAfterMeasureIfNeed();
 }
 
 bool ImagePattern::CheckImagePrivacyForCopyOption()
