@@ -210,6 +210,7 @@ private:
     void LoadDepthMap();
     void OnDepthMapDataReady();
     void OnDepthMapLoadSuccess(const RefPtr<CanvasImage>& canvasImage);
+    void OnDepthMapLoadFail();
     void TransferDataToRosen();
     std::shared_ptr<OHOS::Rosen::RSDepthNode> GetRSDepthNode() const;
     void TransferDepthSpace(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);

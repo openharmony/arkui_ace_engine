@@ -337,7 +337,11 @@ void DepthComponentPattern::LoadDepthMap()
             CHECK_NULL_VOID(canvasImage);
             pattern->OnDepthMapLoadSuccess(canvasImage);
         },
-        nullptr);
+        [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnDepthMapLoadFail();
+        });
     depthMapLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(depthMap_, std::move(loadNotifier), false);
     depthMapLoadingCtx_->LoadImageData();
 }
@@ -371,6 +375,17 @@ void DepthComponentPattern::OnDepthMapLoadSuccess(const RefPtr<CanvasImage>& can
     auto rsDepthNode = GetRSDepthNode();
     CHECK_NULL_VOID(rsDepthNode);
     rsDepthNode->SetDepthImage(rosenImage);
+}
+
+void DepthComponentPattern::OnDepthMapLoadFail()
+{
+    TAG_LOGE(AceLogTag::ACE_DEPTH_COMPONENT, "Depth map load failed: %s", depthMap_.GetKey().c_str());
+    lastLoadedDepthMapKey_.clear();
+    depthMapLoadingCtx_.reset();
+    auto host = GetHost();
+    if (host) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void DepthComponentPattern::TransferDataToRosen()
@@ -664,12 +679,13 @@ void DepthComponentPattern::Update3DOffset()
         }
 
         bool localized = bgOffset.useLocalizedOffset;
-        CHECK_NULL_VOID(localized);
-        float flag = AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0 : 1.0;
-        if (offsetEdges.start.has_value()) {
-            offsetX_ = offsetEdges.start->ConvertToPx() * flag;
-        } else if (offsetEdges.end.has_value()) {
-            offsetX_ = -offsetEdges.end->ConvertToPx() * flag;
+        if (localized) {
+            float flag = AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0 : 1.0;
+            if (offsetEdges.start.has_value()) {
+                offsetX_ = offsetEdges.start->ConvertToPx() * flag;
+            } else if (offsetEdges.end.has_value()) {
+                offsetX_ = -offsetEdges.end->ConvertToPx() * flag;
+            }
         }
     } else if (bgOffset.offset.has_value()) {
         offsetX_ = bgOffset.offset->GetX().ConvertToPx();
