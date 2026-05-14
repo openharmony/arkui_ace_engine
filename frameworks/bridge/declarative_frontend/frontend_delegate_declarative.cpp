@@ -1937,6 +1937,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     }
     if (dialogAttr.backgroundColor.has_value()) {
         dialogProperties.backgroundColor = dialogAttr.backgroundColor.value();
+        dialogProperties.backgroundColorResObj = dialogAttr.backgroundColorResObj;
     }
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
@@ -2022,6 +2023,7 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .onWillDismiss = dialogAttr.customOnWillDismiss,
         .onWillDismissRelease = dialogAttr.customOnWillDismissRelease, .maskColor = dialogAttr.maskColor,
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
+        .backgroundColorResObj = dialogAttr.backgroundColorResObj, .maskColorResObj = dialogAttr.maskColorResObj,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
         .customBuilderWithId = dialogAttr.customBuilderWithId,

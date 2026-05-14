@@ -989,6 +989,51 @@ void DialogPattern::ParseButtonFontColorAndBgColor(
     }
 }
 
+void DialogPattern::AddButtonColorCallback(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(buttonNode);
+    if (params.bgColorResObj) {
+        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
+        CHECK_NULL_VOID(buttonPattern);
+        auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(buttonNode))](
+                            const RefPtr<ResourceObject>& resObj) {
+            auto buttonNode = dialogWeak.Upgrade();
+            CHECK_NULL_VOID(buttonNode);
+            Color buttonBackgroundColor;
+            bool state = ResourceParseUtils::ParseResColor(resObj, buttonBackgroundColor);
+            if (state) {
+                auto renderContext = buttonNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateBackgroundColor(buttonBackgroundColor);
+            }
+        };
+        buttonPattern->AddResObj("dialog.button.bgcolor", params.bgColorResObj, std::move(updateFunc));
+    }
+
+    if (params.textColorResObj) {
+        auto textNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
+        auto textPattern = textNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        auto updateFunc = [textWeak = AceType::WeakClaim(AceType::RawPtr(textNode))](
+                            const RefPtr<ResourceObject>& resObj) {
+            auto textNode = textWeak.Upgrade();
+            CHECK_NULL_VOID(textNode);
+            Color fontColor;
+            bool state = ResourceParseUtils::ParseResColor(resObj, fontColor);
+            if (state) {
+                auto buttonTextLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+                CHECK_NULL_VOID(buttonTextLayoutProperty);
+                buttonTextLayoutProperty->UpdateTextColor(fontColor);
+            }
+        };
+        textPattern->AddResObj("dialog.button.textcolor", params.textColorResObj, std::move(updateFunc));
+    }
+}
+
 RefPtr<FrameNode> DialogPattern::CreateButton(
     const ButtonInfo& params, int32_t index, bool isCancel, bool isVertical, int32_t length)
 {
@@ -1015,6 +1060,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     CHECK_NULL_RETURN(textNode, nullptr);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
+    AddButtonColorCallback(params, buttonNode);
     SetButtonEnabled(buttonNode, params.enabled);
     auto hub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
@@ -1566,13 +1612,58 @@ void DialogPattern::OnColorConfigurationUpdate()
     UpdateDialogTheme();
     UpdateTitleAndContentColor();
     UpdateMaskColor();
+    UpdateResourceColors();
     UpdateWrapperBackgroundStyle(host, dialogTheme_);
     SetDialogSystemMaterial(DynamicCast<FrameNode>(host->GetFirstChild()), dialogProperties_);
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
 }
+void DialogPattern::UpdateResourceColors()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
 
+    if (dialogProperties_.maskColorResObj) {
+        auto maskNode = GetMaskNode();
+        CHECK_NULL_VOID(maskNode);
+        auto renderContext = maskNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        Color maskColor = dialogProperties_.maskColor.value();
+        bool state = ResourceParseUtils::ParseResColor(dialogProperties_.maskColorResObj, maskColor);
+        if (state) {
+            dialogProperties_.maskColor = maskColor;
+            renderContext->UpdateBackgroundColor(maskColor);
+        }
+    }
+
+    CHECK_NULL_VOID(contentRenderContext_);
+    // Also reload internal resources for complex properties
+    if (dialogProperties_.backgroundColorResObj) {
+        Color backgroundColor = dialogProperties_.backgroundColor.value();
+        bool state = ResourceParseUtils::ParseResColor(dialogProperties_.backgroundColorResObj, backgroundColor);
+        if (state) {
+            dialogProperties_.backgroundColor = backgroundColor;
+            contentRenderContext_->UpdateBackgroundColor(backgroundColor);
+        }
+    }
+
+    if (dialogProperties_.effectOption.has_value() && contentRenderContext_->GetBackgroundEffect().has_value()) {
+        dialogProperties_.effectOption->ReloadResources();
+        contentRenderContext_->UpdateBackgroundEffect(dialogProperties_.effectOption);
+    }
+
+    if (dialogProperties_.borderColor.has_value()) {
+        dialogProperties_.borderColor->ReloadResources();
+        contentRenderContext_->UpdateBorderColor(dialogProperties_.borderColor.value());
+    }
+
+    if (dialogProperties_.shadow.has_value()) {
+        dialogProperties_.shadow->ReloadResources();
+        contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
+    }
+}
 bool DialogPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
