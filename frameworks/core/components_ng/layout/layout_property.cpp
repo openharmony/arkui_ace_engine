@@ -1383,9 +1383,10 @@ TextDirection LayoutProperty::GetLayoutDirection() const
 {
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
-    return (!pipeline || (pipeline && !pipeline->GetUseEnvManager()))
-        ? layoutDirection_.value_or(TextDirection::AUTO)
-        : (layoutDirection_.has_value() ? layoutDirection_.value()
+    return (layoutDirection_.has_value())
+        ? layoutDirection_.value()
+        : ((!pipeline || !pipeline->GetUseEnvManager())
+            ? TextDirection::AUTO
             : (host ? pipeline->ResolveDirectionFromEnv(host).value_or(TextDirection::AUTO) : TextDirection::AUTO));
 }
 
