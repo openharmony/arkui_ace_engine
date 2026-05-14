@@ -2172,6 +2172,133 @@ HWTEST_F(SpanTestNg, SpanDumpLog005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanDumpLog006
+ * @tc.desc: Test SpanNode DumpInfo (json) includes FontVariations field.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode with textStyle containing fontVariations.
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    TextStyle textStyle;
+    FONT_VARIATIONS_LIST fontVariations = { { "wght", 400.0f, std::nullopt } };
+    textStyle.SetFontVariations(fontVariations);
+    spanNode->spanItem_->SetTextStyle(std::optional<TextStyle>(textStyle));
+
+    /**
+     * @tc.steps: step2. call DumpInfo with json.
+     * @tc.expected: json contains FontVariations key.
+     */
+    auto json = JsonUtil::Create(true);
+    spanNode->DumpInfo(json);
+    EXPECT_TRUE(json->Contains("FontVariations"));
+    EXPECT_NE(json->GetValue("FontVariations")->GetString(), "");
+}
+
+/**
+ * @tc.name: SpanDumpLog007
+ * @tc.desc: Test SpanNode DumpInfo (json) with empty fontVariations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpLog007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode with textStyle containing empty fontVariations.
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    TextStyle textStyle;
+    textStyle.SetFontVariations(FONT_VARIATIONS_LIST());
+    spanNode->spanItem_->SetTextStyle(std::optional<TextStyle>(textStyle));
+
+    /**
+     * @tc.steps: step2. call DumpInfo with json.
+     * @tc.expected: FontVariations is "[]".
+     */
+    auto json = JsonUtil::Create(true);
+    spanNode->DumpInfo(json);
+    EXPECT_TRUE(json->Contains("FontVariations"));
+    EXPECT_EQ(json->GetValue("FontVariations")->GetString(), "[]");
+}
+
+/**
+ * @tc.name: SpanDumpInfoAdvance001
+ * @tc.desc: Test SpanDumpInfoAdvance includes fontVariations in dump log.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpInfoAdvance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode with textStyle containing fontVariations.
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    TextStyle textStyle;
+    FONT_VARIATIONS_LIST fontVariations = { { "wght", 700.0f, true }, { "wdth", 100.0f, std::nullopt } };
+    textStyle.SetFontVariations(fontVariations);
+    spanNode->spanItem_->SetTextStyle(std::optional<TextStyle>(textStyle));
+
+    /**
+     * @tc.steps: step2. call SpanDumpInfoAdvance.
+     * @tc.expected: dump log includes fontVariations description.
+     */
+    spanNode->spanItem_->SpanDumpInfoAdvance();
+    bool foundFontVariations = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("fontVariations") != std::string::npos) {
+            foundFontVariations = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundFontVariations);
+}
+
+/**
+ * @tc.name: SpanDumpInfoAdvance002
+ * @tc.desc: Test SpanDumpInfoAdvance with fontStyle containing fontVariations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDumpInfoAdvance002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanNode with fontStyle containing fontVariations but no textStyle.
+     */
+    DumpLog::GetInstance().description_.clear();
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    spanNode->spanItem_->textStyle_ = std::nullopt;
+    auto fontStyle = std::make_unique<FontStyle>();
+    FONT_VARIATIONS_LIST fontVariations = { { "wght", 400.0f, std::nullopt } };
+    fontStyle->UpdateFontVariations(fontVariations);
+    spanNode->spanItem_->fontStyle = std::move(fontStyle);
+
+    /**
+     * @tc.steps: step2. call SpanDumpInfoAdvance.
+     * @tc.expected: no crash, returns early when textStyle is null.
+     */
+    spanNode->spanItem_->SpanDumpInfoAdvance();
+    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+}
+
+/**
  * @tc.name: SpanMouseHoverEvent001
  * @tc.desc: test text_select_overlay.cpp on hover event
  * @tc.type: FUNC

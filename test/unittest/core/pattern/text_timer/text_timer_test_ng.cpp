@@ -1644,4 +1644,103 @@ HWTEST_F(TextTimerTestNg, TextTimerTextColorSyncTest002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
     EXPECT_TRUE(layoutProperty->GetTextColorSetByUser());
 }
+
+/**
+ * @tc.name: TextTimerUpdateTextTimerNegative001
+ * @tc.desc: Test UpdateTextTimer with negative elapsedTime produces "-" prefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerUpdateTextTimerNegative001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call UpdateTextTimer with negative value.
+     * @tc.expected: content starts with "-".
+     */
+    pattern->UpdateTextTimer(-1000.0);
+    auto content = textLayoutProperty->GetContent();
+    ASSERT_TRUE(content.has_value());
+    EXPECT_EQ(content.value().front(), u'-');
+}
+
+/**
+ * @tc.name: TextTimerUpdateTextTimerNegative002
+ * @tc.desc: Test UpdateTextTimer with positive elapsedTime has no "-" prefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerUpdateTextTimerNegative002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call UpdateTextTimer with positive value.
+     * @tc.expected: content does not start with "-".
+     */
+    pattern->UpdateTextTimer(1000.0);
+    auto content = textLayoutProperty->GetContent();
+    ASSERT_TRUE(content.has_value());
+    EXPECT_NE(content.value().front(), u'-');
+}
+
+/**
+ * @tc.name: TextTimerUpdateTextTimerNegative003
+ * @tc.desc: Test UpdateTextTimer with zero elapsedTime has no "-" prefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerUpdateTextTimerNegative003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call UpdateTextTimer with zero value.
+     * @tc.expected: content does not start with "-".
+     */
+    pattern->UpdateTextTimer(0.0);
+    auto content = textLayoutProperty->GetContent();
+    ASSERT_TRUE(content.has_value());
+    EXPECT_NE(content.value().front(), u'-');
+}
 } // namespace OHOS::Ace::NG

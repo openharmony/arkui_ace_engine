@@ -254,6 +254,34 @@ void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vect
     }
 }
 
+bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    auto jsArray = JSRef<JSArray>::Cast(jsValue);
+    auto length = jsArray->Length();
+    for (uint32_t i = 0; i < length; ++i) {
+        auto item = jsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            continue;
+        }
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        auto axis = itemObject->GetProperty("axis");
+        auto value = itemObject->GetProperty("value");
+        auto isNormalized = itemObject->GetProperty("isNormalized");
+        if (!axis->IsString() || !value->IsNumber()) {
+            continue;
+        }
+        std::optional<bool> normalized;
+        if (isNormalized->IsBoolean()) {
+            normalized = isNormalized->ToBoolean();
+        }
+        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
+    }
+    return true;
+}
+
 #ifdef PIXEL_MAP_SUPPORTED
 JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap)
 {
