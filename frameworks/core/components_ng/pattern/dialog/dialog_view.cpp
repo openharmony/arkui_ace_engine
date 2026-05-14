@@ -620,6 +620,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(const int32_t nodeId, const Dialo
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
     dialogLayoutProp->UpdateIsSceneBoardDialog(param.isSceneBoardDialog);
+    dialogLayoutProp->UpdateDisplayModeInSubWindow(param.displayModeInSubWindow);
     if (param.width.has_value() && NonNegative(param.width.value().Value())) {
         dialogLayoutProp->UpdateWidth(param.width.value());
     } else {

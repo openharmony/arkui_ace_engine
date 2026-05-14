@@ -1528,4 +1528,243 @@ ArkUINativeModuleValue SelectBridge::ResetMenuSystemMaterial(ArkUIRuntimeCallInf
     GetArkUINodeModifiers()->getSelectModifier()->resetMenuSystemMaterial(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+void ParseAndSetMenuBlurStyleOption(EcmaVM* vm, ArkUINodeHandle nativeNode, Local<JSValueRef> styleArg)
+{
+    auto object = styleArg->ToObject(vm);
+    int32_t colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+    auto colorModeVal = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "colorMode"));
+    if (!colorModeVal->IsNull() && colorModeVal->IsNumber()) {
+        colorMode = colorModeVal->Int32Value(vm);
+    }
+    int32_t adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    auto adaptiveColorVal = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "adaptiveColor"));
+    if (!adaptiveColorVal->IsNull() && adaptiveColorVal->IsNumber()) {
+        adaptiveColor = adaptiveColorVal->Int32Value(vm);
+    }
+    double scale = 1.0;
+    auto scaleVal = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "scale"));
+    if (!scaleVal->IsNull() && scaleVal->IsNumber()) {
+        scale = scaleVal->ToNumber(vm)->Value();
+    }
+    BlurOption blurOption;
+    auto blurOptionsArg = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "blurOptions"));
+    if (!blurOptionsArg.IsEmpty() && blurOptionsArg->IsObject(vm)) {
+        ArkTSUtils::ParseBlurOption(vm, blurOptionsArg, blurOption);
+    }
+    int32_t policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    auto policyVal = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "policy"));
+    if (!policyVal->IsNull() && policyVal->IsNumber()) {
+        policy = policyVal->Int32Value(vm);
+    }
+    bool isValidColor = false;
+    Color inactiveColor = Color::TRANSPARENT;
+    RefPtr<ResourceObject> inactiveColorResObj;
+    auto inactiveColorVal = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "inactiveColor"));
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!inactiveColorVal->IsNull() &&
+        ArkTSUtils::ParseJsColor(vm, inactiveColorVal, inactiveColor, inactiveColorResObj, nodeInfo)) {
+        isValidColor = true;
+    }
+    MenuBgBlurStyleOptionArgs blurStyleOptionArgs;
+    blurStyleOptionArgs.colorMode = colorMode;
+    blurStyleOptionArgs.adaptiveColor = adaptiveColor;
+    blurStyleOptionArgs.scale = scale;
+    blurStyleOptionArgs.blurValues = blurOption.grayscale.data();
+    blurStyleOptionArgs.blurValuesSize = blurOption.grayscale.size();
+    blurStyleOptionArgs.policy = policy;
+    blurStyleOptionArgs.isValidColor = isValidColor;
+    blurStyleOptionArgs.inactiveColor = inactiveColor.GetValue();
+    blurStyleOptionArgs.inactiveColorRawPtr = AceType::RawPtr(inactiveColorResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuBgBlurStyleWithOption(nativeNode, &blurStyleOptionArgs);
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuBackgroundBlurStyleOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (styleArg->IsUndefined() || !styleArg->IsObject(vm)) {
+        return ResetMenuBackgroundBlurStyleOptions(runtimeCallInfo);
+    }
+    ParseAndSetMenuBlurStyleOption(vm, nativeNode, styleArg);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuBackgroundBlurStyleOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuBgBlurStyleWithOption(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void SetMenuBackgroundEffectParam(const EcmaVM* vm, const Local<panda::ObjectRef>& params, int32_t& policy,
+    Color& inactiveColor, bool& isValidColor, ArkUINodeHandle nativeNode, RefPtr<ResourceObject>& resourceObject)
+{
+    auto policyArg = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "policy"));
+    auto inactiveColorArg = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "inactiveColor"));
+
+    if (!policyArg.IsEmpty() && policyArg->IsNumber()) {
+        ArkTSUtils::ParseJsInt32(vm, policyArg, policy);
+        if (policy < static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) ||
+            policy > static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+            policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+        }
+    }
+
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!inactiveColorArg.IsEmpty() &&
+        ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, resourceObject, nodeInfo)) {
+        isValidColor = true;
+    }
+}
+
+void ParseMenuBackgroundEffectParams(const EcmaVM* vm, const Local<panda::ObjectRef>& params,
+    ArkUI_Float32& saturationVal, ArkUI_Float32& brightnessVal, AdaptiveColor& adaptiveColor)
+{
+    ArkUI_Float32 saturation = 1.0f;
+    auto saturationArg = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "saturation"));
+    if (!saturationArg.IsEmpty() && saturationArg->IsNumber()) {
+        saturation = saturationArg->ToNumber(vm)->Value();
+        saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
+    }
+    saturationVal = saturation;
+
+    ArkUI_Float32 brightness = 1.0f;
+    auto brightnessArg = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "brightness"));
+    if (!brightnessArg.IsEmpty() && brightnessArg->IsNumber()) {
+        brightness = brightnessArg->ToNumber(vm)->Value();
+        brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
+    }
+    brightnessVal = brightness;
+
+    auto adaptiveColorArg = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "adaptiveColor"));
+    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    if (!adaptiveColorArg.IsEmpty() && adaptiveColorArg->IsNumber()) {
+        adaptiveColorValue = adaptiveColorArg->Int32Value(vm);
+        if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
+        }
+    }
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    if (optionsArg.IsEmpty() || !optionsArg->IsObject(vm)) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetMenuBackgroundEffect(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto optionsObj = optionsArg->ToObject(vm);
+    CalcDimension radius;
+    auto radiusArg = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "radius"));
+    if (radiusArg.IsEmpty() || !ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) ||
+        LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    ArkUI_Float32 saturation = 1.0f;
+    ArkUI_Float32 brightness = 1.0f;
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    ParseMenuBackgroundEffectParams(vm, optionsObj, saturation, brightness, adaptiveColor);
+    Color color = Color::TRANSPARENT;
+    RefPtr<ResourceObject> colorResObj;
+    auto colorArg = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "color"));
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!colorArg.IsEmpty() && !ArkTSUtils::ParseJsColor(vm, colorArg, color, colorResObj, nodeInfo)) {
+        color.SetValue(Color::TRANSPARENT.GetValue());
+    }
+    BlurOption blurOption;
+    auto blurOptionsArg = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "blurOptions"));
+    if (!blurOptionsArg.IsEmpty() && blurOptionsArg->IsObject(vm)) {
+        ArkTSUtils::ParseBlurOption(vm, blurOptionsArg, blurOption);
+    }
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    Color inactiveColor = Color::TRANSPARENT;
+    bool isValidColor = false;
+    RefPtr<ResourceObject> inactiveColorResObj;
+    SetMenuBackgroundEffectParam(vm, optionsObj, policy, inactiveColor, isValidColor, nativeNode, inactiveColorResObj);
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
+    auto inactiveColorRawPtr = AceType::RawPtr(inactiveColorResObj);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuBackgroundEffect(nativeNode,
+        static_cast<ArkUI_Float32>(radius.Value()), saturation, brightness, color.GetValue(),
+        static_cast<ArkUI_Int32>(adaptiveColor), blurOption.grayscale.data(), blurOption.grayscale.size(), policy,
+        isValidColor, inactiveColor.GetValue(), colorRawPtr, inactiveColorRawPtr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuBackgroundEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuDistortionMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (modeArg->IsUndefined() || !modeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetMenuDistortionMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t modeVal = modeArg->Int32Value(vm);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuDistortionMode(nativeNode, modeVal);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuDistortionMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuDistortionMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuEdgeLightMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (modeArg->IsUndefined() || !modeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetMenuEdgeLightMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t modeVal = modeArg->Int32Value(vm);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuEdgeLightMode(nativeNode, modeVal);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuEdgeLightMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuEdgeLightMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

@@ -1735,6 +1735,9 @@ void ViewAbstractModelImpl::SetAccessibilityGroupOptions(NG::AccessibilityGroupO
 void ViewAbstractModelImpl::SetAccessibilityNextFocusId(const std::string& nextFocusId)
 {}
 
+void ViewAbstractModelImpl::SetAccessibilityNextFocusParams(const NG::AccessibilityNextFocusParams& params)
+{}
+
 void ViewAbstractModelImpl::SetAccessibilityRole(const std::string& role, bool resetValue)
 {}
 
@@ -1768,5 +1771,11 @@ void ViewAbstractModelImpl::SetAccessibilityActionOptions(NG::AccessibilityActio
 {}
 
 void ViewAbstractModelImpl::ResetAccessibilityActionOptions()
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityCustomActions(const std::vector<NG::AccessibilityCustomAction>& actions)
+{}
+
+void ViewAbstractModelImpl::ResetAccessibilityCustomActions()
 {}
 } // namespace OHOS::Ace::Framework

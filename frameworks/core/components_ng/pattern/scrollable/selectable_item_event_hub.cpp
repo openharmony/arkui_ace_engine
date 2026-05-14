@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/selectable_item_event_hub.h"
 #include "ui/base/ace_type.h"
 
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 

@@ -104,6 +104,21 @@ export function RootSceneImpl(
     })
 }
 
+@memo
+export function RootScene(
+    @memo @memo_skip
+    style: ((attributes: RootSceneAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRootSceneComponent>((): ArkRootSceneComponent => {
+        return new ArkRootSceneComponent()
+    })
+    NodeAttach<ArkRootScenePeer>((): ArkRootScenePeer => ArkRootScenePeer.create(receiver), (_: ArkRootScenePeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class RootSceneSession_serializer {
     public static write(buffer: SerializerBase, value: RootSceneSession): void {
     }

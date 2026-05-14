@@ -693,7 +693,8 @@ public:
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
-    bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info,
+        bool useWebWindowID = false);
     void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
     std::string GetPixelMapName(std::shared_ptr<Media::PixelMap> pixelMap, std::string featureName);
     void UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
@@ -932,8 +933,6 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
-    void OnLanguageConfigurationUpdate() override;
-    void OnDirectionConfigurationUpdate() override;
     void OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy);
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
@@ -1054,8 +1053,16 @@ public:
     int ExecuteInputCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteSelectCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteInputMethodCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteCommand(const std::string& eventTypeStr, const std::string& xpathStr, int32_t durationInt,
                         const std::string& alignStr, int32_t offsetInt);
+    int HandleTapCommand(double x, double y, int32_t duration, int32_t tapCount);
+    int HandleScrollGestureCommand(double x, double y, double xDistance, double yDistance, int32_t speed);
+    int HandlePinchGestureCommand(double x, double y, double scaleFactor, int32_t speed);
+    int HandleLongPressCommand(double x, double y);
+    int ExecuteGestureCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int CheckGestureCoordinatesInWebBounds(double screenX, double screenY);
+    bool ConvertScreenToWebCoordinates(double screenX, double screenY, double& outWebX, double& outWebY);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
@@ -1109,8 +1116,6 @@ public:
         isTextSelectionEnable_ = textSelectionEnable;
     }
     void NotifyOverlayRotation();
-    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
-    void SetIsSystemRtlEnable(bool enable);
     void UpdateScrollbarLayout();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
@@ -1145,6 +1150,7 @@ private:
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();
+    void CloseDefaultContextMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
     bool IsNeedResizeVisibleViewport();
@@ -1479,6 +1485,7 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    bool ShouldBlockCursorChangeWhenInvisible(const OHOS::NWeb::CursorType& type);
     void ProcessCustomCursor(std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
     int32_t GetVisibleViewportAvoidHeight();
@@ -1759,6 +1766,8 @@ private:
     bool isDirectionalLockEnabled_ = true;
     ScrollDirectionalLockType scrollDirectionalLockType_ = ScrollDirectionalLockType::NESTED_SCROLL;
     ScrollbarLayoutPolicy scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
+    bool scrollbarLayoutPolicyChanged_ = false;
+    bool isLanguageRtl_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

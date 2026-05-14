@@ -15,14 +15,12 @@
 import { ObserveSingleton } from '../base/observeSingleton';
 import { IBindingSource, ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
-import { RenderIdType, IMutableStateMeta, IComputedDecoratedVariable, IVariableOwner, IDecoratorBaseRegistry } from '../decorator';
+import {
+    RenderIdType, IMutableStateMeta, IComputedDecoratedVariable,
+    IVariableOwner, IDecoratorBaseRegistry,
+} from '../decorator';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ElementInfo } from '../utils';
-
-export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
-    fireChange(): void;
-    isFreeze(): boolean;
-}
 
 export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<T>, IDecoratorBaseRegistry {
     public static readonly MIN_COMPUTED_ID: RenderIdType = 0x10000000;
@@ -53,8 +51,8 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
     fireChange(): void {
         const newValue: T = this.runFunctionAndObserve();
         if (this.cachedValue_ !== newValue) {
-            this.meta_.fireChange();
             this.cachedValue_ = newValue;
+            this.meta_.fireChange();
         }
     }
     clearReverseBindings(): void {

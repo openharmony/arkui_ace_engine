@@ -310,13 +310,16 @@ void PreFixEmptyBundleName(napi_env env, napi_value value)
     }
 }
 
-ResourceStruct CheckResourceStruct(napi_env env, napi_value value)
+ResourceStruct CheckResourceStruct(napi_env env, napi_value value, bool hasGetter)
 {
     napi_value idNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     if (valueType != napi_object) {
         return ResourceStruct::CONSTANT;
+    }
+    if (hasGetter) {
+        return ResourceStruct::DYNAMIC_V2;
     }
     if (napi_get_named_property(env, value, "id", &idNApi) != napi_ok) {
         return ResourceStruct::CONSTANT;
@@ -341,10 +344,10 @@ ResourceStruct CheckResourceStruct(napi_env env, napi_value value)
     return ResourceStruct::CONSTANT;
 }
 
-void CompleteResourceParam(napi_env env, napi_value value)
+void CompleteResourceParam(napi_env env, napi_value value, bool hasGetter)
 {
     PreFixEmptyBundleName(env, value);
-    ResourceStruct resourceStruct = CheckResourceStruct(env, value);
+    ResourceStruct resourceStruct = CheckResourceStruct(env, value, hasGetter);
     switch (resourceStruct) {
         case ResourceStruct::CONSTANT:
             return;
@@ -660,7 +663,10 @@ bool ParseColor(napi_env env, napi_value value, Color& result)
 
 bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
 {
-    CompleteResourceParam(env, value);
+    if (HasGetter(env, value, "id")) {
+        info.hasGetter = true;
+    }
+    CompleteResourceParam(env, value, info.hasGetter);
     napi_value idNApi = nullptr;
     napi_value typeNApi = nullptr;
     napi_value paramsNApi = nullptr;
@@ -669,7 +675,9 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     if (valueType == napi_object) {
-        napi_get_named_property(env, value, "id", &idNApi);
+        if (!info.hasGetter) {
+            napi_get_named_property(env, value, "id", &idNApi);
+        }
         napi_get_named_property(env, value, "type", &typeNApi);
         napi_get_named_property(env, value, "params", &paramsNApi);
         napi_get_named_property(env, value, "bundleName", &bundleNameNApi);
@@ -678,9 +686,13 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
         return false;
     }
 
-    napi_typeof(env, idNApi, &valueType);
-    if (valueType == napi_number) {
-        napi_get_value_int32(env, idNApi, &info.resId);
+    if (idNApi == nullptr) {
+        info.resId = UNKNOWN_RESOURCE_ID;
+    } else {
+        napi_typeof(env, idNApi, &valueType);
+        if (valueType == napi_number) {
+            napi_get_value_int32(env, idNApi, &info.resId);
+        }
     }
 
     napi_typeof(env, typeNApi, &valueType);
@@ -733,10 +745,6 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
         std::unique_ptr<char[]> moduleNameStr = std::make_unique<char[]>(strLen);
         napi_get_value_string_utf8(env, moduleNameNApi, moduleNameStr.get(), strLen, &ret);
         info.moduleName = moduleNameStr.get();
-    }
-
-    if (HasGetter(env, value, "id")) {
-        info.hasGetter = true;
     }
 
     return true;
@@ -1178,7 +1186,8 @@ bool CheckDarkResource(const RefPtr<ResourceObject>& resObj)
 
 RefPtr<ResourceObject> ParseResourceParamToObj(napi_env env, napi_value value)
 {
-    CompleteResourceParam(env, value);
+    bool hasGetter = HasGetter(env, value, "id");
+    CompleteResourceParam(env, value, hasGetter);
     napi_value idNApi = nullptr;
     napi_value typeNApi = nullptr;
     napi_value paramsNApi = nullptr;
@@ -1189,7 +1198,9 @@ RefPtr<ResourceObject> ParseResourceParamToObj(napi_env env, napi_value value)
     if (valueType != napi_object || value == NULL) {
         return nullptr;
     }
-    napi_get_named_property(env, value, "id", &idNApi);
+    if (!hasGetter) {
+        napi_get_named_property(env, value, "id", &idNApi);
+    }
     napi_get_named_property(env, value, "type", &typeNApi);
     napi_get_named_property(env, value, "params", &paramsNApi);
     napi_get_named_property(env, value, "bundleName", &bundleNameNApi);
@@ -1199,9 +1210,11 @@ RefPtr<ResourceObject> ParseResourceParamToObj(napi_env env, napi_value value)
         return nullptr;
     }
     int32_t id = -1;
-    napi_typeof(env, idNApi, &valueType);
-    if (valueType == napi_number) {
-        napi_get_value_int32(env, idNApi, &id);
+    if (idNApi != nullptr) {
+        napi_typeof(env, idNApi, &valueType);
+        if (valueType == napi_number) {
+            napi_get_value_int32(env, idNApi, &id);
+        }
     }
     int32_t type = -1;
     napi_typeof(env, typeNApi, &valueType);

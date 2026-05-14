@@ -18,25 +18,25 @@
 
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
 import { AttributeModifier, hookUIPickerComponentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { ResourceColor, Resource as arkui_component_units_Resource, BorderRadiuses, LocalizedBorderRadiuses, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer } from './units'
 import { Color as arkui_component_enums_Color } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { UIPickerComponentModifier } from './../UIPickerComponentModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkUIPickerComponentPeer extends ArkCommonMethodPeer {
     uIPickerComponentAttributeSet?: UIPickerComponentModifier;
@@ -123,6 +123,30 @@ export class ArkUIPickerComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._UIPickerComponentAttribute_setSelectionIndicator(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setItemHeightAttribute(value: arkui_Graphics_LengthMetrics | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIPickerComponentAttribute_setItemHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setDisplayedItemCountAttribute(value: int32 | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeInt32(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIPickerComponentAttribute_setDisplayedItemCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface UIPickerComponentOptions {
     selectedIndex?: int32;
@@ -159,6 +183,12 @@ export interface UIPickerComponentAttribute extends CommonMethod {
     }
     selectionIndicator(value: PickerIndicatorStyle | undefined): this {
         throw new Error('Unimplemented method selectionIndicator')
+    }
+    itemHeight(value: arkui_Graphics_LengthMetrics | undefined): this {
+        throw new Error('Unimplemented method itemHeight')
+    }
+    displayedItemCount(value: int32 | undefined): this {
+        throw new Error('Unimplemented method displayedItemCount')
     }
     attributeModifier(value: AttributeModifier<UIPickerComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -200,6 +230,16 @@ export class ArkUIPickerComponentComponent extends ArkCommonMethodComponent impl
         this.getPeer()?.setSelectionIndicatorAttribute(value_casted)
         return this
     }
+    public itemHeight(value: arkui_Graphics_LengthMetrics | undefined): this {
+        const value_casted = value as (arkui_Graphics_LengthMetrics | undefined)
+        this.getPeer()?.setItemHeightAttribute(value_casted)
+        return this
+    }
+    public displayedItemCount(value: int32 | undefined): this {
+        const value_casted = value as (int32 | undefined)
+        this.getPeer()?.setDisplayedItemCountAttribute(value_casted)
+        return this
+    }
     public attributeModifier(value: AttributeModifier<UIPickerComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookUIPickerComponentAttributeModifier(this, value);
@@ -231,6 +271,21 @@ export function UIPickerComponentImpl(
     })
 }
 
+@memo
+export function UIPickerComponent(
+    @memo @memo_skip
+    style: ((attributes: UIPickerComponentAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkUIPickerComponentComponent>((): ArkUIPickerComponentComponent => {
+        return new ArkUIPickerComponentComponent()
+    })
+    NodeAttach<ArkUIPickerComponentPeer>((): ArkUIPickerComponentPeer => ArkUIPickerComponentPeer.create(receiver), (_: ArkUIPickerComponentPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class UIPickerComponentOptions_serializer {
     public static write(buffer: SerializerBase, value: UIPickerComponentOptions): void {
         let valueSerializer: SerializerBase = buffer

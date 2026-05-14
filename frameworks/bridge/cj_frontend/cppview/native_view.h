@@ -220,6 +220,16 @@ public:
         recycleCustomNodeName_ = recycleCustomNodeName;
     }
 
+    void SetCjProfilerViewName(const std::string& name)
+    {
+        cjProfilerViewName_ = name;
+    }
+
+    const std::string& GetCjProfilerViewName() const
+    {
+        return cjProfilerViewName_;
+    }
+
     void SetIsRecycleRerender(bool isRecycleRerender)
     {
         isRecycleRerender_ = isRecycleRerender;
@@ -263,6 +273,9 @@ private:
     RefPtr<NG::CustomNodeBase> recycleCustomNode_;
     std::string recycleCustomNodeName_;
     bool isRecycleRerender_ = false;
+
+    std::string cjProfilerViewName_;
+    int32_t profilerElementId_ = -1;
 };
 
 } // namespace OHOS::Ace::Framework

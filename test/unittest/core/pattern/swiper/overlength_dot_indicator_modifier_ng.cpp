@@ -459,7 +459,7 @@ HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveForward001, TestSi
     modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
     modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
     modifier.CalcTargetStatusOnAllPointMoveForward(itemHalfSizes);
-    EXPECT_EQ(modifier.targetSelectedIndex_, 2);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 4);
 }
 
 /**
@@ -488,7 +488,7 @@ HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveForward002, TestSi
     modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
     modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
     modifier.CalcTargetStatusOnAllPointMoveForward(itemHalfSizes);
-    EXPECT_EQ(modifier.targetSelectedIndex_, 2);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 4);
 }
 /**
  * @tc.name: CalcTargetStatusOnAllPointMoveForward003
@@ -599,7 +599,7 @@ HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveBackward001, TestS
     modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
     modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
     modifier.CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
-    EXPECT_EQ(modifier.targetSelectedIndex_, 2);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 4);
 }
 
 /**
@@ -628,7 +628,7 @@ HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveBackward002, TestS
     modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
     modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
     modifier.CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
-    EXPECT_EQ(modifier.targetSelectedIndex_, 2);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 4);
 }
 /**
  * @tc.name: CalcTargetStatusOnAllPointMoveBackward003

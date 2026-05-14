@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "list_test_ng.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
@@ -76,5 +78,26 @@ HWTEST_F(ListScrollerTestNg, SetInitialIndex, TestSize.Level1)
     ListModelStatic::SetInitialIndex(AceType::RawPtr(frameNode_), initialIndex);
     ASSERT_NE(layoutProperty_, nullptr);
     EXPECT_FALSE(layoutProperty_->GetInitialIndex().has_value());
+}
+
+/**
+ * @tc.name: ListLpxAttribute001
+ * @tc.desc: Verify space and spaceWidth keep independent LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ListLpxAttribute001, TestSize.Level1)
+{
+    CreateList();
+    ListModelStatic::SetListSpace(
+        AceType::RawPtr(frameNode_), std::make_optional(Dimension(10.0, DimensionUnit::LPX)));
+    ListModelStatic::SetListSpaceWidth(
+        AceType::RawPtr(frameNode_), std::make_optional(Dimension(20.0, DimensionUnit::LPX)));
+    EXPECT_TRUE(frameNode_->lpxAttributes_.count(LpxAttribute::LPX_SPACE));
+    EXPECT_TRUE(frameNode_->lpxAttributes_.count(LpxAttribute::LPX_SPACE_WIDTH));
+
+    ListModelStatic::SetListSpace(
+        AceType::RawPtr(frameNode_), std::make_optional(Dimension(10.0, DimensionUnit::VP)));
+    EXPECT_FALSE(frameNode_->lpxAttributes_.count(LpxAttribute::LPX_SPACE));
+    EXPECT_TRUE(frameNode_->lpxAttributes_.count(LpxAttribute::LPX_SPACE_WIDTH));
 }
 } // namespace OHOS::Ace::NG

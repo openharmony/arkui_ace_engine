@@ -21,7 +21,7 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, ShadowOptions, PixelMap, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from './common'
-import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, IMEClient, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle, MenuType, TextVerticalAlign, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextChangeReason, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from './textCommon'
+import { LayoutManager_serializer, PreviewText_serializer, TextRange_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextRange, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, TextDataDetectorConfig, OnDidChangeCallback, IMEClient, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle, MenuType, TextVerticalAlign, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextChangeReason, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from './textCommon'
 import { StyledString, StyledStringInternal, DecorationStyleInterface, DecorationStyleInterface_serializer, StyledString_serializer, MutableStyledString_serializer, MutableStyledString, MutableStyledStringInternal } from './styledString'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
@@ -1675,6 +1675,18 @@ export function RichEditorImpl(
     })
 }
 
+@memo
+export function RichEditor(
+    @memo @memo_skip
+    style: ((attributes: RichEditorAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkRichEditorComponent>((): ArkRichEditorComponent => {
+        return new ArkRichEditorComponent()
+    })
+    NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer): void => {
+        style?.(receiver)
+    })
+}
 export class CopyEvent_serializer {
     public static write(buffer: SerializerBase, value: CopyEvent): void {
         let valueSerializer: SerializerBase = buffer

@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
-#include <string>
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
-#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
@@ -942,6 +940,18 @@ ArkUINativeModuleValue GridBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runt
                 };
             options.getPreviewBadge = std::move(onGetPreviewBadge);
         }
+        auto useDefaultStyle = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "useDefaultMultiSelectStyle"));
+        if (useDefaultStyle->IsBoolean()) {
+            options.useDefaultMultiSelectStyle = useDefaultStyle->ToBoolean(vm)->Value();
+        }
+        auto fingerSelect = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableFingerMultiSelect"));
+        if (fingerSelect->IsBoolean()) {
+            options.enableFingerMultiSelect = fingerSelect->ToBoolean(vm)->Value();
+        }
+        auto twoFingerSelect = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableTwoFingerMultiSelect"));
+        if (twoFingerSelect->IsBoolean()) {
+            options.enableFingerMultiSelect = twoFingerSelect->ToBoolean(vm)->Value();
+        }
     }
     GridModelNG::SetEditModeOptions(frameNode, options);
     return panda::JSValueRef::Undefined(vm);
@@ -955,6 +965,72 @@ ArkUINativeModuleValue GridBridge::ResetEditModeOptions(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetEditModeOptions(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::SetEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> arg_enableEditMode = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    bool enableEditMode = arg_enableEditMode->ToBoolean(vm)->Value();
+    GetArkUINodeModifiers()->getGridModifier()->setGridEnableEditMode(nativeNode, enableEditMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::ResetEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridModifier()->resetGridEnableEditMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::SetOnEditModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getGridModifier()->resetOnGridEditModeChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void(bool)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](bool enableEditMode) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        PipelineContext::SetCallBackNode(weakNode);
+        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, enableEditMode) };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getGridModifier()->setOnGridEditModeChangeCallBack(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::ResetOnEditModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridModifier()->resetOnGridEditModeChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

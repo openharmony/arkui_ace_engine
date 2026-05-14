@@ -56,8 +56,18 @@ struct AccessibilityGroupOptions {
     std::string actionControllerByInspector;
 };
 
+struct AccessibilityNextFocusParams {
+    std::string nextFocusInspectorKey;
+    bool descendantMode = false;
+};
+
 struct AccessibilityActionOptions {
     int32_t scrollStep = 1;
+};
+
+struct AccessibilityCustomAction {
+    std::string actionName;
+    std::function<void()> customActionCallback;
 };
 
 struct OverlayAccessibilityProperty {
@@ -513,8 +523,14 @@ public:
 
     virtual std::string GetAccessibilityNextFocusInspectorKey() const
     {
-        return accessibilityNextFocusInspectorKey_.value_or("");
+        return accessibilityNextFocusParams_.has_value()
+            ? accessibilityNextFocusParams_->nextFocusInspectorKey : "";
     }
+
+    void SetAccessibilityNextFocusParams(const AccessibilityNextFocusParams& params);
+    AccessibilityNextFocusParams GetAccessibilityNextFocusParams() const;
+    bool HasAccessibilityNextFocusParams() const;
+    void ResetAccessibilityNextFocusParams();
 
     std::string GetAccessibilityDescription() const;
 
@@ -688,6 +704,10 @@ public:
     void SetAccessibilityActionOptions(const AccessibilityActionOptions& accessibilityActionOptions);
     AccessibilityActionOptions GetAccessibilityActionOptions();
     void ResetAccessibilityActionOptions();
+    void SetAccessibilityCustomActions(const std::vector<AccessibilityCustomAction>& accessibilityCustomActions);
+    std::vector<AccessibilityCustomAction> GetAccessibilityCustomActions();
+    void ResetAccessibilityCustomActions();
+    bool ActActionCustom(const std::string& actionName);
 
     // used to indicate whether a dialog like component is modal
     void SetIsAccessibilityModal(bool isModal);
@@ -757,6 +777,7 @@ private:
     void NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType);
 
     // the interface supports multithreading
+    void SetAccessibilityNextFocusParamsMultiThread(const AccessibilityNextFocusParams& params);
     void SetAccessibilityNextFocusInspectorKeyMultiThread(const std::string& accessibilityNextFocusInspectorKey);
 
 protected:
@@ -799,7 +820,7 @@ protected:
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
     std::optional<std::string> textTypeHint_;
-    std::optional<std::string> accessibilityNextFocusInspectorKey_;
+    std::optional<AccessibilityNextFocusParams> accessibilityNextFocusParams_;
     std::optional<uint32_t> accessibilityActions_;
     std::optional<std::string> accessibilityRole_;
     std::optional<std::string> accessibilityCustomRole_;
@@ -831,6 +852,7 @@ protected:
     std::optional<OverlayAccessibilityProperty> overlayProperty_;
     std::optional<bool> isHeaderOrFooter_;
     std::optional<AccessibilityActionOptions> accessibilityActionOptions_;
+    std::optional<std::vector<AccessibilityCustomAction>> accessibilityCustomActions_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -129,7 +129,7 @@ public:
     Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
     bool IsExpandDisplay();
     Placement GetPlacementWithItem(RefPtr<FrameNode> parentItem);
-    TargetSpaceReason CheckHeightReason(const OffsetF& position, const SizeF& size);
+    TargetSpaceReason CheckHeightReason(const OffsetF& position, const SizeF& size, RefPtr<FrameNode> parentItem);
     bool CheckFitScreen(const OffsetF& position, const SizeF& size);
     bool CheckVerticalRange(const OffsetF& position, const SizeF& size);
     bool CheckHorizontalRange(const OffsetF& position, const SizeF& size);
@@ -147,6 +147,8 @@ protected:
     bool isContainerModal(const RefPtr<FrameNode>& node);
     float GetContainerModalOffsetY(const RefPtr<FrameNode>& node);
     float CalcVerticalPosition(const SizeF& size);
+    bool IsTopPosition(Placement parentPlacement);
+    bool IsBottomPosition(Placement parentPlacement);
 
     // position input is relative to main window left top point,
     // menu show position is relative to menuWrapper.
@@ -158,7 +160,7 @@ protected:
     PreviewMenuParam param_;
     std::optional<Dimension> propTargetSpace_;
     std::optional<OffsetF> propTargetOffset_;
-    std::optional<SizeF> proptargetSize_;
+    std::optional<SizeF> propTargetSize_;
 
 private:
     enum class ErrorPositionType {
@@ -364,11 +366,12 @@ private:
     bool MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode, const std::optional<Dimension>& minKeyboardAvoidDistance,
         float keyboardTopPosition);
     std::optional<float> GetKeyboardTopPosition(const RefPtr<FrameNode>& menuNode);
-    float NeedUpdateMaxHeight(
-        const SizeF& size, OffsetF position, const SizeF& menuItemSize, LayoutWrapper* layoutWrapper);
-    float MenuVerticalPanHeight(const OffsetF& position, const SizeF& size);
-    float GetCurrentPosition(OffsetF& position, const SizeF& size, float flip, bool widthEnough);
-    float GetOthersPosition(OffsetF& position, const SizeF& size);
+    float NeedUpdateMaxHeight(const SizeF& size, OffsetF position, const SizeF& menuItemSize,
+        LayoutWrapper* layoutWrapper, RefPtr<FrameNode> parentItem);
+    float MenuVerticalPanHeight(const OffsetF& position, const SizeF& size, RefPtr<FrameNode> parentItem);
+    float GetCurrentPosition(
+        OffsetF& position, const SizeF& size, float flip, bool widthEnough, RefPtr<FrameNode> parentItem);
+    float GetOthersPosition(OffsetF& position, const SizeF& size, RefPtr<FrameNode> parentItem);
     float CalcSubMenuMaxHeightTargetSpace(LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
     void UpdateTargetSpaceScroll(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateTargetSpaceMaxHeight(

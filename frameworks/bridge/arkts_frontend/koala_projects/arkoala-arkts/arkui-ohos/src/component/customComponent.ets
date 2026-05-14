@@ -39,6 +39,8 @@ import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { transferTypeName } from '../stateManagement/storage/persistenceV2';
 import { ArkCustomComponentRootPeer } from './staticComponents';
 import { ArkUIObjectFinalizationRegisterProxy } from '../base/ArkUIObjectFinalizationRegisterProxy';
+import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../stateManagement/utils';
+import { IVariableOwner } from '../stateManagement/decorator';
 /** @custom_components_common_method_imports */
 
 export class ReuseObject {
@@ -94,7 +96,21 @@ export class ReuseObject {
             }
             return key;
         } else {
-            return Object.getOwnPropertyNames(this._raw!);
+            if (this._raw! instanceof Record) {
+                return Array.from((this._raw! as Record<string, RecordData>).keySet());
+            }
+            if (this._raw! instanceof Array) {
+                let rawArray = this._raw! as Array<RecordData>;
+                let res: string[] = [];
+                for (let i = 0; i < rawArray.length; i++) {
+                    res.push(String(i));
+                }
+                return res;
+            }
+            let cls = Class.of(this._raw! as Object);
+            let keys: string[] = [...reflect.getInstanceFieldsRecursive(cls).map<string>(field => field.getName()),
+                ...reflect.getInstanceGettersRecursive(cls).map<string>(getter => getter.getName().substring("%%get-".length))];
+            return keys;
         }
     }
 
@@ -274,7 +290,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     aboutToBeDeletedInternal(): void {
         if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_ && this.instance instanceof BaseCustomComponent) {
             ArkUIObjectFinalizationRegisterProxy.call(new WeakRef<object>(this.instance),
-                `${Type.of(this.instance)}[${this.getUniqueId()}] is in process of destruction`);
+                `${Class.of(this.instance).getName()}[${this.getUniqueId()}] is in process of destruction`);
         }
         this.instance.__clearStateVariables__Internal();
     }
@@ -317,23 +333,29 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     isValidActiveCount(): boolean {
         return this.instance.__getActive__Internal() < 2;
     }
-    setActiveCount(active: boolean): void {
+    setActiveCount(active: boolean): boolean {
         let activeCount: number = this.instance.__getActive__Internal();
-        activeCount += active ? 1 : -1;
-        this.instance.__setActive__Internal(activeCount);
+        let afterCount: number = activeCount + (active ? 1 : -1);
+        this.instance.__setActive__Internal(afterCount);
         if (!this.isValidActiveCount()) {
             console.log(`activeCount_error: ${this.instance.__getActive__Internal()}`);
         }
+        return (activeCount + afterCount) === 1; // activeCount: 0, afterCount: 1 or activeCount: 1, afterCount: 0
     }
     isViewActive(): boolean {
         return this.instance.__getActive__Internal() > 0;
     }
     setActiveInternal(active: boolean, isReuse: boolean): void {
-        this.setActiveCount(active);
-        if (this.isViewActive()) {
+        const isSwitch: boolean = this.setActiveCount(active);
+        const status = this.isViewActive();
+        if (status) {
             StateUpdateLoop.consumeFreezeTasks(this.getUniqueId());
             ObserveSingleton.instance.unFreezeDelayedComputedProps();
             ObserveSingleton.instance.unFreezeDelayedMonitorPaths();
+            ObserveSingleton.instance.updateDirtyComputedAndMonitorWhenUnfreeze();
+        }
+        if (isSwitch) {
+            this.instance.__fireActiveOrInactiveFunc__Internal(status);
         }
         this.switchNodeFreeze();
         this.instance.__propagateToChild__Internal(active, isReuse);
@@ -500,6 +522,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return this.instance.__onDumpInspector__Internal();
     }
 
+    onDumpInfo(commands: string[]): void {
+        this.instance.__onDumpInfo__Internal(commands);
+    }
+
     onWillApplyTheme(theme: Theme): void {
         this.instance.onWillApplyTheme(theme);
     }
@@ -567,6 +593,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     getName(): string {
         return transferTypeName(Class.of(this.instance).getName());
     }
+
+    getCanUpdateStateVars(): boolean {
+        return this.canUpdateStateVars_;
+    }
 }
 
 function createInstance<T extends ExtendableComponent, T_Options>(
@@ -610,7 +640,7 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
             () => createInstance<S, S_Options>(uiContext, factory, initializers), content, initializers);
     }
 }
@@ -656,7 +686,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
             () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
@@ -706,7 +736,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
             () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
@@ -760,7 +790,7 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
             }
             return undefined;
         });
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
             () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKeyValue);
     }
 
@@ -832,4 +862,16 @@ export enum LifeCycleEvent {
     ON_RECYCLE = 2,       // Triggered when component is recycled
     ON_REUSE = 3,         // Triggered when component is reused
     ON_DISAPPEAR = 4      // Triggered when component disappears
+}
+
+export class CustomComponentContextImpl implements CustomComponentContext {
+    @JSONStringifyIgnore private customComponent: IVariableOwner;
+
+    constructor(customComponent: IVariableOwner) {
+        this.customComponent = customComponent;
+    }
+
+    registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void {
+        this.customComponent.__registerActiveAndInactiveCallback__Internal(active, inactive);
+    }
 }

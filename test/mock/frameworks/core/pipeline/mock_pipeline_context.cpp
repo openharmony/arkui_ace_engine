@@ -22,28 +22,41 @@
 #include "core/common/clipboard/clipboard.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/back_press_handler_manager.h"
+#include "core/pipeline_ng/environment_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/image/image_cache.h"
@@ -51,6 +64,9 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace {
 
@@ -208,6 +224,12 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
     return clickOptimizer_;
 }
 
+bool PipelineContext::GetIsRequestFrame() const
+{
+    CHECK_NULL_RETURN(window_, false);
+    return window_->GetIsRequestFrame();
+}
+
 std::string PipelineContext::GetBundleName() const
 {
     return "";
@@ -227,6 +249,12 @@ RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
 }
+
+const RefPtr<NG::PageInfo> MockPipelineContext::GetLastPageInfo()
+{
+    return nullptr;
+}
+
 
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
@@ -757,6 +785,11 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
+const RefPtr<NavigationManager>& PipelineContext::GetNavigationManager() const
+{
+    return navigationMgr_;
+}
+
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 {
     return fullScreenManager_;
@@ -1134,6 +1167,11 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
     return false;
 }
 
+bool PipelineContext::SetIsFocusActive(bool isFocusActive, bool autoFocusInactive)
+{
+    return false;
+}
+
 bool PipelineContext::NeedSoftKeyboard()
 {
     return false;
@@ -1374,6 +1412,7 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
 
 void PipelineContext::InitManagers()
 {
+    navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
@@ -1711,6 +1750,16 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
     return g_isContainerControlButtonVisible;
 }
 
+std::optional<float> NG::PipelineContext::ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    return std::nullopt;
+}
+
+float NG::PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    return 1.0f;
+}
+
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
@@ -1893,3 +1942,39 @@ bool WindowManager::GetPageViewportConfig(
 }
 } // namespace OHOS::Ace
 // WindowManager ===============================================================
+
+namespace OHOS::Ace::NG {
+bool PipelineContext::GetIsFocusActive() const
+{
+    return false;
+}
+
+RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() const
+{
+    return privacySensitiveManager_;
+}
+
+void PipelineContext::ChangeSensitiveNodes(bool flag)
+{
+}
+
+void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
+{
+}
+
+void EnvironmentManager::OnNodeDetached(const RefPtr<UINode>& node)
+{
+}
+
+ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase)
+{
+    if (!node) {
+        return;
+    }
+    active_ = true;
+}
+
+ScopedEnvConsumer::~ScopedEnvConsumer()
+{
+}
+} // namespace OHOS::Ace::NG

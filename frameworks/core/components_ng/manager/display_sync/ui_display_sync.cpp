@@ -14,6 +14,9 @@
  */
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
+
+#include <cinttypes>
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "transaction/rs_interfaces.h"
 #endif

@@ -38,7 +38,7 @@ const static uint8_t FULL_TRANSPARENCY_VALUE = 0xFF;
 const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
     0x0C000000,
 };
-const static double DEFAULT_ICON_FONT_SIZE = 24;
+const static double DEFAULT_ICON_FONT_SIZE = 16;
 #ifdef SECURITY_COMPONENT_ENABLE
 static bool g_isVerified = false;
 static bool g_hasCustomPermission = false;
@@ -426,6 +426,7 @@ bool SecurityComponentModelNG::IsBelowThreshold(const Color& value)
 
 void SecurityComponentModelNG::SetIconSize(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ICON_SIZE);
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, value);
 }
 
@@ -445,6 +446,7 @@ void SecurityComponentModelNG::SetIconBorderRadius(const Dimension& value)
     auto hasPermission = prop->GetHasCustomPermissionForSecComp();
     if (hasPermission.value_or(false)) {
         NG::BorderRadiusProperty borderRadius = BorderRadiusProperty(value);
+        ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ICON_BORDER_RADIUS);
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconBorderRadius, borderRadius);
     }
 }
@@ -484,6 +486,18 @@ void SecurityComponentModelNG::SetIconBorderRadius(const std::optional<Dimension
         borderRadius.radiusBottomLeft = bottomLeft;
         borderRadius.radiusBottomRight = bottomRight;
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconBorderRadius, borderRadius);
+        if (topLeft) {
+            ACE_CHECK_LPX_ATTRIBUTE(topLeft.value(), LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS);
+        }
+        if (topRight) {
+            ACE_CHECK_LPX_ATTRIBUTE(topRight.value(), LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS);
+        }
+        if (bottomLeft) {
+            ACE_CHECK_LPX_ATTRIBUTE(bottomLeft.value(), LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS);
+        }
+        if (bottomRight) {
+            ACE_CHECK_LPX_ATTRIBUTE(bottomRight.value(), LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS);
+        }
     }
 }
 
@@ -636,6 +650,7 @@ void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::opti
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_ICON_SIZE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, value.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, frameNode);
@@ -669,6 +684,7 @@ void SecurityComponentModelNG::SetIconColor(FrameNode* frameNode, const std::opt
 
 void SecurityComponentModelNG::SetSymbolIconSize(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_SYMBOL_ICON_SIZE);
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolIconSize, value);
 }
 
@@ -679,6 +695,7 @@ void SecurityComponentModelNG::SetSymbolIconColor(const std::vector<Color>& valu
 
 void SecurityComponentModelNG::SetFontSize(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE);
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontSize, value);
 }
 
@@ -686,6 +703,7 @@ void SecurityComponentModelNG::SetFontSize(FrameNode* frameNode, const std::opti
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_FONT_SIZE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontSize, value.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontSize, frameNode);
@@ -864,6 +882,7 @@ void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
         return;
     }
 
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BACKGROUND_BORDER_WIDTH);
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderWidth, value);
 }
 
@@ -876,6 +895,7 @@ void SecurityComponentModelNG::SetBackgroundBorderWidth(FrameNode* frameNode, co
     }
 
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_BACKGROUND_BORDER_WIDTH, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderWidth, value.value(),
             frameNode);
     } else {
@@ -935,6 +955,7 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
     }
 
     NG::BorderRadiusProperty borderRadius = BorderRadiusProperty(value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BACKGROUND_BORDER_RADIUS);
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, borderRadius);
 }
 
@@ -948,6 +969,7 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(FrameNode* frameNode, c
 
     if (value) {
         NG::BorderRadiusProperty borderRadius = BorderRadiusProperty(value.value());
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_BACKGROUND_BORDER_RADIUS, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, borderRadius,
             frameNode);
     } else {
@@ -969,6 +991,18 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const std::optional<Dim
     borderRadius.radiusBottomLeft = bottomLeft;
     borderRadius.radiusBottomRight = bottomRight;
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, borderRadius);
+    if (topLeft.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(topLeft.value(), LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS);
+    }
+    if (topRight.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(topRight.value(), LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS);
+    }
+    if (bottomLeft.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(bottomLeft.value(), LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS);
+    }
+    if (bottomRight.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(bottomRight.value(), LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS);
+    }
 }
 
 void SecurityComponentModelNG::SetBackgroundBorderRadius(FrameNode* frameNode,
@@ -1000,20 +1034,24 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
     auto secCompTheme = GetTheme();
     CHECK_NULL_VOID(secCompTheme);
     if (left.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(left.value(), LpxAttribute::LPX_LEFT_BACKGROUND_PADDING);
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundLeftPadding, left.value());
     }
 
     if (right.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(right.value(), LpxAttribute::LPX_RIGHT_BACKGROUND_PADDING);
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundRightPadding, right.value());
     }
     if (top.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(top.value(), LpxAttribute::LPX_TOP_BACKGROUND_PADDING);
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundTopPadding, top.value());
     }
 
     if (bottom.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(bottom.value(), LpxAttribute::LPX_BOTTOM_BACKGROUND_PADDING);
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundBottomPadding, bottom.value());
     }
@@ -1032,6 +1070,7 @@ void SecurityComponentModelNG::SetBackgroundPadding(
     auto secCompTheme = GetTheme();
     CHECK_NULL_VOID(secCompTheme);
     if (left.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(left.value(), LpxAttribute::LPX_LEFT_BACKGROUND_PADDING, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundLeftPadding, left.value(), frameNode);
     } else {
@@ -1040,6 +1079,7 @@ void SecurityComponentModelNG::SetBackgroundPadding(
     }
 
     if (right.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(right.value(), LpxAttribute::LPX_RIGHT_BACKGROUND_PADDING, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundRightPadding, right.value(), frameNode);
     } else {
@@ -1047,6 +1087,7 @@ void SecurityComponentModelNG::SetBackgroundPadding(
             BackgroundRightPadding, frameNode);
     }
     if (top.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(top.value(), LpxAttribute::LPX_TOP_BACKGROUND_PADDING, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundTopPadding, top.value(), frameNode);
     } else {
@@ -1055,6 +1096,7 @@ void SecurityComponentModelNG::SetBackgroundPadding(
     }
 
     if (bottom.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(bottom.value(), LpxAttribute::LPX_BOTTOM_BACKGROUND_PADDING, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundBottomPadding, bottom.value(), frameNode);
     } else {
@@ -1065,11 +1107,15 @@ void SecurityComponentModelNG::SetBackgroundPadding(
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& padding)
 {
+    if (padding.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.value(), LpxAttribute::LPX_BACKGROUND_PADDING);
+    }
     SetBackgroundPadding(padding, padding, padding, padding);
 }
 
 void SecurityComponentModelNG::SetTextIconSpace(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_ICON_SPACE);
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconSpace, value);
 }
 
@@ -1083,6 +1129,7 @@ void SecurityComponentModelNG::SetTextIconSpace(FrameNode* frameNode, const std:
         return;
     }
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_TEXT_ICON_SPACE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconSpace, value.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconSpace, frameNode);
@@ -1165,6 +1212,7 @@ void SecurityComponentModelNG::SetMaxLines(FrameNode* frameNode, const std::opti
 
 void SecurityComponentModelNG::SetAdaptMaxFontSize(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE);
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMaxFontSize, value);
 }
 
@@ -1172,6 +1220,7 @@ void SecurityComponentModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const s
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMaxFontSize, value.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMaxFontSize, frameNode);
@@ -1180,6 +1229,7 @@ void SecurityComponentModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const s
 
 void SecurityComponentModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE);
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMinFontSize, value);
 }
 
@@ -1187,6 +1237,7 @@ void SecurityComponentModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const s
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMinFontSize, value.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMinFontSize, frameNode);

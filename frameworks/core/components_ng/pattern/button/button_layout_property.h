@@ -46,7 +46,6 @@ public:
         value->propFontWeight_ = CloneFontWeight();
         value->propFontColor_ = CloneFontColor();
         value->propFontColorFlagByUser_ = CloneFontColorFlagByUser();
-        value->propBackgroundColorFlagByUser_ = CloneBackgroundColorFlagByUser();
         value->propFontColorSetByUser_ = CloneFontColorSetByUser();
         value->propFontFamily_ = CloneFontFamily();
         value->propFontStyle_ = CloneFontStyle();
@@ -69,7 +68,6 @@ public:
         ResetFontWeight();
         ResetFontColor();
         ResetFontColorFlagByUser();
-        ResetBackgroundColorFlagByUser();
         ResetFontColorSetByUser();
         ResetFontFamily();
         ResetFontStyle();
@@ -83,13 +81,21 @@ public:
         ResetTextAlign();
     }
 
+    void UpdateBackgroundColorFlagByUser(bool value)
+    {
+        if (GetIsUserSetBackgroundColor() == value) {
+            return;
+        }
+        UpdateIsUserSetBackgroundColor(value);
+        UpdatePropertyChangeFlag(PROPERTY_UPDATE_NORMAL);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Type, ButtonType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextOverflow, Ace::TextOverflow, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, Ace::FontWeight, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColorSetByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontStyle, Ace::FontStyle, PROPERTY_UPDATE_NORMAL);

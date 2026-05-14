@@ -22,9 +22,12 @@
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/base/utils/macros.h"
 #include "frameworks/core/components/common/properties/color.h"
-#include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
-
+#include "frameworks/core/components/common/properties/text_style.h"
 #include "core/common/resource/resource_object.h"
+
+namespace OHOS::Ace::NG {
+class UINode;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 

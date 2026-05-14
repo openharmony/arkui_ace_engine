@@ -22,6 +22,7 @@
 #include "core/animation/animatable_transform_operation.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/transform/render_transform.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/sole_child_component.h"
 

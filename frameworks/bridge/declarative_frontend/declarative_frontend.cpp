@@ -23,6 +23,7 @@
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 #include "napi/native_node_hybrid_api.h"
+#include "core/components/navigator/navigator_type.h"
 
 namespace OHOS::Ace {
 namespace {

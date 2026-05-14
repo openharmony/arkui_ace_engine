@@ -14,6 +14,7 @@
 */
 
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_frame_node_utils.h"
+#include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
@@ -250,14 +251,43 @@ bool FrameNodeRulesCheckNode::IsModal()
 
 std::shared_ptr<FocusRulesCheckNode> FrameNodeRulesCheckNode::GetUserNextFocusNode()
 {
-    auto nextNode = nextNode_.Upgrade();
+    auto node = weakNode_.Upgrade();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto context = node->GetContextRefPtr();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngPipeline, nullptr);
+    auto rootNode = ngPipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto jsAccessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(ngPipeline->GetAccessibilityManager());
+    CHECK_NULL_RETURN(jsAccessibilityManager, nullptr);
+    auto nextNode = jsAccessibilityManager->GetNextFocusNodeByManager(node, rootNode);
+    if (nextNode) {
+        nextNode_ = nextNode;
+    } else {
+        nextNode_.Reset();
+    }
     CHECK_NULL_RETURN(nextNode, nullptr);
-    return std::make_shared<FrameNodeRulesCheckNode>(nextNode, nextNode->GetAccessibilityId(), handleParam_);
+    auto checkNode = std::make_shared<FrameNodeRulesCheckNode>(nextNode, nextNode->GetAccessibilityId(), handleParam_);
+    return checkNode;
 }
 
 std::shared_ptr<FocusRulesCheckNode> FrameNodeRulesCheckNode::GetUserPrevFocusNode()
 {
-    auto prevNode = prevNode_.Upgrade();
+    auto node = weakNode_.Upgrade();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto context = node->GetContextRefPtr();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngPipeline, nullptr);
+    auto rootNode = ngPipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto jsAccessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(ngPipeline->GetAccessibilityManager());
+    CHECK_NULL_RETURN(jsAccessibilityManager, nullptr);
+    auto prevNode = jsAccessibilityManager->GetPrevFocusNodeByManager(node, rootNode, ngPipeline);
+    if (prevNode) {
+        prevNode_ = prevNode;
+    } else {
+        prevNode_.Reset();
+    }
     CHECK_NULL_RETURN(prevNode, nullptr);
     return std::make_shared<FrameNodeRulesCheckNode>(prevNode, prevNode->GetAccessibilityId(), handleParam_);
 }
@@ -328,6 +358,26 @@ bool FrameNodeRulesCheckNode::IsForward()
     CHECK_NULL_RETURN(accessibilityProperty, false);
     return accessibilityProperty->GetScrollableStatus() != NG::ScrollableStatus::AT_BOTTOM
         && accessibilityProperty->GetScrollableStatus() != NG::ScrollableStatus::AT_BOTH_TOP_BOTTOM;
+}
+
+bool FrameNodeRulesCheckNode::IsDescendantMode()
+{
+    auto node = weakNode_.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty &&
+        accessibilityProperty->GetAccessibilityLevel() == NG::AccessibilityProperty::Level::NO_STR &&
+        node->GetTag() == V2::WEB_ETS_TAG) {
+        return true;
+    }
+    auto context = node->GetContextRefPtr();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngPipeline, false);
+    auto jsAccessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(ngPipeline->GetAccessibilityManager());
+    CHECK_NULL_RETURN(jsAccessibilityManager, false);
+    auto instanceId = ngPipeline->GetInstanceId();
+    auto inspectorId = node->GetInspectorId().value_or("");
+    return jsAccessibilityManager->GetNextFocusDescendantMode(instanceId, inspectorId);
 }
 
 bool DetectParentRulesCheckNode::GetPropText(Accessibility::PropValue& value)

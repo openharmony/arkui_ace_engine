@@ -21,6 +21,7 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -70,21 +71,55 @@ public:
         return heightLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
             heightLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT;
     }
+
+    void SetBarItemSize(int32_t barItemSize)
+    {
+        barItemSize_ = barItemSize;
+    }
+
+    void SetItemIndex(const ItemIndex& itemIndex)
+    {
+        itemIndex_ = itemIndex;
+    }
+
+    void SetIsFloatingBar(bool isFloatinBar)
+    {
+        isFloatingBar_ = isFloatinBar;
+    }
+
+    void SetLastFloatingBar(bool lastFloatingBar)
+    {
+        lastFloatingBar_ = lastFloatingBar;
+    }
+
 private:
     BarPosition GetBarPosition(LayoutWrapper* layoutWrapper) const;
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
     TabsItemDivider GetDivider(LayoutWrapper* layoutWrapper) const;
-    float MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
-        const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize);
+    float MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& dividerWrapper,
+        const SizeF& idealSize);
     void MeasureEffectNode(const RefPtr<TabsLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& idealSize);
     SizeF MeasureSwiper(const RefPtr<TabsLayoutProperty>& layoutProperty, RefPtr<LayoutWrapper>& swiperWrapper,
         const SizeF& idealSize, const SizeF& tabBarSize, const float dividerWidth);
-    std::vector<OffsetF> LayoutOffsetList(
-        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper,
+    std::vector<OffsetF> LayoutOffsetList(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper,
         const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize) const;
+
+    void MeasureBackgroundMask(LayoutWrapper* layoutWrapper, const SizeF& idealSize, const SizeF& tabBarSize);
+    SizeF MeasureTabBar(LayoutWrapper* layoutWrapper, LayoutConstraintF childLayoutConstraint);
+    std::optional<float> CalcFloatingBarWidth(LayoutWrapper* layoutWrapper, float barHeight);
+    std::optional<float> ParseBarWidthAndMargin(LayoutWrapper* layoutWrapper, float tabsWidth, float tabsHeight);
+    void UpdateBarBottomMargin(LayoutWrapper* layoutWrapper, OffsetF& barOffset) const;
+    void LayoutBackgroundMask(LayoutWrapper* layoutWrapper);
+
     LayoutCalPolicy widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
     LayoutCalPolicy heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+
+    int32_t barItemSize_ = 0;
+    ItemIndex itemIndex_;
+    bool isFloatingBar_ = false;
+    bool lastFloatingBar_ = false;
+    std::optional<float> floatingBarMargin_;
 };
 
 } // namespace OHOS::Ace::NG

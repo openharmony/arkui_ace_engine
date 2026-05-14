@@ -14,11 +14,13 @@
  */
 
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/common/container.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/log/ace_checker.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

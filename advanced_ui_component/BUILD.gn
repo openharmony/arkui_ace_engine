@@ -13,8 +13,8 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("advanced_ui_component.gni")
 import("//foundation/arkui/ace_engine/build/ace_controller.gni")
+import("advanced_ui_component.gni")
 
 config("ace_napi_config") {
   include_dirs = [
@@ -74,10 +74,12 @@ group("advanced_ui_component") {
     "arcbutton/interfaces:arcbutton",
     "arcslider/interfaces:arcslider",
     "counter/interfaces:counter",
+    "counterv2:counterv2",
     "dialogv2/interfaces:dialogv2",
     "downloadfilebutton/interfaces:downloadfilebutton",
     "foldsplitcontainer/interfaces:foldsplitcontainer",
     "formmenu/interfaces:formmenu",
+
     # "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
     "multinavigation/interfaces:multinavigation",
     "navpushpathhelper:navpushpathhelper",
@@ -86,12 +88,19 @@ group("advanced_ui_component") {
     deps += advanced_ui_component_targets
     deps += [
       "chipgroup/interfaces:chipgroup",
+      "chipgroupv2:chipgroupv2",
+      "chipv2:chipv2",
       "composelistitem/interfaces:composelistitem",
+      "composelistitemv2/interfaces:composelistitemv2",
       "composetitlebar/interfaces:composetitlebar",
+      "composetitlebarv2/interfaces:composetitlebarv2",
       "editabletitlebar/interfaces:editabletitlebar",
+      "editabletitlebarv2/interfaces:editabletitlebarv2",
       "exceptionprompt/interfaces:exceptionprompt",
+      "exceptionpromptv2/interfaces:exceptionpromptv2",
       "filter/interfaces:filter",
       "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
+      "imageGeneratorDialog/interfaces:imageGeneratorDialog",
       "popup/interfaces:popup",
       "popupv2/interfaces:popupv2",
       "progressbutton/interfaces:progressbutton",
@@ -103,11 +112,12 @@ group("advanced_ui_component") {
       "subheader/interfaces:subheader",
       "subheaderv2/interfaces:subheaderv2",
       "swiperefresher/interfaces:swiperefresher",
+      "swiperefresherv2/interfaces:swiperefresherv2",
       "tabtitlebar/interfaces:tabtitlebar",
       "toolbar/interfaces:toolbar",
       "toolbarv2/interfaces:toolbarv2",
       "treeview/interfaces:treeview",
-      "imageGeneratorDialog/interfaces:imageGeneratorDialog",
+      "treeviewv2/interfaces:treeviewv2",
     ]
   }
 }

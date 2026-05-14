@@ -1524,6 +1524,11 @@ public:
         ViewAbstract::SetDebugLine(line);
     }
 
+    void SetInspectorLabel(const std::string& inspectorLabel) override
+    {
+        ViewAbstract::SetInspectorLabel(inspectorLabel);
+    }
+
     void SetHoverEffect(HoverEffectType hoverEffect) override
     {
         ViewAbstract::SetHoverEffect(hoverEffect);
@@ -1696,10 +1701,13 @@ public:
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
     void SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions) override;
     void ResetAccessibilityActionOptions() override;
+    void SetAccessibilityCustomActions(const std::vector<AccessibilityCustomAction>& actions) override;
+    void ResetAccessibilityCustomActions() override;
     void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityGroupOptions(AccessibilityGroupOptions groupOptions) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void SetAccessibilityNextFocusParams(const AccessibilityNextFocusParams& params) override;
     void ResetOnAccessibilityFocus() override;
     void SetAccessibilityDefaultFocus(bool isFocus) override;
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
@@ -1943,6 +1951,9 @@ public:
     static void ResetAccessibilityActionOptions(FrameNode* frameNode);
     static void SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config);
     static void ResetSmartGestureShortcut(FrameNode* frameNode);
+    static void SetAccessibilityCustomActions(
+        FrameNode* frameNode, const std::vector<AccessibilityCustomAction>& actions);
+    static void ResetAccessibilityCustomActions(FrameNode* frameNode);
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
@@ -1951,6 +1962,7 @@ public:
     static void SetOnAccessibilityHoverTransparent(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
     static void ResetOnAccessibilityFocus(FrameNode* frameNode);
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
+    static void SetAccessibilityNextFocusParams(FrameNode* frameNode, const AccessibilityNextFocusParams& params);
     static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
     static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
     static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);

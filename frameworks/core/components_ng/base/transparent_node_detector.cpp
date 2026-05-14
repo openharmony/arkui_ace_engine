@@ -20,6 +20,7 @@
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -158,4 +159,3 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
     executor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME, "ExtensionTransparentDetector");
 }
 } // namespace OHOS::Ace::NG
-

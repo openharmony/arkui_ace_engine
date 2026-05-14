@@ -312,9 +312,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof ErrorCallback<BusinessError>) {
                 thisSerializer.writeInt8((1).toByte())
-                // instructive change start
-                const valueTmpValueForIdx1  = valueTmpValue as object as ErrorCallback<BusinessError<void>>
-                // instructive change end
+                const valueTmpValueForIdx1 = valueTmpValue as ErrorCallback<BusinessError<void>>
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
             }
         } else {
@@ -497,9 +495,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     public setVideoOptions(value: VideoOptions): this {
         hookSetVideoOptions(this, value)
         const value_casted = value as (VideoOptions)
-        // instructive change start
-        hookSetVideoOptions(this, value)
-        // instructive change end
         this.getPeer()?.setVideoOptionsAttribute(value_casted)
         this.applyOptionsFinish('VideoAttribute');
         return this
@@ -629,6 +624,18 @@ export function VideoImpl(
     })
 }
 
+@memo
+export function Video(
+    @memo @memo_skip
+    style: ((attributes: VideoAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkVideoComponent>((): ArkVideoComponent => {
+        return new ArkVideoComponent()
+    })
+    NodeAttach<ArkVideoPeer>((): ArkVideoPeer => ArkVideoPeer.create(receiver), (_: ArkVideoPeer): void => {
+        style?.(receiver)
+    })
+}
 export class FullscreenInfo_serializer {
     public static write(buffer: SerializerBase, value: FullscreenInfo): void {
         let valueSerializer: SerializerBase = buffer

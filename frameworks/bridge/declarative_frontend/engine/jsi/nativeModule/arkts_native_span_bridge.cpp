@@ -53,7 +53,7 @@ bool ParseFontVariations(EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vect
         return false;
     }
     auto array = Local<panda::ArrayRef>(jsValue);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     axisValues.reserve(length);
     fontVariations.reserve(length);
     for (uint32_t i = 0; i < length; ++i) {
@@ -445,7 +445,7 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
         textColor = theme->GetTextStyle().GetTextColor();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontColor(
-        nativeNode, textColor.GetValue(), AceType::RawPtr(colorResObj));
+        nativeNode, textColor.GetValue(), AceType::RawPtr(colorResObj), false);
     return panda::JSValueRef::Undefined(vm);
 }
 

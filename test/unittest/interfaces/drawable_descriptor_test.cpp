@@ -32,6 +32,15 @@ namespace {
 constexpr int32_t ID = 1;
 const uint32_t DENSITY = 0;
 const std::string PATH_NAME = "";
+static const uint8_t MINIMAL_PNG[] = {
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+    0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+    0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xde, 0x00, 0x00, 0x00,
+    0x0c, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0xf8, 0xff, 0xff, 0x3f,
+    0x00, 0x05, 0xfe, 0x02, 0xfe, 0x0d, 0xef, 0x46, 0xb8, 0x00, 0x00, 0x00,
+    0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
+};
+constexpr size_t pngLen = sizeof(MINIMAL_PNG);
 } // namespace
 class DrawableDescriptorTest : public testing::Test {
 public:
@@ -776,5 +785,284 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTestItem001, TestSize.Level1)
     EXPECT_EQ(resItem.state_, state);
     resItem = drawable.PreGetDrawableItem(resourceMgr, item);
     EXPECT_EQ(resItem.len_, 0);
+}
+
+/**
+ * @tc.name: DrawableDescTest0039
+ * @tc.desc: test InitLayeredParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0039, TestSize.Level1)
+{
+    auto fgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(fgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    Napi::DataInfo foregroundInfo = { std::move(fgData), pngLen };
+    Napi::DataInfo backgroundInfo = { nullptr, 0 };
+
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    layeredDrawable.InitLayeredParam(foregroundInfo, backgroundInfo);
+
+    EXPECT_TRUE(layeredDrawable.foreground_.has_value());
+    EXPECT_NE(layeredDrawable.foreground_.value(), nullptr);
+    EXPECT_FALSE(layeredDrawable.background_.has_value());
+}
+
+/**
+ * @tc.name: DrawableDescTest0040
+ * @tc.desc: test InitLayeredParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0040, TestSize.Level1)
+{
+    auto bgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(bgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    Napi::DataInfo foregroundInfo = { nullptr, 0 };
+    Napi::DataInfo backgroundInfo = { std::move(bgData), pngLen };
+
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    layeredDrawable.InitLayeredParam(foregroundInfo, backgroundInfo);
+
+    EXPECT_FALSE(layeredDrawable.foreground_.has_value());
+    EXPECT_TRUE(layeredDrawable.background_.has_value());
+    EXPECT_NE(layeredDrawable.background_.value(), nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0041
+ * @tc.desc: test InitLayeredParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0041, TestSize.Level1)
+{
+    auto fgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(fgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    auto bgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(bgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    Napi::DataInfo foregroundInfo = { std::move(fgData), pngLen };
+    Napi::DataInfo backgroundInfo = { std::move(bgData), pngLen };
+
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    layeredDrawable.InitLayeredParam(foregroundInfo, backgroundInfo);
+
+    EXPECT_TRUE(layeredDrawable.foreground_.has_value());
+    EXPECT_NE(layeredDrawable.foreground_.value(), nullptr);
+    EXPECT_TRUE(layeredDrawable.background_.has_value());
+    EXPECT_NE(layeredDrawable.background_.value(), nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0042
+ * @tc.desc: test InitLayeredParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0042, TestSize.Level1)
+{
+    auto fgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(fgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    auto bgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(bgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    Napi::DataInfo foregroundInfo = { std::move(fgData), pngLen };
+    Napi::DataInfo backgroundInfo = { std::move(bgData), pngLen };
+
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    layeredDrawable.InitLayeredParam(foregroundInfo, backgroundInfo);
+
+    EXPECT_TRUE(layeredDrawable.foreground_.has_value());
+    EXPECT_NE(layeredDrawable.foreground_.value(), nullptr);
+    EXPECT_TRUE(layeredDrawable.background_.has_value());
+    EXPECT_NE(layeredDrawable.background_.value(), nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0043
+ * @tc.desc: test InitLayeredParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0043, TestSize.Level1)
+{
+    auto fgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(fgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    Napi::DataInfo foregroundInfo = { std::move(fgData), pngLen };
+    Napi::DataInfo backgroundInfo = { nullptr, 0 };
+
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    layeredDrawable.InitLayeredParam(foregroundInfo, backgroundInfo);
+
+    EXPECT_TRUE(layeredDrawable.foreground_.has_value());
+    EXPECT_NE(layeredDrawable.foreground_.value(), nullptr);
+    EXPECT_FALSE(layeredDrawable.background_.has_value());
+}
+
+/**
+ * @tc.name: DrawableDescTest0044
+ * @tc.desc: test GetMask function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0044, TestSize.Level1)
+{
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    drawable.mask_ = pixelMap;
+    auto result = drawable.GetMask();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetDrawableType(), Napi::DrawableDescriptor::DrawableType::BASE);
+}
+
+/**
+ * @tc.name: DrawableDescTest0045
+ * @tc.desc: test GetMask function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0045, TestSize.Level1)
+{
+    auto resMgr = std::shared_ptr<Global::Resource::ResourceManager>(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resMgr, nullptr);
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    drawable.InitialMask(resMgr);
+
+    EXPECT_FALSE(drawable.mask_.has_value());
+    EXPECT_TRUE(drawable.maskPath_.empty());
+
+    auto result = drawable.GetMask();
+    EXPECT_NE(result, nullptr);
+    EXPECT_TRUE(drawable.mask_.has_value());
+}
+
+/**
+ * @tc.name: DrawableDescTest0046
+ * @tc.desc: test GetMask function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0046, TestSize.Level1)
+{
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    EXPECT_FALSE(drawable.mask_.has_value());
+    EXPECT_TRUE(drawable.maskPath_.empty());
+
+    auto result = drawable.GetMask();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0047
+ * @tc.desc: test GetMask function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0047, TestSize.Level1)
+{
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    drawable.mask_ = std::make_optional(nullptr);
+
+    auto result = drawable.GetMask();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0048
+ * @tc.desc: test GetLayeredIconParm function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0048, TestSize.Level1)
+{
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    Napi::SharedBitMap foreground;
+    Napi::SharedBitMap background;
+    Napi::SharedBitMap mask;
+    EXPECT_FALSE(drawable.foreground_.has_value());
+    EXPECT_FALSE(drawable.customized_);
+
+    auto ret = drawable.GetLayeredIconParm(foreground, background, mask);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(foreground, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0049
+ * @tc.desc: test GetLayeredIconParm function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0049, TestSize.Level1)
+{
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    drawable.foreground_ = std::make_shared<Media::PixelMap>();
+    EXPECT_TRUE(drawable.foreground_.has_value());
+    EXPECT_FALSE(drawable.background_.has_value());
+    EXPECT_FALSE(drawable.customized_);
+
+    Napi::SharedBitMap foreground;
+    Napi::SharedBitMap background;
+    Napi::SharedBitMap mask;
+    auto ret = drawable.GetLayeredIconParm(foreground, background, mask);
+    EXPECT_FALSE(ret);
+    EXPECT_NE(foreground, nullptr);
+    EXPECT_EQ(background, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0050
+ * @tc.desc: test GetLayeredIconParm function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0050, TestSize.Level1)
+{
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    drawable.foreground_ = std::make_shared<Media::PixelMap>();
+    drawable.background_ = std::make_shared<Media::PixelMap>();
+    EXPECT_TRUE(drawable.foreground_.has_value());
+    EXPECT_TRUE(drawable.background_.has_value());
+    EXPECT_FALSE(drawable.mask_.has_value());
+    EXPECT_TRUE(drawable.maskPath_.empty());
+    EXPECT_FALSE(drawable.customized_);
+
+    Napi::SharedBitMap foreground;
+    Napi::SharedBitMap background;
+    Napi::SharedBitMap mask;
+    auto ret = drawable.GetLayeredIconParm(foreground, background, mask);
+    EXPECT_FALSE(ret);
+    EXPECT_NE(foreground, nullptr);
+    EXPECT_NE(background, nullptr);
+    EXPECT_EQ(mask, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0051
+ * @tc.desc: test CompositeIconNotAdaptive function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0051, TestSize.Level1)
+{
+    auto fgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(fgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    Napi::DataInfo foregroundInfo = { std::move(fgData), pngLen };
+
+    auto bgData = std::make_unique<uint8_t[]>(pngLen);
+    memcpy_s(bgData.get(), pngLen, MINIMAL_PNG, pngLen);
+    Napi::DataInfo backgroundInfo = { std::move(bgData), pngLen };
+
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    drawable.InitLayeredParam(foregroundInfo, backgroundInfo);
+
+    auto resMgr = std::shared_ptr<Global::Resource::ResourceManager>(Global::Resource::CreateResourceManager());
+    drawable.InitialMask(resMgr);
+    drawable.customized_ = true;
+
+    ASSERT_TRUE(drawable.foreground_.has_value());
+    ASSERT_NE(drawable.foreground_.value(), nullptr);
+    ASSERT_TRUE(drawable.background_.has_value());
+    ASSERT_NE(drawable.background_.value(), nullptr);
+    EXPECT_FALSE(drawable.foregroundOverBackground_);
+
+    Napi::SharedBitMap foreground;
+    Napi::SharedBitMap background;
+    Napi::SharedBitMap mask;
+    auto ret = drawable.GetLayeredIconParm(foreground, background, mask);
+    ASSERT_TRUE(ret);
+    ASSERT_NE(foreground, nullptr);
+    ASSERT_NE(background, nullptr);
+    ASSERT_NE(mask, nullptr);
+
+    drawable.CompositeIconNotAdaptive(foreground, background, mask);
+
+    EXPECT_TRUE(drawable.layeredPixelMap_.has_value());
 }
 } // namespace OHOS::Ace

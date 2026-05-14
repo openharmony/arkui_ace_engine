@@ -1217,7 +1217,6 @@ HWTEST_F(SubMenuTestNg, GetSubMenuLayoutOffset001, TestSize.Level1)
     auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
     ASSERT_NE(menuItemNode, nullptr);
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
-    subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
     SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
     auto offset1 = subMenuLayoutAlgorithm.GetSubMenuLayoutOffset(
         layoutWrapper, menuItemNode, size, SubMenuExpandingMode::EMBEDDED);
@@ -1271,28 +1270,37 @@ HWTEST_F(SubMenuTestNg, UpdateStackPosition001, TestSize.Level1)
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
     ASSERT_NE(menuItemNode, nullptr);
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(4, V2::MENU_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menuItemNode->MountToParent(menuNode);
+    auto parentMenuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(parentMenuPattern, nullptr);
+    parentMenuPattern->UpdateLastPlacement(Placement::TOP_RIGHT);
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
     subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
     SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
     auto offset1 =
         subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::EMBEDDED, layoutWrapper);
     EXPECT_EQ(offset1.GetY(), 0.0f);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 10.0, 20.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 10.0, 20.0 };
     auto offset2 =
         subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
     EXPECT_EQ(offset2.GetY(), 0.0f);
     subMenuLayoutAlgorithm.propTargetOffset_ = { 10, 20 };
     auto offset3 =
         subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
-    EXPECT_EQ(offset3.GetY(), 0.0f);
+    EXPECT_EQ(offset3.GetY(), 1.0f);
+    parentMenuPattern->UpdateLastPlacement(Placement::BOTTOM_LEFT);
     auto offset4 = subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, nullptr);
-    EXPECT_EQ(offset4.GetY(), 0.0f);
+    EXPECT_EQ(offset4.GetY(), 80.0f);
     auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
     ASSERT_NE(menuLayoutProperty, nullptr);
     menuLayoutProperty->layoutDirection_ = TextDirection::RTL;
+    subMenuLayoutAlgorithm.wrapperRect_ = Rect(1, 1, 1000, 1000);
     auto offset5 =
         subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
-    EXPECT_EQ(offset5.GetY(), 0.0f);
+    EXPECT_EQ(offset5.GetY(), 80.0f);
 }
 
 /**
@@ -1315,7 +1323,7 @@ HWTEST_F(SubMenuTestNg, UpdateSidePosition001, TestSize.Level1)
     auto offset1 =
         subMenuLayoutAlgorithm.UpdateSidePosition(menuItemNode, size, SubMenuExpandingMode::EMBEDDED, layoutWrapper);
     EXPECT_EQ(offset1.GetY(), 0.0f);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 10.0, 20.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 10.0, 20.0 };
     auto offset2 =
         subMenuLayoutAlgorithm.UpdateSidePosition(menuItemNode, size, SubMenuExpandingMode::SIDE, layoutWrapper);
     EXPECT_EQ(offset2.GetY(), 0.0f);
@@ -1349,23 +1357,26 @@ HWTEST_F(SubMenuTestNg, LayoutSubMenuTargetSpace001, TestSize.Level1)
     ASSERT_NE(menuItemNode, nullptr);
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
     subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(FORTY);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 100.0, 200.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 100.0, 200.0 };
     subMenuLayoutAlgorithm.propTargetOffset_ = { 100, 200 };
     SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
     subMenuLayoutAlgorithm.wrapperSize_ = { 250.0, 400.0 };
     OffsetF position = { 200, 400 };
     SizeF menuItemSize = { 50.0f, 40.0f };
-    auto offset1 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, nullptr);
+    auto offset1 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, menuItemNode, nullptr);
     EXPECT_EQ(offset1.GetY(), 0.0f);
-    auto offset2 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, layoutWrapper);
+    auto offset2 =
+        subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, menuItemNode, layoutWrapper);
     EXPECT_EQ(offset2.GetY(), 0.0f);
     auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
     ASSERT_NE(menuLayoutProperty, nullptr);
     menuLayoutProperty->layoutDirection_ = TextDirection::RTL;
-    auto offset3 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, layoutWrapper);
-    EXPECT_EQ(offset3.GetY(), 440.0f);
+    auto offset3 =
+        subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(size, position, menuItemSize, menuItemNode, layoutWrapper);
+    EXPECT_EQ(offset3.GetY(), 10.0f);
     SizeF sizeTwo(HORIZONTAL_SIZE_HEIGHT, HORIZONTAL_SIZE_HEIGHT);
-    auto offset4 = subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(sizeTwo, position, menuItemSize, nullptr);
+    auto offset4 =
+        subMenuLayoutAlgorithm.LayoutSubMenuTargetSpace(sizeTwo, position, menuItemSize, menuItemNode, nullptr);
     EXPECT_EQ(offset4.GetY(), 0.0f);
 }
 
@@ -1378,41 +1389,43 @@ HWTEST_F(SubMenuTestNg, CurrentPositionCheck001, TestSize.Level1)
 {
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
     subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(10);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 50.0, 50.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 50.0, 50.0 };
     subMenuLayoutAlgorithm.propTargetOffset_ = { 200, 200 };
     subMenuLayoutAlgorithm.wrapperRect_ = Rect(12, 72, 700, 1000);
     subMenuLayoutAlgorithm.wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
     OffsetF position = { 300, 300 };
-    auto offset1 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, size, false, false);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto offset1 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, size, false, false, menuItemNode);
     EXPECT_EQ(offset1.GetY(), 300.0f);
 
     OffsetF positionOne = { 150, 150 };
-    subMenuLayoutAlgorithm.proptargetSize_ = { 100.0, 200.0 };
-    auto offset2 = subMenuLayoutAlgorithm.CurrentPositionCheck(positionOne, size, false, false);
-    EXPECT_EQ(offset2.GetY(), 72);
+    subMenuLayoutAlgorithm.propTargetSize_ = { 100.0, 200.0 };
+    auto offset2 = subMenuLayoutAlgorithm.CurrentPositionCheck(positionOne, size, false, false, menuItemNode);
+    EXPECT_EQ(offset2.GetY(), 410);
 
     OffsetF positionTwo = { 150, 150 };
-    auto offset3 = subMenuLayoutAlgorithm.CurrentPositionCheck(positionTwo, size, 400, true);
+    auto offset3 = subMenuLayoutAlgorithm.CurrentPositionCheck(positionTwo, size, 400, true, menuItemNode);
     EXPECT_EQ(offset3.GetY(), 150.0f);
 
     SizeF sizeThree(TWENTY, TWENTY);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 1000.0, 2000.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 1000.0, 2000.0 };
     subMenuLayoutAlgorithm.propTargetOffset_ = { 350, 350 };
     subMenuLayoutAlgorithm.wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
-    auto offset4 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeThree, 400, true);
+    auto offset4 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeThree, 400, true, menuItemNode);
     EXPECT_EQ(offset4.GetY(), 270.0f);
 
     SizeF sizeFour(HORIZONTAL_SIZE_HEIGHT, HORIZONTAL_SIZE_HEIGHT);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 1000.0, 2000.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 1000.0, 2000.0 };
     subMenuLayoutAlgorithm.wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
-    auto offset5 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeFour, 400, true);
+    auto offset5 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeFour, 400, true, menuItemNode);
     EXPECT_EQ(offset5.GetY(), 140.0f);
 
     SizeF sizeFive(HORIZONTAL_SIZE_HEIGHT, HORIZONTAL_SIZE_HEIGHT);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 1000.0, 2000.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 1000.0, 2000.0 };
     subMenuLayoutAlgorithm.wrapperRect_ = { -4.0, -10.0, 200.0, 300.0 };
-    auto offset6 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeFive, true, true);
+    auto offset6 = subMenuLayoutAlgorithm.CurrentPositionCheck(position, sizeFive, true, true, menuItemNode);
     EXPECT_EQ(offset6.GetY(), 90.0f);
 }
 
@@ -1425,19 +1438,21 @@ HWTEST_F(SubMenuTestNg, OthersPositionCheck001, TestSize.Level1)
 {
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
     subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(10);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 50.0, 50.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 50.0, 50.0 };
     subMenuLayoutAlgorithm.propTargetOffset_ = { 200, 200 };
     subMenuLayoutAlgorithm.wrapperRect_ = Rect(12, 72, 700, 1000);
     subMenuLayoutAlgorithm.wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
     OffsetF position = { 300, 300 };
-    auto offset1 = subMenuLayoutAlgorithm.OthersPositionCheck(position, size);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto offset1 = subMenuLayoutAlgorithm.OthersPositionCheck(position, size, menuItemNode);
     EXPECT_EQ(offset1.GetY(), 300.0f);
 
     OffsetF positionOne = { 150, 150 };
-    subMenuLayoutAlgorithm.proptargetSize_ = { 100.0, 200.0 };
-    auto offset2 = subMenuLayoutAlgorithm.OthersPositionCheck(positionOne, size);
-    EXPECT_EQ(offset2.GetY(), 72);
+    subMenuLayoutAlgorithm.propTargetSize_ = { 100.0, 200.0 };
+    auto offset2 = subMenuLayoutAlgorithm.OthersPositionCheck(positionOne, size, menuItemNode);
+    EXPECT_EQ(offset2.GetY(), 410);
 }
 
 /**
@@ -1449,26 +1464,28 @@ HWTEST_F(SubMenuTestNg, MenuVerticalPan001, TestSize.Level1)
 {
     SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
     subMenuLayoutAlgorithm.propTargetSpace_ = Dimension(10);
-    subMenuLayoutAlgorithm.proptargetSize_ = { 200.0, 200.0 };
+    subMenuLayoutAlgorithm.propTargetSize_ = { 200.0, 200.0 };
     subMenuLayoutAlgorithm.propTargetOffset_ = { 200, 200 };
     subMenuLayoutAlgorithm.wrapperRect_ = Rect(12, 72, 700, 1000);
     subMenuLayoutAlgorithm.wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
     OffsetF position = { 300, 300 };
-    auto offset1 = subMenuLayoutAlgorithm.MenuVerticalPan(position, size);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto offset1 = subMenuLayoutAlgorithm.MenuVerticalPan(position, size, menuItemNode);
     EXPECT_EQ(offset1, 410.0f);
 
     OffsetF positionTwo = { 200, 120 };
-    auto offset2 = subMenuLayoutAlgorithm.MenuVerticalPan(positionTwo, size);
-    EXPECT_EQ(offset2, 72);
+    auto offset2 = subMenuLayoutAlgorithm.MenuVerticalPan(positionTwo, size, menuItemNode);
+    EXPECT_EQ(offset2, 410);
 
     subMenuLayoutAlgorithm.propTargetOffset_ = { 400, 400 };
-    auto offset3 = subMenuLayoutAlgorithm.MenuVerticalPan(positionTwo, size);
+    auto offset3 = subMenuLayoutAlgorithm.MenuVerticalPan(positionTwo, size, menuItemNode);
     EXPECT_EQ(offset3, 922);
 
     subMenuLayoutAlgorithm.propTargetOffset_ = { 400, 300 };
     OffsetF positionThree = { 400, 600 };
-    auto offset4 = subMenuLayoutAlgorithm.MenuVerticalPan(positionThree, size);
-    EXPECT_EQ(offset4, 922);
+    auto offset4 = subMenuLayoutAlgorithm.MenuVerticalPan(positionThree, size, menuItemNode);
+    EXPECT_EQ(offset4, 510);
 }
 } // namespace OHOS::Ace::NG

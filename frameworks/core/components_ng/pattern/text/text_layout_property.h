@@ -24,7 +24,6 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
-#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
@@ -137,7 +136,6 @@ public:
         auto value = MakeRefPtr<TextLayoutProperty>();
         Clone(value);
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propSymbolSourceInfo_ = CloneSymbolSourceInfo();
         return value;
     }
 
@@ -146,8 +144,8 @@ public:
         LayoutProperty::Reset();
         ResetFontStyle();
         ResetTextLineStyle();
+        ResetSymbolStyle();
         ResetContent();
-        ResetSymbolSourceInfo();
         ResetAdaptFontSizeStep();
         ResetTextMarqueeOptions();
         ResetCursorColor();
@@ -195,6 +193,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OptimizeTrailingSpace, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OrphanCharOptimization, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, CompressLeadingPunctuation, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, PunctuationOverflow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
@@ -261,18 +260,19 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ClipEdge, bool, PROPERTY_UPDATE_RENDER);
 
     // symbol
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_GROUP(SymbolStyle, SymbolStyle);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(SymbolStyle, SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        FontStyle, SymbolColorList, std::vector<Color>, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
-        FontStyle, SymbolType, SymbolType, PROPERTY_UPDATE_MEASURE_SELF);
+        SymbolStyle, SymbolColorList, std::vector<Color>, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(SymbolStyle, SymbolType, SymbolType, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        FontStyle, SymbolRenderingStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
+        SymbolStyle, SymbolRenderingStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SymbolStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        FontStyle, SymbolEffectOptions, SymbolEffectOptions, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolShadow, SymbolShadow, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShaderStyle, std::vector<SymbolGradient>, PROPERTY_UPDATE_MEASURE_SELF);
+        SymbolStyle, SymbolEffectOptions, SymbolEffectOptions, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SymbolStyle, SymbolShadow, SymbolShadow, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SymbolStyle, ShaderStyle, std::vector<SymbolGradient>, PROPERTY_UPDATE_MEASURE_SELF);
 
     // fontscale
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);
@@ -360,6 +360,7 @@ protected:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propFontStyle_ = CloneFontStyle();
         value->propTextLineStyle_ = CloneTextLineStyle();
+        value->propSymbolStyle_ = CloneSymbolStyle();
         value->propContent_ = CloneContent();
         value->propAdaptFontSizeStep_ = CloneAdaptFontSizeStep();
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();

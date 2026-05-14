@@ -66,6 +66,7 @@ import systemDateTime from '@ohos.systemDateTime';
 import resourceManager from '@ohos.resourceManager';
 import mediaQuery from '@ohos.mediaquery';
 import I18n from '@ohos.i18n';
+import { UIContext } from "@ohos.arkui.UIContext";
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -77,7 +78,7 @@ const RESOURCE_TYPE_SYMBOL = 40000;
 export interface IconTheme {
   size: SizeOptions;
   margin: LocalizedMargin;
-  fillColor: ResourceColor;
+  fillColor: ColorContent | ResourceColor;
   borderRadius: Length;
 }
 
@@ -144,7 +145,7 @@ export const defaultTheme: PopupTheme = {
       start: LengthMetrics.vp(12),
       end: LengthMetrics.vp(12)
     },
-    fillColor: '',
+    fillColor: ColorContent.ORIGIN as ColorContent,
     borderRadius: $r('sys.float.ohos_id_corner_radius_default_s')
 
   },
@@ -232,7 +233,7 @@ export interface PopupV2InitInfo {
   iconModifier?: ImageModifier
   title?: ResourceStr;
   titleModifier?: TextModifier;
-  message?: ResourceStr;
+  message: ResourceStr;
   messageModifier?: TextModifier
   direction?: Direction;
   showClose?: boolean | Resource;
@@ -245,6 +246,7 @@ const noop = () => {
 };
 
 const POPUP_DEFAULT_MAXWIDTH = 400;
+const MAX_FONT_SCALE = 2;
 
 @Builder
 export function PopupV2(options: PopupV2InitInfo) {
@@ -340,6 +342,8 @@ export struct PopupV2Component {
   @Local closeButtonFillColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   @Local firstButtonHeight: number = 0;
   @Local secondButtonHeight: number = 0;
+  @Local appMaxFontScale: number = MAX_FONT_SCALE;
+
   private listener ?: mediaQuery.MediaQueryListener =
     this.getUIContext().getMediaQuery().matchMediaSync('(orientation: landscape)')
 
@@ -351,7 +355,7 @@ export struct PopupV2Component {
     return this.theme.icon.size.height as number
   }
 
-  private getIconFillColor(): ResourceColor {
+  private getIconFillColor(): ResourceColor | ColorContent {
     return this.theme.icon.fillColor
   }
 
@@ -667,6 +671,8 @@ export struct PopupV2Component {
   }
 
   aboutToAppear() {
+    let uiContext: UIContext = this.getUIContext();
+    this.appMaxFontScale = uiContext.getMaxFontScale();
     this.listener?.onChange((mediaQueryResult) => {
       setTimeout(() => {
         this.currentScreenStatus = mediaQueryResult?.matches as boolean
@@ -895,6 +901,7 @@ export struct PopupV2Component {
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
               .textAlign(this.getTitleTextAlign())
               .attributeModifier(this.titleModifier)
+              .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
             if (this.showClose || this.showClose === undefined) {
               Button() {
                 if (typeof this.showClose === 'object' &&
@@ -949,6 +956,7 @@ export struct PopupV2Component {
               .onAreaChange((_, rect) => {
                 this.textHeight = rect.height as number
               })
+              .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           }
           .direction(this.popupDirection)
           .width('100%')
@@ -972,6 +980,7 @@ export struct PopupV2Component {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
                   .attributeModifier(this.buttons?.[0]?.buttonTextModifier)
+                  .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
               }
               .type(ButtonType.Normal)
               .borderRadius($r('sys.float.popup_button_border_radius'))
@@ -1005,6 +1014,7 @@ export struct PopupV2Component {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
                   .attributeModifier(this.buttons?.[1]?.buttonTextModifier)
+                  .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
               }
               .type(ButtonType.Normal)
               .borderRadius($r('sys.float.popup_button_border_radius'))
@@ -1053,11 +1063,12 @@ export struct PopupV2Component {
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
                 .fontWeight(this.getMessageFontWeight())
-                .constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() })
+                .constraintSize({ minHeight: this.getCloseButtonHeight() })
                 .attributeModifier(this.messageModifier)
                 .onAreaChange((_, rect) => {
                   this.textHeight = rect.height as number
                 })
+                .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
             }
             .direction(this.popupDirection)
             .layoutWeight(this.getLayoutWeight())
@@ -1119,6 +1130,7 @@ export struct PopupV2Component {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
                   .attributeModifier(this.buttons?.[0]?.buttonTextModifier)
+                  .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
               }
               .type(ButtonType.Normal)
               .borderRadius($r('sys.float.popup_button_border_radius'))
@@ -1151,6 +1163,7 @@ export struct PopupV2Component {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
                   .attributeModifier(this.buttons?.[1]?.buttonTextModifier)
+                  .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
               }
               .type(ButtonType.Normal)
               .borderRadius($r('sys.float.popup_button_border_radius'))

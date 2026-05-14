@@ -134,6 +134,14 @@ declare class ArkLazyVGridLayoutComponent extends ArkComponent implements Common
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
+declare class ArkLazyColumnLayoutComponent extends ArkComponent implements CommonMethod<LazyColumnLayoutAttribute> {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+}
+
+declare class ArkLazyVWaterFlowLayoutComponent extends ArkComponent implements CommonMethod<LazyVWaterFlowLayoutAttribute> {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+}
+
 declare class ArkWaterFlowComponent extends ArkScrollable implements CommonMethod<WaterFlowAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
@@ -271,6 +279,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     maxLines(value: number): RichEditorAttribute;
     enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
     compressLeadingPunctuation(enable: Optional<boolean>): RichEditorAttribute;
+    punctuationOverflow(enable: Optional<boolean>): RichEditorAttribute;
 }
 
 declare class ArkButtonComponent extends ArkComponent implements ButtonAttribute {

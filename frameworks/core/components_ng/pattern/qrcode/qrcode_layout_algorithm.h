@@ -20,7 +20,6 @@
 #include <map>
 #include <optional>
 
-#include "base/geometry/axis.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"

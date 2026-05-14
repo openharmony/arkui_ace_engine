@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "mock_navigation_route.h"
 #include "core/accessibility/accessibility_manager.h"
 
 #define protected public

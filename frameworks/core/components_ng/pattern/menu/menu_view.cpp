@@ -20,7 +20,9 @@
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -1141,12 +1143,15 @@ void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const Me
 {
     CHECK_NULL_VOID(menuNode);
     bool isSetMenuSystemMaterial = false;
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial)) {
-        auto renderContext = menuNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);
         isSetMenuSystemMaterial = true;
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(menuParam.systemMaterial));
+    } else if (renderContext->GetSystemMaterial()) {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), nullptr);
+        UpdateMenuBackgroundStyle(menuNode, menuParam);
     }
     auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1666,7 +1671,7 @@ void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
     }
-    if (menuParam.targetSpace.has_value() && !menuParam.anchorPosition.has_value() && menuParam.placement.has_value()) {
+    if (menuParam.targetSpace.has_value()) {
         menuProperty->UpdateMenuTargetSpace(menuParam.targetSpace.value_or(Dimension(0)));
         menuProperty->UpdateTargetOffset(menuParam.targetOffset.value_or(OffsetF()));
         menuProperty->UpdateTargetMenuSize(menuParam.targetSize.value_or(SizeF()));

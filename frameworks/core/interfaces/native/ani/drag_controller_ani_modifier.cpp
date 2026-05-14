@@ -21,6 +21,8 @@
 #include "core/common/udmf/data_load_params.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -28,6 +30,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
@@ -535,6 +538,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     
     auto container = Ace::AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
         return false;
     }
@@ -547,13 +551,16 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
-    auto materialId = DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
+    auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
-        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "", materialId };
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "",
+        materialInfo.materialId };
+    dragData->isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    dragData->materialFilter = materialInfo.materialFilter;
     return true;
 }
 
@@ -764,6 +771,7 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     
     auto container = Ace::AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
         LOGE("AceDrag, can not find current pointerId or not in press.");
         return false;
@@ -773,13 +781,16 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto windowId = container->GetWindowId();
-    auto materialId = DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
+    auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
     dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dataSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
-        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "", materialId };
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "",
+        materialInfo.materialId };
+    dragData.isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    dragData.materialFilter = materialInfo.materialFilter;
     return true;
 }
 

@@ -66,7 +66,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr float DEFAULT_ICON_SIZE = 16.0f;
-constexpr float DEFAULT_SYMBOL_FONT_SIZE = 24.0f;
+constexpr float DEFAULT_SYMBOL_FONT_SIZE = 16.0f;
 constexpr uint32_t DEFAULT_SYMBOL_ICON_COLOR = 0xFF000000;
 constexpr float DEFAULT_FONT_SIZE = 16.0f;
 constexpr float DEFAULT_ICON_MIN_SIZE = 12.0f;
@@ -1150,6 +1150,21 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest007, Tes
     borderRadiusSetted.radiusTopLeft = Dimension(3.0);
     NG::BorderRadiusProperty borderRadiusEmpty;
     EXPECT_EQ(property->GetBackgroundBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
+
+    saveSc.SetBackgroundBorderRadius(std::nullopt, Dimension(3.0), std::nullopt, std::nullopt);
+    borderRadiusSetted.radiusTopLeft = std::nullopt;
+    borderRadiusSetted.radiusTopRight = Dimension(3.0);
+    EXPECT_EQ(property->GetBackgroundBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
+
+    saveSc.SetBackgroundBorderRadius(std::nullopt, std::nullopt, Dimension(3.0), std::nullopt);
+    borderRadiusSetted.radiusTopRight = std::nullopt;
+    borderRadiusSetted.radiusBottomLeft = Dimension(3.0);
+    EXPECT_EQ(property->GetBackgroundBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
+
+    saveSc.SetBackgroundBorderRadius(std::nullopt, std::nullopt, std::nullopt, Dimension(3.0));
+    borderRadiusSetted.radiusBottomLeft = std::nullopt;
+    borderRadiusSetted.radiusBottomRight = Dimension(3.0);
+    EXPECT_EQ(property->GetBackgroundBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
 }
 
 /**
@@ -1200,6 +1215,9 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, Tes
     std::optional<Dimension> bottomRight(Dimension(3.0));
     sc.SetIconBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
     EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusSetted);
+
+    sc.SetIconBorderRadius(std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    EXPECT_EQ(property->GetIconBorderRadius().value_or(borderRadiusEmpty), borderRadiusEmpty);
 }
 
 /**
@@ -1668,6 +1686,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest006, Te
     EXPECT_NE(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_NE(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_NE(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    pasteSc.SetBackgroundPadding(std::nullopt);
 
     auto buttonNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
     ASSERT_NE(buttonNode, nullptr);

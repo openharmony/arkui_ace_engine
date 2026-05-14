@@ -180,15 +180,20 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_getter.cpp",
 
+    "pipeline_context_font_scale_env_test_ng.cpp",
     "pipeline_context_test_ng.cpp",
     "pipeline_context_test_ng_five.cpp",
     "pipeline_context_test_ng_four.cpp",
+    "pipeline_context_test_ng_seven.cpp",
+    "pipeline_context_test_ng_six.cpp",
     "pipeline_context_test_ng_new.cpp",
     "pipeline_context_test_ng_three.cpp",
     "pipeline_context_test_ng_two.cpp",
 
     "$ace_root/frameworks/core/common/back_press_handler_manager.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/with_env_node.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/environment_manager.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
     "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",
   ]

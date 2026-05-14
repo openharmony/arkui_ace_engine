@@ -583,7 +583,9 @@ void WaterFlowLayoutSW::ClearBack(float bound)
     bound += info_->expandHeight_;
     for (int32_t i = info_->EndIndex(); i > startIdx; --i) {
         auto* lane = info_->GetMutableLane(i);
-        CHECK_NULL_BREAK(lane);
+        if (!lane) {
+            break;
+        }
         float itemStartPos = lane->endPos - lane->items_.back().mainSize;
         if (LessNotEqual(itemStartPos, bound)) {
             break;
@@ -601,7 +603,9 @@ void WaterFlowLayoutSW::ClearFront()
     int32_t endIdx = info_->EndIndex();
     for (int32_t i = info_->StartIndex(); i < endIdx; ++i) {
         auto* lane = info_->GetMutableLane(i);
-        CHECK_NULL_BREAK(lane);
+        if (!lane) {
+            break;
+        }
         const float& itemLen = lane->items_.front().mainSize;
         if (NearZero(itemLen) && NearZero(lane->startPos)) {
             break;
@@ -800,6 +804,12 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) co
         info_->CacheItemHeight(idx, 0.0f);
         return 0.0f;
     }
+    auto cacheHeight = info_->GetCachedHeight(idx);
+    if (cacheHeight && !NearEqual(res, *cacheHeight, 0.01f)) {
+        TAG_LOGI(AceLogTag::ACE_WATERFLOW,
+            "item size change. currentIdx:%{public}d,cacheHeight:%{public}f,itemHeight:%{public}f",
+            idx, *cacheHeight, res);
+    }
     info_->CacheItemHeight(idx, res);
     return res;
 }
@@ -993,6 +1003,7 @@ void WaterFlowLayoutSW::MeasureLazyChild(
                                 : info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]),
         .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
         .axis = Axis::VERTICAL,
+        .deadline = cacheDeadline_,
     };
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child));

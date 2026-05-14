@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/common/container.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"

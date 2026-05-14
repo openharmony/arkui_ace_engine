@@ -39,8 +39,7 @@ public:
     static ArkUINodeHandle GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUI_Bool IsCustomFrameNode(FrameNode* node);
     static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const BaseEventInfo& info);
-    static Local<panda::ObjectRef> CreateTouchInfo(
-        EcmaVM* vm, const TouchLocationInfo& touchInfo, TouchEventInfo& info);
+    static Local<panda::ObjectRef> CreateTouchInfo(EcmaVM* vm, const TouchLocationInfo& touchInfo);
     static int GetInstanceId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void SetDrawFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void SetCustomFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo);

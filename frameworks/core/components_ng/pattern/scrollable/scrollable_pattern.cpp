@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/base/modifier.h"
 
 #include "core/accessibility/accessibility_utils.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -28,12 +29,14 @@
 #include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/animation/select_motion.h"
 #include "core/animation/velocity_motion.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
@@ -87,6 +90,8 @@ const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
 const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
+// Threshold for back to top performance optimization (5 screen sizes)
+constexpr uint32_t BACK_TO_TOP_THRESHOLD_SCREEN = 5;
 
 bool IsScrollable(const RefPtr<FrameNode>& frameNode)
 {
@@ -529,6 +534,9 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         }
         return false;
     }
+    if (navBarPattern_ && navBarPattern_->IsScrollEffectEnabled()) {
+        navBarPattern_->OnContentScrollUpdate(offset, GetTotalOffset());
+    }
 
     CHECK_NULL_RETURN(navBarPattern_ && navBarPattern_->NeedCoordWithScroll(), false);
 
@@ -870,6 +878,17 @@ void ScrollablePattern::SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>
     scrollable->SetNeedScrollSnapToSideCallback(std::move(needScrollSnapToSideCallback));
 }
 
+void ScrollablePattern::SetBackToTopCallback(const RefPtr<Scrollable>& scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    auto backToTopCallback = [weak = WeakClaim(this)]() -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->GetBackToTop();
+    };
+    scrollable->SetBackToTopCallback(std::move(backToTopCallback));
+}
+
 void ScrollablePattern::SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable)
 {
     CHECK_NULL_VOID(scrollable);
@@ -1021,6 +1040,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragEndCallback(scrollable);
     SetStartSnapAnimationCallback(scrollable);
     SetNeedScrollSnapToSideCallback(scrollable);
+    SetBackToTopCallback(scrollable);
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
@@ -1959,6 +1979,7 @@ void ScrollablePattern::GetParentNavigation()
         if (!navBarPattern_) {
             continue;
         }
+        navBarPattern_->SetScrollableNode(WeakPtr<FrameNode>(host));
         return;
     }
     navBarPattern_ = nullptr;
@@ -2122,6 +2143,7 @@ void ScrollablePattern::OnAnimateFinish()
     }
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
     isBackToTopRunning_ = false;
+    backToTopSkipDistance_.reset();
 }
 
 void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOption& curveOption, bool useTotalOffset,
@@ -2142,7 +2164,9 @@ void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOpt
     AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->springOffsetProperty_->Set(pattern->GetTotalOffset());
+        float initPos = pattern->GetTotalOffset();
+        initPos -= pattern->CalcSpringAdjustOffset(initPos);
+        pattern->springOffsetProperty_->Set(initPos);
     });
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -2168,6 +2192,8 @@ void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOpt
 void ScrollablePattern::PlayCurveAnimation(
     float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     InitOption(option, duration, curve);
     if (!curveOffsetProperty_) {
@@ -2190,7 +2216,7 @@ void ScrollablePattern::PlayCurveAnimation(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateFinish();
-        });
+        }, nullptr, host->GetContextRefPtr());
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
 
@@ -2222,6 +2248,55 @@ float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
     return delta;
 }
 
+float ScrollablePattern::CalcSpringAdjustOffset(float offset) const
+{
+    CHECK_NULL_RETURN(isBackToTopRunning_, 0.0f);
+    CHECK_NULL_RETURN(backToTopSkipDistance_, 0.0f);
+    float mainContentSize = GetMainContentSize();
+    float skipPos = BACK_TO_TOP_THRESHOLD_SCREEN * mainContentSize / 2;
+    if (GreatNotEqual(offset, skipPos)) {
+        return backToTopSkipDistance_.value();
+    }
+    return 0.0f;
+}
+
+// Process spring offset animation callback
+void ScrollablePattern::ProcessSpringOffsetCallback(float offset)
+{
+    if (isAnimationStop_) {
+        return;
+    }
+
+    bool stopAnimation = false;
+    // Check if we should trigger the skip for back to top optimization
+    // Add skip distance to delta when reaching animation midpoint
+    offset += CalcSpringAdjustOffset(offset);
+    auto delta = GetScrollDelta(offset, stopAnimation);
+
+    auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
+    if (GetLastSnapTargetIndex().has_value()) {
+        source = SCROLL_FROM_ANIMATION;
+    }
+    if (isBackToTopRunning_) {
+        source = SCROLL_FROM_STATUSBAR;
+    }
+    auto totalOffset = GetTotalOffset();
+    if (((scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) &&
+            !GreatNotEqual(totalOffset, finalPosition_)) ||
+        ((scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta)) &&
+            !LessNotEqual(totalOffset, finalPosition_))) {
+        delta = 0;
+    }
+    if (!UpdateCurrentOffset(delta, source) || stopAnimation || isAnimateOverScroll_) {
+        if (isAnimateOverScroll_ && GetCanStayOverScroll()) {
+            isAnimateOverScroll_ = false;
+            SetIsOverScroll(true);
+        } else {
+            StopAnimation(springAnimation_);
+        }
+    }
+}
+
 void ScrollablePattern::InitSpringOffsetProperty()
 {
     auto host = GetHost();
@@ -2231,33 +2306,7 @@ void ScrollablePattern::InitSpringOffsetProperty()
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float offset) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->isAnimationStop_) {
-            return;
-        }
-        bool stopAnimation = false;
-        auto delta = pattern->GetScrollDelta(offset, stopAnimation);
-        auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
-        if (pattern->GetLastSnapTargetIndex().has_value()) {
-            source = SCROLL_FROM_ANIMATION;
-        }
-        if (pattern->isBackToTopRunning_) {
-            source = SCROLL_FROM_STATUSBAR;
-        }
-        auto totalOffset = pattern->GetTotalOffset();
-        if (((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) &&
-                !GreatNotEqual(totalOffset, pattern->finalPosition_)) ||
-            ((pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta)) &&
-                !LessNotEqual(totalOffset, pattern->finalPosition_))) {
-            delta = 0;
-        }
-        if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation || pattern->isAnimateOverScroll_) {
-            if (pattern->isAnimateOverScroll_ && pattern->GetCanStayOverScroll()) {
-                pattern->isAnimateOverScroll_ = false;
-                pattern->SetIsOverScroll(true);
-            } else {
-                pattern->StopAnimation(pattern->springAnimation_);
-            }
-        }
+        pattern->ProcessSpringOffsetCallback(offset);
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     renderContext->AttachNodeAnimatableProperty(springOffsetProperty_);
@@ -3116,6 +3165,42 @@ void ScrollablePattern::ReportBackToTop()
         ", \"compId\": \"" + node->GetInspectorIdValue("") + "\"}");
 }
 
+// Check if all parent components are active and visible
+bool ScrollablePattern::CheckParentsActive() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        if (!frameNode->IsActive() || !frameNode->IsVisible()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Start back to top animation with performance optimization
+void ScrollablePattern::StartBackToTopAnimation()
+{
+    float currentOffset = GetTotalOffset();
+    float targetPosition = 0 - GetContentStartOffset();
+    float distance = currentOffset - targetPosition;
+    float mainContentSize = GetMainContentSize();
+    // Check if performance optimization is needed
+    if (GreatNotEqual(distance, BACK_TO_TOP_THRESHOLD_SCREEN * mainContentSize)) {
+        // Calculate the distance to skip (positive value)
+        backToTopSkipDistance_ = distance - BACK_TO_TOP_THRESHOLD_SCREEN * mainContentSize;
+        AnimateTo(targetPosition, -1, nullptr, true);
+    } else {
+        // Reset optimization variables and use default animation
+        backToTopSkipDistance_.reset();
+        AnimateTo(targetPosition, -1, nullptr, true);
+    }
+}
+
 void ScrollablePattern::OnStatusBarClick()
 {
     if (!backToTop_ || isBackToTopRunning_ || IsAtTop()) {
@@ -3130,24 +3215,13 @@ void ScrollablePattern::OnStatusBarClick()
         return;
     }
 
-    bool isActive = true;
-    // If any of the parent components is not active while traversing the parent components, do not scroll to the top.
-    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
-        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (!frameNode) {
-            continue;
-        }
-        if (!frameNode->IsActive() || !frameNode->IsVisible()) {
-            isActive = false;
-            break;
-        }
-    }
-    if (!isActive) {
+    // If any of the parent components is not active, do not scroll to the top
+    if (!CheckParentsActive()) {
         return;
     }
 
     isBackToTopRunning_ = true; // set stop animation flag when click status bar.
-    AnimateTo(0 - GetContentStartOffset(), -1, nullptr, true);
+    StartBackToTopAnimation();
     ReportBackToTop();
 }
 

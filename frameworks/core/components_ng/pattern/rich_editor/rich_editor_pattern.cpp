@@ -16,6 +16,7 @@
 #define NAPI_VERSION 8 
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
@@ -789,7 +790,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
 {
-    CHECK_NULL_VOID(!IsHandleMoving());
+    CHECK_NULL_VOID(!IsHandleMoving()); // Magnifier opened by long press can be closed via this path.
     if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
         ResetTouchSelectState();
         ResetTouchAndMoveCaretState();
@@ -1258,6 +1259,8 @@ void RichEditorPattern::OnAttachToFrameNode()
 {
     ACE_SCOPED_TRACE("RichEditorPattern::OnAttachToFrameNode");
     TextPattern::OnAttachToFrameNode();
+    InitSurfaceChangedCallback();
+    InitSurfacePositionChangedCallback();
     richEditorInstanceId_ = Container::CurrentIdSafely();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -1273,6 +1276,12 @@ void RichEditorPattern::OnAttachToFrameNode()
     auto contentNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_CONTENT_ETS_TAG, nodeId, patternCreator);
     frameNode->AddChild(contentNode);
     SetContentPattern(contentNode->GetPattern<RichEditorContentPattern>());
+}
+
+void RichEditorPattern::OnAttachToMainTreeMultiThreadExtension()
+{
+    InitSurfaceChangedCallback();
+    InitSurfacePositionChangedCallback();
 }
 
 void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -2575,7 +2584,8 @@ void RichEditorPattern::UpdateCaretStyleByTypingStyle(bool isReset)
 {
     bool empty = spans_.empty();
     bool hasPreviewContent = !previewTextRecord_.previewContent.empty();
-    bool lastNewLine = !empty && styleManager_->HasTypingParagraphStyle() && spans_.back()->content.back() == u'\n';
+    bool lastNewLine = !empty && styleManager_->HasTypingParagraphStyle()
+        && !spans_.back()->content.empty() && spans_.back()->content.back() == u'\n';
     CHECK_NULL_VOID(empty || hasPreviewContent || lastNewLine || isReset);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3367,7 +3377,8 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
     auto paraStart = firstSpan->position - static_cast<int32_t>(firstSpan->content.length());
 
     for (auto it = spanNodes.begin(); it != spanNodes.end(); ++it) {
-        if (it == std::prev(spanNodes.end()) || (*it)->GetSpanItem()->content.back() == u'\n') {
+        if (it == std::prev(spanNodes.end()) || (!(*it)->GetSpanItem()->content.empty()
+            && (*it)->GetSpanItem()->content.back() == u'\n')) {
             ParagraphInfo info;
             auto lm = (*it)->GetLeadingMarginValue({});
             std::optional<double> spacingOpt;
@@ -3441,7 +3452,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
         if (spanNode) {
             auto&& info = spanNode->GetSpanItem();
             spanEnd = info->position;
-            isEnd = info->content.back() == u'\n';
+            isEnd = !info->content.empty() && info->content.back() == u'\n';
         } else {
             ++spanEnd;
             isEnd = false;
@@ -3467,7 +3478,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
             res.emplace_back(spanNode);
             auto&& info = spanNode->GetSpanItem();
             spanEnd = info->position;
-            isEnd = info->content.back() == u'\n';
+            isEnd = !info->content.empty() && info->content.back() == u'\n';
         } else {
             ++spanEnd;
             isEnd = false;
@@ -3853,7 +3864,7 @@ bool RichEditorPattern::HandleUserGestureEvent(
             paragraphOffset.SetY(selectedRects[0].GetOffset().GetY());
             isParagraphHead = false;
         }
-        if (!isParagraphHead && item->content.back() == '\n') {
+        if (!isParagraphHead && !item->content.empty() && item->content.back() == '\n') {
             isParagraphHead = true;
         }
         for (auto&& rect : selectedRects) {
@@ -5562,7 +5573,7 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
     InsertValue(UtfUtils::Str8ToStr16(value->text), true);
 #else
     if (value->isDelete) {
-#ifdef IOS_PLATFORM
+#ifdef CROSS_PLATFORM
         if (value->compose.IsValid()) {
             EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
             if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
@@ -6485,6 +6496,9 @@ void RichEditorPattern::FinishTextPreview()
         RemoveEmptySpans();
         IF_TRUE(previewTextRecord_.isSpanSplit, MergeAdjacentSpans(caretPosition_));
         previewTextRecord_.Reset();
+        UndoRedoRecord styledRecord;
+        undoManager_->UpdateRecordAfterChange(caretPosition_, 0, styledRecord);
+        undoManager_->RecordPreviewInputtingEnd(styledRecord);
         return;
     }
     auto previewContent = previewTextRecord_.previewContent;
@@ -8452,6 +8466,7 @@ void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
     auto acceptedTouchInfo = GetAcceptedTouchLocationInfo(info);
     CHECK_NULL_VOID(acceptedTouchInfo.has_value());
     auto touchInfo = acceptedTouchInfo.value();
+    UpdateMagnifierTouchInfo(info.GetTimeStamp(), touchInfo.GetTouchType());
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(touchInfo);
@@ -8467,9 +8482,11 @@ void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
     } else if (touchType == TouchType::MOVE) {
         HandleTouchMove(touchInfo);
     } else if (touchType == TouchType::CANCEL) {
+        IF_PRESENT(magnifierController_, ResetTouchInfo());
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
         HandleTouchCancelAfterLongPress();
         ResetTouchAndMoveCaretState();
+        ResetMagnifierTouchInfo();
     }
 }
 
@@ -8521,7 +8538,9 @@ void RichEditorPattern::HandleTouchUp()
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
     if (!isHandleMoving) {
+        IF_PRESENT(magnifierController_, ResetTouchInfo()); // Reset state of magnifier which opened by long press.
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
+        ResetMagnifierTouchInfo();
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (isLongPress_) {
@@ -8705,7 +8724,20 @@ void RichEditorPattern::SetMagnifierLocalOffset(Offset offset)
     auto localOffset = OffsetF{ offset.GetX(), offset.GetY() };
     auto localOffsetWithTrans = localOffset;
     selectOverlay_->GetLocalPointWithTransform(localOffsetWithTrans);
-    magnifierController_->SetLocalOffset(localOffsetWithTrans, localOffset);
+    magnifierController_->SetLocalOffset(
+        localOffsetWithTrans, magnifierTouchTimeStamp_, magnifierTouchType_, localOffset);
+}
+
+void RichEditorPattern::UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType)
+{
+    magnifierTouchTimeStamp_ = time;
+    magnifierTouchType_ = touchType;
+}
+
+void RichEditorPattern::ResetMagnifierTouchInfo()
+{
+    magnifierTouchTimeStamp_ = TimeStamp();
+    magnifierTouchType_ = TouchType::UNKNOWN;
 }
 
 void RichEditorPattern::SetMagnifierOffsetWithAnimation(Offset offset)
@@ -10101,10 +10133,10 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
 }
 
 void RichEditorPattern::HandleSurfaceChanged(
-    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type)
+    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
     if (newWidth != prevWidth || newHeight != prevHeight) {
-        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
         UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
@@ -10637,7 +10669,7 @@ void RichEditorPattern::InitScrollablePattern()
         barDisplayMode_ = barState;
         isSingleLineMode_ = singleLine;
     }
-    CHECK_NULL_VOID(!HandleHorizontalScroll() && (needInit || needResetScrollBar_));
+    CHECK_NULL_VOID(!HandleHorizontalScroll(needInit) && (needInit || needResetScrollBar_));
     needResetScrollBar_ = false;
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -10817,7 +10849,7 @@ RefPtr<RichEditorScrollController> RichEditorPattern::GetScrollController() cons
     return scrollController_;
 }
 
-bool RichEditorPattern::HandleHorizontalScroll()
+bool RichEditorPattern::HandleHorizontalScroll(bool needUpdateOffset)
 {
     if (!isHorizontalScrolling_) {
         if (scrollController_->IsFreeScrollEnabled() && scrollController_->IsAttachedModifier()) {
@@ -10841,11 +10873,12 @@ bool RichEditorPattern::HandleHorizontalScroll()
     scrollController_->SetScrollBar(barState);
     UpdateScrollBarColor(GetScrollBarColor());
     auto richEditorTheme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_RETURN(richEditorTheme, false);
+    CHECK_NULL_RETURN(richEditorTheme, true);
     scrollController_->SetMinHeight(richEditorTheme->GetScrollbarMinHeight());
     if (!scrollController_->IsAttachedModifier()) {
         RemoveOverlayModifier();
     }
+    CHECK_NULL_RETURN(needUpdateOffset, true);
     if (overlayMod_) {
         UpdateScrollBarOffset();
     }
@@ -11503,6 +11536,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("includeFontPadding", isIncludeFontPadding_ ? "true" : "false", filter);
     json->PutExtAttr("fallbackLineSpacing", isFallbackLineSpacing_ ? "true" : "false", filter);
     json->PutExtAttr("compressLeadingPunctuation", isCompressLeadingPunctuation_ ? "true" : "false", filter);
+    json->PutExtAttr("punctuationOverflow", isPunctuationOverflow_ ? "true" : "false", filter);
     json->PutExtAttr("scrollBarColor", GetScrollBarColor().ColorToString().c_str(), filter);
     json->PutExtAttr("singleLine", isSingleLineMode_ ? "true" : "false", filter);
     json->PutExtAttr("selectedDragPreviewStyle", GetSelectedDragPreviewStyleColor().ColorToString().c_str(), filter);
@@ -13882,7 +13916,7 @@ SymbolSpanOptions RichEditorPattern::GetSymbolSpanOptions(const RefPtr<SpanItem>
 {
     CHECK_NULL_RETURN(spanItem, {});
     TextStyle textStyle = GetDefaultTextStyle();
-    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle, true);
+    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle, true, spanItem->symbolStyle);
     SymbolSpanOptions options;
     options.style = textStyle;
     options.offset = caretPosition_;
@@ -14519,6 +14553,19 @@ bool RichEditorPattern::IsCompressLeadingPunctuation()
     return isCompressLeadingPunctuation_;
 }
 
+void RichEditorPattern::SetPunctuationOverflow(bool enabled)
+{
+    CHECK_NULL_VOID(isPunctuationOverflow_ != enabled);
+    isPunctuationOverflow_ = enabled;
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPunctuationOverflow: %{public}d", isPunctuationOverflow_);
+}
+
+bool RichEditorPattern::IsPunctuationOverflow()
+{
+    return isPunctuationOverflow_;
+}
+
 void RichEditorPattern::OnAttachToMainTree()
 {
     TextPattern::OnAttachToMainTree();
@@ -15029,4 +15076,11 @@ void RichEditorPattern::PostTaskToLayutSwap(std::function<void()>&& task)
 {
     tasks_.emplace(std::forward<std::function<void()>>(task));
 }
+
+void RichEditorPattern::ClearParagraphCache()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "paragraph cache cleared");
+    paragraphCache_.Clear();
+}
+
 } // namespace OHOS::Ace::NG

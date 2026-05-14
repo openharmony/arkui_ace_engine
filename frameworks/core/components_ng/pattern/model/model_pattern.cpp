@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/model/model_pattern.h"
 
+#include "core/common/window.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "ui/rs_ui_context.h"
 #include "ui/rs_ui_director.h"

@@ -814,6 +814,18 @@ export function CanvasImpl(
     })
 }
 
+@memo
+export function Canvas(
+    @memo @memo_skip
+    style: ((attributes: CanvasAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkCanvasComponent>((): ArkCanvasComponent => {
+        return new ArkCanvasComponent()
+    })
+    NodeAttach<ArkCanvasPeer>((): ArkCanvasPeer => ArkCanvasPeer.create(receiver), (_: ArkCanvasPeer): void => {
+        style?.(receiver)
+    })
+}
 export class CanvasGradient_serializer {
     public static write(buffer: SerializerBase, value: CanvasGradient): void {
         let valueSerializer: SerializerBase = buffer

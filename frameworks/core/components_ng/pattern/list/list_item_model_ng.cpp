@@ -204,6 +204,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         pattern->SetStartNode(startNode);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(length, LpxAttribute::LPX_LIST_ITEM_START_DELETE_AREA_DISTANCE, node);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, node);
     } else {
         RefPtr<NG::UINode> endNode;
@@ -215,6 +216,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         pattern->SetEndNode(endNode);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(length, LpxAttribute::LPX_LIST_ITEM_END_DELETE_AREA_DISTANCE, node);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, node);
     }
 }
@@ -273,6 +275,7 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
         eventHub->SetOnEnterStartDeleteArea(std::move(onEnterDeleteArea));
         eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
         eventHub->SetStartOnStateChange(std::move(onStateChange));
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(length, LpxAttribute::LPX_LIST_ITEM_START_DELETE_AREA_DISTANCE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, frameNode);
     } else {
         const auto endNode = AceType::Claim<UINode>(buildNode);
@@ -282,6 +285,7 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
         eventHub->SetOnEnterEndDeleteArea(std::move(onEnterDeleteArea));
         eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
         eventHub->SetEndOnStateChange(std::move(onStateChange));
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(length, LpxAttribute::LPX_LIST_ITEM_END_DELETE_AREA_DISTANCE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, frameNode);
     }
 }
@@ -326,11 +330,13 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         pattern->SetStartNode(builderComponent);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(length, LpxAttribute::LPX_LIST_ITEM_START_DELETE_AREA_DISTANCE, node);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, node);
     } else {
         pattern->SetEndNode(builderComponent);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(length, LpxAttribute::LPX_LIST_ITEM_END_DELETE_AREA_DISTANCE, node);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, node);
     }
 }
@@ -356,6 +362,7 @@ void ListItemModelNG::ParseResObjStartArea(const RefPtr<ResourceObject>& resObj)
             if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
                 return;
             }
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_LIST_ITEM_START_DELETE_AREA_DISTANCE, frameNode);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, result, frameNode);
         };
         pattern->AddResObj("listItem.StartDeleteAreaDistance", resObj, std::move(updateFunc));
@@ -374,6 +381,7 @@ void ListItemModelNG::ParseResObjEndArea(const RefPtr<ResourceObject>& resObj)
         if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
             return;
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_LIST_ITEM_END_DELETE_AREA_DISTANCE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, result, frameNode);
     };
     pattern->AddResObj("listItem.EndDeleteAreaDistance", resObj, std::move(updateFunc));

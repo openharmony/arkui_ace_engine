@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "frameworks/core/common/container.h"
+#include "base/log/container_scope_wrapper.h"
 namespace OHOS::Ace {
 int32_t GetMainInstanceId(int32_t instanceId)
 {
@@ -32,6 +33,9 @@ int32_t GetMainInstanceId(int32_t instanceId)
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 static thread_local std::vector<int32_t> restoreInstanceIds_;
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+static thread_local std::vector<uint64_t> pushedUids_;
+#endif
 
 JSScopeUtil::JSScopeUtil() {}
 
@@ -57,19 +61,35 @@ void JSScopeUtil::SyncInstanceId(const JSCallbackInfo& info)
     if (!info[0]->IsNumber()) {
         return;
     }
-
     restoreInstanceIds_.emplace_back(Container::CurrentId());
     int32_t instanceId = info[0]->ToNumber<int32_t>();
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+    pushedUids_.emplace_back(CURRENT_ID_PUSH(instanceId, CurrentIdSourceType::JS_FRONTEND));
+#else
     ContainerScope::UpdateCurrent(instanceId);
+#endif
 }
 
 void JSScopeUtil::RestoreInstanceId(const JSCallbackInfo& info)
 {
     if (restoreInstanceIds_.empty()) {
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+        CURRENT_ID_POP(0, INSTANCE_ID_UNDEFINED, CurrentIdSourceType::JS_FRONTEND);
+#else
         ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+#endif
         return;
     }
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+    uint64_t uid = 0;
+    if (!pushedUids_.empty()) {
+        uid = pushedUids_.back();
+        pushedUids_.pop_back();
+    }
+    CURRENT_ID_POP(uid, restoreInstanceIds_.back(), CurrentIdSourceType::JS_FRONTEND);
+#else
     ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
+#endif
     restoreInstanceIds_.pop_back();
 }
 
@@ -105,7 +125,7 @@ void JSScopeUtil::GetAllUIContexts(const JSCallbackInfo& info)
 
 void JSScopeUtil::ResolveUIContext(const JSCallbackInfo& info)
 {
-    auto currentIdWithReason = ContainerScope::CurrentIdWithReason();
+    auto currentIdWithReason = ContainerScope::CurrentIdWithReason(false);
     JSRef<JSArray> jsCurrentIdWithReason = JSRef<JSArray>::New();
     jsCurrentIdWithReason->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(GetMainInstanceId(currentIdWithReason.first))));
     jsCurrentIdWithReason->SetValueAt(

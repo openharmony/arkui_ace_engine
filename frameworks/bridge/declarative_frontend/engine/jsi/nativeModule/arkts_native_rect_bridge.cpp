@@ -136,7 +136,7 @@ void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& j
         return;
     }
     auto arrayVal = panda::Local<panda::ArrayRef>(jsValue);
-    auto length = arrayVal->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, arrayVal);
     if (length <= 0) {
         return;
     }
@@ -153,7 +153,7 @@ void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& j
             break;
         }
         auto radiusArray = panda::Local<panda::ArrayRef>(radiusItem);
-        if (radiusArray->Length(vm) != dataCount) {
+        if (ArkTSUtils::GetArrayLength(vm, radiusArray) != dataCount) {
             SetRadiusArraysInvalidValue(radiusValues, radiusUnits, radiusValidPairs, i);
             break;
         }

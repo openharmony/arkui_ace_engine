@@ -140,6 +140,18 @@ export function PathImpl(
     })
 }
 
+@memo
+export function Path(
+    @memo @memo_skip
+    style: ((attributes: PathAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkPathComponent>((): ArkPathComponent => {
+        return new ArkPathComponent()
+    })
+    NodeAttach<ArkPathPeer>((): ArkPathPeer => ArkPathPeer.create(receiver), (_: ArkPathPeer): void => {
+        style?.(receiver)
+    })
+}
 export class PathOptions_serializer {
     public static write(buffer: SerializerBase, value: PathOptions): void {
         let valueSerializer: SerializerBase = buffer

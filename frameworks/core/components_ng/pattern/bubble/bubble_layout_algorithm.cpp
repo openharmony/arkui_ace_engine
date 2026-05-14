@@ -2888,7 +2888,7 @@ void BubbleLayoutAlgorithm::UpdateClipOffset(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(renderContext);
     if (isUserSetMaterial_) {
         auto bubbleSDFShape = GetBubbleSDFShape();
-        renderContext->ResetClipShape();
+        renderContext->ClearClipBounds();
         renderContext->SetSDFShape(bubbleSDFShape);
     } else {
         renderContext->SetSDFShape(nullptr);

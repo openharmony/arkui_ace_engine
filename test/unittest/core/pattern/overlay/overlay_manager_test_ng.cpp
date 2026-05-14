@@ -74,6 +74,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -317,6 +318,54 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level0)
     overlayManager->modalList_.emplace_back(nullptr);
     overlayManager->DeleteModal(targetId + 1);
     EXPECT_EQ(overlayManager->modalList_.size(), 3);
+}
+
+/**
+ * @tc.name: SheetMaterial001
+ * @tc.desc: Test OverlayManager::OnBindSheet set SheetMaterial.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
+    sheetStyle.borderColor = BORDER_COLOR_TEST;
+    sheetStyle.borderStyle = BORDER_STYLE_TEST;
+    sheetStyle.shadow = shadow;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::NONE);
+    material->SetType(type);
+    sheetStyle.systemMaterial = nullptr;
+
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBorderWidth().value(), BORDER_WIDTH_TEST);
+    EXPECT_EQ(renderContext->GetBorderColor().value(), BORDER_COLOR_TEST);
+    EXPECT_EQ(renderContext->GetBorderStyle().value(), BORDER_STYLE_TEST);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 
 /**
@@ -821,54 +870,6 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
      * @tc.steps: step7. recover api version info.
      */
     AceApplicationInfo::GetInstance().SetApiTargetVersion(orignApiVersion);
-}
-
-/**
- * @tc.name: SheetMaterial001
- * @tc.desc: Test OverlayManager::OnBindSheet set SheetMaterial.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestNg, SheetMaterial001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    auto targetNode = CreateTargetNode();
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    stageNode->MountToParent(rootNode);
-    targetNode->MountToParent(stageNode);
-    rootNode->MarkDirtyNode();
-    /**
-     * @tc.steps: step2. create sheetNode, get sheetPattern.
-     */
-    SheetStyle sheetStyle;
-    bool isShow = true;
-    CreateSheetBuilder();
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-
-    Shadow shadow = ShadowConfig::DefaultShadowL;
-    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
-    sheetStyle.borderColor = BORDER_COLOR_TEST;
-    sheetStyle.borderStyle = BORDER_STYLE_TEST;
-    sheetStyle.shadow = shadow;
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    auto type = static_cast<int32_t>(MaterialType::NONE);
-    material->SetType(type);
-    sheetStyle.systemMaterial = nullptr;
-
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
-    EXPECT_FALSE(overlayManager->modalStack_.empty());
-    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
-    ASSERT_NE(sheetNode, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetBorderWidth().value(), BORDER_WIDTH_TEST);
-    EXPECT_EQ(renderContext->GetBorderColor().value(), BORDER_COLOR_TEST);
-    EXPECT_EQ(renderContext->GetBorderStyle().value(), BORDER_STYLE_TEST);
-    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 
 /**
@@ -4401,6 +4402,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern16, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
@@ -4455,6 +4457,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern17, TestSize.Level1)
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->largePercent_ = 0.5;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
@@ -4507,6 +4510,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern18, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
@@ -4677,6 +4681,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sheetTheme));
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};

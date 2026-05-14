@@ -46,6 +46,7 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #undef private
 #undef protected
@@ -476,12 +477,13 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest007, TestSize.Level0)
     EXPECT_EQ(child0->ExpandIntoKeyboard(child0, parent), OffsetF(0.0f, -50.0f));
     EXPECT_EQ(child1->ExpandIntoKeyboard(child1, child0), OffsetF(0.0f, -50.0f));
     EXPECT_EQ(child2->ExpandIntoKeyboard(child2, child1), OffsetF(0.0f, -50.0f));
+
     parent->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
     child0->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
     child1->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
     EXPECT_EQ(parent->ExpandIntoKeyboard(parent, parentParent), OffsetF(0.0f, -50.0f));
-    EXPECT_EQ(child0->ExpandIntoKeyboard(child0, child1), OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(child1->ExpandIntoKeyboard(child1, child2), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(child0->ExpandIntoKeyboard(child0, parent), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(child1->ExpandIntoKeyboard(child1, child0), OffsetF(0.0f, 0.0f));
 }
 
 /**

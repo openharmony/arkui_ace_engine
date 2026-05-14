@@ -173,6 +173,7 @@ ace_unittest("form_pattern_test") {
     "$ace_root/test/unittest/core/pattern/form/mock/mock_sub_container.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_system_properties.cpp",
     "form_pattern_test.cpp",
+    "form_pattern_test2.cpp",
   ]
 
   if (ohos_indep_compiler_enable) {

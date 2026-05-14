@@ -61,7 +61,7 @@ export class InteropStorageBase extends StorageBase {
     }
 
     // get value from Storage in ArkTS1.1
-    protected getDynamicValue_: (value: string) => Object | undefined = (value: string) => {
+    protected getDynamicValue_: (value: string) => Any = (value: string) => {
         throw new Error('not implement');
     };
     protected removeDynamicValue_: (value: string) => boolean = (value: string) => {
@@ -93,6 +93,9 @@ export class InteropStorageBase extends StorageBase {
     public BindDynamicStorage(dynamicLocalStorage: ESValue): void {
         // call ArkTS1.1 Storage to bind static Storage.
         const global = ESValue.getGlobal();
+        if (!global) {
+ 	        StateMgmtConsole.log('BindDynamicStorage: fail to get global ESValue');
+ 	    }
         const bindFunc = global.getProperty('bindStaticLocalStorage');
         if (bindFunc.isNull() || bindFunc.isUndefined()) {
             StateMgmtConsole.log('fail to find bindStaticLocalStorage');
@@ -129,7 +132,7 @@ export class InteropStorageBase extends StorageBase {
             return this.getStaticKeys();
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => Object | undefined): void => {
+        const setGetValueFunc = (event: (value: string) => Any): void => {
             this.getDynamicValue_ = event;
         };
         const setRemoveValueFunc = (event: (value: string) => boolean): void => {
@@ -193,7 +196,7 @@ export class InteropStorageBase extends StorageBase {
         }
         let dynamicState: ESValue = ESValue.wrap(result);
         let originValue: T = dynamicState.invokeMethod('getUnmonitored').unwrap() as T;
-        let storageProperty = new StorageProperty<T>(key, uiUtils.makeObserved(originValue));
+        let storageProperty = new StorageProperty<T>(key, uiUtils.makeV1Observed(originValue));
 
         const setSource = ((value: T): void => {
             storageProperty.set(value);
@@ -665,7 +668,7 @@ export class InteropAppStorageBase extends InteropStorageBase {
             return this.getStaticKeys();
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => Object | undefined): void => {
+        const setGetValueFunc = (event: (value: string) => Any): void => {
             this.getDynamicValue_ = event;
         };
         const setRemoveValueFunc = (event: (value: string) => boolean): void => {

@@ -106,6 +106,9 @@ public:
     void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     bool OnHandleBeforeMenuVisibiltyChanged(bool isVisible) override;
+    enum class RequestCode: uint32_t {
+        RIGHT_CLICK = 1 << 3
+    };
 
 protected:
     bool AllowTranslate() override;
@@ -114,6 +117,8 @@ protected:
     bool AllowShare() override;
 
 private:
+    void UpdateMagnifierTouchInfo(const GestureEvent& event, TouchType touchType);
+    void ResetMagnifierTouchInfo();
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
     void UpdatePattern(const OverlayRequest& request);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
@@ -127,6 +132,8 @@ private:
     bool needRefreshPasteButton_ = false;
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html", "autofill/secure" };
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
 };
 
 } // namespace OHOS::Ace::NG

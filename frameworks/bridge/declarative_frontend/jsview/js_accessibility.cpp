@@ -92,6 +92,17 @@ void JSViewAbstract::JsAccessibilityNextFocusId(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetAccessibilityNextFocusId(nextFocusId);
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+        NG::AccessibilityNextFocusParams params;
+        auto descendantModeVal = obj->GetProperty("isConsiderDescendants");
+        if (descendantModeVal->IsBoolean()) {
+            params.nextFocusInspectorKey = nextFocusId;
+            params.descendantMode = descendantModeVal->ToBoolean();
+        }
+        ViewAbstractModel::GetInstance()->SetAccessibilityNextFocusParams(params);
+    }
 }
 
 void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
@@ -363,6 +374,57 @@ void JSViewAbstract::JsAccessibilityActionOptions(const JSCallbackInfo& args)
         ViewAbstractModel::GetInstance()->SetAccessibilityActionOptions(options);
     } else {
         ViewAbstractModel::GetInstance()->ResetAccessibilityActionOptions();
+    }
+}
+
+void JSViewAbstract::JsAccessibilityCustomActions(const JSCallbackInfo& args)
+{
+    if (args.Length() == 0 || args[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ResetAccessibilityCustomActions();
+        return;
+    }
+    
+    if (args.Length() > 0 && args[0]->IsArray()) {
+        auto array = JSRef<JSArray>::Cast(args[0]);
+        uint32_t length = array->Length();
+        std::vector<NG::AccessibilityCustomAction> actions;
+        
+        for (uint32_t i = 0; i < length; i++) {
+            auto item = array->GetValueAt(i);
+            if (!item->IsObject()) {
+                continue;
+            }
+            
+            auto obj = JSRef<JSObject>::Cast(item);
+            NG::AccessibilityCustomAction action;
+            
+            auto nameVal = obj->GetProperty("name");
+            if (!ParseJsString(nameVal, action.actionName)) {
+                action.actionName = "";
+            }
+            
+            auto callbackVal = obj->GetProperty("onAction");
+            if (callbackVal->IsFunction()) {
+                auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(callbackVal));
+                WeakPtr<NG::FrameNode> frameNode =
+                    AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+                action.customActionCallback =
+                    [execCtx = args.GetExecutionContext(), func = jsFunc, node = frameNode]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("customActionCallback");
+                    PipelineContext::SetCallBackNode(node);
+                    func->Execute();
+                };
+            }
+            
+            if (!action.actionName.empty() && action.customActionCallback) {
+                actions.push_back(action);
+            }
+        }
+        
+        ViewAbstractModel::GetInstance()->SetAccessibilityCustomActions(actions);
+    } else {
+        ViewAbstractModel::GetInstance()->ResetAccessibilityCustomActions();
     }
 }
 }

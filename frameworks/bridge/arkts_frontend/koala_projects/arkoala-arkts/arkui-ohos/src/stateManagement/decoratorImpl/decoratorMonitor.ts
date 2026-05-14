@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 import { ObserveSingleton } from '../base/observeSingleton';
-import { IBindingSource } from '../base/mutableStateMeta';
+import { IBindingSource, MonitorTarget } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { ITrackedDecoratorRef } from '../base/mutableStateMeta';
-import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo, IVariableOwner, IDecoratorBaseRegistry } from '../decorator';
+import {
+    RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo,
+    IVariableOwner, IDecoratorBaseRegistry,
+} from '../decorator';
 import { ElementInfo } from '../utils';
 import { ObserveWrappedKeyedMeta } from '../base/observeWrappedBase';
 import { IObservedAnyProp } from '../decorator';
@@ -40,7 +43,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         const isSync = isSynchronous ?? false;
 
         pathLambda.forEach((info: IMonitorPathInfo) => {
-            this.values_.push(new MonitorValueInternal(info.path, info.valueCallback, this, isSync, info.isWildcard));
+            this.values_.push(new MonitorValueInternal(info.path, info.valueCallback, this, isSync, info.enableWildcard));
         });
         this.decorator = '@Monitor';
         this.readInitialMonitorValues();
@@ -51,16 +54,21 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         return !!(this.owningComponent_ && !this.owningComponent_!.__isViewActive__Internal());
     }
 
+    // Wildcard monitor values do not represent a single property change —
+    // the wildcard binding fans out to multiple metas, so before/now/path
+    // on a wildcard MonitorValueInternal don't correspond to a single
+    // observable read. Return undefined for them; only non-wildcard dirty
+    // values are surfaced to the user.
     public value<T>(path?: string): IMonitorValue<T> | undefined {
         if (path) {
             for (let monitorValue of this.values_) {
-                if (monitorValue.dirty && monitorValue.path === path) {
+                if (monitorValue.dirty && !monitorValue.enableWildcard && monitorValue.path === path) {
                     return new MonitorValuePublic<T>(monitorValue);
                 }
             }
         } else {
             for (let monitorValue of this.values_) {
-                if (monitorValue.dirty) {
+                if (monitorValue.dirty && !monitorValue.enableWildcard) {
                     return new MonitorValuePublic<T>(monitorValue);
                 }
             }
@@ -68,8 +76,12 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         return undefined;
     }
 
-    public notifyChangesForPath(monitorPath: ITrackedDecoratorRef): boolean {
-        return this.recordDependenciesForMonitorValue(false, monitorPath as MonitorValueInternal);
+    public notifyChangesForPath(
+        monitorPath: ITrackedDecoratorRef,
+        sources: Array<MonitorTarget> | undefined
+    ): boolean {
+        return this.recordDependenciesForMonitorValue(
+            false, monitorPath as MonitorValueInternal, sources);
     }
 
     public runMonitorFunction(): void {
@@ -98,7 +110,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
 
     private readInitialMonitorValues(): void {
         this.values_.forEach((monitorValue: MonitorValueInternal) => {
-            this.recordDependenciesForMonitorValue(true, monitorValue);
+            this.recordDependenciesForMonitorValue(true, monitorValue, undefined);
         });
     }
 
@@ -106,9 +118,22 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
      * Reads monitor value
      * @param isFirstRun true to clear previous bindings, and read value for first time
      * @param monitorValue
+     * @param sources every distinct target that triggered a fire for this monitor
+     *               in the current drain pass. The wildcard LSV check
+     *               (`sources.includes(this.before)`) needs the full list so a
+     *               transit-dep change isn't lost when the drain batches multiple
+     *               metas with different targets. Array (not Set) keeps the
+     *               common single-source case allocation-free aside from the array
+     *               header; recordMonitorSource dedupes via includes() before push
+     *               so the array stays small.
      * @returns true if value is dirty
      */
-    private recordDependenciesForMonitorValue(isFirstRun: boolean, monitorValue: MonitorValueInternal, isReuse: boolean = false): boolean {
+    private recordDependenciesForMonitorValue(
+        isFirstRun: boolean,
+        monitorValue: MonitorValueInternal,
+        sources: Array<MonitorTarget> | undefined,
+        isReuse: boolean = false
+    ): boolean {
         if (!isFirstRun) {
             monitorValue.clearReverseBindings();
         }
@@ -117,9 +142,11 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingMonitor;
         ObserveSingleton.instance.renderingComponentRef = monitorValue;
 
-        let dirty = isReuse ? monitorValue.readValueWhenReuse() : monitorValue.readValue(isFirstRun);
+        let dirty = isReuse ?
+            monitorValue.readValueWhenReuse() :
+            monitorValue.readValue(isFirstRun, sources);
 
-        if (monitorValue.isWildcard) {
+        if (monitorValue.enableWildcard) {
             if (monitorValue.now instanceof ObserveWrappedKeyedMeta) {
                 (monitorValue.now as ObserveWrappedKeyedMeta).addRefAnyKey();
             } else if (monitorValue.now instanceof IObservedAnyProp) {
@@ -146,7 +173,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
     resetOnReuse(): void {
         ObserveSingleton.instance.clearDelayedMonitorWhenReuse();
         this.values_.forEach((monitorValue: MonitorValueInternal) => {
-            this.recordDependenciesForMonitorValue(false, monitorValue, true);
+            this.recordDependenciesForMonitorValue(false, monitorValue, undefined, true);
         });
     }
 
@@ -163,19 +190,19 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
     public now: Any;
     public path: string;
     public monitor: MonitorFunctionDecorator;
-    public isWildcard: boolean;
+    public enableWildcard: boolean;
 
     private dirty_: boolean = false;
     private readonly lambda: () => Any;
 
     constructor(path: string, lambda: () => Any, monitor: MonitorFunctionDecorator,
-        isSync: boolean, isWildcard?: boolean) {
+        isSync: boolean, enableWildcard?: boolean) {
         this.id = isSync ? MonitorFunctionDecorator.nextSyncWatchId_++ : MonitorFunctionDecorator.nextWatchId_++;
         this.path = path;
         this.lambda = lambda;
         this.weakThis = new WeakRef<ITrackedDecoratorRef>(this);
         this.monitor = monitor;
-        this.isWildcard = isWildcard === undefined? false : isWildcard; // isWildcard ?? false
+        this.enableWildcard = enableWildcard === undefined? false : enableWildcard; // isWildcard ?? false
         ObserveSingleton.instance.addToTrackedRegistry(this, this.reverseBindings);
     }
 
@@ -194,14 +221,30 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
      * @param isFirstRun not dirty, now = before
      * @return true if before !== now
      */
-    public readValue(isFirstRun: boolean): boolean {
+    public readValue(isFirstRun: boolean, sources: Array<MonitorTarget> | undefined): boolean {
         try {
             this.now = this.lambda();
             if (isFirstRun) {
                 this.before = this.now;
                 return false;
             }
-            this.dirty_ = this.isWildcard || (this.before !== this.now);
+
+            // No wildcard in the path, compare values now and before
+            if (this.enableWildcard === false) {
+                this.dirty_ = this.before !== this.now;
+                return this.dirty_;
+            }
+
+            // Wildcard path. If any of the sources that triggered this drain
+            // matches our last-seen value, the change was a transit-dep on the
+            // LSV itself and we must fire even when before === now (e.g. a
+            // wildcard `comp.a.*` whose lambda returns comp.a sees comp.a's
+            // own properties change without the comp.a reference moving).
+            if (sources && sources.includes(this.before as MonitorTarget)) {
+                this.dirty_ = true;
+            } else {
+                this.dirty_ = this.before !== this.now;
+            }
             return this.dirty_;
         } catch (e) {
             StateMgmtConsole.log(`Caught exception while reading monitor path ${this.path} value: ${e}.`);

@@ -23,8 +23,10 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/button/button_theme.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/navigation/bar_item_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -33,6 +35,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -84,19 +87,6 @@ void DumpTitleProperty(const RefPtr<TextLayoutProperty>& property, bool isMainTi
     }
     info.append(TextLayoutPropertyToString(property));
     DumpLog::GetInstance().AddDesc(info);
-}
-
-void SetTextColor(const RefPtr<FrameNode>& textNode, const Color& color)
-{
-    CHECK_NULL_VOID(textNode);
-    auto textPattern = textNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    auto property = textNode->GetLayoutPropertyPtr<TextLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    property->UpdateTextColor(color);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, textNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, textNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, textNode);
 }
 
 void SetImageSourceInfoFillColor(ImageSourceInfo& imageSourceInfo)
@@ -569,7 +559,7 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         color = theme->GetMainTitleFontColor();
         mainTitleWeight = FontWeight::BOLD;
     }
-    SetTextColor(textNode, color);
+    TitleBarPattern::SetTextColor(textNode, color);
     titleLayoutProperty->UpdateFontWeight(mainTitleWeight);
     titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -649,7 +639,7 @@ void TitleBarPattern::ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
     titleLayoutProperty->UpdateFontSize(subTitleSize);
     titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     NavigationTitleUtil::InitTextProperty(titleLayoutProperty);
-    SetTextColor(textNode, color);
+    TitleBarPattern::SetTextColor(textNode, color);
 }
 
 void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
@@ -1441,12 +1431,17 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
         needUpdateBgOptions = true;
     }
     options_ = opt;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (opt.brOptions.paddingStart.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(opt.brOptions.paddingStart.value(), LpxAttribute::ALWAYS, host);
+    }
+    if (opt.brOptions.paddingEnd.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(opt.brOptions.paddingEnd.value(), LpxAttribute::ALWAYS, host);
+    }
     if (!needUpdateBgOptions) {
         return;
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     UpdateBackgroundStyle(host);
 }
 
@@ -1772,5 +1767,88 @@ bool TitleBarPattern::CustomizeExpandSafeArea()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     return RunCustomizeExpandIfNeeded(host);
+}
+
+void TitleBarPattern::SetTextColor(const RefPtr<FrameNode>& textNode, const Color& color)
+{
+    CHECK_NULL_VOID(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto property = textNode->GetLayoutPropertyPtr<TextLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    property->UpdateTextColor(color);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, textNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, textNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, textNode);
+}
+
+void TitleBarPattern::SetTextShadow(const RefPtr<FrameNode>& textNode, const std::vector<Shadow>& shadows)
+{
+    CHECK_NULL_VOID(textNode);
+    TextModelNG::SetTextShadow(AceType::RawPtr(textNode), shadows);
+}
+
+void TitleBarPattern::SetBackButtonIconColor(const RefPtr<TitleBarNode>& titleBarNode, const Color& iconColor)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButton);
+    if (backButton->GetTag() == "Navigator") {
+        backButton = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+        CHECK_NULL_VOID(backButton);
+    }
+    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImgNode);
+    if (backButtonImgNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto textLayoutProperty = backButtonImgNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateSymbolColorList({ iconColor });
+    }
+    backButtonImgNode->MarkModifyDone();
+}
+
+void TitleBarPattern::SetMenuItemsStyle(
+    const RefPtr<TitleBarNode>& titleBarNode, const Color& iconColor, const Color& textColor)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto menuNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetMenu());
+    CHECK_NULL_VOID(menuNode);
+    for (const auto& child : menuNode->GetChildren()) {
+        auto menuItemButton = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(menuItemButton);
+        auto barItemNode = AceType::DynamicCast<BarItemNode>(menuItemButton->GetChildren().front());
+        CHECK_NULL_VOID(barItemNode);
+        auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetIconNode());
+        if (iconNode && iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+            auto textLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateSymbolColorList({ iconColor });
+            }
+            iconNode->MarkModifyDone();
+        }
+        auto textNode = AceType::DynamicCast<FrameNode>(barItemNode->GetTextNode());
+        if (textNode) {
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateTextColor(textColor);
+            }
+            textNode->MarkModifyDone();
+        }
+    }
+}
+
+void TitleBarPattern::SetDividerStyle(
+    const RefPtr<FrameNode>& dividerNode, const NavigationTitleBarDividerStyle& dividerStyle)
+{
+    CHECK_NULL_VOID(dividerNode);
+    auto renderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    if (renderProperty) {
+        renderProperty->UpdateDividerColor(dividerStyle.color);
+    }
+    auto renderContext = dividerNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->UpdateOpacity(dividerStyle.opacity);
+    }
+    dividerNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

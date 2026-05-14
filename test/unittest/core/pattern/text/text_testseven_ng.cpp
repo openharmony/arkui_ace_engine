@@ -25,6 +25,9 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -920,5 +923,595 @@ HWTEST_F(TextTestSevenNg, ChangeParagraphColor002, TestSize.Level1)
     paragraph->AddText(u"Hello World");
     contentModifier->ChangeParagraphColor(paragraph);
     EXPECT_NE(paragraph, nullptr);
+}
+
+/**
+ * @tc.name: GetMarqueeOptions001
+ * @tc.desc: Test GetMarqueeOptions with nullptr frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetMarqueeOptions001, TestSize.Level1)
+{
+    auto options = TextModelNG::GetMarqueeOptions(nullptr);
+    EXPECT_FALSE(options.HasTextMarqueeStart());
+    EXPECT_FALSE(options.HasTextMarqueeStep());
+    EXPECT_FALSE(options.HasTextMarqueeLoop());
+    EXPECT_FALSE(options.HasTextMarqueeDirection());
+    EXPECT_FALSE(options.HasTextMarqueeDelay());
+    EXPECT_FALSE(options.HasTextMarqueeFadeout());
+    EXPECT_FALSE(options.HasTextMarqueeStartPolicy());
+    EXPECT_FALSE(options.HasTextMarqueeUpdatePolicy());
+    EXPECT_FALSE(options.HasTextMarqueeSpacing());
+}
+
+/**
+ * @tc.name: GetMarqueeOptions002
+ * @tc.desc: Test GetMarqueeOptions with frameNode that has no marquee properties set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetMarqueeOptions002, TestSize.Level1)
+{
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto options = TextModelNG::GetMarqueeOptions(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(options.HasTextMarqueeStart());
+    EXPECT_FALSE(options.HasTextMarqueeStep());
+    EXPECT_FALSE(options.HasTextMarqueeLoop());
+    EXPECT_FALSE(options.HasTextMarqueeDirection());
+    EXPECT_FALSE(options.HasTextMarqueeDelay());
+    EXPECT_FALSE(options.HasTextMarqueeFadeout());
+    EXPECT_FALSE(options.HasTextMarqueeStartPolicy());
+    EXPECT_FALSE(options.HasTextMarqueeUpdatePolicy());
+    EXPECT_FALSE(options.HasTextMarqueeSpacing());
+}
+
+/**
+ * @tc.name: GetMarqueeOptions003
+ * @tc.desc: Test GetMarqueeOptions with all marquee properties set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetMarqueeOptions003, TestSize.Level1)
+{
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    TextMarqueeOptions marqueeOptions;
+    marqueeOptions.UpdateTextMarqueeStart(true);
+    marqueeOptions.UpdateTextMarqueeStep(6.0);
+    marqueeOptions.UpdateTextMarqueeLoop(3);
+    marqueeOptions.UpdateTextMarqueeDirection(MarqueeDirection::RIGHT);
+    marqueeOptions.UpdateTextMarqueeDelay(500);
+    marqueeOptions.UpdateTextMarqueeFadeout(true);
+    marqueeOptions.UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+    marqueeOptions.UpdateTextMarqueeUpdatePolicy(MarqueeUpdatePolicy::PRESERVE_POSITION);
+    marqueeOptions.UpdateTextMarqueeSpacing(CalcDimension(10.0, DimensionUnit::VP));
+    textModel.SetMarqueeOptions(marqueeOptions);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto options = TextModelNG::GetMarqueeOptions(AceType::RawPtr(frameNode));
+    ASSERT_TRUE(options.HasTextMarqueeStart());
+    EXPECT_EQ(options.GetTextMarqueeStartValue(), true);
+    ASSERT_TRUE(options.HasTextMarqueeStep());
+    EXPECT_EQ(options.GetTextMarqueeStepValue(), 6.0);
+    ASSERT_TRUE(options.HasTextMarqueeLoop());
+    EXPECT_EQ(options.GetTextMarqueeLoopValue(), 3);
+    ASSERT_TRUE(options.HasTextMarqueeDirection());
+    EXPECT_EQ(options.GetTextMarqueeDirectionValue(), MarqueeDirection::RIGHT);
+    ASSERT_TRUE(options.HasTextMarqueeDelay());
+    EXPECT_EQ(options.GetTextMarqueeDelayValue(), 500);
+    ASSERT_TRUE(options.HasTextMarqueeFadeout());
+    EXPECT_EQ(options.GetTextMarqueeFadeoutValue(), true);
+    ASSERT_TRUE(options.HasTextMarqueeStartPolicy());
+    EXPECT_EQ(options.GetTextMarqueeStartPolicyValue(), MarqueeStartPolicy::ON_FOCUS);
+    ASSERT_TRUE(options.HasTextMarqueeUpdatePolicy());
+    EXPECT_EQ(options.GetTextMarqueeUpdatePolicyValue(), MarqueeUpdatePolicy::PRESERVE_POSITION);
+    ASSERT_TRUE(options.HasTextMarqueeSpacing());
+    EXPECT_EQ(options.GetTextMarqueeSpacingValue(), CalcDimension(10.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: GetMarqueeOptions004
+ * @tc.desc: Test GetMarqueeOptions with frameNode that has no TextLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetMarqueeOptions004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto options = TextModelNG::GetMarqueeOptions(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(options.HasTextMarqueeStart());
+    EXPECT_FALSE(options.HasTextMarqueeStep());
+}
+
+/**
+ * @tc.name: GetMarqueeOptions005
+ * @tc.desc: Test GetMarqueeOptions with partial marquee properties set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetMarqueeOptions005, TestSize.Level1)
+{
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    TextMarqueeOptions marqueeOptions;
+    marqueeOptions.UpdateTextMarqueeStart(false);
+    marqueeOptions.UpdateTextMarqueeLoop(-1);
+    marqueeOptions.UpdateTextMarqueeDirection(MarqueeDirection::LEFT);
+    textModel.SetMarqueeOptions(marqueeOptions);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto options = TextModelNG::GetMarqueeOptions(AceType::RawPtr(frameNode));
+    ASSERT_TRUE(options.HasTextMarqueeStart());
+    EXPECT_EQ(options.GetTextMarqueeStartValue(), false);
+    ASSERT_TRUE(options.HasTextMarqueeLoop());
+    EXPECT_EQ(options.GetTextMarqueeLoopValue(), -1);
+    ASSERT_TRUE(options.HasTextMarqueeDirection());
+    EXPECT_EQ(options.GetTextMarqueeDirectionValue(), MarqueeDirection::LEFT);
+    EXPECT_FALSE(options.HasTextMarqueeStep());
+    EXPECT_FALSE(options.HasTextMarqueeDelay());
+    EXPECT_FALSE(options.HasTextMarqueeFadeout());
+    EXPECT_FALSE(options.HasTextMarqueeStartPolicy());
+    EXPECT_FALSE(options.HasTextMarqueeUpdatePolicy());
+    EXPECT_FALSE(options.HasTextMarqueeSpacing());
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle001
+ * @tc.desc: Test SetGradientShaderStyle sets gradient property on frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text and set gradient shader style.
+     */
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    GradientColor color1(Color::RED);
+    GradientColor color2(Color::BLUE);
+    gradient.AddColor(color1);
+    gradient.AddColor(color2);
+    textModel.SetGradientShaderStyle(gradient);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. verify GradientShaderStyle is set and ColorShaderStyle is reset.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_TRUE(layoutProperty->HasGradientShaderStyle());
+    EXPECT_EQ(layoutProperty->GetGradientShaderStyleValue().GetType(), NG::GradientType::LINEAR);
+    EXPECT_FALSE(layoutProperty->HasColorShaderStyle());
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle002
+ * @tc.desc: Test SetColorShaderStyle sets color and resets gradient.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text, set gradient first, then set color shader.
+     */
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    GradientColor color1(Color::RED);
+    GradientColor color2(Color::BLUE);
+    gradient.AddColor(color1);
+    gradient.AddColor(color2);
+    textModel.SetGradientShaderStyle(gradient);
+    textModel.SetColorShaderStyle(Color::GREEN);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. verify ColorShaderStyle is set and GradientShaderStyle is reset.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_TRUE(layoutProperty->HasColorShaderStyle());
+    EXPECT_EQ(layoutProperty->GetColorShaderStyleValue(), Color::GREEN);
+    EXPECT_FALSE(layoutProperty->HasGradientShaderStyle());
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle003
+ * @tc.desc: Test ResetGradientShaderStyle clears both gradient and color shader.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text, set gradient, then reset.
+     */
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    GradientColor color1(Color::RED);
+    GradientColor color2(Color::BLUE);
+    gradient.AddColor(color1);
+    gradient.AddColor(color2);
+    textModel.SetGradientShaderStyle(gradient);
+    textModel.ResetGradientShaderStyle();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. verify both shader styles are reset.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->HasGradientShaderStyle());
+    EXPECT_FALSE(layoutProperty->HasColorShaderStyle());
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle004
+ * @tc.desc: Test SetGradientStyle with FrameNode pointer sets gradient.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text paragraph, then use static SetGradientStyle.
+     */
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(GradientColor(Color::RED));
+    gradient.AddColor(GradientColor(Color::GREEN));
+    TextModelNG::SetGradientStyle(AceType::RawPtr(frameNode), gradient);
+
+    /**
+     * @tc.steps: step2. verify GradientShaderStyle is set via static method.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_TRUE(layoutProperty->HasGradientShaderStyle());
+    EXPECT_EQ(layoutProperty->GetGradientShaderStyleValue().GetColors().size(), 2UL);
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle005
+ * @tc.desc: Test SetGradientStyle with nullptr frameNode does not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text paragraph and set gradient.
+     */
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(GradientColor(Color::RED));
+    gradient.AddColor(GradientColor(Color::BLUE));
+    TextModelNG::SetGradientStyle(AceType::RawPtr(frameNode), gradient);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_TRUE(layoutProperty->HasGradientShaderStyle());
+
+    /**
+     * @tc.steps: step2. call SetGradientStyle with nullptr.
+     * @tc.expected: no crash, original properties unchanged.
+     */
+    NG::Gradient otherGradient;
+    otherGradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    TextModelNG::SetGradientStyle(nullptr, otherGradient);
+    EXPECT_TRUE(layoutProperty->HasGradientShaderStyle());
+    EXPECT_EQ(layoutProperty->GetGradientShaderStyleValue().GetColors().size(), 2UL);
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle006
+ * @tc.desc: Test SetColorShaderStyle with FrameNode pointer sets color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text paragraph, then use static SetColorShaderStyle.
+     */
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+
+    TextModelNG::SetColorShaderStyle(AceType::RawPtr(frameNode), Color::WHITE);
+
+    /**
+     * @tc.steps: step2. verify ColorShaderStyle is set.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_TRUE(layoutProperty->HasColorShaderStyle());
+    EXPECT_EQ(layoutProperty->GetColorShaderStyleValue(), Color::WHITE);
+    EXPECT_FALSE(layoutProperty->HasGradientShaderStyle());
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle007
+ * @tc.desc: Test GetColorShaderStyle and GetGradientStyle read correct values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text, set gradient via static method, then read back.
+     */
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(GradientColor(Color::RED));
+    gradient.AddColor(GradientColor(Color::GREEN));
+    TextModelNG::SetGradientStyle(AceType::RawPtr(frameNode), gradient);
+
+    /**
+     * @tc.steps: step2. read back via getter methods.
+     */
+    auto resultGradient = TextModelNG::GetGradientStyle(AceType::RawPtr(frameNode));
+    EXPECT_EQ(resultGradient.GetType(), NG::GradientType::LINEAR);
+    EXPECT_EQ(resultGradient.GetColors().size(), 2UL);
+
+    /**
+     * @tc.steps: step3. set color shader and read back.
+     */
+    TextModelNG::SetColorShaderStyle(AceType::RawPtr(frameNode), Color::GRAY);
+    auto resultColor = TextModelNG::GetColorShaderStyle(AceType::RawPtr(frameNode));
+    EXPECT_EQ(resultColor, Color::GRAY);
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle008
+ * @tc.desc: Test GetColorShaderStyle and GetGradientStyle with nullptr return defaults.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call getters with nullptr.
+     * @tc.expected: returns without crash. GetColorShaderStyle returns GetDefaultColor(0),
+     *               GetGradientStyle returns default linear gradient.
+     */
+    auto color = TextModelNG::GetColorShaderStyle(nullptr);
+    auto defaultColor = TextModelNG::GetDefaultColor(0);
+    EXPECT_EQ(color, defaultColor);
+
+    auto gradient = TextModelNG::GetGradientStyle(nullptr);
+    EXPECT_EQ(gradient.GetType(), NG::GradientType::LINEAR);
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle009
+ * @tc.desc: Test SetColorShaderStyle with nullptr frameNode does not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text paragraph and set color shader.
+     */
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+    TextModelNG::SetColorShaderStyle(AceType::RawPtr(frameNode), Color::WHITE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_TRUE(layoutProperty->HasColorShaderStyle());
+
+    /**
+     * @tc.steps: step2. call SetColorShaderStyle with nullptr.
+     * @tc.expected: no crash, original properties unchanged.
+     */
+    TextModelNG::SetColorShaderStyle(nullptr, Color::RED);
+    EXPECT_TRUE(layoutProperty->HasColorShaderStyle());
+    EXPECT_EQ(layoutProperty->GetColorShaderStyleValue(), Color::WHITE);
+}
+
+/**
+ * @tc.name: SetExternalDrawCallback001
+ * @tc.desc: Test SetExternalDrawCallback with valid frameNode and callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetExternalDrawCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text paragraph with TextPattern.
+     */
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set callback and verify it is stored.
+     */
+    bool called = false;
+    auto callback = [&called](const ExternalDrawCallbackInfo& info) -> bool {
+        called = true;
+        return true;
+    };
+    TextModelNG::SetExternalDrawCallback(AceType::RawPtr(frameNode), std::move(callback));
+
+    const auto& storedCallback = textPattern->GetExternalDrawCallback();
+    ASSERT_TRUE(storedCallback);
+    ExternalDrawCallbackInfo info;
+    EXPECT_TRUE(storedCallback(info));
+    EXPECT_TRUE(called);
+}
+
+/**
+ * @tc.name: SetExternalDrawCallback002
+ * @tc.desc: Test SetExternalDrawCallback with nullptr frameNode does not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetExternalDrawCallback002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a valid frameNode first.
+     */
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetExternalDrawCallback with nullptr.
+     * @tc.expected: no crash, existing callback unchanged.
+     */
+    bool originalCalled = false;
+    auto originalCallback = [&originalCalled](const ExternalDrawCallbackInfo&) -> bool {
+        originalCalled = true;
+        return true;
+    };
+    textPattern->SetExternalDrawCallback(std::move(originalCallback));
+
+    auto newCallback = [](const ExternalDrawCallbackInfo&) -> bool { return false; };
+    TextModelNG::SetExternalDrawCallback(nullptr, std::move(newCallback));
+    const auto& storedCallback = textPattern->GetExternalDrawCallback();
+    ASSERT_TRUE(storedCallback);
+    ExternalDrawCallbackInfo info;
+    storedCallback(info);
+    EXPECT_TRUE(originalCalled);
+}
+
+/**
+ * @tc.name: SetExternalDrawCallback003
+ * @tc.desc: Test SetExternalDrawCallback with frameNode that has no TextPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetExternalDrawCallback003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a text frameNode and set a callback.
+     */
+    auto textFrameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    bool originalCalled = false;
+    auto originalCallback = [&originalCalled](const ExternalDrawCallbackInfo&) -> bool {
+        originalCalled = true;
+        return true;
+    };
+    textPattern->SetExternalDrawCallback(std::move(originalCallback));
+
+    /**
+     * @tc.steps: step2. create a non-text frameNode and call SetExternalDrawCallback.
+     */
+    auto nonTextFrameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(nonTextFrameNode, nullptr);
+    auto callback = [](const ExternalDrawCallbackInfo&) -> bool { return false; };
+    TextModelNG::SetExternalDrawCallback(AceType::RawPtr(nonTextFrameNode), std::move(callback));
+
+    /**
+     * @tc.steps: step3. verify text frameNode's callback is unaffected.
+     * @tc.expected: textPattern callback still works and returns true.
+     */
+    const auto& storedCallback = textPattern->GetExternalDrawCallback();
+    ASSERT_TRUE(storedCallback);
+    ExternalDrawCallbackInfo info;
+    EXPECT_TRUE(storedCallback(info));
+    EXPECT_TRUE(originalCalled);
+}
+
+/**
+ * @tc.name: ResetCaretColor001
+ * @tc.desc: Test ResetCaretColor with frameNode that has no TextLayoutProperty (false branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ResetCaretColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a text frameNode and set CursorColor.
+     */
+    auto textFrameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateCursorColor(Color::RED);
+    ASSERT_TRUE(textLayoutProperty->HasCursorColor());
+
+    /**
+     * @tc.steps: step2. create a non-text frameNode and call ResetCaretColor.
+     * @tc.expected: no crash, text frameNode's CursorColor unaffected.
+     */
+    auto nonTextFrameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(nonTextFrameNode, nullptr);
+    TextModelNG::ResetCaretColor(AceType::RawPtr(nonTextFrameNode));
+    EXPECT_TRUE(textLayoutProperty->HasCursorColor());
+    EXPECT_EQ(textLayoutProperty->GetCursorColorValue(), Color::RED);
+}
+
+/**
+ * @tc.name: ResetSelectedBackgroundColor001
+ * @tc.desc: Test ResetSelectedBackgroundColor with frameNode that has no TextLayoutProperty (false branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ResetSelectedBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a text frameNode and set SelectedBackgroundColor.
+     */
+    auto textFrameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateSelectedBackgroundColor(Color::BLUE);
+    ASSERT_TRUE(textLayoutProperty->HasSelectedBackgroundColor());
+
+    /**
+     * @tc.steps: step2. create a non-text frameNode and call ResetSelectedBackgroundColor.
+     * @tc.expected: no crash, text frameNode's SelectedBackgroundColor unaffected.
+     */
+    auto nonTextFrameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(nonTextFrameNode, nullptr);
+    TextModelNG::ResetSelectedBackgroundColor(AceType::RawPtr(nonTextFrameNode));
+    EXPECT_TRUE(textLayoutProperty->HasSelectedBackgroundColor());
+    EXPECT_EQ(textLayoutProperty->GetSelectedBackgroundColorValue(), Color::BLUE);
+}
+
+/**
+ * @tc.name: SetSelectedBackgroundColor001
+ * @tc.desc: Test SetSelectedBackgroundColor with non-default alpha (false branch of DEFAULT_ALPHA check).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetSelectedBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text paragraph.
+     */
+    auto frameNode = CreateTextParagraph(CREATE_VALUE_W, TestProperty());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set SelectedBackgroundColor with a custom alpha (0x80 != 0xFF).
+     */
+    Color customColor = Color::FromARGB(0x80, 0x00, 0xFF, 0x00);
+    TextModelNG::SetSelectedBackgroundColor(AceType::RawPtr(frameNode), customColor);
+
+    /**
+     * @tc.steps: step3. verify color is stored as-is without opacity change.
+     * @tc.expected: alpha remains 0x80, ChangeOpacity was NOT called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_TRUE(layoutProperty->HasSelectedBackgroundColor());
+    auto resultColor = layoutProperty->GetSelectedBackgroundColorValue();
+    EXPECT_EQ(resultColor.GetAlpha(), 0x80);
+    EXPECT_EQ(resultColor.GetRed(), 0x00);
+    EXPECT_EQ(resultColor.GetGreen(), 0xFF);
+    EXPECT_EQ(resultColor.GetBlue(), 0x00);
 }
 } // namespace OHOS::Ace::NG

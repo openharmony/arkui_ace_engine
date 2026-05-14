@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/radio/bridge/radio_model_impl.h"
 #include "core/components/checkable/checkable_theme.h"

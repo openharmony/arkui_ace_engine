@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, WatchIdType } from '../decorator';
+import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, OBSERVE, RenderIdType, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
@@ -82,7 +82,7 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
     }
 
     public shouldAddRef(): boolean {
-        return this.allowDeep_ || ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return OBSERVE.renderingComponent > 0;
     }
 
     public toString(): String {
@@ -101,9 +101,17 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
     public add(val: K): this {
         if (!this.store_.has(val)) {
             this.store_.add(val);
-            this.meta_.fireChange(String(val as Object | undefined | null));
-            this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            // Adding a new value: per-value, OB_SET_ANY_PROPERTY, and
+            // OB_LENGTH all fire. Inline batch coalesces them into one
+            // sync-monitor drain without allocating a temporary keys array.
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.meta_.fireChange(String(val as Object | undefined | null));
+                this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+                this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('add');
         }
         return this;
@@ -147,9 +155,16 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
     public delete(val: K): boolean {
         if (this.store_.has(val)) {
             const res = this.store_.delete(val);
-            this.meta_.fireChange(String(val as Object | undefined | null));
-            this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            // Inline batch — wildcard sync monitor sees one callback per
+            // delete(); no temporary keys array.
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.meta_.fireChange(String(val as Object | undefined | null));
+                this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+                this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('delete');
             return res;
         } else {
@@ -162,12 +177,21 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
      */
     public clear(): void {
         if (this.store_.size > 0) {
-            this.store_.forEach((_, val) => {
-                this.meta_.fireChange(String(val as Object | undefined | null));
-            });
-            this.store_.clear();
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
-            this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+            // Inline batch — fires queue inside the batch and the monitor
+            // callbacks only run after endSyncMonitorBatch(), by which time
+            // store_.clear() has executed. So per-value fires can walk
+            // store_ before clear() without needing a keys snapshot.
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.store_.forEach((_, val) => {
+                    this.meta_.fireChange(String(val as Object | undefined | null));
+                });
+                this.store_.clear();
+                this.meta_.fireChange(CONSTANT.OB_LENGTH);
+                this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('clear');
         }
     }

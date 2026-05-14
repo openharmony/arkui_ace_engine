@@ -18,22 +18,10 @@
 
 #include "core/components_ng/base/inspector_filter.h"
 #include "frameworks/core/components_ng/layout/layout_property.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_constant.h"
 #include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-
-enum class RefreshStatus {
-    // The default status.
-    INACTIVE = 0,
-    // While being dragged but not enough to trig refresh.
-    DRAG,
-    // Dragging enough to refresh, and less than the max distance.
-    OVER_DRAG,
-    // While it is refreshing.
-    REFRESH,
-    // While it will scroll back to the top after refreshing.
-    DONE,
-};
 
 class ACE_EXPORT RefreshLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(RefreshLayoutProperty, LayoutProperty);

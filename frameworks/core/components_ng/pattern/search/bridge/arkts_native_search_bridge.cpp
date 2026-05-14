@@ -78,6 +78,7 @@ const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
 const char SEARCH_FIELD_ETS_TAG[] = "SearchField";
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr double DEFAULT_LINE_THICKNESS_SCALE = 1.0;
 
 Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo* info)
 {
@@ -983,11 +984,6 @@ ArkUINativeModuleValue SearchBridge::SetJsCancelButton(ArkUIRuntimeCallInfo* run
         CancelButtonStyle cancelButtonStyle = ConvertStrToCancelButtonStyle(styleString);
         style = static_cast<int32_t>(cancelButtonStyle);
     }
-    if ((thirdArg->IsNull() || thirdArg->IsUndefined()) && (forthArg->IsNull() || forthArg->IsUndefined()) &&
-        (fifthArg->IsNull() || fifthArg->IsUndefined())) {
-        GetArkUINodeModifiers()->getSearchModifier()->setJsSearchDefaultCancelButton(style);
-        return panda::JSValueRef::Undefined(vm);
-    }
     struct ArkUIIconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, 0, nullptr};
     CalcDimension iconSize;
     RefPtr<ResourceObject> sizeObject;
@@ -1627,6 +1623,7 @@ ArkUINativeModuleValue SearchBridge::SetDecoration(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     auto container = Container::Current();
@@ -1652,8 +1649,14 @@ ArkUINativeModuleValue SearchBridge::SetDecoration(ArkUIRuntimeCallInfo* runtime
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
+    double lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    if (!fifthArg->IsNumber() || !ArkTSUtils::ParseJsDouble(vm, fifthArg, lineThicknessScale)) {
+        lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : lineThicknessScale;
     GetArkUINodeModifiers()->getSearchModifier()->setSearchDecoration(
-        nativeNode, searchDecoration, color.GetValue(), textDecorationStyle, AceType::RawPtr(resourceObject));
+        nativeNode, searchDecoration, color.GetValue(), textDecorationStyle, static_cast<float>(lineThicknessScale),
+        AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 

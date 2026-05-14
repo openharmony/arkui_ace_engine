@@ -197,6 +197,9 @@ export class ReactiveComponentContent implements ComponentContentBase {
     public isDisposed(): boolean {
         return this.isDisposed_ && (this.builderNode_?.isDisposed() ?? true)
     }
+    public isTransferred(): boolean {
+        return false;
+    }
     updateConfiguration(): void {
         this.builderNode_.updateConfiguration();
     }

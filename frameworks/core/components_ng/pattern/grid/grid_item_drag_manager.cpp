@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_item_drag_manager.h"
-
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/grid/grid_item_drag_manager.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/property/templates_parser.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -40,16 +44,37 @@
 #include <numeric>
 #include <vector>
 #include <cmath>
+#include <limits>
+#include <set>
+#include <algorithm>
+#include <optional>
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_SCALE = 1.05f;
 constexpr int32_t DEFAULT_Z_INDEX = 100;
 constexpr float HOT_ZONE_SIZE_VP = 59.0f;
-constexpr float MOVE_THRESHOLD = 0.5f;
 constexpr float DEFAULT_ITEM_SIZE = 100.0f;
 constexpr int32_t LONG_PRESS_ANIMATION_DURATION = 300;
 constexpr int32_t SWAP_ANIMATION_DURATION = 30;
+constexpr int32_t POWER_FOR_DISTANCE = 2;
+
+int32_t GetForEachIndexInGrid(const RefPtr<ForEachBaseNode>& forEach)
+{
+    RefPtr<UINode> node = forEach;
+    auto parent = node->GetParent();
+    // assume parent is grid
+    if (parent) {
+        int32_t childIndex = parent->GetChildIndex(node);
+        int32_t startIndex = 0;
+        for (int32_t i = 0; i < childIndex; i++) {
+            auto childNode = parent->GetChildAtIndex(i);
+            startIndex += childNode->FrameCount();
+        }
+        return startIndex;
+    }
+    return 0;
+}
 }
 
 RefPtr<FrameNode> GridItemDragManager::GetGridFrameNode() const
@@ -62,6 +87,46 @@ RefPtr<FrameNode> GridItemDragManager::GetGridFrameNode() const
         return parent;
     }
     return nullptr;
+}
+
+GridItemDragManager::~GridItemDragManager()
+{
+    Reset();
+}
+
+void GridItemDragManager::Reset()
+{
+    if (dragState_ != GridItemDragState::DRAGGING) {
+        return;
+    }
+    auto grid = gridNode_.Upgrade();
+    if (!grid) {
+        return;
+    }
+    auto pattern = grid->GetPattern<GridPattern>();
+    if (!pattern) {
+        return;
+    }
+    if (scrolling_) {
+        pattern->HandleLeaveHotzoneEvent();
+        scrolling_ = false;
+    }
+    autoScrollForward_ = false;
+    inAutoScrollHotZone_ = false;
+    pattern->SetHotZoneScrollCallback(nullptr);
+    pattern->GetMutableLayoutInfo().ClearOnMoveDragState();
+
+    auto forEach = forEachNode_.Upgrade();
+    if (!forEach) {
+        return;
+    }
+    int32_t dropIndex = moveThroughIndex_ >= 0 ? moveThroughIndex_ : fromIndex_;
+    if (fromIndex_ >= 0 && dropIndex >= 0) {
+        forEach->FireOnMove(fromIndex_, dropIndex);
+        forEach->FireOnDrop(dropIndex);
+    }
+    dragState_ = GridItemDragState::IDLE;
+    moveThroughIndex_ = -1;
 }
 
 OffsetF GridItemDragManager::GetParentPaddingOffset() const
@@ -137,13 +202,6 @@ void GridItemDragManager::DeInitDragDropEvent()
     auto gestureHub = gridItemEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->RemoveDragEvent();
-
-    HandleDragEndAnimation();
-    dragState_ = GridItemDragState::IDLE;
-    fromIndex_ = -1;
-    scrolling_ = false;
-    dragOffset_ = OffsetF();
-    realOffset_ = OffsetF();
 }
 
 void GridItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
@@ -155,7 +213,11 @@ void GridItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     CHECK_NULL_VOID(renderContext);
     auto forEach = forEachNode_.Upgrade();
     if (forEach && info.GetSourceTool() != SourceTool::MOUSE) {
-        forEach->FireOnLongPress(GetIndex());
+        auto idx = GetIndex();
+        if (idx < 0) {
+            return;
+        }
+        forEach->FireOnLongPress(idx);
     }
 
     if (renderContext->HasTransformScale()) {
@@ -215,31 +277,59 @@ void GridItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(forEach);
     totalCount_ = forEach->FrameCount();
     currentIndex_ = GetIndex();
-    fromIndex_ = currentIndex_;
-    forEach->FireOnDragStart(fromIndex_);
-}
-
-void GridItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
-{
-    if (dragState_ != GridItemDragState::DRAGGING) {
+    if (currentIndex_ < 0) {
+        dragState_ = GridItemDragState::IDLE;
         return;
     }
+    fromIndex_ = currentIndex_;
+    forEach->FireOnDragStart(fromIndex_);
+    forEachStartIndex_ = GetForEachIndexInGrid(forEach);
+}
 
+bool GridItemDragManager::CancelDragOnGridChange()
+{
+    auto grid = gridNode_.Upgrade();
+    if (!grid) {
+        return false;
+    }
+    auto pattern = grid->GetPattern<GridPattern>();
+    if (!pattern) {
+        return false;
+    }
+    auto& layoutInfo = pattern->GetMutableLayoutInfo();
+    if (!layoutInfo.isOnMoveGridChange_) {
+        return false;
+    }
+    layoutInfo.isOnMoveGridChange_ = false;
+    if (scrolling_) {
+        pattern->HandleLeaveHotzoneEvent();
+        scrolling_ = false;
+    }
+    autoScrollForward_ = false;
+    inAutoScrollHotZone_ = false;
+    pattern->SetHotZoneScrollCallback(nullptr);
+    return true;
+}
+
+void GridItemDragManager::ProcessSwap(int32_t from)
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometry = host->GetGeometryNode();
     CHECK_NULL_VOID(geometry);
     auto frameRect = geometry->GetMarginFrameRect();
-    OffsetF gestureOffset(info.GetOffsetX(), info.GetOffsetY());
-    realOffset_ = gestureOffset + dragOffset_;
-    SetPosition(realOffset_);
-
-    int32_t from = GetIndex();
-    PointF point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-    HandleAutoScroll(from, point, frameRect);
-
     auto paddingOffset = GetParentPaddingOffset();
     int32_t to = FindSwapTarget(from, realOffset_ - frameRect.GetOffset() + paddingOffset);
+    moveThroughIndex_ = to;
+    auto grid = gridNode_.Upgrade();
+    if (grid) {
+        auto pattern = grid->GetPattern<GridPattern>();
+        if (pattern) {
+            auto& layoutInfo = pattern->GetMutableLayoutInfo();
+            layoutInfo.fromDragIndex_ = forEachStartIndex_ + from;
+            layoutInfo.toDragIndex_ = forEachStartIndex_ + to;
+        }
+    }
     if (to == from) {
         return;
     }
@@ -247,6 +337,30 @@ void GridItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
     forEach->FireOnMoveThrough(fromIndex_, to);
+}
+
+void GridItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
+{
+    if (dragState_ != GridItemDragState::DRAGGING) {
+        return;
+    }
+    if (CancelDragOnGridChange()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometry = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometry);
+    OffsetF gestureOffset(info.GetOffsetX(), info.GetOffsetY());
+    realOffset_ = gestureOffset + dragOffset_;
+    SetPosition(realOffset_);
+    int32_t from = GetIndex();
+    if (from < 0) {
+        return;
+    }
+    PointF point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    HandleAutoScroll(from, point, geometry->GetMarginFrameRect());
+    ProcessSwap(from);
 }
 
 void GridItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
@@ -262,12 +376,15 @@ void GridItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     }
     HandleDragEndAnimation();
     int32_t to = GetIndex();
+    pattern->GetMutableLayoutInfo().ClearOnMoveDragState();
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
-    forEach->FireOnMove(fromIndex_, to);
-    forEach->FireOnDrop(to);
-    pattern->GetMutableLayoutInfo().ClearOnMoveDragState();
+    if (fromIndex_ >= 0 && to >= 0) {
+        forEach->FireOnMove(fromIndex_, to);
+        forEach->FireOnDrop(to);
+    }
     dragState_ = GridItemDragState::IDLE;
+    moveThroughIndex_ = -1;
 }
 
 void GridItemDragManager::HandleOnItemDragCancel()
@@ -281,15 +398,21 @@ void GridItemDragManager::HandleOnItemDragCancel()
         pattern->HandleLeaveHotzoneEvent();
         scrolling_ = false;
     }
+    autoScrollForward_ = false;
+    inAutoScrollHotZone_ = false;
     HandleDragEndAnimation();
+    pattern->GetMutableLayoutInfo().ClearOnMoveDragState();
     if (dragState_ == GridItemDragState::DRAGGING) {
         int32_t to = GetIndex();
         auto forEach = forEachNode_.Upgrade();
         CHECK_NULL_VOID(forEach);
-        forEach->FireOnMove(fromIndex_, to);
-        forEach->FireOnDrop(to);
+        if (fromIndex_ >= 0 && to >= 0) {
+            forEach->FireOnMove(fromIndex_, to);
+            forEach->FireOnDrop(to);
+        }
     }
     dragState_ = GridItemDragState::IDLE;
+    moveThroughIndex_ = -1;
 }
 
 void GridItemDragManager::HandleDragEndAnimation()
@@ -376,35 +499,17 @@ void GridItemDragManager::HandleTransformScale()
     );
 }
 
-bool GridItemDragManager::HasIrregularItemInRange(int32_t from, int32_t to) const
-{
-    auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_RETURN(forEach, false);
-    int32_t checkStart = std::min(from, to);
-    int32_t checkEnd = std::max(from, to);
-    for (int32_t i = checkStart; i <= checkEnd; ++i) {
-        auto node = forEach->GetFrameNode(i);
-        if (node) {
-            auto itemPattern = node->GetPattern<GridItemPattern>();
-            if (itemPattern && itemPattern->GetIrregularItemInfo().has_value()) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 void GridItemDragManager::PrepareIrregularDragState(int32_t from, int32_t to, GridLayoutInfo& info)
 {
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
     if (!info.isOnMoveDragUpdate_) {
         for (int32_t i = 0; i < forEach->FrameCount(); ++i) {
-            info.dragOriginalIndexMap_[i] = i;
+            info.dragOriginalIndexMap_[forEachStartIndex_ + i] = forEachStartIndex_ + i;  // Use Grid-relative index
         }
         info.isOnMoveDragUpdate_ = true;
     }
-    info.UpdateDragOriginalIndex(from, to);
+    info.UpdateDragOriginalIndex(forEachStartIndex_ + from, forEachStartIndex_ + to);
 }
 
 void GridItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
@@ -420,12 +525,10 @@ void GridItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
         }
     }
 
-    if (HasIrregularItemInRange(from, to)) {
-        auto pattern = grid->GetPattern<GridPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto& info = pattern->GetMutableLayoutInfo();
-        PrepareIrregularDragState(from, to, info);
-    }
+    auto pattern = grid->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto& info = pattern->GetMutableLayoutInfo();
+    PrepareIrregularDragState(from, to, info);
 
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */
@@ -444,155 +547,522 @@ void GridItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
     );
 }
 
-int32_t GridItemDragManager::FindSwapTarget(int32_t currentIndex, const OffsetF& delta)
+GridItemDragManager::MovementBounds GridItemDragManager::ComputeMovementBounds(
+    int32_t currentIndex, int32_t currentCol, int32_t currentRow,
+    const OffsetF& delta, const GridLayoutInfo& info) const
 {
-    currentIndex_ = currentIndex;
-    auto grid = gridNode_.Upgrade();
-    CHECK_NULL_RETURN(grid, currentIndex);
-
-    auto pattern = grid->GetPattern<GridPattern>();
-    CHECK_NULL_RETURN(pattern, currentIndex);
-
-    auto& info = pattern->GetMutableLayoutInfo();
-
-    auto [currentCol, currentRow] = info.GetItemPos(currentIndex);
-    if (currentCol < 0 || currentRow < 0) {
-        return currentIndex;
+    MovementBounds bounds;
+    float mainDelta = delta.GetMainOffset(axis_);
+    float crossDelta = delta.GetCrossOffset(axis_);
+    ItemSpanInfo currentSpanInfo = GetIrregularItemInfoAndSpan(currentIndex);
+    float mainItemSize = GetItemMainSize(currentIndex, info);
+    float crossItemSize = GetItemCrossSize(currentIndex, info);
+    float singleRowHeight = currentSpanInfo.rowSpan > 0 ? mainItemSize / currentSpanInfo.rowSpan : mainItemSize;
+    float singleColWidth = currentSpanInfo.colSpan > 0 ? crossItemSize / currentSpanInfo.colSpan : crossItemSize;
+    int32_t rowMove = static_cast<int32_t>(std::round(mainDelta / singleRowHeight));
+    int32_t colMove = static_cast<int32_t>(std::round(crossDelta / singleColWidth));
+    if (rowMove == 0 && colMove == 0) {
+        bounds.zeroMove = true;
+        return bounds;
     }
-
-    TargetPosition targetPos = CalculateTargetPosition(currentRow, currentCol, delta, info);
-    if (!targetPos.isValid) {
-        return currentIndex;
-    }
-
-    return GetTargetItemAtPosition(currentIndex, targetPos, info, delta);
+    bounds.startRow = std::min(currentRow, currentRow + rowMove);
+    bounds.endRow = std::max(currentRow, currentRow + rowMove);
+    bounds.startCol = 0;
+    bounds.endCol = info.crossCount_ - 1;
+    return bounds;
 }
 
-int32_t GridItemDragManager::GetTargetItemAtPosition(int32_t currentIndex,
-    const TargetPosition& targetPos, const GridLayoutInfo& info, const OffsetF& delta) const
+std::vector<int32_t> GridItemDragManager::CollectSwapCandidates(int32_t currentIndex,
+    const OffsetF& delta, const GridLayoutInfo& info) const
 {
+    std::vector<int32_t> candidates;
     auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_RETURN(forEach, currentIndex);
-    // Irregular item (spanning multiple cells), use area swap logic
-    std::set<int32_t> targetIndices;
-
-    for (int32_t r = targetPos.row; r < targetPos.row + targetPos.rowSpan; ++r) {
+    CHECK_NULL_RETURN(forEach, candidates);
+    auto [currentCol, currentRow] = info.GetItemPos(forEachStartIndex_ + currentIndex);
+    if (currentCol < 0 || currentRow < 0) {
+        return candidates;
+    }
+    auto bounds = ComputeMovementBounds(currentIndex, currentCol, currentRow, delta, info);
+    if (bounds.zeroMove) {
+        candidates.push_back(currentIndex);
+        return candidates;
+    }
+    float mainGap = 0.0f;
+    float crossGap = 0.0f;
+    CalculateGaps(mainGap, crossGap, info);
+    float mainSize = 0.0f;
+    auto grid = gridNode_.Upgrade();
+    if (grid) {
+        auto gridGeometry = grid->GetGeometryNode();
+        if (gridGeometry) {
+            mainSize = gridGeometry->GetFrameSize().MainSize(axis_);
+        }
+    }
+    std::set<int32_t> candidateSet;
+    for (int32_t r = bounds.startRow; r <= bounds.endRow; ++r) {
+        if (!IsRowInViewport(r, mainGap, mainSize, info)) {
+            continue;
+        }
         auto rowIt = info.gridMatrix_.find(r);
         if (rowIt == info.gridMatrix_.end()) {
             continue;
         }
-
-        for (int32_t c = targetPos.col; c < targetPos.col + targetPos.colSpan; ++c) {
+        for (int32_t c = bounds.startCol; c <= bounds.endCol; ++c) {
             auto colIt = rowIt->second.find(c);
             if (colIt == rowIt->second.end()) {
                 continue;
             }
             int32_t idx = std::abs(colIt->second);
-            if (idx >= info.startIndex_ && idx <= info.endIndex_) {
-                targetIndices.insert(idx);
+            int32_t minIdx = std::max(forEachStartIndex_, info.startIndex_);
+            int32_t maxIdx = std::min(info.endIndex_, totalCount_ + forEachStartIndex_ - 1);
+            if (idx >= minIdx && idx <= maxIdx) {
+                candidateSet.insert(idx - forEachStartIndex_);
             }
         }
     }
-
-    if (targetIndices.empty()) {
-        return currentIndex;
-    }
-
-    float mainDelta = delta.GetMainOffset(axis_);
-    int32_t targetIndex = Positive(mainDelta) ? *targetIndices.rbegin() : *targetIndices.begin();
-    if (ValidateMoveBySimulation(currentIndex, targetIndex, info)) {
-        return targetIndex;
-    }
-    return currentIndex;
+    candidates.insert(candidates.end(), candidateSet.begin(), candidateSet.end());
+    return candidates;
 }
 
-void GridItemDragManager::ComputeTargetRowCol(TargetPosition& targetPos, int32_t currentRow,
-    int32_t currentCol, float mainDelta, float crossDelta, float singleRowHeight,
-    float singleColWidth, int32_t crossCount) const
+bool GridItemDragManager::SimulateLayoutInRange(SimMatrix& matrix, const std::vector<int32_t>& order,
+    const std::vector<SimSpanInfo>& spans, const GridLayoutInfo& info,
+    int32_t startRebuild, int32_t endRebuild, int32_t from, int32_t to,
+    float mainGap, float mainSize) const
 {
-    targetPos.row = currentRow;
-    if (GreatNotEqual(std::abs(mainDelta), singleRowHeight * MOVE_THRESHOLD) &&
-        !NearZero(singleRowHeight)) {
-        if (Positive(mainDelta)) {
-            targetPos.row = currentRow + 1;
-        } else {
-            targetPos.row = currentRow - 1;
+    // Compute the last visible row as the base for PlaceItemInMatrix
+    int32_t viewportEndRow = info.endMainLineIndex_;
+    float pos = static_cast<float>(info.currentOffset_);
+    for (auto it = info.lineHeightMap_.find(info.startMainLineIndex_);
+         it != info.lineHeightMap_.end(); ++it) {
+        float rowTop = pos;
+        if (rowTop >= mainSize) {
+            viewportEndRow = it->first - 1;
+            break;
+        }
+        viewportEndRow = it->first;
+        pos += it->second + mainGap;
+    }
+
+    // Extend by cacheCount to allow swapping items that are pushed off-screen
+    // by large irregular items during auto-scroll drag scenarios.
+    auto grid = gridNode_.Upgrade();
+    if (grid) {
+        auto layoutProperty = grid->GetLayoutProperty<GridLayoutProperty>();
+        int32_t cacheCount = layoutProperty ? layoutProperty->GetCachedCountValue(info.defCachedCount_) : 0;
+        // Walk cacheCount rows past the visible viewport
+        auto it = info.lineHeightMap_.upper_bound(viewportEndRow);
+        for (int32_t c = 0; c < cacheCount && it != info.lineHeightMap_.end(); ++c, ++it) {
+            viewportEndRow = it->first;
         }
     }
 
-    targetPos.col = currentCol;
-    if (GreatNotEqual(std::abs(crossDelta), singleColWidth * MOVE_THRESHOLD) &&
-        !NearZero(singleColWidth)) {
-        if (Positive(crossDelta)) {
-            targetPos.col = currentCol + 1;
-        } else {
-            targetPos.col = currentCol - 1;
+    for (int32_t i = startRebuild; i <= endRebuild; ++i) {
+        int32_t orderIdx = i - info.startIndex_;
+        if (orderIdx < 0 || orderIdx >= static_cast<int32_t>(order.size())) {
+            break;
+        }
+        int32_t itemIdx = order[orderIdx];
+        auto [origCol, origRow] = info.GetItemPos(itemIdx);
+        auto [newRow, newCol] = PlaceItemInMatrix(info, matrix, itemIdx,
+            spans[itemIdx], info.crossCount_, viewportEndRow);
+        if (newRow < 0) {
+            return false;
+        }
+        if (origRow == newRow && origCol == newCol && i > std::max(from, to)) {
+            break;
         }
     }
+    return true;
 }
 
-void GridItemDragManager::ClampTargetPosition(
-    TargetPosition& targetPos, int32_t crossCount, int32_t rowCount) const
+bool GridItemDragManager::IsRowInViewport(int32_t row, float mainGap,
+    float mainSize, const GridLayoutInfo& info) const
 {
-    if (targetPos.row < 0) {
-        targetPos.row = 0;
+    auto heightIt = info.lineHeightMap_.find(row);
+    if (heightIt == info.lineHeightMap_.end()) {
+        return false;
     }
-    if (targetPos.col < 0) {
-        targetPos.col = 0;
+    float rowTop = static_cast<float>(info.currentOffset_) +
+        info.GetHeightInRange(info.startMainLineIndex_, row, mainGap);
+    float rowBottom = rowTop + heightIt->second;
+    return (rowBottom > 0.0f && rowTop < mainSize);
+}
+
+void GridItemDragManager::CalculateGaps(float& mainGap, float& crossGap, const GridLayoutInfo& info) const
+{
+    mainGap = 0.0f;
+    crossGap = 0.0f;
+    auto grid = gridNode_.Upgrade();
+    if (!grid) {
+        return;
     }
-    if (targetPos.colSpan > 0 && targetPos.col + targetPos.colSpan > crossCount) {
-        targetPos.col = std::max(0, crossCount - targetPos.colSpan);
+
+    auto gridGeometry = grid->GetGeometryNode();
+    if (!gridGeometry) {
+        return;
+    }
+
+    auto viewScopeSize = gridGeometry->GetPaddingSize();
+    auto layoutProperty = grid->GetLayoutProperty<GridLayoutProperty>();
+    if (!layoutProperty) {
+        return;
+    }
+
+    mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, axis_);
+    crossGap = GridUtils::GetCrossGap(layoutProperty, viewScopeSize, axis_);
+}
+
+float GridItemDragManager::CalculateMainPosition(int32_t targetRow, float mainGap, const GridLayoutInfo& info) const
+{
+    float mainPos = info.currentOffset_;
+    int32_t prevRow = info.startMainLineIndex_;
+
+    for (auto iter = info.lineHeightMap_.find(info.startMainLineIndex_);
+        iter != info.lineHeightMap_.end() && iter->first < targetRow; ++iter) {
+        mainPos += iter->second;
+        if (iter->first > prevRow && !NearZero(mainGap)) {
+            mainPos += mainGap;
+        }
+        prevRow = iter->first;
+    }
+
+    return mainPos;
+}
+
+std::optional<OffsetF> GridItemDragManager::CreatePositionFromCoords(float mainPos, float crossPos) const
+{
+    if (axis_ == Axis::VERTICAL) {
+        return OffsetF(crossPos, mainPos);
+    } else {
+        return OffsetF(mainPos, crossPos);
     }
 }
 
-bool GridItemDragManager::CheckTargetCellsExist(const TargetPosition& targetPos,
-    int32_t rowCount, const GridLayoutInfo& info) const
+std::pair<std::vector<double>, float> GridItemDragManager::ResolveCrossLens(
+    const RefPtr<GeometryNode>& gridGeometry,
+    const RefPtr<GridLayoutProperty>& layoutProperty,
+    float crossGap, const GridLayoutInfo& info) const
 {
-    int32_t maxRowToCheck = std::min(targetPos.row + targetPos.rowSpan, rowCount);
-    for (int32_t r = targetPos.row; r < maxRowToCheck; ++r) {
-        auto rowIt = info.gridMatrix_.find(r);
-        if (rowIt == info.gridMatrix_.end()) {
+    std::vector<double> crossLens;
+    float adjustedCrossGap = crossGap;
+    float crossSize = gridGeometry ? gridGeometry->GetFrameSize().CrossSize(axis_) : 0.0f;
+    if (layoutProperty) {
+        auto rowsTemplate = layoutProperty->GetRowsTemplate().value_or("");
+        auto columnsTemplate = layoutProperty->GetColumnsTemplate().value_or("");
+        if (!rowsTemplate.empty()) {
+            auto res = ParseTemplateArgs(
+                GridUtils::ParseArgs(rowsTemplate), crossSize, crossGap, info.GetChildrenCount());
+            crossLens = res.first;
+            adjustedCrossGap = static_cast<float>(res.second);
+        } else {
+            auto res = ParseTemplateArgs(
+                GridUtils::ParseArgs(columnsTemplate), crossSize, crossGap, info.GetChildrenCount());
+            crossLens = res.first;
+            adjustedCrossGap = static_cast<float>(res.second);
+        }
+    }
+    if (crossLens.empty()) {
+        crossLens.push_back(crossSize);
+    }
+    return { crossLens, adjustedCrossGap };
+}
+
+float GridItemDragManager::CalculateCrossPosition(int32_t col, float adjustedCrossGap,
+    const std::vector<double>& crossLens, const RefPtr<GeometryNode>& gridGeometry) const
+{
+    bool hasPadding = gridGeometry && gridGeometry->GetPadding();
+    float crossPos = 0.0f;
+    if (axis_ == Axis::HORIZONTAL && hasPadding) {
+        crossPos = gridGeometry->GetPadding()->top.value_or(0.0f);
+    }
+    for (int32_t i = 0; i < col && i < static_cast<int32_t>(crossLens.size()); ++i) {
+        crossPos += static_cast<float>(crossLens[i]);
+    }
+    if (col > 0) {
+        crossPos += col * adjustedCrossGap;
+    }
+    return crossPos;
+}
+
+std::optional<OffsetF> GridItemDragManager::ApplyAlignmentAndRTL(const RefPtr<FrameNode>& node,
+    int32_t row, int32_t col, OffsetF offset, const std::vector<double>& crossLens,
+    const RefPtr<GeometryNode>& gridGeometry,
+    const RefPtr<GridLayoutProperty>& layoutProperty,
+    const GridLayoutInfo& info) const
+{
+    auto childGeometry = node->GetGeometryNode();
+    auto childSize = childGeometry->GetMarginFrameSize();
+    auto lineHeightIt = info.lineHeightMap_.find(row);
+    float lineHeight = lineHeightIt != info.lineHeightMap_.end() ? lineHeightIt->second : 0.0f;
+    float colWidth = col < static_cast<int32_t>(crossLens.size()) ? static_cast<float>(crossLens[col]) : 0.0f;
+    SizeF blockSize(colWidth, lineHeight, axis_);
+    Alignment align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+    auto alignPos = Alignment::GetAlignPosition(blockSize, childSize, align);
+    bool isRtl = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRtl) {
+        SizeF paddedFrameSize = gridGeometry->GetFrameSize();
+        if (gridGeometry->GetPadding()) {
+            MinusPaddingToSize(*gridGeometry->GetPadding(), paddedFrameSize);
+        }
+        offset.SetX(paddedFrameSize.Width() - offset.GetX() - childSize.Width());
+    }
+    float padLeft = (gridGeometry && gridGeometry->GetPadding()) ?
+        gridGeometry->GetPadding()->left.value_or(0.0f) : 0.0f;
+    offset += OffsetF(padLeft, 0.0f);
+    offset += alignPos;
+    
+    // Check if position is within the visible viewport
+    float mainOffset = offset.GetMainOffset(axis_);
+    float childMainSize = childSize.MainSize(axis_);
+    float mainSize = gridGeometry ? gridGeometry->GetFrameSize().MainSize(axis_) : 0.0f;
+    if (mainOffset + childMainSize <= 0.0f || mainOffset >= mainSize) {
+        return std::nullopt;
+    }
+    return CreatePositionFromCoords(offset.GetY(), offset.GetX());
+}
+
+std::optional<OffsetF> GridItemDragManager::SearchRowForTarget(const std::map<int32_t, int32_t>& cols,
+    int32_t targetIdx, int32_t row, const RefPtr<FrameNode>& node, int32_t colSpan,
+    float mainGap, float crossGap, const GridLayoutInfo& info) const
+{
+    for (const auto& [col, idx] : cols) {
+        if (idx != targetIdx) {
             continue;
         }
-        for (int32_t c = targetPos.col; c < targetPos.col + targetPos.colSpan; ++c) {
-            if (rowIt->second.find(c) != rowIt->second.end()) {
-                return true;
-            }
+        auto grid = gridNode_.Upgrade();
+        auto gridGeometry = grid ? grid->GetGeometryNode() : nullptr;
+        auto layoutProperty = grid ? grid->GetLayoutProperty<GridLayoutProperty>() : nullptr;
+        auto [crossLens, adjustedCrossGap] = ResolveCrossLens(gridGeometry, layoutProperty, crossGap, info);
+        float crossPos = CalculateCrossPosition(col, adjustedCrossGap, crossLens, gridGeometry);
+        float mainPos = CalculateMainPosition(row, mainGap, info);
+        bool hasPadding = gridGeometry && gridGeometry->GetPadding();
+        if (axis_ == Axis::VERTICAL && hasPadding) {
+            mainPos += gridGeometry->GetPadding()->top.value_or(0.0f);
+        }
+        OffsetF offset(crossPos, mainPos, axis_);
+        if (!gridGeometry || !layoutProperty || !node || !node->GetGeometryNode()) {
+            return CreatePositionFromCoords(offset.GetY(), offset.GetX());
+        }
+        return ApplyAlignmentAndRTL(node, row, col, offset, crossLens, gridGeometry, layoutProperty, info);
+    }
+    return std::nullopt;
+}
+
+std::optional<OffsetF> GridItemDragManager::FindItemPositionInMatrix(const SimMatrix& simMatrix,
+    int32_t targetIdx, const RefPtr<FrameNode>& node, int32_t colSpan, float mainGap,
+    float crossGap, const GridLayoutInfo& info) const
+{
+    for (const auto& [row, cols] : simMatrix) {
+        auto result = SearchRowForTarget(cols, targetIdx, row, node, colSpan, mainGap, crossGap, info);
+        if (result.has_value()) {
+            return result;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<OffsetF> GridItemDragManager::CalculateFromNewPosition(int32_t from, int32_t to,
+    const GridLayoutInfo& info) const
+{
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_RETURN(forEach, std::nullopt);
+    // drag item not in screen
+    if (forEachStartIndex_ + from < info.startIndex_ || forEachStartIndex_ + from > info.endIndex_
+        || forEachStartIndex_ + to < info.startIndex_ || forEachStartIndex_ + to > info.endIndex_) {
+        return std::nullopt;
+    }
+
+    auto spans = CollectSpanInfo(info);
+
+    int32_t startRebuild = std::max(forEachStartIndex_ + std::min(from, to), info.startIndex_);
+    int32_t endRebuild = std::min(forEachStartIndex_ + std::max(from, to), info.endIndex_);
+
+    SimMatrix simMatrix;
+    float mainGap = 0.0f;
+    float crossGap = 0.0f;
+    CalculateGaps(mainGap, crossGap, info);
+    auto grid = gridNode_.Upgrade();
+    CHECK_NULL_RETURN(grid, std::nullopt);
+    float mainSize = 0.0f;
+    auto gridGeometry = grid->GetGeometryNode();
+    if (gridGeometry) {
+        mainSize = gridGeometry->GetFrameSize().MainSize(axis_);
+    }
+    if (!CopyLayoutToMatrix(simMatrix, spans, info, startRebuild, mainGap, mainSize)) {
+        return std::nullopt;
+    }
+
+    std::vector<int32_t> order;
+    for (int32_t i = info.startIndex_; i <= info.endIndex_; ++i) {
+        order.push_back(i);
+    }
+
+    int32_t localFrom = forEachStartIndex_ + from - info.startIndex_;
+    int32_t localTo = forEachStartIndex_ + to - info.startIndex_;
+    ApplyMoveToArray(order, localFrom, localTo);
+
+    int32_t simFrom = forEachStartIndex_ + from;
+    int32_t simTo = forEachStartIndex_ + to;
+    if (!SimulateLayoutInRange(simMatrix, order, spans, info, startRebuild, endRebuild, simFrom, simTo,
+        mainGap, mainSize)) {
+        return std::nullopt;
+    }
+
+    auto fromNode = forEach->GetFrameNode(from);
+    CHECK_NULL_RETURN(fromNode, std::nullopt);
+
+    auto fromPattern = fromNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_RETURN(fromPattern, std::nullopt);
+
+    auto irregularInfo = fromPattern->GetIrregularItemInfo();
+    int32_t fromColSpan = irregularInfo.has_value() ? irregularInfo->crossSpan : 1;
+    int32_t targetIdx = forEachStartIndex_ + from;
+
+    return FindItemPositionInMatrix(simMatrix, targetIdx, fromNode, fromColSpan, mainGap, crossGap, info);
+}
+
+float GridItemDragManager::CalculateDistance(const OffsetF& pos1, const OffsetF& pos2) const
+{
+    return std::sqrt(
+        std::pow(pos1.GetX() - pos2.GetX(), POWER_FOR_DISTANCE) +
+        std::pow(pos1.GetY() - pos2.GetY(), POWER_FOR_DISTANCE)
+    );
+}
+
+int32_t GridItemDragManager::SelectBestCandidate(int32_t currentIndex, bool movingDown,
+    int32_t currentBest, int32_t candidate, float candidateDistance, float bestDistance) const
+{
+    if (candidateDistance < bestDistance) {
+        return candidate;
+    }
+
+    if (!NearEqual(candidateDistance, bestDistance)) {
+        return currentBest;
+    }
+
+    if (candidate == currentIndex) {
+        return candidate;
+    }
+
+    if (currentBest == currentIndex) {
+        return currentBest;
+    }
+
+    if (movingDown) {
+        return (candidate > currentBest) ? candidate : currentBest;
+    } else {
+        return (candidate < currentBest) ? candidate : currentBest;
+    }
+}
+
+bool GridItemDragManager::IsItemInViewport(int32_t currentIndex, const GridLayoutInfo& info) const
+{
+    int32_t globalIndex = forEachStartIndex_ + currentIndex;
+    if (globalIndex < info.startIndex_ || globalIndex > info.endIndex_) {
+        return false;
+    }
+    auto [currentCol, currentRow] = info.GetItemPos(globalIndex);
+    if (currentCol < 0 || currentRow < 0) {
+        return false;
+    }
+    // Check if the dragged item (including multi-row span) is visible in viewport
+    float mainGap = 0.0f;
+    float crossGap = 0.0f;
+    CalculateGaps(mainGap, crossGap, info);
+    float mainSize = 0.0f;
+    auto grid = gridNode_.Upgrade();
+    if (grid) {
+        auto gridGeometry = grid->GetGeometryNode();
+        if (gridGeometry) {
+            mainSize = gridGeometry->GetFrameSize().MainSize(axis_);
+        }
+    }
+    ItemSpanInfo spanInfo = GetIrregularItemInfoAndSpan(currentIndex);
+    int32_t rowSpan = spanInfo.isIrregular ? spanInfo.rowSpan : 1;
+    int32_t endRow = currentRow + rowSpan - 1;
+    for (int32_t row = currentRow; row <= endRow; ++row) {
+        if (IsRowInViewport(row, mainGap, mainSize, info)) {
+            return true;
         }
     }
     return false;
 }
 
-GridItemDragManager::TargetPosition GridItemDragManager::CalculateTargetPosition(
-    int32_t currentRow, int32_t currentCol, const OffsetF& delta, const GridLayoutInfo& info) const
+std::pair<int32_t, int32_t> GridItemDragManager::GetRowRangeForItem(
+    int32_t currentIndex, const GridLayoutInfo& info) const
 {
-    TargetPosition targetPos;
+    int32_t globalIndex = forEachStartIndex_ + currentIndex;
+    auto [currentCol, currentRow] = info.GetItemPos(globalIndex);
+    ItemSpanInfo spanInfo = GetIrregularItemInfoAndSpan(currentIndex);
+    int32_t rowSpan = spanInfo.isIrregular ? spanInfo.rowSpan : 1;
+    return { currentRow, currentRow + rowSpan - 1 };
+}
 
-    float mainDelta = delta.GetMainOffset(axis_);
-    float crossDelta = delta.GetCrossOffset(axis_);
-    int32_t crossCount = info.crossCount_;
-    int32_t rowCount = info.gridMatrix_.empty() ? 0 : info.gridMatrix_.rbegin()->first + 1;
-
-    float mainItemSize = GetItemMainSize(currentIndex_, info);
-    float crossItemSize = GetItemCrossSize(currentIndex_, info);
-
-    ItemSpanInfo currentSpanInfo = GetIrregularItemInfoAndSpan(currentIndex_);
-    float singleRowHeight = currentSpanInfo.rowSpan > 0 ? mainItemSize / currentSpanInfo.rowSpan : mainItemSize;
-    float singleColWidth = currentSpanInfo.colSpan > 0 ? crossItemSize / currentSpanInfo.colSpan : crossItemSize;
-
-    ComputeTargetRowCol(targetPos, currentRow, currentCol, mainDelta, crossDelta,
-        singleRowHeight, singleColWidth, crossCount);
-    targetPos.rowSpan = currentSpanInfo.rowSpan;
-    targetPos.colSpan = currentSpanInfo.colSpan;
-    ClampTargetPosition(targetPos, crossCount, rowCount);
-
-    bool hasCells = CheckTargetCellsExist(targetPos, rowCount, info);
-    if (!hasCells && targetPos.row < rowCount) {
-        targetPos.isValid = false;
-        return targetPos;
+bool GridItemDragManager::IsCandidateValidForAutoScroll(int32_t candidate,
+    int32_t currentRow, int32_t endRow, const GridLayoutInfo& info) const
+{
+    auto [candidateCol, candidateRow] = info.GetItemPos(forEachStartIndex_ + candidate);
+    if (candidateCol < 0 || candidateRow < 0) {
+        return false;
     }
-    targetPos.isValid = true;
-    return targetPos;
+    if (autoScrollForward_ && candidateRow < currentRow) {
+        return false;
+    }
+    if (!autoScrollForward_ && candidateRow > endRow) {
+        return false;
+    }
+    return true;
+}
+
+int32_t GridItemDragManager::FindBestCandidate(int32_t currentIndex,
+    const std::vector<int32_t>& candidates, const OffsetF& delta,
+    int32_t currentRow, int32_t endRow, const GridLayoutInfo& info) const
+{
+    OffsetF dragPosition = realOffset_ + GetParentPaddingOffset();
+    int32_t bestCandidate = currentIndex;
+    float minDistance = std::numeric_limits<float>::max();
+    float mainDelta = delta.GetMainOffset(axis_);
+    bool movingDown = Positive(mainDelta);
+    for (int32_t candidate : candidates) {
+        if (inAutoScrollHotZone_ && candidate != currentIndex) {
+            if (!IsCandidateValidForAutoScroll(candidate, currentRow, endRow, info)) {
+                continue;
+            }
+        }
+        auto newPositionOpt = CalculateFromNewPosition(currentIndex, candidate, info);
+        if (!newPositionOpt.has_value()) {
+            continue;
+        }
+        OffsetF newPosition = newPositionOpt.value();
+        float distance = CalculateDistance(dragPosition, newPosition);
+        bestCandidate = SelectBestCandidate(currentIndex, movingDown, bestCandidate, candidate, distance, minDistance);
+        if (distance < minDistance) {
+            minDistance = distance;
+        }
+    }
+    return bestCandidate;
+}
+
+int32_t GridItemDragManager::FindSwapTarget(int32_t currentIndex, const OffsetF& delta)
+{
+    currentIndex_ = currentIndex;
+    auto grid = gridNode_.Upgrade();
+    CHECK_NULL_RETURN(grid, currentIndex);
+    auto pattern = grid->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, currentIndex);
+    auto& info = pattern->GetMutableLayoutInfo();
+    if (!IsItemInViewport(currentIndex, info)) {
+        return currentIndex;
+    }
+    auto candidates = CollectSwapCandidates(currentIndex, delta, info);
+    if (candidates.empty()) {
+        return currentIndex;
+    }
+    auto [currentRow, endRow] = GetRowRangeForItem(currentIndex, info);
+    return FindBestCandidate(currentIndex, candidates, delta, currentRow, endRow, info);
 }
 
 float GridItemDragManager::GetItemMainSize(int32_t currentIndex, const GridLayoutInfo& info) const
@@ -603,7 +1073,7 @@ float GridItemDragManager::GetItemMainSize(int32_t currentIndex, const GridLayou
     auto node = forEach->GetFrameNode(currentIndex);
     if (!node) {
         // Item not rendered, try to get the row height of the current item's row
-        auto [col, row] = info.GetItemPos(currentIndex);
+        auto [col, row] = info.GetItemPos(forEachStartIndex_ + currentIndex);
         auto rowIt = info.lineHeightMap_.find(row);
         if (rowIt != info.lineHeightMap_.end()) {
             return rowIt->second;
@@ -634,6 +1104,22 @@ float GridItemDragManager::GetItemCrossSize(int32_t currentIndex, const GridLayo
     return geometry->GetFrameSize().CrossSize(axis_);
 }
 
+int32_t GridItemDragManager::GetColSpanForIrregularItem(int32_t crossSpan) const
+{
+    auto grid = gridNode_.Upgrade();
+    if (!grid) {
+        return crossSpan;
+    }
+
+    auto gridPattern = grid->GetPattern<GridPattern>();
+    if (!gridPattern) {
+        return crossSpan;
+    }
+
+    int32_t crossCount = gridPattern->GetCrossCount();
+    return (crossCount > 1) ? crossSpan : 1;
+}
+
 GridItemDragManager::ItemSpanInfo GridItemDragManager::GetIrregularItemInfoAndSpan(int32_t index) const
 {
     ItemSpanInfo spanInfo;
@@ -648,37 +1134,73 @@ GridItemDragManager::ItemSpanInfo GridItemDragManager::GetIrregularItemInfoAndSp
     CHECK_NULL_RETURN(currentPattern, spanInfo);
 
     auto currentInfo = currentPattern->GetIrregularItemInfo();
-    if (currentInfo.has_value()) {
-        spanInfo.rowSpan = currentInfo->mainSpan;
-        spanInfo.colSpan = currentInfo->crossSpan;
-        spanInfo.isIrregular = true;
+    if (!currentInfo.has_value()) {
+        return spanInfo;
     }
+
+    spanInfo.rowSpan = currentInfo->mainSpan;
+    spanInfo.colSpan = GetColSpanForIrregularItem(currentInfo->crossSpan);
+    spanInfo.isIrregular = true;
 
     return spanInfo;
 }
 
-std::vector<GridItemDragManager::SimSpanInfo> GridItemDragManager::CollectSpanInfo(int32_t totalItems) const
+GridItemDragManager::SimSpanInfo GridItemDragManager::ResolveItemSpan(
+    int32_t forEachIdx, int32_t crossCount) const
 {
-    std::vector<SimSpanInfo> spans(totalItems);
+    SimSpanInfo span;
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_RETURN(forEach, span);
+    auto node = forEach->GetFrameNode(forEachIdx);
+    CHECK_NULL_RETURN(node, span);
+    auto pattern = node->GetPattern<GridItemPattern>();
+    if (!pattern) {
+        return span;
+    }
+    auto irregularInfo = pattern->GetIrregularItemInfo();
+    if (!irregularInfo.has_value()) {
+        return span;
+    }
+    span.rowSpan = irregularInfo->mainSpan;
+    span.colSpan = (crossCount > 1) ? irregularInfo->crossSpan : 1;
+    return span;
+}
+
+std::vector<GridItemDragManager::SimSpanInfo> GridItemDragManager::CollectSpanInfo(const GridLayoutInfo& info) const
+{
+    std::vector<SimSpanInfo> spans(forEachStartIndex_ + totalCount_);
     auto forEach = forEachNode_.Upgrade();
     if (!forEach) {
         return spans;
     }
-    for (int32_t i = 0; i < totalItems; ++i) {
-        auto node = forEach->GetFrameNode(i);
-        if (!node) {
+    auto grid = gridNode_.Upgrade();
+    if (!grid) {
+        return spans;
+    }
+    int32_t crossCount = 1;
+    auto gridPattern = grid->GetPattern<GridPattern>();
+    if (gridPattern) {
+        crossCount = gridPattern->GetCrossCount();
+    }
+    float mainGap = 0.0f;
+    float crossGap = 0.0f;
+    CalculateGaps(mainGap, crossGap, info);
+    float mainSize = 0.0f;
+    auto gridGeometry = grid->GetGeometryNode();
+    if (gridGeometry) {
+        mainSize = gridGeometry->GetFrameSize().MainSize(axis_);
+    }
+    // collect ForEach items
+    for (int32_t forEachIdx = 0; forEachIdx < totalCount_; ++forEachIdx) {
+        int32_t gridIndex = forEachStartIndex_ + forEachIdx;
+        if (gridIndex < info.startIndex_ || gridIndex > info.endIndex_) {
             continue;
         }
-        auto pattern = node->GetPattern<GridItemPattern>();
-        if (!pattern) {
+        auto [col, row] = info.GetItemPos(gridIndex);
+        if (col < 0 || !IsRowInViewport(row, mainGap, mainSize, info)) {
             continue;
         }
-        auto irregularInfo = pattern->GetIrregularItemInfo();
-        if (!irregularInfo.has_value()) {
-            continue;
-        }
-        spans[i].rowSpan = irregularInfo->mainSpan;
-        spans[i].colSpan = irregularInfo->crossSpan;
+        spans[gridIndex] = ResolveItemSpan(forEachIdx, crossCount);
     }
     return spans;
 }
@@ -723,14 +1245,42 @@ int32_t GridItemDragManager::FindAvailableColumn(
     return -1;
 }
 
+int32_t GridItemDragManager::FindMaxIndexRow(const SimMatrix& matrix)
+{
+    int32_t maxIdx = -1;
+    int32_t startRow = 0;
+    for (const auto& [row, cols] : matrix) {
+        for (const auto& [col, val] : cols) {
+            if (val > 0 && val > maxIdx) {
+                maxIdx = val;
+                startRow = row;
+            }
+        }
+    }
+    return startRow;
+}
+
+int32_t GridItemDragManager::FindPlacementStartRow(const SimMatrix& matrix,
+    const GridLayoutInfo& info) const
+{
+    if (!matrix.empty()) {
+        return FindMaxIndexRow(matrix);
+    }
+    if (!info.gridMatrix_.empty()) {
+        return info.gridMatrix_.begin()->first;
+    }
+    return 0;
+}
+
 std::pair<int32_t, int32_t> GridItemDragManager::PlaceItemInMatrix(
-    SimMatrix& matrix, int32_t itemIdx, const SimSpanInfo& span,
-    int32_t crossCount, int32_t totalItems) const
+    const GridLayoutInfo& info, SimMatrix& matrix, int32_t itemIdx,
+    const SimSpanInfo& span, int32_t crossCount, int32_t viewportEndRow) const
 {
     if (span.colSpan > crossCount) {
         return { -1, -1 };
     }
-    for (int32_t row = 0; row <= totalItems; ++row) {
+    int32_t startRow = FindPlacementStartRow(matrix, info);
+    for (int32_t row = startRow; row <= viewportEndRow; ++row) {
         int32_t col = FindAvailableColumn(matrix, row, span.colSpan, crossCount);
         if (col == -1) {
             continue;
@@ -746,8 +1296,76 @@ std::pair<int32_t, int32_t> GridItemDragManager::PlaceItemInMatrix(
     return { -1, -1 };
 }
 
+int32_t GridItemDragManager::CalculateColSpan(const std::map<int32_t, int32_t>& rowCols,
+    int32_t col, int32_t itemIdx, int32_t crossCount) const
+{
+    int32_t colSpan = 1;
+    for (int32_t j = col + 1; j < crossCount; ++j) {
+        auto colIt = rowCols.find(j);
+        if (colIt == rowCols.end()) {
+            break;
+        }
+        if (std::abs(colIt->second) == itemIdx) {
+            colSpan++;
+        } else {
+            break;
+        }
+    }
+    return colSpan;
+}
+
+int32_t GridItemDragManager::CalculateRowSpan(const GridLayoutInfo& info,
+    int32_t row, int32_t col, int32_t itemIdx) const
+{
+    int32_t rowSpan = 1;
+    int32_t nextRow = row + 1;
+    auto rowIt = info.gridMatrix_.find(nextRow);
+    while (rowIt != info.gridMatrix_.end()) {
+        auto colIt = rowIt->second.find(col);
+        if (colIt == rowIt->second.end()) {
+            break;
+        }
+        if (std::abs(colIt->second) == itemIdx) {
+            rowSpan++;
+            nextRow++;
+            rowIt = info.gridMatrix_.find(nextRow);
+        } else {
+            break;
+        }
+    }
+    return rowSpan;
+}
+
+void GridItemDragManager::CalculateSpanInfo(const GridLayoutInfo& info,
+    int32_t itemIdx, int32_t row, int32_t col, std::vector<SimSpanInfo>& spans) const
+{
+    auto origIt = info.gridMatrix_.find(row);
+    if (origIt == info.gridMatrix_.end()) {
+        return;
+    }
+
+    if (origIt->second.find(col) == origIt->second.end()) {
+        return;
+    }
+
+    spans[itemIdx].colSpan = CalculateColSpan(origIt->second, col, itemIdx, info.crossCount_);
+    spans[itemIdx].rowSpan = CalculateRowSpan(info, row, col, itemIdx);
+}
+
+void GridItemDragManager::FillMatrixWithItem(SimMatrix& matrix, int32_t itemIdx,
+    int32_t row, int32_t col, const std::vector<SimSpanInfo>& spans) const
+{
+    for (int32_t r = 0; r < spans[itemIdx].rowSpan; ++r) {
+        for (int32_t c = 0; c < spans[itemIdx].colSpan; ++c) {
+            matrix[row + r][col + c] = -itemIdx;
+        }
+    }
+    matrix[row][col] = itemIdx;
+}
+
 bool GridItemDragManager::CopyLayoutToMatrix(SimMatrix& matrix,
-    const std::vector<SimSpanInfo>& spans, const GridLayoutInfo& info, int32_t count) const
+    std::vector<SimSpanInfo>& spans, const GridLayoutInfo& info, int32_t count,
+    float mainGap, float mainSize) const
 {
     int32_t minItemId = count;
     for (const auto& [rowIdx, cols] : info.gridMatrix_) {
@@ -757,81 +1375,24 @@ bool GridItemDragManager::CopyLayoutToMatrix(SimMatrix& matrix,
             }
         }
     }
+
+    int32_t forEachNotIncludeIndex = std::max(info.startIndex_, forEachStartIndex_);
     for (int32_t i = minItemId; i < count; ++i) {
         auto [col, row] = info.GetItemPos(i);
         if (row < 0 || col < 0) {
             continue;
         }
-        auto origIt = info.gridMatrix_.find(row);
-        if (origIt == info.gridMatrix_.end()) {
-            continue;
+
+        // Calculate span info for items not covered by CollectSpanInfo:
+        // 1. Items from other ForEach nodes (i < forEachNotIncludeIndex)
+        // 2. Items off-screen (CollectSpanInfo now skips off-screen items)
+        if (i < forEachNotIncludeIndex || !IsRowInViewport(row, mainGap, mainSize, info)) {
+            CalculateSpanInfo(info, i, row, col, spans);
         }
-        if (origIt->second.find(col) == origIt->second.end()) {
-            continue;
-        }
-        for (int32_t r = 0; r < spans[i].rowSpan; ++r) {
-            for (int32_t c = 0; c < spans[i].colSpan; ++c) {
-                matrix[row + r][col + c] = -i;
-            }
-        }
-        matrix[row][col] = i;
+
+        FillMatrixWithItem(matrix, i, row, col, spans);
     }
     return true;
-}
-
-bool GridItemDragManager::SimulateLayout(SimMatrix& matrix, const std::vector<int32_t>& order,
-    const std::vector<SimSpanInfo>& spans, const GridLayoutInfo& info,
-    int32_t startRebuild, int32_t totalItems, int32_t from, int32_t to) const
-{
-    for (int32_t i = startRebuild; i < totalItems; ++i) {
-        auto [newRow, newCol] = PlaceItemInMatrix(matrix, order[i], spans[order[i]],
-            info.crossCount_, totalItems);
-        if (newRow < 0) {
-            return false;
-        }
-        auto [origCol, origRow] = info.GetItemPos(order[i]);
-        if (origRow == newRow && origCol == newCol && i > std::max(from, to)) {
-            break;
-        }
-    }
-    return true;
-}
-
-bool GridItemDragManager::ValidateMoveBySimulation(
-    int32_t from, int32_t to, const GridLayoutInfo& info) const
-{
-    if (from == to) {
-        return true;
-    }
-
-    auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_RETURN(forEach, false);
-
-    int32_t totalItems = totalCount_;
-    if (from < 0 || from >= totalItems || to < 0 || to >= totalItems) {
-        return false;
-    }
-
-    int32_t crossCount = info.crossCount_;
-    if (crossCount <= 0) {
-        return false;
-    }
-
-    auto spans = CollectSpanInfo(totalItems);
-
-    std::vector<int32_t> order(totalItems);
-    std::iota(order.begin(), order.end(), 0);
-    ApplyMoveToArray(order, from, to);
-    if (order[from] < info.startIndex_ || order[from] > info.endIndex_) {
-        return false;
-    }
-
-    SimMatrix simMatrix;
-    int32_t startRebuild = std::min(from, to);
-    if (!CopyLayoutToMatrix(simMatrix, spans, info, startRebuild)) {
-        return false;
-    }
-    return SimulateLayout(simMatrix, order, spans, info, startRebuild, totalItems, from, to);
 }
 
 bool GridItemDragManager::IsInHotZone(int32_t index, const RectF& frameRect) const
@@ -864,6 +1425,24 @@ void GridItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, c
     CHECK_NULL_VOID(pattern);
 
     if (IsInHotZone(index, frameRect) && pattern->GetScrollable()) {
+        auto gridGeometry = grid->GetGeometryNode();
+        inAutoScrollHotZone_ = false;
+        if (gridGeometry) {
+            auto gridGlobalOffset = grid->GetTransformRelativeOffset();
+            float gridMainOffset =
+                (axis_ == Axis::VERTICAL) ? gridGlobalOffset.GetY() : gridGlobalOffset.GetX();
+            float gridMainSize = gridGeometry->GetFrameSize().MainSize(axis_);
+            auto pointMain = (axis_ == Axis::VERTICAL) ? point.GetY() : point.GetX();
+            float hotZone = Dimension(HOT_ZONE_SIZE_VP, DimensionUnit::VP).ConvertToPx();
+            float relativeMain = pointMain - gridMainOffset;
+            if (relativeMain < hotZone && !pattern->IsAtTop()) {
+                inAutoScrollHotZone_ = true;
+                autoScrollForward_ = false;
+            } else if (relativeMain > gridMainSize - hotZone && !pattern->IsAtBottom()) {
+                inAutoScrollHotZone_ = true;
+                autoScrollForward_ = true;
+            }
+        }
         pattern->HandleMoveEventInComp(point, true);
 
         if (!scrolling_) {
@@ -874,21 +1453,50 @@ void GridItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, c
             });
             scrolling_ = true;
         }
-    } else if (scrolling_) {
-        pattern->HandleLeaveHotzoneEvent();
-        pattern->SetHotZoneScrollCallback(nullptr);
-        scrolling_ = false;
+    } else {
+        inAutoScrollHotZone_ = false;
+        if (scrolling_) {
+            pattern->HandleLeaveHotzoneEvent();
+            pattern->SetHotZoneScrollCallback(nullptr);
+            scrolling_ = false;
+        }
     }
+}
+
+void GridItemDragManager::StopAutoScroll()
+{
+    auto grid = gridNode_.Upgrade();
+    if (!grid) {
+        return;
+    }
+    auto pattern = grid->GetPattern<GridPattern>();
+    if (!pattern) {
+        return;
+    }
+    if (scrolling_) {
+        pattern->HandleLeaveHotzoneEvent();
+        scrolling_ = false;
+        autoScrollForward_ = false;
+        inAutoScrollHotZone_ = false;
+    }
+    pattern->SetHotZoneScrollCallback(nullptr);
 }
 
 void GridItemDragManager::HandleScrollCallback()
 {
+    if (dragState_ != GridItemDragState::DRAGGING) {
+        StopAutoScroll();
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometry = host->GetGeometryNode();
     CHECK_NULL_VOID(geometry);
     auto frameRect = geometry->GetMarginFrameRect();
     int32_t from = GetIndex();
+    if (from < 0) {
+        return;
+    }
     if (scrolling_ && !IsInHotZone(from, frameRect)) {
         auto grid = gridNode_.Upgrade();
         CHECK_NULL_VOID(grid);
@@ -898,20 +1506,10 @@ void GridItemDragManager::HandleScrollCallback()
         pattern->HandleLeaveHotzoneEvent();
         pattern->SetHotZoneScrollCallback(nullptr);
         scrolling_ = false;
+        autoScrollForward_ = false;
+        inAutoScrollHotZone_ = false;
     }
-
-    auto paddingOffset = GetParentPaddingOffset();
-    int32_t to = FindSwapTarget(from, realOffset_ - frameRect.GetOffset() + paddingOffset);
-    if (to == from) {
-        return;
-    }
-
-    HandleSwapAnimation(from, to);
-
-    auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
-
-    forEach->FireOnMoveThrough(fromIndex_, to);
+    ProcessSwap(from);
 }
 
 void GridItemDragManager::SetPosition(const OffsetF& offset)
@@ -932,51 +1530,4 @@ int32_t GridItemDragManager::GetIndex() const
     CHECK_NULL_RETURN(host, -1);
     return forEach->GetFrameNodeIndex(host);
 }
-
-bool GridItemDragManager::GetDummyItemRect(int32_t index, RectF& rect) const
-{
-    auto grid = gridNode_.Upgrade();
-    CHECK_NULL_RETURN(grid, false);
-    auto pattern = grid->GetPattern<GridPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    auto& info = pattern->GetMutableLayoutInfo();
-
-    auto [col, row] = info.GetItemPos(index);
-    if (col < 0 || row < 0) {
-        return false;
-    }
-
-    auto rowIt = info.lineHeightMap_.find(row);
-    if (rowIt == info.lineHeightMap_.end()) {
-        return false;
-    }
-
-    float height = rowIt->second;
-    float width = 0.0f;
-    for (auto& [r, cMap] : info.gridMatrix_) {
-        if (r != row) {
-            continue;
-        }
-        for (auto& [c, idx] : cMap) {
-            if (c != col) {
-                continue;
-            }
-            auto forEach = forEachNode_.Upgrade();
-            CHECK_NULL_RETURN(forEach, false);
-            auto node = forEach->GetFrameNode(idx);
-            if (!node) {
-                continue;
-            }
-            auto geometry = node->GetGeometryNode();
-            if (geometry) {
-                width = geometry->GetFrameSize().Width();
-                break;
-            }
-        }
-    }
-
-    rect = RectF(OffsetF(0.0f, 0.0f), SizeF(width, height));
-    return true;
-}
-
 } // namespace OHOS::Ace::NG

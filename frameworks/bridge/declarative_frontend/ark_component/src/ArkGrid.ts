@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
   }
   editMode(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, GridEditModeModifier.identity, GridEditModeModifier, value);
+    return this;
+  }
+  enableEditMode(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, GridEnableEditModeModifier.identity, GridEnableEditModeModifier, value);
     return this;
   }
   multiSelectable(value: boolean): this {
@@ -181,6 +185,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
   }
   editModeOptions(options: EditModeOptions | undefined): this {
     modifierWithKey(this._modifiersWithKeys, GridEditModeOptionsModifier.identity, GridEditModeOptionsModifier, options);
+    return this;
+  }
+  onEditModeChange(callback: Callback<boolean> | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, GridOnEditModeChangeModifier.identity, GridOnEditModeChangeModifier, callback);
     return this;
   }
   onWillScroll(callback: (xOffset: number, yOffset: number,
@@ -358,6 +366,20 @@ class GridEditModeModifier extends ModifierWithKey<boolean> {
       getUINativeModule().grid.resetEditMode(node);
     } else {
       getUINativeModule().grid.setEditMode(node, this.value);
+    }
+  }
+}
+
+class GridEnableEditModeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridEnableEditMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetGridEnableEditMode(node);
+    } else {
+      getUINativeModule().grid.setGridEnableEditMode(node, this.value);
     }
   }
 }
@@ -806,6 +828,20 @@ class GridEditModeOptionsModifier extends ModifierWithKey<EditModeOptions | unde
       getUINativeModule().grid.resetEditModeOptions(node);
     } else {
       getUINativeModule().grid.setEditModeOptions(node, this.value);
+    }
+  }
+}
+
+class GridOnEditModeChangeModifier extends ModifierWithKey<Callback<boolean> | undefined> {
+  constructor(callback: Callback<boolean> | undefined) {
+    super(callback);
+  }
+  static identity: Symbol = Symbol('gridOnEditModeChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetOnEditModeChange(node);
+    } else {
+      getUINativeModule().grid.setOnEditModeChange(node, this.value);
     }
   }
 }

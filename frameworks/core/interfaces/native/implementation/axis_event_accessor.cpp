@@ -14,7 +14,9 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/axis_event_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -73,7 +75,13 @@ Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
 }
 Ark_Float64 GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    AxisInfo* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+
+    double value = event->GetPinchAxisScale();
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
                         Ark_AxisType axisType)

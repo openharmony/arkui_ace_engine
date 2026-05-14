@@ -20,6 +20,7 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
 #include "core/accessibility/accessibility_manager.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/container_window_manager.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -269,6 +271,15 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
     std::shared_lock<std::shared_mutex> lock(imageMtx_);
     return imageCache_;
+}
+
+const RefPtr<SharedImageManager>& PipelineBase::GetOrCreateSharedImageManager()
+{
+    std::scoped_lock<std::shared_mutex> lock(imageMtx_);
+    if (!sharedImageManager_) {
+        sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
+    }
+    return sharedImageManager_;
 }
 
 void PipelineBase::SetRootSize(double density, float width, float height)

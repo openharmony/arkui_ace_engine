@@ -53,6 +53,8 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
+#include "core/components_ng/pattern/stage/stage_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {

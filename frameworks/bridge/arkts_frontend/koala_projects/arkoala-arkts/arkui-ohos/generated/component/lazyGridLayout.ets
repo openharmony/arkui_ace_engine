@@ -158,6 +158,11 @@ export class ArkLazyGridLayoutAttributeComponent extends ArkCommonMethodComponen
         this.getPeer()?.setColumnsGapAttribute(value_casted)
         return this
     }
+    public onVisibleIndexesChange(callback_: OnVisibleIndexesChangeCallback | undefined): this {
+        const callback__casted = callback_ as (OnVisibleIndexesChangeCallback | undefined)
+        this.getPeer()?.setOnVisibleIndexesChangeAttribute(callback__casted)
+        return this
+    }
     public attributeModifier(value: AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookLazyGridLayoutAttributeAttributeModifier(this, value);
@@ -184,11 +189,6 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutAttributeCompo
     public columnsTemplate(value: string | undefined): this {
         const value_casted = value as (string | undefined)
         this.getPeer()?.setColumnsTemplateAttribute(value_casted)
-        return this
-    }
-    public onVisibleIndexesChange(callback_: OnVisibleIndexesChangeCallback | undefined): this {
-        const callback__casted = callback_ as (OnVisibleIndexesChangeCallback | undefined)
-        this.getPeer()?.setOnVisibleIndexesChangeAttribute(callback__casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -222,3 +222,18 @@ export function LazyVGridLayoutImpl(
     })
 }
 
+@memo
+export function LazyVGridLayout(
+    @memo @memo_skip
+    style: ((attributes: LazyVGridLayoutAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkLazyVGridLayoutComponent>((): ArkLazyVGridLayoutComponent => {
+        return new ArkLazyVGridLayoutComponent()
+    })
+    NodeAttach<ArkLazyVGridLayoutPeer>((): ArkLazyVGridLayoutPeer => ArkLazyVGridLayoutPeer.create(receiver), (_: ArkLazyVGridLayoutPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

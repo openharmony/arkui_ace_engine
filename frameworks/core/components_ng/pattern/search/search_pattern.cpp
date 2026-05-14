@@ -297,6 +297,19 @@ void SearchPattern::SetAccessibilityClearAction()
     textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
+void SearchPattern::OnAttachToMainTree()
+{
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            auto host = GetHost();
+            if (host) {
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+    }
+}
+
 void SearchPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -1864,6 +1877,8 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     std::string style = V2::ConvertWrapTextDecorationStyleToString(
         textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
     jsonDecoration->Put("style", style.c_str());
+    jsonDecoration->Put(
+        "thicknessScale", std::to_string(textFieldLayoutProperty->GetLineThicknessScale().value_or(1.0f)).c_str());
     json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
     json->PutExtAttr(
         "minFontSize", textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
@@ -2289,6 +2304,7 @@ void SearchPattern::UpdateTextFieldColor()
             auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(buttonLayoutProperty);
             buttonLayoutProperty->UpdateFontColor(searchTheme->GetSearchButtonTextColor());
+            buttonLayoutProperty->UpdateFontColorFlagByUser(true);
         }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2349,6 +2365,12 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     TextNodeOnThemeScopeUpdate(searchTheme, textFieldTheme);
     PaintSearchFocusState();
     UpdateTextFieldColor();
+
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, result);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, result);
+    textFieldPattern->UpdateSelectionMenu(themeScopeId);
 
     return result;
 }
@@ -2938,7 +2960,8 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     symbolEffectOptions.SetIsTxtActive(false);
     symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     auto fontSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
-    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale()),
+    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPxDistributeWithEnv(GetMinFontScale(), GetMaxFontScale(), true,
+        GetEnvFontScale()),
         ICON_MAX_SIZE.ConvertToPx())) {
         symbolLayoutProperty->UpdateFontSize(ICON_MAX_SIZE);
     }
@@ -3000,12 +3023,14 @@ const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSi
     CHECK_NULL_RETURN(host, iconSizeValue);
     auto maxFontScale = GetMaxFontScale();
     auto minFontScale = GetMinFontScale();
-    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale),
+    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
+        GetEnvFontScale()),
         ICON_MAX_SIZE.ConvertToPx())) {
         return ICON_MAX_SIZE;
     }
     if (iconSizeValue.Unit() != DimensionUnit::VP) {
-        return Dimension(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale));
+        return Dimension(
+            iconSizeValue.ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true, GetEnvFontScale()));
     } else {
         return iconSizeValue;
     }

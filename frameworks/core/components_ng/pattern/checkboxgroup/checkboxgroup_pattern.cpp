@@ -86,11 +86,11 @@ void CheckBoxGroupPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
-    if (!IsArkTSStatic()) {
-        UpdateState();
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!IsArkTSStatic() || host->IsOnMainTree()) {
+        UpdateState();
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());

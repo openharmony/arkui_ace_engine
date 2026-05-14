@@ -26,6 +26,7 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline/base/element_register.h"
 #include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -592,9 +593,7 @@ void GetFreeNodeContent(const std::unique_ptr<JsonValue>& jsonTree, const RefPtr
         }
         GetInspectorChildren(uiNode, jsonNodeArray, inspectorParameters);
     }
-    if (jsonNodeArray->GetArraySize()) {
-        jsonTree->PutRef("other_contents", std::move(jsonNodeArray));
-    }
+    jsonTree->PutRef("other_contents", std::move(jsonNodeArray));
 }
 
 std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t pageId,

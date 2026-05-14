@@ -78,10 +78,12 @@ public:
     void SetCapsuleStyle(bool value) override;
     void SetGradientColorByUser(bool value) override;
     void SetBorderColorSetByUser(bool value) override;
+    void ResetBorderColor() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);
     static void SetColor(FrameNode* frameNode, const Color& value);
+    static void SetUserInitiatedColor(FrameNode* frameNode, bool value);
     static void SetGradientColor(FrameNode* frameNode, const Gradient& value);
     static void SetSmoothEffect(FrameNode* frameNode, bool value);
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
@@ -117,8 +119,7 @@ public:
     static void ResetBorderRadius(FrameNode* frameNode);
     static void ResetColor(FrameNode* frameNode);
     static void ResetBackgroundColor(FrameNode* frameNode);
-    static void SetModifierInitiatedColor(FrameNode* frameNode, bool value);
-    static void SetModifierInitiatedBgColor(FrameNode* frameNode, bool value);
+    static void ResetBorderColor(FrameNode* frameNode);
     static void SetProgressColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetLSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetLSSweepingEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);

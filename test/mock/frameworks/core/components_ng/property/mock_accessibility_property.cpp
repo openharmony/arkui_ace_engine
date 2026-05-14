@@ -548,7 +548,10 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
 
 void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey)
 {
-    accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    if (!accessibilityNextFocusParams_.has_value()) {
+        accessibilityNextFocusParams_ = AccessibilityNextFocusParams{};
+    }
+    accessibilityNextFocusParams_->nextFocusInspectorKey = accessibilityNextFocusInspectorKey;
 }
 
 void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)

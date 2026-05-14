@@ -54,13 +54,15 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
+    bool useSystemMaterial = dotIndicatorModifier_->GetUseSystemMaterial();
     dotIndicatorModifier_->SetAxis(axis_);
     auto [currentIndex, currentIndexActual] = CalCurrentIndex();
     dotIndicatorModifier_->SetCurrentIndex(currentIndex);
     dotIndicatorModifier_->SetCurrentIndexActual(currentIndexActual);
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
-    dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
+    dotIndicatorModifier_->SetIndicatorMask(
+        useSystemMaterial ? false : paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
     dotIndicatorModifier_->SetIndicatorDotItemSpace(

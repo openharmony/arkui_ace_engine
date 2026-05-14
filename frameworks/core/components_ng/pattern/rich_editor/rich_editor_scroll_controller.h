@@ -100,7 +100,8 @@ public:
     void UpdateBorderRadius();
     void UpdateScrollBar();
     void UpdateScrollBarOffset();
-    void UpdateScrollBarOffsetWithAxis(Axis axis);
+    void PlayScrollBarUpdateAnimation(Axis axis);
+    void UpdateScrollBarOffsetWithAxis(Axis axis, bool needAnimation = true);
     void SetMinHeight(const Dimension& height);
     bool IsAttachedModifier() const;
     void AttachModifier(const RefPtr<OverlayModifier>& modifier);

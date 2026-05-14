@@ -24,6 +24,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
@@ -418,17 +419,47 @@ RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
     if (innerRecognizers.size() == 1) {
         current = *innerRecognizers.begin();
     } else if (innerRecognizers.size() > 1) {
-        if (!innerExclusiveRecognizer_) {
-            innerExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
+        auto initRecognizerGroup = [&offset, &targetComponent, touchId, originalId, this](auto& recognizer,
+            std::list<RefPtr<NGGestureRecognizer>>&& children) {
+            if (!recognizer) {
+                recognizer = AceType::MakeRefPtr<std::remove_reference_t<decltype(*recognizer)>>(std::move(children));
+            } else {
+                recognizer->AddChildren(std::move(children));
+            }
+            recognizer->SetCoordinateOffset(offset);
+            recognizer->BeginReferee(touchId, originalId);
+            recognizer->AttachFrameNode(GetFrameNode());
+            recognizer->SetTargetComponent(targetComponent);
+        };
+
+        if (panCanCoexistWithScroll_) {
+            // Lift the coexist pans out of the exclusive group so it can fire in
+            // parallel with the scroll pan (and other inner recognizers).
+            // Structure: ParallelRecognizer{ ExclusiveRecognizer{rest}, CoexistPans }
+            std::list<RefPtr<NGGestureRecognizer>> parallelChildren;
+            std::list<RefPtr<NGGestureRecognizer>> otherRecognizers;
+            std::partition_copy(innerRecognizers.begin(), innerRecognizers.end(),
+                std::back_inserter(parallelChildren), std::back_inserter(otherRecognizers),
+                [](const RefPtr<NGGestureRecognizer>& rec) {
+                    auto panRec = AceType::DynamicCast<PanRecognizer>(rec);
+                    return panRec && panRec->CanCoexistWithScroll();
+                });
+
+            if (!otherRecognizers.empty()) {
+                initRecognizerGroup(innerExclusiveRecognizer_, std::move(otherRecognizers));
+                parallelChildren.push_front(innerExclusiveRecognizer_);
+            }
+
+            if (parallelChildren.size() > 1) {
+                initRecognizerGroup(innerParallelRecognizer_, std::move(parallelChildren));
+                current = innerParallelRecognizer_;
+            } else if (!parallelChildren.empty()) {
+                current = parallelChildren.front();
+            }
         } else {
-            innerExclusiveRecognizer_->AddChildren(innerRecognizers);
+            initRecognizerGroup(innerExclusiveRecognizer_, std::move(innerRecognizers));
+            current = innerExclusiveRecognizer_;
         }
-        innerExclusiveRecognizer_->SetCoordinateOffset(offset);
-        innerExclusiveRecognizer_->BeginReferee(touchId, originalId);
-        auto host = GetFrameNode();
-        innerExclusiveRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
-        innerExclusiveRecognizer_->SetTargetComponent(targetComponent);
-        current = innerExclusiveRecognizer_;
     }
 
     return current;
@@ -1610,6 +1641,7 @@ void GestureEventHub::AddPanEvent(
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
+        panEventActuator_->SetCanCoexistWithScroll(panCanCoexistWithScroll_);
     }
     panEventActuator_->SetPanAngle(angle);
     panEventActuator_->AddPanEvent(panEvent);
@@ -1620,6 +1652,7 @@ void GestureEventHub::AddPanEvent(
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
+        panEventActuator_->SetCanCoexistWithScroll(panCanCoexistWithScroll_);
     }
     panEventActuator_->SetPanAngle(angle);
     panEventActuator_->AddPanEvent(panEvent);
@@ -1630,6 +1663,7 @@ void GestureEventHub::AddPanEvent(const RefPtr<PanEvent>& panEvent,
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
+        panEventActuator_->SetCanCoexistWithScroll(panCanCoexistWithScroll_);
     }
     panEventActuator_->SetPanAngle(angle);
     panEventActuator_->AddPanEvent(panEvent);
@@ -1643,10 +1677,25 @@ void GestureEventHub::RemovePanEvent(const RefPtr<PanEvent>& panEvent)
     panEventActuator_->RemovePanEvent(panEvent);
 }
 
+void GestureEventHub::SetPanEventTag(const std::string& tag)
+{
+    CHECK_NULL_VOID(panEventActuator_);
+    panEventActuator_->SetPanEventTag(tag);
+}
+
+
 void GestureEventHub::SetPanEventType(GestureTypeName typeName)
 {
     CHECK_NULL_VOID(panEventActuator_);
     panEventActuator_->SetPanEventType(typeName);
+}
+
+void GestureEventHub::SetPanCanCoexistWithScroll(bool value)
+{
+    panCanCoexistWithScroll_ = value;
+    if (panEventActuator_) {
+        panEventActuator_->SetCanCoexistWithScroll(value);
+    }
 }
 
 void GestureEventHub::SetLongPressEventType(GestureTypeName typeName)
@@ -1746,6 +1795,7 @@ void GestureEventHub::CleanExternalRecognizers()
 void GestureEventHub::CleanInnerRecognizer()
 {
     innerExclusiveRecognizer_ = nullptr;
+    innerParallelRecognizer_ = nullptr;
 }
 
 void GestureEventHub::CleanNodeRecognizer()

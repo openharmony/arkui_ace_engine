@@ -86,7 +86,7 @@ HWTEST_F(ListAlgorithmTestNg, Measure001, TestSize.Level1)
     std::optional<float> height = 8.0f;
     OptionalSizeF selfIdealSize(width, height);
     OptionalSizeF parentIdealSize(width, height);
-    ViewPosReference viewPosRef = { 5.0f, 5.0f, 5.0f, ReferenceEdge::END, Axis::FREE };
+    ViewPosReference viewPosRef = { 5.0f, 5.0f, 0.0f, 0.0f, 5.0f, ReferenceEdge::END, Axis::FREE };
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = selfIdealSize;
     layoutConstraint.parentIdealSize = parentIdealSize;

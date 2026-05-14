@@ -53,6 +53,7 @@ public:
     virtual const NodeSize& GetSize() const = 0;
     virtual const ScaleInfo& GetScaleInfo() const = 0;
     virtual SmartLayoutRect GetChildrenBoundingBox() const = 0;
+    virtual void SetAvoidSafeArea(bool avoid) = 0;
 
     virtual LayoutContext& GetContext() = 0;
 };

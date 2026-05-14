@@ -31,6 +31,20 @@ constexpr float PERCENT_HALF = 0.5f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12f;
 constexpr uint32_t SHADOW_ALPHA = 0.4 * 255;
 constexpr float ZERO_CORNER_RADIUS = 0.0f;
+
+Gradient CreateThemeGradient(const std::pair<Color, Color>& colors)
+{
+    Gradient gradient;
+    GradientColor gradientColorStart;
+    gradientColorStart.SetLinearColor(LinearColor(colors.first));
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor(colors.second));
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+    return gradient;
+}
 } // namespace
 
 DataPanelModifier::DataPanelModifier(const WeakPtr<Pattern>& pattern) : pattern_(pattern)
@@ -40,7 +54,11 @@ DataPanelModifier::DataPanelModifier(const WeakPtr<Pattern>& pattern) : pattern_
     auto host = patternhost->GetHost();
     CHECK_NULL_VOID(host);
     auto theme = host->GetTheme<DataPanelTheme>(true);
+    CHECK_NULL_VOID(theme);
     auto colors = theme->GetColorsArray();
+    if (colors.empty()) {
+        colors.emplace_back(theme->GetProgressColor());
+    }
 
     InitControlProperties();
 
@@ -56,16 +74,9 @@ DataPanelModifier::DataPanelModifier(const WeakPtr<Pattern>& pattern) : pattern_
     AttachProperty(shadowOffsetXFloat_);
     AttachProperty(shadowOffsetYFloat_);
 
-    for (const auto& item : colors) {
-        Gradient gradient;
-        GradientColor gradientColorStart;
-        gradientColorStart.SetLinearColor(LinearColor(item.first));
-        gradientColorStart.SetDimension(Dimension(0.0));
-        gradient.AddColor(gradientColorStart);
-        GradientColor gradientColorEnd;
-        gradientColorEnd.SetLinearColor(LinearColor(item.second));
-        gradientColorEnd.SetDimension(Dimension(1.0));
-        gradient.AddColor(gradientColorEnd);
+    for (size_t i = 0; i < MAX_COUNT; ++i) {
+        const auto& item = colors[std::min(i, colors.size() - 1)];
+        auto gradient = CreateThemeGradient(item);
 
         auto gradientColor = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(gradient));
         AttachProperty(gradientColor);

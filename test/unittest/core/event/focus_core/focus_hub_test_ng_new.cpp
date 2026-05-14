@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/event/focus_hub_test_ng.h"
 #include "core/common/event_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1001,5 +1002,59 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0077, TestSize.Level1)
     focusHub->focusType_ = FocusType::DISABLE;
     focusHub->OnFocus();
     ASSERT_EQ(focusHub->focusType_, FocusType::DISABLE);
+}
+
+/**
+ * @tc.name: FocusHubTestNg_ParentSortChildrenByZIndex_001
+ * @tc.desc: Test ParentSortChildrenByZIndex when frameNode has no parent, GetAncestorNodeOfFrame returns null
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_ParentSortChildrenByZIndex_001, TestSize.Level1)
+{
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("child", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    focusHub->ParentSortChildrenByZIndex(frameNode);
+}
+
+/**
+ * @tc.name: FocusHubTestNg_ParentSortChildrenByZIndex_002
+ * @tc.desc: Test ParentSortChildrenByZIndex when parent exists but GetRsNodeByFrame returns null
+ *           because parent renderContext is MockRenderContext (not RosenRenderContext)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_ParentSortChildrenByZIndex_002, TestSize.Level1)
+{
+    auto parentNode = FrameNodeOnTree::CreateFrameNode("parent", 100, AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNodeOnTree::CreateFrameNode("child", 101, AceType::MakeRefPtr<ButtonPattern>());
+    childNode->SetParent(parentNode);
+
+    childNode->GetOrCreateFocusHub();
+    auto focusHub = childNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    focusHub->ParentSortChildrenByZIndex(childNode);
+}
+
+/**
+ * @tc.name: FocusHubTestNg_ParentSortChildrenByZIndex_003
+ * @tc.desc: Test ParentSortChildrenByZIndex when frameNode is window boundary node,
+ *           GetAncestorNodeOfFrame returns null due to checkBoundary=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_ParentSortChildrenByZIndex_003, TestSize.Level1)
+{
+    auto parentNode = FrameNodeOnTree::CreateFrameNode("parent", 100, AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNodeOnTree::CreateFrameNode("child", 101, AceType::MakeRefPtr<ButtonPattern>());
+    childNode->SetParent(parentNode);
+    childNode->SetWindowBoundary(true);
+
+    childNode->GetOrCreateFocusHub();
+    auto focusHub = childNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    focusHub->ParentSortChildrenByZIndex(childNode);
 }
 } // namespace OHOS::Ace::NG

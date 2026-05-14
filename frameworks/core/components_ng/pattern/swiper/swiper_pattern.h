@@ -31,6 +31,7 @@
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
+#include "core/components_ng/render/animation_utils.h"
 #endif
 namespace OHOS::Ace::NG {
 class JSIndicatorControllerBase;
@@ -172,6 +173,16 @@ public:
     }
 
     GestureState GetGestureState();
+
+    void SetGestureState(GestureState gestureState)
+    {
+        gestureState_ = gestureState;
+    }
+
+    void SetTouchDownOnOverlong(bool isTouchDownOnOverlong)
+    {
+        isTouchDownOnOverlong_ = isTouchDownOnOverlong;
+    }
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
     {

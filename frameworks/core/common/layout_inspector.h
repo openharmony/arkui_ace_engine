@@ -60,6 +60,8 @@ public:
     static void TriggerJsStateProfilerStatusCallback(bool status);
     static void SendMessage(const std::string& message);
     static void SetJsStateProfilerStatusCallback(ProfilerStatusCallback&& callback);
+    static bool HasJsStateProfilerStatusCallback();
+    static void AppendJsStateProfilerStatusCallback(ProfilerStatusCallback&& tail);
 
     // rs profiler
     static RsProfilerNodeMountCallback GetRsProfilerNodeMountCallback();

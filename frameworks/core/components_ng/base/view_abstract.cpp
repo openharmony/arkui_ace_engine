@@ -18,6 +18,7 @@
 #include <functional>
 #include <unordered_map>
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/flex_property.h"
 
@@ -43,13 +44,17 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/ui_material_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -87,6 +92,7 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
 
+#ifdef SMART_GESTURE_SUPPORTED
 void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -98,6 +104,7 @@ void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
     CHECK_NULL_VOID(manager);
     manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
 }
+#endif
 
 std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
 {
@@ -2852,11 +2859,19 @@ void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (style.strokeWidth.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(style.strokeWidth.value(), LpxAttribute::LPX_FOCUS_BOX_STROKE, frameNode);
+    }
+    if (style.margin.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(style.margin.value(), LpxAttribute::LPX_FOCUS_BOX_MARGIN, frameNode);
+    }
+
     focusHub->GetFocusBox().SetStyle(style);
 
     if (SystemProperties::ConfigChangePerform()) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
         SetFocusBoxUpdateFunc(frameNode, style);
     }
 }
@@ -2978,7 +2993,18 @@ void ViewAbstract::SetResponseRegionList(
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (responseRegionMap.empty()) {
+    if (!responseRegionMap.empty()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        for (const auto& [toolType, regions] : responseRegionMap) {
+            for (const auto& region : regions) {
+                ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetWidth(), LpxAttribute::LPX_RESPONSE_REGION_LIST_WIDTH, frameNode);
+                ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetHeight(), LpxAttribute::LPX_RESPONSE_REGION_LIST_HEIGHT, frameNode);
+                ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetX(), LpxAttribute::LPX_RESPONSE_REGION_LIST_X, frameNode);
+                ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetY(), LpxAttribute::LPX_RESPONSE_REGION_LIST_Y, frameNode);
+            }
+        }
+    } else {
         gestureHub->MarkTouchResponseRegionConfigured();
     }
     gestureHub->SetResponseRegionMap(responseRegionMap);
@@ -2988,7 +3014,16 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseR
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (responseRegion.empty()) {
+    if (!responseRegion.empty()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        for (const auto& region : responseRegion) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetWidth(), LpxAttribute::LPX_RESPONSE_REGION_WIDTH, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetHeight(), LpxAttribute::LPX_RESPONSE_REGION_HEIGHT, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetOffset().GetX(), LpxAttribute::LPX_RESPONSE_REGION_X, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetOffset().GetY(), LpxAttribute::LPX_RESPONSE_REGION_Y, frameNode);
+        }
+    } else {
         gestureHub->MarkTouchResponseRegionConfigured();
     }
     gestureHub->SetResponseRegion(responseRegion);
@@ -2998,6 +3033,14 @@ void ViewAbstract::SetMouseResponseRegion(const std::vector<DimensionRect>& mous
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    for (const auto& region : mouseRegion) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetWidth(), LpxAttribute::LPX_MOUSE_RESPONSE_REGION_WIDTH, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetHeight(), LpxAttribute::LPX_MOUSE_RESPONSE_REGION_HEIGHT, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetOffset().GetX(), LpxAttribute::LPX_MOUSE_RESPONSE_REGION_X, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetOffset().GetY(), LpxAttribute::LPX_MOUSE_RESPONSE_REGION_Y, frameNode);
+    }
     gestureHub->SetMouseResponseRegion(mouseRegion);
 }
 
@@ -5278,6 +5321,14 @@ void ViewAbstract::SetDebugLine(const std::string& line)
     }
 }
 
+void ViewAbstract::SetInspectorLabel(const std::string& inspectorLabel)
+{
+    auto& uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetInspectorLabel(inspectorLabel);
+    }
+}
+
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -5928,8 +5979,10 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
 
     if (preBackgroundColor.has_value()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
     } else {
         renderContext->ResetBackgroundColor();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, false, frameNode);
         renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
         pattern->OnBackgroundColorReset();
     }
@@ -5983,6 +6036,7 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
             return;
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
@@ -8627,11 +8681,8 @@ void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
 void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
     const std::vector<ResponseRegion>& responseRegions)
 {
+    CHECK_NULL_VOID(frameNode);
     std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap;
-    for (auto responseRegion : responseRegions) {
-        CalcDimensionRect responseRect(responseRegion.GetWidth(), responseRegion.GetHeight(), responseRegion.GetX(), responseRegion.GetY());
-        responseRegionMap[responseRegion.GetTool()].emplace_back(responseRect);
-    }
     if (responseRegions.empty()) {
         auto toolType = NG::ResponseRegionSupportedTool::ALL;
         CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
@@ -8640,6 +8691,16 @@ void ViewAbstract::SetResponseRegionList(FrameNode* frameNode,
         CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
         CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
         responseRegionMap[toolType].push_back(dimenRect);
+    } else {
+        for (const auto& responseRegion : responseRegions) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(responseRegion.GetWidth(), LpxAttribute::LPX_RESPONSE_REGION_LIST_WIDTH, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(responseRegion.GetHeight(), LpxAttribute::LPX_RESPONSE_REGION_LIST_HEIGHT, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(responseRegion.GetX(), LpxAttribute::LPX_RESPONSE_REGION_LIST_X, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(responseRegion.GetY(), LpxAttribute::LPX_RESPONSE_REGION_LIST_Y, frameNode);
+            CalcDimensionRect responseRect(
+                responseRegion.GetWidth(), responseRegion.GetHeight(), responseRegion.GetX(), responseRegion.GetY());
+            responseRegionMap[responseRegion.GetTool()].emplace_back(responseRect);
+        }
     }
     SetResponseRegionList(frameNode, responseRegionMap);
 }
@@ -8649,7 +8710,14 @@ void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (responseRegion.empty()) {
+    if (!responseRegion.empty()) {
+        for (const auto& region : responseRegion) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetWidth(), LpxAttribute::LPX_RESPONSE_REGION_WIDTH, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetHeight(), LpxAttribute::LPX_RESPONSE_REGION_HEIGHT, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetOffset().GetX(), LpxAttribute::LPX_RESPONSE_REGION_X, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetOffset().GetY(), LpxAttribute::LPX_RESPONSE_REGION_Y, frameNode);
+        }
+    } else {
         gestureHub->MarkTouchResponseRegionConfigured();
     }
     gestureHub->SetResponseRegion(responseRegion);
@@ -8658,6 +8726,12 @@ void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
 void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion)
 {
     CHECK_NULL_VOID(frameNode);
+    for (const auto& region : mouseResponseRegion) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetWidth(), LpxAttribute::LPX_MOUSE_RESPONSE_REGION_WIDTH, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetHeight(), LpxAttribute::LPX_MOUSE_RESPONSE_REGION_HEIGHT, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetOffset().GetX(), LpxAttribute::LPX_MOUSE_RESPONSE_REGION_X, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(region.GetOffset().GetY(), LpxAttribute::LPX_MOUSE_RESPONSE_REGION_Y, frameNode);
+    }
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetMouseResponseRegion(mouseResponseRegion);
@@ -8714,6 +8788,7 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
 
 void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (action != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
@@ -8727,16 +8802,19 @@ void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool se
     config.selectable = selectable;
     smartGestureProperty->SetSmartGestureShortcut(config);
     SyncSmartGesturePrimaryActionRegistry(frameNode);
+#endif
 }
 
 void ViewAbstract::ResetSmartGestureShortcut()
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto smartGestureProperty = frameNode->GetSmartGestureProperty();
     CHECK_NULL_VOID(smartGestureProperty);
     smartGestureProperty->ResetSmartGestureShortcut();
     SyncSmartGesturePrimaryActionRegistry(frameNode);
+#endif
 }
 
 void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
@@ -9686,7 +9764,7 @@ LayoutCalPolicy ViewAbstract::GetLayoutPolicy(FrameNode* frameNode, bool isWidth
 
 Color ViewAbstract::GetBackgroundColor(FrameNode* frameNode)
 {
-    Color value;
+    Color value = Color::TRANSPARENT;
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetBackgroundColorValue(value);
@@ -10108,6 +10186,14 @@ void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyl
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
+
+    if (style.strokeWidth.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(style.strokeWidth.value(), LpxAttribute::LPX_FOCUS_BOX_STROKE, frameNode);
+    }
+    if (style.margin.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(style.margin.value(), LpxAttribute::LPX_FOCUS_BOX_MARGIN, frameNode);
+    }
+
     focusHub->GetFocusBox().SetStyle(style);
 
     if (SystemProperties::ConfigChangePerform()) {
@@ -10157,9 +10243,15 @@ void ViewAbstract::SetBackgroundImageResizableSlice(ImageResizableSlice& slice)
         return;
     }
 
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(slice.left, LpxAttribute::LPX_BORDER_IMAGE_LEFT, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(slice.right, LpxAttribute::LPX_BORDER_IMAGE_RIGHT, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(slice.top, LpxAttribute::LPX_BORDER_IMAGE_TOP, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(slice.bottom, LpxAttribute::LPX_BORDER_IMAGE_BOTTOM, frameNode);
+
     if (SystemProperties::ConfigChangePerform()) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -10180,6 +10272,12 @@ void ViewAbstract::SetBackgroundImageResizableSlice(ImageResizableSlice& slice)
 void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice, bool isReset)
 {
     CHECK_NULL_VOID(frameNode);
+
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(slice.left, LpxAttribute::LPX_BORDER_IMAGE_LEFT, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(slice.right, LpxAttribute::LPX_BORDER_IMAGE_RIGHT, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(slice.top, LpxAttribute::LPX_BORDER_IMAGE_TOP, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(slice.bottom, LpxAttribute::LPX_BORDER_IMAGE_BOTTOM, frameNode);
+
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);

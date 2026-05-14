@@ -106,6 +106,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
     style.orphanCharOptimization = paraStyle.orphanCharOptimization;
     style.compressHeadPunctuation = paraStyle.compressLeadingPunctuation;
+    style.punctuationOverflow = paraStyle.punctuationOverflow;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
@@ -177,6 +178,7 @@ void TxtParagraph::Build()
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Build");
     CHECK_NULL_VOID(!hasExternalParagraph_ && builder_);
     paragraph_ = builder_->CreateTypography();
+    builder_.reset();
 }
 
 uint32_t TxtParagraph::destructCount = 0;

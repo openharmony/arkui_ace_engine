@@ -14,11 +14,13 @@
  */
 
 #include "bridge/common/utils/utils.h"
+#include <optional>
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_container_picker_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -307,6 +309,34 @@ void ResetContainerPickerIndicator(ArkUINodeHandle node)
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
 }
 
+void SetContainerPickerDisplayedItemCount(ArkUINodeHandle node, ArkUI_Int32 count)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ContainerPickerModel::SetDisplayedItemCount(frameNode, std::make_optional(count));
+}
+
+void ResetContainerPickerDisplayedItemCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ContainerPickerModel::SetDisplayedItemCount(frameNode, std::nullopt);
+}
+
+void SetContainerPickerItemHeight(ArkUINodeHandle node, ArkUI_Float32 itemHeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ContainerPickerModel::SetItemHeight(frameNode, std::make_optional(Dimension(itemHeight, DimensionUnit::VP)));
+}
+
+void ResetContainerPickerItemHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ContainerPickerModel::SetItemHeight(frameNode, std::nullopt);
+}
+
 int32_t GetContainerPickerSelectedIndex(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -349,6 +379,31 @@ ArkUI_PickerIndicatorStyle GetContainerPickerIndicator(ArkUINodeHandle node)
     }
     return indicatorStyle;
 }
+
+ArkUI_Int32 GetContainerPickerDisplayedItemCount(ArkUINodeHandle node)
+{
+    constexpr int32_t DEFAULT_DISPLAYED_ITEM_COUNT = 7;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_DISPLAYED_ITEM_COUNT);
+    auto containerPickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_RETURN(containerPickerPattern, DEFAULT_DISPLAYED_ITEM_COUNT);
+    auto layoutProperty = containerPickerPattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, DEFAULT_DISPLAYED_ITEM_COUNT);
+    return layoutProperty->GetDisplayedItemCount().value_or(DEFAULT_DISPLAYED_ITEM_COUNT);
+}
+
+ArkUI_Float32 GetContainerPickerItemHeight(ArkUINodeHandle node)
+{
+    const float defaultItemHeightVp = static_cast<float>(Dimension(40.0, DimensionUnit::VP).Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultItemHeightVp);
+    auto containerPickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_RETURN(containerPickerPattern, defaultItemHeightVp);
+    auto layoutProperty = containerPickerPattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultItemHeightVp);
+    const auto itemHeight = layoutProperty->GetItemHeight().value_or(Dimension(40.0, DimensionUnit::VP));
+    return static_cast<float>(itemHeight.ConvertToVp());
+}
 }  // namespace
 
 namespace NodeModifier {
@@ -370,10 +425,16 @@ const ArkUIContainerPickerModifier* GetContainerPickerModifier()
         .resetContainerPickerSelectedIndex = ResetContainerPickerSelectedIndex,
         .setContainerPickerIndicator = SetContainerPickerIndicator,
         .resetContainerPickerIndicator = ResetContainerPickerIndicator,
+        .setContainerPickerDisplayedItemCount = SetContainerPickerDisplayedItemCount,
+        .resetContainerPickerDisplayedItemCount = ResetContainerPickerDisplayedItemCount,
+        .setContainerPickerItemHeight = SetContainerPickerItemHeight,
+        .resetContainerPickerItemHeight = ResetContainerPickerItemHeight,
         .getContainerPickerSelectedIndex = GetContainerPickerSelectedIndex,
         .getContainerPickerEnableHapticFeedback = GetContainerPickerEnableHapticFeedback,
         .getContainerPickerCanLoop = GetContainerPickerCanLoop,
         .getContainerPickerIndicator = GetContainerPickerIndicator,
+        .getContainerPickerDisplayedItemCount = GetContainerPickerDisplayedItemCount,
+        .getContainerPickerItemHeight = GetContainerPickerItemHeight,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0);  // don't move this line
 

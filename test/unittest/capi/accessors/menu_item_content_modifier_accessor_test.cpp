@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "accessor_test_base.h"
 #include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_model_static.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -48,9 +49,8 @@ static constexpr int TEST_NODE_ID = 333;
 static constexpr int TEST_OBJ_ID = 1001;
 static constexpr int TEST_BUILDER_ID = 1002;
 static constexpr bool TEST_DEFAULT_SELECTED = false;
-static constexpr int TEST_DEFAULT_INDEX = 0;
-static constexpr std::string TEST_TEXT = "XXX";
-static constexpr std::string TEST_ICON = "YYY";
+static std::string TEST_TEXT = "XXX";
+static std::string TEST_ICON = "YYY";
 
 static void NoOpResource(InteropInt32) {}
 
@@ -76,18 +76,20 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, contentModifierMenuItemTest, Tes
     ASSERT_NE(pattern, nullptr);
     pattern->SetMenuNode(wrapperNode);
 
-    SelectParam param = {
-        .text = TEST_TEXT,
-        .icon = TEST_ICON
-    };
-    std::vector<SelectParam> params = {param};
+    SelectParam param = {.text = TEST_TEXT, .icon = TEST_ICON };
+    std::vector<SelectParam> params = {param, param};
     auto mn = pattern->GetMenuNode();
     ASSERT_NE(mn, nullptr);
     auto menuPattern = mn->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     menuPattern->SetSelectProperties(params);
 
-    struct CheckEvent { int32_t nodeId; int32_t objId; bool selected; int index; };
+    struct CheckEvent {
+        std::vector<int32_t> nodeId;
+        std::vector<int32_t> objId;
+        std::vector<bool> selected;
+        std::vector<int> index;
+    };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     // In gen140 ArkCreate<Ark_Object> is deleted; create Ark_Object manually for test id.
@@ -102,12 +104,10 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, contentModifierMenuItemTest, Tes
     auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
         const Ark_MenuItemConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
-            checkEvent = {
-                .nodeId = navigationNode->GetId(),
-                .objId = config->contentModifier_.resource.resourceId,
-                .selected = config->selected_,
-                .index = config->index_
-            };
+            checkEvent->nodeId.push_back(navigationNode->GetId());
+            checkEvent->objId.push_back(config->contentModifier_.resource.resourceId);
+            checkEvent->selected.push_back(config->selected_);
+            checkEvent->index.push_back(config->index_);
     };
 
     EXPECT_CALL(*MockContainer::Current(), GetFrontend()).WillRepeatedly(Return(nullptr));
@@ -120,9 +120,11 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, contentModifierMenuItemTest, Tes
     accessor_->contentModifierMenuItem(nodePtr, &obj, &builder);
     FireBuilder(pattern.GetRawPtr());
 
-    EXPECT_EQ(checkEvent->nodeId, TEST_NODE_ID);
-    EXPECT_EQ(checkEvent->objId, TEST_OBJ_ID);
-    EXPECT_EQ(checkEvent->selected, TEST_DEFAULT_SELECTED);
-    EXPECT_EQ(checkEvent->index, TEST_DEFAULT_INDEX);
+    for (int i = 0; i < checkEvent->nodeId.size(); i++) {
+        EXPECT_EQ(checkEvent->nodeId.at(i), TEST_NODE_ID);
+        EXPECT_EQ(checkEvent->objId.at(i), TEST_OBJ_ID);
+        EXPECT_EQ(checkEvent->selected.at(i), TEST_DEFAULT_SELECTED);
+        EXPECT_EQ(checkEvent->index.at(i), i);
+    }
 }
 }

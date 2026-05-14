@@ -170,6 +170,12 @@ export enum ExpandMode {
     NOT_EXPAND = 0,
     EXPAND = 1,
     LAZY_EXPAND = 2,
+    LAZY_NOT_EXPAND = 3,
+}
+export enum ChildrenCountMode {
+    ALL_EXPAND = 0,
+    ONLY_EXPANDED = 1,
+    ALL_NOT_EXPAND = 2,
 }
 export enum UIState {
     NORMAL = 0,
@@ -509,7 +515,15 @@ export class FrameNode implements MaterializedBase {
         return null;
     }
     public getChildrenCount(): int {
-        return FrameNodeExtender.getChildrenCount(this);
+        let childrenCountMode_casted: number = 0;
+        return FrameNodeExtender.getChildrenCount(this, childrenCountMode_casted);
+    }
+    public getChildrenCount(childrenCountMode: ChildrenCountMode): int {
+        let childrenCountMode_casted: number = 0;
+        if (childrenCountMode !== undefined && childrenCountMode !== null) {
+            childrenCountMode_casted = childrenCountMode;
+        }
+        return FrameNodeExtender.getChildrenCount(this, childrenCountMode_casted);
     }
     public dispose(): void {
         if (this.isDisposed()) {
@@ -669,18 +683,18 @@ export class FrameNode implements MaterializedBase {
         if (count <= 0) {
             return [];
         }
-        const frameNodes: Array<FrameNode> = new Array<FrameNode>(count);
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.instanceId_);
         const frameNodeCreateInfoArray = FrameNodeExtender.getFrameNodeCreateInfoArray(count);
-        const frameNodePtrs: Array<KPointer> = new Array<KPointer>(frameNodeCreateInfoArray.length);
-        for (let i = 0; i < frameNodeCreateInfoArray.length; i++) {
+        const frameNodes: Array<FrameNode> = new Array<FrameNode>(count, (i) => {
             const frameNode = new FrameNode(uiContext, undefined, 'InternalBatchFrameNode', frameNodeCreateInfoArray[i].frameNodePeer);
             frameNode.renderNode_!.peer = new Finalizable(frameNodeCreateInfoArray[i].renderNodePeer, RenderNode.getFinalizer());
             frameNode._nodeId = frameNodeCreateInfoArray[i].id;
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, frameNode);
-            frameNodes[i] = frameNode;
-            frameNodePtrs[i] = frameNodeCreateInfoArray[i].frameNodePeer;
-        }
+            return frameNode;
+        });
+        const frameNodePtrs: Array<KPointer> = new Array<KPointer>(frameNodeCreateInfoArray.length, (i) => {
+            return frameNodeCreateInfoArray[i].frameNodePeer;
+        });
         ArkUIAniModule._SetCustomCallbackWithCheckForFrameNodes(frameNodePtrs, frameNodes);
         ArkUIAniModule._Common_Restore_InstanceId();
         return frameNodes;
@@ -2208,16 +2222,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindTextAreaController(node: FrameNode, controller: TextAreaController): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'TextArea') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'TextArea') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let textAreaNode = node as TextAreaFrameNode
-        if (!textAreaNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
-        textAreaNode.initialize({controller: controller})
+        const retval = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkTextAreaPeer(retval, node._nodeId.toInt(), "TextArea", 0);
+        peer.setTextAreaOptionsAttribute({controller: controller});
         return
     }
 
@@ -2246,16 +2257,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindTextInputController(node: FrameNode, controller: TextInputController): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'TextInput') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'TextInput') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let textInputNode = node as TextInputFrameNode
-        if (!textInputNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
-        textInputNode.initialize({controller: controller})
+        const retval = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkTextInputPeer(retval, node._nodeId.toInt(), "TextInput", 0);
+        peer.setTextInputOptionsAttribute({controller: controller});
         return
     }
 

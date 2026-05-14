@@ -29,7 +29,6 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, ArkCommonMethodComponent } from './common'
-import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
@@ -42,21 +41,29 @@ export class XComponentControllerInternal {
         return new XComponentController(MaterializedBaseTag.NOP, ptr)
     }
 }
-export enum HdrType {
- 	DEFAULT = 0,
- 	AIHDR = 1,
-    EDR = 2,
-}
 export class XComponentController implements MaterializedBase {
     public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-// instructive change start
-    onSurfaceCreated(breakpoints: string): void {}
-    onSurfaceChanged(surfaceId: string,rect: SurfaceRect): void {}
-    onSurfaceDestroyed(breakpoints: string): void {}
-// instructive change end
+    get onSurfaceCreated(): ((breakpoints: string) => void) {
+        return this.getOnSurfaceCreated()
+    }
+    set onSurfaceCreated(onSurfaceCreated: ((breakpoints: string) => void)) {
+        this.setOnSurfaceCreated(onSurfaceCreated)
+    }
+    get onSurfaceChanged(): ((surfaceId: string,rect: SurfaceRect) => void) {
+        return this.getOnSurfaceChanged()
+    }
+    set onSurfaceChanged(onSurfaceChanged: ((surfaceId: string,rect: SurfaceRect) => void)) {
+        this.setOnSurfaceChanged(onSurfaceChanged)
+    }
+    get onSurfaceDestroyed(): ((breakpoints: string) => void) {
+        return this.getOnSurfaceDestroyed()
+    }
+    set onSurfaceDestroyed(onSurfaceDestroyed: ((breakpoints: string) => void)) {
+        this.setOnSurfaceDestroyed(onSurfaceDestroyed)
+    }
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, XComponentController.getFinalizer())
     }
@@ -138,7 +145,7 @@ export class XComponentController implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private setXComponentSurfaceRect_serialize(rect: SurfaceRect): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -151,7 +158,7 @@ export class XComponentController implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SurfaceRect = SurfaceRect_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as SurfaceRect)
     }
     private setXComponentSurfaceRotation_serialize(rotationOptions: SurfaceRotationOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -164,7 +171,7 @@ export class XComponentController implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SurfaceRotationOptions = SurfaceRotationOptions_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as SurfaceRotationOptions)
     }
     private stopImageAnalyzer_serialize(): void {
         ArkUIGeneratedNativeModule._XComponentController_stopImageAnalyzer(this.peer!.ptr)
@@ -179,7 +186,7 @@ export class XComponentController implements MaterializedBase {
         }
         const returnResult: DrawingCanvas | null = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as DrawingCanvas | null)
     }
     private unlockCanvasAndPost_serialize(canvas: DrawingCanvas): void {
         ArkUIGeneratedNativeModule._XComponentController_unlockCanvasAndPost(this.peer!.ptr, extractors.toDrawingCanvasPtr(canvas))
@@ -209,7 +216,7 @@ export class XComponentController implements MaterializedBase {
         resourceFinalizerRegister(bufferClosure, bufferBufResource)
         const returnResult: ((breakpoints: string) => void) = bufferClosure
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ((breakpoints: string) => void))
     }
     private setOnSurfaceCreated_serialize(onSurfaceCreated: ((breakpoints: string) => void)): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -237,7 +244,7 @@ export class XComponentController implements MaterializedBase {
         resourceFinalizerRegister(bufferClosure, bufferBufResource)
         const returnResult: ((surfaceId: string,rect: SurfaceRect) => void) = bufferClosure
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ((surfaceId: string,rect: SurfaceRect) => void))
     }
     private setOnSurfaceChanged_serialize(onSurfaceChanged: ((surfaceId: string,rect: SurfaceRect) => void)): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -264,7 +271,7 @@ export class XComponentController implements MaterializedBase {
         resourceFinalizerRegister(bufferClosure, bufferBufResource)
         const returnResult: ((breakpoints: string) => void) = bufferClosure
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ((breakpoints: string) => void))
     }
     private setOnSurfaceDestroyed_serialize(onSurfaceDestroyed: ((breakpoints: string) => void)): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -380,7 +387,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (brightness !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const brightnessTmpValue  = brightness!
+            const brightnessTmpValue = brightness!
             thisSerializer.writeFloat64(brightnessTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -408,6 +415,11 @@ export interface SurfaceRotationOptions {
 }
 export interface SurfaceConfig {
     isOpaque?: boolean;
+}
+export enum HdrType {
+    DEFAULT = 0,
+    AIHDR = 1,
+    EDR = 2
 }
 export interface XComponentOptions {
     type: XComponentType;
@@ -442,10 +454,10 @@ export interface XComponentAttribute extends CommonMethod {
         throw new Error('Unimplemented method hdrBrightness')
     }
     hdrBrightness(brightness: double | undefined, type?: HdrType): this {
-        throw new Error("Unimplemented method hdrBrightness")
+        throw new Error('Unimplemented method hdrBrightness')
     }
     attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface XComponentParameters {
@@ -492,20 +504,14 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public hdrBrightness(value: double | undefined): this {
-        if (this.checkPriority("hdrBrightness")) {
-            const value_casted = value as (double | undefined)
-            this.getPeer()?.setHdrBrightness0Attribute(value_casted)
-            return this
-        }
+        const value_casted = value as (double | undefined)
+        this.getPeer()?.setHdrBrightness0Attribute(value_casted)
         return this
     }
     public hdrBrightness(brightness: double | undefined, type?: HdrType): this {
-        if (this.checkPriority("hdrBrightness")) {
-            const brightness_casted = brightness as (double | undefined)
-            const type_casted = type as (HdrType | undefined)
-            this.getPeer()?.setHdrBrightness1Attribute(brightness_casted, type_casted)
-            return this
-        }
+        const brightness_casted = brightness as (double | undefined)
+        const type_casted = type as (HdrType | undefined)
+        this.getPeer()?.setHdrBrightness1Attribute(brightness_casted, type_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -536,6 +542,18 @@ export function XComponentImpl(
     })
 }
 
+@memo
+export function XComponent(
+    @memo @memo_skip
+    style: ((attributes: XComponentAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkXComponentComponent>((): ArkXComponentComponent => {
+        return new ArkXComponentComponent()
+    })
+    NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
+        style?.(receiver)
+    })
+}
 export class XComponentController_serializer {
     public static write(buffer: SerializerBase, value: XComponentController): void {
         let valueSerializer: SerializerBase = buffer

@@ -18,7 +18,7 @@
 
 import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, ShaderStyle_serializer, ContentTransition_serializer, SelectedDragPreviewStyle_serializer, FontSettingOptions_serializer, LineSpacingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, ShaderStyle, TextVerticalAlign, ContentTransition, TextContentAlign, SelectedDragPreviewStyle, TextDirection, FontVariation, FontSettingOptions, LineSpacingOptions, MenuType } from './textCommon'
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
-import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, Callback as arkui_component_common_Callback, ArkCommonMethodComponent } from './common'
+import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, Callback as arkui_component_common_Callback, ExtendableCommonMethod, ArkCommonMethodComponent } from './common'
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from './styledString'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
@@ -36,7 +36,7 @@ import { Resource as global_resource_Resource } from 'global.resource'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit } from 'arkui.Graphics'
 import { AttributeModifier, initializers, hookTextAttributeModifier, AttributeUpdater } from '#handwritten'
 import { default as text } from '@ohos.graphics.text'
-import { CustomBuilder } from './builder'
+import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
@@ -1161,194 +1161,809 @@ export interface TextOverflowOptions {
 }
 export interface TextAttribute extends CommonMethod {
     setTextOptions(content?: string | arkui_component_units_Resource, value?: TextOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).setTextOptions(content, value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute setTextOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setTextOptions')
     }
     fontColor(value: ResourceColor | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).fontColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute fontColor can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontColor')
     }
     fontSize(value: double | string | arkui_component_units_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).fontSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute fontSize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontSize')
     }
     minFontSize(value: double | string | arkui_component_units_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).minFontSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute minFontSize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method minFontSize')
     }
     maxFontSize(value: double | string | arkui_component_units_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).maxFontSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute maxFontSize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method maxFontSize')
     }
     minFontScale(value: double | arkui_component_units_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).minFontScale(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute minFontScale can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method minFontScale')
     }
     maxFontScale(value: double | arkui_component_units_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).maxFontScale(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute maxFontScale can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method maxFontScale')
     }
     fontStyle(value: FontStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).fontStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute fontStyle can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontStyle')
     }
     textAlign(value: TextAlign | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textAlign(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textAlign can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textAlign')
     }
     lineHeight(value: double | string | arkui_component_units_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).lineHeight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute lineHeight can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method lineHeight')
     }
     textOverflow(value: TextOverflowOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textOverflow(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textOverflow can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textOverflow')
     }
     fontFamily(value: string | arkui_component_units_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).fontFamily(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute fontFamily can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontFamily')
     }
     maxLines(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).maxLines(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute maxLines can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method maxLines')
     }
     decoration(value: DecorationStyleInterface | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).decoration(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute decoration can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method decoration')
     }
     letterSpacing(value: double | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).letterSpacing(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute letterSpacing can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method letterSpacing')
     }
     textCase(value: TextCase | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textCase(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textCase can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textCase')
     }
     baselineOffset(value: double | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).baselineOffset(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute baselineOffset can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method baselineOffset')
     }
     copyOption(value: CopyOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).copyOption(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute copyOption can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method copyOption')
     }
     draggable(value: boolean | undefined): this
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textShadow(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textShadow can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textShadow')
     }
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).heightAdaptivePolicy(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute heightAdaptivePolicy can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method heightAdaptivePolicy')
     }
     textIndent(value: Length | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textIndent(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textIndent can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textIndent')
     }
     wordBreak(value: WordBreak | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).wordBreak(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute wordBreak can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method wordBreak')
     }
     lineBreakStrategy(value: LineBreakStrategy | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).lineBreakStrategy(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute lineBreakStrategy can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method lineBreakStrategy')
     }
     onCopy(value: ((breakpoints: string) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).onCopy(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute onCopy can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onCopy')
     }
     onWillCopy(value: arkui_component_common_Callback<string, boolean> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).onWillCopy(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute onWillCopy can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onWillCopy')
     }
     caretColor(value: ResourceColor | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).caretColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute caretColor can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method caretColor')
     }
     selectedBackgroundColor(value: ResourceColor | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).selectedBackgroundColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute selectedBackgroundColor can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method selectedBackgroundColor')
     }
     ellipsisMode(value: EllipsisMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).ellipsisMode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute ellipsisMode can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method ellipsisMode')
     }
     enableDataDetector(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).enableDataDetector(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute enableDataDetector can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method enableDataDetector')
     }
     dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).dataDetectorConfig(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute dataDetectorConfig can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method dataDetectorConfig')
     }
     onTextSelectionChange(value: ((first: int32,last: int32) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).onTextSelectionChange(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute onTextSelectionChange can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onTextSelectionChange')
     }
     fontFeature(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).fontFeature(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute fontFeature can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontFeature')
     }
     marqueeOptions(value: TextMarqueeOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).marqueeOptions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute marqueeOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method marqueeOptions')
     }
     onMarqueeStateChange(value: arkui_component_common_Callback<MarqueeState, void> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).onMarqueeStateChange(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute onMarqueeStateChange can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onMarqueeStateChange')
     }
     privacySensitive(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).privacySensitive(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute privacySensitive can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method privacySensitive')
     }
     textSelectable(value: TextSelectableMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textSelectable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textSelectable can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textSelectable')
     }
     editMenuOptions(value: EditMenuOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).editMenuOptions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute editMenuOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method editMenuOptions')
     }
     halfLeading(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).halfLeading(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute halfLeading can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method halfLeading')
     }
     enableHapticFeedback(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).enableHapticFeedback(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute enableHapticFeedback can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method enableHapticFeedback')
     }
     includeFontPadding(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).includeFontPadding(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute includeFontPadding can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method includeFontPadding')
     }
     fallbackLineSpacing(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).fallbackLineSpacing(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute fallbackLineSpacing can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fallbackLineSpacing')
     }
     optimizeTrailingSpace(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).optimizeTrailingSpace(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute optimizeTrailingSpace can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method optimizeTrailingSpace')
     }
     shaderStyle(value: ShaderStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).shaderStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute shaderStyle can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method shaderStyle')
     }
     enableAutoSpacing(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).enableAutoSpacing(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute enableAutoSpacing can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method enableAutoSpacing')
     }
     textVerticalAlign(value: TextVerticalAlign | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textVerticalAlign(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textVerticalAlign can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textVerticalAlign')
     }
     contentTransition(value: ContentTransition | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).contentTransition(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute contentTransition can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method contentTransition')
     }
     textContentAlign(value: TextContentAlign | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textContentAlign(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textContentAlign can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textContentAlign')
     }
     minLines(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).minLines(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute minLines can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method minLines')
     }
     minLineHeight(value: arkui_component_units_LengthMetrics | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).minLineHeight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute minLineHeight can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method minLineHeight')
     }
     maxLineHeight(value: arkui_component_units_LengthMetrics | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).maxLineHeight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute maxLineHeight can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method maxLineHeight')
     }
     lineHeightMultiple(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).lineHeightMultiple(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute lineHeightMultiple can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method lineHeightMultiple')
     }
     enableSelectedDataDetector(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).enableSelectedDataDetector(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute enableSelectedDataDetector can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method enableSelectedDataDetector')
     }
     compressLeadingPunctuation(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).compressLeadingPunctuation(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute compressLeadingPunctuation can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method compressLeadingPunctuation')
     }
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).selectedDragPreviewStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute selectedDragPreviewStyle can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method selectedDragPreviewStyle')
     }
     textDirection(value: TextDirection | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).textDirection(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute textDirection can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method textDirection')
     }
     orphanCharOptimization(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).orphanCharOptimization(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute orphanCharOptimization can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method orphanCharOptimization')
     }
     fontVariations(value: Array<FontVariation> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).fontVariations(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute fontVariations can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontVariations')
     }
     font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).font(fontValue, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute font can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method font')
     }
     fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).fontWeight(weight, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute fontWeight can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontWeight')
     }
     lineSpacing(value: arkui_component_units_LengthMetrics | undefined, options?: LineSpacingOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).lineSpacing(value, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute lineSpacing can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method lineSpacing')
     }
     selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).selection(selectionStart, selectionEnd));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute selection can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method selection')
     }
     bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).bindSelectionMenu(spanType, content, responseType, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute bindSelectionMenu can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method bindSelectionMenu')
     }
     attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableText extends ExtendableCommonMethod implements TextAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableText>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T,
+        @memo @memo_skip
+        _content: CustomBuilder): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: TextAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        TextImpl(
+            cb,
+            _content
+        );
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableText>(factory: () => T, content?: string | arkui_component_units_Resource, value?: TextOptions, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setTextOptions(content?: string | arkui_component_units_Resource, value?: TextOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as TextAttribute).setTextOptions(content, value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Text attribute 'setTextOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setTextOptions')
     }
 }
 export enum TextSpanType {
@@ -1750,6 +2365,21 @@ export function TextImpl(
     })
 }
 
+@memo
+export function Text(
+    @memo @memo_skip
+    style: ((attributes: TextAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkTextComponent>((): ArkTextComponent => {
+        return new ArkTextComponent()
+    })
+    NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class TextController_serializer {
     public static write(buffer: SerializerBase, value: TextController): void {
         let valueSerializer: SerializerBase = buffer

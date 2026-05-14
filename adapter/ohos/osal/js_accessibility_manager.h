@@ -18,6 +18,7 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 #include <vector>
 
 #include "accessibility_config.h"
@@ -101,6 +102,7 @@ struct AccessibilityActionParam {
     TextMoveUnit moveUnit = TextMoveUnit::STEP_CHARACTER;
     AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
     int32_t spanId = -1;
+    std::string customActionName;
 };
 
 struct ActionParam {
@@ -413,7 +415,10 @@ public:
     AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
     void UpdateAccessibilityNextFocusIdMap(int32_t containerId,
                                            const std::string& nextFocusInspectorKey,
-                                           int64_t preAccessibilityId) override;
+                                           int64_t preAccessibilityId,
+                                           bool descendantMode = false) override;
+
+    bool GetNextFocusDescendantMode(int32_t containerId, const std::string& inspectorId);
 
     void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
@@ -753,6 +758,7 @@ private:
     void DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params);
     void DumpInjectActionTest(const std::vector<std::string>& params);
     void DumpExecuteActionTest(const std::vector<std::string>& params);
+    void DumpCustomActionTest(const std::vector<std::string>& params);
     void DumpEmbedSearchTest(const std::vector<std::string>& params);
     void DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId);
     void DumpSetCheckListTest(const std::vector<std::string>& params);
@@ -969,7 +975,7 @@ private:
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
     std::unordered_map<int32_t, std::optional<AccessibilityEvent>> pageIdEventMap_;
-    std::map<int32_t, std::map<std::string, int64_t>> nextFocusMapWithSubWindow_;
+    NG::NextFocusRelationController nextFocusRelationController_;
     std::vector<uint32_t> eventWhiteList_;
 
     AccessibilityParentRectInfo uecRectInfo_;

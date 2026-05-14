@@ -28,6 +28,9 @@ class JSPatternLockTheme {
 public:
     static void ApplyTheme()
     {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             // no need to apply custom theme colors

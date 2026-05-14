@@ -468,6 +468,11 @@ void PinchRecognizer::GetGestureEventInfo(GestureEvent& info)
     info.SetFingerList(fingerList_);
     info.SetScale(scale_);
     info.SetPinchCenter(pinchCenter_);
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    SetGestureEventCurrentLocalLocation(info, touchPoint);
     info.SetDeviceId(deviceId_);
     info.SetSourceDevice(deviceType_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));

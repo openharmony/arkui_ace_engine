@@ -4,6 +4,7 @@
         "arkui.component.customComponent",
         "arkui.component.repeat",
         "arkui.component.repeat",
+        "arkui.stateManagement.utils",
         "ohos.buffer",
         "ohos.util.ArrayList",
         "ohos.util.Deque",

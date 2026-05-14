@@ -158,6 +158,8 @@ interface SymbolSpanAttribute extends CommonAttribute {}
 interface Component3DAttribute extends CommonAttribute {}
 interface ContainerSpanAttribute extends CommonAttribute {}
 interface LazyVGridLayoutAttribute extends CommonAttribute {}
+interface LazyColumnLayoutAttribute extends CommonAttribute {}
+interface LazyVWaterFlowLayoutAttribute extends CommonAttribute {}
 
 type ResourceColor = Resource | string | number | Color;
 type ResourceStr = string | Resource;
@@ -567,6 +569,7 @@ declare interface AttributeModifier<T> {
     applyFocusedAttribute?(instance: T): void;
     applyDisabledAttribute?(instance: T): void;
     applySelectedAttribute?(instance: T): void;
+    applyHoveredAttribute?(instance: T): void;
 }
 
 declare interface CommonMethod<T> {}

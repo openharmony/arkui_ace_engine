@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
+#include "core/common/container.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -71,8 +72,8 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.
     if (isInlineStyle) {
-        auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        auto fontSize = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale(), textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
@@ -279,7 +280,8 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
     auto isPasswordType = pattern->IsInPasswordMode();
     auto disableTextAlign = false;
     auto fontSize =
-        textStyle.GetFontSize().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+        textStyle.GetFontSize().ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), true, textStyle.GetEnvFontScale());
     auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
     auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_RETURN(autofillController, false);

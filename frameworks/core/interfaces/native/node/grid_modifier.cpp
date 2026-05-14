@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 #include "grid_modifier.h"
-#include <memory>
+
+#include "interfaces/native/node/grid_layout_option.h"
+#include "node_model.h"
+
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
-#include "interfaces/native/node/grid_layout_option.h"
-#include "node_model.h"
 
 namespace OHOS::Ace::NG {
 const std::string DEFAULT_ROWS_TEMPLATE = "1fr";
@@ -44,6 +45,7 @@ constexpr Dimension DEFAULT_FADING_EDGE_LENGTH = Dimension(32.0f, DimensionUnit:
 
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
+const int32_t ENABLE_FINGER_MULTI_SELECT_INDEX = 2;
 std::string g_strValue;
 using GridSizeCallback = ArkUI_GridItemSize (*)(int32_t, void*);
 using GridRectCallback = ArkUI_GridItemRect (*)(int32_t, void*);
@@ -537,6 +539,8 @@ void SetGridEditModeOptions(ArkUINodeHandle node, ArkUIEditModeOptions options)
     CHECK_NULL_VOID(frameNode);
     EditModeOptions newOptions;
     newOptions.enableGatherSelectedItemsAnimation = options->enableGatherSelectedItemsAnimation;
+    newOptions.useDefaultMultiSelectStyle = options->useDefaultMultiSelectStyle;
+    newOptions.enableFingerMultiSelect = options->enableFingerMultiSelect;
     GridModelNG::SetEditModeOptions(frameNode, newOptions);
 }
 
@@ -548,12 +552,14 @@ void ResetGridEditModeOptions(ArkUINodeHandle node)
     GridModelNG::SetEditModeOptions(frameNode, newOptions);
 }
 
-void GetGridEditModeOptions(ArkUINodeHandle node, ArkUI_Bool (*values)[1])
+void GetGridEditModeOptions(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     EditModeOptions options = GridModelNG::GetEditModeOptions(frameNode);
     (*values)[0] = options.enableGatherSelectedItemsAnimation ? 1 : 0;
+    (*values)[1] = options.useDefaultMultiSelectStyle ? 1 : 0;
+    (*values)[ENABLE_FINGER_MULTI_SELECT_INDEX] = options.enableFingerMultiSelect ? 1 : 0;
 }
 
 ArkUI_CharPtr GetColumnsTemplate(ArkUINodeHandle node)
@@ -719,15 +725,14 @@ void SetGridLayoutOptions(ArkUINodeHandle node, ArkUIGridLayoutOptions option)
 
     if (option->size > 0 && !option->irregularIndexes.empty()) {
         gridLayoutOptions.irregularIndexes.clear();
-        gridLayoutOptions.irregularIndexes.insert(
-            option->irregularIndexes.begin(), option->irregularIndexes.end());
+        gridLayoutOptions.irregularIndexes.insert(option->irregularIndexes.begin(), option->irregularIndexes.end());
     }
     if (option->onGetIrregularSizeByIndex) {
         auto callback = reinterpret_cast<GridSizeCallback>(option->onGetIrregularSizeByIndex);
         void* userData = option->irregularSizeUserData;
         gridLayoutOptions.getSizeByIndex = [callback, userData](int32_t index) -> GridItemSize {
             ArkUI_GridItemSize arkSize = callback(index, userData);
-            return GridItemSize{arkSize.rowSpan, arkSize.columnSpan};
+            return GridItemSize { arkSize.rowSpan, arkSize.columnSpan };
         };
     }
     if (option->onRectByIndexCallback) {
@@ -735,7 +740,7 @@ void SetGridLayoutOptions(ArkUINodeHandle node, ArkUIGridLayoutOptions option)
         void* userData = option->rectByIndexUserData;
         gridLayoutOptions.getRectByIndex = [callback, userData](int32_t index) -> GridItemRect {
             ArkUI_GridItemRect arkRect = callback(index, userData);
-            return GridItemRect{arkRect.rowStart, arkRect.rowSpan, arkRect.columnStart, arkRect.columnSpan};
+            return GridItemRect { arkRect.rowStart, arkRect.rowSpan, arkRect.columnStart, arkRect.columnSpan };
         };
     }
     GridModelNG::SetLayoutOptions(frameNode, gridLayoutOptions);
@@ -769,6 +774,27 @@ ArkUI_Bool GetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
     return GridModelNG::GetSupportLazyLoadingEmptyBranch(frameNode);
+}
+
+void SetGridEnableEditMode(ArkUINodeHandle node, ArkUI_Bool enableEditMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetEnableEditMode(frameNode, enableEditMode);
+}
+
+void ResetGridEnableEditMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetEnableEditMode(frameNode, false);
+}
+
+ArkUI_Bool GetGridEnableEditMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return GridModelNG::GetEnableEditMode(frameNode);
 }
 
 ArkUINodeHandle GetGridController(ArkUINodeHandle node)
@@ -898,6 +924,11 @@ const ArkUIGridModifier* GetGridModifier()
         .getSupportLazyLoadingEmptyBranch = GetSupportLazyLoadingEmptyBranch,
         .setScrollBarProxy = SetGridScrollBarProxy,
         .getController = GetGridController,
+        .setGridEnableEditMode = SetGridEnableEditMode,
+        .resetGridEnableEditMode = ResetGridEnableEditMode,
+        .getGridEnableEditMode = GetGridEnableEditMode,
+        .setOnGridEditModeChangeCallBack = SetOnGridEditModeChangeCallBack,
+        .resetOnGridEditModeChange = ResetOnGridEditModeChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1372,6 +1403,40 @@ void SetOnGridScrollBarUpdate(ArkUINodeHandle node, void* extraParam)
                               std::optional<float>(event.mixedEvent.numberReturnData[1].f32));
     };
     GridModelNG::SetOnScrollBarUpdate(frameNode, std::move(onGridScrollBarUpdate));
+}
+
+void SetOnGridEditModeChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [extraParam](bool enableEditMode) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_EDIT_MODE_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = enableEditMode ? 1 : 0;
+        SendArkUISyncEvent(&event);
+    };
+    GridModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(onChange));
+}
+
+void ResetOnGridEditModeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetEnableEditModeChangeEvent(frameNode, nullptr);
+}
+
+void SetOnGridEditModeChangeCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(extraParam);
+        GridModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(*onChange));
+    } else {
+        GridModelNG::SetEnableEditModeChangeEvent(frameNode, nullptr);
+    }
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

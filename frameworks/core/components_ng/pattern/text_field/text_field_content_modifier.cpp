@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
+#include "core/common/container.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
@@ -99,10 +100,11 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     TextStyle textStyle;
     if (!textFieldPattern->GetTextUtf16Value().empty()) {
         textStyle = CreateTextStyleUsingTheme(
-            textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme);
+            textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme,
+            false, textFieldPattern);
     } else {
         textStyle = CreateTextStyleUsingTheme(textFieldLayoutProperty->GetPlaceholderFontStyle(),
-            textFieldLayoutProperty->GetPlaceholderTextLineStyle(), theme);
+            textFieldLayoutProperty->GetPlaceholderTextLineStyle(), theme, false, textFieldPattern);
     }
     SetDefaultFontSize(textStyle);
     SetDefaultAdaptMinFontSize(textStyle);
@@ -171,8 +173,9 @@ void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
     float fontSizeValue;
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        fontSizeValue = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     } else {
         fontSizeValue = textStyle.GetFontSize().ConvertToPx();
     }
@@ -186,8 +189,9 @@ void TextFieldContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textS
     float minFontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        minFontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        minFontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
     adaptMinFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(minFontSizeValue);
     AttachProperty(adaptMinFontSizeFloat_);
@@ -198,8 +202,9 @@ void TextFieldContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textS
     float maxFontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        maxFontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        maxFontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
     adaptMaxFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(maxFontSizeValue);
     AttachProperty(adaptMaxFontSizeFloat_);
@@ -235,6 +240,7 @@ void TextFieldContentModifier::SetDefaultTextDecoration(const TextStyle& textSty
     textDecoration_ = textStyle.GetTextDecorationFirst();
     textDecorationStyle_ = textStyle.GetTextDecorationStyle();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
+    lineThicknessScale_ = textStyle.GetLineThicknessScale();
     textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(
         textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha());
     AttachProperty(textDecorationColorAlpha_);
@@ -272,8 +278,8 @@ void TextFieldContentModifier::SetFontFamilies(const std::vector<std::string>& v
 
 void TextFieldContentModifier::SetFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
-        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto valPx = value.ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     fontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(valPx);
@@ -281,8 +287,8 @@ void TextFieldContentModifier::SetFontSize(const Dimension& value, const TextSty
 
 void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
-        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto valPx = value.ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     adaptMinFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(valPx);
@@ -290,8 +296,8 @@ void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value, const
 
 void TextFieldContentModifier::SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
-        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto valPx = value.ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     adaptMaxFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(valPx);
@@ -463,12 +469,14 @@ bool TextFieldContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 }
 
 void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value, const Color& color,
-    const TextDecorationStyle& style)
+    const TextDecorationStyle& style, float lineThicknessScale)
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
     auto oldTextDecorationColor = textDecorationColor_.value_or(Color::BLACK);
     auto oldTextDecorationStyle = textDecorationStyle_.value_or(TextDecorationStyle::SOLID);
-    if ((oldTextDecoration == value) && (oldTextDecorationColor == color) && (oldTextDecorationStyle == style)) {
+    auto oldLineThicknessScale = lineThicknessScale_.value_or(DEFAULT_LINE_THICKNESS_SCALE);
+    if ((oldTextDecoration == value) && (oldTextDecorationColor == color) && (oldTextDecorationStyle == style)
+        && (oldLineThicknessScale == lineThicknessScale)) {
         return;
     }
 
@@ -478,6 +486,7 @@ void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value, co
     textDecoration_ = value;
     textDecorationColor_ = color;
     textDecorationStyle_ = style;
+    lineThicknessScale_ = lineThicknessScale;
     CHECK_NULL_VOID(textDecorationColorAlpha_);
 
     oldColorAlpha_ = textDecorationColorAlpha_->Get();
@@ -507,6 +516,9 @@ void TextFieldContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
     }
     if (textDecorationStyle_.has_value()) {
         textStyle.SetTextDecorationStyle(textDecorationStyle_.value());
+    }
+    if (lineThicknessScale_.has_value()) {
+        textStyle.SetLineThicknessScale(lineThicknessScale_.value());
     }
 }
 

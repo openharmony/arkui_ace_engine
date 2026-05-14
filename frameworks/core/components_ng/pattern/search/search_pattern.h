@@ -230,6 +230,12 @@ public:
 
 private:
     void OnModifyDone() override;
+    void OnAttachToMainTree() override;
+
+    bool NeedReadFontScaleFromEnv() override
+    {
+        return true;
+    }
     void OnAfterModifyDone() override;
     void SetAccessibilityAction();
     void SetAccessibilityClearAction();
@@ -376,7 +382,7 @@ private:
     bool isFocusTextColorSet_ = false;
     bool directionKeysMoveFocusOut_ = false;
     bool isNotifyChildAction_ = false;
-    bool isSearchButtonUsingThemeColor_ = false;
+    bool isSearchButtonUsingThemeColor_ = true;
     Color searchNormalColor_;
     Color transparentColor_ = Color::TRANSPARENT;
 

@@ -20,7 +20,8 @@ import { IMutableStateMeta } from '../decorator'
 
 // unit testing
 import { ObserveSingleton } from '../base/observeSingleton';
-import { TestMSM, TestMutableKeyedStateMeta } from './lib/testAddRefFireChange'
+import { TestMSM, TestMutableKeyedStateMeta, TestMutableStateMeta }
+    from './lib/testAddRefFireChange'
 import { tsuite, tcase, test, eq } from './lib/testFramework'
 import { STATE_MGMT_FACTORY } from '../decorator'
 let StateMgmtFactory = STATE_MGMT_FACTORY;
@@ -76,7 +77,11 @@ export class MyArray<T> extends WrappedArray<T> {
     private __backing_arrProp: string;
 
     // @JsonIgnore
-    public readonly __meta_arrProp: IMutableStateMeta = StateMgmtFactory.makeMutableStateMeta();
+    // Use TestMutableStateMeta directly so getRefCnt/getFireChangeCnt have a
+    // per-instance counter to read. The default factory returns
+    // TrackedMutableStateMeta which only feeds the global StateTracker —
+    // TestMSM.getRefCnt would always return 0 for that type.
+    public readonly __meta_arrProp: IMutableStateMeta = new TestMutableStateMeta('arrProp');
 
     public get arrProp(): string {
         console.log(`MyArray: get @Trace arrProp`);
@@ -184,13 +189,17 @@ export function run_custom_arrays(): boolean {
             ObserveSingleton.instance.renderingId = ObserveSingleton.InvalidRenderId;
         }
 
-        tcase("Modify custom array") {
+        tcase('Modify custom array') {
             comp.arr.join();
-            test("arr.join() refCnt", eq(comp.getRefCnt('__OB_ANY_INDEX'), 1))
+            test('arr.join() refCnt', eq(comp.getRefCnt('__OB_ANY_INDEX'), 1))
 
             comp.arr.func();
-            test("arr.func() OB_LENGTH refCnt", eq(comp.getFireChangeCnt('__OB_LENGTH'), 1));
-            test("arr.func() OB_ANY_INDEX refCnt", eq(comp.getFireChangeCnt('__OB_ANY_INDEX'), 1));
+            // func() calls reverse() which doesn't change array length, so
+            // OB_LENGTH must NOT fire (only OB_ARRAY_ANY_KEY does). The old
+            // expectation of 1 was from the prior reverse impl that also
+            // fired OB_LENGTH spuriously.
+            test('arr.func() OB_LENGTH refCnt', eq(comp.getFireChangeCnt('__OB_LENGTH'), 0));
+            test('arr.func() OB_ANY_INDEX refCnt', eq(comp.getFireChangeCnt('__OB_ANY_INDEX'), 1));
         }
     }
 

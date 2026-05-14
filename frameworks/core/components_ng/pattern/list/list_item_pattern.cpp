@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
@@ -58,6 +59,7 @@ void ListItemPattern::BeforeCreateLayoutWrapper()
         shallowBuilder_->ExecuteDeepRender();
         shallowBuilder_.Reset();
     }
+    SelectableItemPattern::BeforeCreateLayoutWrapper();
 }
 
 void ListItemPattern::OnCollectRemoved()
@@ -191,11 +193,23 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
     CHECK_NULL_RETURN(host, nullptr);
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_RETURN(listItemEventHub, nullptr);
+    int32_t editModeCheckBoxNodeIndex = editModeCheckBoxNode_ ? host->GetChildIndex(editModeCheckBoxNode_) : -1;
+    int32_t itemChildNodeIndex = childNodeIndex_;
+    if (itemChildNodeIndex == editModeCheckBoxNodeIndex) {
+        for (int32_t index = 0; index < static_cast<int32_t>(host->GetChildren().size()); ++index) {
+            if (index != editModeCheckBoxNodeIndex && index != startNodeIndex_ && index != endNodeIndex_) {
+                itemChildNodeIndex = index;
+                break;
+            }
+        }
+    }
     if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
-        !listItemEventHub->GetEndOnDelete()) {
+        !listItemEventHub->GetEndOnDelete() && editModeCheckBoxNodeIndex < 0) {
         return MakeRefPtr<BoxLayoutAlgorithm>();
     }
-    auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, childNodeIndex_);
+    auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, itemChildNodeIndex);
+    layoutAlgorithm->SetEditModeCheckBoxNodeIndex(editModeCheckBoxNodeIndex);
+    layoutAlgorithm->SetNeedReserveEditModeCheckBoxSpace(needReserveEditModeCheckBoxSpace_);
     layoutAlgorithm->SetAxis(axis_);
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
     layoutAlgorithm->SetEndNodeSize(endNodeSize_);
@@ -214,6 +228,7 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 
 bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    SelectableItemPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
@@ -483,6 +498,7 @@ void ListItemPattern::OnModifyDone()
     CHECK_NULL_VOID(listItemEventHub);
     InitOnFocusEvent();
     Pattern::OnModifyDone();
+    SyncCheckBoxFromItem();
     InitListItemCardStyleForList();
     if (!listItemEventHub->HasStateStyle(UI_STATE_SELECTED)) {
         auto context = host->GetRenderContext();
@@ -1154,7 +1170,35 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
             CHECK_NULL_VOID(context);
             context->BlendBgColor(GetBlendGgColor());
         }
+        SyncCheckBoxFromItem();
     }
+}
+
+void ListItemPattern::MarkIsSelectedWithoutCheckbox(bool isSelected)
+{
+    MarkIsSelected(isSelected);
+}
+
+void ListItemPattern::UpdateEditModeCheckBoxPosition()
+{
+    CHECK_NULL_VOID(editModeCheckBoxNode_);
+    auto renderContext = editModeCheckBoxNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (needReserveEditModeCheckBoxSpace_) {
+        ViewAbstract::ResetPosition(AceType::RawPtr(editModeCheckBoxNode_));
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto itemSize = geometryNode->GetFrameSize();
+    auto cbGeometryNode = editModeCheckBoxNode_->GetGeometryNode();
+    auto cbSize = cbGeometryNode ? cbGeometryNode->GetMarginFrameSize() : SizeF(0.0f, 0.0f);
+    float offsetX = IsRTLAndVertical() ? 0.0f : itemSize.Width() - cbSize.Width();
+    float offsetY = itemSize.Height() - cbSize.Height();
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
+    renderContext->UpdateZIndex(INT32_MAX);
 }
 
 void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

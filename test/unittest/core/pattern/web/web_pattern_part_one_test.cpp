@@ -2004,6 +2004,89 @@ HWTEST_F(WebPatternPartOneTest, CloseContextSelectionMenu_WithContextMenuOverlay
 }
 
 /**
+ * @tc.name: CloseDefaultContextMenu_001
+ * @tc.desc: Test CloseDefaultContextMenu with null contextMenuOverlay_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, CloseDefaultContextMenu_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->contextMenuOverlay_ = nullptr;
+    webPattern->CloseDefaultContextMenu();
+    EXPECT_EQ(webPattern->contextMenuOverlay_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: CloseDefaultContextMenu_002
+ * @tc.desc: Test CloseDefaultContextMenu with valid contextMenuOverlay_ not visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, CloseDefaultContextMenu_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    auto textBase = WeakPtr<TextBase>(webPattern);
+    auto contextMenuOverlay = AceType::MakeRefPtr<WebContextMenuOverlay>(textBase);
+    webPattern->contextMenuOverlay_ = contextMenuOverlay;
+
+    webPattern->CloseDefaultContextMenu();
+    EXPECT_NE(webPattern->contextMenuOverlay_, nullptr);
+    EXPECT_FALSE(webPattern->contextMenuOverlay_->IsCurrentMenuVisibile());
+#endif
+}
+
+/**
+ * @tc.name: OnCloseContextMenu_001
+ * @tc.desc: Test OnCloseContextMenu calls CloseDefaultContextMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, OnCloseContextMenu_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    auto textBase = WeakPtr<TextBase>(webPattern);
+    auto contextMenuOverlay = AceType::MakeRefPtr<WebContextMenuOverlay>(textBase);
+    webPattern->contextMenuOverlay_ = contextMenuOverlay;
+
+    webPattern->OnCloseContextMenu();
+    EXPECT_NE(webPattern->contextMenuOverlay_, nullptr);
+    EXPECT_FALSE(webPattern->contextMenuOverlay_->IsCurrentMenuVisibile());
+#endif
+}
+
+/**
  * @tc.name: ShowDefaultContextMenu_001
  * @tc.desc: Test ShowDefaultContextMenu function.
  * @tc.type: FUNC
@@ -2315,6 +2398,53 @@ HWTEST_F(WebPatternPartOneTest, SetEnableDefaultContextMenu_001, TestSize.Level1
     // Set to false
     webPattern->SetEnableDefaultContextMenu(false);
     EXPECT_EQ(webPattern->IsEnableDefaultContextMenu(), false);
+#endif
+}
+
+/**
+ * @tc.name: NotifyMenuLifeCycleEvent003
+ * @tc.desc: Comprehensive test for NotifyMenuLifeCycleEvent with full lifecycle and cursor state verification
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, NotifyMenuLifeCycleEvent003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
+    EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
+
+    // Set cursorType_ to verify it's not changed after menu events
+    webPattern->cursorType_ = OHOS::NWeb::CursorType::CT_IBEAM;
+    OHOS::NWeb::CursorType originalCursorType = webPattern->cursorType_;
+
+    // Trigger menu appearance - ABOUT_TO_APPEAR should call OnCursorChange(CT_TEMP_POINTER, nullptr, true)
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
+
+    EXPECT_TRUE(webPattern->isMenuShownFromWeb_);
+    // cursorType_ should not be changed (CT_TEMP_POINTER in switch breaks)
+    EXPECT_EQ(webPattern->cursorType_, originalCursorType);
+
+    // Trigger menu disappearance - ON_DISAPPEAR should call OnCursorChange(CT_DRAG, nullptr, true)
+    // isMenuShownFromWeb_ should still be true until ON_DID_DISAPPEAR
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DISAPPEAR);
+
+    EXPECT_TRUE(webPattern->isMenuShownFromWeb_);
+    // cursorType_ should not be changed (CT_DRAG in switch breaks)
+    EXPECT_EQ(webPattern->cursorType_, originalCursorType);
+
+    webPattern->isFocus_ = true;
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+    EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
 #endif
 }
 } // namespace OHOS::Ace::NG

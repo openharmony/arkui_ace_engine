@@ -54,7 +54,7 @@ void InitProp(const RefPtr<PropertyBase>& propBase)
     /* add code for other types */
 }
 } // namespace
-void MockRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier)
+void MockRenderContext::AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier)
 {
     if (!MockAnimationManager::Enabled()) {
         return;

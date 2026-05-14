@@ -21,6 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/pattern/search/search_model.h"
@@ -119,7 +120,7 @@ public:
             theme->symbolIconHeight_ = pattern->GetAttr<Dimension>("search_symbol_icon_height", 16.0_fp);
             theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
             theme->buttonFontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 theme->searchButtonSpace_ = pattern->GetAttr<Dimension>("search_button_space_API16", 4.0_vp);
                 theme->dividerSideSpace_ = pattern->GetAttr<Dimension>("search_button_space_API16", 4.0_vp);
                 theme->searchButtonTextPadding_ = pattern->

@@ -21,8 +21,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/snapshot_param.h"
 
+class RSUIContext;
 namespace OHOS::Rosen {
 class RSNode;
+class RSUIContext;
 }
 
 namespace OHOS::Ace::NG {

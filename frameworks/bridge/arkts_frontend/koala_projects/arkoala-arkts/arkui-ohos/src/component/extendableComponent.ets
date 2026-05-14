@@ -16,16 +16,14 @@
 import { int32 } from '@koalaui/common';
 import { RecordData } from '@ohos.base';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { CustomComponentV2, CustomComponentLifecycle, CustomDelegate } from './customComponent';
+import { CustomComponentLifecycle, CustomDelegate } from './customComponent';
 import { __CustomComponentLifecycle__Internal } from './customComponentLifecycle';
-import { InteropNativeModule, SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
+import { SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
 import {
     IProvideDecoratedVariable,
     IProviderDecoratedVariable,
     IVariableOwner,
-    LocalStorage,
-    StateMgmtDFX,
-    DumpInfo
+    LocalStorage
 } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
@@ -34,6 +32,10 @@ import { Theme } from '@ohos/arkui/theme';
 import { DecoratedVariableBase } from '../stateManagement/decoratorImpl/decoratorBase';
 import { IDecoratorBaseRegistry } from '../stateManagement/decorator';
 import { IEnvironmentValueBase, IEnvVariable, EnvDecoratedVariable } from '../stateManagement/decoratorImpl/decoratorEnv';
+import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../stateManagement/utils';
+import { CustomComponentContextImpl } from './customComponent.ets';
+import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
+import { ExtendableComponentDFX } from './extendableComponentDFX';
 
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
@@ -66,6 +68,7 @@ export interface IExtendableComponent {
     fireAboutToRecycle(): void;
     __getParentNode__Internal(): PeerNode | undefined;
     getInstance(): ExtendableComponent;
+    getCanUpdateStateVars(): boolean;
 }
 
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
@@ -75,6 +78,9 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     // Lifecycle management
     @JSONStringifyIgnore
     private __lifecycle__Internal?: CustomComponentLifecycle;
+
+    @JSONStringifyIgnore
+    private __customComponentContext__Internal?: CustomComponentContext;
 
     __getLifecycle__Internal(): CustomComponentLifecycle {
         if (!this.__lifecycle__Internal) {
@@ -96,6 +102,9 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private ownedStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
     private envPropertySet: Set<IEnvVariable> = new Set<IEnvVariable>();
     private envInstanceId: int32 | undefined;
+
+    private __activeFunc__Internal?: ActiveAndInactiveCallbackType;
+    private __inactiveFunc__Internal?: ActiveAndInactiveCallbackType;
 
     public static finalizationRegistry_: FinalizationRegistry<Object> = new FinalizationRegistry<Object>(
         (destroyProperty: Object) => {
@@ -190,6 +199,10 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.childrenWeakRefMap_.clear();
     }
 
+    __getChildrenWeakRefMap__Internal(): Map<int32, WeakRef<ExtendableComponent>> {
+        return this.childrenWeakRefMap_;
+    }
+
     __getActive__Internal(): number {
         return this.activeCount_;
     }
@@ -200,10 +213,16 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
 
     __freezeWhenRecycle__Internal(): void {
         this.activeCount_--;
+        if (this.activeCount_ === 0) {
+            this.__fireActiveOrInactiveFunc__Internal(false);
+        }
     }
 
     __unfreezeWhenReuse__Internal(): void {
         this.activeCount_++;
+        if (this.activeCount_ === 1) {
+            this.__fireActiveOrInactiveFunc__Internal(true);
+        }
     }
 
     __isViewActive__Internal(): boolean {
@@ -368,23 +387,42 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
 
     public __onDumpInspector__Internal(): string {
-        const dumpInfo: DumpInfo = new DumpInfo();
-        const isV2 = this instanceof CustomComponentV2;
-        dumpInfo.viewinfo = {
-            componentName: Class.of(this).getName(),
-            isV2: isV2
-        };
-        let ret: string = '';
-        try {
-            StateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo, isV2);
-            ret = JSON.stringify(dumpInfo);
-        } catch (error) {
-            InteropNativeModule._NativeLog(`dump component ${ dumpInfo.viewinfo.componentName} error: ${(error as Error).message}`);
-        }
-        return ret;
+        return ExtendableComponentDFX.onDumpInspector(this);
+    }
+
+    public __onDumpInfo__Internal(commands: string[]): void {
+        ExtendableComponentDFX.onDumpInfo(this, commands);
     }
 
     onWillApplyTheme(theme: Theme) {}
+
+    __getCustomComponentContext__Internal(): CustomComponentContext {
+        if (!this.__customComponentContext__Internal) {
+            this.__customComponentContext__Internal = new CustomComponentContextImpl(this);
+        }
+        return this.__customComponentContext__Internal as CustomComponentContext;
+    }
+
+    __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void {
+        this.__activeFunc__Internal = active;
+        this.__inactiveFunc__Internal = inactive;
+    }
+
+    public __fireActiveOrInactiveFunc__Internal(active: boolean): void {
+        if (active) {
+            ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                this.__activeFunc__Internal?.();
+            });
+        } else {
+            ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                this.__inactiveFunc__Internal?.();
+            });
+        }
+    }
+
+    public __getCanUpdateStateVars__Internal(): boolean {
+        return this.delegate_!.getCanUpdateStateVars();
+    }
 }
 
 export class ExtendableComponent_serializer {

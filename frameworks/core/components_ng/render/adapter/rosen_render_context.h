@@ -56,6 +56,7 @@
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
+#include "core/components_ng/property/particle_property.h"
 
 namespace OHOS::Ace::NG {
 class BackgroundModifier;
@@ -122,12 +123,13 @@ public:
 
     void SetExtraOffset(const std::optional<OffsetF>& offset) override;
 
-    void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
+    // Geometry transition counter management
+    void IncrementGeometryTransitionCounter() override;
+    void DecrementGeometryTransitionCounter() override;
+    void ClearGeometryTransitionCounter() override;
+    bool IsGeometryTransitionAnimating() const override;
 
-    bool HasSandBox() const override
-    {
-        return sandBoxCount_ > 0;
-    }
+    void SetSandBox(const std::optional<OffsetF>& parentPosition) override;
 
     size_t GetAnimationsCount() const override
     {
@@ -259,6 +261,9 @@ public:
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
     void SetShadowPath(const std::string path) override;
     void ResetShadowPath() override;
+    void ClearClipBounds() override;
+
+    void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -399,6 +404,7 @@ public:
     void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void OnZIndexUpdateMultiThread(const RefPtr<FrameNode>& parent);
+    void SortChildrenByZIndex() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json);
@@ -449,7 +455,7 @@ public:
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr, Rosen::Drawing::Rect* rect = nullptr);
     void SetActualForegroundColor(const Color& value) override;
-    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+    void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) override;
@@ -462,7 +468,7 @@ public:
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
     void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
-    ACE_FORCE_EXPORT void SetHDRColorHeadRoom(float headRoom);
+    ACE_FORCE_EXPORT void SetHDRColorHeadRoom(float headRoom) override;
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     void SetRotation(float rotationX, float rotationY, float rotationZ) override;
@@ -585,9 +591,14 @@ public:
 
     void UpdateOverlayText() override;
 
+    void UpdateSubmenuDistortionParam() override;
+
     void UpdateDistortionParam(const DistortionParam& param) override;
 
     void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
+
+    std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
+        const FrostedGlassParam& param, float dipScale) override;
 
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
@@ -878,7 +889,7 @@ protected:
     bool hasScales_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
-    int sandBoxCount_ = 0;
+    int animatingGeometryTransitionCount_ = 0;
     uint32_t colorGamut_ = 0;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 8;
@@ -986,6 +997,7 @@ private:
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> sdfShape_;
 };
 } // namespace OHOS::Ace::NG
 

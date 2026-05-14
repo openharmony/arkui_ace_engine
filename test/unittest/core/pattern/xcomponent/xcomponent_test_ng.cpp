@@ -46,6 +46,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
+#include "core/gestures/drag_event.h"
+#include "core/gestures/drag_recognizer.h"
 
 using namespace testing;
 using namespace testing::ext;

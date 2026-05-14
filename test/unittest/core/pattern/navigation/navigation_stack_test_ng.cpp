@@ -27,6 +27,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "mock_navigation_route.h"
 
 using namespace testing;
 using namespace testing::ext;

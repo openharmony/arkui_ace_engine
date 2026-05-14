@@ -41,6 +41,7 @@ template("ace_core_interfaces_native_node") {
       "node/column_modifier.cpp",
       "node/column_split_modifier.cpp",
       "node/common_shape_modifier.cpp",
+      "node/node_container_reader_modifier.cpp",
       "node/counter_modifier.cpp",
       "node/custom_dialog_model.cpp",
       "node/data_panel_modifier.cpp",
@@ -149,7 +150,9 @@ template("ace_core_interfaces_native_node") {
       "utility/error_message_manager.cpp",
       "node/water_flow_modifier.cpp",
       "node/styled_string_impl.cpp",
-      "runtime/runtime_init.cpp"
+      "runtime/runtime_init.cpp",
+      "node/lazy_column_layout_modifier.cpp",
+      "node/lazy_water_flow_layout_modifier.cpp",
     ]
 
     if (!is_arkui_x) {
@@ -310,6 +313,7 @@ template("ace_core_interfaces_native_node") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:libudmf" ]
+        external_deps += [ "ability_base:want" ]
       }
     }
     if (build_ohos_sdk) {

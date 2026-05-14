@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,11 +35,13 @@ void LazyGridLayoutModel::Create()
 
 void LazyGridLayoutModel::SetRowGap(const Dimension& rowGap)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(rowGap, LpxAttribute::LPX_ROWS_GAP);
     ACE_UPDATE_LAYOUT_PROPERTY(LazyGridLayoutProperty, RowGap, rowGap);
 }
 
 void LazyGridLayoutModel::SetColumnGap(const Dimension& columnGap)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(columnGap, LpxAttribute::LPX_COLUMNS_GAP);
     ACE_UPDATE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnGap, columnGap);
 }
 
@@ -62,11 +65,13 @@ void LazyVGridLayoutModel::SetColumnsTemplate(const std::string& value)
 
 void LazyGridLayoutModel::SetRowGap(FrameNode* frameNode, const Dimension& rowGap)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(rowGap, LpxAttribute::LPX_ROWS_GAP, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, RowGap, rowGap, frameNode);
 }
 
 void LazyGridLayoutModel::SetColumnGap(FrameNode* frameNode, const Dimension& columnGap)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(columnGap, LpxAttribute::LPX_COLUMNS_GAP, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnGap, columnGap, frameNode);
 }
 

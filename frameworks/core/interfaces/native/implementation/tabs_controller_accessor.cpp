@@ -14,6 +14,8 @@
  */
 
 #include "tabs_controller_modifier_peer_impl.h"
+
+#include "base/error/error_code.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"

@@ -44,6 +44,8 @@ std::string ParagraphStyle::ToString() const
     result += orphanCharOptimization;
     result += ", compressLeadingPunctuation: ";
     result += compressLeadingPunctuation;
+    result += ", punctuationOverflow: ";
+    result += punctuationOverflow;
     result += ", includeFontPadding: ";
     result += includeFontPadding;
     result += ", fallbackLineSpacing: ";

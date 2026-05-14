@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 #include "accessibility_frame_node_utils.h"
+
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/property/accessibility_property.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -497,7 +500,9 @@ void AccessibilityFrameNodeUtils::IsCoveredByBrother(
     auto parentFrameNode = frameNode;
     do {
         parentFrameNode = GetParentFrameNodeWithVirtualNode(parentFrameNode);
-        CHECK_NULL_BREAK(parentFrameNode);
+        if (!parentFrameNode) {
+            break;
+        }
 
         auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_CONTINUE(accessibilityProperty);

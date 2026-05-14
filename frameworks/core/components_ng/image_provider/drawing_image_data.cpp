@@ -32,8 +32,27 @@ inline void RSDataWrapperReleaseProc(const void*, void* context)
     RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
     delete wrapper;
 }
-
-constexpr char IMAGE_SVG_MIME[] = "image/svg+xml";
+bool IsSvgData(const uint8_t* data, size_t size)
+{
+    static constexpr char SVG_STAMP[] = "<?xml";
+    static constexpr char SVG_SIGN[] = "<svg";
+    static constexpr size_t SVG_MIN_SIZE = sizeof(SVG_STAMP) - 1;
+    if (data == nullptr || size < SVG_MIN_SIZE) {
+        return false;
+    }
+    if (memcmp(SVG_STAMP, data, sizeof(SVG_STAMP) - 1) == 0 ||
+        memcmp(SVG_SIGN, data, sizeof(SVG_SIGN) - 1) == 0) {
+        return true;
+    }
+    static constexpr size_t SVG_SEARCH_RANGE = 2048;
+    size_t searchLen = size > SVG_SEARCH_RANGE ? SVG_SEARCH_RANGE : size;
+    for (size_t i = 0; i <= searchLen - sizeof(SVG_SIGN) + 1; ++i) {
+        if (memcmp(data + i, SVG_SIGN, sizeof(SVG_SIGN) - 1) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace
 
 constexpr int32_t ASTC_FRAME_COUNT = 1;
@@ -122,16 +141,16 @@ ImageCodec DrawingImageData::Parse() const
         imageSize.SetSizeT(SizeF(astcSize.first, astcSize.second));
         return { imageSize, ASTC_FRAME_COUNT, ImageRotateOrientation::UP };
     }
-    
+
+    if (IsSvgData(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize())) {
+        return { SizeF(-1, -1), 1, ImageRotateOrientation::UP, true };
+    }
+
     uint32_t errorCode = 0;
     auto imageSource = 
         ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
     if (!imageSource) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "image source create failed in drawing data parsing.");
-        return {};
-    }
-    auto format = imageSource->GetEncodedFormat();
-    if (format == IMAGE_SVG_MIME) {
         return {};
     }
     auto originImageSize = imageSource->GetImageSize();

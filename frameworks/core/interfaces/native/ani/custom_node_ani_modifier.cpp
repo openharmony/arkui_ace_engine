@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/implementation/navigation_context.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -43,6 +44,9 @@ ani_long ConstructCustomNode(ani_int id, ArkUICustomNodeInfo&& customNodeInfo)
     customNode->SetPageTransitionFunc(std::move(customNodeInfo.pageTransitionFunc));
     customNode->SetOnCleanupFunc(std::move(customNodeInfo.onCleanupFunc));
     customNode->SetOnDumpInspectorFunc(std::move(customNodeInfo.onDumpInspectorFunc));
+    if (customNodeInfo.onDumpInfoFunc) {
+        customNode->SetOnDumpInfoFunc(std::move(customNodeInfo.onDumpInfoFunc));
+    }
     customNode->SetSetActiveFunc(std::move(customNodeInfo.setActiveFunc));
     customNode->SetDestroyFunction(std::move(customNodeInfo.onCleanupFunc));
     customNode->SetJSViewName(customNodeInfo.onGetJsViewNameFunc());

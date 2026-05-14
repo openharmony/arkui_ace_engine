@@ -49,8 +49,10 @@ void DataPanelModelStatic::SetTrackBackground(FrameNode* frameNode, const std::o
     if (trackBackgroundColor.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(
             DataPanelPaintProperty, TrackBackground, trackBackgroundColor.value(), frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false, frameNode);
     }
 }
 

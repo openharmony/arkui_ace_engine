@@ -915,6 +915,16 @@ void SelectOverlayPattern::OnDetachFromMainTree()
     }
 }
 
+bool SelectOverlayPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(host);
+    CHECK_NULL_RETURN(selectOverlayNode, false);
+    selectOverlayNode->UpdateMenuColors();
+    return true;
+}
+
 void SelectOverlayPattern::InitSurfaceChangedCallback()
 {
     CHECK_NULL_VOID(info_);

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include <algorithm>
@@ -32,6 +33,7 @@
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -48,6 +50,8 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "base/log/ace_checker.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -1317,7 +1321,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     }
     auto indexes = navigationStack_->GetAllPathIndex();
     auto toIndex = indexes.size() - 1;
-    auto topNavPath = navigationStack_->GetTopNavPath();
+    auto topNavPath = navigationStack_->GetPreTopNavPath();
     FireNavigateChangeCallback();
     FireInterceptionBeforeLifeCycleEvent(topNavPath, toIndex);
     needSyncWithJsStack_ = false;
@@ -2359,7 +2363,8 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
 
     if (isOnShow) {
         if (needHideOrShowPrimaryNodes) {
-            navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_SHOW, visibilityReason);
+            navigationPattern->FirePrimaryNodesLifecycle(
+                NavDestinationLifecycle::ON_SHOW, visibilityReason, false);
         }
         navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
             NavDestinationLifecycle::ON_SHOW, false, visibilityReason);
@@ -2418,7 +2423,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
         NavDestinationLifecycle::ON_HIDE, false, visibilityReason);
     if (needHideOrShowPrimaryNodes) {
-        navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, visibilityReason);
+        navigationPattern->FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, visibilityReason, false);
     }
 }
 
@@ -6243,6 +6248,21 @@ void NavigationPattern::UpdateNavigationStatus()
     SetNavigationWidthToolBarManager(initNavBarWidth_, frameWidth - initNavBarWidth_ - dividerWidth, dividerWidth);
 }
 
+void NavigationPattern::InitToolBarManager()
+{
+    if (!toolbarManager_) {
+        auto pipeline = GetHost()->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        toolbarManager_ = pipeline->GetToolbarManager();
+        UpdateNavigationStatus();
+    }
+}
+
+RefPtr<ToolbarManager> NavigationPattern::GetToolBarManager()
+{
+    return toolbarManager_;
+}
+
 SizeF NavigationPattern::GetNavigationFrameSize()
 {
     auto host = GetHost();
@@ -7296,7 +7316,7 @@ bool NavigationPattern::IsDestinationNeedHideInPush(
 }
 
 void NavigationPattern::FirePrimaryNodesLifecycle(
-    NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason)
+    NavDestinationLifecycle lifecycle, NavDestVisibilityChangeReason reason, bool needTriggerActive)
 {
     if (lifecycle != NavDestinationLifecycle::ON_SHOW && lifecycle != NavDestinationLifecycle::ON_HIDE) {
         return;
@@ -7320,7 +7340,7 @@ void NavigationPattern::FirePrimaryNodesLifecycle(
                 NotifyDestinationLifecycle(node, NavDestinationLifecycle::ON_SHOW);
                 pattern->SetIsOnShow(true);
             }
-            if (idx == primaryNodes.size() - 1 && !pattern->IsActive()) {
+            if (needTriggerActive && idx == primaryNodes.size() - 1 && !pattern->IsActive()) {
                 NotifyDestinationLifecycle(node,
                     NavDestinationLifecycle::ON_ACTIVE, NavDestinationActiveReason::TRANSITION);
                 pattern->SetIsActive(true);
@@ -7335,7 +7355,7 @@ void NavigationPattern::FirePrimaryNodesLifecycle(
         CHECK_NULL_CONTINUE(node);
         auto pattern = node->GetPattern<NavDestinationPattern>();
         CHECK_NULL_CONTINUE(pattern);
-        if (idx == 0 && pattern->IsActive()) {
+        if (needTriggerActive && idx == 0 && pattern->IsActive()) {
             NotifyDestinationLifecycle(node,
                 NavDestinationLifecycle::ON_INACTIVE, NavDestinationActiveReason::TRANSITION);
             pattern->SetIsActive(false);

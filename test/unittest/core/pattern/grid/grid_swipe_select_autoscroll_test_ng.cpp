@@ -275,8 +275,8 @@ HWTEST_F(GridSwipeSelectAutoScrollTestNg, AutoScrollCallbackUpdatesSelection001,
 
     pattern_->UpdateSwipeSelection();
 
-    int32_t rangeStart = std::min(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
-    int32_t rangeEnd = std::max(pattern_->swipeStartIndex_, pattern_->swipeCurrentIndex_);
+    int32_t rangeStart = std::min(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
+    int32_t rangeEnd = std::max(pattern_->swipeStartStateKey_.index, pattern_->swipeCurrentStateKey_.index);
     bool isSelected = (pattern_->swipeSelectState_ == SwipeSelectState::SELECTING);
     for (int32_t i = rangeStart; i <= rangeEnd; ++i) {
         auto child = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(i));
@@ -332,6 +332,35 @@ HWTEST_F(GridSwipeSelectAutoScrollTestNg, AutoScrollAfterEndNoCrash001, TestSize
     PointF bottomPoint(30.f, 600.f);
     EXPECT_NO_FATAL_FAILURE(pattern_->SwipeSelectAutoScroll(bottomPoint));
     EXPECT_NO_FATAL_FAILURE(pattern_->StopSwipeSelectAutoScroll());
+}
+
+/**
+ * @tc.name: AutoScrollCallbackWithNegativeIndexNoCrash001
+ * @tc.desc: Verify UpdateSwipeSelection called via auto-scroll callback does not crash
+ *           when swipeStartStateKey_ is invalid (reset by End) but state is still SELECTING.
+ *           Tests the boundary condition for race between auto-scroll callback and state reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSwipeSelectAutoScrollTestNg, AutoScrollCallbackWithNegativeIndexNoCrash001, TestSize.Level2)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->OnModifyDone();
+    FlushUITasks();
+
+    GestureEvent startInfo = CreateGestureEvent(30.f, 30.f);
+    pattern_->HandleSwipeSelectStart(startInfo);
+    ASSERT_NE(pattern_->swipeSelectState_, SwipeSelectState::INACTIVE);
+
+    pattern_->swipeStartStateKey_.index = -1;
+    pattern_->swipeCurrentStateKey_.index = -1;
+    ASSERT_NE(pattern_->swipeSelectState_, SwipeSelectState::INACTIVE);
+
+    EXPECT_NO_FATAL_FAILURE(pattern_->UpdateSwipeSelection());
 }
 
 } // namespace OHOS::Ace::NG

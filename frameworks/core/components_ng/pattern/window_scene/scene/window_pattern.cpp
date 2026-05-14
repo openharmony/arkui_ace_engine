@@ -24,6 +24,7 @@
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -1031,10 +1032,10 @@ std::vector<Rosen::Rect> WindowPattern::GetHotAreas()
     return session_->GetTouchHotAreas();
 }
 
-bool WindowPattern::GetSessionTouchable()
+bool WindowPattern::GetSessionTouchable() const
 {
     CHECK_NULL_RETURN(session_, false);
-    if (!session_->GetSystemTouchable() || !session_->GetForegroundInteractiveStatus()) {
+    if (!session_->GetSessionTouchable()) {
         return false;
     }
     return true;

@@ -19,6 +19,9 @@
 
 namespace OHOS::Ace::NG {
 
+// Maximum layout size bound (16K resolution, sufficient for all practical screen sizes)
+constexpr double MAX_LAYOUT_SIZE = 16384.0;
+
 std::shared_ptr<SmartLayoutNode> SmartLayoutNode::CreateRootNode(const std::string& name)
 {
     auto engine = std::make_shared<localsmt::Engine>();
@@ -29,12 +32,14 @@ SmartLayoutNode::SmartLayoutNode(std::shared_ptr<localsmt::Engine> engine, const
     : engine_(engine),
       name_(name),
       position_{
-          {engine_->Var((name_ + ".x").c_str()), 0.0},
-          {engine_->Var((name_ + ".y").c_str()), 0.0}
+          // Set bounds: offsetX/offsetY >= 0 (eliminates 2 non-negativity constraints per child)
+          {engine_->Var((name_ + ".x").c_str(), 0.0, MAX_LAYOUT_SIZE), 0.0},
+          {engine_->Var((name_ + ".y").c_str(), 0.0, MAX_LAYOUT_SIZE), 0.0}
       },
       size_{
-          {engine_->Var((name_ + ".w").c_str()), 0.0},
-          {engine_->Var((name_ + ".h").c_str()), 0.0}
+          // Set bounds: width/height >= 0 (eliminates 2 non-negativity constraints per node)
+          {engine_->Var((name_ + ".w").c_str(), 0.0, MAX_LAYOUT_SIZE), 0.0},
+          {engine_->Var((name_ + ".h").c_str(), 0.0, MAX_LAYOUT_SIZE), 0.0}
       },
       scaleInfo_{
           {engine_->Var((name_ + ".mainAxisSpaceScale").c_str(), 1.0), 1.0},
@@ -45,14 +50,14 @@ SmartLayoutNode::SmartLayoutNode(std::shared_ptr<localsmt::Engine> engine, const
 }
 
 std::shared_ptr<SmartLayoutNode> SmartLayoutNode::CreateChildNode(
-    const ChildLayoutInfo& info, const EdgesSpaces& spaces)
+    const ChildLayoutInfo& info, const EdgesSpaces& spaces, bool firstChild)
 {
     std::string childName = CHILD_NODE_PREFIX + std::to_string(info.id);
     auto node = std::make_shared<SmartLayoutNode>(engine_, childName);
     node->id_ = info.id;
 
     // Set size (Blank node: height is 0 for Column, width is 0 for Row)
-    if (info.isBlank) {
+    if (info.isBlank && !(firstChild && context_.avoidSafeArea)) {
         if (context_.layoutType == SmartLayoutType::COLUMN) {
             node->SetFixedSize(info.width, 0);
         } else {
@@ -128,7 +133,7 @@ void SmartLayoutNode::CreateChildrenFromInfos(const std::vector<ChildLayoutInfo>
 
         auto spaces = CalculateChildSpaces(childInfos[i], prevInfo, nextInfo,
             context_.layoutType, context_.size);
-        auto node = CreateChildNode(childInfos[i], spaces);
+        auto node = CreateChildNode(childInfos[i], spaces, i == 0);
         childNodes.push_back(node);
     }
 
@@ -228,7 +233,6 @@ SmartLayoutRect SmartLayoutNode::GetChildrenBoundingBox() const
     double maxBottom = std::numeric_limits<double>::lowest();
 
     for (const auto& child : children_) {
-        child->SyncData();
         double childX = child->GetPosition().offsetX.value;
         double childY = child->GetPosition().offsetY.value;
         double childW = child->GetSize().width.value;

@@ -37,6 +37,7 @@ public:
     static void SetControlButtonSwitchingIconInfo(
         FrameNode* frameNode, const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
     static void SetShowControlButton(FrameNode* frameNode, bool showControlButton);
+    static void SetShowSideBarWithGesture(FrameNode* frameNode, bool showSideBarWithGesture);
     static void SetAutoHide(FrameNode* frameNode, bool autoHide);
     static void SetMaxSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& maxSideBarWidth);
     static void SetMinContentWidth(FrameNode* frameNode, const std::optional<Dimension>& minContentWidth);

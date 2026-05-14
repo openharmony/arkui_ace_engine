@@ -216,7 +216,8 @@ public:                                                                         
     }                                                                                                         \
     void Set##name(const Dimension& value)                                                                    \
     {                                                                                                         \
-        auto actualValue = value.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale()); \
+        auto actualValue = value.ConvertToPxDistributeWithEnv(                                                \
+            GetMinFontScale(), GetMaxFontScale(), IsAllowScale(), GetEnvFontScale());                         \
         auto newValue = DimensionWithActual(value, static_cast<float>(actualValue));                          \
         if (NearEqual(prop##name##_, newValue)) {                                                             \
             return;                                                                                           \
@@ -618,6 +619,8 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(WhiteSpace, WhiteSpace, WhiteSpace::PRE, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(MaxFontScale, float, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(MinFontScale, float, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(EnvFontScale, float, TextStyleAttribute::RE_CREATE);
+
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(VariableFontWeight, int32_t, 0, TextStyleAttribute::FONT_VARIATIONS);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         EnableVariableFontWeight, bool, false, TextStyleAttribute::FONT_VARIATIONS);
@@ -673,6 +676,8 @@ public:
         OrphanCharOptimization, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         CompressLeadingPunctuation, bool, false, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        PunctuationOverflow, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(ColorShaderStyle, Color, TextStyleAttribute::FOREGROUND_BRUSH);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(IncludeFontPadding, bool, false, ParagraphStyleAttribute::RE_CREATE);
@@ -693,7 +698,8 @@ public:
 
     void SetFontSize(const Dimension& fontSize)
     {
-        auto actualValue = fontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto actualValue = fontSize.ConvertToPxDistributeWithEnv(
+            GetMinFontScale(), GetMaxFontScale(), IsAllowScale(), GetEnvFontScale());
         auto newValue = DimensionWithActual(fontSize, static_cast<float>(actualValue));
         if (NearEqual(newValue, fontSize_)) {
             return;
@@ -796,7 +802,8 @@ public:
 
     void SetLineHeight(const Dimension& lineHeight, bool hasHeightOverride = true)
     {
-        auto actualValue = lineHeight.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto actualValue = lineHeight.ConvertToPxDistributeWithEnv(
+            GetMinFontScale(), GetMaxFontScale(), IsAllowScale(), GetEnvFontScale());
         auto newValue = DimensionWithActual(lineHeight, static_cast<float>(actualValue));
         if (NearEqual(newValue, lineHeight_)) {
             return;
@@ -839,7 +846,8 @@ public:
 
     void SetLineSpacing(const Dimension& lineSpacing)
     {
-        auto actualValue = lineSpacing.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto actualValue = lineSpacing.ConvertToPxDistributeWithEnv(
+            GetMinFontScale(), GetMaxFontScale(), IsAllowScale(), GetEnvFontScale());
         auto newValue = DimensionWithActual(lineSpacing, static_cast<float>(actualValue));
         if (NearEqual(newValue, lineSpacing_)) {
             return;
@@ -909,7 +917,8 @@ public:
     // Must use with SetAdaptMaxFontSize.
     void SetAdaptMinFontSize(const Dimension& adaptMinFontSize)
     {
-        auto actualValue = adaptMinFontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto actualValue = adaptMinFontSize.ConvertToPxDistributeWithEnv(
+            GetMinFontScale(), GetMaxFontScale(), IsAllowScale(), GetEnvFontScale());
         auto newValue = DimensionWithActual(adaptMinFontSize, static_cast<float>(actualValue));
         if (NearEqual(newValue, adaptMinFontSize_)) {
             return;
@@ -921,7 +930,8 @@ public:
     // Must use with SetAdaptMinFontSize.
     void SetAdaptMaxFontSize(const Dimension& adaptMaxFontSize)
     {
-        auto actualValue = adaptMaxFontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto actualValue = adaptMaxFontSize.ConvertToPxDistributeWithEnv(
+            GetMinFontScale(), GetMaxFontScale(), IsAllowScale(), GetEnvFontScale());
         auto newValue = DimensionWithActual(adaptMaxFontSize, static_cast<float>(actualValue));
         if (NearEqual(newValue, adaptMaxFontSize_)) {
             return;

@@ -162,6 +162,25 @@ public:
         return paintMethod;
     }
 
+    bool UseSystemMaterialForBindIndicator() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto swiperNode = GetSwiperNode();
+        CHECK_NULL_RETURN(swiperNode, false);
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_RETURN(swiperPattern, false);
+        if (!swiperPattern->IsBindIndicator()) {
+            return false;
+        }
+        if (host->GetParent() == swiperNode) {
+            return false;
+        }
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        return renderContext->GetSystemMaterial() != nullptr;
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         ACE_UINODE_TRACE(GetHost());
@@ -171,7 +190,7 @@ public:
         CHECK_NULL_RETURN(swiperPattern, nullptr);
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
             if (swiperPattern->GetMaxDisplayCount() > 0) {
-                SetIndicatorInteractive(false);
+                SetIndicatorInteractive(swiperPattern->IsIndicatorInteractive());
                 return CreateOverlongDotIndicatorPaintMethod(swiperPattern);
             }
 

@@ -28,6 +28,8 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/tips_anchor_type.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
@@ -895,6 +897,26 @@ public:
         return systemMaterial_;
     }
 
+    void SetBlurStyleOption(const BlurStyleOption& blurStyleOption)
+    {
+        blurStyleOption_ = blurStyleOption;
+    }
+
+    const std::optional<BlurStyleOption>& GetBlurStyleOption() const
+    {
+        return blurStyleOption_;
+    }
+
+    void SetEffectOption(const EffectOption& effectOption)
+    {
+        effectOption_ = effectOption;
+    }
+
+    const std::optional<EffectOption>& GetEffectOption() const
+    {
+        return effectOption_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -949,6 +971,8 @@ private:
     std::optional<Dimension> radius_;
     std::optional<Shadow> shadow_;
     RefPtr<UiMaterial> systemMaterial_ = nullptr;
+    std::optional<BlurStyleOption> blurStyleOption_;
+    std::optional<EffectOption> effectOption_;
     // Used in NG mode
     StateChangeFunc onStateChange_;
     ButtonProperties primaryButtonProperties_;   // first button.

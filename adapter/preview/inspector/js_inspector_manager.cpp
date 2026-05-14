@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

@@ -393,7 +393,10 @@ public:
     void SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions) override;
     void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) override;
     void ResetAccessibilityActionOptions() override;
+    void SetAccessibilityCustomActions(const std::vector<NG::AccessibilityCustomAction>& actions) override;
+    void ResetAccessibilityCustomActions() override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void SetAccessibilityNextFocusParams(const NG::AccessibilityNextFocusParams& params) override;
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void ResetOnAccessibilityFocus() override;

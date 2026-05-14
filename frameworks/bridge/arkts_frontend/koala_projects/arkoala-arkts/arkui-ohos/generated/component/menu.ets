@@ -285,3 +285,18 @@ export function MenuImpl(
     })
 }
 
+@memo
+export function Menu(
+    @memo @memo_skip
+    style: ((attributes: MenuAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkMenuComponent>((): ArkMenuComponent => {
+        return new ArkMenuComponent()
+    })
+    NodeAttach<ArkMenuPeer>((): ArkMenuPeer => ArkMenuPeer.create(receiver), (_: ArkMenuPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

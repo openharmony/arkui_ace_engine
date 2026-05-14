@@ -21,7 +21,7 @@ index 5c91580..1bfe5a9 100644
   */
  export declare interface NavDestinationAttribute extends CommonMethod {
 +    // instructive change start
-+    setNavDestinationOptions(moduleInfo: NavDestinationModuleInfo | undefined): this;
++    setNavDestinationOptions(moduleInfo?: NavDestinationModuleInfo | undefined): this;
 +    // instructive change end
      /**
       * NavDestination title bar

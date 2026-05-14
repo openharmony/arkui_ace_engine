@@ -482,11 +482,11 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutTargetSpace(const RefPtr<FrameNode>& p
     SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper)
 {
     Placement parentPlacement = GetPlacementWithItem(parentMenuItem);
-    bool isTop = (parentPlacement == Placement::TOP || parentPlacement == Placement::TOP_LEFT ||
-                  parentPlacement == Placement::TOP_RIGHT);
+    bool isTop = IsTopPosition(parentPlacement);
+    bool isBottom = IsBottomPosition(parentPlacement);
     if (expandingMode == SubMenuExpandingMode::STACK) {
-        return isTop ? UpdateStackPosition(parentMenuItem, size, expandingMode, layoutWrapper)
-                     : MenuLayoutAvoidAlgorithm(parentMenuItem, size, expandingMode, layoutWrapper);
+        return (isTop || isBottom) ? UpdateStackPosition(parentMenuItem, size, expandingMode, layoutWrapper)
+                                   : MenuLayoutAvoidAlgorithm(parentMenuItem, size, expandingMode, layoutWrapper);
     } else {
         return UpdateSidePosition(parentMenuItem, size, expandingMode, layoutWrapper);
     }
@@ -495,12 +495,16 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutTargetSpace(const RefPtr<FrameNode>& p
 OffsetF SubMenuLayoutAlgorithm::UpdateStackPosition(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
     SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper)
 {
-    if (!propTargetOffset_.has_value() || !proptargetSize_.has_value()) {
+    if (!propTargetOffset_.has_value() || !propTargetSize_.has_value()) {
         return NG::OffsetF(0.0f, 0.0f);
     }
-    auto pipelineContext = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
-    auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
+    CHECK_NULL_RETURN(parentMenuItem, NG::OffsetF(0.0f, 0.0f));
+    auto menuGeometry = parentMenuItem->GetGeometryNode();
+    CHECK_NULL_RETURN(menuGeometry, NG::OffsetF(0.0f, 0.0f));
+    auto menuItemSize = menuGeometry->GetFrameSize();
+    auto theme = parentMenuItem->GetTheme<SelectTheme>(true);
+    CHECK_NULL_RETURN(theme, NG::OffsetF(0.0f, 0.0f));
+    auto minItemHeight = theme->GetOptionMinHeight();
     position_ = GetSubMenuPosition(parentMenuItem, expandingMode);
     if (layoutWrapper != nullptr) {
         auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
@@ -511,30 +515,47 @@ OffsetF SubMenuLayoutAlgorithm::UpdateStackPosition(const RefPtr<FrameNode>& par
             position_ = OffsetF(wrapperSize_.Width() - leftSpace, position_.GetY());
         }
     }
+    Placement parentPlacement = GetPlacementWithItem(parentMenuItem);
+    bool isTop = IsTopPosition(parentPlacement);
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
     x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
     float targetSpace = propTargetSpace_.value().ConvertToPx();
-    float topY = propTargetOffset_.value().GetY() - targetSpace - size.Height();
+    float topY = propTargetOffset_.value().GetY() - targetSpace - size.Height() - minItemHeight.ConvertToPx();
+    float bottomY =
+        propTargetOffset_.value().GetY() + propTargetSize_.value().Height() + targetSpace + minItemHeight.ConvertToPx();
     auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_RETURN(parentItemPattern, NG::OffsetF(0.0f, 0.0f));
-    auto parentMenu = parentItemPattern->GetMenu();
-    CHECK_NULL_RETURN(parentMenu, NG::OffsetF(0.0f, 0.0f));
-    float y = parentMenuItem->GetPaintRectOffset(false, true).GetY() - size.Height();
-    float yMin = std::max(1.0f, static_cast<float>(wrapperRect_.Top()) + paddingTop_);
-    y = std::clamp(y, yMin, topY);
+    float y = 0.0f;
+    if (isTop) {
+        float yMin = std::max(1.0f, static_cast<float>(wrapperRect_.Top()) + paddingTop_);
+        y = parentMenuItem->GetPaintRectOffset(false, true).GetY() - size.Height();
+        y = std::clamp(y, yMin, topY);
+    } else {
+        y = parentMenuItem->GetPaintRectOffset(false, true).GetY() + menuItemSize.Height();
+        float yMax = static_cast<float>(wrapperRect_.Bottom()) - paddingBottom_;
+        if (y + size.Height() > yMax) {
+            y = yMax - size.Height();
+        }
+        y = std::max(y, bottomY);
+    }
     return NG::OffsetF(x, y);
 }
 
 OffsetF SubMenuLayoutAlgorithm::UpdateSidePosition(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
     SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper)
 {
-    if (!propTargetOffset_.has_value() || !proptargetSize_.has_value()) {
+    if (!propTargetOffset_.has_value() || !propTargetSize_.has_value()) {
         return NG::OffsetF(0.0f, 0.0f);
     }
-    auto pipelineContext = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
-    auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
+    CHECK_NULL_RETURN(parentMenuItem, NG::OffsetF(0.0f, 0.0f));
+    auto menuGeometry = parentMenuItem->GetGeometryNode();
+    CHECK_NULL_RETURN(menuGeometry, NG::OffsetF(0.0f, 0.0f));
+    auto menuItemSize = menuGeometry->GetFrameSize();
     auto position = GetSubMenuPosition(parentMenuItem, expandingMode);
+    float yMin = std::max(1.0f, static_cast<float>(wrapperRect_.Top()) + paddingTop_);
+    float yMax = static_cast<float>(wrapperRect_.Bottom()) - paddingBottom_;
+    position.SetX(std::clamp(position.GetX(), paddingStart_, wrapperSize_.Width() - paddingEnd_));
+    position.SetY(std::clamp(position.GetY(), yMin, yMax));
     if (layoutWrapper != nullptr) {
         auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
         CHECK_NULL_RETURN(menuLayoutProperty, NG::OffsetF(0.0f, 0.0f));
@@ -544,11 +565,11 @@ OffsetF SubMenuLayoutAlgorithm::UpdateSidePosition(const RefPtr<FrameNode>& pare
             position = OffsetF(wrapperSize_.Width() - leftSpace, position.GetY());
         }
     }
-    return LayoutSubMenuTargetSpace(size, position, menuItemSize, layoutWrapper);
+    return LayoutSubMenuTargetSpace(size, position, menuItemSize, parentMenuItem, layoutWrapper);
 }
 
-OffsetF SubMenuLayoutAlgorithm::LayoutSubMenuTargetSpace(
-    const SizeF& size, OffsetF position, const SizeF& menuItemSize, LayoutWrapper* layoutWrapper)
+OffsetF SubMenuLayoutAlgorithm::LayoutSubMenuTargetSpace(const SizeF& size, OffsetF position, const SizeF& menuItemSize,
+    const RefPtr<FrameNode>& parentMenuItem, LayoutWrapper* layoutWrapper)
 {
     NG::OffsetF offset;
     float wrapperWidth = wrapperSize_.Width();
@@ -565,20 +586,20 @@ OffsetF SubMenuLayoutAlgorithm::LayoutSubMenuTargetSpace(
     }
     if (rightSpace >= size.Width()) {
         position.SetX(std::clamp(position.GetX(), paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_));
-        offset = CurrentPositionCheck(
-            position, size, position.GetX() - size.Width() - menuItemSize.Width(), leftSpace >= size.Width());
+        offset = CurrentPositionCheck(position, size, position.GetX() - size.Width() - menuItemSize.Width(),
+            leftSpace >= size.Width(), parentMenuItem);
         return offset;
     }
     if (leftSpace >= size.Width()) {
         position.SetX(std::clamp(position.GetX() - size.Width() - menuItemSize.Width(), paddingStart_,
             wrapperSize_.Width() - size.Width() - paddingEnd_));
-        offset = OthersPositionCheck(position, size);
+        offset = OthersPositionCheck(position, size, parentMenuItem);
         return offset;
     }
     if (size.Width() < wrapperWidth) {
         position.SetX(std::clamp(wrapperWidth - size.Width() - paddingEnd_, paddingStart_,
             wrapperSize_.Width() - size.Width() - paddingEnd_));
-        offset = OthersPositionCheck(position, size);
+        offset = OthersPositionCheck(position, size, parentMenuItem);
         return offset;
     }
     offset.SetY(std::clamp(offset.GetY(), static_cast<float>(wrapperRect_.Top() + paddingTop_),
@@ -586,7 +607,8 @@ OffsetF SubMenuLayoutAlgorithm::LayoutSubMenuTargetSpace(
     return offset;
 }
 
-OffsetF SubMenuLayoutAlgorithm::CurrentPositionCheck(OffsetF& position, const SizeF& size, float flip, bool widthEnough)
+OffsetF SubMenuLayoutAlgorithm::CurrentPositionCheck(
+    OffsetF& position, const SizeF& size, float flip, bool widthEnough, const RefPtr<FrameNode>& parentMenuItem)
 {
     position.SetX(std::clamp(position.GetX(), paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_));
     flip = std::clamp(flip, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
@@ -596,38 +618,40 @@ OffsetF SubMenuLayoutAlgorithm::CurrentPositionCheck(OffsetF& position, const Si
         return currentPosition;
     }
     if (!widthEnough) {
-        currentPosition.SetY(MenuVerticalPan(currentPosition, size));
+        currentPosition.SetY(MenuVerticalPan(currentPosition, size, parentMenuItem));
         return currentPosition;
     }
     if (CheckFitScreen(flipPosition, size)) {
         return flipPosition;
     }
     if (!CheckHorizontalRange(currentPosition, size)) {
-        currentPosition.SetY(MenuVerticalPan(currentPosition, size));
+        currentPosition.SetY(MenuVerticalPan(currentPosition, size, parentMenuItem));
         return currentPosition;
     }
     if (!CheckHorizontalRange(flipPosition, size)) {
-        flipPosition.SetY(MenuVerticalPan(flipPosition, size));
+        flipPosition.SetY(MenuVerticalPan(flipPosition, size, parentMenuItem));
         return flipPosition;
     }
-    float y = MenuVerticalPan(currentPosition, size);
+    float y = MenuVerticalPan(currentPosition, size, parentMenuItem);
     currentPosition.SetY(std::clamp(y, static_cast<float>(wrapperRect_.Top() + paddingTop_),
         static_cast<float>(wrapperRect_.Bottom() - paddingBottom_)));
     return currentPosition;
 }
 
-OffsetF SubMenuLayoutAlgorithm::OthersPositionCheck(OffsetF& position, const SizeF& size)
+OffsetF SubMenuLayoutAlgorithm::OthersPositionCheck(
+    OffsetF& position, const SizeF& size, const RefPtr<FrameNode>& parentMenuItem)
 {
     if (CheckFitScreen(position, size)) {
         return position;
     }
-    float y = MenuVerticalPan(position, size);
+    float y = MenuVerticalPan(position, size, parentMenuItem);
     position.SetY(std::clamp(y, static_cast<float>(wrapperRect_.Top() + paddingTop_),
         static_cast<float>(wrapperRect_.Bottom() - paddingBottom_)));
     return position;
 }
 
-float SubMenuLayoutAlgorithm::MenuVerticalPan(const OffsetF& position, const SizeF& size)
+float SubMenuLayoutAlgorithm::MenuVerticalPan(
+    const OffsetF& position, const SizeF& size, const RefPtr<FrameNode>& parentMenuItem)
 {
     float yMin = std::max(1.0f, static_cast<float>(wrapperRect_.Top()) + paddingTop_);
     float yMax = static_cast<float>(wrapperRect_.Bottom()) - paddingBottom_;
@@ -635,18 +659,29 @@ float SubMenuLayoutAlgorithm::MenuVerticalPan(const OffsetF& position, const Siz
         return std::max(yMax - size.Height(), yMin);
     }
     float targetSpace = propTargetSpace_.value().ConvertToPx();
-    TargetSpaceReason reason = CheckHeightReason(position, size);
+    float topSpace = propTargetOffset_.value().GetY() - targetSpace - yMin;
+    float bottomSpace = yMax - propTargetOffset_.value().GetY() - targetSpace - propTargetSize_.value().Height();
+    TargetSpaceReason reason = CheckHeightReason(position, size, parentMenuItem);
+    float targetSpaceTop = propTargetOffset_.value().GetY() - targetSpace;
+    float targetSpaceBottom = propTargetOffset_.value().GetY() + propTargetSize_.value().Height() + targetSpace;
     float positionY = 0.0f;
     switch (reason) {
         case TargetSpaceReason::TOP:
-            positionY = std::max(propTargetOffset_.value().GetY() - targetSpace - size.Height(), yMin);
+            positionY = std::max(targetSpaceTop - size.Height(), yMin);
             break;
         case TargetSpaceReason::MIDDLE:
-            positionY = propTargetOffset_.value().GetY() + proptargetSize_.value().Height() + targetSpace;
+            if (GreatOrEqual(topSpace, bottomSpace)) {
+                positionY = std::max(targetSpaceTop - size.Height(), yMin);
+            } else {
+                positionY = targetSpaceBottom;
+            }
             break;
         case TargetSpaceReason::BOTTOM:
-            positionY = std::max(yMax - size.Height(),
-                propTargetOffset_.value().GetY() + proptargetSize_.value().Height() + targetSpace);
+            if (GreatOrEqual(position.GetY(), targetSpaceBottom)) {
+                positionY = std::max(yMax - size.Height(), targetSpaceBottom);
+            } else {
+                positionY = targetSpaceBottom;
+            }
             break;
         default:
             break;

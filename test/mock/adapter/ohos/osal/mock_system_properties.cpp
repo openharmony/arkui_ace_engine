@@ -76,7 +76,7 @@ int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::recycleImageEnabled_ = false;
-bool SystemProperties::imageReleaseManageObjectEnabled_ = false;
+bool SystemProperties::imageReleaseManageObjectEnabled_ = true;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
@@ -119,6 +119,7 @@ bool SystemProperties::debugThreadSafeNodeEnable_ = false;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
 bool SystemProperties::autoResizeEnabled_ = false;
 std::once_flag SystemProperties::getSysPropertiesFlag_;
+uint32_t SystemProperties::canvasDebugMode_ = 1;
 
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;

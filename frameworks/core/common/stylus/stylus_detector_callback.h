@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STYLUS_STYLUS_DETECTOR_CALLBACK_H
 
 #include "interfaces/inner_api/ace/stylus/stylus_detector_interface.h"
+#include "base/thread/task_executor.h"
 
 #include "core/components_ng/base/frame_node.h"
 

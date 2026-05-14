@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+
 export type int32 = int;
 
 export function propDeepCopy<T>(value: T): T {
-  console.log('Mock variant of propDeepCopy not supported');
+  StateMgmtConsole.log('Mock variant of propDeepCopy not supported');
   return value;
 }
 

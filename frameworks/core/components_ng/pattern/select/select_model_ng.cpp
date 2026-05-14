@@ -1401,6 +1401,67 @@ void SelectModelNG::SetMenuSystemMaterial(FrameNode* frameNode, const RefPtr<UiM
     }
 }
 
+void SelectModelNG::SetMenuBackgroundBlurStyleOptions(const std::optional<BlurStyleOption>& blurStyleOption)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMenuBackgroundBlurStyleOptions(frameNode, blurStyleOption);
+}
+
+void SelectModelNG::SetMenuBackgroundBlurStyleOptions(
+    FrameNode* frameNode, const std::optional<BlurStyleOption>& blurStyleOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuBackgroundBlurStyleOptions(*blurStyleOption);
+}
+
+void SelectModelNG::SetMenuBackgroundEffect(const std::optional<EffectOption>& effectOption)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMenuBackgroundEffect(frameNode, effectOption);
+}
+
+void SelectModelNG::SetMenuBackgroundEffect(FrameNode* frameNode, const std::optional<EffectOption>& effectOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuBackgroundEffect(effectOption);
+}
+
+void SelectModelNG::SetMenuDistortionMode(const std::optional<DistortionMode>& mode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMenuDistortionMode(frameNode, mode);
+}
+
+void SelectModelNG::SetMenuDistortionMode(FrameNode* frameNode, const std::optional<DistortionMode>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuDistortionMode(mode);
+}
+
+void SelectModelNG::SetMenuEdgeLightMode(const std::optional<EdgeLightMode>& mode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMenuEdgeLightMode(frameNode, mode);
+}
+
+void SelectModelNG::SetMenuEdgeLightMode(FrameNode* frameNode, const std::optional<EdgeLightMode>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuEdgeLightMode(mode);
+}
+
 void SelectModelNG::SetDividerPropertiesSetByUser(bool strokeWidth, bool color, bool startMargin, bool endMargin)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

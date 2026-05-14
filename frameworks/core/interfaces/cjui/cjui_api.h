@@ -239,6 +239,8 @@ struct CJUICommonModifier {
     void (*resetAccessibilityDescription)(ArkUINodeHandle node);
     void (*setId)(ArkUINodeHandle node, ArkUI_CharPtr id);
     void (*resetId)(ArkUINodeHandle node);
+    void (*setInspectorLabel)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetInspectorLabel)(ArkUINodeHandle node);
     void (*setKey)(ArkUINodeHandle node, ArkUI_CharPtr key);
     void (*resetKey)(ArkUINodeHandle node);
     void (*setRestoreId)(ArkUINodeHandle node, ArkUI_Uint32 id);
@@ -1694,6 +1696,7 @@ struct CJUITextAreaModifier {
     void (*setTextAreaDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
         ArkUI_Int32 style, void* resRawPtr);
     void (*resetTextAreaDecoration)(ArkUINodeHandle node);
+    void (*getTextAreaDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
     void (*setTextAreaLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetTextAreaLetterSpacing)(ArkUINodeHandle node);
     void (*setTextAreaLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
@@ -1830,14 +1833,15 @@ struct CJUITextInputModifier {
     void (*resetTextInputFontSize)(ArkUINodeHandle node);
     void (*setTextInputMaxLength)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputMaxLength)(ArkUINodeHandle node);
-    void (*setTextInputSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*setTextInputSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr,
+        bool isCapi);
     void (*resetTextInputSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setTextInputShowError)(ArkUINodeHandle node, ArkUI_CharPtr error, ArkUI_Uint32 visible, void* resRawPtr);
     void (*resetTextInputShowError)(ArkUINodeHandle node);
     void (*setTextInputPlaceholderFont)(ArkUINodeHandle node, const struct ArkUIPlaceholderFontType* placeholderFont,
         void* fontsizeResRawPtr, void* fontfamilyResRawPtr);
     void (*resetTextInputPlaceholderFont)(ArkUINodeHandle node);
-    void (*setTextInputFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*setTextInputFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr, bool isCapi);
     void (*resetTextInputFontColor)(ArkUINodeHandle node);
     void (*setTextInputFontStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputFontStyle)(ArkUINodeHandle node);
@@ -1894,6 +1898,7 @@ struct CJUITextInputModifier {
     void (*setTextInputDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
                                    ArkUI_Int32 style, void* resRawPtr);
     void (*resetTextInputDecoration)(ArkUINodeHandle node);
+    void (*getTextInputDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
     void (*setTextInputLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetTextInputLetterSpacing)(ArkUINodeHandle node);
     void (*setTextInputLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
@@ -2877,6 +2882,7 @@ struct CJUISearchModifier {
     void (*setSearchDecoration)(
         ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style, void* resRawPtr);
     void (*resetSearchDecoration)(ArkUINodeHandle node);
+    void (*getSearchDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
     void (*setSearchLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetSearchLetterSpacing)(ArkUINodeHandle node);
     void (*setSearchLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
@@ -3182,7 +3188,7 @@ struct CJUISpanModifier {
     void (*setSpanDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
                               ArkUI_Int32 style); // thicknessScale is set to 1.0
     void (*resetSpanDecoration)(ArkUINodeHandle node);
-    void (*setSpanFontColor)(ArkUINodeHandle node, ArkUI_Uint32 textColor, void* resourceRawPtr);
+    void (*setSpanFontColor)(ArkUINodeHandle node, ArkUI_Uint32 textColor, void* resourceRawPtr, bool isCapi);
     void (*resetSpanFontColor)(ArkUINodeHandle node);
     void (*setSpanLetterSpacing)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue,
         void* resourceRawPtr);
@@ -3635,7 +3641,7 @@ struct CJUIFrameNodeModifier {
     ArkUI_Bool (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*clearChildren)(ArkUINodeHandle node);
-    ArkUI_Uint32 (*getChildrenCount)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
+    ArkUI_Uint32 (*getChildrenCount)(ArkUINodeHandle node, ArkUI_Uint32 childrenCountMode);
     ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode);
     ArkUINodeHandle (*getFirst)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getNextSibling)(ArkUINodeHandle node, ArkUI_Bool isExpanded);

@@ -154,6 +154,7 @@ void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(minWidth, LpxAttribute::LPX_ITEM_MIN_WIDTH, frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(minWidth), std::nullopt));
@@ -166,6 +167,7 @@ void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(minHeight, LpxAttribute::LPX_ITEM_MIN_HEIGHT, frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMinSize(CalcSize(std::nullopt, CalcLength(minHeight)));
@@ -178,6 +180,7 @@ void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(maxWidth, LpxAttribute::LPX_ITEM_MAX_WIDTH, frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMaxSize(CalcSize(CalcLength(maxWidth), std::nullopt));
@@ -190,6 +193,7 @@ void WaterFlowModelNG::SetItemMaxHeight(const Dimension& maxHeight)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(maxHeight, LpxAttribute::LPX_ITEM_MAX_HEIGHT, frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMaxSize(CalcSize(std::nullopt, CalcLength(maxHeight)));
@@ -198,6 +202,7 @@ void WaterFlowModelNG::SetItemMaxHeight(const Dimension& maxHeight)
 void WaterFlowModelNG::SetColumnsGap(const Dimension& value)
 {
     if (value.IsNonNegative()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_COLUMNS_GAP);
         ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value);
     }
 }
@@ -205,6 +210,7 @@ void WaterFlowModelNG::SetColumnsGap(const Dimension& value)
 void WaterFlowModelNG::SetRowsGap(const Dimension& value)
 {
     if (value.IsNonNegative()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ROWS_GAP);
         ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value);
     }
 }
@@ -514,6 +520,7 @@ void WaterFlowModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled
 void WaterFlowModelNG::SetColumnsGap(FrameNode* frameNode, const Dimension& value)
 {
     if (value.IsNonNegative()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_COLUMNS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value, frameNode);
     }
 }
@@ -521,8 +528,11 @@ void WaterFlowModelNG::SetColumnsGap(FrameNode* frameNode, const Dimension& valu
 void WaterFlowModelNG::SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_COLUMNS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, value.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_COLUMNS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, frameNode);
     }
 }
@@ -530,6 +540,7 @@ void WaterFlowModelNG::SetColumnsGap(FrameNode* frameNode, const std::optional<D
 void WaterFlowModelNG::SetRowsGap(FrameNode* frameNode, const Dimension& value)
 {
     if (value.IsNonNegative()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ROWS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value, frameNode);
     }
 }
@@ -537,8 +548,11 @@ void WaterFlowModelNG::SetRowsGap(FrameNode* frameNode, const Dimension& value)
 void WaterFlowModelNG::SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_ROWS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, value.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ROWS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, frameNode);
     }
 }
@@ -546,6 +560,11 @@ void WaterFlowModelNG::SetRowsGap(FrameNode* frameNode, const std::optional<Dime
 void WaterFlowModelNG::SetItemMinWidth(FrameNode* frameNode, const std::optional<Dimension>& minWidth)
 {
     CHECK_NULL_VOID(frameNode);
+    if (minWidth) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(minWidth.value(), LpxAttribute::LPX_ITEM_MIN_WIDTH, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MIN_WIDTH);
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMinSize(CalcSize(minWidth ? std::optional(CalcLength(*minWidth)) : std::nullopt,
@@ -555,6 +574,11 @@ void WaterFlowModelNG::SetItemMinWidth(FrameNode* frameNode, const std::optional
 void WaterFlowModelNG::SetItemMinHeight(FrameNode* frameNode, const std::optional<Dimension>& minHeight)
 {
     CHECK_NULL_VOID(frameNode);
+    if (minHeight) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(minHeight.value(), LpxAttribute::LPX_ITEM_MIN_HEIGHT, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MIN_HEIGHT);
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMinSize(CalcSize(std::nullopt,
@@ -564,6 +588,11 @@ void WaterFlowModelNG::SetItemMinHeight(FrameNode* frameNode, const std::optiona
 void WaterFlowModelNG::SetItemMaxWidth(FrameNode* frameNode, const std::optional<Dimension>& maxWidth)
 {
     CHECK_NULL_VOID(frameNode);
+    if (maxWidth) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(maxWidth.value(), LpxAttribute::LPX_ITEM_MAX_WIDTH, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MAX_WIDTH);
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMaxSize(CalcSize(maxWidth ? std::optional(CalcLength(*maxWidth)) : std::nullopt,
@@ -573,6 +602,11 @@ void WaterFlowModelNG::SetItemMaxWidth(FrameNode* frameNode, const std::optional
 void WaterFlowModelNG::SetItemMaxHeight(FrameNode* frameNode, const std::optional<Dimension>& maxHeight)
 {
     CHECK_NULL_VOID(frameNode);
+    if (maxHeight) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(maxHeight.value(), LpxAttribute::LPX_ITEM_MAX_HEIGHT, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ITEM_MAX_HEIGHT);
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateItemMaxSize(CalcSize(std::nullopt,
@@ -917,8 +951,9 @@ void WaterFlowModelNG::ParseResObjRowsGap(FrameNode* frameNode, const RefPtr<Res
         CalcDimension result;
         bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
         if (!(parseOk && result > 0.0_vp)) {
-            result.SetValue(0.0);
+            result = 0.0_vp;
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_ROWS_GAP, AceType::RawPtr(node));
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsGap, result, node);
     };
     pattern->AddResObj("waterflow.rowsGap", resObj, std::move(updateFunc));
@@ -944,8 +979,9 @@ void WaterFlowModelNG::ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<
         CalcDimension result;
         bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
         if (!(parseOk && result > 0.0_vp)) {
-            result.SetValue(0.0);
+            result = 0.0_vp;
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_COLUMNS_GAP, AceType::RawPtr(node));
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsGap, result, node);
     };
     pattern->AddResObj("waterflow.columnsGap", resObj, std::move(updateFunc));

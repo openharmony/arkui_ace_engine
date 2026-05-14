@@ -421,6 +421,103 @@ HWTEST_F(WebPatternCursorTest, HandleMouseEventOnDrag_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnCursorChange_InvisibleNonPointer
+ * @tc.desc: Invisible web should ignore non-pointer cursor changes without updating local cursor state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, OnCursorChange_InvisibleNonPointer, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto info = std::make_shared<NWebCursorInfoTestImpl>();
+    ASSERT_NE(info, nullptr);
+    web_pattern_->isVisible_ = false;
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_POINTER;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    ASSERT_NE(mockMouseStyle, nullptr);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).Times(0);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).Times(0);
+
+    bool ret = web_pattern_->OnCursorChange(OHOS::NWeb::CursorType::CT_IBEAM, info);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(web_pattern_->cursorType_, OHOS::NWeb::CursorType::CT_POINTER);
+#endif
+}
+
+/**
+ * @tc.name: OnCursorChange_InvisiblePointer
+ * @tc.desc: Invisible web should still allow pointer cursor reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, OnCursorChange_InvisiblePointer, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    web_pattern_->isVisible_ = false;
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_IBEAM;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    ASSERT_NE(mockMouseStyle, nullptr);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(0));
+
+    bool ret = web_pattern_->OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(web_pattern_->cursorType_, OHOS::NWeb::CursorType::CT_POINTER);
+#endif
+}
+
+/**
+ * @tc.name: OnCursorChange_InvisibleUnlock
+ * @tc.desc: Invisible web should clean mouse lock state without restoring stale cursor style.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, OnCursorChange_InvisibleUnlock, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    web_pattern_->isVisible_ = false;
+    web_pattern_->isMouseLocked_ = true;
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_IBEAM;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    ASSERT_NE(mockMouseStyle, nullptr);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).Times(0);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).Times(0);
+
+    bool ret = web_pattern_->OnCursorChange(OHOS::NWeb::CursorType::CT_UNLOCK, nullptr);
+
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(web_pattern_->isMouseLocked_);
+    EXPECT_EQ(web_pattern_->cursorType_, OHOS::NWeb::CursorType::CT_IBEAM);
+#endif
+}
+
+/**
+ * @tc.name: OnCursorChange_InvisibleLock
+ * @tc.desc: Invisible web should keep mouse lock state without updating pointer style.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, OnCursorChange_InvisibleLock, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    web_pattern_->isVisible_ = false;
+    web_pattern_->isMouseLocked_ = false;
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_IBEAM;
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    ASSERT_NE(mockMouseStyle, nullptr);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).Times(0);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).Times(0);
+
+    bool ret = web_pattern_->OnCursorChange(OHOS::NWeb::CursorType::CT_LOCK, nullptr);
+
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(web_pattern_->isMouseLocked_);
+    EXPECT_EQ(web_pattern_->cursorType_, OHOS::NWeb::CursorType::CT_IBEAM);
+#endif
+}
+
+/**
  * @tc.name: ProcessCustomCursor_001
  * @tc.desc: ProcessCustomCursor when info is nullptr should return early without allocation
  * @tc.type: FUNC
@@ -464,6 +561,65 @@ HWTEST_F(WebPatternCursorTest, ProcessCustomCursor_002, TestSize.Level1)
 
     EXPECT_NE(web_pattern_->custom_cursorImg_.get(), nullptr);
     EXPECT_NE(info->GetBuff(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: OnCursorChangeWebWindowID_001
+ * @tc.desc: OnCursorChange with useWebWindowID=true and CT_TEMP_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, OnCursorChangeWebWindowID_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    OHOS::NWeb::CursorType type = OHOS::NWeb::CursorType::CT_TEMP_POINTER;
+    auto info = std::make_shared<NWebCursorInfoTestImpl>();
+    ASSERT_NE(info, nullptr);
+    web_pattern_->isHoverExit_ = false;
+    web_pattern_->windowId_ = 100;
+
+    OHOS::NWeb::CursorType originalCursorType = web_pattern_->cursorType_;
+
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    MockContainer::Current()->SetIsUIExtensionWindow(false);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillRepeatedly(Return(0));
+
+    bool result = web_pattern_->OnCursorChange(type, info, true);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(web_pattern_->cursorType_, originalCursorType);
+#endif
+}
+
+/**
+ * @tc.name: OnCursorChangeWebWindowID_002
+ * @tc.desc: OnCursorChange with useWebWindowID=true and CT_DRAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, OnCursorChangeWebWindowID_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    OHOS::NWeb::CursorType type = OHOS::NWeb::CursorType::CT_DRAG;
+    auto info = std::make_shared<NWebCursorInfoTestImpl>();
+    ASSERT_NE(info, nullptr);
+    web_pattern_->isHoverExit_ = false;
+    web_pattern_->windowId_ = 100;
+
+    // First set cursorType_ to a specific value
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_POINTER;
+    OHOS::NWeb::CursorType originalCursorType = web_pattern_->cursorType_;
+
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    MockContainer::Current()->SetIsUIExtensionWindow(false);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillRepeatedly(Return(0));
+
+    bool result = web_pattern_->OnCursorChange(type, info, true);
+
+    EXPECT_TRUE(result);
+    // CT_DRAG should not change cursorType_
+    EXPECT_EQ(web_pattern_->cursorType_, originalCursorType);
 #endif
 }
 } // namespace OHOS::Ace::NG

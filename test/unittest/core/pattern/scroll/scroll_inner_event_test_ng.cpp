@@ -924,6 +924,38 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragEndScrollBar001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleLongPressScrollBar001
+ * @tc.desc: Test scrollbar long press with empty scrollPageCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleLongPressScrollBar001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    scrollBar_->SetScrollPageCallback(nullptr);
+    MouseOnScrollBar(MouseButton::LEFT_BUTTON, MouseAction::PRESS, Offset(239.f, 350.f));
+
+    ASSERT_NE(scrollBar_->longPressRecognizer_, nullptr);
+    EXPECT_TRUE(scrollBar_->isMousePressed_);
+    EXPECT_FALSE(scrollBar_->scrollPageCallback_);
+
+    bool reverse = true;
+    EXPECT_TRUE(scrollBar_->AnalysisUpOrDown(Point(239.f, 350.f), reverse));
+    EXPECT_FALSE(reverse);
+    EXPECT_TRUE(Position(0));
+
+    GestureEvent info;
+    auto handleLongPress = *(scrollBar_->longPressRecognizer_->onAction_);
+    handleLongPress(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(scrollBar_->isMousePressed_);
+    EXPECT_TRUE(Position(0));
+}
+
+/**
  * @tc.name: MouseEventScrollBar001
  * @tc.desc: Test scroll bar hover.
  * @tc.type: FUNC

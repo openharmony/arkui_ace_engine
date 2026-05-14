@@ -88,6 +88,7 @@ public:
     virtual void SetCapsuleStyle(bool value) = 0;
     virtual void SetGradientColorByUser(bool value) = 0;
     virtual void SetBorderColorSetByUser(bool value) = 0;
+    virtual void ResetBorderColor() = 0;
 
 private:
     static std::unique_ptr<ProgressModel> instance_;

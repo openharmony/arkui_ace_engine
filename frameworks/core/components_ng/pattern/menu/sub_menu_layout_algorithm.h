@@ -55,11 +55,12 @@ private:
         SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper = nullptr);
     OffsetF UpdateSidePosition(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size,
         SubMenuExpandingMode expandingMode, LayoutWrapper* layoutWrapper = nullptr);
-    OffsetF LayoutSubMenuTargetSpace(
-        const SizeF& size, OffsetF position, const SizeF& menuItemSize, LayoutWrapper* layoutWrapper = nullptr);
-    OffsetF CurrentPositionCheck(OffsetF& position, const SizeF& size, float flip, bool widthEnough);
-    OffsetF OthersPositionCheck(OffsetF& position, const SizeF& size);
-    float MenuVerticalPan(const OffsetF& position, const SizeF& size);
+    OffsetF LayoutSubMenuTargetSpace(const SizeF& size, OffsetF position, const SizeF& menuItemSize,
+        const RefPtr<FrameNode>& parentMenuItem, LayoutWrapper* layoutWrapper = nullptr);
+    OffsetF CurrentPositionCheck(
+        OffsetF& position, const SizeF& size, float flip, bool widthEnough, const RefPtr<FrameNode>& parentMenuItem);
+    OffsetF OthersPositionCheck(OffsetF& position, const SizeF& size, const RefPtr<FrameNode>& parentMenuItem);
+    float MenuVerticalPan(const OffsetF& position, const SizeF& size, const RefPtr<FrameNode>& parentMenuItem);
     float NormalizePositionY(const RefPtr<FrameNode>& frameNode, float menuTopPositionY, float positionY);
     float margin_ = 0.0f;
     float paddingStart_ = 0.0f;

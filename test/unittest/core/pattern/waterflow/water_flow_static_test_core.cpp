@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "gtest/gtest.h"
 
 #define protected public
@@ -49,4 +51,25 @@ public:
 };
 
 } // namespace
+
+/**
+ * @tc.name: WaterFlowLpxAttribute001
+ * @tc.desc: Verify rowsGap and itemMinWidth keep independent LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowStaticTestCore, WaterFlowLpxAttribute001, TestSize.Level1)
+{
+    auto frameNode = WaterFlowModelNG::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+
+    WaterFlowModelNG::SetRowsGap(AceType::RawPtr(frameNode), std::make_optional(Dimension(12.0, DimensionUnit::LPX)));
+    WaterFlowModelNG::SetItemMinWidth(
+        AceType::RawPtr(frameNode), std::make_optional(Dimension(100.0, DimensionUnit::LPX)));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ROWS_GAP));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ITEM_MIN_WIDTH));
+
+    WaterFlowModelNG::SetRowsGap(AceType::RawPtr(frameNode), std::make_optional(Dimension(12.0, DimensionUnit::VP)));
+    EXPECT_FALSE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ROWS_GAP));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ITEM_MIN_WIDTH));
+}
 } // namespace OHOS::Ace::NG

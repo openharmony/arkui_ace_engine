@@ -18,7 +18,9 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
@@ -36,6 +38,8 @@ public:
     static void SetOnChange(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, ContainerPickerChangeEvent&& onScrollStop);
     static void SetChangeEvent(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
+    static void SetDisplayedItemCount(FrameNode* frameNode, std::optional<int32_t> count);
+    static void SetItemHeight(FrameNode* frameNode, std::optional<Dimension> height);
 };
 } // namespace OHOS::Ace::NG
 

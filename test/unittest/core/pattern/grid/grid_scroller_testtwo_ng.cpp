@@ -14,6 +14,7 @@
  */
 
 #include "grid_test_ng.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"

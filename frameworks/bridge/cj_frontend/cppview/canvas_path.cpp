@@ -15,6 +15,8 @@
 
 #include "bridge/cj_frontend/cppview/canvas_path.h"
 
+#include <inttypes.h>
+
 #include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::Framework {
 

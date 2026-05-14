@@ -14,6 +14,7 @@
  */
 
 #include "base/utils/multi_thread.h"
+#include "core/common/container.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
@@ -333,7 +334,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
         };
         AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
         cancelAnimationCallbacl();
-        auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus();
+        auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus(nullptr, true);
         if (status != CancelAnimationStatus::SUCCESS &&
             status != CancelAnimationStatus::EMPTY_PENDING_SYNC_LIST) {
             ACE_SCOPED_TRACE("Marquee stop property sync failed");

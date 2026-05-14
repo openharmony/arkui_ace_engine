@@ -39,6 +39,8 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void PaintNormalIndicator(const PaintWrapper* paintWrapper) override;
+    void PaintPressIndicator(const PaintWrapper* paintWrapper) override;
+    void UpdateBackground(const PaintWrapper* paintWrapper) override;
     std::pair<float, float> CalculatePointCenterX(
         const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index) override;
 

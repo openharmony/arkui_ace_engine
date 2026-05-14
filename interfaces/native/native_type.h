@@ -2909,6 +2909,8 @@ typedef enum {
      * <b>Checkbox</b>, <b>Radio</b>, <b>Toggle</b>, <b>List</b>, <b>Grid</b>, and <b>MenuItem</b>.
      */
     UI_STATE_SELECTED = 1 << 3,
+    /** Hovered state. */
+    UI_STATE_HOVERED = 1 << 4,
 } ArkUI_UIState;
 
 /**
@@ -2930,6 +2932,18 @@ typedef enum {
     /** Move focus right. */
     ARKUI_FOCUS_MOVE_RIGHT,
 } ArkUI_FocusMove;
+
+/**
+ * @brief Enumerates whether accessibility default focus is enabled.
+ *
+ * @since 26
+ */
+typedef enum {
+    /** Accessibility default focus is disabled. */
+    ARKUI_ACCESSIBILITY_DEFAULT_FOCUS_DISABLED = 0,
+    /** Accessibility default focus is enabled. */
+    ARKUI_ACCESSIBILITY_DEFAULT_FOCUS_ENABLED,
+} ArkUI_AccessibilityDefaultFocus;
 
 /**
  * @brief Enumerates the edge derection.

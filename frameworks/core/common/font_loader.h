@@ -20,6 +20,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+class RenderNode;
 
 class FontLoader : public virtual AceType {
     DECLARE_ACE_TYPE(FontLoader, AceType);

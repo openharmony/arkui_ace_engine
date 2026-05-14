@@ -23,7 +23,7 @@ void NativeNavigationUtils::ParseBarItems(
     EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vector<ArkUIBarItem>& items)
 {
     auto array = panda::Local<panda::ArrayRef>(jsValue);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
         if (!item->IsObject(vm)) {
@@ -200,7 +200,7 @@ void NativeNavigationUtils::ParseAndSendFunctionParam(ArkUIRuntimeCallInfo* runt
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     auto jsArray = Framework::JSRef<Framework::JSArray>::Cast(info[1]);
     auto array = panda::Local<panda::ArrayRef>(jsValue);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     for (uint32_t index = 0; index < length; index++) {
         auto item = panda::ArrayRef::GetValueAt(vm, array, index);
         if (!item->IsObject(vm)) {

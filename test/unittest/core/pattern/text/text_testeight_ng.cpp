@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <chrono>
+
 #include "foundation/arkui/ace_engine/test/mock/frameworks/core/rosen/testing_canvas.h"
 #include "gmock/gmock.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -309,6 +311,7 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate005, TestSize.Level1)
     pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
     pattern->magnifierController_->magnifierNodeExist_ = false;
     pattern->textSelector_.baseOffset = 0;
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->isTriggerParentToScroll_ = true;
     pattern->OnTextGestureSelectionUpdate(start, end, touchEventInfo);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
@@ -353,6 +356,33 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionEnd002, TestSize.Level1)
     TouchLocationInfo locationInfo(0);
     pattern->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_EQ(secondHandle_, pattern->textSelector_.secondHandle);
+}
+
+/**
+ * @tc.name: OnTextGestureSelectionEnd003
+ * @tc.desc: test OnTextGestureSelectionEnd resets magnifier touch velocity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnTextGestureSelectionEnd003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->textForDisplay_ = CREATE_VALUE_W;
+    pattern->SetupMagnifier();
+    ASSERT_NE(pattern->magnifierController_, nullptr);
+
+    auto time1 = TimeStamp(std::chrono::milliseconds(10));
+    auto time2 = TimeStamp(std::chrono::milliseconds(20));
+    pattern->magnifierController_->UpdateTouchVelocity(OffsetF(10.0f, 10.0f), time1, TouchType::MOVE);
+    pattern->magnifierController_->UpdateTouchVelocity(OffsetF(40.0f, 10.0f), time2, TouchType::MOVE);
+    EXPECT_GE(pattern->magnifierController_->touchVelocityX_, 0.0f);
+
+    TouchLocationInfo locationInfo(0);
+    pattern->OnTextGestureSelectionEnd(locationInfo);
+    EXPECT_EQ(pattern->magnifierController_->touchVelocityX_, 0.0f);
+    EXPECT_FALSE(pattern->magnifierController_->magnifierNodeExist_);
 }
 
 /**
@@ -599,6 +629,7 @@ HWTEST_F(TextTestEightNg, HandleUrlMouseEvent001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto oldLocalLocation = info.GetLocalLocation();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->hasTransform_ = true;
     auto hasTransform = pattern->selectOverlay_->hasTransform_;
     pattern->isMousePressed_ = true;
@@ -621,6 +652,7 @@ HWTEST_F(TextTestEightNg, HandleUrlMouseEvent002, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto oldLocalLocation = info.GetLocalLocation();
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->hasTransform_ = true;
     auto hasTransform = pattern->selectOverlay_->hasTransform_;
     pattern->isMousePressed_ = false;
@@ -661,7 +693,7 @@ HWTEST_F(TextTestEightNg, OnWindowSizeChanged001, TestSize.Level1)
 
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);
-    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
     pattern->selectOverlay_->OnBind(manager);
     SelectOverlayInfo overlayInfo;
     auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
@@ -1199,6 +1231,7 @@ HWTEST_F(TextTestEightNg, HandleLongPress001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     GestureEvent info;
     pattern->isMousePressed_ = false;
+    pattern->GetSelectOverlay();
     pattern->selectOverlay_->isHandleDragging_ = true;
     pattern->HandleLongPress(info);
     auto host = pattern->GetHost();

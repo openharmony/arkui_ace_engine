@@ -226,15 +226,22 @@ advanced_ui_component/atomicservicetabs/ @giteewzp
 advanced_ui_component/atomicserviceweb/ @giteewzp
 advanced_ui_component/BUILD.gn @arkuitoolchain
 advanced_ui_component/chipgroup/ @arkuitoolchain
+advanced_ui_component/chipgroupv2/ @arkuitoolchain
 advanced_ui_component/chip/ @arkuitoolchain
+advanced_ui_component/chipv2/ @arkuitoolchain
 advanced_ui_component/composelistitem/ @arkuiadvancedcomponent
+advanced_ui_component/composelistitemv2/ @arkuiadvancedcomponent
 advanced_ui_component/composetitlebar/ @arkuiadvancedcomponent
+advanced_ui_component/composetitlebarv2/ @arkuiadvancedcomponent
 advanced_ui_component/counter/ @arkuitoolchain
+advanced_ui_component/counterv2/ @arkuitoolchain
 advanced_ui_component/dialog/ @arkuiadvancedcomponent
 advanced_ui_component/dialogv2/ @arkuiadvancedcomponent
 advanced_ui_component/downloadfilebutton/
 advanced_ui_component/editabletitlebar/ @arkuiadvancedcomponent
+advanced_ui_component/editabletitlebarv2/ @arkuiadvancedcomponent
 advanced_ui_component/exceptionprompt/ @arkuiadvancedcomponent
+advanced_ui_component/exceptionpromptv2/ @arkuiadvancedcomponent
 advanced_ui_component/filter/ @arkuiadvancedcomponent
 advanced_ui_component/foldsplitcontainer/ @arkuilayout1
 advanced_ui_component/formmenu/ @form_framework
@@ -250,13 +257,16 @@ advanced_ui_component/selectionmenu/ @huawei_g_five
 advanced_ui_component_static/selectionmenu/ @huawei_g_five
 advanced_ui_component/selecttitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/splitlayout/ @arkuiadvancedcomponent
+advanced_ui_component/splitlayoutv2/ @arkuiadvancedcomponent
 advanced_ui_component/subheader/ @arkuiadvancedcomponent
 advanced_ui_component/subheaderv2/ @arkuiadvancedcomponent
 advanced_ui_component/swiperefresher/ @arkuiadvancedcomponent
+advanced_ui_component/swiperefresherv2/ @arkuiadvancedcomponent
 advanced_ui_component/tabtitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbarv2/ @arkuiadvancedcomponent
 advanced_ui_component/treeview/ @arkuiadvancedcomponent
+advanced_ui_component/treeviewv2/ @arkuiadvancedcomponent
 advanced_ui_component_static/multinavigation/ @arkui_navigation
 advanced_ui_component_static/arcbutton/ @arkuipopupwindow_all
 advanced_ui_component_static/arcslider/ @arkuipopupwindow_all
@@ -269,6 +279,7 @@ advanced_ui_component_static/assembled_advanced_ui_component/ @arkuiadvancedcomp
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.Chip.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.ChipGroup.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.Counter.ets @arkuitoolchain
+advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.CounterV2.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.SegmentButton.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.SegmentButtonV2.ets @arkuitoolchain
 
@@ -571,7 +582,6 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitemgroup
 frameworks/bridge/declarative_frontend/ark_component/components/arksearch.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arksymbolglyph.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkricheditor.js @arkui_rich_editor
-frameworks/bridge/declarative_frontend/ark_component/src_dir/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/types/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package-lock.json @arkuieco3
@@ -579,8 +589,8 @@ frameworks/bridge/declarative_frontend/ark_component/package.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkflowitem.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkfolderstack.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arklazywaterflow.js @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_component/components/arklazycolumnlayout.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
-frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component_new/src/arkgauge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkcounter.ts @huawei_g_five
@@ -635,6 +645,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui0
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyGridLayout.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyWaterFlowLayout.ts @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyColumnLayout.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLine.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLinearIndicator.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @arkuiscroll
@@ -697,7 +708,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts @arkuis
 frameworks/bridge/declarative_frontend/ark_component/src/ArkWeb.ts @arkweb-committer-group
 frameworks/bridge/declarative_frontend/ark_component/src/ArkXComponent.ts @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/ark_component/src/import.ts @arkuieco3
-frameworks/bridge/declarative_frontend/ark_component/tsconfig.json @arkui_architecture
+frameworks/bridge/declarative_frontend/ark_component/tsconfig.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_layoutalgorithm/ @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/alphabet_indexer_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/blank_modifier.ts @arkuilayout1
@@ -729,6 +740,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @
 frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_grid_layout_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_water_flow_layout_modifier.ts @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_column_layout_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier.ts @arkuiscroll
@@ -2041,6 +2053,8 @@ frameworks/core/components/common/properties/marquee_option.h @arkui_framework_x
 frameworks/core/components/common/properties/motion_path_evaluator.cpp @arkui_framework_xnode
 frameworks/core/components/common/properties/motion_path_evaluator.h @arkui_framework_xnode
 frameworks/core/components/common/properties/motion_path_option.h @arkui_framework_xnode
+frameworks/core/components/common/properties/os_content.cpp @arkuiscroll
+frameworks/core/components/common/properties/os_content.h @arkuiscroll
 frameworks/core/components/common/properties/outline_style.h @arkui_framework_xnode
 frameworks/core/components/common/properties/page_transition_option.cpp @arkuicodepulse
 frameworks/core/components/common/properties/page_transition_option.h @arkuicodepulse
@@ -2511,7 +2525,8 @@ frameworks/core/components_ng/pattern/image_animator/ @arkui001
 frameworks/core/components_ng/pattern/image/ @arkui001
 frameworks/core/components_ng/pattern/indexer/ @arkui_navigation
 frameworks/core/components_ng/pattern/lazy_layout/ @arkuiscroll
-frameworks/core/components_ng/pattern/lazy_waterflow/ @arkuiscroll
+frameworks/core/components_ng/pattern/lazy_waterflow_layout/ @arkuiscroll
+frameworks/core/components_ng/pattern/lazy_column_layout/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_indicator/ @arkui_navigation
 frameworks/core/components_ng/pattern/linear_layout/ @arkuilayout1
 frameworks/core/components_ng/pattern/linear_split/ @arkuilayout1
@@ -2580,7 +2595,7 @@ frameworks/core/components_ng/pattern/recycle_view/ @arkuieco3
 frameworks/core/components_ng/pattern/refresh/ @arkuiscroll
 frameworks/core/components_ng/pattern/relative_container/ @arkuilayout1
 frameworks/core/components_ng/pattern/remote_window/
-frameworks/core/components_ng/pattern/render_node/ @arkui_framework_xnode
+frameworks/core/components_ng/pattern/render_node/ @arkuieco3
 frameworks/core/components_ng/pattern/rich_editor/ @arkui_rich_editor
 frameworks/core/components_ng/pattern/rich_editor_drag/ @arkui_rich_editor
 frameworks/core/components_ng/pattern/root/ @ArkUI_Event
@@ -2730,6 +2745,7 @@ frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp @arkuicod
 frameworks/core/components_ng/render/adapter/rosen_luminance_sampling_helper.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_luminance_sampling_helper.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/sampler_manager.h @arkuicodepulse
+frameworks/core/components_ng/render/adapter/sheet_popup_shape.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_image.cpp @arkui001
@@ -2755,6 +2771,7 @@ frameworks/core/components_ng/render/adapter/rosen_transition_effect.h @arkuicod
 frameworks/core/components_ng/render/adapter/rosen_transition_effect_impl.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_window.cpp @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_window.h @arkui_framework_xnode
+frameworks/core/components_ng/render/adapter/sheet_render_edge_light_modifier.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/skia_color_filter.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/skia_color_filter.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/skia_decoration_painter.cpp @arkuicodepulse
@@ -2822,6 +2839,7 @@ frameworks/core/components_ng/render/render_surface.h @arkuilayout1
 frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout1
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout1
 frameworks/core/components_ng/render/snapshot_param.h @ArkUI_Event
+frameworks/core/components_ng/render/sheet_popup_shape.h @arkuicodepulse
 frameworks/core/components_ng/token_theme/ @arkui_framework_resource
 frameworks/core/drawable/ @arkui001
 frameworks/core/pipeline_ng/ @arkui_architecture
@@ -2895,6 +2913,8 @@ frameworks/core/interfaces/native/node/lazy_grid_layout_modifier.cpp @arkuiscrol
 frameworks/core/interfaces/native/node/lazy_grid_layout_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/lazy_water_flow_layout_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/lazy_water_flow_layout_modifier.h @arkuiscroll
+frameworks/core/interfaces/native/node/lazy_column_layout_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/node/lazy_column_layout_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/line_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/line_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/linear_indicator_modifier.cpp @arkui_navigation
@@ -3157,6 +3177,7 @@ interfaces/native/node/span_style_native_impl.cpp @arkui_rich_editor
 [ANI Interfaces]
 interfaces/ets/ani/componentSnapshot/src/componentSnapshot.cpp @ArkUI_Event
 interfaces/ets/ani/test/ @ArkUI_Event
+interfaces/ets/ani/smartgesturecontroller/BUILD.gn @ArkUI_Event
 
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkui_framework_xnode
@@ -3567,6 +3588,7 @@ test/mock/core/common/mock_container.h @arkui_framework_xnode
 test/mock/core/common/mock_data_detector_adapter.cpp @huawei_g_five
 test/mock/core/common/mock_data_detector_mgr.cpp @huawei_g_five
 test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
+test/mock/frameworks/core/common/mock_container_scope.cpp @arkui_framework_xnode
 test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp @arkui_framework_xnode
 test/mock/interfaces/native/mock_native_error_message_wrapper.cpp @arkui_framework_xnode
 test/mock/ohos_mock/ @arkui_framework_xnode
@@ -3610,6 +3632,9 @@ test/unittest/core/common/task_runner_adapter_impl/task_runner_adapter_test.cpp 
 test/unittest/core/common/vibrator/ @arkui_framework_xnode
 test/unittest/core/common/transform/ @ArkUI_Event
 test/unittest/core/common/statistic_event/ @arkui_framework_xnode
+test/unittest/core/components/BUILD.gn @arkuiscroll
+test/unittest/core/components/common/properties/os_content_test.cpp @arkuiscroll
+test/unittest/core/components/common/properties/os_content_test.h @arkuiscroll
 test/unittest/core/event/ @ArkUI_Event
 test/unittest/core/gestures/ @ArkUI_Event
 test/unittest/core/image_file_cache/ @arkui001
@@ -3721,7 +3746,7 @@ test/unittest/core/pattern/rating/ @arkuipopupwindow_all
 test/unittest/core/pattern/recycle_node/ @arkuieco3
 test/unittest/core/pattern/refresh/ @arkuiscroll
 test/unittest/core/pattern/relative_container/ @arkuilayout1
-test/unittest/core/pattern/render_node/ @arkui_framework_xnode
+test/unittest/core/pattern/render_node/ @arkuieco3
 test/unittest/core/pattern/rich_editor/ @arkui_rich_editor
 test/unittest/core/pattern/rich_editor_drag/ @arkui_rich_editor
 test/unittest/core/pattern/scroll/ @arkuiscroll
@@ -4507,8 +4532,8 @@ frameworks/core/interfaces/native/implementation/offscreen_canvas_rendering_cont
 frameworks/core/interfaces/native/implementation/offscreen_canvas_rendering_context2d_peer_impl.h @arkuilayout1
 frameworks/core/interfaces/native/implementation/pan_gesture_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/pan_gesture_event_peer.h @ArkUI_Event
-frameworks/core/interfaces/native/implementation/pan_gesture_options_accessor.cpp @ArkUI_Event
-frameworks/core/interfaces/native/implementation/pan_gesture_options_peer.h @ArkUI_Event
+frameworks/core/interfaces/native/implementation/pan_gesture_options_proxy_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/pan_gesture_options_proxy_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/pan_recognizer_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/pan_recognizer_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/particle_helper_accessor.cpp @arkuicodepulse
@@ -4678,6 +4703,7 @@ interfaces/ets/ani/inspector/src/inspector_util.h @ArkUI_ability_group
 interfaces/ets/ani/matrix4/src/matrix4.cpp @arkuicodepulse
 interfaces/ets/ani/mediaquery/src/mediaquery.cpp @arkuilayout1
 interfaces/ets/ani/ohosprompt/src/prompt.cpp @arkuipopupwindow_all
+interfaces/ets/ani/overlayManager/BUILD.gn @arkuipopupwindow_all
 interfaces/ets/ani/overlayManager/src/overlayManager.cpp @arkuipopupwindow_all
 interfaces/ets/ani/performanceMonitor/src/performanceMonitor.cpp @arkui_framework_xnode
 interfaces/ets/ani/pluginComponent/ @ArkUI_ability_group

@@ -14,7 +14,10 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/modifier.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cinttypes>
@@ -31,11 +34,14 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #endif
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
@@ -78,6 +84,8 @@
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -150,6 +158,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -251,6 +260,11 @@ void UpdateNeedRenderInfoAfterRequestFrame(const RefPtr<FrameNode>& frameNode)
     }
 }
 } // namespace
+
+bool FrameNode::ShouldDetectAceObjTypeConvertion()
+{
+    return SystemProperties::DetectAceObjTypeConvertion();
+}
 
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
@@ -618,7 +632,10 @@ private:
 
 FrameNode::FrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
-    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
+    : UINode(tag, nodeId, isRoot),
+      LayoutWrapper(WeakClaim(this)),
+      renderContext_(RenderContext::Create()),
+      pattern_(pattern)
 {
     if (isRoot) {
         isPendingState_ = true;
@@ -650,6 +667,41 @@ FrameNode::FrameNode(
 #endif
     }
     uiNodeType_ = UINodeType::FRAME_NODE;
+}
+
+bool FrameNode::ZIndexComparator::operator()(
+    const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
+{
+    auto left = weakLeft.Upgrade();
+    auto right = weakRight.Upgrade();
+    if (left && right) {
+        auto leftContext = left->GetRenderContext();
+        auto rightContext = right->GetRenderContext();
+        CHECK_NULL_RETURN(leftContext, false);
+        CHECK_NULL_RETURN(rightContext, false);
+        return leftContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE) < rightContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+    }
+    return false;
+}
+
+bool FrameNode::HasPositionProp() const
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
+           renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
+}
+
+bool FrameNode::IsOutOfLayout() const
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
+}
+
+void FrameNode::UpdateOcclusionCullingStatus(bool enable)
+{
+    if (renderContext_) {
+        renderContext_->UpdateOcclusionCullingStatus(enable);
+    }
 }
 
 void FrameNode::OnDelete()
@@ -1628,6 +1680,9 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     json->Put("isMeasureBoundary", isMeasureBoundary_);
     json->Put("hasPendingRequest", hasPendingRequest_);
     json->Put("isFirstBuilding", isFirstBuilding_);
+    if (!GetInspectorLabel().empty()) {
+        json->Put("inspectorLabel", GetInspectorLabel().c_str());
+    }
     ExtraCustomPropertyToJsonValue(json, filter);
     if (IsCNode() || !IsJsCustomPropertyUpdated()) {
         auto jsonNode = JsonUtil::Create(true);
@@ -5297,8 +5352,13 @@ bool FrameNode::MarkRemoving()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        geometryTransition->Build(WeakClaim(this), false);
-        pendingRemove = true;
+        const bool isOnShow = GetContext() ? GetContext()->GetOnShow() : true;
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "FrameNode::MarkRemoving, outNode: %{public}d, %{public}s,"
+            " isOnForeground: %{public}d", GetId(), GetTag().c_str(), isOnShow);
+        if (isOnShow) {
+            geometryTransition->Build(WeakClaim(this), false);
+            pendingRemove = true;
+        }
     }
 
     const auto children = GetChildren();
@@ -6175,6 +6235,7 @@ void FrameNode::UpdateFocusState()
 
 void FrameNode::UpdateSmartGestureSelectedState()
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto eventManager = context->GetEventManager();
@@ -6182,6 +6243,7 @@ void FrameNode::UpdateSmartGestureSelectedState()
     auto smartGestureManager = eventManager->GetSmartGestureManager();
     CHECK_NULL_VOID(smartGestureManager);
     smartGestureManager->UpdateSelectedNodePaintIfNeeded(AceType::Claim(this));
+#endif
 }
 
 bool FrameNode::SelfOrParentExpansive()
@@ -7207,6 +7269,7 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
         eventHub_->OnAttachContext(context);
     }
     pattern_->OnAttachContext(context);
+#ifdef SMART_GESTURE_SUPPORTED
     if (smartGestureProperty_) {
         auto eventManager = context->GetEventManager();
         CHECK_NULL_VOID(eventManager);
@@ -7215,11 +7278,13 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
             manager->SyncPrimaryActionNode(AceType::Claim(this));
         }
     }
+#endif
 }
 
 void FrameNode::DetachContext(bool recursive)
 {
     CHECK_NULL_VOID(context_);
+#ifdef SMART_GESTURE_SUPPORTED
     if (smartGestureProperty_) {
         auto eventManager = context_->GetEventManager();
         CHECK_NULL_VOID(eventManager);
@@ -7228,6 +7293,7 @@ void FrameNode::DetachContext(bool recursive)
             manager->RemovePrimaryActionNode(GetId());
         }
     }
+#endif
     pattern_->OnDetachContext(context_);
     if (eventHub_) {
         eventHub_->OnDetachContext(context_);

@@ -263,6 +263,16 @@ public:
      */
     double ConvertToVpByAppFontScale() const;
 
+    double ConvertToFpWithEnv(std::optional<float> envFontScale = std::nullopt) const;
+    double ConvertToPxDistributeWithEnv(
+        std::optional<float> minOptional, std::optional<float> maxOptional, bool allowScale = true,
+        std::optional<float> envFontScale = std::nullopt) const;
+    double ConvertToPxByCustomFontScaleWithEnv(float minFontScale, float maxFontScale,
+        std::optional<float> envFontScale = std::nullopt) const;
+    double ConvertToPxByAppFontScaleWithEnv(float minFontScale,
+        std::optional<float> envFontScale = std::nullopt) const;
+    double ConvertToVpByAppFontScaleWithEnv(std::optional<float> envFontScale = std::nullopt) const;
+
     /**
      * @brief Gets the native value in the specified unit.
      * @param unit The target unit to convert to.

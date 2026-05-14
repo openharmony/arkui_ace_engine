@@ -18,6 +18,8 @@
 
 #include <future>
 #include <list>
+
+#include "base/error/error_code.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_config_interface.h"
 #include "interfaces/native/native_interface_xcomponent.h"
 

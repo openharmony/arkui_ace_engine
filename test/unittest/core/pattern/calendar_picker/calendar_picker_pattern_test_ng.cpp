@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -67,6 +68,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 using namespace testing;
@@ -1532,6 +1534,243 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnThemeScopeUpdate_A
 
     const bool updateResult = pickerPattern->OnThemeScopeUpdate(1);
     EXPECT_TRUE(updateResult);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_SetDialogNodeAndGetDialogNode_001
+ * @tc.desc: Test SetDialogNode and GetDialogNode methods for basic set/get functionality.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_SetDialogNodeAndGetDialogNode_001, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+
+    pickerPattern->SetDialogNode(dialogNode);
+    auto retrievedDialogNode = pickerPattern->GetDialogNode().Upgrade();
+    EXPECT_EQ(retrievedDialogNode, dialogNode);
+
+    pickerPattern->SetDialogNode(nullptr);
+    auto nullDialogNode = pickerPattern->GetDialogNode().Upgrade();
+    EXPECT_EQ(nullDialogNode, nullptr);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_SetDialogShow_ClearsDialogNode_001
+ * @tc.desc: Test SetDialogShow clears dialogNode when flag is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_SetDialogShow_ClearsDialogNode_001, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+
+    pickerPattern->SetDialogNode(dialogNode);
+    EXPECT_TRUE(pickerPattern->GetDialogNode().Upgrade());
+
+    pickerPattern->SetDialogShow(true);
+    EXPECT_TRUE(pickerPattern->GetDialogNode().Upgrade());
+    EXPECT_TRUE(pickerPattern->IsDialogShow());
+
+    pickerPattern->SetDialogShow(false);
+    EXPECT_FALSE(pickerPattern->GetDialogNode().Upgrade());
+    EXPECT_FALSE(pickerPattern->IsDialogShow());
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_OnThemeScopeUpdate_WithDialogNode_001
+ * @tc.desc: OnThemeScopeUpdate should call DialogPattern OnThemeScopeUpdate when dialogNode exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnThemeScopeUpdate_WithDialogNode_001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    pickerPattern->SetDialogNode(dialogNode);
+
+    constexpr int32_t testThemeScopeId = 100;
+    const bool result = pickerPattern->OnThemeScopeUpdate(testThemeScopeId);
+    EXPECT_TRUE(result);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_OnThemeScopeUpdate_WithoutDialogNode_001
+ * @tc.desc: OnThemeScopeUpdate should not crash when dialogNode is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnThemeScopeUpdate_WithoutDialogNode_001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    pickerPattern->SetDialogNode(nullptr);
+
+    constexpr int32_t testThemeScopeId = 100;
+    const bool result = pickerPattern->OnThemeScopeUpdate(testThemeScopeId);
+    EXPECT_TRUE(result);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_OnThemeScopeUpdate_NoDialogPattern_001
+ * @tc.desc: OnThemeScopeUpdate should not crash when dialogNode has no DialogPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_OnThemeScopeUpdate_NoDialogPattern_001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(dialogNode, nullptr);
+
+    pickerPattern->SetDialogNode(dialogNode);
+
+    constexpr int32_t testThemeScopeId = 100;
+    const bool result = pickerPattern->OnThemeScopeUpdate(testThemeScopeId);
+    EXPECT_TRUE(result);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_CreateCalendarPicker_ApplyDefaultColor_001
+ * @tc.desc: CreateCalendarPicker should apply default theme color when NormalTextColorSetByUser is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_CreateCalendarPicker_ApplyDefaultColor_001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    CalendarSettingData settingData;
+    CalendarPickerModelNG::CreateCalendarPicker(settingData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
+    ASSERT_NE(calendarTheme, nullptr);
+
+    EXPECT_EQ(layoutProperty->GetColor().value_or(Color::TRANSPARENT), calendarTheme->GetEntryFontColor());
+    EXPECT_FALSE(layoutProperty->GetNormalTextColorSetByUser().value_or(false));
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarPickerPattern_CreateCalendarPicker_BelowApi26_001
+ * @tc.desc: CreateCalendarPicker below API 26 should not apply default PickerTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarPickerPattern_CreateCalendarPicker_BelowApi26_001, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+
+    CalendarSettingData settingData;
+    CalendarPickerModelNG::CreateCalendarPicker(settingData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    EXPECT_FALSE(layoutProperty->HasColor());
+    EXPECT_FALSE(layoutProperty->GetNormalTextColorSetByUser().value_or(false));
 
     container->SetApiTargetVersion(backupContainerApi);
     pipeline->SetApiTargetVersion(backupPipelineApi);

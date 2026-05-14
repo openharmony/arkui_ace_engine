@@ -62,7 +62,7 @@ const Quota: string = 'quota';
 const Serialization: string = 'serialization';
 const Unknown: string = 'unknown';
 
-type PersistenceErrorCallback = ((key: string, reason: string, message: string) => void) | undefined;
+type PersistenceErrorCallback = ((key: string, reason: string, message: string, oldValue?: string) => void) | undefined;
 
 enum MapType {
     NOT_IN_MAP = -1,
@@ -767,8 +767,9 @@ export class PersistenceV2Impl {
         defaultCreator: StorageDefaultCreator<T> | undefined,
         enableAutoSave: boolean,
         areaMode?: AreaMode): T | undefined {
+        let jsonString: string | undefined = undefined;
         try {
-            const jsonString: string = this.storageBackend_!.get(key, areaMode)!;
+            jsonString = this.storageBackend_!.get(key, areaMode)!;
             if (!jsonString) {
                 this.errorHelper(key, Serialization, StorageHelper.ERROR_NOT_IN_THE_STORE);
                 return undefined;
@@ -815,7 +816,7 @@ export class PersistenceV2Impl {
             return newObservedValue;
         } catch (err) {
             this.stopObservation();
-            this.errorHelper(key, Serialization, JSON.stringify(err));
+            this.errorHelper(key, Serialization, JSON.stringify(err), jsonString);
         }
         return undefined;
     }
@@ -1015,9 +1016,9 @@ export class PersistenceV2Impl {
         return this.isPersistentKeyValid(key);
     }
 
-    private errorHelper(key: string, reason: string, message: string) {
+    private errorHelper(key: string, reason: string, message: string, oldValue?: string) {
         if (this.errorCB_ !== undefined) {
-            this.errorCB_!(key, reason, message);
+            this.errorCB_!(key, reason, message, oldValue);
             return;
         }
         if (!key) {

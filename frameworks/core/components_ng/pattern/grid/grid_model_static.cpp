@@ -17,6 +17,7 @@
 
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
@@ -209,8 +210,11 @@ void GridModelStatic::SetScrollBarWidth(FrameNode* frameNode, const std::optiona
     if (scrollBarWidth &&
         GreatOrEqual(scrollBarWidth.value().Value(), 0.0f) &&
         scrollBarWidth.value().Unit() != DimensionUnit::PERCENT) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(scrollBarWidth.value(), LpxAttribute::LPX_SCROLL_BAR_WIDTH, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_BAR_WIDTH);
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
     }
 }
@@ -466,8 +470,11 @@ void GridModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& 
 void GridModelStatic::SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& columnsGap)
 {
     if (columnsGap) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(columnsGap.value(), LpxAttribute::LPX_COLUMNS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, columnsGap.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_COLUMNS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GridLayoutProperty, ColumnsGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
@@ -475,8 +482,11 @@ void GridModelStatic::SetColumnsGap(FrameNode* frameNode, const std::optional<Di
 void GridModelStatic::SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& rowsGap)
 {
     if (rowsGap) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(rowsGap.value(), LpxAttribute::LPX_ROWS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, rowsGap.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ROWS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GridLayoutProperty, RowsGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }

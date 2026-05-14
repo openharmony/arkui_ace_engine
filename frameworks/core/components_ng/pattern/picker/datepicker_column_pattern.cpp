@@ -510,6 +510,9 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         GetStartIndex(startIndex, totalCount);
         if ((currentIndex == startIndex && dir == PickerScrollDirection::DOWN && GreatOrEqual(yOffset_, 0.0)) ||
             (currentIndex == totalCount - 1 && dir == PickerScrollDirection::UP && LessOrEqual(yOffset_, 0.0))) {
+            auto toss = GetToss();
+            CHECK_NULL_VOID(toss);
+            toss->StopTossAnimation();
             return;
         }
     }
@@ -530,6 +533,9 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         dragDelta %= (static_cast<int32_t>(shiftDistance) != 0 ? static_cast<int32_t>(shiftDistance) : 1);
         if (!NearZero(static_cast<double>(dragDelta)) && !CanMove(LessNotEqual(static_cast<double>(dragDelta), 0.0))) {
             dragDelta = 0;
+            auto toss = GetToss();
+            CHECK_NULL_VOID(toss);
+            toss->StopTossAnimation();
             if (hapticController_) {
                 hapticController_->Stop();
             }

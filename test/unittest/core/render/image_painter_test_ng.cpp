@@ -29,6 +29,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #undef private
@@ -377,7 +378,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit6, TestSize.Level1)
      * @tc.expected: expect viewScale is 1.
      */
     imagePainter.ApplyImageFit(ImageFit::FILL, rawpicsize, dstsize, srcRect_, dstRect_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContext();
     float viewScale = context ? context->GetViewScale() : 1.0;
     EXPECT_EQ(viewScale, 1);
 

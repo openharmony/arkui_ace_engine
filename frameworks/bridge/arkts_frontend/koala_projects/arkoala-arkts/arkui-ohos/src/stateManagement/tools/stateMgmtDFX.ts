@@ -26,6 +26,7 @@ import { PeerNode } from '@peerNode';
 import { transferTypeName } from '../storage/persistenceV2';
 import { InterfaceProxyHandler, StateMgmtTool } from './arkts';
 import { ObserveWrappedBase } from '../base/observeWrappedBase';
+import { IDecoratorBaseRegistry } from '../decorator'
 
 export class StateMgmtConsole {
     static log(str: string): void {
@@ -63,13 +64,13 @@ class PropertyDependenciesInfo {
 type SimpleAndNonType = string | int | double | long | boolean | undefined | null;
 type DumpObjectType = Array<[string, Any]>;
 
-class DFXDecoratorInfo {
+export class DFXDecoratorInfo {
     decorator?: string;
     propertyName?: string | Array<string>;
     value?: Any;
     syncPeers?: DFXDecoratorInfo[];
     id?: int;
-    dependentElementIds?: PropertyDependenciesInfo;
+    dependentElementIds?: Array<ElementInfo> | PropertyDependenciesInfo;
 }
 
 export class DumpInfo {
@@ -125,23 +126,24 @@ export class StateMgmtDFX {
         return undefined;
     }
 
-    static getDecoratedVariableInfo(view: Any, dumpInfo: DumpInfo, isV2: boolean): void {
+    static getDecoratedVariableInfo(view: Any, dumpInfo: DumpInfo, isV2: boolean, needDependentInfo?: boolean): void {
         if (isV2) {
-            StateMgmtDFX.dumpV2VariableInfo(view, dumpInfo);
+            StateMgmtDFX.dumpV2VariableInfo(view, dumpInfo, needDependentInfo);
         } else {
-            StateMgmtDFX.dumpV1VariableInfo(view, dumpInfo);
+            StateMgmtDFX.dumpV1VariableInfo(view, dumpInfo, needDependentInfo);
         }
     }
 
-    static dumpV1VariableInfo(view: Any, dumpInfo: DumpInfo): void {
+    static dumpV1VariableInfo(view: Any, dumpInfo: DumpInfo, needDependentInfo?: boolean): void {
         try {
             if (view instanceof ExtendableComponent) {
-                const viewOwnPropertyArray = view.getownedStateVariables();
-                if (viewOwnPropertyArray === undefined) {
+                const viewOwnProperty = view.getownedStateVariables();
+                if (viewOwnProperty === undefined) {
                     return;
                 }
+                const viewOwnPropertyArray = viewOwnProperty as Array<IDecoratorBaseRegistry>;
                 viewOwnPropertyArray
-                    .forEach((ownProperty) => {
+                    .forEach((ownProperty: IDecoratorBaseRegistry) => {
                         if (ownProperty && ownProperty instanceof DecoratedV1VariableBase) {
                             dumpInfo.observedPropertiesInfo.push({
                                 decorator: ownProperty.decorator,
@@ -149,11 +151,9 @@ export class StateMgmtDFX {
                                 value: StateMgmtDFX.getRawValue(ownProperty),
                                 syncPeers: [],
                                 id: -1,
-                                dependentElementIds: {
-                                    mode: 'Compatible Mode',
-                                    propertyDependencies: [],
-                                    trackPropertiesDependencies: []
-                                }
+                                dependentElementIds: needDependentInfo
+ 	                                ? transferNodeInfoToElementInfo(ownProperty.getDependentInfo())
+ 	                                : { mode: 'Compatible Mode', propertyDependencies: [], trackPropertiesDependencies: [] } as PropertyDependenciesInfo
                             });
                         }
                     });
@@ -163,15 +163,16 @@ export class StateMgmtDFX {
         }
     }
 
-    static dumpV2VariableInfo(view: Any, dumpInfo: DumpInfo): void {
+    static dumpV2VariableInfo(view: Any, dumpInfo: DumpInfo, needDependentInfo?: boolean): void {
         try {
             if (view instanceof ExtendableComponent) {
-                const viewOwnPropertyArray = view.getownedStateVariables();
-                if (viewOwnPropertyArray === undefined) {
+                const viewOwnProperty = view.getownedStateVariables();
+                if (viewOwnProperty === undefined) {
                     return;
                 }
+                const viewOwnPropertyArray = viewOwnProperty as Array<IDecoratorBaseRegistry>;
                 viewOwnPropertyArray
-                    .forEach((ownProperty) => {
+                    .forEach((ownProperty: IDecoratorBaseRegistry) => {
                         if (ownProperty && ownProperty instanceof DecoratedV2VariableBase) {
                             dumpInfo.observedPropertiesInfo.push({
                                 decorator: ownProperty.decorator,
@@ -179,11 +180,9 @@ export class StateMgmtDFX {
                                 value: StateMgmtDFX.getRawValue(ownProperty),
                                 syncPeers: [],
                                 id: -1,
-                                dependentElementIds: {
-                                    mode: 'Compatible Mode',
-                                    propertyDependencies: [],
-                                    trackPropertiesDependencies: []
-                                }
+                                dependentElementIds: needDependentInfo
+ 	                                ? transferNodeInfoToElementInfo(ownProperty.getDependentInfo())
+ 	                                : { mode: 'Compatible Mode', propertyDependencies: [], trackPropertiesDependencies: [] } as PropertyDependenciesInfo
                             });
                         } else if (ownProperty && ownProperty instanceof ComputedDecoratedVariable) {
                             dumpInfo.observedPropertiesInfo.push({
@@ -192,11 +191,7 @@ export class StateMgmtDFX {
                                 value: StateMgmtDFX.getRawValue(ownProperty.get()),
                                 syncPeers: [],
                                 id: -1,
-                                dependentElementIds: {
-                                    mode: 'Compatible Mode',
-                                    propertyDependencies: [],
-                                    trackPropertiesDependencies: []
-                                }
+                                dependentElementIds: { mode: 'Compatible Mode', propertyDependencies: [], trackPropertiesDependencies: [] }
                             });
                         } else if (ownProperty && ownProperty instanceof MonitorFunctionDecorator) {
                             dumpInfo.observedPropertiesInfo.push({
@@ -204,11 +199,7 @@ export class StateMgmtDFX {
                                 propertyName: StateMgmtDFX.getRawValue(ownProperty.path) as Array<string>,
                                 syncPeers: [],
                                 id: -1,
-                                dependentElementIds: {
-                                    mode: 'Compatible Mode',
-                                    propertyDependencies: [],
-                                    trackPropertiesDependencies: []
-                                }
+                                dependentElementIds: { mode: 'Compatible Mode', propertyDependencies: [], trackPropertiesDependencies: [] }
                             });
                         }
                     });
@@ -264,7 +255,9 @@ export class StateMgmtDFX {
     private static dumpObjectProperty(value: Object): DumpObjectType | string {
         const tempObj: DumpObjectType = new Array<[string, Any]>();
         try {
-            let properties: string[] = Object.getOwnPropertyNames(value);
+            let cls = Class.of(value);
+            let properties: string[] = [...reflect.getInstanceFieldsRecursive(cls).map<string>(field => field.getName()),
+                ...reflect.getInstanceGettersRecursive(cls).map<string>(getter => getter.getName().substring('%%get-'.length))];
             properties
                 .slice(0, StateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
                 .forEach((varName: string) => {
@@ -307,7 +300,7 @@ export class StateMgmtDFX {
             }
 
             // Get original object
-            rawValue = UIUtils.getTarget(rawValue);
+            rawValue = UIUtils.getTarget(rawValue as Object) as T;
 
             if (rawValue instanceof Map) {
                 return StateMgmtDFX.dumpMap(rawValue as Any as Map<Object, Object>) as Any;
@@ -877,5 +870,15 @@ function extractMetaInfos(objectInfo: ObservedObjectInfo, observedType: Observed
         isObserved: true,
         reason: elementsCount > 0 ? ObservedTypeToReasonUI.get(observedType)! : ObservedTypeToReasonNOUI.get(observedType)!,
         decoratorInfo: metaInfos
+    }
+}
+
+export class StringUtils {
+    public static repeat(str: string, count: number): string {
+        let result = '';
+        for (let i = 0; i < count; i++) {
+            result += str;
+        }
+        return result;
     }
 }

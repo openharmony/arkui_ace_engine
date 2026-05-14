@@ -19,6 +19,8 @@
 #include <vector>
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/color.h"
 
 class NativeEngine;
 typedef struct napi_value__* napi_value;
@@ -38,6 +40,7 @@ class ACE_EXPORT DrawingColorFilter : public AceType {
 public:
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(void* sptrAddr);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(const std::vector<float>& matrix);
+    static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(Color color, BlendMode mode);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilterFromNative(void* sptrAddr);
     virtual void* GetDrawingColorFilterSptrAddr() = 0; //define the return value as void is for tdd compilation
     virtual napi_value GetDrawingColorFilterNapiValue(NativeEngine* nativeEngine) = 0;

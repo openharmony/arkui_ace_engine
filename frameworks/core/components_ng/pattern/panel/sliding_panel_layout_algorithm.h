@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <optional>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"

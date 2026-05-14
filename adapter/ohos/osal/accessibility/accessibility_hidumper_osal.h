@@ -19,10 +19,15 @@
 #include <string>
 #include "accessibility_element_info.h"
 
+#include "base/memory/referenced.h"
 #include "core/accessibility/accessibility_utils.h"
 
 namespace OHOS::Accessibility {
     class AccessibilityElementInfo;
+}
+
+namespace OHOS::Ace::NG {
+class FrameNode;
 }
 
 namespace OHOS::Ace::Framework {
@@ -66,6 +71,9 @@ public:
 
     static AceAction ConvertAccessibilityAction(Accessibility::ActionType accessibilityAction);
     static std::string ConvertActionTypeToString(Accessibility::ActionType action);
+    static void DumpCustomActionTest(
+        const std::vector<std::string>& params,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& frameNode);
 };
 } // OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_ACCESSIBILITY_HIDUMPER_OSAL_H

@@ -26,6 +26,7 @@
 #include "core/components/common/painter/rosen_universal_painter.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace {
 namespace {

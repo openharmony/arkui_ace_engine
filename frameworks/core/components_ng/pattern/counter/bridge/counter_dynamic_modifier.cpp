@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/counter/bridge/counter_model_impl.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 

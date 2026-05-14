@@ -23,6 +23,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
@@ -257,13 +258,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColor, Color);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSizeScale, double);
 
@@ -314,6 +310,50 @@ struct FontStyle {
     std::unordered_map<std::string, resourceUpdater> resMap_;
 };
 
+struct SymbolStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolSourceInfo, SymbolSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolShadow, SymbolShadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ShaderStyle, std::vector<SymbolGradient>);
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, SymbolStyle&)>&& updateFunc)
+    {
+        CHECK_NULL_VOID(resObj && updateFunc);
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    size_t RemoveResource(const std::string& key)
+    {
+        return resMap_.erase(key);
+    }
+
+    void CopyResource(const std::unique_ptr<SymbolStyle>& source)
+    {
+        CHECK_NULL_VOID(source);
+        resMap_ = source->resMap_;
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, SymbolStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+};
+
 struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineHeight, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineHeightMultiply, double);
@@ -341,6 +381,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OrphanCharOptimization, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CompressLeadingPunctuation, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PunctuationOverflow, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextContentAlign, TextContentAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDirection, TextDirection);
 };
@@ -377,16 +418,18 @@ struct HandleInfoNG {
 PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign);
 
 ACE_FORCE_EXPORT TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false,
+    const RefPtr<Pattern>& pattern = nullptr);
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol = false);
+    TextStyle& textStyle, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
 
 ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false,
+    const std::unique_ptr<SymbolStyle>& symbolStyle = nullptr, const RefPtr<Pattern>& pattern = nullptr);
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
 void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme);
 

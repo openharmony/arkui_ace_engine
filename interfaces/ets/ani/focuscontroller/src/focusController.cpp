@@ -20,8 +20,10 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/core/common/container.h"
 #include "frameworks/base/error/error_code.h"
 
 namespace {

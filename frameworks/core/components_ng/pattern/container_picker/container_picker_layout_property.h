@@ -16,7 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_LAYOUT_PROPERTY_H
 
-#include "base/geometry/axis.h"
+#include <string>
+#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
@@ -61,6 +62,8 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propCanLoop_ = CloneCanLoop();
         value->propEnableHapticFeedback_ = CloneEnableHapticFeedback();
+        value->propDisplayedItemCount_ = CloneDisplayedItemCount();
+        value->propItemHeight_ = CloneItemHeight();
         return value;
     }
 
@@ -69,6 +72,8 @@ public:
         LayoutProperty::Reset();
         ResetCanLoop();
         ResetEnableHapticFeedback();
+        ResetDisplayedItemCount();
+        ResetItemHeight();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -77,6 +82,10 @@ public:
         json->PutExtAttr("canLoop", V2::ConvertBoolToString(GetCanLoopValue(true)).c_str(), filter);
         json->PutExtAttr(
             "enableHapticFeedback", V2::ConvertBoolToString(GetEnableHapticFeedbackValue(true)).c_str(), filter);
+        json->PutExtAttr("displayedItemCount",
+            std::to_string(HasDisplayedItemCount() ? GetDisplayedItemCount().value() : 7).c_str(), filter);
+        json->PutExtAttr("itemHeight",
+            (HasItemHeight() ? GetItemHeight().value() : Dimension(40, DimensionUnit::VP)).ToString().c_str(), filter);
 
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -108,6 +117,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedIndex, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CanLoop, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHapticFeedback, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayedItemCount, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorType, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorDividerWidth, Dimension, PROPERTY_UPDATE_MEASURE);

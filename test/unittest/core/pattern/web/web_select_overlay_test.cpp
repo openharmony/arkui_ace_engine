@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"
 #include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "test/mock/frameworks/core/common/mock_container.h"

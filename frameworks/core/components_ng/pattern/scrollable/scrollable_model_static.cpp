@@ -98,9 +98,11 @@ void ScrollableModelStatic::SetScrollBarColorMultiThread(FrameNode* frameNode, c
 void ScrollableModelStatic::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     if (value) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value(), LpxAttribute::LPX_SCROLL_BAR_WIDTH, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, value.value(), frameNode);
     } else {
         CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_BAR_WIDTH);
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
             ScrollablePaintProperty, ScrollBarWidth, PROPERTY_UPDATE_RENDER, frameNode);
         FREE_NODE_CHECK(frameNode, SetScrollBarWidth, frameNode, std::nullopt);
@@ -262,6 +264,12 @@ void ScrollableModelStatic::SetFadingEdge(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdge, frameNode);
     }
+    CHECK_NULL_VOID(frameNode);
+    if (fadingEdgeLength) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(fadingEdgeLength.value(), LpxAttribute::LPX_FADING_EDGE_LENGTH, frameNode);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_FADING_EDGE_LENGTH);
+    }
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength,
         fadingEdgeLength.value_or(DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE), frameNode);
 }
@@ -296,6 +304,8 @@ void ScrollableModelStatic::ResetBackToTopMultiThread(FrameNode* frameNode)
 void ScrollableModelStatic::SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(scrollBarMargin.start_, LpxAttribute::LPX_SCROLL_BAR_MARGIN_START, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(scrollBarMargin.end_, LpxAttribute::LPX_SCROLL_BAR_MARGIN_END, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMargin, scrollBarMargin, frameNode);
 }
 
@@ -371,4 +381,3 @@ void ScrollableModelStatic::SetAutoAdjustScrollBarMargin(FrameNode* frameNode, s
         ScrollablePaintProperty, AutoAdjustScrollBarMargin, autoAdjust.value_or(false), frameNode);
 }
 } // namespace OHOS::Ace::NG
- 

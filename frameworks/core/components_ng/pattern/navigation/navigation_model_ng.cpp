@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/base/system_bar/system_bar_style.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -241,7 +242,7 @@ void NavigationModelNG::Create(bool useHomeDestination)
     auto useHomeDest = navigationGroupNode->GetUseHomeDestination();
     if (!useHomeDest.has_value()) {
         useHomeDest = useHomeDestination;
-        navigationGroupNode->SetUseHomeDestinatoin(useHomeDestination);
+        navigationGroupNode->SetUseHomeDestination(useHomeDestination);
     }
     if (!useHomeDest.value() && !CreateNavBarNodeIfNeeded(navigationGroupNode)) { // navBar node
         return;
@@ -677,6 +678,7 @@ void NavigationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
 
 void NavigationModelNG::SetTitleHeight(const Dimension& height, bool isValid)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(height, LpxAttribute::ALWAYS);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
@@ -699,6 +701,7 @@ void NavigationModelNG::SetTitleHeight(const Dimension& height, bool isValid)
 
 void NavigationModelNG::SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(height, LpxAttribute::ALWAYS);
     SetTitleHeight(height);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1533,6 +1536,7 @@ void NavigationModelNG::SetNavBarPosition(NG::NavBarPosition mode)
 
 void NavigationModelNG::SetNavBarWidth(const Dimension& value, bool isDoubleBind)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::ALWAYS);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1598,6 +1602,7 @@ void NavigationModelNG::SetNavBarWidth(const RefPtr<ResourceObject>& navBarWidth
 
 void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::ALWAYS);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1656,6 +1661,7 @@ void NavigationModelNG::SetMinNavBarWidth(const RefPtr<ResourceObject>& minNavBa
 
 void NavigationModelNG::SetMaxNavBarWidth(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::ALWAYS);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1714,6 +1720,7 @@ void NavigationModelNG::SetMaxNavBarWidth(const RefPtr<ResourceObject>& maxNavBa
 
 void NavigationModelNG::SetMinContentWidth(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::ALWAYS);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -2029,6 +2036,7 @@ void NavigationModelNG::ResetResObj(FrameNode* frameNode, NavigationPatternType 
 
 void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::ALWAYS, frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
@@ -2081,6 +2089,7 @@ void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const RefPtr<Re
 
 void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::ALWAYS, frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
@@ -2136,6 +2145,7 @@ void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const RefPtr<Res
 
 void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::ALWAYS, frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
@@ -2192,6 +2202,7 @@ void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const RefPtr<Res
 void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value, frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
@@ -3162,6 +3173,7 @@ RefPtr<FrameNode> NavigationModelNG::GetCustomTitle(FrameNode* frameNode)
 
 void NavigationModelNG::SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(height, LpxAttribute::ALWAYS, frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -3332,6 +3344,7 @@ void NavigationModelNG::UpdateDefineColor(bool isDefined)
 
 void NavigationModelNG::UpdateDividerStartMargin(const CalcDimension& start, const RefPtr<ResourceObject>& startRes)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(start, LpxAttribute::ALWAYS);
     auto navigationNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     UpdateDividerStartMargin(navigationNode, start, startRes);
 }
@@ -3339,6 +3352,7 @@ void NavigationModelNG::UpdateDividerStartMargin(const CalcDimension& start, con
 void NavigationModelNG::UpdateDividerStartMargin(FrameNode* navigationNode,
     const CalcDimension& start, const RefPtr<ResourceObject>& startRes)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(start, LpxAttribute::ALWAYS, navigationNode);
     CHECK_NULL_VOID(navigationNode);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
@@ -3372,6 +3386,7 @@ void NavigationModelNG::UpdateDividerStartMargin(FrameNode* navigationNode,
 
 void NavigationModelNG::UpdateDividerEndMargin(const CalcDimension& end, const RefPtr<ResourceObject>& endRes)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(end, LpxAttribute::ALWAYS);
     auto navigationNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     UpdateDividerEndMargin(navigationNode, end, endRes);
 }
@@ -3379,6 +3394,7 @@ void NavigationModelNG::UpdateDividerEndMargin(const CalcDimension& end, const R
 void NavigationModelNG::UpdateDividerEndMargin(FrameNode* frameNode, const CalcDimension& end,
     const RefPtr<ResourceObject>& endRes)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(end, LpxAttribute::ALWAYS, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);

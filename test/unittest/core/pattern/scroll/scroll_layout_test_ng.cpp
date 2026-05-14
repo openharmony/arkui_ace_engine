@@ -1942,4 +1942,298 @@ HWTEST_F(ScrollLayoutTestNg, RTLwithContentOffset001, TestSize.Level1)
     RectF childRect = GetChildRect(frameNode_, 0);
     EXPECT_EQ(childRect.x_, -CONTENT_START_OFFSET);
 }
+
+/**
+ * @tc.name: MeasureLazyChild001
+ * @tc.desc: Test MeasureLazyChild with valid contentSize and isMainFix=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, MeasureLazyChild001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll with LazyLayout child
+     */
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create layout wrapper and algorithm
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set layout constraint
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    /**
+     * @tc.steps: step4. Measure lazy child with valid contentSize
+     * @tc.expected: estimatedIdealSize remains empty, viewPosEnd = LayoutInfinity
+     */
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = false;
+    auto childSize = layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    const float expectedHeight = LAZY_GRID_ITEM_HEIGHT * 2 + LAZY_GRID_GAP;
+    EXPECT_EQ(childSize.Width(), WIDTH);
+    EXPECT_EQ(childSize.Height(), expectedHeight);
+
+    ASSERT_TRUE(childLayoutConstraint.viewPosRef.has_value());
+    auto& viewPosRef = childLayoutConstraint.viewPosRef.value();
+    EXPECT_EQ(viewPosRef.viewPosStart, 0.0f);
+    EXPECT_EQ(viewPosRef.viewPosEnd, HEIGHT);
+    EXPECT_EQ(viewPosRef.referenceEdge, ReferenceEdge::START);
+    EXPECT_EQ(viewPosRef.axis, axis);
+}
+
+/**
+ * @tc.name: MeasureLazyChild002
+ * @tc.desc: Test MeasureLazyChild when viewPortLength <= 0 triggers MATCH_PARENT calculation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, MeasureLazyChild002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll with LazyLayout child
+     */
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create layout wrapper and algorithm
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set layout constraint
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    /**
+     * @tc.steps: step4. Measure lazy child with contentSize.Height=0
+     * @tc.expected: MATCH_PARENT triggered, estimatedIdealSize.Height = constraint.maxSize.Height
+     */
+    auto contentSize = SizeF(WIDTH, 0.0f);
+    bool isMainFix = false;
+    auto childSize = layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    EXPECT_GT(childSize.Width(), 0.0f);
+    EXPECT_GT(childSize.Height(), 0.0f);
+
+    ASSERT_TRUE(childLayoutConstraint.viewPosRef.has_value());
+    auto& viewPosRef = childLayoutConstraint.viewPosRef.value();
+    EXPECT_EQ(viewPosRef.viewPosStart, 0.0f);
+    EXPECT_EQ(viewPosRef.viewPosEnd, HEIGHT);
+}
+
+/**
+ * @tc.name: MeasureLazyChild003
+ * @tc.desc: Test MeasureLazyChild with isMainFix=true applies calcLayoutConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, MeasureLazyChild003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll with LazyLayout child
+     */
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create layout wrapper and algorithm
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set layout constraint and calcLayoutConstraint
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+
+    auto calcLayoutConstraint = std::make_unique<MeasureProperty>();
+    calcLayoutConstraint->maxSize = CalcSize(CalcLength(WIDTH), CalcLength(500.0f));
+    scrollLayoutProperty->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
+
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    /**
+     * @tc.steps: step4. Measure lazy child with isMainFix=true
+     * @tc.expected: calcLayoutConstraint applied to estimatedIdealSize
+     */
+    auto contentSize = SizeF(WIDTH, HEIGHT);
+    bool isMainFix = true;
+    auto childSize = layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    EXPECT_GT(childSize.Width(), 0.0f);
+    EXPECT_GT(childSize.Height(), 0.0f);
+}
+
+/**
+ * @tc.name: MeasureLazyChild004
+ * @tc.desc: Test MeasureLazyChild with contentStartOffset reset logic
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, MeasureLazyChild004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll with LazyLayout child and contentOffset
+     */
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create layout wrapper and algorithm with large offset
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+    layoutAlgorithm->contentStartOffset_ = CONTENT_START_OFFSET;
+    layoutAlgorithm->contentEndOffset_ = CONTENT_END_OFFSET;
+
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set layout constraint with small maxSize to trigger reset
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, 50.0f);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, 50.0f);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    /**
+     * @tc.steps: step4. Measure lazy child
+     * @tc.expected: estimatedContentStartOffset reset when offset >= estimatedIdealSize
+     */
+    auto contentSize = SizeF(WIDTH, 0.0f);
+    bool isMainFix = false;
+    auto childSize = layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    EXPECT_GT(childSize.Width(), 0.0f);
+    EXPECT_GT(childSize.Height(), 0.0f);
+}
+
+/**
+ * @tc.name: MeasureLazyChild005
+ * @tc.desc: Test MeasureLazyChild with maxSize.Height=0 and contentSize.Height=0
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, MeasureLazyChild005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll with LazyLayout child
+     */
+    CreateScroll();
+    CreateLazyVGridInScroll(LAZY_GRID_ITEM_HEIGHT, LAZY_GRID_SMALL_ITEM_COUNT);
+    CreateScrollDone();
+
+    auto gridNode = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(gridNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create layout wrapper and algorithm
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(0.0);
+
+    auto scrollLayoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Set layout constraint with maxSize.Height=0
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(WIDTH, 0.0f);
+    parentLayoutConstraint.percentReference = SizeF(WIDTH, HEIGHT);
+    parentLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    scrollLayoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto axis = scrollLayoutProperty->GetAxis().value_or(Axis::VERTICAL);
+
+    auto childLayoutConstraint = scrollLayoutProperty->CreateChildConstraint();
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    ASSERT_NE(childWrapper, nullptr);
+
+    /**
+     * @tc.steps: step4. Measure lazy child with maxSize.Height=0 and contentSize.Height=0
+     * @tc.expected: CreateIdealSize uses parentIdealSize or percentReference.Height=HEIGHT
+     *                estimatedIdealSize.Height = HEIGHT, viewPosEnd = HEIGHT
+     */
+    auto contentSize = SizeF(WIDTH, 0.0f);
+    bool isMainFix = false;
+    layoutAlgorithm->MeasureLazyChild(
+        AceType::RawPtr(layoutWrapper), childWrapper, childLayoutConstraint, axis, contentSize, isMainFix);
+
+    ASSERT_TRUE(childLayoutConstraint.viewPosRef.has_value());
+    auto& viewPosRef = childLayoutConstraint.viewPosRef.value();
+    EXPECT_EQ(viewPosRef.viewPosStart, 0.0f);
+    EXPECT_EQ(viewPosRef.viewPosEnd, HEIGHT);
+    EXPECT_EQ(viewPosRef.referenceEdge, ReferenceEdge::START);
+    EXPECT_EQ(viewPosRef.axis, axis);
+}
+
 } // namespace OHOS::Ace::NG

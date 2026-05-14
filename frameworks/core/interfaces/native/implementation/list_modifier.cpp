@@ -155,6 +155,31 @@ namespace OHOS::Ace::NG::Converter {
         dst = ret;
     }
 }
+
+namespace OHOS::Ace::NG {
+namespace {
+std::optional<bool> ProcessBindableEditMode(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean* value)
+{
+    std::optional<bool> result;
+    Converter::VisitUnionPtr(value,
+        [&result](const Ark_Boolean& src) {
+            result = Converter::OptConvert<bool>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_Boolean& src) {
+            result = Converter::OptConvert<bool>(src.value);
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](bool enableEditMode) {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(enableEditMode));
+            };
+            ListModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(onEvent));
+        },
+        [] {});
+    return result;
+}
+} // namespace
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -382,8 +407,30 @@ void SetEditModeOptionsImpl(Ark_NativePointer node,
             };
             options.getPreviewBadge = modelCallback;
         }
+
+        auto useDefaultMultiSelectStyle = Converter::OptConvert<bool>(value->useDefaultMultiSelectStyle);
+        if (useDefaultMultiSelectStyle.has_value()) {
+            options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle.value();
+        }
+
+        auto enableTwoFingerMultiSelect = Converter::OptConvert<bool>(value->enableTwoFingerMultiSelect);
+        if (enableTwoFingerMultiSelect.has_value()) {
+            options.enableFingerMultiSelect = enableTwoFingerMultiSelect.value();
+        }
     }
     ListModelStatic::SetEditModeOptions(frameNode, options);
+}
+void SetEnableEditModeImpl(Ark_NativePointer node,
+                           const Opt_Union_Boolean_Bindable_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = ProcessBindableEditMode(frameNode, value);
+    if (!convValue) {
+        ListModelNG::SetEnableEditMode(frameNode, false);
+        return;
+    }
+    ListModelNG::SetEnableEditMode(frameNode, *convValue);
 }
 void SetFocusWrapModeImpl(Ark_NativePointer node,
                           const Opt_FocusWrapMode* value)
@@ -733,6 +780,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
         ListAttributeModifier::SetStackFromEndImpl,
         ListAttributeModifier::SetEditModeOptionsImpl,
+        ListAttributeModifier::SetEnableEditModeImpl,
         ListAttributeModifier::SetFocusWrapModeImpl,
         ListAttributeModifier::SetSyncLoadImpl,
         ListAttributeModifier::SetScrollSnapAnimationSpeedImpl,

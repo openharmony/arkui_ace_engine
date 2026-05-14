@@ -131,6 +131,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_image_span_ffi.cpp",
       "interfaces/cj_ffi/cj_interactable_view_ffi.cpp",
       "interfaces/cj_ffi/cj_lazy_foreach_ffi.cpp",
+      "interfaces/cj_ffi/cj_layout_inspector_ffi.cpp",
       "interfaces/cj_ffi/cj_line_ffi.cpp",
       "interfaces/cj_ffi/cj_list_ffi.cpp",
       "interfaces/cj_ffi/cj_list_item_ffi.cpp",

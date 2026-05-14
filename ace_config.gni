@@ -99,8 +99,8 @@ declare_args() {
   #Enable default click sound
   ace_engine_feature_enable_default_click_sound = false
 
-  #Enable back to top
-  ace_engine_feature_enable_back_to_top = false
+  #Enable container_scope tracking
+  ace_engine_feature_enable_container_scope_tracking = false
 }
 
 enable_dump_drawcmd = false
@@ -393,6 +393,10 @@ if (ace_engine_feature_enable_default_click_sound) {
     ace_common_defines += [ "ENABLE_DEFAULT_CLICK_SOUND" ]
 }
 
-if (ace_engine_feature_enable_back_to_top) {
-    ace_common_defines += [ "ENABLE_BACK_TO_TOP" ]
+if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+  ace_common_defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+}
+
+if (ace_engine_feature_enable_container_scope_tracking) {
+    ace_common_defines += [ "ENABLE_CONTAINER_SCOPE_TRACKING" ]
 }

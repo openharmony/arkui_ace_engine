@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
 
 #define private public

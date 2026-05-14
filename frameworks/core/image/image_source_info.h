@@ -139,6 +139,9 @@ public:
     void SetReloadKey(const std::optional<std::string>& reloadKey);
     const std::optional<std::string>& GetReloadKey() const;
 
+    // Update isSvg_ flag based on actual content detection and regenerate cache key
+    void SetIsSvgByContent(bool isSvg);
+
 private:
     SrcType ResolveSrcType() const;
 

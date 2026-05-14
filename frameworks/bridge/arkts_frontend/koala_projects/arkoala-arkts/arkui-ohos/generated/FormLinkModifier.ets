@@ -25,16 +25,11 @@ import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { CommonMethod } from './component/common'
 export class FormLinkModifier extends CommonMethodModifier implements FormLinkAttribute,AttributeModifier<FormLinkAttribute> {
-    _instanceId: number = -1;
-    _state: ModifierState = new ModifierState;
-    _addr: ArrayBuffer = new ArrayBuffer(4096);
-    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    _FormLink_addr: ArrayBuffer = new ArrayBuffer(4096);
+    _FormLink_flagArray: Uint8Array = new Uint8Array(this._FormLink_addr);
     constructor() {
         super();
-        this._flagArray.fill(0);
-    }
-    setInstanceId(instanceId: number): void {
-        this._instanceId = instanceId
+        this._FormLink_flagArray.fill(0);
     }
     isUpdater: () => boolean = () => false
     applyNormalAttribute(instance: FormLinkAttribute): void { }
@@ -42,16 +37,17 @@ export class FormLinkModifier extends CommonMethodModifier implements FormLinkAt
     applyFocusedAttribute(instance: FormLinkAttribute): void { }
     applyDisabledAttribute(instance: FormLinkAttribute): void { }
     applySelectedAttribute(instance: FormLinkAttribute): void { }
+    applyHoveredAttribute(instance: FormLinkAttribute): void { }
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
         const peer = node as ArkFormLinkPeer;
-        const flagArray = this._flagArray;
+        const flagArray = this._FormLink_flagArray;
     }
     mergeModifier(modifier: FormLinkModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        const flagArray = modifier._flagArray;
+        const flagArray = modifier._FormLink_flagArray;
     }
     public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Not implemented')

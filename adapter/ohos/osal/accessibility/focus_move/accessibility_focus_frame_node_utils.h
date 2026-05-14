@@ -72,6 +72,7 @@ public:
 
     bool IsEmbededTarget() override;
     bool IsHeaderFooterInScroll() override;
+    bool IsDescendantMode() override;
 
     RefPtr<NG::FrameNode> GetFrameNode()
     {

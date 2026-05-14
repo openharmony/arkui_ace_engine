@@ -25,6 +25,7 @@
 #include "ui/view/ui_context.h"
 
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"

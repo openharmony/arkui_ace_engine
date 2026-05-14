@@ -182,6 +182,10 @@ declare class ArkToggleComponent extends ArkComponent {}
 
 declare class ArkLazyVGridLayoutComponent extends ArkComponent {}
 
+declare class ArkLazyColumnLayoutComponent extends ArkComponent {}
+
+declare class ArkLazyVWaterFlowLayoutComponent extends ArkComponent {}
+
 declare class ArkContainerPickerComponent extends ArkComponent {}
 
 declare class SwiperController {}
@@ -307,7 +311,7 @@ declare interface FrameNodeNativeModule {
   clearChildren(nodePtr: NodePtr): void;
   getFirstChildIndexWithoutExpand(nodePtr: NodePtr): number;
   getLastChildIndexWithoutExpand(nodePtr: NodePtr): number;
-  getChildrenCount(nodePtr: NodePtr, isExpanded: boolean): number;
+  getChildrenCount(nodePtr: NodePtr, childrenCountMode: ChildrenCountMode | boolean): number;
   getPositionToParent(nodePtr: NodePtr): Position;
   getPositionToScreen(nodePtr: NodePtr): Position;
   getPositionToWindow(nodePtr: NodePtr): Position;
@@ -453,6 +457,9 @@ declare interface RenderNodeNativeModule {
     rectBottom: number): void;
   setOvalClip(nodePtr: NodePtr, left: number, top: number, right: number, bottom: number): void;
   setPathClip(nodePtr: NodePtr, path: string): void;
+  setBackgroundBlur(nodePtr: NodePtr, radius: number, grayscale1: number, grayscale2: number): void;
+  setContentBlur(nodePtr: NodePtr, radius: number, grayscale1: number, grayscale2: number): void;
+  setForegroundBlur(nodePtr: NodePtr, radius: number): void;
 
   // No validation for return values
   appendChild(parentNodePtr: NodePtr, childNodePtr: NodePtr): any;

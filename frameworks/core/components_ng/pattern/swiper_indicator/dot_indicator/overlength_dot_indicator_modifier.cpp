@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -101,6 +102,12 @@ void OverlengthDotIndicatorModifier::PaintBackground(
     rectRight_ = rectRight;
     rectTop_ = rectTop;
     rectBottom_ = rectBottom;
+    backgroundStart_ = axis_ == Axis::HORIZONTAL ? rectLeft : rectTop;
+    backgroundEnd_ = axis_ == Axis::HORIZONTAL ? rectRight : rectBottom;
+    if (GetUseSystemMaterial()) {
+        isDrawbackground_ = false;
+        return;
+    }
     CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
     // Paint background
     RSCanvas& canvas = context.canvas;
@@ -109,8 +116,6 @@ void OverlengthDotIndicatorModifier::PaintBackground(
     brush.SetColor(ToRSColor(contentProperty.backgroundColor));
     canvas.AttachBrush(brush);
     auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
-    backgroundStart_ = axis_ == Axis::HORIZONTAL ? rectLeft : rectTop;
-    backgroundEnd_ = axis_ == Axis::HORIZONTAL ? rectRight : rectBottom;
     isDrawbackground_ = true;
     canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
     canvas.DetachBrush();
@@ -463,11 +468,6 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
 
     auto leftMoveRate = longPointLeftCenterMoveRate_;
     auto rightMoveRate = longPointRightCenterMoveRate_;
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
-        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
-        leftMoveRate = 1.0f - longPointLeftCenterMoveRate_;
-        rightMoveRate = 1.0f - longPointRightCenterMoveRate_;
-    }
 
     auto targetIndex = isHorizontalAndRTL_ ? currentSelectedIndex_ - 1 : currentSelectedIndex_ + 1;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
@@ -520,11 +520,6 @@ void OverlengthDotIndicatorModifier::UpdateUnselectedCenterXOnDrag()
         moveRate = GetMoveRateOnAllMove();
     }
 
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
-        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
-        moveRate = 1.0f - moveRate;
-    }
-
     for (size_t i = 0; i < animationEndIndicatorWidth_.size(); i++) {
         animationEndIndicatorWidth_[i] = animationStartIndicatorWidth_[i] +
                                          (animationEndIndicatorWidth_[i] - animationStartIndicatorWidth_[i]) * moveRate;
@@ -551,10 +546,17 @@ int32_t OverlengthDotIndicatorModifier::CalcTargetIndexOnDrag() const
     auto startIndex = isHorizontalAndRTL_ ? realItemCount_ - 1 - animationStartIndex_ : animationStartIndex_;
     auto endIndex = isHorizontalAndRTL_ ? realItemCount_ - 1 - animationEndIndex_ : animationEndIndex_;
     if (startIndex == endIndex) {
-        if (startIndex == realItemCount_ - 1) {
+        if (turnPageRate_ < 0.0f) {
+            if (startIndex == realItemCount_ - 1) {
+                return animationStartIndex_;
+            }
+            return isHorizontalAndRTL_ ? animationStartIndex_ - 1 : animationStartIndex_ + 1;
+        }
+
+        if (startIndex == 0) {
             return animationStartIndex_;
         }
-        return isHorizontalAndRTL_ ? animationStartIndex_ - 1 : animationStartIndex_ + 1;
+        return isHorizontalAndRTL_ ? animationStartIndex_ + 1 : animationStartIndex_ - 1;
     }
 
     if (startIndex == 0 && endIndex == realItemCount_ - 1) {
@@ -631,10 +633,7 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const
     UpdateSelectedCenterXOnDrag(itemHalfSizes);
 
     if (isSwiperTouchDown_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
-                                  gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
-        targetSelectedIndex_ = currentSelectedIndex_;
-        targetOverlongType_ = currentOverlongType_;
-
+                                   gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
         auto opacityMoveRate = GetMoveRateOnAllMove();
         auto firstPointOpacity = static_cast<uint8_t>(UINT8_MAX * opacityMoveRate);
         auto newPointOpacity = static_cast<uint8_t>(UINT8_MAX * (1.0f - opacityMoveRate));
@@ -673,10 +672,7 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
     UpdateSelectedCenterXOnDrag(itemHalfSizes);
 
     if (isSwiperTouchDown_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
-                                  gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
-        targetSelectedIndex_ = currentSelectedIndex_;
-        targetOverlongType_ = currentOverlongType_;
-
+                                   gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
         auto opacityMoveRate = GetMoveRateOnAllMove();
         auto firstPointOpacity = static_cast<uint8_t>(UINT8_MAX * (1.0f - opacityMoveRate));
         auto newPointOpacity = static_cast<uint8_t>(UINT8_MAX * opacityMoveRate);
@@ -1190,7 +1186,12 @@ void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnBackward(
     int32_t currentPageIndex, int32_t targetPageIndex)
 {
     auto step = std::abs(targetPageIndex - currentPageIndex);
-    if (currentSelectedIndex_ > THIRD_POINT_INDEX) {
+    auto rightThirdIndicatorIndex = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+    if (currentSelectedIndex_ == rightThirdIndicatorIndex &&
+        currentOverlongType_ == OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT &&
+        targetPageIndex > SECOND_POINT_INDEX) {
+        step = 0;
+    } else if (currentSelectedIndex_ > THIRD_POINT_INDEX) {
         if (targetPageIndex > SECOND_POINT_INDEX) {
             step = std::min(currentPageIndex - targetPageIndex, currentSelectedIndex_ - THIRD_POINT_INDEX);
         } else if (targetPageIndex == SECOND_POINT_INDEX) {
@@ -1212,6 +1213,26 @@ void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnBackward(
 
     targetSelectedIndex_ = currentSelectedIndex_ - step;
     AdjustTargetStatus(targetPageIndex);
+}
+
+void OverlengthDotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& margin,
+    const LinearVector<float>& normalItemHalfSizes, const LinearVector<float>& vectorBlackPointCenterX,
+    const std::pair<float, float>& longPointCenterX)
+{
+    UpdateNormalPaintProperty(margin, normalItemHalfSizes, longPointCenterX);
+}
+
+void OverlengthDotIndicatorModifier::UpdatePressPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
+    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+{
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    auto backgroundColor = swiperTheme->GetPressedColor();
+    
+    CalcAnimationEndCenterX(hoverItemHalfSizes);
+    
+    UpdateShrinkPaintProperty(normalMargin_, hoverItemHalfSizes, overlongSelectedEndCenterX_);
+    UpdateBackgroundColor(backgroundColor);
 }
 
 } // namespace OHOS::Ace::NG

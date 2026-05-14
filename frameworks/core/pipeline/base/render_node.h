@@ -23,17 +23,14 @@
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "base/utils/system_properties.h"
 #include "core/animation/animatable_properties.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/animation/property_animatable.h"
 #include "core/common/draw_delegate.h"
-#include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/motion_path_option.h"
-#include "core/components/common/properties/state_attributes.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/event/axis_event.h"
@@ -53,7 +50,12 @@ class InspectorNode;
 
 namespace OHOS::Ace {
 
+class AlignDeclaration;
+using AlignDeclarationPtr = AlignDeclaration*;
+enum class VisualState;
+
 ACE_FORCE_EXPORT extern const Dimension FOCUS_BOUNDARY;
+ACE_FORCE_EXPORT bool IsRosenBackendEnabledForRenderNode();
 
 class Component;
 
@@ -503,7 +505,7 @@ public:
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
-            if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
+            if (!inRecursion && IsRosenBackendEnabledForRenderNode()) {
                 MarkParentNeedRender();
             }
             if (hidden_) {
@@ -523,7 +525,7 @@ public:
             hidden_ = hidden;
             AddDirtyRenderBoundaryNode();
             OnHiddenChanged(hidden);
-            if (SystemProperties::GetRosenBackendEnabled()) {
+            if (IsRosenBackendEnabledForRenderNode()) {
                 MarkParentNeedRender();
             }
         }
@@ -1115,7 +1117,7 @@ public:
     bool IsHeadRenderNode() const
     {
 #ifdef ENABLE_ROSEN_BACKEND
-        return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
+        return IsRosenBackendEnabledForRenderNode() ? isHeadRenderNode_ : false;
 #else
         return false;
 #endif

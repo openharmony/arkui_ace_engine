@@ -22,6 +22,7 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "core/interfaces/native/implementation/shape_clip_peer.h"
 #include "core/interfaces/native/implementation/shape_mask_peer.h"
@@ -831,6 +832,62 @@ void InvalidateImpl(Ark_RenderNode peer)
     pattern->Invalidate();
     renderContext->RequestNextFrame();
 }
+
+void SetBackgroundBlurImpl(Ark_RenderNode peer, Ark_Float64 radius,
+    Ark_Int32 grayscale1, Ark_Int32 grayscale2)
+{
+    if (!peer) {
+        LOGW("This renderNode is nullptr when SetBackgroundBlur !");
+        return;
+    }
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetBackgroundEffect().has_value()) {
+        renderContext->UpdateBackgroundEffect(std::nullopt);
+    }
+    BlurOption blurOption;
+    blurOption.grayscale = { static_cast<float>(grayscale1), static_cast<float>(grayscale2) };
+    renderContext->UpdateBackBlur(Dimension(radius), blurOption);
+    if (renderContext->GetBackBlurStyle().has_value()) {
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+    }
+    renderContext->RequestNextFrame();
+}
+
+void SetContentBlurImpl(Ark_RenderNode peer, Ark_Float64 radius,
+    Ark_Int32 grayscale1, Ark_Int32 grayscale2)
+{
+    if (!peer) {
+        LOGW("This renderNode is nullptr when SetContentBlur !");
+        return;
+    }
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BlurOption blurOption;
+    blurOption.grayscale = { static_cast<float>(grayscale1), static_cast<float>(grayscale2) };
+    renderContext->UpdateFrontBlur(Dimension(radius), blurOption);
+    if (renderContext->GetFrontBlurStyle().has_value()) {
+        renderContext->UpdateFrontBlurStyle(std::nullopt);
+    }
+    renderContext->RequestNextFrame();
+}
+
+void SetForegroundBlurImpl(Ark_RenderNode peer, Ark_Float64 radius)
+{
+    if (!peer) {
+        LOGW("This renderNode is nullptr when SetForegroundBlur !");
+        return;
+    }
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateForegroundEffect(radius);
+}
 } // RenderNodeExtenderAccessor
 const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor()
 {
@@ -875,6 +932,9 @@ const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor()
         RenderNodeExtenderAccessor::RemoveChildImpl,
         RenderNodeExtenderAccessor::ClearChildrenImpl,
         RenderNodeExtenderAccessor::InvalidateImpl,
+        RenderNodeExtenderAccessor::SetBackgroundBlurImpl,
+        RenderNodeExtenderAccessor::SetContentBlurImpl,
+        RenderNodeExtenderAccessor::SetForegroundBlurImpl,
     };
     return &RenderNodeExtenderAccessorImpl;
 }

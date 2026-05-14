@@ -34,6 +34,7 @@
 #include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG::Converter {
 struct FontSettingOptions {
@@ -214,6 +215,9 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->ClearSelectionMenu();
 
     auto text = Converter::OptConvertPtr<std::u16string>(content);
     if (text) {

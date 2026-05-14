@@ -122,6 +122,7 @@ void ListLanesLayoutAlgorithm::MeasureItem(const RefPtr<LayoutWrapper>& itemWrap
         ACE_SCOPED_TRACE("[Measure%sListItem:%d][self:%d][parent:%d]", direction, index, host->GetId(),
             host->GetParent() ? host->GetParent()->GetId() : 0);
     }
+    UpdateListItemEditModeCheckBoxSpace(itemWrapper);
     itemWrapper->Measure(childLayoutConstraint_);
 }
 

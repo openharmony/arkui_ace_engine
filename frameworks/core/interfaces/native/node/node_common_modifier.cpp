@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/common/container.h"
 
 #include "interfaces/native/node/node_model.h"
 
@@ -43,6 +44,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/event/overflow_scroll_event_hub.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -5240,6 +5242,23 @@ void ResetId(ArkUINodeHandle node)
     ViewAbstract::SetInspectorId(frameNode, id);
 }
 
+void SetInspectorLabel(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    frameNode->SetInspectorLabel(valueStr);
+}
+
+void ResetInspectorLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string defaultStr = "";
+    frameNode->SetInspectorLabel(defaultStr);
+}
+
 void SetKey(ArkUINodeHandle node, ArkUI_CharPtr key)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5840,6 +5859,24 @@ void ResetAccessibilityNextFocusId(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
+}
+
+void SetAccessibilityNextFocusParams(ArkUINodeHandle node, ArkUI_Bool descendantMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::AccessibilityNextFocusParams params;
+    params.descendantMode = descendantMode;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode, params);
+}
+
+void ResetAccessibilityNextFocusParams(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityNextFocusParams();
 }
 
 void SetAccessibilityDefaultFocus(ArkUINodeHandle node, ArkUI_Bool value)
@@ -8294,6 +8331,14 @@ ArkUI_CharPtr GetKey(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+ArkUI_CharPtr GetInspectorLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = frameNode->GetInspectorLabel();
+    return g_strValue.c_str();
+}
+
 int GetEnabled(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -9627,6 +9672,10 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
     if (arkUITouchEvent->historySize > 0) {
         for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
             SetSingleHistoryEvent(allHistoryEvents, arkUITouchEvent, i);
+            if (arkUITouchEvent->historyEvents[i].touchPointSize > 0 &&
+                !arkUITouchEvent->historyEvents[i].touchPointes) {
+                continue;
+            }
             for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
                 allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
                 allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
@@ -11484,6 +11533,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityDescription = ResetAccessibilityDescription,
         .setId = SetId,
         .resetId = ResetId,
+        .setInspectorLabel = SetInspectorLabel,
+        .resetInspectorLabel = ResetInspectorLabel,
         .setKey = SetKey,
         .resetKey = ResetKey,
         .setRestoreId = SetRestoreId,
@@ -11525,6 +11576,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityGroup = ResetAccessibilityGroup,
         .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
         .resetAccessibilityNextFocusId = ResetAccessibilityNextFocusId,
+        .setAccessibilityNextFocusParams = SetAccessibilityNextFocusParams,
+        .resetAccessibilityNextFocusParams = ResetAccessibilityNextFocusParams,
         .setAccessibilityDefaultFocus = SetAccessibilityDefaultFocus,
         .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
         .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,
@@ -11660,6 +11713,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getPaddingDimension = GetPaddingDimension,
         .getConfigSize = GetConfigSize,
         .getKey = GetKey,
+        .getInspectorLabel = GetInspectorLabel,
         .getEnabled = GetEnabled,
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
@@ -12027,6 +12081,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetAccessibilityDescription = ResetAccessibilityDescription,
         .setId = SetId,
         .resetId = ResetId,
+        .setInspectorLabel = SetInspectorLabel,
+        .resetInspectorLabel = ResetInspectorLabel,
         .setKey = SetKey,
         .resetKey = ResetKey,
         .setRestoreId = SetRestoreId,

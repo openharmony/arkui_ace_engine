@@ -258,6 +258,18 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setShowSideBarWithGestureAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setShowSideBarWithGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SideBarContainerType {
     Embed = 0,
@@ -317,6 +329,9 @@ export interface SideBarContainerAttribute extends CommonMethod {
     }
     minContentWidth(value: Dimension | undefined): this {
         throw new Error('Unimplemented method minContentWidth')
+    }
+    showSideBarWithGesture(value: boolean | undefined): this {
+        throw new Error('Unimplemented method showSideBarWithGesture')
     }
     attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -388,6 +403,11 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         this.getPeer()?.setMinContentWidthAttribute(value_casted)
         return this
     }
+    public showSideBarWithGesture(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setShowSideBarWithGestureAttribute(value_casted)
+        return this
+    }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookSideBarContainerAttributeModifier(this, value);
@@ -419,6 +439,21 @@ export function SideBarContainerImpl(
     })
 }
 
+@memo
+export function SideBarContainer(
+    @memo @memo_skip
+    style: ((attributes: SideBarContainerAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkSideBarContainerComponent>((): ArkSideBarContainerComponent => {
+        return new ArkSideBarContainerComponent()
+    })
+    NodeAttach<ArkSideBarContainerPeer>((): ArkSideBarContainerPeer => ArkSideBarContainerPeer.create(receiver), (_: ArkSideBarContainerPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ButtonIconOptions_serializer {
     public static write(buffer: SerializerBase, value: ButtonIconOptions): void {
         let valueSerializer: SerializerBase = buffer

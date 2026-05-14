@@ -1725,9 +1725,27 @@ int32_t CanvasPattern::GetId()
 void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(paintMethod_);
-    json->Put("CanvasPaint", paintMethod_->GetDumpInfo().c_str());
+    auto canvasPaints = paintMethod_->GetDumpInfo();
+    if (!canvasPaints.empty()) {
+        auto canvasPaintArray = JsonUtil::CreateArray();
+        for (const auto& canvasPaint : canvasPaints) {
+            auto item = JsonUtil::Create();
+            item->Put("text", canvasPaint.c_str());
+            canvasPaintArray->PutRef(std::move(item));
+        }
+        json->PutRef("CanvasPaint", std::move(canvasPaintArray));
+    }
     CHECK_NULL_VOID(contentModifier_);
-    json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
+    auto canvasModifierInfo = contentModifier_->GetDumpInfo();
+    if (!canvasModifierInfo.empty()) {
+        auto canvasModifierArray = JsonUtil::CreateArray();
+        for (const auto& info : canvasModifierInfo) {
+            auto item = JsonUtil::Create();
+            item->Put("text", info.c_str());
+            canvasModifierArray->PutRef(std::move(item));
+        }
+        json->PutRef("CanvasModifier", std::move(canvasModifierArray));
+    }
 }
 
 void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)

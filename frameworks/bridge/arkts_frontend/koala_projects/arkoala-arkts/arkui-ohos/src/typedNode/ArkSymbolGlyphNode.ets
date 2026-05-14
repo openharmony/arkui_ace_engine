@@ -17,7 +17,7 @@ import { int32 } from "@koalaui/common"
 import { InteropNativeModule, runtimeType, RuntimeType } from "@koalaui/interop";
 
 import { ArkBaseNode } from "./ArkBaseNode";
-import { SymbolGlyphAttribute, ResourceColor, FontWeight, SymbolEffect, SymbolEffectStrategy, SymbolRenderingStrategy } from "../framework";
+import { SymbolGlyphAttribute, ResourceColor, FontWeight, SymbolEffect, SymbolEffectStrategy, SymbolRenderingStrategy, FontWeightConfigs, ResourceStr } from '../framework';
 import { ArkSymbolGlyphPeer } from "../framework";
 import { Resource } from "global.resource";
 import { ColorMetrics } from "#generated"
@@ -64,9 +64,16 @@ export class ArkSymbolGlyphNode extends ArkBaseNode implements SymbolGlyphAttrib
     }
     fontWeight(value: int32 | FontWeight | string | undefined): this {
         const value_casted = value as (int32 | FontWeight | string | undefined)
-        this.getPeer()?.setFontWeightAttribute(value_casted)
+        this.getPeer()?.setFontWeight0Attribute(value_casted)
         this.markDirty();
         return this;
+    }
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        const valueCasted = value as (int32 | FontWeight | ResourceStr | undefined)
+        const fontWeightConfigsCasted = fontWeightConfigs as (FontWeightConfigs | undefined)
+        this.getPeer()?.setFontWeight1Attribute(valueCasted, fontWeightConfigsCasted)
+        this.markDirty();
+        return this
     }
     effectStrategy(value: SymbolEffectStrategy | undefined): this {
         const value_casted = value as (SymbolEffectStrategy | undefined)

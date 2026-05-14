@@ -54,7 +54,8 @@ CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus()
     return CancelAnimationStatus::SUCCESS;
 }
 
-CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(
+    const RefPtr<PipelineBase>& context, bool nodeExceptionSensitive)
 {
     return CancelAnimationStatus::SUCCESS;
 }

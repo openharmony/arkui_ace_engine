@@ -19,7 +19,6 @@
 #include <optional>
 #include "core/components_ng/pattern/qrcode/qrcode_modifier.h"
 
-#include "base/geometry/axis.h"
 #include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/qrcode/qrcode_layout_algorithm.h"

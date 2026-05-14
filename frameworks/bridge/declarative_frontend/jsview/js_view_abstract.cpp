@@ -55,6 +55,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_test_done_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
@@ -87,6 +88,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/depth_option.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -99,6 +101,7 @@
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/common/color_inverter.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
@@ -161,7 +164,9 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+#ifdef SMART_GESTURE_SUPPORTED
 constexpr int32_t SMART_GESTURE_SHORTCUT_PRIMARY = 0;
+#endif
 constexpr int32_t SECOND_INDEX = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
@@ -3995,7 +4000,9 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
         }
         params.position = position;
     }
-
+    if (positionValue->IsNumber()) {
+        params.depth = positionValue->ToNumber<float>();
+    }
     auto occlusionWeightValue = jsObject->GetProperty("occlusionWeight");
     if (occlusionWeightValue->IsNumber()) {
         params.occlusionWeight = occlusionWeightValue->ToNumber<float>();
@@ -10221,6 +10228,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("enableClickSoundEffect", &JSViewAbstract::JsSetEnableClickSoundEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSViewAbstract>::StaticMethod("inspectorLabel", &JSViewAbstract::JsInspectorLabel);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("onSizeChange", &JSViewAbstract::JsOnSizeChange);
@@ -10268,6 +10276,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("dragPreview", &JSViewAbstract::JsDragPreview);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityTextHint", &JSViewAbstract::JsAccessibilityTextHint);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityActionOptions", &JSViewAbstract::JsAccessibilityActionOptions);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityCustomActions", &JSViewAbstract::JsAccessibilityCustomActions);
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
@@ -11930,6 +11939,7 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
 
 void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     if (info.Length() != PARAMETER_LENGTH_FIRST) {
         return;
     }
@@ -11940,6 +11950,7 @@ void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
         return;
     }
 
@@ -11947,20 +11958,23 @@ void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
     auto actionValue = options->GetProperty("action");
     auto enabledValue = options->GetProperty("enabled");
     if (!actionValue->IsNumber() || !enabledValue->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
         return;
     }
 
     int32_t action = actionValue->ToNumber<int32_t>();
     if (action != SMART_GESTURE_SHORTCUT_PRIMARY) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
         return;
     }
     bool enabled = enabledValue->ToBoolean();
-    bool selectable = false;
+    bool selectable = enabled;
     auto selectableValue = options->GetProperty("selectable");
     if (selectableValue->IsBoolean()) {
         selectable = selectableValue->ToBoolean();
     }
     ViewAbstractModel::GetInstance()->SetSmartGestureShortcut(action, enabled, selectable);
+#endif
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
@@ -13192,6 +13206,23 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetDebugLine(debugLine);
+}
+
+void JSViewAbstract::JsInspectorLabel(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetInspectorLabel("");
+        return;
+    }
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string inspectorLabel;
+    if (!ParseJsString(jsValue, inspectorLabel)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetInspectorLabel(inspectorLabel);
 }
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)

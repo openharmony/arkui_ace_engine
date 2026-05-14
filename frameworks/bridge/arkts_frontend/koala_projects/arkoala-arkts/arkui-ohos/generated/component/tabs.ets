@@ -52,7 +52,6 @@ export class TabContentTransitionProxyInternal implements MaterializedBase,TabCo
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    // instructive change begin
     get from(): int32 {
         return this.getFrom()
     }
@@ -65,20 +64,11 @@ export class TabContentTransitionProxyInternal implements MaterializedBase,TabCo
     set to(to: int32) {
         this.setTo(to)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TabContentTransitionProxyInternal.getFinalizer())
-        // instructive change begin
-        // this.from = this.getFrom()
-        // this.to = this.getTo()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, TabContentTransitionProxyInternal.construct())
-        // instructive change begin
-        // this.from = this.getFrom()
-        // this.to = this.getTo()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._TabContentTransitionProxy_construct()
@@ -1072,6 +1062,21 @@ export function TabsImpl(
     })
 }
 
+@memo
+export function Tabs(
+    @memo @memo_skip
+    style: ((attributes: TabsAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkTabsComponent>((): ArkTabsComponent => {
+        return new ArkTabsComponent()
+    })
+    NodeAttach<ArkTabsPeer>((): ArkTabsPeer => ArkTabsPeer.create(receiver), (_: ArkTabsPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class TabContentTransitionProxy_serializer {
     public static write(buffer: SerializerBase, value: TabContentTransitionProxy): void {
         let valueSerializer: SerializerBase = buffer

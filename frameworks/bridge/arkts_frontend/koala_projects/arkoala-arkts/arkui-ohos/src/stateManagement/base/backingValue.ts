@@ -19,8 +19,7 @@
 */
 import { IMutableStateMeta } from '../decorator';
 import { IBackingValue } from './iBackingValue';
-import { STATE_MGMT_FACTORY } from '../decorator';
-import { ObserveSingleton } from './observeSingleton';
+import { FactoryInternal } from './iFactoryInternal';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { IncrementalNode } from '@koalaui/runtime';
 
@@ -35,7 +34,10 @@ export class DecoratorBackingValue<T> implements IBackingValue<T> {
         }
         this.propertyName_ = propertyName;
         this.value_ = initValue;
-        this.metaDependency_ = STATE_MGMT_FACTORY.makeMutableStateMeta();
+        // Pass `this` as the wildcard LSV target so fireChange()'s addDirtyRef
+        // routes the BackingValue identity (a safe anti-target — no user
+        // lambda returns a BackingValue) into per-monitor sources.
+        this.metaDependency_ = FactoryInternal.mkMutableStateMeta(propertyName, this);
     }
     getDependentInfo(): Set<IncrementalNode> | undefined {
         return this.metaDependency_.getDependentNodeInfo();
@@ -52,6 +54,10 @@ export class DecoratorBackingValue<T> implements IBackingValue<T> {
         if (newValue !== this.value_) {
             if (this.isValueValid(newValue)) {
                 this.value_ = newValue;
+                // The meta's constructor-stored target_ is `this` (set in the
+                // BackingValue constructor), so fireChange routes the
+                // BackingValue identity into per-monitor sources — a safe
+                // anti-target since no user lambda returns a BackingValue.
                 this.fireChange();
                 return true;
             }
@@ -65,6 +71,7 @@ export class DecoratorBackingValue<T> implements IBackingValue<T> {
     }
     public setNoCheck(newValue: T): void {
         this.value_ = newValue;
+        // Same rationale as set() above: meta's stored target_ is `this`.
         this.fireChange();
     }
     // create dependency if currently rendering anything

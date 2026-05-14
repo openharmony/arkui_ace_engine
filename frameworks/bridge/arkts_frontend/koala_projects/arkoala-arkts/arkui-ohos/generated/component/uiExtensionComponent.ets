@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { extractors, AttributeModifier, hookUIExtensionComponentAttributeModifier, AttributeUpdater } from '#handwritten'
 import { RecordData, Callback as ohos_base_Callback, ErrorCallback, BusinessError } from '@ohos.base'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
@@ -25,7 +26,6 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent } from './common'
-import { extractors, AttributeModifier, hookUIExtensionComponentAttributeModifier, AttributeUpdater } from '#handwritten'
 import { VoidCallback } from './units'
 import { default as Want } from '@ohos.app.ability.Want'
 import { CallbackKind } from './../framework/peers/CallbackKind'
@@ -105,10 +105,11 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             const dataKeyVar = pair[0]
             const dataValueVar = pair[1]
             thisSerializer.writeString(dataKeyVar)
-            if (dataValueVar !== undefined && dataValueVar !== null) {
+            const dataValueVarTransformed: Object | undefined = extractors.transform_Ark_RecordData_to_Opt_Object(dataValueVar)
+            if (dataValueVarTransformed !== undefined) {
                 thisSerializer.writeInt8(RuntimeType.OBJECT)
-                const dataValueVarTmpValue = dataValueVar!
-                thisSerializer.holdAndWriteObject(dataValueVarTmpValue)
+                const dataValueVarTransformedTmpValue = dataValueVarTransformed!
+                thisSerializer.holdAndWriteObject(dataValueVarTransformedTmpValue)
             } else {
                 thisSerializer.writeInt8(RuntimeType.UNDEFINED)
             }
@@ -123,10 +124,11 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             const dataKeyVar = pair[0]
             const dataValueVar = pair[1]
             thisSerializer.writeString(dataKeyVar)
-            if (dataValueVar !== undefined && dataValueVar !== null) {
+            const dataValueVarTransformed: Object | undefined = extractors.transform_Ark_RecordData_to_Opt_Object(dataValueVar)
+            if (dataValueVarTransformed !== undefined) {
                 thisSerializer.writeInt8(RuntimeType.OBJECT)
-                const dataValueVarTmpValue = dataValueVar!
-                thisSerializer.holdAndWriteObject(dataValueVarTmpValue)
+                const dataValueVarTransformedTmpValue = dataValueVarTransformed!
+                thisSerializer.holdAndWriteObject(dataValueVarTransformedTmpValue)
             } else {
                 thisSerializer.writeInt8(RuntimeType.UNDEFINED)
             }
@@ -139,17 +141,18 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         // TODO: TS map resize
         for (let bufferIVar = 0; bufferIVar < bufferSizeVar; bufferIVar++) {
             const bufferKeyVar: string = (retvalDeserializer.readString() as string)
-            const bufferValueVarTempBuf_runtimeType = retvalDeserializer.readInt8()!.toInt()
-            let bufferValueVarTempBuf: Object | null | undefined = undefined
-            if ((bufferValueVarTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-                bufferValueVarTempBuf = (retvalDeserializer.readObject() as object)
+            const bufferValueVarTempBufD_runtimeType = retvalDeserializer.readInt8()!.toInt()
+            let bufferValueVarTempBufD: Object | undefined = undefined
+            if ((bufferValueVarTempBufD_runtimeType) != (RuntimeType.UNDEFINED)) {
+                bufferValueVarTempBufD = (retvalDeserializer.readObject() as object)
             }
-            const bufferValueVar: RecordData = bufferValueVarTempBuf
+            const bufferValueVarTempBufDeserialized: Object | undefined = bufferValueVarTempBufD
+            const bufferValueVar: RecordData = extractors.transform_Opt_Object_to_Ark_RecordData(bufferValueVarTempBufDeserialized)
             buffer.set(bufferKeyVar, bufferValueVar)
         }
         const returnResult: Record<string, RecordData> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Record<string, RecordData>)
     }
     private onAsyncReceiverRegister_serialize(callback_: ohos_base_Callback<UIExtensionProxy>): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -189,7 +192,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
     }
 }
 export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
-    uiExtensionComponentAttributeSet?: UIExtensionComponentModifier;
+    uIExtensionComponentAttributeSet?: UIExtensionComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -378,6 +381,18 @@ export function UIExtensionComponentImpl(
     })
 }
 
+@memo
+export function UIExtensionComponent(
+    @memo @memo_skip
+    style: ((attributes: UIExtensionComponentAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkUIExtensionComponentComponent>((): ArkUIExtensionComponentComponent => {
+        return new ArkUIExtensionComponentComponent()
+    })
+    NodeAttach<ArkUIExtensionComponentPeer>((): ArkUIExtensionComponentPeer => ArkUIExtensionComponentPeer.create(receiver), (_: ArkUIExtensionComponentPeer): void => {
+        style?.(receiver)
+    })
+}
 export class UIExtensionProxy_serializer {
     public static write(buffer: SerializerBase, value: UIExtensionProxy): void {
         let valueSerializer: SerializerBase = buffer

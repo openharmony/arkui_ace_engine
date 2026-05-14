@@ -358,6 +358,8 @@ public:
     bool IsOrphanCharOptimization();
     void SetCompressLeadingPunctuation(bool enabled);
     bool IsCompressLeadingPunctuation();
+    void SetPunctuationOverflow(bool enabled);
+    bool IsPunctuationOverflow();
     BlurReason GetBlurReason();
     uint32_t GetSCBSystemWindowId();
     void OnAttachToMainTree() override;
@@ -688,8 +690,7 @@ public:
     bool BetweenSelection(const Offset& globalOffset);
     bool InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
-        WindowSizeChangeReason type) override;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     void RequestCustomKeyboardBuilder();
@@ -728,6 +729,7 @@ public:
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTreeMultiThreadExtension() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsAtTop() const override;
@@ -891,7 +893,7 @@ public:
     }
     bool IsFreeScrollEnabled() const;
     RefPtr<RichEditorScrollController> GetScrollController() const;
-    bool HandleHorizontalScroll();
+    bool HandleHorizontalScroll(bool needUpdateOffset);
     void RemoveOverlayModifier();
     void ScheduleDisappearDelayTask();
     bool IsMouseOverScrollBar(const MouseInfo& info);
@@ -1270,6 +1272,8 @@ private:
     bool IsEnPreview();
     void SetMagnifierLocalOffset(Offset localOffset);
     void SetMagnifierOffsetWithAnimation(Offset offset);
+    void UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType);
+    void ResetMagnifierTouchInfo();
     void SetIsEnableSubWindowMenu();
     void UpdateSelectionAndHandleVisibility();
     void OnReportRichEditorEvent(const std::string& event);
@@ -1284,6 +1288,7 @@ private:
     void HandleBlurEventReset();
     void ReportComponentChangeEvent();
     void HandleTouchedFingersCount(TouchEventInfo& info);
+    void ClearParagraphCache() override;
     // hostOverlayMod_ is the overlay modifier of rich editor,
     // while overlayMod_ is the overlay modifier of rich editor content node.
     RefPtr<TextOverlayModifier> hostOverlayMod_;
@@ -1404,6 +1409,8 @@ private:
     bool editingLongPress_ = false;
     bool isTouchSelecting_ = false;
     int32_t selectingFingerId_ = -1;
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
     bool needMoveCaretToContentRect_ = false;
     std::queue<std::function<void()>> tasks_;
     bool isModifyingContent_ = false;
@@ -1415,6 +1422,7 @@ private:
     bool isEnableAutoSpacing_ = false;
     bool isOrphanCharOptimization_ = false;
     bool isCompressLeadingPunctuation_ = false;
+    bool isPunctuationOverflow_ = false;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;

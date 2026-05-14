@@ -40,6 +40,7 @@ ace_unittest("shape_test_ng") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_drawing_painter.cpp",
     "base_polygon_pattern_test_ng.cpp",
     "base_shape_pattern_test_ng.cpp",
+    "circle_hdr_runtime_test_ng.cpp",
     "circle_pattern_test_ng.cpp",
     "ellipse_pattern_test_ng.cpp",
     "line_pattern_test_ng.cpp",

@@ -22,6 +22,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/touch_event.h"
+#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,6 +52,8 @@ public:
 
     ACE_FORCE_EXPORT void SetLocalOffset(
         const OffsetF& localOffset, const std::optional<OffsetF>& localOffsetWithoutTrans = std::nullopt);
+    ACE_FORCE_EXPORT void SetLocalOffset(const OffsetF& localOffset, const TimeStamp& time, TouchType touchType,
+        const std::optional<OffsetF>& localOffsetWithoutTrans = std::nullopt);
 
     OffsetF GetLocalOffset() const
     {
@@ -72,6 +76,7 @@ public:
     uint32_t ArgbToRgba(const uint32_t& color);
 
     ACE_FORCE_EXPORT void RemoveMagnifierFrameNode();
+    ACE_FORCE_EXPORT void ResetTouchInfo();
 
     void SetColorModeChange(const bool& colorModeChange)
     {
@@ -98,7 +103,16 @@ public:
     }
 
     RectF GetViewPort(const RefPtr<FrameNode>& host);
+
+    float GetTouchVelocityX() const
+    {
+        return touchVelocityX_;
+    }
 private:
+    bool IsDynamicShapeEnabled() const;
+    void UpdateTouchVelocity(const OffsetF& localOffset, const TimeStamp& time, TouchType touchType);
+    void ResetTouchVelocity();
+    void UpdateMagnifierShapeByVelocity();
     bool IsLocalOffsetInHostRange(const RefPtr<FrameNode>& host);
 
     MagnifierParams params_;
@@ -117,6 +131,9 @@ private:
     Dimension magnifierNodeWidth_;
     Dimension magnifierNodeHeight_;
     std::optional<RectF> hostViewPort_;
+    VelocityTracker velocityTracker_ { Axis::HORIZONTAL };
+    float touchVelocityX_ = 0.0f;
+    float shapeProgress_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

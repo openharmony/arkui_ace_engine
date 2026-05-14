@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 
+#include <optional>
+
 #include "core/common/resource/resource_object.h"
 #include "frameworks/base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -131,6 +133,33 @@ void JSContainerPicker::OnScrollStop(const JSCallbackInfo& info)
     };
     NG::ContainerPickerModel::SetOnScrollStop(std::move(onScrollStop));
     info.ReturnSelf();
+}
+
+void JSContainerPicker::SetDisplayedItemCount(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsUndefined() || info[0]->IsNull()) {
+        NG::ContainerPickerModel::SetDisplayedItemCount(std::nullopt);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    NG::ContainerPickerModel::SetDisplayedItemCount(std::make_optional(info[0]->ToNumber<int32_t>()));
+}
+
+void JSContainerPicker::SetItemHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsUndefined() || info[0]->IsNull()) {
+        NG::ContainerPickerModel::SetItemHeight(std::nullopt);
+        return;
+    }
+    CalcDimension dim;
+    RefPtr<ResourceObject> resObj;
+    if (!ParseLengthMetricsToDimension(info[0], dim, resObj)) {
+        return;
+    }
+    Dimension pickerDim = dim;
+    NG::ContainerPickerModel::SetItemHeight(std::make_optional(pickerDim));
 }
 
 void JSContainerPicker::SetSelectionIndicator(const JSCallbackInfo& info)
@@ -255,6 +284,8 @@ void JSContainerPicker::JSBind(BindingTarget globalObj)
     JSClass<JSContainerPicker>::StaticMethod("canLoop", &JSContainerPicker::SetCanLoop);
     JSClass<JSContainerPicker>::StaticMethod("enableHapticFeedback", &JSContainerPicker::SetEnableHapticFeedback);
     JSClass<JSContainerPicker>::StaticMethod("selectionIndicator", &JSContainerPicker::SetSelectionIndicator);
+    JSClass<JSContainerPicker>::StaticMethod("displayedItemCount", &JSContainerPicker::SetDisplayedItemCount);
+    JSClass<JSContainerPicker>::StaticMethod("itemHeight", &JSContainerPicker::SetItemHeight);
     JSClass<JSContainerPicker>::StaticMethod("onChange", &JSContainerPicker::OnChange);
     JSClass<JSContainerPicker>::StaticMethod("onScrollStop", &JSContainerPicker::OnScrollStop);
 

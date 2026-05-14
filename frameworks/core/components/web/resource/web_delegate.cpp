@@ -14,6 +14,7 @@
  */
 
 #include "core/components/web/resource/web_delegate.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include <cctype>
 #include <cfloat>
@@ -69,6 +70,7 @@
 #include "core/common/container.h"
 #include "base/include/ark_web_errno.h"
 #include "arkweb_utils.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace {
 
@@ -118,6 +120,9 @@ constexpr uint32_t ACCESSIBILITY_DELAY_MILLISECONDS = 100;
 constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 200;
+constexpr int32_t ACCESSIBILITY_PAGE_CHANGE_MAX_RETRY = 10;
+constexpr int64_t WEB_ACCESSIBILITY_INVALID_NODE_ID = -1;
+constexpr int32_t WEB_ACCESSIBILITY_FOCUS_FORWARD = 1 << 4;
 constexpr uint32_t AUTOFILL_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 constexpr uint32_t TIMEOUT_SECONDS = 5;
@@ -6112,71 +6117,125 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
 
 void WebDelegate::AccessibilitySendPageChange()
 {
+    AccessibilitySendPageChange(0);
+}
+
+void WebDelegate::AccessibilitySendPageChange(int32_t retryCount)
+{
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostDelayedTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), retryCount]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            auto webPattern = delegate->webPattern_.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            auto context = AceType::DynamicCast<NG::PipelineContext>(delegate->context_.Upgrade());
-            CHECK_NULL_VOID(context);
-            auto webNode = webPattern->GetHost();
-            CHECK_NULL_VOID(webNode);
-            auto accessibilityManager = context->GetAccessibilityManager();
-            CHECK_NULL_VOID(accessibilityManager);
-            if (!accessibilityManager->IsScreenReaderEnabled()) {
-                return;
-            }
-            delegate->SetPageFinishedState(true);
-            if (webNode->IsOnMainTree()) {
-                if (webPattern->IsAccessibilitySamePage()) {
-                    TAG_LOGI(AceLogTag::ACE_WEB,
-                        "WebDelegate::AccessibilitySendPageChange IsAccessibilitySamePage accessibilityId = "
-                        "%{public}" PRId64,
-                        webNode->GetAccessibilityId());
-                    return;
-                }
-                if (!webPattern->CheckVisible()) {
-                    bool deleteResult = accessibilityManager->DeleteFromPageEventController(webNode);
-                    TAG_LOGI(AceLogTag::ACE_WEB,
-                        "WebDelegate::AccessibilitySendPageChange CheckVisible accessibilityId = "
-                        "%{public}" PRId64 ", deleteResult = %{public}d",
-                        webNode->GetAccessibilityId(), deleteResult);
-                    return;
-                }
-                if (accessibilityManager->CheckPageEventCached(webNode, false)) {
-                    TAG_LOGI(AceLogTag::ACE_WEB,
-                        "WebDelegate::AccessibilitySendPageChange CheckPageEventCached accessibilityId = "
-                        "%{public}" PRId64,
-                        webNode->GetAccessibilityId());
-                    accessibilityManager->ReleasePageEvent(webNode, true, true);
-                    return;
-                }
-                auto accessibilityProperty = webNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-                CHECK_NULL_VOID(accessibilityProperty);
-                auto navigationMgr = context->GetNavigationManager();
-                if (navigationMgr && navigationMgr->IsNavigationInAnimation() &&
-                    !accessibilityProperty->HasAccessibilitySamePage()) {
-                    TAG_LOGI(AceLogTag::ACE_WEB,
-                        "WebDelegate::AccessibilitySendPageChange IsNavigationInAnimation accessibilityId = "
-                        "%{public}" PRId64,
-                        webNode->GetAccessibilityId());
-                    accessibilityManager->ReleasePageEvent(webNode, true, true);
-                    return;
-                }
-                TAG_LOGI(AceLogTag::ACE_WEB,
-                    "WebDelegate::AccessibilitySendPageChange accessibilityId = %{public}" PRId64,
-                    webNode->GetAccessibilityId());
-                accessibilityManager->ReleasePageEvent(webNode, true, true);
-                AccessibilityEvent event;
-                event.nodeId = webNode->GetAccessibilityId();
-                event.type = AccessibilityEventType::PAGE_CHANGE;
-                accessibilityManager->SendAccessibilityAsyncEvent(event);
-            }
+            delegate->HandleAccessibilitySendPageChange(retryCount);
         },
         TaskExecutor::TaskType::UI, ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS,
         "ArkUIWebAccessibilitySendPageChange");
+}
+
+void WebDelegate::HandleAccessibilitySendPageChange(int32_t retryCount)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(context);
+    auto webNode = webPattern->GetHost();
+    CHECK_NULL_VOID(webNode);
+    auto accessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (!accessibilityManager->IsScreenReaderEnabled()) {
+        return;
+    }
+    SetPageFinishedState(true);
+    if (!webNode->IsOnMainTree()) {
+        return;
+    }
+    if (retryCount == 0 && !CheckAccessibilityPageChangeState(webPattern, webNode, context, accessibilityManager)) {
+        return;
+    }
+    if (!CheckAccessibilityNodeReady(webNode, retryCount)) {
+        return;
+    }
+    // Avoid unnecessary page state checks during retry before the accessibility node is ready.
+    if (retryCount != 0 && !CheckAccessibilityPageChangeState(webPattern, webNode, context, accessibilityManager)) {
+        return;
+    }
+    SendAccessibilityPageChangeEvent(webNode, accessibilityManager);
+}
+
+bool WebDelegate::CheckAccessibilityPageChangeState(const RefPtr<NG::WebPattern>& webPattern,
+    const RefPtr<NG::FrameNode>& webNode, const RefPtr<NG::PipelineContext>& context,
+    const RefPtr<AccessibilityManager>& accessibilityManager)
+{
+    if (webPattern->IsAccessibilitySamePage()) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebDelegate::AccessibilitySendPageChange IsAccessibilitySamePage accessibilityId = %{public}" PRId64,
+            webNode->GetAccessibilityId());
+        return false;
+    }
+    if (!webPattern->CheckVisible()) {
+        bool deleteResult = accessibilityManager->DeleteFromPageEventController(webNode);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebDelegate::AccessibilitySendPageChange CheckVisible accessibilityId = "
+            "%{public}" PRId64 ", deleteResult = %{public}d",
+            webNode->GetAccessibilityId(), deleteResult);
+        return false;
+    }
+    if (accessibilityManager->CheckPageEventCached(webNode, false)) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebDelegate::AccessibilitySendPageChange CheckPageEventCached accessibilityId = %{public}" PRId64,
+            webNode->GetAccessibilityId());
+        accessibilityManager->ReleasePageEvent(webNode, true, true);
+        return false;
+    }
+
+    auto accessibilityProperty = webNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    auto navigationMgr = context->GetNavigationManager();
+    if (navigationMgr && navigationMgr->IsNavigationInAnimation() &&
+        !accessibilityProperty->HasAccessibilitySamePage()) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebDelegate::AccessibilitySendPageChange IsNavigationInAnimation accessibilityId = %{public}" PRId64,
+            webNode->GetAccessibilityId());
+        accessibilityManager->ReleasePageEvent(webNode, true, true);
+        return false;
+    }
+    return true;
+}
+
+bool WebDelegate::CheckAccessibilityNodeReady(const RefPtr<NG::FrameNode>& webNode, int32_t retryCount)
+{
+    auto accessibilityNodeInfo = GetAccessibilityNodeInfoByFocusMove(
+        WEB_ACCESSIBILITY_INVALID_NODE_ID, WEB_ACCESSIBILITY_FOCUS_FORWARD);
+    if (accessibilityNodeInfo) {
+        return true;
+    }
+    if (retryCount < ACCESSIBILITY_PAGE_CHANGE_MAX_RETRY) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebDelegate::AccessibilitySendPageChange accessibility node not ready, retryCount = "
+            "%{public}d, accessibilityId = %{public}" PRId64,
+            retryCount, webNode->GetAccessibilityId());
+        AccessibilitySendPageChange(retryCount + 1);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "WebDelegate::AccessibilitySendPageChange accessibility node not ready after max retry, "
+            "accessibilityId = %{public}" PRId64,
+            webNode->GetAccessibilityId());
+    }
+    return false;
+}
+
+void WebDelegate::SendAccessibilityPageChangeEvent(const RefPtr<NG::FrameNode>& webNode,
+    const RefPtr<AccessibilityManager>& accessibilityManager)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebDelegate::AccessibilitySendPageChange accessibilityId = %{public}" PRId64,
+        webNode->GetAccessibilityId());
+    accessibilityManager->ReleasePageEvent(webNode, true, true);
+    AccessibilityEvent event;
+    event.nodeId = webNode->GetAccessibilityId();
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    accessibilityManager->SendAccessibilityAsyncEvent(event);
 }
 
 void WebDelegate::AccessibilityReleasePageEvent()

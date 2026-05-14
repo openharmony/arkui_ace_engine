@@ -38,6 +38,8 @@ const auto POS_0 = 0;
 const auto POS_1 = 1;
 const auto POS_2 = 2;
 const auto MODE_0 = 0;
+const auto MODE_1 = 1;
+const auto MODE_2 = 2;
 const auto CHILD_COUNT_0 = 0;
 const auto CHILD_COUNT_1 = 1;
 const auto CHILD_COUNT_2 = 2;
@@ -560,7 +562,8 @@ HWTEST_F(FrameNodeAccessorTest, DISABLED_getChildrenCountTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChildrenCount, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
-    EXPECT_EQ(accessor_->getChildrenCount(peer_), 0);
+    auto modeAllExpand = Converter::ArkValue<Ark_Number>(MODE_0);
+    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeAllExpand), CHILD_COUNT_0);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
     auto childPeer1 = CreatePeer();
@@ -577,7 +580,38 @@ HWTEST_F(FrameNodeAccessorTest, DISABLED_getChildrenCountTest, TestSize.Level1)
     accessor_->appendChild(peer_, childPeer3);
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
-    EXPECT_EQ(accessor_->getChildrenCount(peer_), childList.size());
+    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeAllExpand), static_cast<Ark_Int32>(childList.size()));
+    DestroyPeer(childPeer1);
+    DestroyPeer(childPeer2);
+    DestroyPeer(childPeer3);
+}
+
+/**
+ * @tc.name: getChildrenCountModeTest
+ * @tc.desc: Verify getChildrenCount returns expected value for all supported modes and invalid mode fallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, getChildrenCountModeTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getChildrenCount, nullptr);
+    ASSERT_NE(accessor_->appendChild, nullptr);
+
+    auto childPeer1 = CreatePeer();
+    auto childPeer2 = CreatePeer();
+    auto childPeer3 = CreatePeer();
+
+    accessor_->appendChild(peer_, childPeer1);
+    accessor_->appendChild(peer_, childPeer2);
+    accessor_->appendChild(peer_, childPeer3);
+
+    auto modeAllExpand = Converter::ArkValue<Ark_Number>(MODE_0);
+    auto modeOnlyExpanded = Converter::ArkValue<Ark_Number>(MODE_1);
+    auto modeAllNotExpand = Converter::ArkValue<Ark_Number>(MODE_2);
+
+    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeAllExpand), CHILD_COUNT_3);
+    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeOnlyExpanded), CHILD_COUNT_3);
+    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeAllNotExpand), CHILD_COUNT_3);
+
     DestroyPeer(childPeer1);
     DestroyPeer(childPeer2);
     DestroyPeer(childPeer3);

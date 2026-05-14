@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/common/thread_checker.h"
+#include "core/components_ng/base/frame_node.h"
 #undef private
 #undef protected
 

@@ -24,12 +24,12 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
 import { extractors, AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from '#handwritten'
-import { ShaderStyle_serializer, ShaderStyle } from './textCommon'
+import { ShaderStyle_serializer, FontWeightConfigs_serializer, ShaderStyle, FontWeightConfigs } from './textCommon'
 import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent } from './common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { ResourceColor, Resource as arkui_component_units_Resource, ColorMetrics as arkui_component_units_ColorMetrics } from './units'
+import { ResourceColor, Resource as arkui_component_units_Resource, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr } from './units'
 import { Color as arkui_component_enums_Color, FontWeight } from './enums'
 import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
 import { CallbackKind } from './../framework/peers/CallbackKind'
@@ -229,7 +229,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
+    setFontWeight0Attribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -250,7 +250,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontWeight0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEffectStrategyAttribute(value: SymbolEffectStrategy | undefined): void {
@@ -379,6 +379,45 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setFontWeight1Attribute(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof FontWeight) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as FontWeight
+                thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
+            } else if (valueTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0 = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
+                } else if (valueTmpValueForIdx2 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1 = valueTmpValueForIdx2 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (fontWeightConfigs !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fontWeightConfigsTmpValue = fontWeightConfigs!
+            FontWeightConfigs_serializer.write(thisSerializer, fontWeightConfigsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontWeight1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSymbolEffect1Attribute(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (symbolEffect !== undefined) {
@@ -482,6 +521,9 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     symbolShadow(value: ShadowOptions | undefined): this {
         throw new Error('Unimplemented method symbolShadow')
     }
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        throw new Error('Unimplemented method fontWeight')
+    }
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
         throw new Error('Unimplemented method symbolEffect')
     }
@@ -520,7 +562,7 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
     }
     public fontWeight(value: int32 | FontWeight | string | undefined): this {
         const value_casted = value as (int32 | FontWeight | string | undefined)
-        this.getPeer()?.setFontWeightAttribute(value_casted)
+        this.getPeer()?.setFontWeight0Attribute(value_casted)
         return this
     }
     public effectStrategy(value: SymbolEffectStrategy | undefined): this {
@@ -556,6 +598,12 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
     public symbolShadow(value: ShadowOptions | undefined): this {
         const value_casted = value as (ShadowOptions | undefined)
         this.getPeer()?.setSymbolShadowAttribute(value_casted)
+        return this
+    }
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined, fontWeightConfigs?: FontWeightConfigs): this {
+        const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
+        const fontWeightConfigs_casted = fontWeightConfigs as (FontWeightConfigs | undefined)
+        this.getPeer()?.setFontWeight1Attribute(value_casted, fontWeightConfigs_casted)
         return this
     }
     public symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
@@ -598,6 +646,18 @@ export function SymbolGlyphImpl(
     })
 }
 
+@memo
+export function SymbolGlyph(
+    @memo @memo_skip
+    style: ((attributes: SymbolGlyphAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkSymbolGlyphComponent>((): ArkSymbolGlyphComponent => {
+        return new ArkSymbolGlyphComponent()
+    })
+    NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (_: ArkSymbolGlyphPeer): void => {
+        style?.(receiver)
+    })
+}
 export class AppearSymbolEffect_serializer {
     public static write(buffer: SerializerBase, value: AppearSymbolEffect): void {
         let valueSerializer: SerializerBase = buffer

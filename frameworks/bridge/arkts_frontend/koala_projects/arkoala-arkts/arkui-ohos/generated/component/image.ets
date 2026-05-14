@@ -30,7 +30,7 @@ import { extractors, AttributeModifier, hookImageOnError, hookImageAttributeModi
 import { matrix4_Matrix4Transit_serializer } from './../framework/ohos.matrix4'
 import { ColorFilter_serializer, ResourceColor, Resource as arkui_component_units_Resource, ColorMetrics as arkui_component_units_ColorMetrics, ColorFilter, VoidCallback, ResourceStr, EdgeWidths, EdgeWidths_serializer } from './units'
 import { drawing_ColorFilter_serializer, drawing_Lattice_serializer } from './../framework/ohos.graphics.drawing'
-import { PointLightStyle_serializer, ContentTransitionEffect_serializer, ArkCommonMethodPeer, CommonMethod, PixelMap, PointLightStyle, ContentTransitionEffect, ArkCommonMethodComponent } from './common'
+import { PointLightStyle_serializer, ContentTransitionEffect_serializer, ArkCommonMethodPeer, CommonMethod, PixelMap, PointLightStyle, ContentTransitionEffect, ExtendableCommonMethod, ArkCommonMethodComponent } from './common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -45,6 +45,7 @@ import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { default as cacheDownload } from '@ohos.request.cacheDownload'
 import { BusinessError } from '@ohos.base'
+import { ConstructorT, CustomBuilderT } from './builder'
 import { ImageModifier } from './../ImageModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
@@ -94,7 +95,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setImageOptionsAttribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): void {
+    setImageOptions0Attribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (src !== undefined) {
@@ -135,7 +136,102 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setImageOptions1Attribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions, reloadKey?: string): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (src !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const srcTmpValue = src!
+            if (srcTmpValue instanceof PixelMap) {
+                thisSerializer.writeInt8((0).toByte())
+                const srcTmpValueForIdx0 = srcTmpValue as PixelMap
+                image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx0)
+            } else if (srcTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((1).toByte())
+                const srcTmpValueForIdx1 = srcTmpValue as ResourceStr
+                if (srcTmpValueForIdx1 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const srcTmpValueForIdx1ForIdx0 = srcTmpValueForIdx1 as string
+                    thisSerializer.writeString(srcTmpValueForIdx1ForIdx0)
+                } else if (srcTmpValueForIdx1 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const srcTmpValueForIdx1ForIdx1 = srcTmpValueForIdx1 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, srcTmpValueForIdx1ForIdx1)
+                }
+            } else if (srcTmpValue instanceof DrawableDescriptor) {
+                thisSerializer.writeInt8((2).toByte())
+                const srcTmpValueForIdx2 = srcTmpValue as DrawableDescriptor
+                DrawableDescriptor_serializer.write(thisSerializer, srcTmpValueForIdx2)
+            } else if (srcTmpValue instanceof ImageContent) {
+                thisSerializer.writeInt8((3).toByte())
+                const srcTmpValueForIdx3 = srcTmpValue as ImageContent
+                thisSerializer.writeInt32(srcTmpValueForIdx3.valueOf())
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (imageAIOptions !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const imageAIOptionsTmpValue = imageAIOptions!
+            ImageAIOptions_serializer.write(thisSerializer, imageAIOptionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (reloadKey !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const reloadKeyTmpValue = reloadKey!
+            thisSerializer.writeString(reloadKeyTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setImageOptions2Attribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, reloadKey?: string): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (src !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const srcTmpValue = src!
+            if (srcTmpValue instanceof PixelMap) {
+                thisSerializer.writeInt8((0).toByte())
+                const srcTmpValueForIdx0 = srcTmpValue as PixelMap
+                image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx0)
+            } else if (srcTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((1).toByte())
+                const srcTmpValueForIdx1 = srcTmpValue as ResourceStr
+                if (srcTmpValueForIdx1 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const srcTmpValueForIdx1ForIdx0 = srcTmpValueForIdx1 as string
+                    thisSerializer.writeString(srcTmpValueForIdx1ForIdx0)
+                } else if (srcTmpValueForIdx1 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const srcTmpValueForIdx1ForIdx1 = srcTmpValueForIdx1 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, srcTmpValueForIdx1ForIdx1)
+                }
+            } else if (srcTmpValue instanceof DrawableDescriptor) {
+                thisSerializer.writeInt8((2).toByte())
+                const srcTmpValueForIdx2 = srcTmpValue as DrawableDescriptor
+                DrawableDescriptor_serializer.write(thisSerializer, srcTmpValueForIdx2)
+            } else if (srcTmpValue instanceof ImageContent) {
+                thisSerializer.writeInt8((3).toByte())
+                const srcTmpValueForIdx3 = srcTmpValue as ImageContent
+                thisSerializer.writeInt32(srcTmpValueForIdx3.valueOf())
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (reloadKey !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const reloadKeyTmpValue = reloadKey!
+            thisSerializer.writeString(reloadKeyTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAltAttribute(value: string | global_resource_Resource | PixelMap | ImageAlt | undefined): void {
@@ -351,7 +447,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_setSyncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColorFilterAttribute(value: ColorFilter | DrawingColorFilter | undefined): void {
+    setColorFilterAttribute(value: ColorFilter | DrawingColorFilter | ResourceColor | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -364,6 +460,26 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as DrawingColorFilter
                 drawing_ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof ResourceColor) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2 = valueTmpValue as ResourceColor
+                if (valueTmpValueForIdx2 instanceof arkui_component_enums_Color) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0 = valueTmpValueForIdx2 as arkui_component_enums_Color
+                    thisSerializer.writeInt32((valueTmpValueForIdx2ForIdx0.getOrdinal()) % (12))
+                } else if (valueTmpValueForIdx2 instanceof int32) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1 = valueTmpValueForIdx2 as int32
+                    thisSerializer.writeInt32(valueTmpValueForIdx2ForIdx1)
+                } else if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((2).toByte())
+                    const valueTmpValueForIdx2ForIdx2 = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx2)
+                } else if (valueTmpValueForIdx2 instanceof arkui_component_units_Resource) {
+                    thisSerializer.writeInt8((3).toByte())
+                    const valueTmpValueForIdx2ForIdx3 = valueTmpValueForIdx2 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx3)
+                }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -619,101 +735,496 @@ export interface ImageAlt {
 }
 export interface ImageAttribute extends CommonMethod {
     setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).setImageOptions(src, imageAIOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute setImageOptions can only be set when creating an extendable component.')
+            }
+        }
+        throw new Error('Unimplemented method setImageOptions')
+    }
+    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions, reloadKey?: string): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).setImageOptions(src, imageAIOptions, reloadKey));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute setImageOptions can only be set when creating an extendable component.')
+            }
+        }
+        throw new Error('Unimplemented method setImageOptions')
+    }
+    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, reloadKey?: string): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).setImageOptions(src, reloadKey));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute setImageOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setImageOptions')
     }
     alt(value: string | global_resource_Resource | PixelMap | ImageAlt | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).alt(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute alt can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method alt')
     }
     matchTextDirection(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).matchTextDirection(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute matchTextDirection can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method matchTextDirection')
     }
     fitOriginalSize(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).fitOriginalSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute fitOriginalSize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fitOriginalSize')
     }
     fillColor(value: ResourceColor | ColorContent | arkui_component_units_ColorMetrics | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).fillColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute fillColor can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fillColor')
     }
     objectFit(value: ImageFit | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).objectFit(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute objectFit can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method objectFit')
     }
     imageMatrix(value: ImageMatrix | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).imageMatrix(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute imageMatrix can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method imageMatrix')
     }
     objectRepeat(value: ImageRepeat | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).objectRepeat(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute objectRepeat can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method objectRepeat')
     }
     autoResize(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).autoResize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute autoResize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method autoResize')
     }
     renderMode(value: ImageRenderMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).renderMode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute renderMode can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method renderMode')
     }
     dynamicRangeMode(value: DynamicRangeMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).dynamicRangeMode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute dynamicRangeMode can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method dynamicRangeMode')
     }
     hdrBrightness(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).hdrBrightness(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute hdrBrightness can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method hdrBrightness')
     }
     interpolation(value: ImageInterpolation | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).interpolation(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute interpolation can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method interpolation')
     }
     sourceSize(value: ImageSourceSize | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).sourceSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute sourceSize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method sourceSize')
     }
     syncLoad(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).syncLoad(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute syncLoad can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method syncLoad')
     }
-    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+    colorFilter(value: ColorFilter | DrawingColorFilter | ResourceColor | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).colorFilter(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute colorFilter can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method colorFilter')
     }
     copyOption(value: CopyOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).copyOption(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute copyOption can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method copyOption')
     }
     draggable(value: boolean | undefined): this
     pointLight(value: PointLightStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).pointLight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute pointLight can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method pointLight')
     }
     edgeAntialiasing(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).edgeAntialiasing(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute edgeAntialiasing can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method edgeAntialiasing')
     }
     onComplete(value: ImageOnCompleteCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).onComplete(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute onComplete can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onComplete')
     }
     onError(value: ImageErrorCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).onError(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute onError can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onError')
     }
     onFinish(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).onFinish(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute onFinish can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onFinish')
     }
     enableAnalyzer(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).enableAnalyzer(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute enableAnalyzer can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method enableAnalyzer')
     }
     analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).analyzerConfig(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute analyzerConfig can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method analyzerConfig')
     }
     resizable(value: ResizableOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).resizable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute resizable can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method resizable')
     }
     privacySensitive(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).privacySensitive(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute privacySensitive can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method privacySensitive')
     }
     enhancedImageQuality(value: ResolutionQuality | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).enhancedImageQuality(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute enhancedImageQuality can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method enhancedImageQuality')
     }
     orientation(value: ImageRotateOrientation | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).orientation(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute orientation can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method orientation')
     }
     supportSvg2(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).supportSvg2(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute supportSvg2 can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method supportSvg2')
     }
     contentTransition(value: ContentTransitionEffect | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).contentTransition(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute contentTransition can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method contentTransition')
     }
     antialiased(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).antialiased(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute antialiased can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method antialiased')
     }
     attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ImageAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Image attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableImage extends ExtendableCommonMethod implements ImageAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableImage>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: ImageAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        ImageImpl(cb);
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableImage>(factory: () => T, src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableImage>(factory: () => T, src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions, reloadKey?: string): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableImage>(factory: () => T, src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, reloadKey?: string): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ImageAttribute).setImageOptions(src, imageAIOptions)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Image attribute 'setImageOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setImageOptions')
+    }
+
+    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions, reloadKey?: string): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ImageAttribute).setImageOptions(src, imageAIOptions, reloadKey)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Image attribute 'setImageOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setImageOptions')
+    }
+
+    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, reloadKey?: string): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ImageAttribute).setImageOptions(src, reloadKey)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Image attribute 'setImageOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setImageOptions')
     }
 }
 export type ImageErrorCallback = (error: ImageError) => void;
@@ -737,7 +1248,22 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
         const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
-        this.getPeer()?.setImageOptionsAttribute(src_casted, imageAIOptions_casted)
+        this.getPeer()?.setImageOptions0Attribute(src_casted, imageAIOptions_casted)
+        this.applyOptionsFinish('ImageAttribute');
+        return this
+    }
+    public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions, reloadKey?: string): this {
+        const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
+        const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
+        const reloadKey_casted = reloadKey as (string | undefined)
+        this.getPeer()?.setImageOptions1Attribute(src_casted, imageAIOptions_casted, reloadKey_casted)
+        this.applyOptionsFinish('ImageAttribute');
+        return this
+    }
+    public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, reloadKey?: string): this {
+        const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined)
+        const reloadKey_casted = reloadKey as (string | undefined)
+        this.getPeer()?.setImageOptions2Attribute(src_casted, reloadKey_casted)
         this.applyOptionsFinish('ImageAttribute');
         return this
     }
@@ -811,8 +1337,8 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         this.getPeer()?.setSyncLoadAttribute(value_casted)
         return this
     }
-    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
-        const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
+    public colorFilter(value: ColorFilter | DrawingColorFilter | ResourceColor | undefined): this {
+        const value_casted = value as (ColorFilter | DrawingColorFilter | ResourceColor | undefined)
         this.getPeer()?.setColorFilterAttribute(value_casted)
         return this
     }
@@ -925,6 +1451,18 @@ export function ImageImpl(
     })
 }
 
+@memo
+export function Image(
+    @memo @memo_skip
+    style: ((attributes: ImageAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkImageComponent>((): ArkImageComponent => {
+        return new ArkImageComponent()
+    })
+    NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer): void => {
+        style?.(receiver)
+    })
+}
 export class ColorContent_serializer {
     public static write(buffer: SerializerBase, value: ColorContent): void {
         let valueSerializer: SerializerBase = buffer

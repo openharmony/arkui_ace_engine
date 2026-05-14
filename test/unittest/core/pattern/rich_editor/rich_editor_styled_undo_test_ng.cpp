@@ -521,4 +521,87 @@ HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation008, TestSize.Level0)
     EXPECT_TRUE(imageAttribute.has_value());
     EXPECT_EQ(*imageAttribute, imageStyle);
 }
+
+/**
+ * @tc.name: RecordOperation009
+ * @tc.desc: Test FinishTextPreview with empty previewContent triggers UndoRedoRecord flow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation009, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    ASSERT_NE(richEditorPattern->undoManager_, nullptr);
+    auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
+    auto& previewInputRecord = richEditorPattern->undoManager_->previewInputRecord_;
+
+    // step1 Setup initial text content
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    EXPECT_EQ(undoRecords.size(), 1);
+    richEditorPattern->ClearOperationRecords();
+    EXPECT_EQ(undoRecords.size(), 0);
+
+    // step2 Setup previewTextRecord_ state with empty previewContent
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->SetCaretPosition(3);
+
+    // step3 Setup previewInputRecord_ by calling RecordPreviewInputtingStart
+    richEditorPattern->undoManager_->RecordPreviewInputtingStart(0, 6);
+    EXPECT_TRUE(previewInputRecord.IsBeforeStateValid());
+
+    // step4 Call FinishTextPreview and verify UndoRedoRecord flow
+    richEditorPattern->FinishTextPreview();
+    EXPECT_EQ(undoRecords.size(), 1);
+    auto undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeAfter.start, 3);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 3);
+    EXPECT_FALSE(previewInputRecord.IsBeforeStateValid());
+    EXPECT_FALSE(richEditorPattern->previewTextRecord_.previewTextHasStarted);
+}
+
+/**
+ * @tc.name: RecordOperation010
+ * @tc.desc: Test FinishTextPreview with empty previewContent but no previewInputRecord.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation010, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    ASSERT_NE(richEditorPattern->undoManager_, nullptr);
+    auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
+    auto& previewInputRecord = richEditorPattern->undoManager_->previewInputRecord_;
+
+    // step1 Setup initial text content
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->ClearOperationRecords();
+
+    // step2 Setup previewTextRecord_ state with empty previewContent but no previewInputRecord
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->SetCaretPosition(5);
+
+    // step3 Verify previewInputRecord_ is not valid (no RecordPreviewInputtingStart called)
+    EXPECT_FALSE(previewInputRecord.IsBeforeStateValid());
+
+    // step4 Call FinishTextPreview - RecordPreviewInputtingEnd returns false, no record added
+    richEditorPattern->FinishTextPreview();
+    EXPECT_EQ(undoRecords.size(), 0);
+    EXPECT_FALSE(richEditorPattern->previewTextRecord_.previewTextHasStarted);
+}
 }

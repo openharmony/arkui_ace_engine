@@ -25,6 +25,7 @@ public:
     static void SetTextDecoration(FrameNode* frameNode, const std::optional<TextDecoration>& valueOpt);
     static void SetTextDecorationColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);
     static void SetTextDecorationStyle(FrameNode* frameNode, const std::optional<TextDecorationStyle>& valueOpt);
+    static void SetLineThicknessScale(FrameNode* frameNode, const std::optional<float>& valueOpt);
     static void SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetLineSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);

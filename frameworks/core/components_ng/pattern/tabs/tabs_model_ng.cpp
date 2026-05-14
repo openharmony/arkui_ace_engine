@@ -259,6 +259,7 @@ void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
 
 void TabsModelNG::SetTabBarWidth(const Dimension& tabBarWidth)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(tabBarWidth, LpxAttribute::ALWAYS);
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarWidth, tabBarWidth);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
@@ -279,6 +280,7 @@ void TabsModelNG::SetTabBarWidth(const Dimension& tabBarWidth)
 
 void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(tabBarHeight, LpxAttribute::ALWAYS);
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarHeight, tabBarHeight);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
@@ -545,6 +547,9 @@ void TabsModelNG::SetDivider(const TabsItemDivider& divider)
         ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, currentDivider);
     } else {
         dividerRenderContext->UpdateOpacity(1.0f);
+        ACE_CHECK_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::ALWAYS);
+        ACE_CHECK_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::ALWAYS);
+        ACE_CHECK_LPX_ATTRIBUTE(divider.strokeWidth, LpxAttribute::ALWAYS);
         ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider);
     }
 }
@@ -715,6 +720,7 @@ void TabsModelNG::SetClipEdge(bool clipEdge)
 
 void TabsModelNG::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(option.margin, LpxAttribute::ALWAYS);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateScrollableBarModeOptions(option);
@@ -727,11 +733,13 @@ void TabsModelNG::ResetScrollableBarModeOptions()
     tabBarLayoutProperty->ResetScrollableBarModeOptions();
 }
 
-void TabsModelNG::SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions)
+void TabsModelNG::SetBarGridAlign(const BarGridColumnOptions& barGridColumnOptions)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(barGridColumnOptions.margin, LpxAttribute::ALWAYS);
+    ACE_CHECK_LPX_ATTRIBUTE(barGridColumnOptions.gutter, LpxAttribute::ALWAYS);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabBarLayoutProperty->UpdateBarGridAlign(BarGridColumnOptions);
+    tabBarLayoutProperty->UpdateBarGridAlign(barGridColumnOptions);
 }
 
 RefPtr<TabBarLayoutProperty> TabsModelNG::GetTabBarLayoutProperty(FrameNode* frameNode)
@@ -786,12 +794,14 @@ void TabsModelNG::SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode)
     tabBarLayoutProperty->UpdateTabBarMode(tabBarMode);
 }
 
-void TabsModelNG::SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions)
+void TabsModelNG::SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& barGridColumnOptions)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(barGridColumnOptions.margin, LpxAttribute::ALWAYS, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(barGridColumnOptions.gutter, LpxAttribute::ALWAYS, frameNode);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabBarLayoutProperty->UpdateBarGridAlign(BarGridColumnOptions);
+    tabBarLayoutProperty->UpdateBarGridAlign(barGridColumnOptions);
 }
 
 void TabsModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)
@@ -831,6 +841,9 @@ void TabsModelNG::SetDivider(FrameNode* frameNode, const TabsItemDivider& divide
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, currentDivider, frameNode);
     } else {
         dividerRenderContext->UpdateOpacity(1.0f);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.startMargin, LpxAttribute::ALWAYS, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.endMargin, LpxAttribute::ALWAYS, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.strokeWidth, LpxAttribute::ALWAYS, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, frameNode);
     }
 }
@@ -999,6 +1012,7 @@ void TabsModelNG::SetScrollable(FrameNode* frameNode, bool scrollable)
 
 void TabsModelNG::SetTabBarWidth(FrameNode* frameNode, const Dimension& tabBarWidth)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(tabBarWidth, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarWidth, tabBarWidth, frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
@@ -1019,6 +1033,7 @@ void TabsModelNG::SetTabBarWidth(FrameNode* frameNode, const Dimension& tabBarWi
 
 void TabsModelNG::SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarHeight)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(tabBarHeight, LpxAttribute::ALWAYS, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarHeight, tabBarHeight, frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
@@ -1073,6 +1088,7 @@ void TabsModelNG::SetAnimationDuration(FrameNode* frameNode, float duration)
 void TabsModelNG::SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(option.margin, LpxAttribute::ALWAYS, frameNode);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateScrollableBarModeOptions(option);
@@ -1801,5 +1817,96 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
     };
     RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
+}
+
+void TabsModelNG::SetBarFloatingStyle(const BarFloatingStyleParameters& parameters)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, parameters);
+    if (SystemProperties::ConfigChangePerform()) {
+        ProcessDimensionWithResourceObj(tabsNode, "smallBarWidth", parameters.smallBarWidthObject);
+        ProcessDimensionWithResourceObj(tabsNode, "mediumBarWidth", parameters.mediumBarWidthObject);
+        ProcessDimensionWithResourceObj(tabsNode, "largeBarWidth", parameters.largeBarWidthObject);
+        ProcessDimensionWithResourceObj(tabsNode, "barSideMargin", parameters.barSideMarginObject);
+        ProcessDimensionWithResourceObj(tabsNode, "barBottomMargin", parameters.barBottomMarginObject);
+        ProcessColorWithResourceObj(tabsNode, "maskColor", parameters.maskColorObject);
+        ProcessDimensionWithResourceObj(tabsNode, "maskHeight", parameters.maskHeightObject);
+    }
+}
+
+void TabsModelNG::ResetBarFloatingStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle);
+}
+
+void TabsModelNG::ProcessDimensionWithResourceObj(
+    FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
+            BarFloatingStyleParameters param;
+            ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+                TabsLayoutProperty, BarFloatingStyle, param, AceType::RawPtr(node), param);
+            std::optional<Dimension> optResult;
+            if (parseOk) {
+                optResult = result;
+            } else {
+                optResult = std::nullopt;
+            }
+            if (name == "smallBarWidth") {
+                param.smallBarWidth = optResult;
+            } else if (name == "mediumBarWidth") {
+                param.mediumBarWidth = optResult;
+            } else if (name == "largeBarWidth") {
+                param.largeBarWidth = optResult;
+            } else if (name == "barSideMargin") {
+                param.barSideMargin = optResult;
+            } else if (name == "barBottomMargin") {
+                param.barBottomMargin = optResult;
+            } else if (name == "maskHeight") {
+                param.maskHeight = optResult;
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, param, AceType::RawPtr(node));
+        };
+        pattern->AddResObj("tabs." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("tabs." + name);
+    }
+}
+
+void TabsModelNG::ProcessColorWithResourceObj(
+    FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            Color result;
+            bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
+            BarFloatingStyleParameters param;
+            ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+                TabsLayoutProperty, BarFloatingStyle, param, AceType::RawPtr(node), param);
+            if (parseOk) {
+                param.maskColor = result;
+            } else {
+                param.maskColor = std::nullopt;
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, param, AceType::RawPtr(node));
+        };
+        pattern->AddResObj("tabs." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("tabs." + name);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -26,18 +26,14 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/border.h"
-#include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
-#include "core/components/common/properties/effect_option.h"
 #include "core/components/common/properties/invert.h"
-#include "core/components/common/properties/outline_style.h"
 #include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace {

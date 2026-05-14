@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
+#include "core/common/container.h"
 
 #include <algorithm>
 #include <cmath>
@@ -1393,10 +1394,9 @@ void CustomPaintPaintMethod::PaintText(
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
-            rsCanvas_->SaveLayer(slo);
-        }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN) &&
+        (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER)) {
+        rsCanvas_->SaveLayer(slo);
     }
     if (isStroke && shadowParagraph_ != nullptr && HasShadow()) {
         PaintStrokeTextShadow(width, dx, dy, scale, &slo);
@@ -1412,11 +1412,11 @@ void CustomPaintPaintMethod::PaintText(
     } else {
         paragraph_->Paint(rsCanvas_.get(), dx, dy);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
-            rsCanvas_->Restore();
-        }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN) &&
+        (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER)) {
+        rsCanvas_->Restore();
     }
+    AddParagraphHistory();
 }
 
 void CustomPaintPaintMethod::PaintStrokeTextShadow(

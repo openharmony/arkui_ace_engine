@@ -29,6 +29,7 @@ namespace OHOS::Rosen {
     class Session;
 }
 namespace OHOS::Ace::NG {
+class OverlayManager;
 class SystemWindowScene : public StackPattern, public FocusView {
     DECLARE_ACE_TYPE(SystemWindowScene, StackPattern, FocusView);
 
@@ -57,32 +58,9 @@ public:
     void UnRegisterVisibleChangeCallback(int32_t nodeId);
     void HandleVisibleChangeCallback(bool visible);
 
-    void CreateOverlayManager(bool isShow, const RefPtr<FrameNode>& target)
-    {
-        auto targetId = target->GetId();
-        auto it = targetOverlayMap_.find(targetId);
-        if (it == targetOverlayMap_.end() && isShow) {
-            targetOverlayMap_[targetId] = MakeRefPtr<OverlayManager>(target);
-            targetOverlayMap_[targetId]->SetIsAttachToCustomNode(true);
-        }
-    }
-
-    RefPtr<OverlayManager> GetOverlayManager(int32_t targetId)
-    {
-        auto it = targetOverlayMap_.find(targetId);
-        if (it != targetOverlayMap_.end()) {
-            return it->second;
-        }
-        return nullptr;
-    }
-
-    void DeleteOverlayManager(int32_t targetId)
-    {
-        auto it = targetOverlayMap_.find(targetId);
-        if (it != targetOverlayMap_.end()) {
-            targetOverlayMap_.erase(it);
-        }
-    }
+    void CreateOverlayManager(bool isShow, const RefPtr<FrameNode>& target);
+    RefPtr<OverlayManager> GetOverlayManager(int32_t targetId);
+    void DeleteOverlayManager(int32_t targetId);
     uint32_t GetWindowPatternType() const override;
 
 protected:

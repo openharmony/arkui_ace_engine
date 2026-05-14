@@ -30,6 +30,7 @@
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -1915,7 +1916,8 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode, .systemMaterial = dialogAttr.systemMaterial
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode, .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode, .edgeLightMode = dialogAttr.edgeLightMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -2042,7 +2044,9 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
-        .systemMaterial = dialogAttr.systemMaterial
+        .displayModeInSubWindow = dialogAttr.displayModeInSubWindow,
+        .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode, .edgeLightMode = dialogAttr.edgeLightMode,
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
@@ -2313,6 +2317,8 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
         .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode,
+        .edgeLightMode = dialogAttr.edgeLightMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -3939,7 +3945,9 @@ void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::Fram
         ContainerScope scope(containerId);
         overlayManager->RemoveFrameNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", nullptr);
+    CHECK_NULL_VOID(node);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(node->GetParentFrameNode());
+    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", currentOverlay);
 }
 
 void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)

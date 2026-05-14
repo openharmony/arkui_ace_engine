@@ -18,6 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
@@ -122,6 +123,7 @@ void GridModelNG::SetRowsTemplate(const std::string& value)
 void GridModelNG::SetColumnsGap(const Dimension& value)
 {
     if (value.IsNonNegative()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_COLUMNS_GAP);
         ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, value);
     }
 }
@@ -129,6 +131,7 @@ void GridModelNG::SetColumnsGap(const Dimension& value)
 void GridModelNG::SetRowsGap(const Dimension& value)
 {
     if (value.IsNonNegative()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ROWS_GAP);
         ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, value);
     }
 }
@@ -156,7 +159,9 @@ void GridModelNG::SetScrollBarColor(const std::optional<Color>& scrollBarColor)
 
 void GridModelNG::SetScrollBarWidth(const std::string& value)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
+    auto scrollBarWidth = StringUtils::StringToDimensionWithUnit(value);
+    ACE_CHECK_LPX_ATTRIBUTE(scrollBarWidth, LpxAttribute::LPX_SCROLL_BAR_WIDTH);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth);
 }
 
 void GridModelNG::SetCachedCount(int32_t value, bool show)
@@ -476,6 +481,7 @@ void GridModelNG::SetRowsTemplate(FrameNode* frameNode, const std::string& rowsT
 void GridModelNG::SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGap)
 {
     if (columnsGap.IsNonNegative()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(columnsGap, LpxAttribute::LPX_COLUMNS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, columnsGap, frameNode);
     }
 }
@@ -483,6 +489,7 @@ void GridModelNG::SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGa
 void GridModelNG::SetRowsGap(FrameNode* frameNode, const Dimension& rowsGap)
 {
     if (rowsGap.IsNonNegative()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(rowsGap, LpxAttribute::LPX_ROWS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, rowsGap, frameNode);
     }
 }
@@ -508,8 +515,11 @@ void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Di
     if (scrollBarWidth &&
         GreatOrEqual(scrollBarWidth.value().Value(), 0.0f) &&
         scrollBarWidth.value().Unit() != DimensionUnit::PERCENT) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(scrollBarWidth.value(), LpxAttribute::LPX_SCROLL_BAR_WIDTH, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_BAR_WIDTH);
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
     }
 }
@@ -1071,6 +1081,23 @@ void GridModelNG::SetEnableEditModeChangeEvent(FrameNode* frameNode, std::functi
     pattern->SetEnableEditModeChangeEvent(std::move(changeEvent));
 }
 
+void GridModelNG::SetEnableEditModeBindingEvent(FrameNode* frameNode, std::function<void(bool)>&& bindingEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
+void GridModelNG::SetEnableEditModeBindingEvent(std::function<void(bool)>&& bindingEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
 void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1138,8 +1165,9 @@ void GridModelNG::ParseResObjRowsGap(FrameNode* frameNode, const RefPtr<Resource
         CalcDimension result;
         bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
         if (!(parseOk && result > 0.0_vp)) {
-            result.SetValue(0.0);
+            result = 0.0_vp;
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_ROWS_GAP, node);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, result, node);
     };
     pattern->AddResObj("grid.rowsGap", resObj, std::move(updateFunc));
@@ -1165,8 +1193,9 @@ void GridModelNG::ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<Resou
         CalcDimension result;
         bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
         if (!(parseOk && result > 0.0_vp)) {
-            result.SetValue(0.0);
+            result = 0.0_vp;
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_COLUMNS_GAP, node);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, result, node);
     };
     pattern->AddResObj("grid.columnsGap", resObj, std::move(updateFunc));

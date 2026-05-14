@@ -27,11 +27,6 @@ void LoadingProgressModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::LOADING_PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     stack->Push(frameNode);
-    RefPtr<ProgressTheme> theme = frameNode->GetTheme<ProgressTheme>(true);
-    CHECK_NULL_VOID(theme);
-    if (frameNode->GetThemeScopeId()) {
-        ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, theme->GetLoadingColor());
-    }
     auto pros = frameNode->GetPaintProperty<LoadingProgressPaintProperty>();
     if (pros) {
         pros->ResetColorSetByUser();
@@ -44,11 +39,6 @@ RefPtr<FrameNode> LoadingProgressModelNG::CreateFrameNode(int32_t nodeId)
 }
 void LoadingProgressModelNG::SetColor(const Color& value)
 {
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetColorLock(true);
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value);
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, true);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
@@ -58,11 +48,6 @@ void LoadingProgressModelNG::SetColor(const Color& value)
 
 void LoadingProgressModelNG::ResetColor()
 {
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetColorLock(false);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER);
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, false);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
@@ -163,13 +148,6 @@ void LoadingProgressModelNG::SetForegroundColorParseFailed(FrameNode* frameNode,
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetForegroundColorParseFailed(isParseFailed);
-}
-
-void LoadingProgressModelNG::SetColorParseFailed(FrameNode* frameNode, bool isParseFailed)
-{
-    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetColorLock(isParseFailed);
 }
 
 void LoadingProgressModelNG::CreateWithResourceObj(

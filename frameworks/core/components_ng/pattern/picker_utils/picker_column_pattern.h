@@ -16,6 +16,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_PICKER_COLUMN_PATTERN_H
 #include <cstdint>
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
@@ -77,13 +78,8 @@ class ACE_FORCE_EXPORT PickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(PickerColumnPattern, LinearLayoutPattern);
 
 public:
-    PickerColumnPattern(bool isVertical = false) : LinearLayoutPattern(isVertical) {};
-    virtual ~PickerColumnPattern()
-    {
-        if (circleUtils_) {
-            delete circleUtils_;
-        }
-    }
+    PickerColumnPattern(bool isVertical = false);
+    virtual ~PickerColumnPattern();
 
     virtual void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
         bool isUpdateAnimationProperties = false, bool isTossPlaying = false) = 0;

@@ -23,6 +23,10 @@
 
 namespace OHOS::Ace::NodeModel {
 
+namespace {
+constexpr ArkUI_Uint32 ALL_EXPAND = 0;
+}
+
 struct InnerCustomExtraParam  {
     int32_t targetId;
     void* userData;
@@ -385,7 +389,7 @@ uint32_t GetTotalChildCount(ArkUI_NodeHandle node)
         return 0;
     }
     const auto* impl = GetFullImpl();
-    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle, true);
+    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle, ALL_EXPAND);
 }
 
 ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)

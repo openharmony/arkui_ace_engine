@@ -16,6 +16,7 @@
 
 #include <string>
 
+#include "core/components_ng/base/modifier.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -69,8 +70,11 @@ void RefreshModelStatic::SetIsCustomBuilderExist(FrameNode* frameNode, bool isCu
 void RefreshModelStatic::SetRefreshOffset(FrameNode* frameNode, const std::optional<Dimension>& offset)
 {
     if (offset) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(offset.value(), LpxAttribute::LPX_REFRESH_OFFSET, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_REFRESH_OFFSET);
         ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, frameNode);
     }
 }

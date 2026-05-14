@@ -42,6 +42,13 @@ enum ExpandMode {
   NOT_EXPAND = 0,
   EXPAND = 1,
   LAZY_EXPAND = 2,
+  LAZY_NOT_EXPAND = 3,
+}
+
+enum ChildrenCountMode {
+  ALL_EXPAND = 0,
+  ONLY_EXPANDED = 1,
+  ALL_NOT_EXPAND = 2,
 }
 
 enum UIState {
@@ -597,11 +604,21 @@ class FrameNode {
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
-  getChildrenCount(isExpanded?: boolean): number {
+  getChildrenCount(childrenCountMode?: ChildrenCountMode | boolean): number {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    let valueCountMode = ChildrenCountMode.ALL_EXPAND;
+    if (typeof childrenCountMode === 'boolean') {
+      if (childrenCountMode === true) {
+        valueCountMode = ChildrenCountMode.ALL_EXPAND;
+      } else if (childrenCountMode === false) {
+        valueCountMode = ChildrenCountMode.ONLY_EXPANDED;
+      }
+    } else if (childrenCountMode !== undefined) {
+      valueCountMode = childrenCountMode;
+    }
     let childrenCount;
     try {
-      childrenCount = getUINativeModule().frameNode.getChildrenCount(this.getNodePtr(), isExpanded);
+        childrenCount = getUINativeModule().frameNode.getChildrenCount(this.getNodePtr(), valueCountMode);
     } finally {
       __JSScopeUtil__.restoreInstanceId();
     }
@@ -1906,7 +1923,7 @@ class typeNode {
         throw { message: 'Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.', code: 100023 };
       }
     }
-    const needModifiableCheck = !['Scroll', 'List', 'Grid', 'WaterFlow'].includes(nodeType);
+    const needModifiableCheck = !['Scroll', 'List', 'Grid', 'WaterFlow', 'TextInput', 'TextArea'].includes(nodeType);
     if (needModifiableCheck && !node.checkIfCanCrossLanguageAttributeSetting()) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }

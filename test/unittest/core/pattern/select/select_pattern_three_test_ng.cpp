@@ -2144,4 +2144,71 @@ HWTEST_F(SelectPatternTheTestNg, SetSelectedOptionBgColorByUser002, TestSize.Lev
     selectPattern->SetSelectedOptionBgColorByUser(theme, props, layoutProps);
     EXPECT_TRUE(true);
 }
+
+/**
+ * @tc.name: SetMenuBackgroundBlurStyleOptions001
+ * @tc.desc: Test SelectPattern SetMenuBackgroundBlurStyleOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetMenuBackgroundBlurStyleOptions001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    BlurStyleOption blurOption;
+    blurOption.colorMode = ThemeColorMode::DARK;
+    blurOption.adaptiveColor = AdaptiveColor::AVERAGE;
+    blurOption.scale = 0.8f;
+    blurOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
+    blurOption.isValidColor = true;
+
+    std::optional<BlurStyleOption> opt = blurOption;
+    selectPattern->SetMenuBackgroundBlurStyleOptions(opt);
+
+    EXPECT_EQ(selectPattern->blurStyleOption_.colorMode, ThemeColorMode::DARK);
+    EXPECT_EQ(selectPattern->blurStyleOption_.adaptiveColor, AdaptiveColor::AVERAGE);
+    EXPECT_EQ(selectPattern->blurStyleOption_.scale, 0.8f);
+    EXPECT_EQ(selectPattern->blurStyleOption_.policy, BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    EXPECT_EQ(selectPattern->blurStyleOption_.isValidColor, true);
+    
+    auto menu = selectPattern->GetMenuNode();
+    ASSERT_NE(menu, nullptr);
+    auto renderContext = menu->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::DARK);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->scale, 0.8f);
+}
+
+/**
+ * @tc.name: SetMenuBackgroundEffect
+ * @tc.desc: Test SelectPattern SetMenuBackgroundEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SetMenuBackgroundEffect, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    EffectOption effectOption;
+    effectOption.blurOption.grayscale.assign({ 0.5f, 0.8f });
+    std::optional<EffectOption> opt = effectOption;
+    selectPattern->SetMenuBackgroundEffect(opt);
+    auto menu = selectPattern->GetMenuNode();
+    ASSERT_NE(menu, nullptr);
+    auto renderContext = menu->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_EQ(renderContext->GetBackgroundEffect()->blurOption.grayscale[0], 0.5f);
+    ASSERT_EQ(renderContext->GetBackgroundEffect()->blurOption.grayscale[1], 0.8f);
+}
 } // namespace OHOS::Ace::NG

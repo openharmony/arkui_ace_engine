@@ -21,6 +21,7 @@
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,6 +62,32 @@ PaintWrapper::PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<Geometry
 {}
 
 PaintWrapper::~PaintWrapper() = default;
+
+RefPtr<RenderContext> PaintWrapper::GetRenderContext() const
+{
+    return renderContext_.Upgrade();
+}
+
+bool PaintWrapper::HasForegroundColor() const
+{
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_RETURN(renderContext, false);
+    return renderContext->HasForegroundColor();
+}
+
+bool PaintWrapper::HasForegroundColorStrategy() const
+{
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_RETURN(renderContext, false);
+    return renderContext->HasForegroundColorStrategy();
+}
+
+Color PaintWrapper::GetForegroundColor() const
+{
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_RETURN(renderContext, Color::FOREGROUND);
+    return renderContext->GetForegroundColor().value_or(Color::FOREGROUND);
+}
 
 void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintImpl)
 {

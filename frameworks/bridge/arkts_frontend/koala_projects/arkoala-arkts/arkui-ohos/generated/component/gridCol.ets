@@ -205,6 +205,21 @@ export function GridColImpl(
     })
 }
 
+@memo
+export function GridCol(
+    @memo @memo_skip
+    style: ((attributes: GridColAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkGridColComponent>((): ArkGridColComponent => {
+        return new ArkGridColComponent()
+    })
+    NodeAttach<ArkGridColPeer>((): ArkGridColPeer => ArkGridColPeer.create(receiver), (_: ArkGridColPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class GridColColumnOption_serializer {
     public static write(buffer: SerializerBase, value: GridColColumnOption): void {
         let valueSerializer: SerializerBase = buffer

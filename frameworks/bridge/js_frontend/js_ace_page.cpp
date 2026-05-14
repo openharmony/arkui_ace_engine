@@ -17,6 +17,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
+#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::Framework {
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "core/pipeline/container_window_manager.h"
 #include <cstdint>
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"

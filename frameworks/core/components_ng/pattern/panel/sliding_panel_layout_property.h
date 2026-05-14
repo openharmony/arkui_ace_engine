@@ -18,7 +18,6 @@
 
 #include <string>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"

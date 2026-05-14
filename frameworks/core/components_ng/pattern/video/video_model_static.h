@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_model.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT VideoModelStatic {

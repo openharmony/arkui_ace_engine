@@ -20,6 +20,7 @@
 #include "core/animation/keyframe_animation.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/render_box_base.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
@@ -29,6 +30,7 @@
 #include "core/gestures/raw_recognizer.h"
 #include "base/window/drag_window.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/common/properties/state_attributes.h"
 
 namespace OHOS::Ace {
 

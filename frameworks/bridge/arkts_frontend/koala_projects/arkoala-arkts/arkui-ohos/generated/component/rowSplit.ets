@@ -118,3 +118,18 @@ export function RowSplitImpl(
     })
 }
 
+@memo
+export function RowSplit(
+    @memo @memo_skip
+    style: ((attributes: RowSplitAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRowSplitComponent>((): ArkRowSplitComponent => {
+        return new ArkRowSplitComponent()
+    })
+    NodeAttach<ArkRowSplitPeer>((): ArkRowSplitPeer => ArkRowSplitPeer.create(receiver), (_: ArkRowSplitPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

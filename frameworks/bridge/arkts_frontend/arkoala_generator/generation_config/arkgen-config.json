@@ -26,7 +26,22 @@
         "LengthMetrics",
         "ColorMetrics",
         "CustomSpan",
-        "TouchEvent"
+        "TouchEvent",
+        "PanGestureOptions"
+    ],
+    "extendableComponents": [
+        "arkui.component.button.ExtendableButton",
+        "arkui.component.column.ExtendableColumn",
+        "arkui.component.grid.ExtendableGrid",
+        "arkui.component.gridItem.ExtendableGridItem",
+        "arkui.component.image.ExtendableImage",
+        "arkui.component.list.ExtendableList",
+        "arkui.component.listItem.ExtendableListItem",
+        "arkui.component.relativeContainer.ExtendableRelativeContainer",
+        "arkui.component.row.ExtendableRow",
+        "arkui.component.stack.ExtendableStack",
+        "arkui.component.text.ExtendableText",
+        "arkui.component.toggle.ExtendableToggle"
     ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
@@ -69,6 +84,10 @@
         {
             "from": "arkui.component.common.TouchEvent",
             "to": "arkui.component.idlize.TouchEventProxy"
+        },
+        {
+            "from": "arkui.component.gesture.PanGestureOptions",
+            "to": "arkui.component.idlize.PanGestureOptionsProxy"
         }
     ],
     "forceMaterialized": [
@@ -514,7 +533,9 @@
         "PinchGestureHandler",
         "TapGestureHandler",
         "RotationGestureHandler",
-        "SwipeGestureHandler"
+        "SwipeGestureHandler",
+        "CustomColors",
+        "CustomDarkColors"
     ],
     "boundProperties": {
         "Checkbox": [
@@ -701,7 +722,11 @@
             "SaveButton",
             "PasteButton",
             "CustomSpan",
-            "TouchEvent"
+            "TouchEvent",
+            "ContentSlot",
+            "ContentSlotAttribute",
+            "ContentSlotInterface",
+            "PanGestureOptions"
         ],
         "ignoreEntry": [
             "Optional",
@@ -914,10 +939,6 @@
         "ListItemGroupAttribute": {
             "childrenMainSize": {
                 "hookName": "hookListItemGroupChildrenMainSizeImpl",
-                "replaceImplementation": true
-            },
-            "setListItemGroupOptions": {
-                "hookName": "hookListItemGroupOptionsImpl",
                 "replaceImplementation": true
             }
         },

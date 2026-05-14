@@ -38,6 +38,7 @@
 #include "frameworks/core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -85,7 +86,7 @@ constexpr size_t MAX_DUMP_INFO_SIZE = 5000;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
-const std::string ACTION_ARGU_FOCUS_TYPE_STUB = "ActAccessibilityFocus";
+const std::string ACTION_ARGU_FOCUS_TYPE_STUB = "accessibilityFocusScene";
 const std::string ACTION_ARGU_FOCUS_MOVE_VALUE =
     std::to_string(static_cast<int32_t>(AccessibilityFocusActionType::SWIPE_FOCUS));
 
@@ -148,6 +149,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
     { ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK,
         [](const AccessibilityActionParam& param) {
             return param.accessibilityProperty->ActActionExecSubComponent(static_cast<int32_t>(param.spanId));
+        } },
+    { ActionType::ACCESSIBILITY_ACTION_CUSTOM,
+        [](const AccessibilityActionParam& param) {
+            return param.accessibilityProperty->ActActionCustom(param.customActionName);
         } },
 };
 
@@ -960,7 +965,7 @@ void SetRootAccessibilityNextFocusId(const RefPtr<NG::UINode>& currentNode, cons
 RefPtr<NG::FrameNode> GetAccessibilityPrevFocusNode(
     const RefPtr<NG::UINode>& currentNode,
     const RefPtr<NG::FrameNode>& rootNode,
-    const std::map<std::string, int64_t>& nextFocusIdMap)
+    const NG::NextFocusRelationController::TargetMap& nextFocusIdMap)
 {
     auto currentFrameNode = AceType::DynamicCast<NG::FrameNode>(currentNode);
     CHECK_NULL_RETURN(currentFrameNode, nullptr);
@@ -971,17 +976,18 @@ RefPtr<NG::FrameNode> GetAccessibilityPrevFocusNode(
     }
     auto it = nextFocusIdMap.find(currentInspectorId);
     if (it != nextFocusIdMap.end()) {
-        if (currentFrameNode->GetAccessibilityId() == it->second) {
+        if (currentFrameNode->GetAccessibilityId() == it->second.sourceAccessibilityId) {
             return nullptr;
         }
-        return NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, it->second);
+        return NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(
+            rootNode, it->second.sourceAccessibilityId);
     }
     return nullptr;
 }
 
 void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const RefPtr<NG::FrameNode>& rootNode,
                                     AccessibilityElementInfo& nodeInfo,
-                                    const std::map<std::string, int64_t>& nextFocusIdMap)
+                                    const NG::NextFocusRelationController::TargetMap& nextFocusIdMap)
 {
     auto currentFrameNode = AceType::DynamicCast<NG::FrameNode>(currentNode);
     CHECK_NULL_VOID(currentFrameNode);
@@ -992,7 +998,7 @@ void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const
     }
     auto it = nextFocusIdMap.find(currentInspectorId);
     if (it != nextFocusIdMap.end()) {
-        int64_t preAccessibilityId = it->second;
+        int64_t preAccessibilityId = it->second.sourceAccessibilityId;
         if (currentFrameNode->GetAccessibilityId() == preAccessibilityId) {
             return;
         }
@@ -1000,27 +1006,6 @@ void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const
             AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(nodeInfo.GetBelongTreeId(), preAccessibilityId);
         }
         nodeInfo.SetAccessibilityPreviousFocusId(preAccessibilityId);
-    }
-}
-
-void RemoveEntriesWithPreAccessibilityId(std::map<std::string, int64_t>& nextFocusMap, int64_t preAccessibilityId)
-{
-    for (auto mapIt = nextFocusMap.begin(); mapIt != nextFocusMap.end();) {
-        if (mapIt->second == preAccessibilityId) {
-            mapIt = nextFocusMap.erase(mapIt);
-        } else {
-            ++mapIt;
-        }
-    }
-}
-
-void HandleExistingContext(std::map<int32_t, std::map<std::string, int64_t>>::iterator& it,
-                           const std::string& nextFocusInspectorKey, int64_t preAccessibilityId)
-{
-    if (nextFocusInspectorKey.empty()) {
-        RemoveEntriesWithPreAccessibilityId(it->second, preAccessibilityId);
-    } else {
-        it->second[nextFocusInspectorKey] = preAccessibilityId;
     }
 }
 
@@ -1393,7 +1378,8 @@ RefPtr<NG::FrameNode> JsAccessibilityManager::GetPrevFocusNodeByManager(
     CHECK_NULL_RETURN(currentNode, nullptr);
     CHECK_NULL_RETURN(rootNode, nullptr);
     CHECK_NULL_RETURN(context, nullptr);
-    return GetAccessibilityPrevFocusNode(currentNode, rootNode, nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+    return GetAccessibilityPrevFocusNode(
+        currentNode, rootNode, nextFocusRelationController_.GetTargetMap(context->GetInstanceId()));
 }
 
 
@@ -1522,6 +1508,17 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         }
     }
     nodeInfo.SetExtraElement(extraElementInfo);
+
+    // Set custom action list for accessibility
+    auto customActions = accessibilityProperty->GetAccessibilityCustomActions();
+    if (!customActions.empty()) {
+        std::vector<std::string> customActionNames;
+        customActionNames.reserve(customActions.size());
+        for (const auto& customAction : customActions) {
+            customActionNames.push_back(customAction.actionName);
+        }
+        nodeInfo.SetCustomActionList(customActionNames);
+    }
 
     int32_t row = accessibilityProperty->GetCollectionItemInfo().row;
     int32_t column = accessibilityProperty->GetCollectionItemInfo().column;
@@ -2924,17 +2921,16 @@ AccessibilityWorkMode JsAccessibilityManager::GenerateAccessibilityWorkMode()
 
 void JsAccessibilityManager::UpdateAccessibilityNextFocusIdMap(int32_t containerId,
                                                                const std::string& nextFocusInspectorKey,
-                                                               int64_t preAccessibilityId)
+                                                               int64_t preAccessibilityId,
+                                                               bool descendantMode)
 {
-    auto it = nextFocusMapWithSubWindow_.find(containerId);
-    if (it != nextFocusMapWithSubWindow_.end()) {
-        HandleExistingContext(it, nextFocusInspectorKey, preAccessibilityId);
-    } else {
-        if (!nextFocusInspectorKey.empty()) {
-            nextFocusMapWithSubWindow_.emplace(
-                containerId, std::map<std::string, int64_t> {{ nextFocusInspectorKey, preAccessibilityId }});
-        }
-    }
+    nextFocusRelationController_.UpdateNextFocusIdMap(
+        containerId, nextFocusInspectorKey, preAccessibilityId, descendantMode);
+}
+
+bool JsAccessibilityManager::GetNextFocusDescendantMode(int32_t containerId, const std::string& inspectorId)
+{
+    return nextFocusRelationController_.GetNextFocusDescendantMode(containerId, inspectorId);
 }
 
 void JsAccessibilityManager::InitializeCallback()
@@ -4149,6 +4145,12 @@ void JsAccessibilityManager::ProcessParameters(
             paramsMap = { { ACTION_ARGU_SPAN_ID, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
         }
     }
+
+    if (op == ActionType::ACCESSIBILITY_ACTION_CUSTOM) {
+        if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER) {
+            paramsMap = { { ACTION_ARGU_CUSTOM_ACTION, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
+        }
+    }
 }
 
 bool TransferExecuteAction(int64_t elementId, const RefPtr<NG::FrameNode>& node,
@@ -4378,6 +4380,27 @@ void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>
         );
     }
     DumpLog::GetInstance().Print(std::string("Result: inject action done"));
+}
+
+void JsAccessibilityManager::DumpCustomActionTest(const std::vector<std::string>& params)
+{
+    int64_t nodeId = 0;
+    std::string actionName;
+    bool listActions = false;
+
+    if (!AccessibilityHidumper::DumpProcessCustomActionParameters(params, nodeId, actionName, listActions)) {
+        return;
+    }
+
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<NG::PipelineContext> ngPipeline;
+
+    RefPtr<NG::FrameNode> frameNode;
+    ngPipeline = FindPipelineByElementId(nodeId, frameNode);
+    CHECK_NULL_VOID(ngPipeline);
+    CHECK_NULL_VOID(frameNode);
+    AccessibilityManagerHidumper::DumpCustomActionTest(params, frameNode);
 }
 
 void JsAccessibilityManager::DumpEmbedSearchTest(const std::vector<std::string>& params)
@@ -4693,6 +4716,9 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
             }
         } else if (*arg == "--event-test") {
             return CheckAndGetEventTestArgument(arg, params, argument);
+        } else if (*arg == "--custom-action-test") {
+            argument.mode = DumpMode::CUSTOM_ACTION_TEST;
+            break;
         } else if (*arg == "-v") {
             argument.verbose = true;
 #ifdef WEB_SUPPORTED
@@ -4789,6 +4815,9 @@ void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& par
             ChooseWebDumpEvent(argument, windowId);
             break;
 #endif
+        case DumpMode::CUSTOM_ACTION_TEST:
+            DumpCustomActionTest(params);
+            break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
             break;
@@ -4952,6 +4981,10 @@ void JsAccessibilityManager::DumpPropertyInfo(
         DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
         DumpLog::GetInstance().AddDesc("childTreeId: ", accessibilityProperty->GetChildTreeId());
         DumpLog::GetInstance().AddDesc("childWindowId: ", accessibilityProperty->GetChildWindowId());
+        if (accessibilityProperty->HasAccessibilityNextFocusParams()) {
+            DumpLog::GetInstance().AddDesc("descendantMode: ",
+                BoolToString(accessibilityProperty->GetAccessibilityNextFocusParams().descendantMode));
+        }
     }
 
     DumpLog::GetInstance().AddDesc("surfaceId: ", GetSurfaceIdByEmbedNode(frameNode));
@@ -4997,7 +5030,7 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
     SetRootAccessibilityVisible(frameNode, nodeInfo);
     SetRootAccessibilityNextFocusId(frameNode, ngPipeline->GetRootElement(), nodeInfo);
     SetRootAccessibilityPreFocusId(frameNode, ngPipeline->GetRootElement(), nodeInfo,
-                                   nextFocusMapWithSubWindow_[pipeline->GetInstanceId()]);
+        nextFocusRelationController_.GetTargetMap(pipeline->GetInstanceId()));
     if (IsExtensionComponent(frameNode) && !IsUIExtensionShowPlaceholder(frameNode)) {
         SearchParameter param {-1, "", PREFETCH_RECURSIVE_CHILDREN, NG::UI_EXTENSION_OFFSET_MAX};
         std::list<AccessibilityElementInfo> extensionElementInfos;
@@ -6179,7 +6212,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
     SetRootAccessibilityVisible(node, nodeInfo);
     SetRootAccessibilityNextFocusId(node, rootNode, nodeInfo);
     SetRootAccessibilityPreFocusId(node, rootNode, nodeInfo,
-                                   nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+        nextFocusRelationController_.GetTargetMap(context->GetInstanceId()));
     if (IsExtensionComponent(node) && !IsUIExtensionShowPlaceholder(node)) {
         SearchParameter param {-1, "", mode, uiExtensionOffset};
         SearchExtensionElementInfoNG(param, node, infos, nodeInfo);
@@ -6209,7 +6242,7 @@ bool JsAccessibilityManager::SetAccessibilityCustomId(RefPtr<NG::FrameNode> chec
         SetRootAccessibilityVisible(checkNode, nodeInfo);
         SetRootAccessibilityNextFocusId(checkNode, rootNode, nodeInfo);
         SetRootAccessibilityPreFocusId(checkNode, rootNode, nodeInfo,
-            nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+            nextFocusRelationController_.GetTargetMap(context->GetInstanceId()));
         infos.emplace_back(nodeInfo);
         return true;
     }
@@ -6240,7 +6273,7 @@ bool JsAccessibilityManager::FindUIExtensionAccessibilityElement(const RefPtr<NG
     SetRootAccessibilityVisible(checkNode, parentInfo);
     SetRootAccessibilityNextFocusId(checkNode, rootNode, parentInfo);
     SetRootAccessibilityPreFocusId(checkNode, rootNode, parentInfo,
-        nextFocusMapWithSubWindow_[ngPipeline->GetInstanceId()]);
+        nextFocusRelationController_.GetTargetMap(ngPipeline->GetInstanceId()));
 
     std::list<Accessibility::AccessibilityElementInfo> extensionElementInfos;
     SearchExtensionElementInfoNG(searchParam, checkNode, extensionElementInfos, parentInfo);
@@ -6302,7 +6335,7 @@ void JsAccessibilityManager::SearchElementInfoByCustomIdNG(const int64_t element
             SetRootAccessibilityVisible(checkNode, nodeInfo);
             SetRootAccessibilityNextFocusId(checkNode, rootNode, nodeInfo);
             SetRootAccessibilityPreFocusId(checkNode, rootNode, nodeInfo,
-                nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+                nextFocusRelationController_.GetTargetMap(context->GetInstanceId()));
             treeInfos.emplace_back(nodeInfo);
         }
         GetChildrenFromFrameNode(checkNode, children, commonProperty);
@@ -6373,7 +6406,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(const SearchParameter& s
     CHECK_NULL_VOID(rootNode);
     SetRootAccessibilityNextFocusId(node, rootNode, nodeInfo);
     SetRootAccessibilityPreFocusId(node, rootNode, nodeInfo,
-                                   nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+        nextFocusRelationController_.GetTargetMap(context->GetInstanceId()));
     ConvertExtensionAccessibilityNodeId(extensionElementInfos, uiExtensionNode,
         searchParam.uiExtensionOffset, nodeInfo);
     for (auto& info : extensionElementInfos) {
@@ -6772,7 +6805,7 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int64_t elementId, int32_t
     SetRootAccessibilityVisible(resultNode, info);
     SetRootAccessibilityNextFocusId(resultNode, rootNode, info);
     SetRootAccessibilityPreFocusId(resultNode, rootNode, info,
-        nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+        nextFocusRelationController_.GetTargetMap(context->GetInstanceId()));
     UpdateUiExtensionParentIdForFocus(rootNode, uiExtensionOffset, info);
 }
 
@@ -7129,6 +7162,12 @@ bool JsAccessibilityManager::ActAccessibilityAction(Accessibility::ActionType ac
     }
     if (action == ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK) {
         param.spanId = getArgumentByKey(actionArguments, ACTION_ARGU_SPAN_ID);
+    }
+    if (action == ActionType::ACCESSIBILITY_ACTION_CUSTOM) {
+        auto iter = actionArguments.find(ACTION_ARGU_CUSTOM_ACTION);
+        if (iter != actionArguments.end()) {
+            param.customActionName = iter->second;
+        }
     }
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {
@@ -9653,7 +9692,8 @@ SearchSurfaceIdRet JsAccessibilityManager::SearchElementInfoBySurfaceId(
     UpdateAccessibilityElementInfo(lastNode, commonProperty, elementInfo, ngPipeline);
     SetRootAccessibilityVisible(lastNode, elementInfo);
     SetRootAccessibilityNextFocusId(lastNode, node, elementInfo);
-    SetRootAccessibilityPreFocusId(lastNode, node, elementInfo, nextFocusMapWithSubWindow_[pipeline->GetInstanceId()]);
+    SetRootAccessibilityPreFocusId(
+        lastNode, node, elementInfo, nextFocusRelationController_.GetTargetMap(pipeline->GetInstanceId()));
     infos.push_back(elementInfo);
     UpdateElementInfosTreeId(infos);
     return SearchSurfaceIdRet::SEARCH_SUCCESS;

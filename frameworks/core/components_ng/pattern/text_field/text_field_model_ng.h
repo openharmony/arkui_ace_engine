@@ -149,6 +149,7 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    void SetLineThicknessScale(float value) override;
     void SetBackBorder() override;
     void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
@@ -182,6 +183,11 @@ public:
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
+    static void SetLineThicknessScale(FrameNode* frameNode, float value);
+    static TextDecoration GetDecoration(FrameNode* frameNode);
+    static Color GetTextDecorationColor(FrameNode* frameNode);
+    static TextDecorationStyle GetTextDecorationStyle(FrameNode* frameNode);
+    static float GetLineThicknessScale(FrameNode* frameNode);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetHalfLeading(FrameNode* frameNode, const bool& value);
@@ -270,6 +276,7 @@ public:
         std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
     static void SetCleanNodeStyle(FrameNode* frameNode, CleanNodeStyle cleanNodeStyle);
     static void SetIsShowCancelButton(FrameNode* frameNode, bool isShowCancelButton);
+    static void SetIsShowVoiceButton(FrameNode* frameNode, bool isShowButton);
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);

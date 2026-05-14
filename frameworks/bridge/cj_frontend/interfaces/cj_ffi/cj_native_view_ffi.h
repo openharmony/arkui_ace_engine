@@ -34,6 +34,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkThrowNativeError(const char* msg);
 CJ_EXPORT void FfiOHOSAceFrameworkNativeLog(const char* msg);
 CJ_EXPORT bool FfiOHOSAceFrameworkLoadNativeView(int64_t nativeViewID);
 CJ_EXPORT void FfiOHOSAceFrameworkNativeViewCreate(int64_t nativeViewID);
+CJ_EXPORT void FfiOHOSAceFrameworkNativeViewSetJsViewName(int64_t nativeViewID, const char* utf8);
 CJ_EXPORT void FfiOHOSAceFrameworkNativeViewCreateRecycle(
     int64_t nativeViewId, bool isRecycling, const char* name, void (*callback)());
 CJ_EXPORT int64_t FfiOHOSAceFrameworkNativeViewCtor(int64_t remoteId);

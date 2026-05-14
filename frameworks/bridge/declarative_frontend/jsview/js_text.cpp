@@ -1204,7 +1204,7 @@ bool JSText::BindPreviewMenu(const JSRef<JSVal> argsMenuOptions, NG::TextRespons
     bool isPreviewMenu = !menuType->IsUndefined() && !menuType->IsNull() && menuType->IsNumber() &&
                         (menuType->ToNumber<int32_t>() == 1);
     bool bindImagePreviewMenu = isPreviewMenu && responseType == NG::TextResponseType::LONG_PRESS;
-    if (bindImagePreviewMenu) {
+    if (bindImagePreviewMenu && textSpanType == NG::TextSpanType::IMAGE) {
         TextModel::GetInstance()->BindPreviewMenu(textSpanType, buildFunc, menuParam);
         return true;
     } else {

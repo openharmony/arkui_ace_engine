@@ -15,6 +15,7 @@
 #include "test/unittest/core/event/focus_hub_test_ng.h"
 #include "gtest/gtest.h"
 #include "core/components_ng/event/focus_event_handler.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/event/focus_axis_event.h"
 
 using namespace testing;

@@ -97,19 +97,23 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
 }
 
 // for EmbeddedComponent
-void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType)
+void UIExtensionModelNG::Create(const EmbeddedUIExtensionConfig& config)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_UINODE_TRACE(nodeId);
+    auto sessionType = config.sessionType;
     auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
         [sessionType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNeedCheckWindowSceneId(true);
-    pattern->SetWantWrap(wantWrap);
+    pattern->SetWantWrap(config.wantWrap);
+    pattern->SetPlaceholderMap(config.placeholderMap);
+    pattern->SetDensityDpi(config.densityDpi);
+    pattern->SetIsWindowModeFollowHost(config.isWindowModeFollowHost);
     if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
-        pattern->UpdateWant(wantWrap);
+        pattern->UpdateWant(config.wantWrap);
     }
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();

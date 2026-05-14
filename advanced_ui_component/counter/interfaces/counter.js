@@ -1050,7 +1050,8 @@ export class CounterComponent extends ViewPU {
   updateInlineStyleOptions() {
     if (this.initFlag) {
       this.initFlag = false;
-      this.value = this.inlineStyleOptions.value !== undefined ? this.inlineStyleOptions.value : 0;
+      const truncatedValue = Math.trunc(this.inlineStyleOptions.value);
+      this.value = Number.isFinite(truncatedValue) ? truncatedValue : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
     }

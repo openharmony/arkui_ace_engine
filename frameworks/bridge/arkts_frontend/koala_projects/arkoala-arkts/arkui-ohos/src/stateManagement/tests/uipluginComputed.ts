@@ -126,7 +126,86 @@ class ClassA implements IObservedObject, IWatchSubscriberRegister
         }
     }
 }
- 
+
+class ClassPerson implements IObservedObject, IWatchSubscriberRegister
+{
+    private readonly subscribedWatches_: ISubscribedWatches;
+
+    constructor(firstName: string, lastName: string) {
+        this.__backing_firstName = firstName;
+        this.__backing_lastName = lastName;
+        this.subscribedWatches_ = StateMgmtFactory.makeSubscribedWatches();
+
+        this.__computed_fullName = StateMgmtFactory.makeComputed<string>(
+            () : string => {
+                stateMgmtConsole.log('computing fullName')
+                return this.firstName + ' ' + this.lastName
+            },
+            'fullName'
+        )
+    }
+
+    public addWatchSubscriber(watchId: WatchIdType): void {
+        this.subscribedWatches_!.addWatchSubscriber(watchId);
+    }
+    public removeWatchSubscriber(watchId: WatchIdType): boolean {
+        return this.subscribedWatches_!.removeWatchSubscriber(watchId);
+    }
+    protected executeOnSubscribingWatches(changedPropName: string): void {
+        this.subscribedWatches_!.executeOnSubscribingWatches(changedPropName);
+    }
+
+    private ____V1RenderId: RenderIdType = 0;
+    public setV1RenderId(renderId: RenderIdType): void {
+        this.____V1RenderId = renderId;
+    }
+
+    protected conditionalAddRef(meta: IMutableStateMeta): void {
+        if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
+            meta.addRef();
+        }
+    }
+
+    private __backing_firstName: string;
+
+    private readonly __meta_firstName: IMutableStateMeta =
+        StateMgmtFactory.makeMutableStateMeta();
+
+    public get firstName(): string {
+        this.conditionalAddRef(this.__meta_firstName);
+        return this.__backing_firstName
+    }
+    public set firstName(newValue: string) {
+        if (this.__backing_firstName !== newValue) {
+            this.__backing_firstName = newValue;
+            this.__meta_firstName.fireChange();
+            this.executeOnSubscribingWatches('firstName');
+        }
+    }
+
+    private __backing_lastName: string;
+
+    private readonly __meta_lastName: IMutableStateMeta =
+        StateMgmtFactory.makeMutableStateMeta();
+
+    public get lastName(): string {
+        this.conditionalAddRef(this.__meta_lastName);
+        return this.__backing_lastName;
+    }
+    public set lastName(newValue: string) {
+        if (this.__backing_lastName !== newValue) {
+            this.__backing_lastName = newValue;
+            this.__meta_lastName.fireChange();
+            this.executeOnSubscribingWatches('lastName');
+        }
+    }
+
+    private __computed_fullName : IComputedDecoratedVariable<string>;
+    public get fullName(): string {
+        return this.__computed_fullName.get()
+    }
+}
+
 interface EntryComponent_init_update_struct {
     stateA?: ClassA
     stateN?: int32
@@ -365,14 +444,14 @@ class ChainedComputedComponent extends ExtendableComponent {
             'Kelvin'
         )
 
-        /*
         this._monitorDecorator = StateMgmtFactory.makeMonitor(new Array<IMonitorPathInfo>(
-            StateMgmtFactory.makeMonitorPath("kelvin", () => {
-                const result = this.kelvin;
-                //stateMgmtConsole.log("lamda for path kelvin, value: "+result);
-                return result;
-            })
-        ),
+                {
+                    path: 'kelvin',
+                    valueCallback:   () => {
+                        return this.kelvin;
+                    }
+                }  as IMonitorPathInfo
+            ),
             (m: IMonitor) => {
                 if(this._monitorFunction) {
                     this.monitorFunctionRunCount++;
@@ -380,7 +459,6 @@ class ChainedComputedComponent extends ExtendableComponent {
                 }
             }
         );
-        */
     }
 
     __updateStruct(param: EntryComponent_init_update_struct) : void {
@@ -626,7 +704,14 @@ interface ComputedComponentWithInterfaceLiteral_init_update_struct {
 }
 
 class ComputedComponentWithDate extends ExtendableComponent {
-    public current: Date;
+    // @Local current: Date = new Date();
+    private _backing_current: ILocalDecoratedVariable<Date>;
+    get current(): Date {
+        return this._backing_current!.get();
+    }
+    set current(newValue: Date) {
+        this._backing_current!.set(newValue);
+    }
 
     /**
      * @Computed generated code:
@@ -646,11 +731,15 @@ class ComputedComponentWithDate extends ExtendableComponent {
 
     constructor(parent : ExtendableComponent | null, param : ComputedComponentWithDate_init_update_struct) {
         super(parent);
-        this.current = new Date()
+        this._backing_current = StateMgmtFactory.makeLocal<Date>(
+            this,
+            'current',
+            param.current !== undefined ? param.current! : new Date()
+        );
         this.__computed_tomorrow = StateMgmtFactory.makeComputed<Date>(
             () : Date => {
                 let d = new Date();
-                d.setDate(d.getDate() + 1)
+                d.setDate(this.current.getDate() + 1)
                 return d;
             },
             'tomorrow'
@@ -669,113 +758,163 @@ interface ComputedComponentWithDate_init_update_struct {
     current?: Date
 }
 
+// === Test bodies =============================================================
+
+function doComputedSquare25(entryComponent: EntryComputedComponent): void {
+    entryComponent.stateN = 5
+    ObserveSingleton.instance.updateDirty()
+    test(`entryComponent.squareN = ${entryComponent.squareN} === 25`,
+        entryComponent.squareN === 25);
+}
+
+function doComputedSquare36AfterUpdate(entryComponent: EntryComputedComponent): void {
+    entryComponent.stateN = 5
+    ObserveSingleton.instance.updateDirty()
+    entryComponent.stateN = 6
+    ObserveSingleton.instance.updateDirty()
+    test(`entryComponent.squareN = ${entryComponent.squareN} === 36`,
+        entryComponent.squareN === 36);
+}
+
+function doComputedSumNM(entryComponent: EntryComputedComponent): void {
+    entryComponent.stateN = 5
+    ObserveSingleton.instance.updateDirty()
+    test(`entryComponent.squareN = ${entryComponent.sumNM} === 105`,
+        entryComponent.sumNM === 105);
+}
+
+function doComputedSumNMAfterStateMUpdate(entryComponent: EntryComputedComponent): void {
+    entryComponent.stateN = 5
+    ObserveSingleton.instance.updateDirty()
+
+    entryComponent.stateM = 200
+    ObserveSingleton.instance.updateDirty()
+    test(`entryComponent.squareN = ${entryComponent.sumNM} === 205`,
+        entryComponent.sumNM === 205);
+}
+
+function doComputedChained(): void {
+    const chainedComponent = new ChainedComputedComponent(null, {celcius: 10});
+    ObserveSingleton.instance.updateDirty()
+    test(`chainedComponent.fahrenheit = ${chainedComponent.fahrenheit} === 50`,
+        eq(chainedComponent.fahrenheit, 50));
+    test(`chainedComponent.kelvin = ${chainedComponent.kelvin} === 283.15`,
+        eq(chainedComponent.kelvin, 283.15));
+
+    chainedComponent.celcius = 20
+    ObserveSingleton.instance.updateDirty()
+    test(`chainedComponent.fahrenheit = ${chainedComponent.fahrenheit} === 68`,
+        eq(chainedComponent.fahrenheit, 68));
+    test(`chainedComponent.kelvin = ${chainedComponent.kelvin} === 293.15`,
+        eq(chainedComponent.kelvin, 293.15));
+}
+
+function doComputedInTheClass(): void {
+    const classWithComputed = new ClassWithComputed('Celciuskatu')
+    test(`classWithComputed.propB1 = ${classWithComputed.propB1} === Celciuskatu`,
+        eq(classWithComputed.propB1, 'Celciuskatu'));
+    test(`classWithComputed.homeAddress = ${classWithComputed.homeAddress}` +
+        ` === Home address: Celciuskatu`,
+        eq(classWithComputed.homeAddress, 'Home address: Celciuskatu'));
+}
+
+function doComputedThatChangesStateThrows(): void {
+    let detected: Boolean = false;
+    try {
+        let comp = new ComputedComponentWithException(null, {stateN: 2})
+        let a = comp.sumWithError
+    } catch (e) {
+        detected = true;
+    } finally {
+        test(`Exception detected as expected`, detected);
+    }
+}
+
+function doComputedUsingObservedInterfaceObject(): void {
+    let ObjLiteral = new ComputedComponentWithInterfaceLiteral(null,
+        {person: {first: 'Jack', last: 'Ripper'} as InterfacePerson})
+    test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === Jack-Ripper`,
+        eq(ObjLiteral.fullName, 'Jack-Ripper'));
+    ObjLiteral.PersonInterface.first = 'John'
+    test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === Jack-Ripper`,
+        eq(ObjLiteral.fullName, 'Jack-Ripper'));
+    ObserveSingleton.instance.updateDirty()
+    test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === John-Ripper`,
+        eq(ObjLiteral.fullName, 'John-Ripper'));
+}
+
+function doComputedUsingWrappedDate(): void {
+    const d = new Date();
+    const comp = new ComputedComponentWithDate(null, {});
+    comp.current = d;
+    test(
+        `comp.tomorrow.getDate() (${comp.tomorrow.getDate()})` +
+            ` === d.getDate() + 1 (${d.getDate() + 1})`,
+        eq(comp.tomorrow.getDate(), d.getDate() + 1),
+    );
+}
+
+function doComputedFullNameOnClassPerson(): void {
+    const person = new ClassPerson('Jack', 'Ripper')
+    test(`person.fullName = ${person.fullName} === Jack Ripper`,
+        eq(person.fullName, 'Jack Ripper'));
+    person.firstName = 'John'
+    ObserveSingleton.instance.updateDirty()
+    test(`person.fullName = ${person.fullName} === John Ripper`,
+        eq(person.fullName, 'John Ripper'));
+    person.lastName = 'Doe'
+    ObserveSingleton.instance.updateDirty()
+    test(`person.fullName = ${person.fullName} === John Doe`, eq(person.fullName, 'John Doe'));
+}
+
+// === Suite wiring ============================================================
+
 export function run_computed() : Boolean {
     StateMgmtFactory = STATE_MGMT_FACTORY;
 
     const tests = tsuite('@Computed tests', () => {
-    const entryComponent = new EntryComputedComponent(null, 
-        {stateN: 2, stateM: 100} as EntryComponent_init_update_struct);
+        const entryComponent = new EntryComputedComponent(null,
+            {stateN: 2, stateM: 100} as EntryComponent_init_update_struct);
 
-    tcase('Test 1: @Computed square 25', () => {
-        entryComponent.stateN = 5
-        ObserveSingleton.instance.updateDirty()
-        test(`entryComponent.squareN = ${entryComponent.squareN} === 25`, entryComponent.squareN === 25);
-    })
+        tcase('Test 1: @Computed square 25', () => {
+            doComputedSquare25(entryComponent);
+        })
 
-    tcase('Test 2: @Computed square 36, after update', () => {
-        entryComponent.stateN = 5
-        ObserveSingleton.instance.updateDirty()
-        entryComponent.stateN = 6
-        ObserveSingleton.instance.updateDirty()
-        test(`entryComponent.squareN = ${entryComponent.squareN} === 36`, entryComponent.squareN === 36);
-    })
+        tcase('Test 2: @Computed square 36, after update', () => {
+            doComputedSquare36AfterUpdate(entryComponent);
+        })
 
-    tcase('Test 3: @Computed sumMN ', () => {
-        entryComponent.stateN = 5
-        ObserveSingleton.instance.updateDirty()
-        test(`entryComponent.squareN = ${entryComponent.sumNM} === 105`, entryComponent.sumNM === 105);
-    })
+        tcase('Test 3: @Computed sumMN ', () => {
+            doComputedSumNM(entryComponent);
+        })
 
-    tcase('Test 4: @Computed 2nd sumMN ', () => {
-        entryComponent.stateN = 5
-        ObserveSingleton.instance.updateDirty()
+        tcase('Test 4: @Computed 2nd sumMN ', () => {
+            doComputedSumNMAfterStateMUpdate(entryComponent);
+        })
 
-        entryComponent.stateM = 200
-        ObserveSingleton.instance.updateDirty()
-        test(`entryComponent.squareN = ${entryComponent.sumNM} === 205`, entryComponent.sumNM === 205);
-    })
+        tcase('Test 5: @Computed chained ', () => {
+            doComputedChained();
+        })
 
-    tcase('Test 5: @Computed chained ', () => {
-        const chainedComponent = new ChainedComputedComponent(null, {celcius: 10});
-        ObserveSingleton.instance.updateDirty()
-        test(`chainedComponent.fahrenheit = ${chainedComponent.fahrenheit} === 50`, eq(chainedComponent.fahrenheit, 50));
-        test(`chainedComponent.kelvin = ${chainedComponent.kelvin} === 283.15`, eq(chainedComponent.kelvin, 283.15));
+        tcase('Test 6: @Computed in the class', () => {
+            doComputedInTheClass();
+        })
 
-        chainedComponent.celcius = 20
-        ObserveSingleton.instance.updateDirty()
-        test(`chainedComponent.fahrenheit = ${chainedComponent.fahrenheit} === 68`, eq(chainedComponent.fahrenheit, 68));
-        test(`chainedComponent.kelvin = ${chainedComponent.kelvin} === 293.15`, eq(chainedComponent.kelvin, 293.15));
-    })
+        tcase('Test 7: @Computed that changes state -> Exception', () => {
+            doComputedThatChangesStateThrows();
+        })
 
-    tcase('Test 5: @Computed chained with Kelvin Monitor', () => {
-        const chainedComponent = new ChainedComputedComponent(null, {celcius: 10});
-        ObserveSingleton.instance.updateDirty()
-        test(`chainedComponent.fahrenheit = ${chainedComponent.fahrenheit} === 50`, eq(chainedComponent.fahrenheit, 50));
-        test(`chainedComponent.kelvin = ${chainedComponent.kelvin} === 283.15`, eq(chainedComponent.kelvin, 283.15));
+        tcase('Test 8: @Computed using Observed Interface object', () => {
+            doComputedUsingObservedInterfaceObject();
+        })
 
-        let monitorFunction = (m: IMonitor) => {
-            stateMgmtConsole.log(`KELVIN monitor called ${chainedComponent.kelvin} <<<<<<<<<<<<<<<<`)
-        }
+        tcase('Test 9: @Computed using wrapped Date — tomorrow.getDate() === today + 1', () => {
+            doComputedUsingWrappedDate();
+        })
 
-        chainedComponent._monitorFunction = monitorFunction
-        chainedComponent.celcius = 20
-        ObserveSingleton.instance.updateDirty()
-        test(`chainedComponent.fahrenheit = ${chainedComponent.fahrenheit} === 68`, eq(chainedComponent.fahrenheit, 68));
-        test(`chainedComponent.kelvin = ${chainedComponent.kelvin} === 293.15`, eq(chainedComponent.kelvin, 293.15));
-        test(`chainedComponent.kelvin = ${chainedComponent.kelvin} === 293.15`, eq(chainedComponent.kelvin, 293.15));
-        // Test will be reenable after monitors are fixed
-        //test(`monitor count = ${chainedComponent.monitorFunctionRunCount} === 1`, eq(chainedComponent.monitorFunctionRunCount, 1));
-    })
-
-    tcase('Test 6: @Computed in the class', () => {
-        const classWithComputed = new ClassWithComputed('Celciuskatu')
-        test(`classWithComputed.propB1 = ${classWithComputed.propB1} === Celciuskatu`, eq(classWithComputed.propB1, 'Celciuskatu'));
-        test(`classWithComputed.propB1 = ${classWithComputed.homeAddress} === Home Address: Celciuskatu`, eq(classWithComputed.homeAddress, 'Home address: Celciuskatu'));
-    })
-
-    tcase('Test 7: @Computed that changes state -> Exception', () => {
-        let detected:Boolean = false;
-        try {
-            let comp = new ComputedComponentWithException(null, {stateN: 2})
-            let a = comp.sumWithError
-        } catch(e) {
-            detected = true;
-        } finally {
-            test(`Exception detected as expected`, detected);
-        }
-    })
-    
-    tcase('Test 8: @Computed using Observed Interface object', () => {
-        let ObjLiteral = new ComputedComponentWithInterfaceLiteral(null,
-            {person: {first: 'Jack', last: 'Ripper'} as InterfacePerson})
-        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === Jack-Ripper`, eq(ObjLiteral.fullName, 'Jack-Ripper'));
-        ObjLiteral.PersonInterface.first = 'John'
-        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === Jack-Ripper`, eq(ObjLiteral.fullName, 'Jack-Ripper'));
-        ObserveSingleton.instance.updateDirty()
-        test(`ObjLiteral.fullName = ${ObjLiteral.fullName} === John-Ripper`, eq(ObjLiteral.fullName, 'John-Ripper'));
-    })
-    
-    tcase('Test 9: @Computed using wrapped Date', () => {
-        let d = new Date();
-        let comp = new ComputedComponentWithDate(null, {})
-        comp.current = d;
-        d.setDate(d.getDate() + 1)
-        // No test for modification of WrappedDate
-        test(`Component.tomorrow = ${comp.tomorrow} === ??`, eq(comp.tomorrow.getDate(), d.getDate()));
-        //test(`Component.tomorrow = ${comp.tomorrow} === ??`, eq(Class.of(comp.tomorrow).getName(), "observeWrappedDate.WrappedDate"));
-        //test(`Component.tomorrow = ${comp.tomorrow} === ??`, eq(comp.tomorrow instanceof WrappedDate, true));
-    })
-
+        tcase('Test 10: @Computed fullName on ClassPerson', () => {
+            doComputedFullNameOnClassPerson();
+        })
     });
 
     tests();

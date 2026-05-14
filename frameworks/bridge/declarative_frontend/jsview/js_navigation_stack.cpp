@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/base/json/json_util.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -972,6 +973,10 @@ bool JSNavigationStack::ExecutePopCallbackInStack(const JSRef<JSVal>& param)
 
 void JSNavigationStack::ExecutePopCallbackForHomeNavDestination(const JSRef<JSVal>& param)
 {
+    auto size = GetSize();
+    if (size > 0) {
+        return;
+    }
     auto homeDest = homeDestinationNode_.Upgrade();
     CHECK_NULL_VOID(homeDest);
     auto destPattern = homeDest->GetPattern<NG::NavDestinationPattern>();

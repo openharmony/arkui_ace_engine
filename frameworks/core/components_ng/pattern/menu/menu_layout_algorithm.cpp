@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
@@ -3993,6 +3994,9 @@ void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetSDFShape(menuSDFShape);
+        if (!menuPattern->IsUseDistortionAnimation()) {
+            renderContext->UpdateSubmenuDistortionParam();
+        }
     }
 #endif
 }

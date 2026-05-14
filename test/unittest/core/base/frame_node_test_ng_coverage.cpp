@@ -19,6 +19,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/accessibility_property.h"

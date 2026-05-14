@@ -114,7 +114,7 @@ export class RenderNodeTransfer {
     // 2. get nodeId
     // 3. check map
     // 4. transfer property
-    public transfer2S(input: Object): RenderNode | undefined {
+    public transfer2S(input: Any): RenderNode | undefined {
         let inVal = ESValue.wrap(input);
         if (inVal.isNull() || inVal.isUndefined()) {
             return undefined;
@@ -147,9 +147,9 @@ export class RenderNodeTransfer {
         // set parent
         let ParentVal = inVal.getProperty("parentRenderNode");
         if (ParentVal.isObject()) {
-            let parVal = TransferUtil.nodeDeref(ParentVal.unwrap()! as Object);
+            let parVal = TransferUtil.nodeDeref(ParentVal.unwrap()!);
             if (parVal !== undefined) {
-                this.transfer2S(parVal as Object);
+                this.transfer2S(parVal);
             }
         }
  
@@ -160,7 +160,7 @@ export class RenderNodeTransfer {
             if (childVal.isNull() || childVal.isUndefined()) {
                 break;
             }
-            const childObj = childVal.unwrap() as Object;
+            const childObj = childVal.unwrap();
             let childNode = this.transfer2S(childObj);
             if (childNode === undefined) {
                 break;
@@ -237,7 +237,7 @@ export class RenderNodeTransfer {
      *  4. transfer property
      * @returns Object for arkts1.1
      */
-    public transfer2D(input: Object): Object | undefined {
+    public transfer2D(input: Object): Any {
         let inVal = ESValue.wrap(input);
         // get peerPtr
         let peerPtr = TransferUtil.getPropPeerPtr(inVal, "peer");
@@ -255,7 +255,7 @@ export class RenderNodeTransfer {
             let dVal = this.mapNodeDynamic.get(nodeId);
             let nodeVal = dVal! as ESValue;
             let obj = nodeVal.unwrap();
-            return obj! as Object;
+            return obj!;
         }
         // get type
         let typeStr: string | undefined = TransferUtil.getPropStringType(inVal, "type");
@@ -281,15 +281,15 @@ export class RenderNodeTransfer {
             if (childVal.isNull() || childVal.isUndefined()) {
                 break;
             }
-            const childObj = childVal.unwrap();
-            let jsChild = this.transfer2D(childObj! as Object);
+            const childObj: Any = childVal.unwrap();
+            let jsChild: Any = childObj instanceof Object ? this.transfer2D(childObj as Object) : childObj;
             if (jsChild === undefined) {
                 break;
             }
-            jsNodeVal.invokeMethod("appendChild", jsChild as Object);
+            jsNodeVal.invokeMethod("appendChild", ESValue.wrap(jsChild));
         }
         let obj = jsNodeVal.unwrap();
-        return obj as Object;
+        return obj;
     }
 
     /*
@@ -303,7 +303,7 @@ export class RenderNodeTransfer {
         }
     
         const trans = new RenderNodeTransfer();
-        const node = trans.transfer2S(input! as Object);
+        const node = trans.transfer2S(input);
     
         return node !== undefined ? node : new Object();
     }
