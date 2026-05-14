@@ -50,6 +50,10 @@ void CustomNode::FlushReload()
 {
 }
 
+void CustomNode::ResetNode()
+{
+}
+
 bool CustomNode::RenderCustomChild(int64_t deadline)
 {
     return true;

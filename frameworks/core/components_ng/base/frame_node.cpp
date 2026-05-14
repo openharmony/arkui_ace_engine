@@ -77,6 +77,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
+#include "core/common/premake_scope.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -640,6 +641,7 @@ FrameNode::FrameNode(
     if (isRoot) {
         isPendingState_ = true;
     }
+    hasPreMake_ = PreMakeScope::IsPreMake();
     isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
     if (IsFree()) {
@@ -5944,6 +5946,7 @@ bool FrameNode::IsVerticalScrollable() const
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    PreMakeScope preMakeScope(hasPreMake_);
     if (GetIgnoreLayoutProcess() && EnsureDelayedMeasureBeingOnlyOnce()) {
         return;
     }
@@ -5964,6 +5967,17 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
+
+    if (IsPreMakeAndScroll()) {
+        layoutAlgorithm_->SetSkipMeasure();
+        layoutAlgorithm_->SetSkipLayout();
+        isLayoutDirtyMarked_ = true;
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddDirtyLayoutNode(Claim(this));
+        ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d] reason: Node is PreMake", tag_.c_str(), nodeId_);
+        ACE_LAYOUT_TRACE_END()
+        return;
+    }
 
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         layoutAlgorithm_->SetSkipMeasure();
@@ -6093,6 +6107,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             GetGeometryNode()->GetFrameRect().ToString().c_str(),
             GetGeometryNode()->GetContentSize().ToString().c_str());
     }
+    hasPreMake_ = false;
     ACE_LAYOUT_TRACE_END()
 }
 
@@ -8716,6 +8731,22 @@ void FrameNode::UnRegisterLpxAttribute(LpxAttribute attribute)
         CHECK_NULL_VOID(context);
         context->UnRegisterLpxDirtyNode(WeakClaim(this));
     }
+}
+
+bool FrameNode::IsPreMakeAndScroll()
+{
+    // IsActive function is make sure active nodes can be draw when scrolling
+    if (IsActive() || !HasPreMake()) {
+        return false;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto contentChangeMgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_RETURN(contentChangeMgr, false);
+    if (contentChangeMgr->IsSwiperScrolling() || contentChangeMgr->IsScrolling()) {
+        return true;
+    }
+    return false;
 }
 
 template<typename T>

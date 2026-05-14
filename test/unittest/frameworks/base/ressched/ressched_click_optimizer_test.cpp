@@ -121,11 +121,11 @@ HWTEST_F(ResSchedClickOptimizerTest, ReportClickTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetComponentTextAndImageSourceRecursiveTest001
- * @tc.desc: test GetComponentTextAndImageSourceRecursive method
+ * @tc.name: GetComponentTextRecursiveTest001
+ * @tc.desc: test GetComponentTextRecursive method
  * @tc.type: FUNC
  */
-HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextAndImageSourceRecursiveTest001, TestSize.Level1)
+HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextRecursiveTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init node.
@@ -136,152 +136,52 @@ HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextAndImageSourceRecursiveTest
     CHECK_NULL_VOID(accessibilityProperty);
 
     /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive and compare result.
+     * @tc.steps: step2. call GetComponentTextRecursive and compare result.
      * @tc.steps: case1. deep lte 0
      * @tc.expected: step2. result equals.
      */
     std::string text1 = "";
-    std::string imgSrc1 = "";
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text1, imgSrc1, 0);
+    ResSchedClickOptimizer::GetComponentTextRecursive(host, text1, 0);
     EXPECT_EQ(text1, "");
-    EXPECT_EQ(imgSrc1, "");
 
     /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive and compare result.
+     * @tc.steps: step2. call GetComponentTextRecursive and compare result.
      * @tc.steps: case2. deep gt 0, text is empty, nodeText is empty
      * @tc.expected: step2. result equals.
      */
     std::string text2 = "";
-    std::string imgSrc2 = "";
     accessibilityProperty->SetText("");
     accessibilityProperty->SetAccessibilityText("");
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text2, imgSrc2, 1);
+    ResSchedClickOptimizer::GetComponentTextRecursive(host, text2, 1);
     EXPECT_EQ(text2, "");
-    EXPECT_EQ(imgSrc2, "");
 
     /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive and compare result.
+     * @tc.steps: step2. call GetComponentTextRecursive and compare result.
      * @tc.steps: case3. deep gt 0, text is not empty, nodeText is empty
      * @tc.expected: step2. result equals.
      */
     std::string text3 = "123";
-    std::string imgSrc3 = "";
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text3, imgSrc3, 1);
+    ResSchedClickOptimizer::GetComponentTextRecursive(host, text3, 1);
     EXPECT_EQ(text3, "123");
-    EXPECT_EQ(imgSrc3, "");
 
     /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive and compare result.
+     * @tc.steps: step2. call GetComponentTextRecursive and compare result.
      * @tc.steps: case4. deep gt 0, text is empty, nodeText is not empty
      * @tc.expected: step2. result equals.
      */
     std::string text4 = "";
-    std::string imgSrc4 = "";
     accessibilityProperty->SetText("test");
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text4, imgSrc4, 1);
+    ResSchedClickOptimizer::GetComponentTextRecursive(host, text4, 1);
     EXPECT_EQ(text4, "test");
-    EXPECT_EQ(imgSrc4, "");
 
     /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive and compare result.
+     * @tc.steps: step2. call GetComponentTextRecursive and compare result.
      * @tc.steps: case5. deep gt 0, text is not empty, nodeText is not empty
      * @tc.expected: step2. result equals.
      */
     std::string text5 = "123";
-    std::string imgSrc5 = "";
     accessibilityProperty->SetText("test");
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text5, imgSrc5, 1);
+    ResSchedClickOptimizer::GetComponentTextRecursive(host, text5, 1);
     EXPECT_EQ(text5, "123,test");
-    EXPECT_EQ(imgSrc5, "");
-}
-
-/**
- * @tc.name: GetComponentTextAndImageSourceRecursiveTest002
- * @tc.desc: test GetComponentTextAndImageSourceRecursive method
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextAndImageSourceRecursiveTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init node.
-     */
-    auto node = NG::FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NG::ImagePattern>());
-    WeakPtr<NG::FrameNode> host = AceType::WeakClaim(AceType::RawPtr(node));
-
-    /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive function and compare result.
-     * @tc.steps: case1: imgSrc is empty, property is null
-     * @tc.expected: step2. result equals.
-     */
-    node->layoutProperty_ = nullptr;
-    std::string text1 = "";
-    std::string imgSrc1 = "";
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text1, imgSrc1, 1);
-    EXPECT_EQ(text1, "");
-    EXPECT_EQ(imgSrc1, "");
-
-    /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive function and compare result.
-     * @tc.steps: case2: imgSrc is empty, src is empty
-     * @tc.expected: step2. result equals.
-     */
-    std::string text2 = "";
-    std::string imgSrc2 = "";
-    auto imageLayoutProperty = AceType::MakeRefPtr<NG::ImageLayoutProperty>();
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo("", Dimension(300.0), Dimension(200.0)));
-    node->SetLayoutProperty(imageLayoutProperty);
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text2, imgSrc2, 1);
-    EXPECT_EQ(text2, "");
-    EXPECT_EQ(imgSrc2, "");
-
-    /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive function and compare result.
-     * @tc.steps: case3: imgSrc is not empty, src is empty
-     * @tc.expected: step2. result equals.
-     */
-    std::string text3 = "";
-    std::string imgSrc3 = "123";
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text3, imgSrc3, 1);
-    EXPECT_EQ(text3, "");
-    EXPECT_EQ(imgSrc3, "123");
-
-    /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive function and compare result.
-     * @tc.steps: case4: imgSrc is empty, src is not empty
-     * @tc.expected: step2. result equals.
-     */
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo("file://data/data/com.example.test/res/example.svg", Dimension(300.0), Dimension(200.0)));
-    std::string text4 = "";
-    std::string imgSrc4 = "";
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text4, imgSrc4, 1);
-    EXPECT_EQ(text4, "");
-    EXPECT_EQ(imgSrc4, "file://data/data/com.example.test/res/example.svg");
-
-    /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive function and compare result.
-     * @tc.steps: case5: imgSrc is not empty, src is not empty
-     * @tc.expected: step2. result equals.
-     */
-    std::string text5 = "";
-    std::string imgSrc5 = "123";
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text5, imgSrc5, 1);
-    EXPECT_EQ(text5, "");
-    EXPECT_EQ(imgSrc5, "123,file://data/data/com.example.test/res/example.svg");
-
-    /**
-     * @tc.steps: step2. call GetComponentTextAndImageSourceRecursive function and compare result.
-     * @tc.steps: case6: imgSrc is base64
-     * @tc.expected: step2. result equals.
-     */
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA", Dimension(300.0), Dimension(200.0)));
-    std::string text6 = "";
-    std::string imgSrc6 = "";
-    ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(host, text6, imgSrc6, 1);
-    EXPECT_EQ(text6, "");
-    EXPECT_EQ(imgSrc6, "data:image/png;base64;iVBORw0KGg");
 }
 } // namespace OHOS::Ace
