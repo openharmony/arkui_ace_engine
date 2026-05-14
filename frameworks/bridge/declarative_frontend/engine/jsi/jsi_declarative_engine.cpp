@@ -241,13 +241,15 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
 {
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    std::string str("arkui_binary_jsUIContext_abc_loadFile");
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
     int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+    return runtime->EvaluateJsCode(codeStart, codeLength, str);
 #else
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsPreload_abc_start));
     int32_t codeLength = _binary_jsPreload_abc_end - _binary_jsPreload_abc_start;
-#endif
     return runtime->EvaluateJsCode(codeStart, codeLength);
+#endif
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
