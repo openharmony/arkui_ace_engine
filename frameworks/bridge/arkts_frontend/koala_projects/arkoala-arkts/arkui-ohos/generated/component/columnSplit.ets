@@ -145,6 +145,21 @@ export function ColumnSplitImpl(
     })
 }
 
+@memo
+export function ColumnSplit(
+    @memo @memo_skip
+    style: ((attributes: ColumnSplitAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkColumnSplitComponent>((): ArkColumnSplitComponent => {
+        return new ArkColumnSplitComponent()
+    })
+    NodeAttach<ArkColumnSplitPeer>((): ArkColumnSplitPeer => ArkColumnSplitPeer.create(receiver), (_: ArkColumnSplitPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ColumnSplitDividerStyle_serializer {
     public static write(buffer: SerializerBase, value: ColumnSplitDividerStyle): void {
         let valueSerializer: SerializerBase = buffer

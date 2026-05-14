@@ -305,6 +305,21 @@ export function RowImpl(
     })
 }
 
+@memo
+export function Row(
+    @memo @memo_skip
+    style: ((attributes: RowAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRowComponent>((): ArkRowComponent => {
+        return new ArkRowComponent()
+    })
+    NodeAttach<ArkRowPeer>((): ArkRowPeer => ArkRowPeer.create(receiver), (_: ArkRowPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class RowOptionsV2_serializer {
     public static write(buffer: SerializerBase, value: RowOptionsV2): void {
         let valueSerializer: SerializerBase = buffer

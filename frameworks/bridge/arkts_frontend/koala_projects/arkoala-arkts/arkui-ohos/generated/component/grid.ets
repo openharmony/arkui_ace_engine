@@ -1306,6 +1306,21 @@ export function GridImpl(
     })
 }
 
+@memo
+export function Grid(
+    @memo @memo_skip
+    style: ((attributes: GridAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkGridComponent>((): ArkGridComponent => {
+        return new ArkGridComponent()
+    })
+    NodeAttach<ArkGridPeer>((): ArkGridPeer => ArkGridPeer.create(receiver), (_: ArkGridPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class StartLineInfo_serializer {
     public static write(buffer: SerializerBase, value: StartLineInfo): void {
         let valueSerializer: SerializerBase = buffer

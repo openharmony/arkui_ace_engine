@@ -467,6 +467,9 @@ export class ArkSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SpanAttribute_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setApplyAttributesFinishAttribute(): void {
+        ArkUIGeneratedNativeModule._SpanAttribute_setApplyAttributesFinish(this.peer.ptr)
+    }
 }
 export interface TextBackgroundStyle {
     color?: ResourceColor;
@@ -546,6 +549,9 @@ export interface SpanAttribute {
     }
     debugLine(sourceLine: string, moduleName?: string): this {
         throw new Error('Unimplemented method debugLine')
+    }
+    applyAttributesFinish(): void {
+        throw new Error('Unimplemented method applyAttributesFinish')
     }
     attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -694,6 +700,10 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
         this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
         return this
     }
+    public applyAttributesFinish(): void {
+        this.getPeer()?.setApplyAttributesFinishAttribute()
+        return
+    }
     public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookSpanAttributeModifier(this, value);
@@ -722,6 +732,18 @@ export function SpanImpl(
     })
 }
 
+@memo
+export function Span(
+    @memo @memo_skip
+    style: ((attributes: SpanAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkSpanComponent>((): ArkSpanComponent => {
+        return new ArkSpanComponent()
+    })
+    NodeAttach<ArkSpanPeer>((): ArkSpanPeer => ArkSpanPeer.create(receiver), (_: ArkSpanPeer): void => {
+        style?.(receiver)
+    })
+}
 export class TextBackgroundStyle_serializer {
     public static write(buffer: SerializerBase, value: TextBackgroundStyle): void {
         let valueSerializer: SerializerBase = buffer

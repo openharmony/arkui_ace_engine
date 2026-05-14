@@ -2365,6 +2365,21 @@ export function TextImpl(
     })
 }
 
+@memo
+export function Text(
+    @memo @memo_skip
+    style: ((attributes: TextAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkTextComponent>((): ArkTextComponent => {
+        return new ArkTextComponent()
+    })
+    NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class TextController_serializer {
     public static write(buffer: SerializerBase, value: TextController): void {
         let valueSerializer: SerializerBase = buffer

@@ -256,6 +256,21 @@ export function StackImpl(
     })
 }
 
+@memo
+export function Stack(
+    @memo @memo_skip
+    style: ((attributes: StackAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkStackComponent>((): ArkStackComponent => {
+        return new ArkStackComponent()
+    })
+    NodeAttach<ArkStackPeer>((): ArkStackPeer => ArkStackPeer.create(receiver), (_: ArkStackPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class StackOptions_serializer {
     public static write(buffer: SerializerBase, value: StackOptions): void {
         let valueSerializer: SerializerBase = buffer

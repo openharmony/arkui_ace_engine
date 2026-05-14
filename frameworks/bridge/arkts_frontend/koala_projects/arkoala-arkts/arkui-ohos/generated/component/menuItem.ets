@@ -331,6 +331,21 @@ export function MenuItemImpl(
     })
 }
 
+@memo
+export function MenuItem(
+    @memo @memo_skip
+    style: ((attributes: MenuItemAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkMenuItemComponent>((): ArkMenuItemComponent => {
+        return new ArkMenuItemComponent()
+    })
+    NodeAttach<ArkMenuItemPeer>((): ArkMenuItemPeer => ArkMenuItemPeer.create(receiver), (_: ArkMenuItemPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class MenuItemOptions_serializer {
     public static write(buffer: SerializerBase, value: MenuItemOptions): void {
         let valueSerializer: SerializerBase = buffer

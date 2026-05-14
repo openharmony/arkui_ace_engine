@@ -136,6 +136,21 @@ export function MediaCachedImageImpl(
     })
 }
 
+@memo
+export function MediaCachedImage(
+    @memo @memo_skip
+    style: ((attributes: MediaCachedImageAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkMediaCachedImageComponent>((): ArkMediaCachedImageComponent => {
+        return new ArkMediaCachedImageComponent()
+    })
+    NodeAttach<ArkMediaCachedImagePeer>((): ArkMediaCachedImagePeer => ArkMediaCachedImagePeer.create(receiver), (_: ArkMediaCachedImagePeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ASTCResource_serializer {
     public static write(buffer: SerializerBase, value: ASTCResource): void {
         let valueSerializer: SerializerBase = buffer

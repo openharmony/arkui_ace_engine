@@ -646,6 +646,18 @@ export function SymbolGlyphImpl(
     })
 }
 
+@memo
+export function SymbolGlyph(
+    @memo @memo_skip
+    style: ((attributes: SymbolGlyphAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkSymbolGlyphComponent>((): ArkSymbolGlyphComponent => {
+        return new ArkSymbolGlyphComponent()
+    })
+    NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (_: ArkSymbolGlyphPeer): void => {
+        style?.(receiver)
+    })
+}
 export class AppearSymbolEffect_serializer {
     public static write(buffer: SerializerBase, value: AppearSymbolEffect): void {
         let valueSerializer: SerializerBase = buffer

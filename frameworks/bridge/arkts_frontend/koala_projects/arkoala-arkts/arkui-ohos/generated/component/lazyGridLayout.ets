@@ -222,3 +222,18 @@ export function LazyVGridLayoutImpl(
     })
 }
 
+@memo
+export function LazyVGridLayout(
+    @memo @memo_skip
+    style: ((attributes: LazyVGridLayoutAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkLazyVGridLayoutComponent>((): ArkLazyVGridLayoutComponent => {
+        return new ArkLazyVGridLayoutComponent()
+    })
+    NodeAttach<ArkLazyVGridLayoutPeer>((): ArkLazyVGridLayoutPeer => ArkLazyVGridLayoutPeer.create(receiver), (_: ArkLazyVGridLayoutPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

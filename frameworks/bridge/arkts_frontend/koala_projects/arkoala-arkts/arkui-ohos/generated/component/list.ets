@@ -19,7 +19,7 @@
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister, Finalizable, MaterializedBaseTag } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { EditModeOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ExtendableCommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { EditModeOptions_serializer, Bindable_Boolean_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, EditModeOptions, Bindable, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ExtendableCommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
 import { LengthConstrain_serializer, ItemFillPolicy_serializer, CacheCountInfo_serializer, Resource as arkui_component_units_Resource, LengthConstrain, ItemFillPolicy, Dimension, CacheCountInfo, Length, ResponsiveFillType, ResourceColor } from './units'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
@@ -1266,6 +1266,21 @@ export function ListImpl(
     })
 }
 
+@memo
+export function List(
+    @memo @memo_skip
+    style: ((attributes: ListAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkListComponent>((): ArkListComponent => {
+        return new ArkListComponent()
+    })
+    NodeAttach<ArkListPeer>((): ArkListPeer => ArkListPeer.create(receiver), (_: ArkListPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ListScroller_serializer {
     public static write(buffer: SerializerBase, value: ListScroller): void {
         let valueSerializer: SerializerBase = buffer

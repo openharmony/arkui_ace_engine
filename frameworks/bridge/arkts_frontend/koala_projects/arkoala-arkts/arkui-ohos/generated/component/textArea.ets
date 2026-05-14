@@ -1926,6 +1926,18 @@ export function TextAreaImpl(
     })
 }
 
+@memo
+export function TextArea(
+    @memo @memo_skip
+    style: ((attributes: TextAreaAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkTextAreaComponent>((): ArkTextAreaComponent => {
+        return new ArkTextAreaComponent()
+    })
+    NodeAttach<ArkTextAreaPeer>((): ArkTextAreaPeer => ArkTextAreaPeer.create(receiver), (_: ArkTextAreaPeer): void => {
+        style?.(receiver)
+    })
+}
 export class TextAreaController_serializer {
     public static write(buffer: SerializerBase, value: TextAreaController): void {
         let valueSerializer: SerializerBase = buffer

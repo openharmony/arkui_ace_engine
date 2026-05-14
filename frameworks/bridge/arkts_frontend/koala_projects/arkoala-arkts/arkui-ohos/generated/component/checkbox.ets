@@ -290,6 +290,21 @@ export function CheckboxImpl(
     })
 }
 
+@memo
+export function Checkbox(
+    @memo @memo_skip
+    style: ((attributes: CheckboxAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkCheckboxComponent>((): ArkCheckboxComponent => {
+        return new ArkCheckboxComponent()
+    })
+    NodeAttach<ArkCheckboxPeer>((): ArkCheckboxPeer => ArkCheckboxPeer.create(receiver), (_: ArkCheckboxPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class CheckBoxConfiguration_serializer {
     public static write(buffer: SerializerBase, value: CheckBoxConfiguration): void {
         let valueSerializer: SerializerBase = buffer

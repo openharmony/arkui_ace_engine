@@ -190,6 +190,21 @@ export function GridRowImpl(
     })
 }
 
+@memo
+export function GridRow(
+    @memo @memo_skip
+    style: ((attributes: GridRowAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkGridRowComponent>((): ArkGridRowComponent => {
+        return new ArkGridRowComponent()
+    })
+    NodeAttach<ArkGridRowPeer>((): ArkGridRowPeer => ArkGridRowPeer.create(receiver), (_: ArkGridRowPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class BreakPoints_serializer {
     public static write(buffer: SerializerBase, value: BreakPoints): void {
         let valueSerializer: SerializerBase = buffer

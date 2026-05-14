@@ -624,6 +624,18 @@ export function VideoImpl(
     })
 }
 
+@memo
+export function Video(
+    @memo @memo_skip
+    style: ((attributes: VideoAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkVideoComponent>((): ArkVideoComponent => {
+        return new ArkVideoComponent()
+    })
+    NodeAttach<ArkVideoPeer>((): ArkVideoPeer => ArkVideoPeer.create(receiver), (_: ArkVideoPeer): void => {
+        style?.(receiver)
+    })
+}
 export class FullscreenInfo_serializer {
     public static write(buffer: SerializerBase, value: FullscreenInfo): void {
         let valueSerializer: SerializerBase = buffer

@@ -376,6 +376,21 @@ export function FormComponentImpl(
     })
 }
 
+@memo
+export function FormComponent(
+    @memo @memo_skip
+    style: ((attributes: FormComponentAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkFormComponentComponent>((): ArkFormComponentComponent => {
+        return new ArkFormComponentComponent()
+    })
+    NodeAttach<ArkFormComponentPeer>((): ArkFormComponentPeer => ArkFormComponentPeer.create(receiver), (_: ArkFormComponentPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ErrorInformation_serializer {
     public static write(buffer: SerializerBase, value: ErrorInformation): void {
         let valueSerializer: SerializerBase = buffer

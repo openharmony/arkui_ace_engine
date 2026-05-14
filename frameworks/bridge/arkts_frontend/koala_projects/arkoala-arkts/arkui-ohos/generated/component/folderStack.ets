@@ -225,6 +225,21 @@ export function FolderStackImpl(
     })
 }
 
+@memo
+export function FolderStack(
+    @memo @memo_skip
+    style: ((attributes: FolderStackAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkFolderStackComponent>((): ArkFolderStackComponent => {
+        return new ArkFolderStackComponent()
+    })
+    NodeAttach<ArkFolderStackPeer>((): ArkFolderStackPeer => ArkFolderStackPeer.create(receiver), (_: ArkFolderStackPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class OnFoldStatusChangeInfo_serializer {
     public static write(buffer: SerializerBase, value: OnFoldStatusChangeInfo): void {
         let valueSerializer: SerializerBase = buffer
