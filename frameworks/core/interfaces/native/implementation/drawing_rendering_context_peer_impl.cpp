@@ -19,6 +19,9 @@
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "drawing_rendering_context_peer_impl.h"
 #include "canvas_rendering_context2d_peer_impl.h"
+#ifdef ACE_UNITTEST
+#include "test/mock/frameworks/core/components_ng/pattern/mock_canvas_pattern.h"
+#endif // ACE_UNITTEST
 #ifdef WINDOWS_PLATFORM
 #include <windows.h>
 inline void* LoadLibrary()
@@ -76,7 +79,7 @@ drawing_CanvasPeer* DrawingRenderingContextPeerImpl::GetCanvas() const
 {
     return rsCanvas_;
 }
-void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern)
+void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(const WeakPtr<AceType>& canvasPattern)
 {
     std::function<void(std::shared_ptr<RSCanvas>, double, double)> callback =
         [wp = WeakClaim(this)](std::shared_ptr<RSCanvas> canvas, double width, double height) {
@@ -96,6 +99,13 @@ void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(WeakPtr<AceType>& canv
     if (customPaintPattern) {
         customPaintPattern->SetRSCanvasCallback(callback);
     }
+#ifdef ACE_UNITTEST
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->rsCallback = std::move(callback);
+    }
+#endif // ACE_UNITTEST
 }
 void DrawingRenderingContextPeerImpl::ThrowError(int32_t errCode, const std::string& errorMsg)
 {

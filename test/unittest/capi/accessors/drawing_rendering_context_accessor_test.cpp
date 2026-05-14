@@ -18,6 +18,7 @@
 #include "accessor_test_base.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_canvas_pattern.h"
 
@@ -198,24 +199,26 @@ HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_getSizeTest, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_getCanvasTest, TestSize.Level1)
+HWTEST_F(DrawingRenderingContextAccessorTest, getCanvasTest, TestSize.Level1)
 {
-#ifdef WRONG_SDK
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_NE(accessor_->getCanvas, nullptr);
     auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer_);
     ASSERT_NE(peerImpl, nullptr);
     peerImpl->SetCanvasPattern(mockPatternKeeper_);
+    peerImpl->SetRSCanvasCallback(mockPatternKeeper_);
     ASSERT_NE(holder->rsCallback, nullptr);
     std::shared_ptr<RSCanvas> rsCanvas = std::make_shared<RSCanvas>();
     holder->rsCallback(rsCanvas, DEFAULT_VALUE, DEFAULT_VALUE);
 
-    Ark_drawing_Canvas result = accessor_->getCanvas(peer_);
+    Opt_drawing_Canvas result = accessor_->getCanvas(peer_);
+    std::optional<Ark_drawing_Canvas> resultOpt =
+        Converter::OptConvert<Ark_drawing_Canvas>(result);
+    ASSERT_TRUE(resultOpt.has_value());
 
-    ASSERT_NE(result, nullptr);
-    auto canvas = result->GetCanvas();
-    EXPECT_EQ(canvas, rsCanvas);
-#endif
+    ASSERT_NE(resultOpt.value(), nullptr);
+    auto canvas = resultOpt.value();
+    EXPECT_EQ(canvas, reinterpret_cast<drawing_CanvasPeer*>(rsCanvas.get()));
 }
 } // namespace OHOS::Ace::NG

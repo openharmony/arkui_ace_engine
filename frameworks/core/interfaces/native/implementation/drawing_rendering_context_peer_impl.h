@@ -33,7 +33,7 @@ public:
     void SetInvalidate();
     SizeF GetSize();
     drawing_CanvasPeer* GetCanvas() const;
-    void SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern);
+    void SetRSCanvasCallback(const WeakPtr<AceType>& canvasPattern);
     CanvasRenderingContext2DPeer* GetOrCreateContext2D();
     void SetCanvasPattern(const RefPtr<AceType>& canvas);
     void SetUnit(CanvasUnit unit);

@@ -17,22 +17,32 @@
 
 #include "core/interfaces/native/utility/peer_utils.h"
 
-struct drawing_CanvasPeer {
 #ifndef ACE_UNITTEST
+namespace OHOS::Rosen::Drawing {
+class Canvas;
+}
+using RSCanvas = OHOS::Rosen::Drawing::Canvas;
+#else
+namespace OHOS::Ace::Testing {
+class TestingCanvas;
+}
+using RSCanvas = OHOS::Ace::Testing::TestingCanvas;
+#endif
+
+struct drawing_CanvasPeer {
 public:
-    explicit drawing_CanvasPeer(OHOS::Rosen::Drawing::Canvas* rsCanvas)
+    explicit drawing_CanvasPeer(RSCanvas* rsCanvas)
     {
         rsCanvas_ = rsCanvas;
     }
     ~drawing_CanvasPeer() = default;
-    OHOS::Rosen::Drawing::Canvas* GetCanvas() const
+    RSCanvas* GetCanvas() const
     {
         return rsCanvas_;
     }
     friend OHOS::Ace::NG::PeerUtils;
 private:
-    OHOS::Rosen::Drawing::Canvas* rsCanvas_;
-#endif
+    RSCanvas* rsCanvas_;
 };
 
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPLEMENTATION_DRAWING_CANVAS_PEER_IMPL_H
