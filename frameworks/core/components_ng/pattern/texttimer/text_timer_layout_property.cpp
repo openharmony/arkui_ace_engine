@@ -94,7 +94,7 @@ void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str(), filter);
     json->PutExtAttr("startTime", std::to_string(propStartTime_.value_or(DEFAULT_START_TIME)).c_str(), filter);
 
-    auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow(0.0) });
     // Determines if there are multiple textShadows
     auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
     json->PutExtAttr("textShadow", jsonShadow, filter);

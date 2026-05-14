@@ -1443,7 +1443,7 @@ RefPtr<TextShadowSpan> SpanString::ToTextShadowSpan(
     const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
 {
     CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
-    std::vector<Shadow> textShadow = spanItem->fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    std::vector<Shadow> textShadow = spanItem->fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow(0.0) });
     return AceType::MakeRefPtr<TextShadowSpan>(textShadow, start, end);
 }
 

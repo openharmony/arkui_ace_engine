@@ -925,7 +925,7 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
-        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResArr);
+        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseTextShadowRadiusWithResObj, radiusResArr);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(

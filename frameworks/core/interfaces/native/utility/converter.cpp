@@ -783,7 +783,7 @@ SelectionOptions Convert(const Ark_SelectionOptions& options)
 template<>
 Shadow Convert(const Ark_ShadowOptions& src)
 {
-    Shadow shadow;
+    Shadow shadow(ConverterState::defShadowBlurRadius);
 
     auto radius = Converter::OptConvert<float>(src.radius);
     if (radius) {

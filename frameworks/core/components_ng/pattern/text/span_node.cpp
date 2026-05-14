@@ -196,7 +196,7 @@ void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const Inspec
     json->Put("symbolEffect", GetSymbolEffectOptionsInJson(
         symbolStyle ? symbolStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions()) : SymbolEffectOptions())
         .c_str());
-    auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow(0.0) });
     auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
     json->PutExtAttr("textShadow", jsonShadow, filter);
     json->PutExtAttr("fontWeightConfigs", GetFontWeightConfigs().c_str(), filter);

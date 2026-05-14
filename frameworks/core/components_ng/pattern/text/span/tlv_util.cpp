@@ -181,7 +181,7 @@ void TLVUtil::WriteTextShadow(std::vector<uint8_t>& buff, Shadow& value)
 
 Shadow TLVUtil::ReadTextShadow(std::vector<uint8_t>& buff, int32_t& cursor)
 {
-    Shadow shadow;
+    Shadow shadow(0.0);
     if (ReadUint8(buff, cursor) != TLV_TEXTSHADOW_TAG) {
         return shadow;
     }

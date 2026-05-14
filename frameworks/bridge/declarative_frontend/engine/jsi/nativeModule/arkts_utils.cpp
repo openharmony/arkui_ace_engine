@@ -2570,6 +2570,18 @@ double ArkTSUtils::parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSV
     return radius;
 };
 
+double ArkTSUtils::parseTextShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+    RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo)
+{
+    double radius = 0.0;
+    ArkTSUtils::ParseJsDouble(vm, jsValue, radius, resObj);
+    if (LessNotEqual(radius, 0.0) &&
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        radius = 0.0;
+    }
+    return radius;
+};
+
 double ArkTSUtils::parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     RefPtr<ResourceObject> resObj;

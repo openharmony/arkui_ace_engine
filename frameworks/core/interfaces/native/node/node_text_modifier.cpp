@@ -1092,6 +1092,7 @@ void ResetTextTextShadow(ArkUINodeHandle node)
     Shadow shadow;
     shadow.SetOffsetX(0.0);
     shadow.SetOffsetY(0.0);
+    shadow.SetBlurRadius(0);
     TextModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
 
