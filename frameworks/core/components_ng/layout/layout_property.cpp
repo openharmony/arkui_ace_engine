@@ -1381,13 +1381,14 @@ void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value)
 
 TextDirection LayoutProperty::GetLayoutDirection() const
 {
+    if (layoutDirection_.has_value()) {
+        return layoutDirection_.value();
+    }
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
-    return layoutDirection_.has_value()
-        ? layoutDirection_.value()
-        : ((host && pipeline && pipeline->GetUseEnvManager())
+    return (host && pipeline && pipeline->isEnvManagerInUse)
             ? pipeline->ResolveDirectionFromEnv(host).value_or(TextDirection::AUTO)
-            : TextDirection::AUTO);
+            : TextDirection::AUTO;
 }
 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
