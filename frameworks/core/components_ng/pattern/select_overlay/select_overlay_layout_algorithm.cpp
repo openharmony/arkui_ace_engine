@@ -26,6 +26,8 @@
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_animation_utils.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -36,7 +38,8 @@ namespace {
 constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
 constexpr float ROUND_EPSILON = 0.5f;
 constexpr float CUSTOM_MENU_HEIGHT_CONSTRAINT_FACTOR = 0.8;
-}
+
+} // namespace
 
 void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -203,19 +206,10 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    auto shouldInActiveByHandle =
-        !info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible;
-    if ((!CheckInShowArea(*info_) || (!info_->isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
-        menu->SetActive(false);
+    if (ShouldSkipMenuLayout(layoutWrapper, menu)) {
         return;
     }
-    menu->SetActive(true);
-    UpdateMainWindowOffset(layoutWrapper);
-    OffsetF menuOffset = info_->isUsingMouse ? CalculateCustomMenuByMouseOffset(layoutWrapper)
-                                             : ComputeSelectMenuPosition(layoutWrapper);
-    auto menuGetGeometryNode = menu->GetGeometryNode();
-    CHECK_NULL_VOID(menuGetGeometryNode);
-    menuGetGeometryNode->SetMarginFrameOffset(menuOffset);
+    auto menuOffset = LayoutMenuAndGetOffset(layoutWrapper, menu);
     // custom menu need to layout all menu and submenu
     if (info_->menuInfo.menuBuilder) {
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -224,11 +218,41 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
         return;
     }
     menu->Layout();
+    LayoutMenuExtensionPart(layoutWrapper, menu, menuOffset, mode);
+}
+
+bool SelectOverlayLayoutAlgorithm::ShouldSkipMenuLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& menu)
+{
+    auto shouldInActiveByHandle =
+        !info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible;
+    if ((!CheckInShowArea(*info_) || (!info_->isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
+        menu->SetActive(false);
+        return true;
+    }
+    menu->SetActive(true);
+    return false;
+}
+
+OffsetF SelectOverlayLayoutAlgorithm::LayoutMenuAndGetOffset(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& menu)
+{
+    UpdateMainWindowOffset(layoutWrapper);
+    OffsetF menuOffset = info_->isUsingMouse ? CalculateCustomMenuByMouseOffset(layoutWrapper)
+                                             : ComputeSelectMenuPosition(layoutWrapper);
+    auto menuGeometryNode = menu->GetGeometryNode();
+    CHECK_NULL_RETURN(menuGeometryNode, OffsetF());
+    menuGeometryNode->SetMarginFrameOffset(menuOffset);
+    return menuOffset;
+}
+
+RefPtr<LayoutWrapper> SelectOverlayLayoutAlgorithm::LayoutMoreButton(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& menu, const OffsetF& menuOffset, SelectOverlayMode mode)
+{
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(button);
+    CHECK_NULL_RETURN(button, nullptr);
     if ((!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) && mode != SelectOverlayMode::MENU_ONLY) {
         hasExtensionMenu_ = false;
-        return;
+        return nullptr;
     }
     hasExtensionMenu_ = true;
     auto buttonSize = button->GetGeometryNode()->GetMarginFrameSize();
@@ -244,8 +268,38 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
     }
     button->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
     button->Layout();
+    return button;
+}
 
+void SelectOverlayLayoutAlgorithm::SyncSelectMenuPaintRectToExtensionMenu(
+    const RefPtr<LayoutWrapper>& menu, LayoutWrapper* layoutWrapper)
+{
+    auto menuHost = menu->GetHostNode();
+    CHECK_NULL_VOID(menuHost);
+    auto extensionMenu = layoutWrapper->GetOrCreateChildByIndex(2);
+    CHECK_NULL_VOID(extensionMenu);
+    auto extensionMenuHost = extensionMenu->GetHostNode();
+    CHECK_NULL_VOID(extensionMenuHost);
+    auto extensionMenuPattern = extensionMenuHost->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(extensionMenuPattern);
+    auto renderContext = menuHost->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY,
+        "MenuPattern::LayoutChild,menuHost: %{public}i, GetPaintRectWithoutTransform: %{public}s",
+        menuHost->GetId(), renderContext->GetPaintRectWithoutTransform().ToString().c_str());
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    if (GreatNotEqual(rect.Width(), 0.0) && GreatNotEqual(rect.Height(), 0.0)) {
+        extensionMenuPattern->SetSelectMenuPaintRect(rect);
+    }
+}
+
+void SelectOverlayLayoutAlgorithm::LayoutMenuExtensionPart(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& menu, const OffsetF& menuOffset, SelectOverlayMode mode)
+{
+    auto button = LayoutMoreButton(layoutWrapper, menu, menuOffset, mode);
+    CHECK_NULL_VOID(button);
     LayoutExtensionMenu(layoutWrapper, button);
+    SyncSelectMenuPaintRectToExtensionMenu(menu, layoutWrapper);
 }
 
 void SelectOverlayLayoutAlgorithm::LayoutExtensionMenu(
@@ -461,7 +515,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     defaultMenuStartOffset_ = menuPosition;
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     // back and more button layout is on the left side of the selectmenu when reverse layout.
-    if (isExtension && !isReverse) {
+    if (isExtension && !isReverse && !UseNewAnimation(host)) { // In new animation, back button is invisible.
         OffsetF position = defaultMenuEndOffset_ - OffsetF(width, 0);
         TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "ComputeSelectMenuPosition isExtension menuPosition : %{public}s",
             position.ToString().c_str());

@@ -1826,7 +1826,8 @@ void MenuPattern::ShowMenuAppearAnimation()
     CHECK_NULL_VOID(host);
     if (isMenuShow_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         previewMode_ == MenuPreviewMode::NONE) {
-        if (IsUseDistortionAnimation() || IsUseEdgeLightAnimation()) {
+        if (IsUseDistortionAnimation() || IsUseEdgeLightAnimation() ||
+            GetIsExtensionMenuEnableNewAnimation()) {
             TAG_LOGD(AceLogTag::ACE_MENU, "Show menu with material animation.");
             ShowMenuAppearMaterialAnimation();
             isExtensionMenuShow_ = false;
@@ -1885,6 +1886,13 @@ void MenuPattern::ShowMenuAppearMaterialAnimation()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto menuPosition = renderContext->GetPaintRectWithoutTransform().GetOffset();
+    if (IsSelectOverlayExtensionMenu() && !isExtensionMenuShow_) {
+        menuPosition = GetEndOffset();
+    }
+    if (GetIsExtensionMenuEnableNewAnimation()) {
+        PlayExtensionMenuDistortAnimation(menuPosition);
+        return;
+    }
     if (IsUseDistortionAnimation()) {
         PlayDistortAnimation(menuPosition);
     } else {
@@ -2322,6 +2330,51 @@ void MenuPattern::PlayLightAnimation()
             renderContext->UpdateEdgeLightParam(param2);
         },
         option.GetOnFinishEvent(), nullptr, host->GetContextRefPtr());
+}
+
+
+OffsetF MenuPattern::GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition)
+{
+    auto finalPlacement = Placement::NONE;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, menuPosition);
+    auto selectMenuPaintRect = GetSelectMenuPaintRect();
+    auto extensionMenuGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(extensionMenuGeometryNode, menuPosition);
+    auto extensionMenuSize = extensionMenuGeometryNode->GetMarginFrameSize();
+    auto extensionMenuRect = RectF(menuPosition, extensionMenuSize);
+    auto extensionTop = extensionMenuRect.Top();
+    auto extensionBottom = extensionMenuRect.Bottom();
+    auto selectTop = selectMenuPaintRect.Top();
+    auto selectBottom = selectMenuPaintRect.Bottom();
+    if (LessNotEqual(extensionTop, selectTop) && LessOrEqual(extensionBottom, selectBottom)) {
+        finalPlacement = Placement::TOP;
+    } else if (GreatOrEqual(extensionTop, selectTop)) {
+        finalPlacement = Placement::BOTTOM;
+    }
+
+    OffsetF adjustedMenuPosition = menuPosition;
+    adjustedMenuPosition.SetX(selectMenuPaintRect.Left() +
+        (selectMenuPaintRect.Width() - extensionMenuSize.Width()) / 2.0f);
+    if (finalPlacement == Placement::BOTTOM) {
+        adjustedMenuPosition.SetY(selectTop);
+    } else if (finalPlacement == Placement::TOP) {
+        adjustedMenuPosition.SetY(selectBottom - extensionMenuSize.Height());
+    }
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuPattern::PlayDistortAnimation, finalPlacement: %{public}i, "
+        "selectMenuPaintRect: %{public}s, extensionMenuRect: %{public}s, adjustedMenuPosition: %{public}s",
+        finalPlacement, selectMenuPaintRect.ToString().c_str(),
+        extensionMenuRect.ToString().c_str(), adjustedMenuPosition.ToString().c_str());
+    return adjustedMenuPosition;
+}
+
+void MenuPattern::PlayExtensionMenuDistortAnimation(const OffsetF& menuPosition)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (beforeExtensionMenuDistortAnimationCallback_) {
+        beforeExtensionMenuDistortAnimationCallback_(host, menuPosition);
+    }
 }
 
 RefPtr<FrameNode> MenuPattern::GetTitleContentNode(const RefPtr<FrameNode>& subMenuNode) const

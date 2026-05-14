@@ -798,6 +798,35 @@ public:
         isExtensionInnerMenu_ = isExtensionInnerMenu;
     }
 
+    void SetIsExtensionMenuEnableNewAnimation(bool flag)
+    {
+        isExtensionMenuEnableNewAnimation_ = flag;
+    }
+
+    bool GetIsExtensionMenuEnableNewAnimation()
+    {
+        return isExtensionMenuEnableNewAnimation_;
+    }
+
+    void SetSelectMenuPaintRect(const RectF& rect)
+    {
+        selectMenuPaintRect_ = rect;
+    }
+
+    RectF GetSelectMenuPaintRect() const
+    {
+        return selectMenuPaintRect_;
+    }
+
+    using BeforeExtensionMenuDistortAnimationCallback =
+        std::function<void(const RefPtr<FrameNode>&, const OffsetF&)>;
+
+    void SetBeforeExtensionMenuDistortAnimationCallback(BeforeExtensionMenuDistortAnimationCallback&& callback)
+    {
+        beforeExtensionMenuDistortAnimationCallback_ = std::move(callback);
+    }
+
+    OffsetF GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition);
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -894,7 +923,7 @@ private:
     void OnAttachToMainTree() override;
     void BuildDivider();
     RefPtr<FrameNode> GetFirstNodeWithTagInParent(const RefPtr<UINode>& node, const std::string& tag);
-
+    void PlayExtensionMenuDistortAnimation(const OffsetF& menuPosition);
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
@@ -960,9 +989,12 @@ private:
     OffsetF subMenuOriginOffset_ = OffsetF();
     std::optional<DisplayMode> scrollBar_;
     bool isColorModeFollowTarget_ = true;
-
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;
+
+    bool isExtensionMenuEnableNewAnimation_ = false;
+    RectF selectMenuPaintRect_;
+    BeforeExtensionMenuDistortAnimationCallback beforeExtensionMenuDistortAnimationCallback_;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
 

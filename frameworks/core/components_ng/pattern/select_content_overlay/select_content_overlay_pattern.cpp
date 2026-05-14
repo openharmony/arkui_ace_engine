@@ -23,7 +23,8 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnimation, bool showSubMenu)
+void SelectContentOverlayPattern::UpdateMenuIsShow(
+    bool menuIsShow, bool noAnimation, bool showSubMenu, bool useNewAnimation)
 {
     if (info_->menuInfo.menuIsShow == menuIsShow) {
         return;
@@ -36,7 +37,7 @@ void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnima
         DeleteHotAreas();
     }
     info_->menuInfo.menuIsShow = menuIsShow;
-    if (info_->menuInfo.menuIsShow && info_->menuInfo.isShowAIMenuOptionChanged) {
+    if ((info_->menuInfo.menuIsShow && info_->menuInfo.isShowAIMenuOptionChanged) || useNewAnimation) {
         selectOverlayNode->UpdateToolBar(true, noAnimation);
     } else {
         selectOverlayNode->UpdateToolBar(false, noAnimation);

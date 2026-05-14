@@ -919,14 +919,14 @@ void SelectContentOverlayManager::Close(int32_t id, bool animation, CloseReason 
     CloseInternal(id, animation, reason);
 }
 
-void SelectContentOverlayManager::ShowOptionMenu()
+void SelectContentOverlayManager::ShowOptionMenu(bool useNewAnimation)
 {
     auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     if (HandleMenuVisibilityChanged(true)) {
         return;
     }
-    pattern->UpdateMenuIsShow(true);
+    pattern->UpdateMenuIsShow(true, false, false, useNewAnimation);
 }
 
 void SelectContentOverlayManager::HideOptionMenu(bool noAnimation, bool showSubMenu)
