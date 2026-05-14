@@ -30,8 +30,8 @@
 #include <string>
 #include <utility>
 
-#include "base/log/event_report.h"
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
+#include "base/log/event_report.h"
 #include "base/geometry/offset.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -40,6 +40,7 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
+#include "base/view_data/ace_auto_fill_error.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"

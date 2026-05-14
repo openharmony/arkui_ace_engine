@@ -152,6 +152,9 @@ public:
         const std::function<void()>& onUIExtNodeBindingCompleted = nullptr,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
 
+    HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder,
+        const std::optional<std::string>& msdpType = std::nullopt) override;
+
     ResourceConfiguration GetResourceConfiguration() const override
     {
         return ResourceConfiguration();

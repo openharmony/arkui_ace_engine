@@ -31,8 +31,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "base/view_data/ace_auto_fill_error.h"
-#include "base/view_data/hint_to_type_wrap.h"
+#include "base/view_data/ace_auto_fill_type.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
 #include "core/common/display_info.h"
@@ -62,6 +61,7 @@ class FrameNode;
 struct SafeAreaInsets;
 } // namespace NG
 
+struct HintToTypeWrap;
 struct MouseEvent;
 struct CrownEvent;
 
@@ -116,11 +116,7 @@ public:
     }
 
     virtual HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder,
-        const std::optional<std::string>& msdpType = std::nullopt)
-    {
-        HintToTypeWrap hintToTypeWrap;
-        return hintToTypeWrap;
-    }
+        const std::optional<std::string>& msdpType = std::nullopt);
 
     // Get the instance id of this container
     virtual int32_t GetInstanceId() const = 0;
@@ -575,10 +571,7 @@ public:
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
         const std::function<void()>& onUIExtNodeBindingCompleted = nullptr,
-        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST)
-    {
-        return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
-    }
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
 
     virtual bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
     {

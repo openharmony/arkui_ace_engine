@@ -20,6 +20,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/property/property.h"
 #include "core/components/common/properties/text_enums.h"

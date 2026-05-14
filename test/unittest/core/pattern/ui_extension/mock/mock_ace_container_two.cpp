@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/view_data/ace_auto_fill_error.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::Platform {
