@@ -1232,7 +1232,7 @@ const ArkUI_AttributeItem* GetKey(ArkUI_NodeHandle node)
 
 int32_t SetInspectorLabel(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!item->string) {
+    if (item == nullptr || !item->string) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -20271,8 +20271,6 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetBorderRadiusType,
         SetAccessibilityNextFocusId,
         SetAccessibilityDefaultFocus,
-        nullptr,
-        nullptr,
         SetInspectorLabel,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
@@ -20412,8 +20410,6 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetDashGap,
         GetLayoutGravity,
         GetBorderRadiusType,
-        nullptr,
-        nullptr,
         nullptr,
         nullptr,
         GetInspectorLabel,
@@ -20558,8 +20554,6 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetBorderRadiusType,
         ResetAccessibilityNextFocusId,
         ResetAccessibilityDefaultFocus,
-        nullptr,
-        nullptr,
         ResetInspectorLabel,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {

@@ -2329,6 +2329,12 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     value[0].f32 = val01;
     nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_CHANGE_RATIO, &item);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_VISIBLE_AREA_CHANGE_RATIO), nullptr);
+    
+    auto labelCode = nodeAPI->setAttribute(rootNode, NODE_INSPECTOR_LABEL, nullptr);
+    EXPECT_EQ(labelCode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    item.string = "test";
+    labelCode = nodeAPI->setAttribute(rootNode, NODE_INSPECTOR_LABEL, &item);
+    EXPECT_EQ(labelCode, ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WIDTH), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_HEIGHT), ARKUI_ERROR_CODE_NO_ERROR);
