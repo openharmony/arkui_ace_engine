@@ -330,7 +330,7 @@ export class CommonMethodModifier implements CommonMethod {
     public _onAreaChange_1_1value?: AreaChangeOptions | undefined
     public _toolbar_0_0value?: CustomBuilder | undefined
     public _onGestureCollectIntercept_0_0value?: GestureCollectInterceptCallback
-    public _shouldRecognizerParallelWith_0_0value?: ShouldRecognizerParallelWithCallback
+    public _shouldRecognizerParallelWith_0_0value?: ShouldRecognizerParallelWithCallback | undefined
     public _inspectorLabel_0_0value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
@@ -4035,7 +4035,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[216] != 0) {
             switch (flagArray[216]) {
                 case 1: {
-                    peer.setShouldRecognizerParallelWithAttribute((this._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback));
+                    peer.setShouldRecognizerParallelWithAttribute((this._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback | undefined));
                     flagArray[216] = 2;
                     break;
                 }
@@ -4045,6 +4045,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[216] = 0;
+                    peer.setShouldRecognizerParallelWithAttribute((undefined as ShouldRecognizerParallelWithCallback | undefined));
                 }
             }
         }
@@ -6714,10 +6715,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[216]) {
                 case 1:
                 case 3: {
-                    this.shouldRecognizerParallelWith((modifier._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback));
+                    this.shouldRecognizerParallelWith((modifier._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback | undefined));
                     break;
                 }
                 default: {
+                    this.shouldRecognizerParallelWith((undefined as ShouldRecognizerParallelWithCallback | undefined));
                 }
             }
         }
@@ -8970,7 +8972,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
+    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback | undefined): this {
         if (((this._flagArray[216]) == (0)) || (true)) {
             this._flagArray[216] = 1
             this._shouldRecognizerParallelWith_0_0value = value
