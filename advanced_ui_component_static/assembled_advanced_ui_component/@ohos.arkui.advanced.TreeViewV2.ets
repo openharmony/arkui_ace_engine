@@ -86,7 +86,7 @@ const ARROW_DOWN_WITHE: Resource = $r('sys.symbol.chevron_down');
 const ARROW_RIGHT: Resource = $r('sys.symbol.chevron_right');
 const ARROW_RIGHT_WITHE: Resource = $r('sys.symbol.chevron_right');
 
-enum Event {
+export enum Event {
   TOUCH_DOWN = 0,
   TOUCH_UP = 1,
   HOVER = 3,
@@ -97,25 +97,25 @@ enum Event {
   DRAG = 8,
 }
 
-enum MenuOperation {
+export enum MenuOperation {
   ADD_NODE = 0,
   REMOVE_NODE = 1,
   MODIFY_NODE = 2,
   COMMIT_NODE = 3,
 }
 
-enum PopUpType {
+export enum PopUpType {
   HINTS = 0,
   WARNINGS = 1,
 }
 
-enum InputError {
+export enum InputError {
   INVALID_ERROR = 0,
   LENGTH_ERROR = 1,
   NONE = 2,
 }
 
-enum Flag {
+export enum Flag {
   DOWN_FLAG = 0,
   UP_FLAG = 1,
   NONE = 2,
@@ -135,26 +135,26 @@ export enum InteractionStatus {
   FINISH_DRAG_INSERT,
 }
 
-enum CollapseImageType {
+export enum CollapseImageType {
   ARROW_DOWN = 0,
   ARROW_RIGHT,
   ARROW_DOWN_WHITE,
   ARROW_RIGHT_WHITE,
 }
 
-enum AccessibilityNodeType {
+export enum AccessibilityNodeType {
   TEXT = 0,
   PLACE = 1,
   LIFT = 2,
 }
 
-interface ChildNodeInfo {
+export interface ChildNodeInfo {
   isHasChildNode: boolean;
   childNum: int;
   allChildNum: int;
 }
 
-interface NodeItemView {
+export interface NodeItemView {
   imageNode?: ImageNode;
   inputText: InputText;
   mainTitleNode: MainTitleNode;
@@ -162,7 +162,7 @@ interface NodeItemView {
   fontColor?: ResourceColor;
 }
 
-interface Status {
+export interface Status {
   normal: ResourceColor;
   hover: ResourceColor;
   press: ResourceColor;
@@ -170,13 +170,13 @@ interface Status {
   highLight?: ResourceColor;
 }
 
-interface NodeBorder {
+export interface NodeBorder {
   borderWidth: Resource | number;
   borderColor: ResourceColor;
   borderRadius: Resource;
 }
 
-interface PopUpInfo {
+export interface PopUpInfo {
   popUpIsShow: boolean;
   popUpEnableArrow: boolean;
   popUpColor?: ResourceColor;
@@ -184,7 +184,7 @@ interface PopUpInfo {
   popUpTextColor?: ResourceColor;
 }
 
-interface BorderWidth {
+export interface BorderWidth {
   has: Resource | number;
   none: Resource | number;
 }
@@ -195,7 +195,7 @@ interface TextSetting {
   fontWeight: FontWeight;
 }
 
-interface NodeInfoView {
+export interface NodeInfoView {
   itemId?: number;
   itemIcon?: ResourceStr;
   itemTitle?: ResourceStr;
@@ -219,14 +219,14 @@ interface TreeViewPadding {
   right: Resource;
 }
 
-interface ItemPadding {
+export interface ItemPadding {
   left: LengthMetrics;
   right: LengthMetrics;
   top: LengthMetrics;
   bottom: LengthMetrics;
 }
 
-interface DragPopup {
+export interface DragPopup {
   floorConstraintSize: FloorConstraintSize;
   textConstraintSize: TextConstraintSize;
   padding: TreeViewPadding;
@@ -246,7 +246,7 @@ interface DragNodeParamV2 {
   data: NodeParamV2,
 }
 
-interface FlagLine {
+export interface FlagLine {
   flagLineHeight: string;
   flagLineColor: Resource;
   xOffset: string;
@@ -255,7 +255,7 @@ interface FlagLine {
   yBasePlateOffset: string;
 }
 
-interface SubTitleStyle {
+export interface SubTitleStyle {
   normalFontColor: ResourceColor;
   highLightFontColor: ResourceColor;
   fontSize: Resource;
@@ -378,7 +378,7 @@ let emptyNodeInfo: NodeParamV2 = {
   currentNodeId: Double.toInt(-1),
 }
 
-class TreeViewTheme {
+export class TreeViewTheme {
   private static instance: TreeViewTheme = new TreeViewTheme();
   public itemSelectedBgColor: ResourceColor = '#1A0A59F7';
   public primaryTitleFontColor: ResourceColor = $r('sys.color.ohos_id_color_primary');
@@ -1418,13 +1418,13 @@ export struct TreeViewV2 {
 
   build() {
     List() {
-      LazyForEach(this.listNodeDataSource, (itemInner: NodeInfo, index?: number) => {
+      LazyForEach(this.listNodeDataSource, (itemInner: NodeInfo) => {
         ListItem() {
           Row() {
             TreeViewInnerV2({
               item: itemInner,
               listNodeDataSource: this.listNodeDataSource,
-              index: this.listNodeDataSource.findIndex((itemInner.getNodeCurrentNodeId() as number)),
+              index: this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId().toDouble()),
               callBackClick: (): void => { this.clickInner(itemInner) },
             })
           }
@@ -2422,7 +2422,7 @@ export class TreeControllerV2 {
   }
 }
 
-class BasicDataSource implements IDataSource<NodeInfo> {
+export class BasicDataSource implements IDataSource<NodeInfo> {
   private listeners: DataChangeListener[] = []
 
   public totalCount(): int {
@@ -3309,9 +3309,9 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public clearTimeOutAboutDelayHighLightAndExpand(currentIndex: number): void {
-    let lastPassIdNum: number = (this.lastPassId ?? -1) as number;
-    if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(lastPassIdNum.toDouble())) {
-      let index: number = this.loadedNodeIdAndIndexMap.get(lastPassIdNum.toDouble()) ?? -1;
+    let lastPassIdNum: number = Int.toDouble(this.lastPassId ?? -1);
+    if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(lastPassIdNum)) {
+      let index: number = this.loadedNodeIdAndIndexMap.get(lastPassIdNum) ?? -1;
       this.listNode.forEach((value) => {
         if (value.getNodeCurrentNodeId() === this.lastPassId) {
           value.setCanShowFlagLine(false);
