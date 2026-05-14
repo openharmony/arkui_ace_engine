@@ -55,6 +55,7 @@
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/module_buffer_reader.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"

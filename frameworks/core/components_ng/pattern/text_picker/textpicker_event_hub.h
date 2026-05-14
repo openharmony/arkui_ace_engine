@@ -18,7 +18,6 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
-#include "ui/gestures/gesture_event.h"
 
 namespace OHOS::Ace {
 class GestureEvent;

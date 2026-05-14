@@ -39,7 +39,6 @@
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components/common/properties/motion_path_option.h"
-#include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"

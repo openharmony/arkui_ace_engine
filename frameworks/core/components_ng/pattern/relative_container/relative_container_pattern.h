@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RELATIVE_CONTAINER_RELATIVE_CONTAINER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RELATIVE_CONTAINER_RELATIVE_CONTAINER_PATTERN_H
 
-#include "base/log/dump_log.h"
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/pattern.h"

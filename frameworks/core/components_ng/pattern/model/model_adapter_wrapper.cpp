@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/draw_delegate.h"
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "frameworks/core/common/container.h"
