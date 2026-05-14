@@ -11006,7 +11006,8 @@ void JSViewAbstract::ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& s
     }
 }
 
-void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow)
+void JSViewAbstract::ParseShadowPropsUpdate(
+    const JSRef<JSObject>& jsObj, double defaultRadius, double& radius, Shadow& shadow)
 {
     if (jsObj->IsUndefined()) {
         return;
@@ -11014,8 +11015,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     RefPtr<ResourceObject> radiusResObj;
     ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = -1.0;
+        auto&& updateFunc = [defaultRadius](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
+            double radius = defaultRadius;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
             shadow.SetBlurRadius(radius);
         };
@@ -11023,8 +11024,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     }
 }
 
-bool JSViewAbstract::ParseShadowProps(
-    const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
+bool JSViewAbstract::ParseShadowPropsInner(
+    const JSRef<JSVal>& jsValue, Shadow& shadow, double defaultRadius, const bool configChangePerform, bool needResObj)
 {
     int32_t shadowStyle = 0;
     if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
@@ -11035,8 +11036,8 @@ bool JSViewAbstract::ParseShadowProps(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    double radius = -1.0;
-    ParseShadowPropsUpdate(jsObj, radius, shadow);
+    double radius = defaultRadius;
+    ParseShadowPropsUpdate(jsObj, defaultRadius, radius, shadow);
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(jsObj, shadow);
 
@@ -11072,6 +11073,18 @@ bool JSViewAbstract::ParseShadowProps(
     bool isFilled = jsObj->GetPropertyValue<bool>(static_cast<int32_t>(ArkUIIndex::FILL), false);
     shadow.SetIsFilled(isFilled);
     return true;
+}
+
+bool JSViewAbstract::ParseShadowProps(
+    const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
+{
+    return ParseShadowPropsInner(jsValue, shadow, -1.0, configChangePerform, needResObj);
+}
+
+bool JSViewAbstract::ParseTextShadowProps(
+    const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
+{
+    return ParseShadowPropsInner(jsValue, shadow, 0.0, configChangePerform, needResObj);
 }
 
 bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform)

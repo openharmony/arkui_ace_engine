@@ -236,7 +236,7 @@ void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vect
     }
     if (!shadowObject->IsArray()) {
         Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(shadowObject, shadow, false, needResObj)) {
+        if (!JSViewAbstract::ParseTextShadowProps(shadowObject, shadow, false, needResObj)) {
             return;
         }
         shadows.push_back(shadow);
@@ -247,7 +247,7 @@ void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vect
     for (size_t i = 0; i < shadowLength; ++i) {
         auto shadowJsVal = params->GetValueAt(i);
         Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow, false, needResObj)) {
+        if (!JSViewAbstract::ParseTextShadowProps(shadowJsVal, shadow, false, needResObj)) {
             continue;
         }
         shadows.push_back(shadow);

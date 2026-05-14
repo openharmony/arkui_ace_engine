@@ -1149,6 +1149,7 @@ namespace Converter {
     class ConverterState {
     public:
         inline static DimensionUnit defDimensionUnit = DimensionUnit::VP;
+        inline static double defShadowBlurRadius = -1.0;
     };
 
     class DefaultDimensionUnit {
@@ -1165,6 +1166,22 @@ namespace Converter {
 
     private:
         DimensionUnit save_;
+    };
+
+    class DefaultShadowBlurRadius {
+    public:
+        explicit DefaultShadowBlurRadius(double radius)
+        {
+            save_ = ConverterState::defShadowBlurRadius;
+            ConverterState::defShadowBlurRadius = radius;
+        }
+        ~DefaultShadowBlurRadius()
+        {
+            ConverterState::defShadowBlurRadius = save_;
+        }
+
+    private:
+        double save_;
     };
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
