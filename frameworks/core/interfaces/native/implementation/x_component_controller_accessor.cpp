@@ -20,7 +20,6 @@
 #include "arkoala_api_generated.h"
 
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 

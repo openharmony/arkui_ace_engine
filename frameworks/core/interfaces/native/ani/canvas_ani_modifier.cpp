@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"

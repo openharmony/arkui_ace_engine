@@ -22,7 +22,6 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #endif // XCOMPONENT_SUPPORTED
 
