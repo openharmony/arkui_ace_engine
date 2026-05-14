@@ -1185,8 +1185,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     obj->SetNativePointerFieldCount(vm, 1);
+    size_t nativeSize = infoPtr->GetSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
     return obj;
 }
 
@@ -1293,8 +1294,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     eventObj->SetNativePointerFieldCount(vm, 1);
+    size_t nativeSize = infoPtr->GetSize();
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO);
+        (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO, nativeSize);
     return eventObj;
 }
 
@@ -1428,8 +1430,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEv
         panda::BooleanRef::New(vm, infoPtr->GetScrollLock()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
+    size_t nativeSize = infoPtr->GetSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO, nativeSize);
     return obj;
 }
 
@@ -1570,8 +1573,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* 
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
         panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     eventObj->SetNativePointerFieldCount(vm, 1);
+    size_t nativeSize = infoPtr->GetSize();
     eventObj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
     return eventObj;
 }
 
@@ -1723,8 +1727,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* 
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
         panda::FunctionRef::New(vm, Framework::JsGetMouseHistoricalPoints));
     obj->SetNativePointerFieldCount(vm, 1);
+    size_t nativeSize = infoPtr->GetSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO, nativeSize);
     return obj;
 }
 
