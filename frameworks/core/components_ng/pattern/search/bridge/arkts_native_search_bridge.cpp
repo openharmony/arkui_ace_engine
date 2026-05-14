@@ -69,6 +69,9 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
+constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 constexpr int PARAM_ARR_LENGTH_3 = 3;
@@ -240,7 +243,8 @@ void SearchBridge::RegisterSearchAttributes(Local<panda::ObjectRef> object, Ecma
         "setSelectedDragPreviewStyle", "resetSelectedDragPreviewStyle", "setSearchSymbol", "setBorderRadius",
         "setBackgroundColor", "setCancelSymbolButton", "setDragPreviewOptions", "setBackBorder", "setJsCustomKeyboard",
         "setJsSearchMinFontSize", "setJsInputFilter", "setJsCancelButton", "setSearchDefaultIcon",
-        "setJsDefaultCancelButton" };
+        "setJsDefaultCancelButton",
+        "setStrokeJoinStyle", "resetStrokeJoinStyle", "setShaderStyle", "resetShaderStyle" };
 
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::JsCreate),
@@ -386,6 +390,10 @@ void SearchBridge::RegisterSearchAttributes(Local<panda::ObjectRef> object, Ecma
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetJsCancelButton),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchDefaultIcon),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetJsDefaultCancelButton),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetStrokeJoinStyle),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetStrokeJoinStyle),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetShaderStyle),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetShaderStyle),
     };
 
     auto search = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
@@ -3587,6 +3595,164 @@ ArkUINativeModuleValue SearchBridge::SetBackBorder(ArkUIRuntimeCallInfo* runtime
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getSearchModifier()->setBackBorder(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetStrokeJoinStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+ 
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
+    bool isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+    CHECK_EQUAL_RETURN(isJsView && argc < NUM_2, true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+ 
+    if (!(secondArg->IsUndefined()) && !(secondArg->IsNull()) && secondArg->IsNumber()) {
+        int32_t value = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchStrokeJoinStyle(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchStrokeJoinStyle(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SearchBridge::ResetStrokeJoinStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchStrokeJoinStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SetSearchShaderStyleSetLinear(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto angleArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    std::vector<RefPtr<ResourceObject>> vectorResObj;
+    std::vector<ArkUIInt32orFloat32> colors;
+    std::vector<ArkUIInt32orFloat32> values;
+    ArkTSUtils::ParseGradientAngle(vm, angleArg, values);
+    int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
+    ArkTSUtils::ParseJsInt32(vm, directionArg, direction);
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(direction) });
+ 
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
+    auto colorRawPtr = static_cast<void*>(&vectorResObj);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchLinearGradient(
+        nativeNode, values.data(), values.size(), colors.data(), colors.size(), colorRawPtr);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SetSearchShaderStyleSetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+ 
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+ 
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchColorShaderColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchColorShaderColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(colorResObj));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SearchBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto centerArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto radiusArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    if (centerArg->BooleaValue(vm) && (radiusArg->IsNumber() || radiusArg->BooleaValue(vm))) {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        std::vector<RefPtr<ResourceObject>> vectorResObj;
+        std::vector<ArkUIInt32orFloat32> colors;
+        std::vector<ArkUIInt32orFloat32> values;
+        ArkTSUtils::ParseGradientCenter(vm, centerArg, values, vectorResObj);
+        CalcDimension radius;
+        RefPtr<ResourceObject> radiusResObj;
+        auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius, radiusResObj, false);
+        if (radiusResObj) {
+            vectorResObj.push_back(radiusResObj);
+        } else {
+            vectorResObj.push_back(nullptr);
+        }
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(hasRadius) });
+        values.push_back({ .f32 = static_cast<ArkUI_Float32>(radius.Value()) });
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(radius.Unit()) });
+        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+        auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
+        auto colorRawPtr = static_cast<void*>(&vectorResObj);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchRadialGradient(
+            nativeNode, values.data(), values.size(), colors.data(), colors.size(), colorRawPtr);
+    } else if (colorsArg->BooleaValue(vm)) {
+        SetSearchShaderStyleSetLinear(runtimeCallInfo);
+    } else if (colorArg->BooleaValue(vm)) {
+        SetSearchShaderStyleSetColor(runtimeCallInfo);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchGradient(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SearchBridge::ResetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchGradient(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

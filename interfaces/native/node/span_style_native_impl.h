@@ -86,6 +86,8 @@ struct OH_ArkUI_ParagraphStyle {
     void* onDrawLeadingMargin = nullptr;
     void* onGetLeadingMargin = nullptr;
     ArkUI_TextDirection textDirection;
+    std::optional<OH_ArkUI_LinearGradientOptions> linearGradient = std::nullopt;
+    std::optional<OH_ArkUI_RadialGradientOptions> radialGradient = std::nullopt;
 };
 
 struct OH_ArkUI_LeadingMarginSpanDrawInfo {

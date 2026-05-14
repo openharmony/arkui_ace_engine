@@ -21,6 +21,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -188,49 +189,8 @@ void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(pattern);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph()) {
+    if (!pattern->GetExternalParagraph()) {
         RelayoutShaderStyle(textLayoutProperty);
-    }
-}
-
-void TextLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty)
-{
-    CHECK_NULL_VOID(paragraphManager_);
-    auto paragraphs = paragraphManager_->GetParagraphs();
-    if (spans_.empty()) {
-        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
-            auto paragraph = pIter->paragraph;
-            if (!paragraph) {
-                continue;
-            }
-            auto textStyle = textStyle_;
-            textStyle.SetForeGroundBrushBitMap();
-            paragraph->ReLayoutForeground(textStyle);
-        }
-        return;
-    }
-    if (!spans_.empty()) {
-        size_t itemIndex = -1;
-        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
-            ++itemIndex;
-            auto paragraph = pIter->paragraph;
-            if (!paragraph) {
-                continue;
-            }
-            if (itemIndex >= spans_.size()) {
-                return;
-            }
-            auto spans = spans_[itemIndex];
-            TextStyle textStyle;
-            if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
-                spans.front()->GetTextStyle()->GetGradient().has_value()) {
-                textStyle = spans.front()->GetTextStyle().value();
-            } else {
-                textStyle = textStyle_;
-            }
-            textStyle.SetForeGroundBrushBitMap();
-            paragraph->ReLayoutForeground(textStyle);
-        }
     }
 }
 

@@ -638,7 +638,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes003, TestSize.Level0)
         }));
     const OHOS::Ace::NG::ParagraphStyle expectedStyle;
     LeadingMargin leadingMarginOne;
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    mockParagraph->paraStyle_ = expectedStyle;
     paragraphInfo.paragraph = mockParagraph;
     paragraphInfo.paragraphStyle = expectedStyle;
     paragraphInfo.start = 0;
@@ -673,7 +673,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes004, TestSize.Level0)
             selectedRects.emplace_back(RectF(0, 0, 100, 20));
         }));
     LeadingMargin leadingMarginOne;
-    EXPECT_CALL(*mockParagraphOne, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
+    mockParagraphOne->paraStyle_ = paragraphStyle;
     paragraphInfoOne.paragraph = mockParagraphOne;
     paragraphInfoOne.paragraphStyle = paragraphStyle;
     paragraphInfoOne.start = 0;
@@ -1233,8 +1233,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
     ParagraphStyle testStyle = {};
-    EXPECT_CALL(*paragraph, GetParagraphStyle())
-        .WillRepeatedly(ReturnRef(testStyle));
+    paragraph->paraStyle_ = testStyle;
     /**
      * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
     */
@@ -1270,8 +1269,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
     ASSERT_NE(paragraph, nullptr);
     ParagraphStyle testStyle = {};
     testStyle.leadingMargin = LeadingMargin();
-    EXPECT_CALL(*paragraph, GetParagraphStyle())
-        .WillRepeatedly(ReturnRef(testStyle));
+    paragraph->paraStyle_ = testStyle;
     /**
      * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
     */
@@ -1308,8 +1306,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
     ASSERT_NE(paragraph, nullptr);
     ParagraphStyle testStyle = {};
     testStyle.leadingMargin = LeadingMargin();
-    EXPECT_CALL(*paragraph, GetParagraphStyle())
-        .WillRepeatedly(ReturnRef(testStyle));
+    paragraph->paraStyle_ = testStyle;
     /**
      * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
     */

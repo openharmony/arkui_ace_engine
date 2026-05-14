@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace {
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
@@ -135,6 +136,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableDeviceFontWeightCategory, EnableDeviceFontWeightCategory);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, StrokeJoinStyle, StrokeJoinStyle);
 
     if (isSymbol) {
         UpdateSymbolTextStyleWithTheme(symbolStyle, textStyle, textTheme);
@@ -165,6 +167,12 @@ void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLin
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, PunctuationOverflow, PunctuationOverflow);
+    if (textLineStyle && (textLineStyle)->GetGradient().has_value()) {
+        textStyle.SetGradient(GradientConvert::ToGradient((textLineStyle)->GetGradient()));
+    } else if (textTheme) {
+        textStyle.SetGradient(textTheme->GetTextStyle().GetGradient());
+    }
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ColorShaderStyle, ColorShaderStyle);
 }
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
@@ -190,7 +198,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
         UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
         UPDATE_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
-
+        UPDATE_TEXT_STYLE(fontStyle, StrokeJoinStyle, SetStrokeJoinStyle);
         UPDATE_TEXT_STYLE(fontStyle, TextColor, SetTextColor);
         UPDATE_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
         UPDATE_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
@@ -240,6 +248,10 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, OrphanCharOptimization, SetOrphanCharOptimization);
         UPDATE_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, SetCompressLeadingPunctuation);
         UPDATE_TEXT_STYLE(textLineStyle, PunctuationOverflow, SetPunctuationOverflow);
+        if ((textLineStyle)->GetGradient().has_value()) {
+            textStyle.SetGradient(GradientConvert::ToGradient((textLineStyle)->GetGradient()));
+        }
+        UPDATE_TEXT_STYLE(textLineStyle, ColorShaderStyle, SetColorShaderStyle);
     }
 }
 

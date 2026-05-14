@@ -4167,6 +4167,22 @@ RectHeightStyle Convert(const Ark_text_RectHeightStyle& src)
     return RectHeightStyle::TIGHT;
 }
 template<>
+StrokeJoinStyle Convert(const Ark_StrokeJoinStyle& src)
+{
+    switch (src) {
+        case Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_MITER_JOIN:
+            return StrokeJoinStyle::MITER_JOIN;
+        case Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_ROUND_JOIN:
+            return StrokeJoinStyle::ROUND_JOIN;
+        case Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_BEVEL_JOIN:
+            return StrokeJoinStyle::BEVEL_JOIN;
+        default:
+            LOGE("Unexpected enum value in Ark_StrokeJoinStyle: %{public}d", src);
+            break;
+    }
+    return StrokeJoinStyle::MITER_JOIN;
+}
+template<>
 void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
 {
     auto peer = src;

@@ -19,6 +19,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -38,6 +39,7 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
+constexpr float COLOR_COEFFICIENT = 100.0f;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 }
 Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info)
@@ -498,6 +500,107 @@ ArkUINativeModuleValue RichEditorBridge::ResetEnableDataDetector(ArkUIRuntimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
+void ParseRadialGradient(EcmaVM* vm, const NG::Gradient& gradient, Local<panda::ObjectRef>& options)
+{
+    CHECK_NULL_VOID(gradient.GetRadialGradient());
+    auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
+    auto radialCenterY = gradient.GetRadialGradient()->radialCenterY;
+    auto center = panda::ArrayRef::New(vm);
+    if (radialCenterX.has_value()) {
+        panda::ArrayRef::SetValueAt(vm, center, NUM_0,
+            panda::StringRef::NewFromUtf8(vm, radialCenterX.value().ToString().c_str()));
+    }
+    if (radialCenterY.has_value()) {
+        panda::ArrayRef::SetValueAt(vm, center, NUM_1,
+            panda::StringRef::NewFromUtf8(vm, radialCenterY.value().ToString().c_str()));
+    }
+    if (radialCenterX.has_value() || radialCenterY.has_value()) {
+        options->Set(vm, panda::StringRef::NewFromUtf8(vm, "center"), center);
+    }
+    auto radialVerticalSize = gradient.GetRadialGradient()->radialVerticalSize;
+    if (radialVerticalSize.has_value()) {
+        options->Set(vm, panda::StringRef::NewFromUtf8(vm, "radius"),
+            panda::StringRef::NewFromUtf8(vm, radialVerticalSize.value().ToString().c_str()));
+    }
+    auto gradientColors = gradient.GetColors();
+    if (!gradientColors.empty()) {
+        auto colors = panda::ArrayRef::New(vm);
+        auto size = static_cast<int32_t>(gradientColors.size());
+        for (int32_t index = 0; index < size; index++) {
+            auto color = gradientColors[index];
+            CHECK_NULL_CONTINUE(color.GetDimension().Unit() == DimensionUnit::PERCENT);
+            auto temp = panda::ArrayRef::New(vm);
+            panda::ArrayRef::SetValueAt(vm, temp, NUM_0,
+                panda::StringRef::NewFromUtf8(vm, color.GetColor().ToString().c_str()));
+            panda::ArrayRef::SetValueAt(vm, temp, NUM_1,
+                panda::NumberRef::New(vm, color.GetDimension().Value() / COLOR_COEFFICIENT));
+            panda::ArrayRef::SetValueAt(vm, colors, index, temp);
+        }
+        options->Set(vm, panda::StringRef::NewFromUtf8(vm, "colors"), colors);
+    }
+    options->Set(vm, panda::StringRef::NewFromUtf8(vm, "repeating"),
+             panda::BooleanRef::New(vm, gradient.GetRepeat()));
+}
+ 
+void ParseLinearGradient(EcmaVM* vm, const NG::Gradient& gradient, Local<panda::ObjectRef>& options)
+{
+    CHECK_NULL_VOID(gradient.GetLinearGradient());
+    auto angle = gradient.GetLinearGradient()->angle;
+    if (angle.has_value()) {
+        options->Set(vm, panda::StringRef::NewFromUtf8(vm, "angle"),
+            panda::NumberRef::New(vm, static_cast<float>(angle.value().ConvertToPx())));
+    }
+    auto direction = GradientConvert::ParseGradientDirection(gradient);
+    options->Set(vm, panda::StringRef::NewFromUtf8(vm, "direction"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(direction.value_or(NG::GradientDirection::NONE))));
+    auto gradientColors = gradient.GetColors();
+    if (!gradientColors.empty()) {
+        auto colors = panda::ArrayRef::New(vm);
+        auto size = static_cast<int32_t>(gradientColors.size());
+        for (int32_t index = 0; index < size; index++) {
+            auto color = gradientColors[index];
+            CHECK_NULL_CONTINUE(color.GetDimension().Unit() == DimensionUnit::PERCENT);
+            auto temp = panda::ArrayRef::New(vm);
+            panda::ArrayRef::SetValueAt(vm, temp, NUM_0,
+                panda::StringRef::NewFromUtf8(vm, color.GetColor().ToString().c_str()));
+            panda::ArrayRef::SetValueAt(vm, temp, NUM_1,
+                panda::NumberRef::New(vm, color.GetDimension().Value() / COLOR_COEFFICIENT));
+            panda::ArrayRef::SetValueAt(vm, colors, index, temp);
+        }
+        options->Set(vm, panda::StringRef::NewFromUtf8(vm, "colors"), colors);
+    }
+    options->Set(vm, panda::StringRef::NewFromUtf8(vm, "repeating"),
+             panda::BooleanRef::New(vm, gradient.GetRepeat()));
+}
+ 
+void ConvertJsTextShaderStyle(EcmaVM* vm, const std::optional<NG::Gradient>& gradientShaderStyle,
+    const std::optional<Color>& colorShaderStyle, Local<panda::ObjectRef>& obj)
+{
+    bool hasGradient = gradientShaderStyle.has_value();
+    bool hasColor = colorShaderStyle.has_value();
+    CHECK_EQUAL_VOID(hasGradient, hasColor);
+    if (hasGradient) {
+        auto gradient = gradientShaderStyle.value();
+        auto options = panda::ObjectRef::New(vm);
+        switch (gradient.GetType()) {
+            case NG::GradientType::RADIAL:
+                ParseRadialGradient(vm, gradient, options);
+                break;
+            case NG::GradientType::LINEAR:
+                ParseLinearGradient(vm, gradient, options);
+                break;
+            default:
+                // error
+                return;
+        }
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "options"), options);
+    }
+    if (hasColor) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "color"),
+            panda::StringRef::NewFromUtf8(vm, colorShaderStyle.value().ToString().c_str()));
+    }
+}
+
 Local<panda::ObjectRef> CreateParagraphStyle(EcmaVM *vm, const TextStyleResult& textStyleResult)
 {
     auto leadingMarginArray = panda::ArrayRef::New(vm);
@@ -525,6 +628,13 @@ Local<panda::ObjectRef> CreateParagraphStyle(EcmaVM *vm, const TextStyleResult& 
     if (textStyleResult.textDirection.has_value()) {
         returnObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "textDirection"),
             panda::NumberRef::New(vm, static_cast<int32_t>(textStyleResult.textDirection.value())));
+    }
+    auto gradient = GradientConvert::ToNGGradient(textStyleResult.GetGradient());
+    auto colorShaderStyle = textStyleResult.colorShaderStyle;
+    if (gradient.has_value() || colorShaderStyle.has_value()) {
+        auto shaderStyleObj = panda::ObjectRef::New(vm);
+        ConvertJsTextShaderStyle(vm, gradient, colorShaderStyle, shaderStyleObj);
+        returnObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "shaderStyle"), shaderStyleObj);
     }
     return returnObject;
 }
@@ -719,6 +829,9 @@ Local<panda::ObjectRef> CreateAbstractSpanResult(EcmaVM *vm, RichEditorAbstractS
         panda::NumberRef::New(vm, static_cast<double>(event.GetTextStyle().strokeWidth)));
     textStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "strokeColor"),
         panda::StringRef::NewFromUtf8(vm, event.GetTextStyle().strokeColor.c_str()));
+    auto strokeJoinStyle = event.GetTextStyle().strokeJoinStyle;
+    textStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "strokeJoinStyle"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(strokeJoinStyle.value_or(StrokeJoinStyle::MITER_JOIN))));
     auto offsetInSpan = panda::ArrayRef::New(vm);
     panda::ArrayRef::SetValueAt(vm, offsetInSpan, NUM_0, panda::NumberRef::New(vm, event.OffsetInSpan()));
     panda::ArrayRef::SetValueAt(vm, offsetInSpan, NUM_1,
@@ -826,6 +939,9 @@ void CreateTextStyleObj(
         panda::NumberRef::New(vm, static_cast<double>(spanResult.GetTextStyle().strokeWidth)));
     textStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "strokeColor"),
         panda::StringRef::NewFromUtf8(vm, spanResult.GetTextStyle().strokeColor.c_str()));
+    auto strokeJoinStyle = spanResult.GetTextStyle().strokeJoinStyle;
+    textStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "strokeJoinStyle"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(strokeJoinStyle.value_or(StrokeJoinStyle::MITER_JOIN))));
 }
 
 void SetTextChangeSpanResult(EcmaVM* vm, panda::Local<panda::ObjectRef>& resultObj,
@@ -887,6 +1003,9 @@ Local<panda::ObjectRef> CreateTextStyleResult(EcmaVM *vm, const TextStyleResult&
         panda::NumberRef::New(vm, static_cast<double>(textStyleResult.strokeWidth)));
     textStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "strokeColor"),
         panda::StringRef::NewFromUtf8(vm, textStyleResult.strokeColor.c_str()));
+    auto strokeJoinStyle = textStyleResult.strokeJoinStyle;
+    textStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "strokeJoinStyle"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(strokeJoinStyle.value_or(StrokeJoinStyle::MITER_JOIN))));
     return textStyleObj;
 }
 

@@ -641,6 +641,47 @@ void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonS
     }
 }
 
+void AssignArkValue(Ark_StrokeJoinStyle& dst, const OHOS::Ace::StrokeJoinStyle& src)
+{
+    switch (src) {
+        case OHOS::Ace::StrokeJoinStyle::MITER_JOIN: dst = Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_MITER_JOIN; break;
+        case OHOS::Ace::StrokeJoinStyle::ROUND_JOIN: dst = Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_ROUND_JOIN; break;
+        case OHOS::Ace::StrokeJoinStyle::BEVEL_JOIN: dst = Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_BEVEL_JOIN; break;
+        default:
+            LOGE("Unexpected enum value in StrokeJoinStyle: %{public}d", src);
+            dst = Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_MITER_JOIN;
+            break;
+    }
+}
+ 
+void AssignArkValue(Ark_GradientDirection& dst, const NG::GradientDirection& src)
+{
+    switch (src) {
+        case NG::GradientDirection::LEFT:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_LEFT; break;
+        case NG::GradientDirection::TOP:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_TOP; break;
+        case NG::GradientDirection::RIGHT:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_RIGHT; break;
+        case NG::GradientDirection::BOTTOM:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_BOTTOM; break;
+        case NG::GradientDirection::LEFT_TOP:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_LEFT_TOP; break;
+        case NG::GradientDirection::LEFT_BOTTOM:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_LEFT_BOTTOM; break;
+        case NG::GradientDirection::RIGHT_TOP:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_RIGHT_TOP; break;
+        case NG::GradientDirection::RIGHT_BOTTOM:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_RIGHT_BOTTOM; break;
+        case NG::GradientDirection::NONE:
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_NONE; break;
+        default:
+            LOGE("Unexpected enum value in GradientDirection: %{public}d", src);
+            dst = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_NONE;
+            break;
+    }
+}
+
 void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
 {
     switch (src) {

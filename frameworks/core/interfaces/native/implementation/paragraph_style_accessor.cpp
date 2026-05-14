@@ -23,12 +23,30 @@
 #include "paragraph_style_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
+void ProcessLinearGradient(const Opt_LinearGradientOptions& linearGradientOpt, Gradient& gradient);
 template<>
 LeadingMarginSize Convert(const Ark_Tuple_Dimension_Dimension& src)
 {
     return LeadingMarginSize(
         OptConvert<Dimension>(src.value0).value_or(Dimension()),
         OptConvert<Dimension>(src.value1).value_or(Dimension()));
+}
+void ParseShaderStyle(const Opt_ShaderStyleProxy& proxy, OHOS::Ace::SpanParagraphStyle& paragraphStyle)
+{
+    CHECK_NULL_VOID(proxy.tag != InteropTag::INTEROP_TAG_UNDEFINED);
+    auto shaderStyleProxy = proxy.value;
+    auto colorOpt = Converter::OptConvert<Color>(shaderStyleProxy.color);
+    auto linearGradientOpt = shaderStyleProxy.linearGradientOptions;
+    auto radialGradientOpt = shaderStyleProxy.radialGradientOptions;
+    paragraphStyle.colorShaderStyle = colorOpt;
+    if (linearGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        Gradient gradient;
+        Converter::ProcessLinearGradient(linearGradientOpt, gradient);
+        paragraphStyle.SetOptGradient(gradient);
+    } else if (radialGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        Gradient gradient = Converter::Convert<Gradient>(radialGradientOpt.value);
+        paragraphStyle.SetOptGradient(gradient);
+    }
 }
 template<>
 OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
@@ -68,6 +86,7 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
             };
         },
         []() {});
+    ParseShaderStyle(src.shaderStyle, ret);
     return ret;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -179,6 +198,60 @@ Opt_LeadingMarginSpan GetLeadingMarginSpanImpl(Ark_ParagraphStyle peer)
     auto result = Converter::ArkValue<Opt_LeadingMarginSpan>(style.drawableLeadingMargin);
     return result;
 }
+Opt_ShaderStyleProxy ProcessShaderStyle(const std::optional<NG::Gradient>& gradientOpt,
+    const std::optional<Color>& color)
+{
+    auto invalid = Converter::ArkValue<Opt_ShaderStyleProxy>();
+    CHECK_EQUAL_RETURN(gradientOpt.has_value(), color.has_value(), invalid);
+    Ark_ShaderStyleProxy proxy;
+    proxy.linearGradientOptions = Converter::ArkValue<Opt_LinearGradientOptions>(Ark_Empty(), Converter::FC);
+    proxy.radialGradientOptions = Converter::ArkValue<Opt_RadialGradientOptions>(Ark_Empty(), Converter::FC);
+    proxy.color = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
+    if (gradientOpt.has_value()) {
+        auto gradient = gradientOpt.value();
+        auto type = gradient.GetType();
+        if (type == OHOS::Ace::NG::GradientType::RADIAL) {
+            Opt_RadialGradientOptions options = {
+                .tag = InteropTag::INTEROP_TAG_OBJECT,
+                .value =  Converter::ArkValue<Ark_RadialGradientOptions>(gradient, Converter::FC)
+            };
+            proxy.radialGradientOptions = options;
+            Opt_ShaderStyleProxy shaderStyle;
+            shaderStyle.tag = InteropTag::INTEROP_TAG_OBJECT;
+            shaderStyle.value = proxy;
+            return shaderStyle;
+        }
+        if (type == OHOS::Ace::NG::GradientType::LINEAR) {
+            Opt_LinearGradientOptions options = {
+                .tag = InteropTag::INTEROP_TAG_OBJECT,
+                .value = Converter::ArkValue<Ark_LinearGradientOptions>(gradient, Converter::FC)
+            };
+            proxy.linearGradientOptions = options;
+            Opt_ShaderStyleProxy shaderStyle;
+            shaderStyle.tag = InteropTag::INTEROP_TAG_OBJECT;
+            shaderStyle.value = proxy;
+            return shaderStyle;
+        }
+    }
+    if (color.has_value()) {
+        proxy.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
+        Opt_ShaderStyleProxy shaderStyle;
+        shaderStyle.tag = InteropTag::INTEROP_TAG_OBJECT;
+        shaderStyle.value = proxy;
+        return shaderStyle;
+    }
+    return invalid;
+}
+Opt_ShaderStyleProxy GetShaderStyleImpl(Ark_ParagraphStyle peer)
+{
+    auto invalid = Converter::ArkValue<Opt_ShaderStyleProxy>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    auto style = peer->span->GetParagraphStyle();
+    auto gradientOpt = style.GetGradient();
+    auto color = style.colorShaderStyle;
+    return ProcessShaderStyle(gradientOpt, color);
+}
 } // ParagraphStyleAccessor
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
 {
@@ -196,6 +269,7 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
         ParagraphStyleAccessor::GetParagraphSpacingImpl,
         ParagraphStyleAccessor::GetTextDirectionImpl,
         ParagraphStyleAccessor::GetLeadingMarginSpanImpl,
+        ParagraphStyleAccessor::GetShaderStyleImpl,
     };
     return &ParagraphStyleAccessorImpl;
 }

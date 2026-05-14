@@ -5409,6 +5409,13 @@ let GestureShortcut;
 })(GestureShortcut || (GestureShortcut = {}));
 globalThis.GestureShortcut = GestureShortcut;
 
+let StrokeJoinStyle;
+(function (StrokeJoinStyle) {
+  StrokeJoinStyle [StrokeJoinStyle.MITER_JOIN = 0] = 'MITER_JOIN';
+  StrokeJoinStyle [StrokeJoinStyle.ROUND_JOIN = 1] = 'ROUND_JOIN';
+  StrokeJoinStyle [StrokeJoinStyle.BEVEL_JOIN = 1] = 'BEVEL_JOIN';
+})(StrokeJoinStyle || (StrokeJoinStyle = {}));
+
 let EdgeLightPosition;
 (function (EdgeLightPosition) {
   EdgeLightPosition[EdgeLightPosition.TOP_LEFT = 0] = 'TOP_LEFT';

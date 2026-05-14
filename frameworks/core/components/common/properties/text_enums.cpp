@@ -137,5 +137,16 @@ std::string ToString(const TextDirection& textDirection)
     auto iter = BinarySearchFindIndex(table, ArraySize(table), textDirection);
     return iter != -1 ? table[iter].value : "";
 }
+
+std::string ToString(const StrokeJoinStyle& strokeJoinStyle)
+{
+    static const LinearEnumMapNode<StrokeJoinStyle, std::string> table[] = {
+        { StrokeJoinStyle::MITER_JOIN, "MITER_JOIN" },
+        { StrokeJoinStyle::ROUND_JOIN, "ROUND_JOIN" },
+        { StrokeJoinStyle::BEVEL_JOIN, "BEVEL_JOIN" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), strokeJoinStyle);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace StringUtils
 } // namespace OHOS::Ace

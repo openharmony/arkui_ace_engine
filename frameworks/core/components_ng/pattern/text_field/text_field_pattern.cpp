@@ -9369,6 +9369,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
     json->PutExtAttr("autoCapitalizationMode", AutoCapTypeToString().c_str(), filter);
     json->PutExtAttr("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false", filter);
+    json->PutExtAttr("shaderStyle", GetShaderStyleInJson(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueForFontFeature(json, filter);
     ToJsonValueSelectOverlay(json, filter);
@@ -9531,10 +9532,39 @@ std::string TextFieldPattern::GetStrokeColor() const
     return theme->GetTextColor().ColorToString();
 }
 
+std::string TextFieldPattern::GetStrokeJoinStyle() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return StringUtils::ToString(layoutProperty->GetStrokeJoinStyle().value_or(StrokeJoinStyle::MITER_JOIN));
+}
+ 
+std::unique_ptr<JsonValue> TextFieldPattern::GetShaderStyleInJson() const
+{
+    auto resultJson = JsonUtil::Create(true);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, resultJson);
+    if (layoutProperty->HasGradientShaderStyle()) {
+        auto propGradient = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+        auto type = propGradient.GetType();
+        if (type == GradientType::LINEAR) {
+            return GradientJsonUtils::LinearGradientToJson(propGradient);
+        } else if (type == GradientType::RADIAL) {
+            return GradientJsonUtils::RadialGradientToJson(propGradient);
+        }
+    } else if (layoutProperty->HasColorShaderStyle()) {
+        resultJson->Put(
+            "color", layoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT).ColorToString().c_str());
+        return resultJson;
+    }
+    return resultJson;
+}
+
 void TextFieldPattern::ToJsonValueForStroke(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutExtAttr("strokeWidth", GetStrokeWidth().c_str(), filter);
     json->PutExtAttr("strokeColor", GetStrokeColor().c_str(), filter);
+    json->PutExtAttr("strokeJoinStyle", GetStrokeJoinStyle().c_str(), filter);
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)

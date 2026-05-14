@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
@@ -48,18 +48,16 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     // Create paragraph.
     pattern->SetAdaptFontSize(std::nullopt);
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
-    textFieldContentConstraint_ = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
-    auto contentConstraintWithoutResponseArea =
-        BuildLayoutConstraintWithoutResponseArea(textFieldContentConstraint_, layoutWrapper);
+    textFieldContentConstraint_ = CalculateContentMaxSizeWithCalculateConstraint(constraint, layoutWrapper);
+    auto contentConstraint = BuildLayoutConstraintWithoutResponseArea(textFieldContentConstraint_, layoutWrapper);
     if (IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, textFieldContentConstraint_)) {
-        if (!AddAdaptFontSizeAndAnimations(
-            textStyle, textFieldLayoutProperty, contentConstraintWithoutResponseArea, layoutWrapper)) {
+        if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty, contentConstraint, layoutWrapper)) {
             return std::nullopt;
         }
         pattern->SetAdaptFontSize(textStyle.GetFontSize());
     } else if (!isStyledPlacehodler) {
         // placeHodler属性字符串样式,不需要创建paragraph
-        CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
+        CreateParagraphEx(textStyle, textContent_, constraint, layoutWrapper);
     }
 
     autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
@@ -69,6 +67,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         // Used for empty text.
         preferredHeight_ = pattern->PreferredLineHeight(true, isStyledPlacehodler);
     }
+    std::optional<SizeF> contentSize;
 
     // Paragraph layout.
     if (isInlineStyle) {
@@ -76,16 +75,18 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
             textStyle.GetMaxFontScale(), textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
-        return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
+        contentSize = InlineMeasureContent(contentConstraint, layoutWrapper);
     } else if (showPlaceHolder_) {
         if (isStyledPlacehodler) {
-            return StyledPlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
+            return StyledPlaceHolderMeasureContent(contentConstraint, layoutWrapper);
         } else {
-            return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
+            return PlaceHolderMeasureContent(contentConstraint, layoutWrapper);
         }
     } else {
-        return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
+        contentSize = TextInputMeasureContent(contentConstraint, layoutWrapper, 0);
     }
+    RelayoutShaderStyle(textStyle);
+    return contentSize;
 }
 
 bool TextInputLayoutAlgorithm::IsFontSizeNonPositive(const TextStyle& textStyle) const

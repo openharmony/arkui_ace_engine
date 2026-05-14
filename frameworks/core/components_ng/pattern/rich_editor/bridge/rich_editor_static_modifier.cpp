@@ -89,6 +89,7 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstract
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(textStyle.textBackgroundStyle, ctx);
     dst.strokeWidth = ArkValue<Opt_Float64>(textStyle.strokeWidth);
     dst.strokeColor = ArkUnion<Opt_ResourceColor, Ark_String>(textStyle.strokeColor, ctx);
+    dst.strokeJoinStyle = Converter::ArkValue<Opt_StrokeJoinStyle>(textStyle.strokeJoinStyle);
 }
 
 void AssignArkValue(Ark_RichEditorUrlStyle& dst, const std::u16string& src, ConvContext *ctx)

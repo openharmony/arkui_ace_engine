@@ -124,6 +124,10 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetStrokeJoinStyle(StrokeJoinStyle style) = 0;
+    virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
+    virtual void SetColorShaderStyle(const Color& value) = 0;
+    virtual void ResetGradientShaderStyle() = 0;
     virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func);
     virtual void SetUserMargin() {};

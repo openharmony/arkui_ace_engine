@@ -57,6 +57,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_richeditor_binding.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
@@ -210,7 +211,8 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     SetJsTextBackgroundStyle(textStyleObj, textStyleResult);
     textStyleObj->SetProperty<double>("strokeWidth", textStyleResult.strokeWidth);
     textStyleObj->SetProperty<std::string>("strokeColor", textStyleResult.strokeColor);
-
+    textStyleObj->SetProperty<int32_t>("strokeJoinStyle",
+        static_cast<int32_t>(textStyleResult.strokeJoinStyle.value_or(StrokeJoinStyle::MITER_JOIN)));
     return textStyleObj;
 }
 
@@ -272,6 +274,13 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
     }
     if (textStyleResult.textDirection.has_value()) {
         paragraphStyleObj->SetProperty<int32_t>("textDirection", textStyleResult.textDirection.value());
+    }
+    auto gradient = GradientConvert::ToNGGradient(textStyleResult.GetGradient());
+    auto colorShaderStyle = textStyleResult.colorShaderStyle;
+    if (gradient.has_value() || colorShaderStyle.has_value()) {
+        auto shaderStyleObj = JSRef<JSObject>::New();
+        JSViewAbstract::ConvertJsTextShaderStyle(gradient, colorShaderStyle, shaderStyleObj);
+        paragraphStyleObj->SetPropertyObject("shaderStyle", shaderStyleObj);
     }
     return paragraphStyleObj;
 }
@@ -365,6 +374,13 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     }
     if (info.textDirection.has_value()) {
         obj->SetProperty<int32_t>("textDirection", info.textDirection.value());
+    }
+    auto gradient = GradientConvert::ToNGGradient(info.GetGradient());
+    auto colorShaderStyle = info.colorShaderStyle;
+    if (gradient.has_value() || colorShaderStyle.has_value()) {
+        auto shaderStyleObj = JSRef<JSObject>::New();
+        JSViewAbstract::ConvertJsTextShaderStyle(gradient, colorShaderStyle, shaderStyleObj);
+        obj->SetPropertyObject("shaderStyle", shaderStyleObj);
     }
     return obj;
 }
@@ -1317,6 +1333,29 @@ void JSRichEditorBaseControllerBinding::ParseTextDirection(const JSRef<JSObject>
     style.textDirection = TEXT_DIRECTIONS[index];
 }
 
+void ParseShaderStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
+{
+    auto shaderStyleObj = styleObject->GetProperty("shaderStyle");
+    std::optional<NG::Gradient> gradientShaderStyle;
+    std::optional<Color> colorShaderStyle;
+    RefPtr<ResourceObject> resObj;
+    auto jsObject = JSRef<JSObject>::Cast(shaderStyleObj);
+    JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
+    style.colorShaderStyle = colorShaderStyle;
+    if (gradientShaderStyle.has_value()) {
+        style.SetOptGradient(GradientConvert::ToGradient(gradientShaderStyle.value()));
+    }
+    if (style.colorShaderStyle.has_value()) {
+        auto colorObj = jsObject->GetProperty("color");
+        if (colorObj->IsObject()) {
+            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
+            JSViewAbstract::CompleteResourceObject(jsObj);
+            resObj = JSViewAbstract::GetResourceObject(jsObj);
+        }
+    }
+    NG::StyleManager::AddColorShaderStyleResource(style, resObj);
+}
+
 bool JSRichEditorBaseControllerBinding::ParseParagraphStyle(
     const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
@@ -1371,6 +1410,7 @@ bool JSRichEditorBaseControllerBinding::ParseParagraphStyle(
         JSContainerBase::ParseJsDimensionVp(lm, width);
         style.leadingMargin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
     }
+    ParseShaderStyle(styleObject, style);
     return true;
 }
 
@@ -1686,6 +1726,7 @@ void JSRichEditorBaseControllerBinding::ParseJsTextStyle(
     ParseTextBackgroundStyle(styleObject, style, updateSpanStyle);
     ParseJsStrokeWidthTextStyle(styleObject, style, updateSpanStyle);
     ParseJsStrokeColorTextStyle(styleObject, style, updateSpanStyle);
+    ParseJsStrokeJoinStyleTextStyle(styleObject, style, updateSpanStyle);
 }
 
 void JSRichEditorBaseControllerBinding::ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject,
@@ -1891,6 +1932,23 @@ void JSRichEditorBaseControllerBinding::ParseJsStrokeColorTextStyle(const JSRef<
     NG::StyleManager::AddStrokeColorResource(updateSpanStyle, colorResObj);
 }
 
+void JSRichEditorBaseControllerBinding::ParseJsStrokeJoinStyleTextStyle(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    if (styleObject->HasProperty("strokeJoinStyle")) {
+        auto obj = styleObject->GetProperty("strokeJoinStyle");
+        StrokeJoinStyle strokeJoinStyle = StrokeJoinStyle::MITER_JOIN;
+        if (!obj->IsNull() && obj->IsNumber()) {
+            auto value = obj->ToNumber<int32_t>();
+            if (value >= 0 && value < static_cast<int32_t>(STROKE_JOIN_STYLES.size())) {
+                strokeJoinStyle = static_cast<StrokeJoinStyle>(value);
+            }
+        }
+        updateSpanStyle.updateStrokeJoinStyle = strokeJoinStyle;
+        style.SetStrokeJoinStyle(strokeJoinStyle);
+    }
+}
+
 void JSRichEditorBaseControllerBinding::GetTypingStyle(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -1899,6 +1957,20 @@ void JSRichEditorBaseControllerBinding::GetTypingStyle(const JSCallbackInfo& inf
     auto typingStyle = controller->GetTypingStyle();
     auto style = CreateTypingStyleResult(typingStyle.value_or(UpdateSpanStyle()));
     info.SetReturnValue(JSRef<JSVal>::Cast(style));
+}
+
+void CreateStrokeTypingStyleResult(const struct UpdateSpanStyle& typingStyle, JSRef<JSObject>& tyingStyleObj)
+{
+    if (typingStyle.updateStrokeWidth.has_value()) {
+        tyingStyleObj->SetProperty<double>("strokeWidth", typingStyle.updateStrokeWidth.value().ConvertToVp());
+    }
+    if (typingStyle.updateStrokeColor.has_value()) {
+        tyingStyleObj->SetProperty<std::string>("strokeColor", typingStyle.updateStrokeColor.value().ColorToString());
+    }
+    if (typingStyle.updateStrokeJoinStyle.has_value()) {
+        tyingStyleObj->SetProperty<int32_t>("strokeJoinStyle",
+            static_cast<int32_t>(typingStyle.updateStrokeJoinStyle.value()));
+    }
 }
 
 JSRef<JSObject> JSRichEditorBaseControllerBinding::CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle)
@@ -1945,13 +2017,7 @@ JSRef<JSObject> JSRichEditorBaseControllerBinding::CreateTypingStyleResult(const
         tyingStyleObj->SetPropertyObject("textBackgroundStyle",
             JSRichEditor::CreateJsTextBackgroundStyle(typingStyle.updateTextBackgroundStyle.value()));
     }
-    if (typingStyle.updateStrokeWidth.has_value()) {
-        tyingStyleObj->SetProperty<double>("strokeWidth", typingStyle.updateStrokeWidth.value().ConvertToVp());
-    }
-    if (typingStyle.updateStrokeColor.has_value()) {
-        tyingStyleObj->SetProperty<std::string>("strokeColor", typingStyle.updateStrokeColor.value().ColorToString());
-    }
-
+    CreateStrokeTypingStyleResult(typingStyle, tyingStyleObj);
     return tyingStyleObj;
 }
 

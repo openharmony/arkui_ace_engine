@@ -43,6 +43,7 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
@@ -1105,6 +1106,7 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::T
     fontStyle.UpdateAdaptMinFontSize(textStyle->GetAdaptMinFontSize());
     fontStyle.UpdateAdaptMaxFontSize(textStyle->GetAdaptMaxFontSize());
     fontStyle.UpdateLetterSpacing(textStyle->GetLetterSpacing());
+    fontStyle.UpdateStrokeJoinStyle(textStyle->GetStrokeJoinStyle());
     symbolStyle.UpdateSymbolColorList(textStyle->GetSymbolColorList());
     symbolStyle.UpdateSymbolType(textStyle->GetSymbolType());
     textLineStyle.UpdateLineHeight(textStyle->GetLineHeight());
@@ -1121,6 +1123,8 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::T
     textLineStyle.UpdateHalfLeading(textStyle->GetHalfLeading());
     textLineStyle.UpdateAllowScale(textStyle->IsAllowScale());
     textLineStyle.UpdateParagraphSpacing(textStyle->GetParagraphSpacing());
+    textLineStyle.SetOptGradient(GradientConvert::ToNGGradient(textStyle->GetGradient()));
+    textLineStyle.UpdateColorShaderStyle(textStyle->GetColorShaderStyle());
 }
 
 RefPtr<TaskExecutor> TextPattern::GetTaskExecutorItem()
@@ -3844,6 +3848,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.fontColor = node->GetTextColorValue(Color::BLACK).ColorToString();
     textStyle.fontStyle = static_cast<int32_t>(node->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     textStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
+    textStyle.strokeJoinStyle = node->GetStrokeJoinStyle();
     std::string fontFamilyValue;
     const std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
     auto fontFamily = node->GetFontFamilyValue(defaultFontFamily);
@@ -3884,6 +3889,8 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.textBackgroundStyle = node->GetTextBackgroundStyle();
     textStyle.paragraphSpacing = node->GetParagraphSpacing();
     textStyle.textDirection = static_cast<int32_t>(node->GetTextDirectionValue(TextDirection::INHERIT));
+    textStyle.SetOptGradient(GradientConvert::ToGradient(node->GetGradient()));
+    textStyle.colorShaderStyle = node->GetColorShaderStyle();
     if (auto textVerticalAlign = node->GetTextVerticalAlign(); textVerticalAlign.has_value()) {
         textStyle.textVerticalAlign = static_cast<int32_t>(textVerticalAlign.value());
     }
@@ -5344,6 +5351,8 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
                 json->Put("fontWeight", fontStyle && fontStyle->HasFontWeight()
                                             ? GetFontWeightInJson(fontStyle->GetFontWeightValue()).c_str()
                                             : GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
+                json->Put("strokeJoinStyle", fontStyle && fontStyle->HasStrokeJoinStyle() ?
+                    StringUtils::ToString(fontStyle->GetStrokeJoinStyleValue()).c_str(): "Na");
                 break;
             }
         }

@@ -1827,7 +1827,7 @@ HWTEST_F(TextFieldControllerTest, TextFiledControllerScrollToVisible, TestSize.L
     std::vector<RectF> expectedRects = { RectF(6, 6, 10, 5) };
     EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(expectedRects));
     const OHOS::Ace::NG::ParagraphStyle expectedStyle;
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    mockParagraph->paraStyle_ = expectedStyle;
     controller->ScrollToVisible({ .start = 5, .end = 6 });
     EXPECT_EQ(textFiled->textRect_.GetOffset().GetX(), -6.0f);
 }

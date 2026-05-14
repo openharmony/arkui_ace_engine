@@ -1042,6 +1042,8 @@ public:
     // xts
     std::string GetStrokeWidth() const;
     std::string GetStrokeColor() const;
+    std::string GetStrokeJoinStyle() const;
+    std::unique_ptr<JsonValue> GetShaderStyleInJson() const;
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;

@@ -45,7 +45,6 @@ public:
     MOCK_METHOD0(GetDumpInfo, std::string());
     MOCK_METHOD0(GetParagraphText, std::u16string());
     MOCK_METHOD0(GetEllipsisTextRange, std::pair<size_t, size_t>());
-    MOCK_CONST_METHOD0(GetParagraphStyle, const ParagraphStyle&());
     MOCK_CONST_METHOD0(empty, bool());
     MOCK_METHOD1(PushStyle, void(const TextStyle& style));
     MOCK_METHOD1(AddText, void(const std::u16string& text));
@@ -127,6 +126,10 @@ public:
     }
 
     void UpdateColor(size_t from, size_t to, const Color& color) override;
+    const ParagraphStyle& GetParagraphStyle() const override
+    {
+        return paraStyle_;
+    }
 
     std::optional<CaretMetricsF> caretMetrics_;
 
@@ -135,6 +138,7 @@ public:
 
     static RefPtr<MockParagraph> paragraph_;
     static bool enabled_;
+    ParagraphStyle paraStyle_;
     static bool enableCalcCaretMetricsByPosition_;
 };
 } // namespace OHOS::Ace::NG

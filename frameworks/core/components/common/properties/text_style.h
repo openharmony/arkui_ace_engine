@@ -415,6 +415,11 @@ public:                                                                         
             return;                                                                  \
         }                                                                            \
         advancedTextStyle_->Set##name(newValue);                                     \
+    }                                                                                \
+    void Reset##name()                                                               \
+    {                                                                                \
+        CHECK_NULL_VOID(advancedTextStyle_);                                         \
+        advancedTextStyle_->Reset##name();                                           \
     }
 
 #define ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(name, type, changeflag)  \
@@ -632,6 +637,7 @@ public:
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(LineHeightMultiply, double, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(MinimumLineHeight, Dimension, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(MaximumLineHeight, Dimension, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(StrokeJoinStyle, StrokeJoinStyle, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_DIMENSION_STYLE(LetterSpacing, TextStyleAttribute::LETTER_SPACING);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(MaxLines, uint32_t, UINT32_MAX, ParagraphStyleAttribute::MAXLINES);
     // Must use with SetAdaptMinFontSize and SetAdaptMaxFontSize.

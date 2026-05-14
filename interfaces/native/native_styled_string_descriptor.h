@@ -1910,6 +1910,62 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetTextDirection(const OH_ArkUI_Paragrap
     ArkUI_TextDirection* textDirection);
 
 /**
+ * @brief Set linear gradient of paragraph style.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param paragraphStyle Pointer to the <b>OH_ArkUI_ParagraphStyle</b> object.
+ * @param linearGradient Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetLinearGradient(
+    OH_ArkUI_ParagraphStyle* paragraphStyle, const OH_ArkUI_LinearGradientOptions* linearGradient);
+ 
+/**
+ * @brief Get linear gradient of paragraph style.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param paragraphStyle Pointer to the <b>OH_ArkUI_ParagraphStyle</b> object.
+ * @param linearGradient Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetLinearGradient(
+    const OH_ArkUI_ParagraphStyle* paragraphStyle, OH_ArkUI_LinearGradientOptions* linearGradient);
+ 
+/**
+ * @brief Set radial gradient of paragraph style.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param paragraphStyle Pointer to the <b>OH_ArkUI_ParagraphStyle</b> object.
+ * @param radialGradient Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetRadialGradient(
+    OH_ArkUI_ParagraphStyle* paragraphStyle, const OH_ArkUI_RadialGradientOptions* radialGradient);
+ 
+/**
+ * @brief Get radial gradient of paragraph style.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param paragraphStyle Pointer to the <b>OH_ArkUI_ParagraphStyle</b> object.
+ * @param radialGradient Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetRadialGradient(
+    const OH_ArkUI_ParagraphStyle* paragraphStyle, OH_ArkUI_RadialGradientOptions* radialGradient);
+
+/**
  * @brief Create an <b>OH_ArkUI_GestureStyle</b> object.
  *
  * @note When the object is no longer in use, invoke <b> OH_ArkUI_GestureStyle_Destroy </b> to destroy it.

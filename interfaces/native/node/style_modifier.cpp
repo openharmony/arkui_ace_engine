@@ -16779,8 +16779,22 @@ int32_t SetTextLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
         {.i32 = item->value[NUM_2].i32}  //repeating
     };
 
-    fullImpl->getNodeModifiers()->getTextModifier()->setLinearGradient(
-        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3, nullptr);
+    switch (node->type) {
+        case ARKUI_NODE_TEXT_INPUT:
+            fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputLinearGradient(
+                node->uiNodeHandle, values, NUM_4, colors, size * NUM_3, nullptr);
+            break;
+        case ARKUI_NODE_TEXT:
+            fullImpl->getNodeModifiers()->getTextModifier()->setLinearGradient(
+                node->uiNodeHandle, values, NUM_4, colors, size * NUM_3, nullptr);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+            fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaLinearGradient(
+                node->uiNodeHandle, values, NUM_4, colors, size * NUM_3, nullptr);
+            break;
+        default:
+            break;
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -16792,8 +16806,23 @@ const ArkUI_AttributeItem* GetTextLinearGradient(ArkUI_NodeHandle node)
     ArkUI_Uint32 colors[NUM_10];
     //default size 10
     ArkUI_Float32 stops[NUM_10];
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getLinearGradient(
-        node->uiNodeHandle, &values, &colors, &stops);
+    ArkUI_Int32 resultValue = 0;
+    switch (node->type) {
+        case ARKUI_NODE_TEXT_INPUT:
+            resultValue = GetFullImpl()->getNodeModifiers()->getTextInputModifier()->getTextInputLinearGradient(
+                node->uiNodeHandle, &values, &colors, &stops);
+            break;
+        case ARKUI_NODE_TEXT:
+            resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getLinearGradient(
+                node->uiNodeHandle, &values, &colors, &stops);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+            resultValue = GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->getTextAreaLinearGradient(
+                node->uiNodeHandle, &values, &colors, &stops);
+            break;
+        default:
+            break;
+    }
     //angle
     g_numberValues[0].f32 = values[0];
     //direction
@@ -16822,10 +16851,20 @@ const ArkUI_AttributeItem* GetTextLinearGradient(ArkUI_NodeHandle node)
 
 void ResetTextLinearGradient(ArkUI_NodeHandle node)
 {
-    // already check in entry point.
-    auto* fullImpl = GetFullImpl();
-
-    fullImpl->getNodeModifiers()->getTextModifier()->resetTextGradient(node->uiNodeHandle);
+    switch (node->type) {
+        case ARKUI_NODE_TEXT_INPUT:
+            GetFullImpl()->getNodeModifiers()->getTextInputModifier()->resetTextInputGradient(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT:
+            GetFullImpl()->getNodeModifiers()->getTextModifier()->resetTextGradient(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+ 
+            GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->resetTextAreaGradient(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
 }
 
 int32_t SetTextRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -16848,16 +16887,11 @@ int32_t SetTextRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     }
 
     ArkUIInt32orFloat32 values[NUM_10] = {
-        {.i32 = static_cast<ArkUI_Int32>(false) },
-        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_X) },
-        {.i32 = static_cast<ArkUI_Float32>(unit) },
-        {.i32 = static_cast<ArkUI_Int32>(false) },
-        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_Y) },
-        {.i32 = static_cast<ArkUI_Float32>(unit) },
-        {.i32 = static_cast<ArkUI_Int32>(false) },
-        {.f32 = static_cast<ArkUI_Float32>(NUM_0) },
-        {.i32 = static_cast<ArkUI_Float32>(unit) },
-        {.i32 = static_cast<ArkUI_Int32>(false) }
+        {.i32 = static_cast<ArkUI_Int32>(false) }, {.f32 = static_cast<ArkUI_Float32>(DEFAULT_X) },
+        {.i32 = static_cast<ArkUI_Float32>(unit) },{.i32 = static_cast<ArkUI_Int32>(false) },
+        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_Y) }, {.i32 = static_cast<ArkUI_Float32>(unit) },
+        {.i32 = static_cast<ArkUI_Int32>(false) },  {.f32 = static_cast<ArkUI_Float32>(NUM_0) },
+        {.i32 = static_cast<ArkUI_Float32>(unit) }, {.i32 = static_cast<ArkUI_Int32>(false) }
     };
 
     if (item->size > NUM_0) {
@@ -16876,15 +16910,35 @@ int32_t SetTextRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     }
 
     values[NUM_9].i32 = item->size > NUM_3 ? item->value[NUM_3].i32 : static_cast<ArkUI_Int32>(false);
-    fullImpl->getNodeModifiers()->getTextModifier()->setRadialGradient(
-        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3, nullptr);
+    if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputRadialGradient(
+            node->uiNodeHandle, values, NUM_10, colors, size * NUM_3, nullptr);
+    } else if (node->type == ARKUI_NODE_TEXT) {
+        fullImpl->getNodeModifiers()->getTextModifier()->setRadialGradient(
+            node->uiNodeHandle, values, NUM_10, colors, size * NUM_3, nullptr);
+    }else if (node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaRadialGradient(
+            node->uiNodeHandle, values, NUM_10, colors, size * NUM_3, nullptr);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetTextRadialGradient(ArkUI_NodeHandle node)
 {
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextModifier()->resetTextGradient(node->uiNodeHandle);
+    switch (node->type) {
+        case ARKUI_NODE_TEXT_INPUT:
+            GetFullImpl()->getNodeModifiers()->getTextInputModifier()->resetTextInputGradient(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT:
+            GetFullImpl()->getNodeModifiers()->getTextModifier()->resetTextGradient(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+ 
+            GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->resetTextAreaGradient(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
 }
 
 const ArkUI_AttributeItem* GetTextRadialGradient(ArkUI_NodeHandle node)
@@ -16897,8 +16951,23 @@ const ArkUI_AttributeItem* GetTextRadialGradient(ArkUI_NodeHandle node)
     ArkUI_Float32 stops[NUM_10];
 
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getRadialGradient(
-        node->uiNodeHandle, &values, &colors, &stops, unit);
+    ArkUI_Int32 resultValue = 0;
+    switch (node->type) {
+        case ARKUI_NODE_TEXT_INPUT:
+            resultValue = GetFullImpl()->getNodeModifiers()->getTextInputModifier()->getTextInputRadialGradient(
+                        node->uiNodeHandle, &values, &colors, &stops, unit);
+            break;
+        case ARKUI_NODE_TEXT:
+            resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getRadialGradient(
+                        node->uiNodeHandle, &values, &colors, &stops, unit);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+            resultValue = GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->getTextAreaRadialGradient(
+                        node->uiNodeHandle, &values, &colors, &stops, unit);
+            break;
+        default:
+            break;
+    }
     //centerX
     g_numberValues[NUM_0].f32 = values[NUM_0];
     //centerY
@@ -21054,7 +21123,7 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         SetTextInputLineHeight, SetSelectDetectorEnable, nullptr, SetTextInputShowCounter,
         TextInputBaseControllerAttribute, SetTextInputEllipsisMode, SetOrphanCharOptimization, SetCompressLeadingPunctuation, SetIncludeFontPadding,
         SetFallbackLineSpacing, SetTextInputDirection, SetSelectedDragPreviewStyle, SetTextInputTextOverflow,
-        SetComponentDecoration };
+        SetComponentDecoration, SetTextLinearGradient, SetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -21075,7 +21144,7 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
         GetTextInputHalfLeading, GetKeyboardAppearance, GetTextInputEnableAutoFillAnimation, GetTextInputLineHeight,
         GetSelectDetectorEnable, nullptr, GetTextInputShowCounter, nullptr, GetTextInputEllipsisMode, GetOrphanCharOptimization,
         GetCompressLeadingPunctuation, GetIncludeFontPadding, GetFallbackLineSpacing, GetTextInputDirection, GetSelectedDragPreviewStyle,
-        GetTextInputTextOverflow, GetComponentDecoration };
+        GetTextInputTextOverflow, GetComponentDecoration, GetTextLinearGradient, GetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -21097,7 +21166,7 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputLineHeight, ResetSelectDetectorEnable, nullptr, ResetTextInputShowCounter, nullptr, ResetTextInputEllipsisMode,
         ResetOrphanCharOptimization, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing,
         ResetTextInputDirection, ResetSelectedDragPreviewStyle, ResetTextInputTextOverflow,
-        ResetComponentDecoration };
+        ResetComponentDecoration, ResetTextLinearGradient, ResetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -21119,7 +21188,7 @@ int32_t SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
         SetTextAreaLineHeight, SetTextAreaBarState, SetSelectDetectorEnable, nullptr,
         SetTextAreaScrollBarColor, SetTextAreaCustomKeyboard, TextAreaBaseControllerAttribute, SetTextAreaEllipsisMode, SetOrphanCharOptimization,
         SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, SetTextAreaHorizontalScrolling, SetTextAreaDirection,
-        SetSelectedDragPreviewStyle, SetTextAreaTextOverflow, SetComponentDecoration };
+        SetSelectedDragPreviewStyle, SetTextAreaTextOverflow, SetComponentDecoration, SetTextLinearGradient, SetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -21139,7 +21208,7 @@ const ArkUI_AttributeItem* GetTextAreaAttribute(ArkUI_NodeHandle node, int32_t s
         GetTextAreaMaxLines, GetTextAreaLineHeight, GetTextAreaBarState, GetSelectDetectorEnable,
         nullptr, GetTextAreaScrollBarColor, GetTextAreaCustomKeyboard, nullptr, GetTextAreaEllipsisMode, GetOrphanCharOptimization,
         GetCompressLeadingPunctuation, GetIncludeFontPadding, GetFallbackLineSpacing, GetTextAreaHorizontalScrolling, GetTextAreaDirection,
-        GetSelectedDragPreviewStyle, GetTextAreaTextOverflow, GetComponentDecoration };
+        GetSelectedDragPreviewStyle, GetTextAreaTextOverflow, GetComponentDecoration, GetTextLinearGradient, GetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -21162,7 +21231,8 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextAreaMinLines, ResetTextAreaMaxLinesWithScroll, ResetTextAreaLineHeight, ResetTextAreaBarState,
         ResetSelectDetectorEnable, nullptr, ResetTextAreaScrollBarColor, ResetTextAreaCustomKeyboard, nullptr, ResetTextAreaEllipsisMode,
         ResetOrphanCharOptimization, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing, ResetTextAreaHorizontalScrolling,
-        ResetTextAreaDirection, ResetSelectedDragPreviewStyle, ResetTextAreaTextOverflow, ResetComponentDecoration };
+        ResetTextAreaDirection, ResetSelectedDragPreviewStyle, ResetTextAreaTextOverflow,
+        ResetComponentDecoration, ResetTextLinearGradient, ResetTextRadialGradient };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

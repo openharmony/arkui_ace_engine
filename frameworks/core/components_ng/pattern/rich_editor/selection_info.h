@@ -23,6 +23,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
+#include "core/components/common/properties/text_style_gradient.h"
 namespace OHOS::Ace::NG {
 struct SpanItem;
 }
@@ -95,6 +96,8 @@ struct TextStyleResult {
     std::optional<Dimension> paragraphSpacing;
     std::optional<int32_t> textVerticalAlign;
     std::optional<int32_t> textDirection;
+    ACE_DEFINE_TEXT_STYLE_GRADIENT_OPTIONAL_TYPE();
+    std::optional<Color> colorShaderStyle;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
     FONT_FEATURES_LIST fontFeature;
@@ -114,6 +117,7 @@ struct TextStyleResult {
     bool compressLeadingPunctuation = false;
     double strokeWidth = 0.0;
     std::string strokeColor;
+    std::optional<StrokeJoinStyle> strokeJoinStyle;
 };
 
 struct ImageStyleResult {
@@ -186,6 +190,8 @@ struct ParagraphInfo {
     std::optional<double> paragraphSpacing;
     std::optional<int32_t> textVerticalAlign;
     std::optional<int32_t> textDirection;
+    ACE_DEFINE_TEXT_STYLE_GRADIENT_OPTIONAL_TYPE();
+    std::optional<Color> colorShaderStyle;
     std::pair<int32_t, int32_t> range;
 };
 } // namespace OHOS::Ace

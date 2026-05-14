@@ -116,6 +116,10 @@ public:
     void SetEnableHapticFeedback(bool state) override {};
     void SetKeyboardAppearance(KeyboardAppearance value) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
+    void SetStrokeJoinStyle(StrokeJoinStyle style) override {};
+    void SetGradientShaderStyle(NG::Gradient& gradient) override {};
+    void SetColorShaderStyle(const Color& value) override {};
+    void ResetGradientShaderStyle() override {};
     void SetCompressLeadingPunctuation(bool enabled) override {};
     void SetOnWillAttachIME(IMEAttachCallback&& func) override {};
 
