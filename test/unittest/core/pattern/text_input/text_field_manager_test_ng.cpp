@@ -2211,4 +2211,371 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_NeedCloseKeyboard001, TestSi
     EXPECT_FALSE(textFieldManager.NeedCloseKeyboard());
 }
 
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue001
+ * @tc.desc: Test parsing valid MSDP auto fill JSON array with valid items
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create valid JSON array with string id and content_type
+     */
+    auto allItems = JsonUtil::CreateArray(true);
+    auto itemOne = JsonUtil::Create(true);
+    itemOne->Put("id", "10");
+    itemOne->Put("content_type", "username");
+    allItems->Put(itemOne);
+    auto itemTwo = JsonUtil::Create(true);
+    itemTwo->Put("id", "11");
+    itemTwo->Put("content_type", "password");
+    allItems->Put(itemTwo);
+
+    TextFieldManagerNG textFieldManager;
+
+    /**
+     * @tc.expected: step1. Parse should succeed and populate map with two entries
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(allItems);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 2);
+    auto type = textFieldManager.GetMSDPAutoFillType(10);
+    EXPECT_TRUE(type.has_value());
+    EXPECT_EQ(type.value(), "username");
+    type = textFieldManager.GetMSDPAutoFillType(11);
+    EXPECT_TRUE(type.has_value());
+    EXPECT_EQ(type.value(), "password");
+}
+
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue002
+ * @tc.desc: Test parsing non-array JSON should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create object JSON instead of array
+     */
+    auto jsonObject = JsonUtil::Create(true);
+    jsonObject->Put("id", "10");
+
+    TextFieldManagerNG textFieldManager;
+
+    /**
+     * @tc.expected: step1. Parse should return false and map should be empty
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(jsonObject);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 0);
+}
+
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue003
+ * @tc.desc: Test parsing invalid JSON should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Pass nullptr as JSON
+     */
+    TextFieldManagerNG textFieldManager;
+
+    /**
+     * @tc.expected: step1. Parse should return false
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(nullptr);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue004
+ * @tc.desc: Test parsing array with items missing required fields should skip those items
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create array with some items missing id or content_type
+     */
+    auto allItems = JsonUtil::CreateArray(true);
+    auto validItem = JsonUtil::Create(true);
+    validItem->Put("id", "10");
+    validItem->Put("content_type", "username");
+    allItems->Put(validItem);
+    auto noId = JsonUtil::Create(true);
+    noId->Put("content_type", "missing_id");
+    allItems->Put(noId);
+    auto noType = JsonUtil::Create(true);
+    noType->Put("id", "12");
+    allItems->Put(noType);
+
+    TextFieldManagerNG textFieldManager;
+
+    /**
+     * @tc.expected: step1. Only valid item should be parsed, invalid ones skipped
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(allItems);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 1);
+    auto type = textFieldManager.GetMSDPAutoFillType(10);
+    EXPECT_TRUE(type.has_value());
+    EXPECT_EQ(type.value(), "username");
+}
+
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue005
+ * @tc.desc: Test parsing array with non-string id should skip those items
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue005, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create array with integer id instead of string id
+     */
+    auto allItems = JsonUtil::CreateArray(true);
+    auto intIdItem = JsonUtil::Create(true);
+    intIdItem->Put("id", 10);
+    intIdItem->Put("content_type", "username");
+    allItems->Put(intIdItem);
+    auto stringIdItem = JsonUtil::Create(true);
+    stringIdItem->Put("id", "11");
+    stringIdItem->Put("content_type", "password");
+    allItems->Put(stringIdItem);
+
+    TextFieldManagerNG textFieldManager;
+
+    /**
+     * @tc.expected: step1. Integer id item should be skipped, string id item should be parsed
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(allItems);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 1);
+    auto type = textFieldManager.GetMSDPAutoFillType(11);
+    EXPECT_TRUE(type.has_value());
+    EXPECT_EQ(type.value(), "password");
+}
+
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue006
+ * @tc.desc: Test parsing array with empty msdpType should remove existing entry
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Pre-populate map with an entry, then parse JSON with empty content_type
+     */
+    TextFieldManagerNG textFieldManager;
+    textFieldManager.textFieldMSDPAutoFillTypes_[10] = "old_value";
+
+    auto allItems = JsonUtil::CreateArray(true);
+    auto emptyTypeItem = JsonUtil::Create(true);
+    emptyTypeItem->Put("id", "10");
+    emptyTypeItem->Put("content_type", "");
+    allItems->Put(emptyTypeItem);
+
+    /**
+     * @tc.expected: step1. Entry with id 10 should be removed due to empty msdp type
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(allItems);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 0);
+    auto type = textFieldManager.GetMSDPAutoFillType(10);
+    EXPECT_FALSE(type.has_value());
+}
+
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue007
+ * @tc.desc: Test parsing array with non-digit id string should skip those items
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue007, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create array with non-digit id string like "abc"
+     */
+    auto allItems = JsonUtil::CreateArray(true);
+    auto nonDigitItem = JsonUtil::Create(true);
+    nonDigitItem->Put("id", "abc");
+    nonDigitItem->Put("content_type", "username");
+    allItems->Put(nonDigitItem);
+    auto validItem = JsonUtil::Create(true);
+    validItem->Put("id", "10");
+    validItem->Put("content_type", "password");
+    allItems->Put(validItem);
+
+    TextFieldManagerNG textFieldManager;
+
+    /**
+     * @tc.expected: step1. Non-digit id item should be skipped, valid item should be parsed
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(allItems);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 1);
+    auto type = textFieldManager.GetMSDPAutoFillType(10);
+    EXPECT_TRUE(type.has_value());
+    EXPECT_EQ(type.value(), "password");
+}
+
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue008
+ * @tc.desc: Test parsing array with id <= 0 should skip those items
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue008, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create array with negative id and zero id
+     */
+    auto allItems = JsonUtil::CreateArray(true);
+    auto negativeIdItem = JsonUtil::Create(true);
+    negativeIdItem->Put("id", "-1");
+    negativeIdItem->Put("content_type", "negative");
+    allItems->Put(negativeIdItem);
+    auto zeroIdItem = JsonUtil::Create(true);
+    zeroIdItem->Put("id", "0");
+    zeroIdItem->Put("content_type", "zero");
+    allItems->Put(zeroIdItem);
+    auto validItem = JsonUtil::Create(true);
+    validItem->Put("id", "10");
+    validItem->Put("content_type", "valid");
+    allItems->Put(validItem);
+
+    TextFieldManagerNG textFieldManager;
+
+    /**
+     * @tc.expected: step1. Items with id <= 0 should be skipped, valid item should be parsed
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(allItems);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 1);
+    auto type = textFieldManager.GetMSDPAutoFillType(10);
+    EXPECT_TRUE(type.has_value());
+    EXPECT_EQ(type.value(), "valid");
+}
+
+/**
+ * @tc.name: ParseMSDPAutoFillJsonValue009
+ * @tc.desc: Test that ClearMSDPAutoFillTypes is called at the beginning of Parse
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ParseMSDPAutoFillJsonValue009, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Pre-populate map with entries, then parse new JSON that replaces them
+     */
+    TextFieldManagerNG textFieldManager;
+    textFieldManager.textFieldMSDPAutoFillTypes_[10] = "old_value1";
+    textFieldManager.textFieldMSDPAutoFillTypes_[11] = "old_value2";
+
+    auto allItems = JsonUtil::CreateArray(true);
+    auto newItem = JsonUtil::Create(true);
+    newItem->Put("id", "20");
+    newItem->Put("content_type", "new_value");
+    allItems->Put(newItem);
+
+    /**
+     * @tc.expected: step1. Old entries should be cleared, only new entry should remain
+     */
+    auto result = textFieldManager.ParseMSDPAutoFillJsonValue(allItems);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 1);
+    auto type = textFieldManager.GetMSDPAutoFillType(10);
+    EXPECT_FALSE(type.has_value());
+    type = textFieldManager.GetMSDPAutoFillType(20);
+    EXPECT_TRUE(type.has_value());
+    EXPECT_EQ(type.value(), "new_value");
+}
+
+/**
+ * @tc.name: GetMSDPAutoFillType001
+ * @tc.desc: Test GetMSDPAutoFillType with non-existing id returns nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, GetMSDPAutoFillType001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Call GetMSDPAutoFillType on empty manager
+     */
+    TextFieldManagerNG textFieldManager;
+
+    /**
+     * @tc.expected: step1. Should return nullopt
+     */
+    auto type = textFieldManager.GetMSDPAutoFillType(999);
+    EXPECT_FALSE(type.has_value());
+}
+
+/**
+ * @tc.name: RemoveMSDPAutoFillType001
+ * @tc.desc: Test RemoveMSDPAutoFillType with existing id
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, RemoveMSDPAutoFillType001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Populate map and remove an existing entry
+     */
+    TextFieldManagerNG textFieldManager;
+    textFieldManager.textFieldMSDPAutoFillTypes_[10] = "username";
+    textFieldManager.textFieldMSDPAutoFillTypes_[11] = "password";
+
+    textFieldManager.RemoveMSDPAutoFillType(10);
+
+    /**
+     * @tc.expected: step1. Entry 10 should be removed, entry 11 should remain
+     */
+    EXPECT_FALSE(textFieldManager.GetMSDPAutoFillType(10).has_value());
+    auto type = textFieldManager.GetMSDPAutoFillType(11);
+    EXPECT_TRUE(type.has_value());
+    EXPECT_EQ(type.value(), "password");
+}
+
+/**
+ * @tc.name: RemoveMSDPAutoFillType002
+ * @tc.desc: Test RemoveMSDPAutoFillType with non-existing id should not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, RemoveMSDPAutoFillType002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Call RemoveMSDPAutoFillType with non-existing id
+     */
+    TextFieldManagerNG textFieldManager;
+    textFieldManager.textFieldMSDPAutoFillTypes_[10] = "username";
+
+    /**
+     * @tc.expected: step1. Should not crash and existing entries should remain
+     */
+    textFieldManager.RemoveMSDPAutoFillType(999);
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 1);
+    EXPECT_TRUE(textFieldManager.GetMSDPAutoFillType(10).has_value());
+}
+
+/**
+ * @tc.name: ClearMSDPAutoFillTypes001
+ * @tc.desc: Test ClearMSDPAutoFillTypes clears all entries
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, ClearMSDPAutoFillTypes001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Populate map and call ClearMSDPAutoFillTypes
+     */
+    TextFieldManagerNG textFieldManager;
+    textFieldManager.textFieldMSDPAutoFillTypes_[10] = "username";
+    textFieldManager.textFieldMSDPAutoFillTypes_[11] = "password";
+
+    textFieldManager.ClearMSDPAutoFillTypes();
+
+    /**
+     * @tc.expected: step1. Map should be empty
+     */
+    EXPECT_EQ(textFieldManager.textFieldMSDPAutoFillTypes_.size(), 0);
+    EXPECT_FALSE(textFieldManager.GetMSDPAutoFillType(10).has_value());
+    EXPECT_FALSE(textFieldManager.GetMSDPAutoFillType(11).has_value());
+}
+
 } // namespace OHOS::Ace::NG

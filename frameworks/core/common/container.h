@@ -19,6 +19,7 @@
 #include <atomic>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 
 #include "interfaces/inner_api/ace/constants.h"
@@ -116,7 +117,8 @@ public:
         return false;
     }
 
-    virtual HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder)
+    virtual HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder,
+        const std::optional<std::string>& msdpType = std::nullopt)
     {
         HintToTypeWrap hintToTypeWrap;
         return hintToTypeWrap;

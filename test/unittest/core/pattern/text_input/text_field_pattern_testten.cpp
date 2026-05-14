@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 
@@ -1473,5 +1474,247 @@ HWTEST_F(TextFieldPatternTestten, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
     ASSERT_NE(dragPattern->animatingParagraph_, nullptr);
     dragParagraph = dragPattern->GetParagraph().Upgrade();
     EXPECT_EQ(paragraph1, dragParagraph);
+}
+
+/**
+ * @tc.name: HandleMSDPAutoFillCommand001
+ * @tc.desc: Test HandleMSDPAutoFillCommand with valid command JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, HandleMSDPAutoFillCommand001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field with pipeline and construct valid MSDP auto fill command JSON
+     */
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto resultArray = JsonUtil::CreateArray(true);
+    auto item = JsonUtil::Create(true);
+    item->Put("id", "10");
+    item->Put("content_type", "username");
+    resultArray->Put(item);
+
+    auto params = JsonUtil::Create(true);
+    params->Put("result", resultArray);
+
+    auto commandJson = JsonUtil::Create(true);
+    commandJson->Put("params", params);
+
+    /**
+     * @tc.steps: step2. Call HandleMSDPAutoFillCommand
+     * @tc.expected: step2. Should return true and manager should have the entry
+     */
+    auto result = pattern->HandleMSDPAutoFillCommand(commandJson);
+    EXPECT_TRUE(result);
+
+    auto pipeline = textFieldNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    ASSERT_NE(textFieldManager, nullptr);
+    auto msdpType = textFieldManager->GetMSDPAutoFillType(10);
+    EXPECT_TRUE(msdpType.has_value());
+    EXPECT_EQ(msdpType.value(), "username");
+}
+
+/**
+ * @tc.name: HandleMSDPAutoFillCommand002
+ * @tc.desc: Test HandleMSDPAutoFillCommand with null JSON should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, HandleMSDPAutoFillCommand002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field and call HandleMSDPAutoFillCommand with nullptr
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.expected: step1. Should return false for null input
+     */
+    auto result = pattern->HandleMSDPAutoFillCommand(nullptr);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleMSDPAutoFillCommand003
+ * @tc.desc: Test HandleMSDPAutoFillCommand with JSON missing params should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, HandleMSDPAutoFillCommand003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field and construct JSON without params
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto commandJson = JsonUtil::Create(true);
+    commandJson->Put("other", "value");
+
+    /**
+     * @tc.expected: step1. Should return false when params is missing
+     */
+    auto result = pattern->HandleMSDPAutoFillCommand(commandJson);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleMSDPAutoFillCommand004
+ * @tc.desc: Test HandleMSDPAutoFillCommand with params missing result should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, HandleMSDPAutoFillCommand004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field and construct JSON with params but no result
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto params = JsonUtil::Create(true);
+    params->Put("other", "value");
+
+    auto commandJson = JsonUtil::Create(true);
+    commandJson->Put("params", params);
+
+    /**
+     * @tc.expected: step1. Should return false when result is missing
+     */
+    auto result = pattern->HandleMSDPAutoFillCommand(commandJson);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleMSDPAutoFillCommand005
+ * @tc.desc: Test HandleMSDPAutoFillCommand with non-array result should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, HandleMSDPAutoFillCommand005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field and construct JSON with non-array result
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto params = JsonUtil::Create(true);
+    params->Put("result", "not_an_array");
+
+    auto commandJson = JsonUtil::Create(true);
+    commandJson->Put("params", params);
+
+    /**
+     * @tc.expected: step1. Should return false when result is not an array
+     */
+    auto result = pattern->HandleMSDPAutoFillCommand(commandJson);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RemoveMSDPAutoFillType001
+ * @tc.desc: Test RemoveMSDPAutoFillType removes the entry from manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, RemoveMSDPAutoFillType001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field and pre-populate MSDP type on manager
+     */
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = textFieldNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    ASSERT_NE(textFieldManager, nullptr);
+    int32_t nodeId = textFieldNode->GetId();
+    textFieldManager->textFieldMSDPAutoFillTypes_[nodeId] = "username";
+    EXPECT_TRUE(textFieldManager->GetMSDPAutoFillType(nodeId).has_value());
+
+    /**
+     * @tc.steps: step2. Call RemoveMSDPAutoFillType
+     * @tc.expected: step2. Entry should be removed from manager
+     */
+    pattern->RemoveMSDPAutoFillType();
+    EXPECT_FALSE(textFieldManager->GetMSDPAutoFillType(nodeId).has_value());
+}
+
+/**
+ * @tc.name: RemoveMSDPAutoFillType002
+ * @tc.desc: Test RemoveMSDPAutoFillType when no entry exists should not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, RemoveMSDPAutoFillType002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field and call RemoveMSDPAutoFillType without pre-populating
+     */
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.expected: step1. Should not crash when no MSDP type was set
+     */
+    pattern->RemoveMSDPAutoFillType();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMSDP001
+ * @tc.desc: Test OnDetachFromMainTree calls RemoveMSDPAutoFillType to clean up
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, OnDetachFromMainTreeMSDP001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field and pre-populate MSDP type on manager
+     */
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = textFieldNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    ASSERT_NE(textFieldManager, nullptr);
+    int32_t nodeId = textFieldNode->GetId();
+    textFieldManager->textFieldMSDPAutoFillTypes_[nodeId] = "username";
+    EXPECT_TRUE(textFieldManager->GetMSDPAutoFillType(nodeId).has_value());
+
+    /**
+     * @tc.steps: step2. Call OnDetachFromMainTree
+     * @tc.expected: step2. MSDP type should be cleaned up
+     */
+    pattern->OnDetachFromMainTree();
+    EXPECT_FALSE(textFieldManager->GetMSDPAutoFillType(nodeId).has_value());
 }
 } // namespace OHOS::Ace::NG

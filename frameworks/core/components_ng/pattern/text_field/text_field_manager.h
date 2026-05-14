@@ -310,6 +310,10 @@ public:
     bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject);
     FillContentMap GetFillContentMap(int32_t id);
     void RemoveFillContentMap(int32_t id);
+    bool ParseMSDPAutoFillJsonValue(const std::unique_ptr<JsonValue>& jsonObject);
+    std::optional<std::string> GetMSDPAutoFillType(int32_t id) const;
+    void RemoveMSDPAutoFillType(int32_t id);
+    void ClearMSDPAutoFillTypes();
 
     void SetLastAvoidOrientation(int32_t lastAvoidOrientation)
     {
@@ -411,6 +415,7 @@ private:
     std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
     std::unordered_map<int32_t, FillContentMap> textFieldFillContentMaps_;
+    std::unordered_map<int32_t, std::string> textFieldMSDPAutoFillTypes_;
     int32_t currentCustomId_ = -1;
     WeakPtr<FrameNode> preNode_;
     int32_t attachInputId_ = -1;
