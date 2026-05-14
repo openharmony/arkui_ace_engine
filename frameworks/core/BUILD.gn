@@ -1018,6 +1018,7 @@ template("ace_core_ng_source_set") {
         "components/common/properties/page_transition_option.cpp",
         "components/common/properties/scroll_bar.cpp",
         "components/declaration/common/event.cpp",
+        "components/text/text_theme.cpp",
       ]
     }
 
