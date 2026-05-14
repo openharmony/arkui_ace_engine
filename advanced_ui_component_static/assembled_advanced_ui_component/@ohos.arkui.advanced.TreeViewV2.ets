@@ -2787,12 +2787,13 @@ export class ListNodeDataSource extends BasicDataSource {
       this.notifyDataReload();
       return;
     }
-    let childNum: int[] | null = new Array<int>(this.listNode[thisIndex.toInt()].getChildNodeInfo().childNum);
-    childNum[0] = thisIndex + 1;
+    let childNum: int[] = [];
+    childNum.push(thisIndex + 1);
     let index: int = 1;
     while (index < this.listNode[thisIndex].getChildNodeInfo().childNum) {
-      childNum[index] =
-        childNum[index - 1] + this.listNode[childNum[(index - 1)]].getChildNodeInfo().allChildNum + 1;
+      childNum.push(
+        childNum[index - 1] + this.listNode[childNum[(index - 1)]].getChildNodeInfo().allChildNum + 1
+      );
       index++;
     }
     if (rootNodeStatus === NodeStatus.EXPAND) {
@@ -2808,7 +2809,6 @@ export class ListNodeDataSource extends BasicDataSource {
         }
       }
     }
-    childNum = null;
     if (isRefreshList) {
       this.loadedListNodeFunction();
       this.notifyDataReload();
@@ -4532,20 +4532,19 @@ newNodeParamV2 = newNodeParamV2InterFace
       if (parent.children.length === 0) {
         return [];
       } else if (parent.children.length > 0) {
-        let childrenNodeInfo: NodeInfoView[] = new Array<NodeInfoView>(parent.children.length);
-        for (let i: int = 0; i < childrenNodeInfo.length; i++) {
-          childrenNodeInfo[i] = {};
-        }
-        for (let i: int = 0; i < parent.children.length && i < childrenNodeInfo.length; i++) {
-          childrenNodeInfo[i].itemId = parent.children[i].currentNodeId;
+        let childrenNodeInfo: NodeInfoView[] = [];
+        for (let i: int = 0; i < parent.children.length; i++) {
+          let nodeInfoView: NodeInfoView = {};
+          nodeInfoView.itemId = parent.children[i].currentNodeId;
           let nodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent.children[i]);
           if (nodeInfo.getNodeItem().imageNode) {
-            childrenNodeInfo[i].itemIcon = nodeInfo.getNodeItem().imageNode?.source;
+            nodeInfoView.itemIcon = nodeInfo.getNodeItem().imageNode?.source;
           }
           if (nodeInfo.getNodeItem().mainTitleNode) {
-            childrenNodeInfo[i].itemTitle = nodeInfo.getNodeItem().mainTitleNode?.title;
+            nodeInfoView.itemTitle = nodeInfo.getNodeItem().mainTitleNode?.title;
           }
-          childrenNodeInfo[i].isFolder = nodeInfo.getIsFolder();
+          nodeInfoView.isFolder = nodeInfo.getIsFolder();
+          childrenNodeInfo.push(nodeInfoView);
         }
         return childrenNodeInfo;
       }
