@@ -952,7 +952,7 @@ export class TreeListenerV2 {
    * @since 10
    */
 
-  public emit(event: TreeListenType, argument: CallbackParamV2) {
+  public emit(event: TreeListenType, argument: CallbackParamV2): void {
     if (this._events.get(event)) {
       const callback: ((callbackParam: CallbackParamV2) => void) | undefined =
         this._events.get(event) as ((callbackParam: CallbackParamV2) => void) | undefined;
@@ -989,7 +989,7 @@ export class TreeListenerV2 {
  */
 
 export class TreeListenerManagerV2 {
-  public static readonly APP_KEY_EVENT_BUS = 'app_key_event_bus';
+  public static readonly APP_KEY_EVENT_BUS: string = 'app_key_event_bus';
   private appEventBus: TreeListenerV2;
 
   private constructor() {
@@ -1095,7 +1095,7 @@ export struct TreeViewV2 {
   @Local isAccessibilityEnabled: boolean = accessibility.isScreenReaderOpenSync();
 
   @Builder
-  NullBuilder() {
+  NullBuilder(): void {
   };
 
   @Param private listTreeViewMenu: () => void = () => {};
@@ -1104,7 +1104,7 @@ export struct TreeViewV2 {
   private readonly INITIAL_INVALID_VALUE: number = -1;
   private readonly MAX_TOUCH_DOWN_COUNT: number = 0;
   private isMultiPress: boolean = false;
-  private touchDownCount: number = this.INITIAL_INVALID_VALUE;
+  private touchDownCount: number = -1;
   private appEventBus: TreeListenerV2 = TreeListenerManagerV2.getInstance().getTreeListener();
   private readonly itemPadding: ItemPadding = {
     left: LengthMetrics.resource($r('sys.float.ohos_id_card_margin_start')),
@@ -1120,7 +1120,7 @@ export struct TreeViewV2 {
       bottom: LengthMetrics.resource($r('sys.float.padding_level0')),
     } as ItemPadding;
 
-  onWillApplyTheme(theme: Theme) {
+  onWillApplyTheme(theme: Theme): void {
     this.treeViewTheme.itemSelectedBgColor = theme.colors.interactiveSelect;
     this.treeViewTheme.itemPressedBgColor = theme.colors.interactivePressed;
     this.treeViewTheme.itemHoverBgColor = theme.colors.interactiveHover;
@@ -1177,7 +1177,7 @@ export struct TreeViewV2 {
 
   @Builder
   popupForShowTitle(text: undefined | ResourceStr, backgroundColor: undefined | ResourceColor,
-    fontColor: undefined | ResourceColor) {
+    fontColor: undefined | ResourceColor): void {
     Row() {
       Text(text)
         .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -1197,7 +1197,7 @@ export struct TreeViewV2 {
   }
 
   @Builder
-  builder() {
+  builder(): void {
     this.listTreeViewMenu?.()
   }
 
@@ -1205,7 +1205,7 @@ export struct TreeViewV2 {
   /* Set the popup of dragging node. */
 
   @Builder
-  draggingPopup(item: NodeInfo) {
+  draggingPopup(item: NodeInfo): void {
     Row() {
       if (item.getNodeItem().imageNode) {
         Row() {
@@ -1416,7 +1416,7 @@ export struct TreeViewV2 {
     }
   }
 
-  build() {
+  build(): void {
     List() {
       LazyForEach(this.listNodeDataSource, (itemInner: NodeInfo) => {
         ListItem() {
@@ -2592,33 +2592,33 @@ export class ListNodeDataSource extends BasicDataSource {
   private isInnerDrag: boolean = false; // Judge whether it is an internal drag event.
   // It is used to handle events(For example, prevent press events) during global drag.
   private isDrag: boolean = false;
-  private draggingCurrentNodeId: number = this.INITIAL_INVALID_VALUE; // Record the current ID of the dragged node.
-  private draggingParentNodeId: number = this.INITIAL_INVALID_VALUE; // Record the parent ID of the dragged node.
+  private draggingCurrentNodeId: number = -1; // Record the current ID of the dragged node.
+  private draggingParentNodeId: number = -1; // Record the parent ID of the dragged node.
   private currentNodeInfo: NodeInfo | null = null; // To solve the problem of currentIndex missed in onDrop event.
   private listItemOpacity: number = 1; // It is used to set the opacity of the node when dragged.
-  private lastPassIndex: number = this.INITIAL_INVALID_VALUE; // record the last passing node index in drag.
-  private lastPassId?: int = Double.toInt(this.INITIAL_INVALID_VALUE); // record the last passing node Id in drag.
-  private thisPassIndex: number = this.INITIAL_INVALID_VALUE; // record the current passing node in drag.
+  private lastPassIndex: number = -1; // record the last passing node index in drag.
+  private lastPassId?: int = -1; // record the last passing node Id in drag.
+  private thisPassIndex: number = -1; // record the current passing node in drag.
   // record last passing node in delay expand event.
-  private lastDelayExpandIndex: number = this.INITIAL_INVALID_VALUE;
-  private timeoutExpandId: number = this.INITIAL_INVALID_VALUE;
-  private lastTimeoutExpandId: number = this.INITIAL_INVALID_VALUE;
-  private clearTimeoutExpandId: number = this.INITIAL_INVALID_VALUE;
-  private timeoutHighLightId: number = this.INITIAL_INVALID_VALUE;
-  private lastTimeoutHighLightId: number = this.INITIAL_INVALID_VALUE;
-  private clearTimeoutHighLightId: number = this.INITIAL_INVALID_VALUE;
+  private lastDelayExpandIndex: number = -1;
+  private timeoutExpandId: number = -1;
+  private lastTimeoutExpandId: number = -1;
+  private clearTimeoutExpandId: number = -1;
+  private timeoutHighLightId: number = -1;
+  private lastTimeoutHighLightId: number = -1;
+  private clearTimeoutHighLightId: number = -1;
   // record last passing node in HighLight event.
-  private lastDelayHighLightIndex: number = this.INITIAL_INVALID_VALUE;
+  private lastDelayHighLightIndex: number = -1;
   //record last passing node Id in HighLight event.
-  private lastDelayHighLightId: number = this.INITIAL_INVALID_VALUE;
+  private lastDelayHighLightId: number = -1;
   private nodeIdAndSubtitleMap: Map<number, ResourceStr> = new Map<number, ResourceStr>();
   private flag: Flag = Flag.NONE;
-  private selectedParentNodeId: number = this.INITIAL_INVALID_VALUE;
+  private selectedParentNodeId: number = -1;
   private selectedParentNodeSubtitle: ResourceStr = '';
   private insertNodeSubtitle: ResourceStr = '';
-  private currentFocusNodeId: number = this.INITIAL_INVALID_VALUE;
-  private lastFocusNodeId: number = this.INITIAL_INVALID_VALUE;
-  private addFocusNodeId: number = this.INITIAL_INVALID_VALUE;
+  private currentFocusNodeId: number = -1;
+  private lastFocusNodeId: number = -1;
+  private addFocusNodeId: number = -1;
   private treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   public updateNodeIdList: number[] = [];
   public readonly FLAG_LINE: FlagLine = {
@@ -2647,13 +2647,13 @@ export class ListNodeDataSource extends BasicDataSource {
       offsetY: 0,
     } as ShadowOptions,
     borderRadius: $r('sys.float.ohos_id_corner_radius_default_s'),
-    fontColor: this.treeViewTheme.primaryTitleFontColor,
+    fontColor: TreeViewTheme.getInstance().primaryTitleFontColor,
     fontSize: $r('sys.float.ohos_id_text_size_body1'),
     fontWeight: FontWeight.Regular,
     imageOpacity: $r('sys.float.ohos_id_alpha_content_fourth')
   };
   private readonly subTitle: SubTitleStyle = {
-    normalFontColor: this.treeViewTheme.secondaryTitleFontColor,
+    normalFontColor: TreeViewTheme.getInstance().secondaryTitleFontColor,
     highLightFontColor: $r('sys.color.ohos_id_color_primary_contrary'),
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
     fontWeight: FontWeight.Regular,
@@ -4728,7 +4728,7 @@ export struct TreeViewInnerV2 {
   private readonly INITIAL_INVALID_VALUE: number = -1;
   private readonly MAX_TOUCH_DOWN_COUNT: number = 0;
   private isMultiPress: boolean = false;
-  private touchDownCount: number = this.INITIAL_INVALID_VALUE;
+  private touchDownCount: number = -1;
   private appEventBus: TreeListenerV2 = TreeListenerManagerV2.getInstance().getTreeListener();
   private readonly itemPadding: ItemPadding = {
     left: LengthMetrics.resource($r('sys.float.ohos_id_card_margin_start')),
@@ -5084,7 +5084,7 @@ export struct TreeViewInnerV2 {
     }
   }
 
-  build() {
+  build(): void {
     if (this.item.getNodeIsShow()) {
       Stack() {
         Column() {
