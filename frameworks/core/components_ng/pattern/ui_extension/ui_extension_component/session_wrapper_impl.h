@@ -116,7 +116,7 @@ public:
 private:
     int32_t GetFrameNodeId() const;
     void InitAllCallback();
-    void setConnectToRenderInner(RefPtr<PipelineBase> context, Rosen::SessionInfo& sesson);
+    void setConnectToRenderInner(const RefPtr<PipelineBase>& context, Rosen::SessionInfo& sesson);
     void InitForegroundCallback();
     void InitBackgroundCallback();
     void InitDestructionCallback();
