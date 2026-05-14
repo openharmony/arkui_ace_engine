@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutBase::PreloadItems(

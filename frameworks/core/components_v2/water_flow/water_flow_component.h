@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_COMPONENT_H
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/scroll_bar.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/components_v2/water_flow/water_flow_position_controller.h"

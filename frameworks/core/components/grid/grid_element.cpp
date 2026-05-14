@@ -16,6 +16,7 @@
 #include "core/components/grid/grid_element.h"
 
 #include "core/components/grid/grid_component.h"
+#include "core/components/grid/render_grid.h"
 #include "core/components/proxy/render_item_proxy.h"
 #include "core/event/ace_event_helper.h"
 

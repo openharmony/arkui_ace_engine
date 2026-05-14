@@ -23,6 +23,8 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "core/animation/curve_animation.h"
+#include "core/components/positioned/positioned_component.h"
+#include "core/components/stack/stack_element.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
 

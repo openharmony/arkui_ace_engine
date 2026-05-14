@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLL_BAR_THEME_WRAPPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLL_BAR_THEME_WRAPPER_H
 
-#include <memory>
-
 #include "core/components/common/properties/color.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"

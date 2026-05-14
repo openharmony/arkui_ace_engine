@@ -19,11 +19,8 @@
 #include <stdint.h>
 #include "compatible/components/list_v2/list_item_group_component.h"
 #include "base/geometry/dimension.h"
-#include "compatible/components/list_v2/list_component.h"
-#include "compatible/components/list_v2/list_item_component.h"
 #include "compatible/components/list_v2/list_item_generator.h"
 #include "compatible/components/list_v2/render_list_item.h"
-#include "core/gestures/long_press_recognizer.h"
 
 namespace OHOS::Ace::V2 {
 

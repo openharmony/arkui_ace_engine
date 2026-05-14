@@ -18,7 +18,6 @@
 
 #include "compatible/components/list/render_list.h"
 #include "compatible/components/list/render_list_item.h"
-#include "base/utils/system_properties.h"
 #include "core/animation/animator.h"
 #include "core/components/box/render_box.h"
 #include "core/components/image/image_component.h"

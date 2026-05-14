@@ -18,8 +18,6 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/grid/grid_controller.h"
-#include "core/components/grid/grid_element.h"
-#include "core/components/grid/render_grid.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/constants.h"
 
