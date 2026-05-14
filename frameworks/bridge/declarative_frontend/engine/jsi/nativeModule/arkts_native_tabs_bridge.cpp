@@ -1781,4 +1781,99 @@ void TabsBridge::ParseCustomContentTransition(
 
     TabsModel::GetInstance()->SetOnCustomAnimation(std::move(onCustomAnimation));
 }
+
+std::optional<Dimension> TabsBridge::ParseBarFloatingDimension(
+    Framework::EcmaVM* vm, Local<JSValueRef> value, RefPtr<ResourceObject>& resObj)
+{
+    CalcDimension dimension;
+    auto parseOk = ArkTSUtils::ParseJsDimensionVp(vm, value, dimension, resObj);
+    if (parseOk) {
+        return dimension;
+    } else {
+        return std::nullopt;
+    }
+    return dimension;
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabsBarFloatingStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    using namespace OHOS::Ace::Framework;
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> param = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    if (!param->IsObject(vm)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsBarFloatingStyle(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    BarFloatingStyleParameters parameters;
+    auto paramObject = param->ToObject(vm);
+
+    RefPtr<ResourceObject> smallBarWidthObj;
+    RefPtr<ResourceObject> mediumBarWidthObj;
+    RefPtr<ResourceObject> largeBarWidthObj;
+    RefPtr<ResourceObject> barSideMarginObj;
+    RefPtr<ResourceObject> barBottomMarginObj;
+    RefPtr<ResourceObject> maskColorObj;
+    RefPtr<ResourceObject> maskHeightObj;
+
+    auto barWidthVal = ArkTSUtils::GetProperty(vm, paramObject, "barWidth");
+    if (barWidthVal->IsObject(vm)) {
+        auto barWidthObject = barWidthVal->ToObject(vm);
+        parameters.smallBarWidth = ParseBarFloatingDimension(
+            vm, ArkTSUtils::GetProperty(vm, barWidthObject, "smallBarWidth"), smallBarWidthObj);
+        parameters.mediumBarWidth = ParseBarFloatingDimension(
+            vm, ArkTSUtils::GetProperty(vm, barWidthObject, "mediumBarWidth"), mediumBarWidthObj);
+        parameters.largeBarWidth = ParseBarFloatingDimension(
+            vm, ArkTSUtils::GetProperty(vm, barWidthObject, "largeBarWidth"), largeBarWidthObj);
+    }
+
+    parameters.barSideMargin =
+        ParseBarFloatingDimension(vm, ArkTSUtils::GetProperty(vm, paramObject, "barSideMargin"), barSideMarginObj);
+    parameters.barBottomMargin =
+        ParseBarFloatingDimension(vm, ArkTSUtils::GetProperty(vm, paramObject, "barBottomMargin"), barBottomMarginObj);
+    Color colorVal;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    bool parseOk = ArkTSUtils::ParseJsColorAlpha(
+        vm, ArkTSUtils::GetProperty(vm, paramObject, "maskColor"), colorVal, maskColorObj, nodeInfo);
+    if (parseOk) {
+        parameters.maskColor = colorVal;
+    } else {
+        parameters.maskColor = std::nullopt;
+    }
+    parameters.maskHeight =
+        ParseBarFloatingDimension(vm, ArkTSUtils::GetProperty(vm, paramObject, "maskHeight"), maskHeightObj);
+
+    if (ArkTSUtils::GetProperty(vm, paramObject, "adaptToHandedness")->IsBoolean()) {
+        parameters.adaptToHandedness =
+            ArkTSUtils::GetProperty(vm, paramObject, "adaptToHandedness")->ToBoolean(vm)->Value();
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        parameters.smallBarWidthObject = smallBarWidthObj;
+        parameters.mediumBarWidthObject = mediumBarWidthObj;
+        parameters.largeBarWidthObject = largeBarWidthObj;
+        parameters.barSideMarginObject = barSideMarginObj;
+        parameters.barBottomMarginObject = barBottomMarginObj;
+        parameters.maskColorObject = maskColorObj;
+        parameters.maskHeightObject = maskHeightObj;
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setTabsBarFloatingStyle(nativeNode, &parameters);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsBarFloatingStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsBarFloatingStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

@@ -25324,6 +25324,10 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, CachedMaxCountModifier.identity, CachedMaxCountModifier, arkTabsCachedMaxCount);
     return this;
   }
+  barFloatingStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TabBarFloatingStyleModifier.identity, TabBarFloatingStyleModifier, value);
+    return this;
+  }
 }
 class BarGridAlignModifier extends ModifierWithKey {
   constructor(value) {
@@ -25981,6 +25985,19 @@ class CachedMaxCountModifier extends ModifierWithKey {
   }
 }
 CachedMaxCountModifier.identity = Symbol('cachedMaxCount');
+class TabBarFloatingStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsBarFloatingStyle(node);
+    } else {
+      getUINativeModule().tabs.setTabsBarFloatingStyle(node, this.value);
+    }
+  }
+}
+TabBarFloatingStyleModifier.identity = Symbol('barFloatingStyle');
 // @ts-ignore
 if (globalThis.Tabs !== undefined) {
   globalThis.Tabs.attributeModifier = function (modifier) {
