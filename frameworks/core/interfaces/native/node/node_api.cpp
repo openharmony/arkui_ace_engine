@@ -674,6 +674,7 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
     NodeModifier::SetOnListScrollVisibleContentChange,
+    NodeModifier::SetOnListEditModeChange,
 };
 
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -920,6 +921,7 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnListReachStart,
     NodeModifier::ResetOnListReachEnd,
     NodeModifier::ResetOnScrollVisibleContentChange,
+    NodeModifier::ResetOnListEditModeChange,
 };
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

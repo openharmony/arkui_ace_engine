@@ -146,6 +146,10 @@ public:
     {
         return { GetItemAtPosition(offsetX, offsetY), -1 };
     }
+    virtual SwipeSelectStateKey GetSwipeSelectStateKeyNearPosition(float offsetX, float offsetY) const
+    {
+        return GetSwipeSelectStateKeyAtPosition(offsetX, offsetY);
+    }
     virtual SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const
     {
         return { index, -1 };
@@ -176,12 +180,17 @@ public:
     }
     void SwipeSelectAutoScroll(const PointF& globalPoint);
     void StopSwipeSelectAutoScroll();
+    void UpdateSwipeSelectStateKeyForAutoScroll(float offsetPct);
 
     virtual void ApplyEditModeToVisibleItems();
     virtual void RemoveEditModeFromItems();
 
 protected:
     virtual void ApplyEditModeToCachedItems(bool enabled) {}
+    void RecordSwipeOriginalStatesInRange(const std::vector<SwipeSelectStateKey>& stateKeysInRange);
+    void ApplySwipeSelectionForFirstRange(const std::vector<SwipeSelectStateKey>& stateKeysInRange, bool isSelected);
+    void ApplySwipeSelectionForDeltaRange(
+        const SwipeSelectStateKey& rangeStartKey, const SwipeSelectStateKey& rangeEndKey, bool isSelected);
     struct ItemSelectedStatus {
         std::function<void(bool)> onSelected;
         std::function<void(bool)> selectChangeEvent;
@@ -252,6 +261,10 @@ private:
     SwipeSelectStateKey swipeStartStateKey_;
     SwipeSelectStateKey swipeCurrentStateKey_;
     std::map<SwipeSelectStateKey, bool> swipeOriginalStates_;
+    SwipeSelectStateKey swipePrevRangeStartKey_;
+    SwipeSelectStateKey swipePrevRangeEndKey_;
+    float lastSwipeSelectLocalX_ = -1.0f;
+    static constexpr float SWIPE_SELECT_EDGE_MARGIN_PX = 2.0f;
 };
 } // namespace OHOS::Ace::NG
 

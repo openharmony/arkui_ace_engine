@@ -77,6 +77,7 @@ public:
     virtual void SetEditModeOptions(NG::EditModeOptions& editModeOptions) {}
     virtual void SetEnableEditMode(bool enableEditMode) {}
     virtual void SetEnableEditModeChangeEvent(std::function<void(bool)>&& changeEvent) {}
+    virtual void SetEnableEditModeBindingEvent(std::function<void(bool)>&& bindingEvent) {}
     virtual void SetOnScroll(OnScrollEvent&& onScroll) = 0;
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) = 0;

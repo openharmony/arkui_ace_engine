@@ -485,6 +485,72 @@ HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeEditModeOffThreeFingerReject001,
     EXPECT_EQ(result, GestureJudgeResult::REJECT);
 }
 
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeEditModeOffFingerTooFarReject001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = std::make_shared<PanGestureEvent>();
+    event->SetRawInputEventType(InputEventType::TOUCH_SCREEN);
+    std::list<FingerInfo> fingers;
+    FingerInfo finger0;
+    finger0.fingerId_ = 0;
+    finger0.globalLocation_ = Offset(0.0, 0.0);
+    fingers.push_back(finger0);
+    FingerInfo finger1;
+    finger1.fingerId_ = 1;
+    finger1.globalLocation_ = Offset(500.0, 500.0);
+    fingers.push_back(finger1);
+    event->SetFingerList(fingers);
+
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+HWTEST_F(GridTwoFingerSelectTestNg, GestureJudgeEditModeOffFingerNearContinue001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+    auto event = std::make_shared<PanGestureEvent>();
+    event->SetRawInputEventType(InputEventType::TOUCH_SCREEN);
+    std::list<FingerInfo> fingers;
+    FingerInfo finger0;
+    finger0.fingerId_ = 0;
+    finger0.globalLocation_ = Offset(100.0, 100.0);
+    fingers.push_back(finger0);
+    FingerInfo finger1;
+    finger1.fingerId_ = 1;
+    finger1.globalLocation_ = Offset(120.0, 120.0);
+    fingers.push_back(finger1);
+    event->SetFingerList(fingers);
+
+    auto result = callback(gestureInfo, event);
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
 // ============================================================
 // OnModifyDone init/uninit cycle with two-finger select
 // ============================================================

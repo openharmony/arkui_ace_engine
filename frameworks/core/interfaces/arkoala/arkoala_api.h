@@ -1495,6 +1495,7 @@ enum ArkUIEventSubKind {
     ON_LIST_REACH_START,
     ON_LIST_REACH_END,
     ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE,
+    ON_LIST_EDIT_MODE_CHANGE,
 
     ON_LIST_ITEM_SELECTED = ARKUI_MAX_EVENT_NUM * ARKUI_LIST_ITEM,
 
@@ -4456,6 +4457,7 @@ struct ArkUIListModifier {
     void (*setOnListReachEndCallBack)(ArkUINodeHandle node, void* callback);
     void (*setOnListScrollStartCallBack)(ArkUINodeHandle node, void* callback);
     void (*setOnListScrollStopCallBack)(ArkUINodeHandle node, void* callback);
+    void (*setOnListEditModeChangeCallBack)(ArkUINodeHandle node, void* callback);
 
     void (*resetOnListScrollIndex)(ArkUINodeHandle node);
     void (*resetOnScrollVisibleContentChange)(ArkUINodeHandle node);
@@ -4472,6 +4474,7 @@ struct ArkUIListModifier {
     void (*resetOnListDidScroll)(ArkUINodeHandle node);
     void (*resetOnListReachStart)(ArkUINodeHandle node);
     void (*resetOnListReachEnd)(ArkUINodeHandle node);
+    void (*resetOnListEditModeChange)(ArkUINodeHandle node);
     void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
     void (*parseResObjDividerStrokeWidth)(ArkUINodeHandle node, void* resObj);
     void (*parseResObjDividerColor)(ArkUINodeHandle node, void* resObj);

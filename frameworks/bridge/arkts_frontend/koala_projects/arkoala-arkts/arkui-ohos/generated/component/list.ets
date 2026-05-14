@@ -272,6 +272,18 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListAttribute_setEnableEditMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnEditModeChangeAttribute(value: arkui_component_common_Callback<boolean, void> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setOnEditModeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFocusWrapModeAttribute(value: FocusWrapMode | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1146,6 +1158,11 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     public enableEditMode(value: boolean | Bindable<boolean> | undefined): this {
         const value_casted = value as (boolean | Bindable<boolean> | undefined)
         this.getPeer()?.setEnableEditModeAttribute(value_casted)
+        return this
+    }
+    public onEditModeChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<boolean, void> | undefined)
+        this.getPeer()?.setOnEditModeChangeAttribute(value_casted)
         return this
     }
     public focusWrapMode(value: FocusWrapMode | undefined): this {

@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include <cmath>
+#include <limits>
+
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -330,6 +333,47 @@ bool GridPattern::IsItemSelected(float offsetX, float offsetY)
 int32_t GridPattern::GetItemAtPosition(float offsetX, float offsetY) const
 {
     return GetItemIndex(static_cast<double>(offsetX), static_cast<double>(offsetY));
+}
+
+int32_t GridPattern::GetNearestItemIndex(double x, double y) const
+{
+    int32_t nearestIndex = -1;
+    double minDistance = std::numeric_limits<double>::max();
+    for (int32_t index = info_.startIndex_; index <= info_.endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.Width() <= 0 && rect.Height() <= 0) {
+            continue;
+        }
+        double dx = 0.0;
+        if (LessNotEqual(x, rect.Left())) {
+            dx = rect.Left() - x;
+        } else if (GreatNotEqual(x, rect.Right())) {
+            dx = x - rect.Right();
+        }
+        double dy = 0.0;
+        if (LessNotEqual(y, rect.Top())) {
+            dy = rect.Top() - y;
+        } else if (GreatNotEqual(y, rect.Bottom())) {
+            dy = y - rect.Bottom();
+        }
+        double distance = std::sqrt(dx * dx + dy * dy);
+        if (LessNotEqual(distance, minDistance)) {
+            minDistance = distance;
+            nearestIndex = index;
+        }
+    }
+    return nearestIndex;
+}
+
+SelectableContainerPattern::SwipeSelectStateKey GridPattern::GetSwipeSelectStateKeyNearPosition(
+    float offsetX, float offsetY) const
+{
+    auto key = GetSwipeSelectStateKeyAtPosition(offsetX, offsetY);
+    if (key.IsValid()) {
+        return key;
+    }
+    auto nearestIndex = GetNearestItemIndex(static_cast<double>(offsetX), static_cast<double>(offsetY));
+    return { nearestIndex, -1 };
 }
 
 void GridPattern::MarkSwipeItemSelected(int32_t index, bool isSelected)

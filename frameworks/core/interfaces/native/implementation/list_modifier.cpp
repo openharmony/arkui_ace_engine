@@ -432,6 +432,22 @@ void SetEnableEditModeImpl(Ark_NativePointer node,
     }
     ListModelNG::SetEnableEditMode(frameNode, *convValue);
 }
+void SetOnEditModeChangeImpl(Ark_NativePointer node,
+                             const Opt_arkui_component_common_Callback_Boolean_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ListModelNG::SetEnableEditModeChangeEvent(frameNode, nullptr);
+        return;
+    }
+    auto onEditModeChange = [arkCallback = CallbackHelper(*optValue)](bool enableEditMode) {
+        auto arkEnableEditMode = Converter::ArkValue<Ark_Boolean>(enableEditMode);
+        arkCallback.Invoke(arkEnableEditMode);
+    };
+    ListModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(onEditModeChange));
+}
 void SetFocusWrapModeImpl(Ark_NativePointer node,
                           const Opt_FocusWrapMode* value)
 {
@@ -781,6 +797,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetStackFromEndImpl,
         ListAttributeModifier::SetEditModeOptionsImpl,
         ListAttributeModifier::SetEnableEditModeImpl,
+        ListAttributeModifier::SetOnEditModeChangeImpl,
         ListAttributeModifier::SetFocusWrapModeImpl,
         ListAttributeModifier::SetSyncLoadImpl,
         ListAttributeModifier::SetScrollSnapAnimationSpeedImpl,

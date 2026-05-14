@@ -683,11 +683,53 @@ void JSList::SetEditModeOptions(const JSCallbackInfo& info)
 
 void JSList::SetEnableEditMode(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     bool enableEditMode = false;
-    if (info[0]->IsBoolean()) {
-        ParseJsBool(info[0], enableEditMode);
+    JSRef<JSVal> changeEventVal;
+    auto enableVal = info[0];
+    if (enableVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(enableVal);
+        enableVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+    if (enableVal->IsBoolean()) {
+        ParseJsBool(enableVal, enableEditMode);
     }
     ListModel::GetInstance()->SetEnableEditMode(enableEditMode);
+    if (changeEventVal->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                               bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("List.EnableEditModeChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ListModel::GetInstance()->SetEnableEditModeBindingEvent(std::move(changeEvent));
+    }
+}
+
+void JSList::SetOnEditModeChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("List.OnEditModeChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(1, &newJSVal);
+    };
+    ListModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
 }
 
 void JSList::SetScrollSnapAnimationSpeed(const JSCallbackInfo& args)
@@ -1087,6 +1129,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);
     JSClass<JSList>::StaticMethod("enableEditMode", &JSList::SetEnableEditMode);
+    JSClass<JSList>::StaticMethod("onEditModeChange", &JSList::SetOnEditModeChange);
     JSClass<JSList>::StaticMethod("scrollSnapAnimationSpeed", &JSList::SetScrollSnapAnimationSpeed);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
