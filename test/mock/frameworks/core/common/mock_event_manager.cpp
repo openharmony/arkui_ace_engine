@@ -79,6 +79,8 @@ struct RectCallbackListImpl {};
 EventManager::EventManager()
 {
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
+    refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
+    postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
 }
 
 EventManager::~EventManager() = default;

@@ -15,13 +15,14 @@
 
 #include "relaxed_interaction_manager_test_ng.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components_ng/relaxed_interaction/executor_choreographer.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {
+constexpr int INVALID_EXECUTOR_RESULT_VALUE = 999;
 const std::string VALID_BACKPRESS_JSON = R"({
   "cmd": {
     "type": "backpress"
@@ -89,7 +90,25 @@ private:
     bool isSingleStep_;
 };
 
-} // namespace
+class MockExecutorUnknownResult : public BaseExecutor {
+public:
+    MockExecutorUnknownResult() : BaseExecutor(nullptr) {}
+
+    ExecutorResult ExecuteStep() override
+    {
+        return static_cast<ExecutorResult>(INVALID_EXECUTOR_RESULT_VALUE);
+    }
+
+    std::string GetType() const override
+    {
+        return "mock_unknown";
+    }
+
+    bool IsSingleStep() const override
+    {
+        return true;
+    }
+};
 
 class RelaxedInteractionManagerConstructorTest : public RelaxedInteractionManagerTestBase {};
 class RelaxedInteractionManagerProcessCommandTest : public RelaxedInteractionManagerTestBase {};
@@ -557,6 +576,26 @@ HWTEST_F(RelaxedInteractionManagerExecutionStateToStringTest, ExecutionStateToSt
     auto invalidState = static_cast<ExecutionState>(invalidExecutionStateValue);
     auto result = manager_->ExecutionStateToString(invalidState);
     EXPECT_EQ(result, "UNKNOWN");
+}
+
+HWTEST_F(RelaxedInteractionManagerProcessCommandTest, ProcessCommand_DebugEnabled_LogsExecutors, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    auto result = manager_->ProcessCommand(VALID_BACKPRESS_JSON);
+    EXPECT_EQ(result, ProcessResult::SUCCESS);
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+HWTEST_F(
+    RelaxedInteractionManagerExecuteNextStepTest, ExecuteNextStep_UnknownExecutorResult_ReturnsFailed, TestSize.Level1)
+{
+    std::vector<std::unique_ptr<BaseExecutor>> executors;
+    executors.emplace_back(std::make_unique<MockExecutorUnknownResult>());
+    manager_->choreographer_->Enqueue(std::move(executors));
+
+    auto state = manager_->ExecuteNextStep();
+    EXPECT_EQ(state, ExecutionState::FAILED);
 }
 
 } // namespace OHOS::Ace::NG
