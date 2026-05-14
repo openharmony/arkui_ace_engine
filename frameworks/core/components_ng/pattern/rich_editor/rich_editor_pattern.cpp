@@ -4536,6 +4536,26 @@ Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
     return Offset(localPoint.GetX(), localPoint.GetY());
 }
 
+OffsetF RichEditorPattern::ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset)
+{
+    std::vector<OffsetF> points = { localOffset };
+    selectOverlay_->GetGlobalPointsWithTransform(points);
+    CHECK_NULL_RETURN(!points.empty(), localOffset);
+    return OffsetF(points[0].GetX(), points[0].GetY());
+}
+
+bool RichEditorPattern::HasRenderTransform()
+{
+    return selectOverlay_->HasRenderTransform();
+}
+
+VectorF RichEditorPattern::GetHostScale() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, VectorF(1, 1));
+    return TextBase::GetHostScale(host);
+}
+
 void RichEditorPattern::HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd)
 {
     initSelector_ = { selectStart, selectEnd };
@@ -9838,15 +9858,7 @@ void RichEditorPattern::CreateDragNode()
     info.maxSelectedWidth = GetMaxSelectedWidth();
     info.handleColor = GetCaretColor();
     info.selectedBackgroundColor = GetSelectedBackgroundColor();
-    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
-    if (selectOverlayInfo.has_value()) {
-        if (selectOverlayInfo->firstHandle.isShow) {
-            info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
-        }
-        if (selectOverlayInfo->secondHandle.isShow) {
-            info.secondHandle =  selectOverlayInfo->secondHandle.paintRect;
-        }
-    }
+    SetHandleInfo(info);
     if (textSelector_.GetTextEnd() - textSelector_.GetTextStart() == 1) {
         auto spanItem = GetSpanItemByPosition(textSelector_.GetTextStart());
         auto placeholderSpanItem = DynamicCast<PlaceholderSpanItem>(spanItem);
@@ -9870,6 +9882,21 @@ void RichEditorPattern::CreateDragNode()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetPixelMap(nullptr);
+}
+
+void RichEditorPattern::SetHandleInfo(TextDragInfo& info)
+{
+    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(selectOverlayInfo.has_value());
+    if (selectOverlayInfo->firstHandle.isShow) {
+        info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
+    }
+    if (selectOverlayInfo->secondHandle.isShow) {
+        info.secondHandle = selectOverlayInfo->secondHandle.paintRect;
+    }
+    CHECK_NULL_VOID(HasRenderTransform());
+    info.firstHandle.SetOffset(selectOverlayInfo->firstHandle.GetPaintRect().GetOffset());
+    info.secondHandle.SetOffset(selectOverlayInfo->secondHandle.GetPaintRect().GetOffset());
 }
 
 void RichEditorPattern::SetSelectedDragPreviewColor(const Color& selectedDragPreviewColor)
@@ -11689,6 +11716,28 @@ void RichEditorPattern::ResetDragOption()
     }
 }
 
+RectF RichEditorPattern::GetVisibleContentRect()
+{
+    CHECK_NULL_RETURN(!HasRenderTransform(), selectOverlay_->GetVisibleContentRectWithTransform(0.0f));
+    auto contentRect = contentRect_;
+    auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
+    contentRect.SetOffset(contentRect.GetOffset() + paintOffset);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, contentRect);
+    auto parent = host->GetAncestorNodeOfFrame(false);
+    return SelectOverlayClient::GetVisibleContentRect(parent, contentRect);
+}
+
+void RichEditorPattern::ConvertLocalToGlobalRect(RectF& localRect)
+{
+    if (HasRenderTransform()) {
+        selectOverlay_->GetGlobalRectWithTransform(localRect);
+        return;
+    }
+    auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
+    localRect.SetOffset(localRect.GetOffset() + paintOffset);
+}
+
 void RichEditorPattern::AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects)
 {
     if (pos == SelectRectsType::LEFT_TOP_POINT) {
@@ -11703,14 +11752,8 @@ void RichEditorPattern::AdjustSelectRects(SelectRectsType pos, std::vector<RectF
 RectF RichEditorPattern::GetSelectArea(SelectRectsType pos)
 {
     RectF rect;
-    auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
     auto selectRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-    auto contentRect = contentRect_;
-    contentRect.SetOffset(contentRect.GetOffset() + paintOffset);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, rect);
-    auto parent = host->GetAncestorNodeOfFrame(false);
-    contentRect = GetVisibleContentRect(parent, contentRect);
+    auto contentRect = GetVisibleContentRect();
     AppendSelectRect(selectRects);
     if (selectRects.empty()) {
         CHECK_NULL_RETURN(overlayMod_, rect);
@@ -11718,7 +11761,8 @@ RectF RichEditorPattern::GetSelectArea(SelectRectsType pos)
         CHECK_NULL_RETURN(richEditorOverlay, rect);
         auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
         auto caretWidth = GetCaretWidth();
-        auto selectRect = RectF(caretOffset + paintOffset, SizeF(caretWidth, caretHeight));
+        auto selectRect = RectF(caretOffset, SizeF(caretWidth, caretHeight));
+        ConvertLocalToGlobalRect(selectRect);
         return selectRect.IntersectRectT(contentRect);
     }
     AdjustSelectRects(pos, selectRects);
@@ -11741,10 +11785,10 @@ RectF RichEditorPattern::GetSelectArea(SelectRectsType pos)
             selectAreaLeft = std::min(selectAreaLeft, combineLineRect.Left());
         }
     }
-    RectF res = { selectAreaLeft + richTextRect_.GetX() + paintOffset.GetX(),
-        frontRect.GetY() + richTextRect_.GetY() + paintOffset.GetY(), selectAreaRight - selectAreaLeft,
-        backRect.Bottom() - frontRect.Top() };
-    return res.IntersectRectT(contentRect);
+    RectF localSelectArea = { selectAreaLeft + richTextRect_.GetX(), frontRect.GetY() + richTextRect_.GetY(),
+        selectAreaRight - selectAreaLeft, backRect.Bottom() - frontRect.Top() };
+    ConvertLocalToGlobalRect(localSelectArea);
+    return localSelectArea.IntersectRectT(contentRect);
 }
 
 void RichEditorPattern::AppendSelectRect(std::vector<RectF>& selectRects)
@@ -11789,7 +11833,7 @@ bool RichEditorPattern::IsTouchInFrameArea(const PointF& touchPoint)
     CHECK_NULL_RETURN(host, false);
     auto viewPort = RectF(parentGlobalOffset_, frameRect_.GetSize());
     auto parent = host->GetAncestorNodeOfFrame(false);
-    viewPort = GetVisibleContentRect(parent, viewPort);
+    viewPort = SelectOverlayClient::GetVisibleContentRect(parent, viewPort);
     return viewPort.IsInRegion(touchPoint);
 }
 

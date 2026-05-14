@@ -931,6 +931,7 @@
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateTransformFlag()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateViewPort()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::GetClearPolicy()";
+      "OHOS::Ace::NG::BaseTextSelectOverlay::GetVisibleContentRectWithTransform(float)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>, Ark_BorderRadiuses>(Ark_BorderRadiuses const&)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator==(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator!=(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
