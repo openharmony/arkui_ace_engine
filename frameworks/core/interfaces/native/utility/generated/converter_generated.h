@@ -1489,6 +1489,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Resource_image_PixelMap_String& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Resource_String& src)
 {
     switch (src.selector) {
@@ -5040,6 +5056,7 @@ ASSIGN_OPT(Opt_Union_MenuPreviewMode_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_NestedScrollOptions_NestedScrollOptionsExt)
 ASSIGN_OPT(Opt_Union_OutlineStyle_EdgeOutlineStyles)
 ASSIGN_OPT(Opt_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner)
+ASSIGN_OPT(Opt_Union_Resource_image_PixelMap_String)
 ASSIGN_OPT(Opt_Union_Resource_String)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColorContent_ColorMetricsExt)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColoringStrategy)

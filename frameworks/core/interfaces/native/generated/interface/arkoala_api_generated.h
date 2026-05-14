@@ -2829,6 +2829,8 @@ typedef struct Ark_Union_OutlineStyle_EdgeOutlineStyles Ark_Union_OutlineStyle_E
 typedef struct Opt_Union_OutlineStyle_EdgeOutlineStyles Opt_Union_OutlineStyle_EdgeOutlineStyles;
 typedef struct Ark_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner Ark_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner;
 typedef struct Opt_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner Opt_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner;
+typedef struct Ark_Union_Resource_image_PixelMap_String Ark_Union_Resource_image_PixelMap_String;
+typedef struct Opt_Union_Resource_image_PixelMap_String Opt_Union_Resource_image_PixelMap_String;
 typedef struct Ark_Union_Resource_String Ark_Union_Resource_String;
 typedef struct Opt_Union_Resource_String Opt_Union_Resource_String;
 typedef struct Ark_Union_ResourceColor_ColorContent_ColorMetricsExt Ark_Union_ResourceColor_ColorContent_ColorMetricsExt;
@@ -18416,6 +18418,19 @@ typedef struct Opt_Union_ParticleColorOptions_Array_ParticlePropertyAnimationCol
     Ark_Tag tag;
     Ark_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner value;
 } Opt_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner;
+typedef struct Ark_Union_Resource_image_PixelMap_String {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Resource value0;
+        Ark_image_PixelMap value1;
+        Ark_String value2;
+    };
+} Ark_Union_Resource_image_PixelMap_String;
+typedef struct Opt_Union_Resource_image_PixelMap_String {
+    Ark_Tag tag;
+    Ark_Union_Resource_image_PixelMap_String value;
+} Opt_Union_Resource_image_PixelMap_String;
 typedef struct Ark_Union_Resource_String {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -29592,8 +29607,10 @@ typedef struct GENERATED_ArkUIImageAttachmentAccessor {
 
 typedef struct GENERATED_ArkUIImageBitmapAccessor {
     void (*destroyPeer)(Ark_ImageBitmap peer);
-    Ark_ImageBitmap (*construct)(const Ark_Union_image_PixelMap_String* src,
-                                 const Opt_LengthMetricsUnit* unit);
+    Ark_ImageBitmap (*construct0)(const Ark_Union_image_PixelMap_String* src,
+                                  const Opt_LengthMetricsUnit* unit);
+    Ark_ImageBitmap (*construct1)(const Ark_Union_Resource_image_PixelMap_String* src,
+                                  const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     void (*close)(Ark_ImageBitmap peer);
     Ark_Float64 (*getHeight)(Ark_ImageBitmap peer);

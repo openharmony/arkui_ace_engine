@@ -29,8 +29,10 @@ import { Size_serializer, arkui_Graphics_LengthMetrics_serializer } from './../f
 import { drawing_Canvas_serializer } from './../framework/ohos.graphics.drawing'
 import { default as drawing } from '@ohos.graphics.drawing'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
+import { global_resource_Resource_serializer } from './../framework/resource'
 import { PixelMap, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, ArkCommonMethodComponent } from './common'
 import { default as image } from '@ohos.multimedia.image'
+import { Resource as global_resource_Resource } from 'global.resource'
 import { ArkThemeScopeManager } from '#arktheme'
 import { ImageAIOptions_serializer, ImageAIOptions, ImageAnalyzerConfig_serializer, ImageAnalyzerConfig } from './imageCommon'
 import { ComponentBase } from './../ComponentBase'
@@ -404,9 +406,12 @@ export class ImageBitmap implements MaterializedBase {
         this.peer = new Finalizable(peerPtr, ImageBitmap.getFinalizer())
     }
     constructor(src: PixelMap | string, unit?: arkui_component_units_LengthMetricsUnit) {
-        this(MaterializedBaseTag.NOP, ImageBitmap.construct(src, unit))
+        this(MaterializedBaseTag.NOP, ImageBitmap.construct0(src, unit))
     }
-    static construct(src: PixelMap | string, unit?: arkui_component_units_LengthMetricsUnit): KPointer {
+    constructor(src: global_resource_Resource | PixelMap | string, unit?: arkui_component_units_LengthMetricsUnit) {
+        this(MaterializedBaseTag.NOP, ImageBitmap.construct1(src, unit))
+    }
+    static construct0(src: PixelMap | string, unit?: arkui_component_units_LengthMetricsUnit): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (src instanceof PixelMap) {
             thisSerializer.writeInt8((0).toByte())
@@ -424,7 +429,33 @@ export class ImageBitmap implements MaterializedBase {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const retval = ArkUIGeneratedNativeModule._ImageBitmap_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._ImageBitmap_construct0(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static construct1(src: global_resource_Resource | PixelMap | string, unit?: arkui_component_units_LengthMetricsUnit): KPointer {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (src instanceof global_resource_Resource) {
+            thisSerializer.writeInt8((0).toByte())
+            const srcForIdx0 = src as global_resource_Resource
+            global_resource_Resource_serializer.write(thisSerializer, srcForIdx0)
+        } else if (src instanceof PixelMap) {
+            thisSerializer.writeInt8((1).toByte())
+            const srcForIdx1 = src as PixelMap
+            image_PixelMap_serializer.write(thisSerializer, srcForIdx1)
+        } else if (src instanceof string) {
+            thisSerializer.writeInt8((2).toByte())
+            const srcForIdx2 = src as string
+            thisSerializer.writeString(srcForIdx2)
+        }
+        if (unit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const unitTmpValue = (unit as arkui_component_units_LengthMetricsUnit)
+            thisSerializer.writeInt32(unitTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._ImageBitmap_construct1(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
