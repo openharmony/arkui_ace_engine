@@ -593,9 +593,7 @@ void GetFreeNodeContent(const std::unique_ptr<JsonValue>& jsonTree, const RefPtr
         }
         GetInspectorChildren(uiNode, jsonNodeArray, inspectorParameters);
     }
-    if (jsonNodeArray->GetArraySize()) {
-        jsonTree->PutRef("other_contents", std::move(jsonNodeArray));
-    }
+    jsonTree->PutRef("other_contents", std::move(jsonNodeArray));
 }
 
 std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t pageId,
