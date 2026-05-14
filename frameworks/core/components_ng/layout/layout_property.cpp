@@ -1381,26 +1381,17 @@ void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value)
 
 TextDirection LayoutProperty::GetLayoutDirection() const
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    if (!pipeline || !pipeline->GetUseEnvManager()) {
-        return layoutDirection_.value_or(TextDirection::AUTO);
-    }
-    if (layoutDirection_.has_value()) {
-        return layoutDirection_.value();
-    }
     auto host = GetHost();
-    if (host) {
-        auto envDirection = pipeline->ResolveDirectionFromEnv(host);
-        if (envDirection.has_value()) {
-            return envDirection.value();
-        }
-    }
-    return TextDirection::AUTO;
+    auto pipeline = host ? host->GetContext() : nullptr;
+    return (!pipeline || (pipeline && !pipeline->GetUseEnvManager()))
+        ? layoutDirection_.value_or(TextDirection::AUTO)
+        : (layoutDirection_.has_value() ? layoutDirection_.value()
+            : (host ? pipeline->ResolveDirectionFromEnv(host).value_or(TextDirection::AUTO) : TextDirection::AUTO));
 }
 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
 {
-    auto direction = layoutDirection_.value_or(TextDirection::AUTO);
+    auto direction = GetLayoutDirection();
     return direction != TextDirection::AUTO
                ? direction
                : (AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
