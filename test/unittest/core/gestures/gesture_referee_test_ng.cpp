@@ -2461,4 +2461,207 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeForEachRecognizerTest004, TestSize.
 
     EXPECT_EQ(callCount, 0);
 }
+
+/**
+ * @tc.name: GestureRefereeCheckEventTypeChangeTest001
+ * @tc.desc: Test CheckEventTypeChange returns true when lastIsAxis=true, isAxis=false, type=TOUCH
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCheckEventTypeChangeTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.lastIsAxis_ = true;
+    auto result = gestureReferee.CheckEventTypeChange(SourceType::TOUCH, false);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureRefereeCheckEventTypeChangeTest002
+ * @tc.desc: Test CheckEventTypeChange returns true when lastIsAxis=true, isAxis=false, type=MOUSE
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCheckEventTypeChangeTest002, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.lastIsAxis_ = true;
+    auto result = gestureReferee.CheckEventTypeChange(SourceType::MOUSE, false);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureRefereeCheckEventTypeChangeTest003
+ * @tc.desc: Test CheckEventTypeChange returns false when lastIsAxis=true, isAxis=false, type=KEYBOARD
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCheckEventTypeChangeTest003, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.lastIsAxis_ = true;
+    auto result = gestureReferee.CheckEventTypeChange(SourceType::KEYBOARD, false);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureRefereeCheckEventTypeChangeTest004
+ * @tc.desc: Test CheckEventTypeChange returns false when lastIsAxis=false
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCheckEventTypeChangeTest004, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.lastIsAxis_ = false;
+    auto result = gestureReferee.CheckEventTypeChange(SourceType::TOUCH, false);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureRefereeAdjudicateNoneTest001
+ * @tc.desc: Test Adjudicate with GestureDisposal::NONE goes to default branch
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeAdjudicateNoneTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    auto prevState = gestureRecognizer->GetRefereeState();
+    gestureReferee.Adjudicate(gestureRecognizer, GestureDisposal::NONE);
+    EXPECT_EQ(gestureRecognizer->GetRefereeState(), prevState);
+}
+
+/**
+ * @tc.name: GestureScopeCloseBlockedTest001
+ * @tc.desc: Test GestureScope::Close with isBlocked=true
+ */
+HWTEST_F(GestureRefereeTestNg, GestureScopeCloseBlockedTest001, TestSize.Level1)
+{
+    GestureScope gestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope.recognizers_.emplace_back(gestureRecognizer);
+    gestureScope.Close(true);
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeCheckInnerContainerTest001
+ * @tc.desc: Test CheckRecognizerInInnerContainer returns true when touchId < 100000 and recognizer exists
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCheckInnerContainerTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    auto result = gestureReferee.CheckRecognizerInInnerContainer(gestureRecognizer);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureRefereeCheckInnerContainerTest002
+ * @tc.desc: Test CheckRecognizerInInnerContainer returns false when touchId >= 100000
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCheckInnerContainerTest002, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(200000);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    gestureReferee.gestureScopes_[200000] = gestureScope;
+    auto result = gestureReferee.CheckRecognizerInInnerContainer(gestureRecognizer);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureRefereeCheckInnerContainerTest003
+ * @tc.desc: Test CheckRecognizerInInnerContainer returns false when recognizer not in any scope
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCheckInnerContainerTest003, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    auto result = gestureReferee.CheckRecognizerInInnerContainer(gestureRecognizer);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GestureRefereeHandleAcceptDelayTest001
+ * @tc.desc: Test HandleAcceptDisposal delays when RecognizerDelayStatus is START and recognizer in inner container
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeHandleAcceptDelayTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.recognizerDelayStatus_ = RecognizerDelayStatus::START;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleAcceptDisposal(gestureRecognizer);
+    EXPECT_EQ(gestureRecognizer->GetRefereeState(), RefereeState::READY);
+}
+
+/**
+ * @tc.name: GestureRefereeHandleRejectUnblockPendingTest001
+ * @tc.desc: Test HandleRejectDisposal unblocks PENDING_BLOCKED recognizer
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeHandleRejectUnblockPendingTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> pendingRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    pendingRecognizer->refereeState_ = RefereeState::PENDING;
+    RefPtr<ClickRecognizer> blockedRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    blockedRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(
+        AceType::DynamicCast<NGGestureRecognizer>(pendingRecognizer));
+    gestureScope->recognizers_.emplace_back(
+        AceType::DynamicCast<NGGestureRecognizer>(blockedRecognizer));
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleRejectDisposal(
+        AceType::DynamicCast<NGGestureRecognizer>(pendingRecognizer));
+    EXPECT_EQ(pendingRecognizer->GetRefereeState(), RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: GestureRefereeHandleRejectUnblockSucceedTest001
+ * @tc.desc: Test HandleRejectDisposal unblocks SUCCEED_BLOCKED recognizer
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeHandleRejectUnblockSucceedTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> pendingRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    pendingRecognizer->refereeState_ = RefereeState::PENDING;
+    RefPtr<ClickRecognizer> blockedRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    blockedRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(
+        AceType::DynamicCast<NGGestureRecognizer>(pendingRecognizer));
+    gestureScope->recognizers_.emplace_back(
+        AceType::DynamicCast<NGGestureRecognizer>(blockedRecognizer));
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleRejectDisposal(
+        AceType::DynamicCast<NGGestureRecognizer>(pendingRecognizer));
+    EXPECT_EQ(pendingRecognizer->GetRefereeState(), RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: GestureRefereeCleanAllBlockedTest001
+ * @tc.desc: Test CleanAll with isBlocked=true passes flag to Close
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeCleanAllBlockedTest001, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.CleanAll(true);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

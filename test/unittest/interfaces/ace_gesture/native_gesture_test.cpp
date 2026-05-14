@@ -1519,3 +1519,586 @@ HWTEST_F(NativeGestureTest, GestureImplTest0047, TestSize.Level1)
     ASSERT_EQ(gestureEvent->eventData.rawPointerEvent, nullptr);
     nodeAPI->disposeNode(gestureNode);
 }
+
+/**
+ * @tc.name: GestureImplTest0048
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers with null info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0048, TestSize.Level1)
+{
+    ArkUI_GestureRecognizerHandleArray array;
+    int32_t size = 0;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers(nullptr, &array, &size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0049
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers with null array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0049, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    int32_t size = 0;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers(&info, nullptr, &size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0050
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers with null size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0050, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    ArkUI_GestureRecognizerHandleArray array;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers(&info, &array, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0051
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0051, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    ArkUI_GestureRecognizerHandleArray array;
+    int32_t size = 0;
+    info.interceptData.count = 5;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_GetResponseRecognizers(&info, &array, &size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(size, 5);
+}
+
+/**
+ * @tc.name: GestureImplTest0052
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers with null info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0052, TestSize.Level1)
+{
+    ArkUI_TouchRecognizerHandleArray recognizers;
+    int32_t size = 0;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers(nullptr, &recognizers, &size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0053
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers with null recognizers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0053, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    int32_t size = 0;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers(&info, nullptr, &size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0054
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers with null size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0054, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    ArkUI_TouchRecognizerHandleArray recognizers;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers(&info, &recognizers, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0055
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0055, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    ArkUI_TouchRecognizerHandleArray recognizers;
+    int32_t size = 0;
+    info.interceptData.touchRecognizerCnt = 3;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_GetTouchRecognizers(&info, &recognizers, &size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(size, 3);
+}
+
+/**
+ * @tc.name: GestureImplTest0056
+ * @tc.desc: Test OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention with null info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0056, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention(
+        nullptr, OH_ARKUI_GESTURE_COLLECT_INTERVENTION_CONTINUE);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0057
+ * @tc.desc: Test SetGestureCollectIntervention with intervention below valid range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0057, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    auto intervention = static_cast<OH_ArkUI_GestureCollectIntervention>(
+        OH_ARKUI_GESTURE_COLLECT_INTERVENTION_CONTINUE - 1);
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention(&info, intervention);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0058
+ * @tc.desc: Test SetGestureCollectIntervention with intervention above valid range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0058, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    auto intervention = static_cast<OH_ArkUI_GestureCollectIntervention>(
+        OH_ARKUI_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER_PRIORITY_SIBLINGS + 1);
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention(&info, intervention);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0059
+ * @tc.desc: Test SetGestureCollectIntervention with CONTINUE (lower boundary).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0059, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention(
+        &info, OH_ARKUI_GESTURE_COLLECT_INTERVENTION_CONTINUE);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: GestureImplTest0060
+ * @tc.desc: Test SetGestureCollectIntervention with DISCARD_LOWER_PRIORITY_SIBLINGS (upper boundary).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0060, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention(
+        &info, OH_ARKUI_GESTURE_COLLECT_INTERVENTION_DISCARD_LOWER_PRIORITY_SIBLINGS);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: GestureImplTest0061
+ * @tc.desc: Test SetGestureCollectIntervention with DISCARD_HIGHER (middle value).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0061, TestSize.Level1)
+{
+    ArkUI_GestureCollectInterceptInfo info;
+    auto ret = OH_ArkUI_GestureCollectInterceptInfo_SetGestureCollectIntervention(
+        &info, OH_ARKUI_GESTURE_COLLECT_INTERVENTION_DISCARD_HIGHER);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: GestureImplTest0062
+ * @tc.desc: Test OH_ArkUI_TouchRecognizer_IsHostBelongsTo with null recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0062, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_TouchRecognizer_IsHostBelongsTo(nullptr, 1);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GestureImplTest0063
+ * @tc.desc: Test OH_ArkUI_GestureRecognizer_IsHostBelongsTo with null recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0063, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GestureRecognizer_IsHostBelongsTo(nullptr, 1);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GestureImplTest0064
+ * @tc.desc: Test OH_ArkUI_GestureRecognizer_IsHostBelongsTo with valid recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0064, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer recognizer;
+    auto ret = OH_ArkUI_GestureRecognizer_IsHostBelongsTo(&recognizer, 1);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GestureImplTest0065
+ * @tc.desc: Test OH_ArkUI_GetGestureBindNodeUniqueId with null recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0065, TestSize.Level1)
+{
+    int32_t uniqueId = 0;
+    auto ret = OH_ArkUI_GetGestureBindNodeUniqueId(nullptr, &uniqueId);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0066
+ * @tc.desc: Test OH_ArkUI_GetGestureBindNodeUniqueId with valid recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0066, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer recognizer;
+    int32_t uniqueId = 0;
+    auto ret = OH_ArkUI_GetGestureBindNodeUniqueId(&recognizer, &uniqueId);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0067
+ * @tc.desc: Test OH_ArkUI_PanGesture_SetDistanceMap with null recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0067, TestSize.Level1)
+{
+    int toolType = 1;
+    double distance = 5.0;
+    auto ret = OH_ArkUI_PanGesture_SetDistanceMap(nullptr, 1, &toolType, &distance);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0068
+ * @tc.desc: Test OH_ArkUI_PanGesture_SetDistanceMap with null toolTypeArray.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0068, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer recognizer;
+    double distance = 5.0;
+    auto ret = OH_ArkUI_PanGesture_SetDistanceMap(&recognizer, 1, nullptr, &distance);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0069
+ * @tc.desc: Test OH_ArkUI_PanGesture_SetDistanceMap with null distanceArray.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0069, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer recognizer;
+    int toolType = 1;
+    auto ret = OH_ArkUI_PanGesture_SetDistanceMap(&recognizer, 1, &toolType, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0070
+ * @tc.desc: Test OH_ArkUI_PanGesture_SetDistanceMap with null gesture field.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0070, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer recognizer;
+    recognizer.gesture = nullptr;
+    int toolType = 1;
+    double distance = 5.0;
+    auto ret = OH_ArkUI_PanGesture_SetDistanceMap(&recognizer, 1, &toolType, &distance);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0071
+ * @tc.desc: Test OH_ArkUI_PanGesture_SetDistanceMap with non-PAN gesture type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0071, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    ASSERT_NE(gestureAPI, nullptr);
+    auto tapGesture = gestureAPI->createTapGesture(1, 1);
+    ASSERT_NE(tapGesture, nullptr);
+    int toolType = 1;
+    double distance = 5.0;
+    auto ret = OH_ArkUI_PanGesture_SetDistanceMap(tapGesture, 1, &toolType, &distance);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED);
+    gestureAPI->dispose(tapGesture);
+}
+
+/**
+ * @tc.name: GestureImplTest0072
+ * @tc.desc: Test OH_ArkUI_PanGesture_SetDistanceMap with valid PAN gesture.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0072, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    ASSERT_NE(gestureAPI, nullptr);
+    auto panGesture = gestureAPI->createPanGesture(1, GESTURE_DIRECTION_ALL, 5.0);
+    ASSERT_NE(panGesture, nullptr);
+    int toolType = 1;
+    double distance = 10.0;
+    auto ret = OH_ArkUI_PanGesture_SetDistanceMap(panGesture, 1, &toolType, &distance);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    gestureAPI->dispose(panGesture);
+}
+
+/**
+ * @tc.name: GestureImplTest0073
+ * @tc.desc: Test OH_ArkUI_PreventGestureRecognizerBegin with null recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0073, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_PreventGestureRecognizerBegin(nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0074
+ * @tc.desc: Test OH_ArkUI_PreventGestureRecognizerBegin with valid recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0074, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    ASSERT_NE(gestureAPI, nullptr);
+    auto panGesture = gestureAPI->createPanGesture(1, GESTURE_DIRECTION_ALL, 5.0);
+    ASSERT_NE(panGesture, nullptr);
+    auto ret = OH_ArkUI_PreventGestureRecognizerBegin(panGesture);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    gestureAPI->dispose(panGesture);
+}
+
+/**
+ * @tc.name: GestureImplTest0075
+ * @tc.desc: Test OH_ArkUI_SetTouchTestDoneCallback with null node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0075, TestSize.Level1)
+{
+    auto callback = [](ArkUI_GestureEvent* event, ArkUI_GestureRecognizerHandleArray recognizers,
+        int32_t count, void* userData) {};
+    auto ret = OH_ArkUI_SetTouchTestDoneCallback(nullptr, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0076
+ * @tc.desc: Test OH_ArkUI_SetTouchTestDoneCallback with valid node and callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0076, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    auto callback = [](ArkUI_GestureEvent* event, ArkUI_GestureRecognizerHandleArray recognizers,
+        int32_t count, void* userData) {};
+    auto ret = OH_ArkUI_SetTouchTestDoneCallback(node, nullptr, callback);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: GestureImplTest0077
+ * @tc.desc: Test OH_ArkUI_PanGesture_GetDistanceByToolType with null recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0077, TestSize.Level1)
+{
+    double distance = 0.0;
+    auto ret = OH_ArkUI_PanGesture_GetDistanceByToolType(nullptr, 1, &distance);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0078
+ * @tc.desc: Test OH_ArkUI_PanGesture_GetDistanceByToolType with null distance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0078, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer recognizer;
+    auto ret = OH_ArkUI_PanGesture_GetDistanceByToolType(&recognizer, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: GestureImplTest0079
+ * @tc.desc: Test OH_ArkUI_PanGesture_GetDistanceByToolType with non-PAN gesture type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0079, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    ASSERT_NE(gestureAPI, nullptr);
+    auto tapGesture = gestureAPI->createTapGesture(1, 1);
+    ASSERT_NE(tapGesture, nullptr);
+    double distance = 0.0;
+    auto ret = OH_ArkUI_PanGesture_GetDistanceByToolType(tapGesture, 1, &distance);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED);
+    gestureAPI->dispose(tapGesture);
+}
+
+/**
+ * @tc.name: GestureImplTest0080
+ * @tc.desc: Test OH_ArkUI_PanGesture_GetDistanceByToolType with valid PAN gesture.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0080, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    ASSERT_NE(gestureAPI, nullptr);
+    auto panGesture = gestureAPI->createPanGesture(1, GESTURE_DIRECTION_ALL, 5.0);
+    ASSERT_NE(panGesture, nullptr);
+    double distance = 0.0;
+    auto ret = OH_ArkUI_PanGesture_GetDistanceByToolType(panGesture, 1, &distance);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    gestureAPI->dispose(panGesture);
+}
+
+/**
+ * @tc.name: GestureImplTest0081
+ * @tc.desc: Test SetGestureParallelTo with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0081, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    auto parallelGesture = [](ArkUI_ParallelGestureEvent* event) -> ArkUI_GestureRecognizer* {
+        return nullptr;
+    };
+    auto ret = OHOS::Ace::GestureModel::SetGestureParallelTo(node, nullptr, parallelGesture);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: GestureImplTest0082
+ * @tc.desc: Test OH_ArkUI_GestureInterruptInfo_GetSystemFlag with isSystemGesture false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0082, TestSize.Level1)
+{
+    ArkUI_GestureInterruptInfo interruptInfo;
+    interruptInfo.interruptData.isSystemGesture = false;
+    auto result = OH_ArkUI_GestureInterruptInfo_GetSystemFlag(&interruptInfo);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GestureImplTest0083
+ * @tc.desc: Test OH_ArkUI_TouchRecognizer_CancelTouch with null info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0083, TestSize.Level1)
+{
+    ArkUI_TouchRecognizerHandle recognizer = reinterpret_cast<ArkUI_TouchRecognizerHandle>(new int(1));
+    auto ret = OH_ArkUI_TouchRecognizer_CancelTouch(recognizer, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete reinterpret_cast<int*>(recognizer);
+}
+
+/**
+ * @tc.name: GestureImplTest0084
+ * @tc.desc: Test HandleGestureEvent with KEY input event type.
+ * @tc.type: FUNC
+ */
+static bool g_keyEventTypeIdChecked = false;
+static bool g_keyInputTypeChecked = false;
+void MockTargetReceiverForKey(ArkUI_GestureEvent* event, void* extraParam)
+{
+    ASSERT_NE(event->eventData.rawPointerEvent, nullptr);
+    auto* uiEvent = reinterpret_cast<ArkUI_UIInputEvent*>(event->eventData.rawPointerEvent);
+    if (uiEvent->eventTypeId == C_CLICK_EVENT_ID) {
+        g_keyEventTypeIdChecked = true;
+    }
+    if (uiEvent->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
+        g_keyInputTypeChecked = true;
+    }
+}
+HWTEST_F(NativeGestureTest, GestureImplTest0084, TestSize.Level1)
+{
+    ArkUINodeEvent event = {0};
+    OHOS::Ace::GestureModel::GestureInnerData extraData;
+    event.kind = ArkUIEventCategory::GESTURE_ASYNC_EVENT;
+    event.gestureAsyncEvent.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_KEY);
+    event.gestureAsyncEvent.rawPointerEvent = nullptr;
+    extraData.gesture = nullptr;
+    extraData.targetReceiver = MockTargetReceiverForKey;
+    extraData.extraParam = nullptr;
+    event.extraParam = reinterpret_cast<ArkUI_Int64>(&extraData);
+
+    g_keyEventTypeIdChecked = false;
+    g_keyInputTypeChecked = false;
+    OHOS::Ace::GestureModel::HandleGestureEvent(&event);
+    EXPECT_TRUE(g_keyEventTypeIdChecked);
+    EXPECT_TRUE(g_keyInputTypeChecked);
+}
+
+/**
+ * @tc.name: GestureImplTest0085
+ * @tc.desc: Test OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify with capi=false internal recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0085, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    ASSERT_NE(gestureAPI, nullptr);
+    auto panGesture = gestureAPI->createPanGesture(1, GESTURE_DIRECTION_ALL, 5.0);
+    ASSERT_NE(panGesture, nullptr);
+    panGesture->capi = false;
+    ArkUI_GestureRecognizerDisposeNotifyCallback callback =
+        reinterpret_cast<ArkUI_GestureRecognizerDisposeNotifyCallback>(+[](ArkUI_GestureRecognizer* r, void* d) {});
+    auto ret = OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(panGesture, callback, nullptr);
+    EXPECT_EQ(ret, 0);
+    gestureAPI->dispose(panGesture);
+}
+
+/**
+ * @tc.name: GestureImplTest0086
+ * @tc.desc: Test OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify with capi=true recognizer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0086, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    ASSERT_NE(gestureAPI, nullptr);
+    auto panGesture = gestureAPI->createPanGesture(1, GESTURE_DIRECTION_ALL, 5.0);
+    ASSERT_NE(panGesture, nullptr);
+    // capi is true by default for CAPI-created recognizers
+    ArkUI_GestureRecognizerDisposeNotifyCallback callback =
+        reinterpret_cast<ArkUI_GestureRecognizerDisposeNotifyCallback>(+[](ArkUI_GestureRecognizer* r, void* d) {});
+    auto ret = OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(panGesture, callback, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    gestureAPI->dispose(panGesture);
+}
