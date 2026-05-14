@@ -175,6 +175,12 @@ void JSDepthComponent::Create(const JSCallbackInfo& info)
     }
 #endif
     auto background = ParseBackgroundSource(info[0]);
+    
+    if (!background.IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent background is invalid, cannot create component");
+        return;
+    }
+    
     NG::DepthComponentModel::Create(background);
     if (info.Length() > 1) {
         ParseAndSetDepthSpace(info[1]);
@@ -351,12 +357,29 @@ bool JSDepthComponent::IsGltfSource(const std::string& src)
     }
 
     auto queryPos = src.find('?');
+    std::string query = (queryPos != std::string::npos) ? src.substr(queryPos + 1) : "";
+    
+    if (!query.empty()) {
+        StringUtils::TransformStrCase(query, StringUtils::TEXT_CASE_LOWERCASE);
+        if (query.find("type=gltf") != std::string::npos || 
+            query.find("type=glb") != std::string::npos ||
+            query.find("format=gltf") != std::string::npos ||
+            query.find("format=glb") != std::string::npos) {
+            return true;
+        }
+        if (query.find("type=image") != std::string::npos || 
+            query.find("format=image") != std::string::npos) {
+            return false;
+        }
+    }
+
     std::string cleanSrc = (queryPos == std::string::npos) ? src : src.substr(0, queryPos);
     if (cleanSrc.size() <= NUM_5) {
         return false;
     }
     StringUtils::TransformStrCase(cleanSrc, StringUtils::TEXT_CASE_LOWERCASE);
-    return cleanSrc.rfind(".gltf") == cleanSrc.size() - NUM_5 || cleanSrc.rfind(".glb") == cleanSrc.size() - NUM_4;
+    return cleanSrc.rfind(".gltf") == cleanSrc.size() - NUM_5 || 
+           cleanSrc.rfind(".glb") == cleanSrc.size() - NUM_4;
 }
 
 bool JSDepthComponent::SetOhosPath(const std::string& uri, std::string& ohosPath)

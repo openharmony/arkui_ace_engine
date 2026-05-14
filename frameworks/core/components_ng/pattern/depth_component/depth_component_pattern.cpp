@@ -128,14 +128,16 @@ void DepthComponentPattern::OnModifyDone()
         RemoveBackgroundImageNode();
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
         InitGltfAdapter();
-        if (!gltfWindowsInitialized_) {
+        if (!gltfWindowsInitialized_ && Positive(width3d_) && Positive(height3d_)) {
             CreateCustomNativeWindows(width3d_, height3d_);
         }
         UpdateGltfScene();
         Update3DScale();
-        UpdateWindowChangeSize(true);
-        UpdateWindowInfo();
-        MarkRender3D();
+        if (gltfWindowsInitialized_) {
+            UpdateWindowChangeSize(true);
+            UpdateWindowInfo();
+            MarkRender3D();
+        }
 #endif
     } else {
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
@@ -165,6 +167,13 @@ bool DepthComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
     width3d_ = frameRect.Width();
     height3d_ = frameRect.Height();
     if (IsGltfBackground()) {
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+        if (!gltfWindowsInitialized_ && Positive(width3d_) && Positive(height3d_)) {
+            CreateCustomNativeWindows(width3d_, height3d_);
+            UpdateGltfScene();
+            UpdateWindowInfo();
+        }
+#endif
         UpdateGltfWindowChange(dirty, config);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -573,6 +582,13 @@ void DepthComponentPattern::CreateCustomNativeWindows(float width, float height)
 {
     ACE_SCOPED_TRACE("DepthComponent::CreateCustomNativeWindows width=%.1f height=%.1f current=%zu", width, height,
         nativeWindows_.size());
+    
+    if (NearZero(width) || NearZero(height)) {
+        TAG_LOGW(AceLogTag::ACE_DEPTH_COMPONENT, 
+            "Invalid size for native window: width=%.1f height=%.1f", width, height);
+        return;
+    }
+    
     if (nativeWindows_.size() == DEPTH_COMPONENT_NATIVE_WINDOW_COUNT) {
         return;
     }
