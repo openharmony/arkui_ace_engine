@@ -538,6 +538,45 @@ HWTEST_F(TextTestNgNine, HandleTouchEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleTouchEvent002
+ * @tc.desc: test HandleTouchEvent after enabling one step drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, HandleTouchEvent002, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textFrameNode, nullptr);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    pattern->GetTextController()->CloseSelectionMenu();
+
+    int32_t callBack = 0;
+    std::function<void()> buildFunc = [&callBack]() {
+        callBack = 1;
+        return;
+    };
+    pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc, {});
+    ASSERT_TRUE(static_cast<bool>(pattern->oneStepDragController_));
+    EXPECT_FALSE(pattern->GetIsTouchPressed());
+
+    TouchEventInfo touchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetLocalLocation(Offset(0, 0));
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    std::list<TouchLocationInfo> touchLocationInfos;
+    touchLocationInfos.emplace_back(touchLocationInfo);
+    touchEventInfo.SetChangedTouches(std::move(touchLocationInfos));
+
+    pattern->HandleTouchEvent(touchEventInfo);
+
+    EXPECT_TRUE(pattern->GetIsTouchPressed());
+}
+
+/**
  * @tc.name: HandleDoubleClickEvent001
  * @tc.desc: test test_pattern.h HandleDoubleClickEvent function.
  * @tc.type: FUNC
