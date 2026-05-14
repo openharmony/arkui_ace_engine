@@ -98,6 +98,7 @@ private:
     static void ParseTransitionParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseAnchorPositionParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuGridStyleParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuTargetSpace(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::Framework

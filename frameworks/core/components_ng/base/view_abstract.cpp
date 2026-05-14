@@ -4785,14 +4785,22 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     }
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     CHECK_NULL_VOID(menuViewModifier);
+    auto menuType = (menuParam.type == MenuType::CONTEXT_MENU) ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = menuViewModifier->createWithOptionParams(
-                        std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+                        std::move(params), targetNode->GetId(), targetNode->GetTag(), menuType, menuParam);
     CHECK_NULL_VOID(menuNode);
     ACE_UINODE_TRACE(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
     menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+
+    // CONTEXT_MENU always shows in subwindow
+    if (menuParam.type == MenuType::CONTEXT_MENU) {
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
+        return;
+    }
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();

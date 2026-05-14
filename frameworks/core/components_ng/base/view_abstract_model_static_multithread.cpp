@@ -79,4 +79,18 @@ void BindContextMenuStaticMultiThread(const RefPtr<FrameNode>& targetNode, Respo
                 frameNode, type, std::move(builder), menuParam, std::move(previewBuildFunc));
         });
 }
+
+void BindContextMenuStaticWithOptionsMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::vector<NG::OptionParam>&& param, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
+{
+    CHECK_NULL_VOID(targetNode);
+    targetNode->PostAfterAttachMainTreeTask(
+        [weak = AceType::WeakClaim(targetNode.GetRawPtr()), type, param = std::move(param), menuParam,
+            previewBuildFunc = std::move(previewBuildFunc)]() mutable {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ViewAbstractModelStatic::BindContextMenuStaticWithOptions(
+                frameNode, type, std::move(param), menuParam, std::move(previewBuildFunc));
+        });
+}
 } // namespace OHOS::Ace::NG
