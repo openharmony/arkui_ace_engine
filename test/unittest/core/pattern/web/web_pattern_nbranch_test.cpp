@@ -86,6 +86,10 @@ public:
     MOCK_METHOD(bool, GetIsFocus, (), (const, override));
     MOCK_METHOD(void, SetPageNodeRect, (const NG::RectF& rect), (override));
     MOCK_METHOD(const NG::RectF&, GetPageNodeRect, (), (const, override));
+    MOCK_METHOD(void, SetUserAutoFillType, (bool userType), (override));
+    MOCK_METHOD(bool, GetUserAutoFillType, (), (const, override));
+    MOCK_METHOD(void, SetKeyAttribute, (const std::string& keyAttribute), (override));
+    MOCK_METHOD(const std::string&, GetKeyAttribute, (), (const, override));
 };
 
 class ViewDataWrapMock : public ViewDataWrap {

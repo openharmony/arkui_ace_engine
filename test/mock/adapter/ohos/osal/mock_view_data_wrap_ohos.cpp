@@ -229,6 +229,24 @@ public:
         return pageNodeRect_;
     }
 
+    void SetUserAutoFillType(bool userType) override
+    {
+        return;
+    }
+    bool GetUserAutoFillType() const override
+    {
+        return false;
+    }
+
+    void SetKeyAttribute(const std::string& keyAttribute) override
+    {
+        return;
+    }
+    const std::string& GetKeyAttribute() const override
+    {
+        return str_;
+    }
+
 private:
     OHOS::Ace::AceAutoFillType autoFillType;
     OHOS::Ace::NG::RectF pageNodeRect_;

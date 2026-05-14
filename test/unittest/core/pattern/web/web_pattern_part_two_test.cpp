@@ -378,6 +378,10 @@ public:
     MOCK_METHOD(bool, GetIsFocus, (), (const, override));
     MOCK_METHOD(void, SetPageNodeRect, (const NG::RectF& rect), (override));
     MOCK_METHOD(const NG::RectF&, GetPageNodeRect, (), (const, override));
+    MOCK_METHOD(void, SetUserAutoFillType, (bool userType), (override));
+    MOCK_METHOD(bool, GetUserAutoFillType, (), (const, override));
+    MOCK_METHOD(void, SetKeyAttribute, (const std::string& keyAttribute), (override));
+    MOCK_METHOD(const std::string&, GetKeyAttribute, (), (const, override));
 };
 
 /**
@@ -917,6 +921,214 @@ HWTEST_F(WebPatternPartTwoTest, GetFocusedType004, TestSize.Level1)
     EXPECT_CALL(*pageNodeInfo, GetIsFocus()).WillRepeatedly(::testing::Return(false));
     AceAutoFillType result = webPattern->GetFocusedType();
     EXPECT_EQ(result, AceAutoFillType::ACE_UNSPECIFIED);
+#endif
+}
+
+/**
+ * @tc.name: IsHint2Type001
+ * @tc.desc: IsHint2Type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, IsHint2Type001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+
+    std::string value_1 = "";
+    bool type = webPattern->IsHint2Type(value_1);
+    EXPECT_EQ(type, false);
+
+    std::string value_2 = "{\"isHint2Type\": false}";
+    type = webPattern->IsHint2Type(value_2);
+    EXPECT_EQ(type, false);
+
+    std::string value_3 = "{\"isHint2Type\": true}";
+    type = webPattern->IsHint2Type(value_3);
+    EXPECT_EQ(type, true);
+#endif
+}
+
+/**
+ * @tc.name: IsMsdpType001
+ * @tc.desc: IsMsdpType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, IsMsdpType001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+
+    std::string value_1 = "";
+    bool type = webPattern->IsMsdpType(value_1);
+    EXPECT_EQ(type, false);
+
+    std::string value_2 = "{\"isMSDP\": false}";
+    type = webPattern->IsMsdpType(value_2);
+    EXPECT_EQ(type, false);
+
+    std::string value_3 = "{\"isMSDP\": true}";
+    type = webPattern->IsMsdpType(value_3);
+    EXPECT_EQ(type, true);
+#endif
+}
+
+/**
+ * @tc.name: SaveMsdpResultForAutoFill001
+ * @tc.desc: SaveMsdpResultForAutoFill.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, SaveMsdpResultForAutoFill001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    auto comJson = std::make_unique<JsonValue>();
+    int ret = webPattern->SaveMsdpResultForAutoFill(comJson);
+    EXPECT_EQ(ret, static_cast<int>(WebCommandResult::JSON_IS_INVALID));
+
+    cJSON* jsObj_2 = cJSON_Parse("{\"cmd\":\"MSDP_AutoFill\"}");
+    auto command_2 = std::make_unique<JsonValue>(jsObj_2);
+    ret = webPattern->SaveMsdpResultForAutoFill(command_2);
+    EXPECT_EQ(ret, static_cast<int>(WebCommandResult::JSON_IS_INVALID));
+
+    const std::string& command3 = R"({
+        "cmd":"MSDP_AutoFill",
+        "params":{"result":[
+            {"content_type" : "PHONE_NUMBER", "id" : "93"},
+            {"content_type" : "PHONE_NUMBER", "id" : "93#15"}
+        ]}
+    })";
+    cJSON* jsObj_3 = cJSON_Parse(command3.c_str());
+    auto command_3 = std::make_unique<JsonValue>(jsObj_3);
+    ret = webPattern->SaveMsdpResultForAutoFill(command_3);
+    EXPECT_EQ(ret, static_cast<int>(WebCommandResult::SUCCESS));
+#endif
+}
+
+/**
+ * @tc.name: SaveMsdpResultForAutoFill002
+ * @tc.desc: SaveMsdpResultForAutoFill.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, SaveMsdpResultForAutoFill002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    const std::string& command4 = R"({
+        "cmd":"MSDP_AutoFill",
+        "params":{"result":[
+            {"content_type" : "PHONE_NUMBER", "id" : "93#5"},
+            {"content_type" : "PHONE_NUMBER", "id" : "93#10"},
+            {"content_type" : "PHONE_NUMBER", "id" : "93#15"}
+        ]}
+    })";
+    cJSON* jsObj_4 = cJSON_Parse(command4.c_str());
+    auto command_4 = std::make_unique<JsonValue>(jsObj_4);
+    int ret = webPattern->SaveMsdpResultForAutoFill(command_4);
+    EXPECT_EQ(ret, static_cast<int>(WebCommandResult::SUCCESS));
+
+    const std::string& command5 = R"({
+        "cmd":"MSDP_AutoFill",
+        "params":{"result":[
+            {"content_type" : "PHONE_NUMBER", "id" : "93"},
+            "invalid_item"
+        ]}
+    })";
+    cJSON* jsObj_5 = cJSON_Parse(command5.c_str());
+    auto command_5 = std::make_unique<JsonValue>(jsObj_5);
+    ret = webPattern->SaveMsdpResultForAutoFill(command_5);
+    EXPECT_EQ(ret, static_cast<int>(WebCommandResult::FAILED));
+#endif
+}
+
+/**
+ * @tc.name: MergeHint2TypeAndMsdpType001
+ * @tc.desc: MergeHint2TypeAndMsdpType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, MergeHint2TypeAndMsdpType001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+
+    std::string metadata = "metadata";
+    std::string value = "5";
+    std::string value2 = "10";
+    RefPtr<PageNodeInfoWrapMock> pageNodeInfo = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
+    EXPECT_CALL(*pageNodeInfo, GetUserAutoFillType()).WillRepeatedly(::testing::Return(true));
+    EXPECT_CALL(*pageNodeInfo, GetMetadata()).WillRepeatedly(ReturnRef(metadata));
+    EXPECT_CALL(*pageNodeInfo, GetKeyAttribute()).WillRepeatedly(::testing::ReturnRef(value));
+    EXPECT_CALL(*pageNodeInfo, GetAutoFillType()).WillRepeatedly(::testing::Return(AceAutoFillType::ACE_UNSPECIFIED));
+    webPattern->pageNodeInfo_.push_back(pageNodeInfo);
+
+    RefPtr<PageNodeInfoWrapMock> pageNodeInfo2 = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
+    EXPECT_CALL(*pageNodeInfo2, GetUserAutoFillType()).WillRepeatedly(::testing::Return(false));
+    EXPECT_CALL(*pageNodeInfo2, GetMetadata()).WillRepeatedly(ReturnRef(metadata));
+    EXPECT_CALL(*pageNodeInfo2, GetKeyAttribute()).WillRepeatedly(::testing::ReturnRef(value2));
+    EXPECT_CALL(*pageNodeInfo2, GetAutoFillType()).WillRepeatedly(::testing::Return(AceAutoFillType::ACE_USER_NAME));
+    webPattern->pageNodeInfo_.push_back(pageNodeInfo2);
+
+    webPattern->msdpTypes_[value] = "PHONE_NUMBER";
+    webPattern->msdpTypes_[value2] = "USER_NAME";
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto ret = webPattern->MergeHint2TypeAndMsdpType();
+    EXPECT_EQ(ret, true);
 #endif
 }
 

@@ -223,6 +223,8 @@ constexpr Dimension CALIBERATE_X = 4.0_vp;
 constexpr Color SELECTED_OPTION_FONT_COLOR = Color(0xff0a59f7);
 constexpr Color SELECTED_OPTION_BACKGROUND_COLOR = Color(0x19254FF7);
 
+constexpr int32_t MSDP_SPLIT_SIZE = 2;
+constexpr int32_t MSDP_SPLIT_COMPONENTID = 1;
 constexpr int32_t HALF = 2;
 constexpr int32_t AI_TIMEOUT_LIMIT = 200;
 constexpr int32_t CHECK_PRE_SIZE = 5;
@@ -430,6 +432,31 @@ bool IsSnapshotPathValid(const std::string& snapshotPath)
     }
     return true;
 }
+
+std::vector<std::string> SplitAllByString(const std::string &src, const std::string &delim)
+{
+    std::vector<std::string> result;
+    if (delim.empty()) {
+        result.push_back(src);
+        return result;
+    }
+    if (src == delim) {
+        result.push_back(src);
+        return result;
+    }
+    size_t startPos = 0;
+    size_t pos = src.find(delim);
+    while (pos != std::string::npos) {
+        result.push_back(src.substr(startPos, pos - startPos));
+        startPos = pos + delim.size();
+        pos = src.find(delim, startPos);
+    }
+    if (startPos < src.size()) {
+        result.push_back(src.substr(startPos));
+    }
+    return result;
+}
+
 } // namespace
 
 namespace SameLayerSurface {
@@ -5840,6 +5867,35 @@ OHOS::NWeb::NWebAutoFillTriggerType ConvertAceAutoFillTriggerType(const AceAutoF
     }
 }
 
+bool WebPattern::IsHint2Type(const std::string& meta)
+{
+    //{"isHint2Type": false, "isMSDP": true}
+    auto json = JsonUtil::ParseJsonString(meta);
+    if (!json || !json->IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The isHint2Type json is invalid");
+        return false;
+    }
+    auto hint = json->GetValue("isHint2Type");
+    if (hint && hint->GetBool()) {
+        return true;
+    }
+     return false;
+}
+
+bool WebPattern::IsMsdpType(const std::string& meta)
+{
+    auto json = JsonUtil::ParseJsonString(meta);
+    if (!json || !json->IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The isMsdpType json is invalid");
+        return false;
+    }
+    auto msdp = json->GetValue("isMSDP");
+    if (msdp && msdp->GetBool()) {
+        return true;
+    }
+     return false;
+}
+
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
 {
@@ -5857,7 +5913,8 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
             jsonNode->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE.c_str(), nodeInfoWrap->GetValue().c_str());
         } else if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {  // white list check
             std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
-            if (nodeInfoWrap->GetMetadata() != IS_HINT_TYPE) {
+            std::string metaData = nodeInfoWrap->GetMetadata();
+            if (!IsHint2Type(metaData) && !IsMsdpType(metaData)) {
                 jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
             } else {
                 auto json = JsonUtil::Create(true);
@@ -5962,6 +6019,7 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
         }
         hintToTypeWrap.autoFillType = type;
         hintToTypeWrap.metadata = node->GetMetadata();
+        node->SetUserAutoFillType(true);
     } else if (!placeholder.empty()) {
         // try hint2Type
         auto host = GetHost();
@@ -6016,8 +6074,6 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
     if (type != AceAutoFillType::ACE_UNSPECIFIED) {
         node->SetAutoFillType(type);
         node->SetMetadata(hintToTypeWrap.metadata);
-    } else {
-        return;
     }
 
     NG::RectF rectF;
@@ -6025,6 +6081,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
     node->SetPageNodeRect(rectF);
     node->SetId(nodeId);
     node->SetDepth(-1);
+    node->SetKeyAttribute(attribute);
     nodeInfos.emplace_back(node);
 }
 
@@ -6082,6 +6139,86 @@ void WebPattern::ParseNWebViewDataJson(const std::string& viewDataJson,
     }
 }
 
+int WebPattern::SaveMsdpResultForAutoFill(const std::unique_ptr<JsonValue>& comJson)
+{
+    auto valueCmd = comJson->GetValue("cmd");
+    if (!valueCmd || !valueCmd->IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The MsdpResult json is invalid");
+        return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "The MsdpResult json cmd=%{public}s", valueCmd->GetString().c_str());
+
+    auto value = comJson->GetValue("params");
+    if (!value || !value->IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The MsdpResult json is invalid");
+        return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
+    }
+    std::lock_guard<std::mutex> lock(msdpTypesMutex_);
+    msdpTypes_.clear();
+    auto result = value->GetValue("result");
+    if (result && result->IsArray()) {
+        auto length = result->GetArraySize();
+        for (int32_t index = 0; index < length; ++index) {
+            auto item = result->GetArrayItem(index);
+            if (!item || !item->IsValid() || !item->IsObject()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "The MsdpResult json in array acton is InValid");
+                return static_cast<int>(WebCommandResult::FAILED);
+            }
+            auto content = item->GetValue("content_type");
+            std::string contentStr = content ? content->GetString() : "";
+            auto itemId = item->GetValue("id");
+            std::string itemIdStr = itemId ? itemId->GetString() : "";
+            std::vector<std::string>  splitResult = SplitAllByString(itemIdStr, "#");
+            if (splitResult.size() >= MSDP_SPLIT_SIZE){
+                std::string componentId = splitResult[MSDP_SPLIT_COMPONENTID];
+                msdpTypes_[componentId] = contentStr;
+            }
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "The MsdpResult json save is success");
+    return static_cast<int>(WebCommandResult::SUCCESS);
+}
+
+bool WebPattern::MergeHint2TypeAndMsdpType()
+{
+    std::lock_guard<std::mutex> lock(msdpTypesMutex_);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto container = Container::Current();
+    if (container == nullptr) {
+        container = Container::GetActive();
+    }
+    HintToTypeWrap hintWrap;
+    for (const auto& nodeInfo : pageNodeInfo_) {
+        if (nodeInfo) {
+            hintWrap.autoFillType = nodeInfo->GetAutoFillType();
+            hintWrap.metadata = nodeInfo->GetMetadata();
+            auto attribute = nodeInfo->GetKeyAttribute();
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "MergeMsdpType old autoFillType=%{public}d, metadata=%{public}s, attribute=%{public}s",
+                static_cast<int32_t>(hintWrap.autoFillType), hintWrap.metadata.c_str(), attribute.c_str());
+            if (nodeInfo->GetUserAutoFillType()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "MergeMsdpType type is user set");
+                continue;
+            }
+            if (container == nullptr) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "MergeMsdpType container is nullptr");
+                continue;
+            }
+            auto iter = msdpTypes_.find(attribute);
+            std::string msdpValue = (iter != msdpTypes_.end()) ? iter->second : "";
+            HintToTypeWrap hintMerge = container->PlaceHolderToType(hintWrap.metadata, msdpValue);
+            TAG_LOGI(AceLogTag::ACE_WEB, "MergeMsdpType new autoFillType=%{public}d, metadata=%{public}s",
+                static_cast<int32_t>(hintMerge.autoFillType), hintMerge.metadata.c_str());
+            if (hintMerge.autoFillType != AceAutoFillType::ACE_UNSPECIFIED) {
+                nodeInfo->SetAutoFillType(hintMerge.autoFillType);
+                nodeInfo->SetMetadata(hintMerge.metadata);
+            }
+        }
+    }
+    return true;
+}
+
 AceAutoFillType WebPattern::GetFocusedType()
 {
     AceAutoFillType type = AceAutoFillType::ACE_UNSPECIFIED;
@@ -6123,6 +6260,7 @@ bool WebPattern::HandleAutoFillEvent()
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
                 AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
+                pattern->MergeHint2TypeAndMsdpType();
                 return pattern->RequestAutoFill(pattern->GetFocusedType(), nodeInfos, triggerType);
             },
             TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
@@ -9815,6 +9953,7 @@ int32_t WebPattern::OnInjectionEvent(const std::string &command)
             std::to_string(static_cast<int32_t>(WebCommandResult::JSON_IS_INVALID)));
         return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
     }
+    SaveMsdpResultForAutoFill(json);
     if (json->IsObject()) {
         int result = SendCommandToNWeb(std::move(json));
         TAG_LOGI(AceLogTag::ACE_WEB, "Web exe the command result is : %{public}d" , result);
