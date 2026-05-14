@@ -31,6 +31,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MAX_FONT_SCALE = 2.0;
+constexpr int32_t DEFAULT_LINE_HEIGHT = 28;
 } // namespace
 
 void TextModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -505,7 +506,8 @@ void TextModelStatic::SetMaximumLineHeight(FrameNode* frameNode, const std::opti
 
 void TextModelStatic::SetLineHeightMultiply(FrameNode* frameNode, const std::optional<double>& valueOpt)
 {
-    if (valueOpt.has_value()) {
+    if (valueOpt.has_value() && !LessNotEqual(valueOpt.value(), 0.0)) {
+        TextModelNG::SetLineHeight(frameNode, CalcDimension(DEFAULT_LINE_HEIGHT, DimensionUnit::PX));
         TextModelNG::SetLineHeightMultiply(frameNode, valueOpt.value());
     } else {
         TextModelNG::ResetLineHeightMultiply(frameNode);
