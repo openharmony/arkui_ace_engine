@@ -99,7 +99,6 @@ public:
             }
             default: {
                 return DefaultVariantVal(type);
-                break;
             }
         }
 
