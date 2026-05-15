@@ -68,6 +68,7 @@ void SearchModelStatic::SetTextIndent(FrameNode* frameNode, const std::optional<
     CHECK_NULL_VOID(textFieldChild);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, textFieldChild);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_TEXT_INDENT, textFieldChild);
 }
 
 void SearchModelStatic::SetCustomKeyboard(FrameNode* frameNode,
@@ -93,10 +94,13 @@ void SearchModelStatic::SetPlaceholderFont(FrameNode* frameNode, const std::opti
     if (font && font->fontSize) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontSize,
             font->fontSize.value(), textFieldChild);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            font->fontSize.value(), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE, textFieldChild);
     } else {
         if (textFieldLayoutProperty->GetPlaceholderFontStyle()) {
             textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetFontSize();
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE, textFieldChild);
     }
     if (font && font->fontStyle) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderItalicFontStyle,
@@ -195,6 +199,7 @@ void SearchModelStatic::SetSearchButtonFontSize(FrameNode* frameNode, const std:
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButtonFontSize, frameNode);
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_FONT_SIZE, buttonFrameNode);
 }
 
 void SearchModelStatic::SetSearchButtonFontColor(FrameNode* frameNode, const std::optional<Color>& color)
@@ -254,10 +259,12 @@ void SearchModelStatic::SetTextFont(FrameNode* frameNode, const std::optional<Fo
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font && font->fontSize) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, font->fontSize.value(), textFieldChild);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(font->fontSize.value(), LpxAttribute::LPX_FONT_SIZE, textFieldChild);
     } else {
         if (textFieldLayoutProperty->GetFontStyle()) {
             textFieldLayoutProperty->GetFontStyle()->ResetFontSize();
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_FONT_SIZE, textFieldChild);
     }
     if (font && font->fontStyle) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ItalicFontStyle,
@@ -461,6 +468,7 @@ void SearchModelStatic::SetAdaptMinFontSize(FrameNode* frameNode, const std::opt
     CHECK_NULL_VOID(textFieldLayoutProperty);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, textFieldChild);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, textFieldChild);
 }
 
 void SearchModelStatic::SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
@@ -476,6 +484,7 @@ void SearchModelStatic::SetAdaptMaxFontSize(FrameNode* frameNode, const std::opt
     CHECK_NULL_VOID(textFieldLayoutProperty);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, textFieldChild);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, textFieldChild);
 }
 
 void SearchModelStatic::SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
@@ -489,6 +498,7 @@ void SearchModelStatic::SetLetterSpacing(FrameNode* frameNode, const std::option
     CHECK_NULL_VOID(textFieldChild);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, textFieldChild);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_LETTER_SPACING, textFieldChild);
 }
 
 void SearchModelStatic::SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
@@ -502,6 +512,7 @@ void SearchModelStatic::SetLineHeight(FrameNode* frameNode, const std::optional<
     CHECK_NULL_VOID(textFieldChild);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, textFieldChild);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_LINE_HEIGHT, textFieldChild);
 }
 
 void SearchModelStatic::SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt)
@@ -744,6 +755,7 @@ void SearchModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optional
         return;
     }
     ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeWidth, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void SearchModelStatic::SetStrokeColor(FrameNode* frameNode, const std::optional<Color>& color)

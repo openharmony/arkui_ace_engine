@@ -79,6 +79,7 @@ constexpr int32_t PREVIEW_MENU_DELAY = 600;
 constexpr int32_t DRAG_NODE_HIDE = 300;
 constexpr int32_t HIGHLIGHT_ANIMATION_DURATION = 300;
 constexpr int32_t HIGHLIGHT_SHOWING_DURATION = 5000;
+const auto LPX_UNIT_SPAN_FILTER = [](const RefPtr<SpanItem>& span) { return span && span->HasLpxUnitStyle(); };
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
@@ -4852,6 +4853,7 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
             dataDetectorAdapter_->StartAITask();
         }
     }
+    UpdateLpxUnitFlag();
 }
 
 void TextPattern::ResetAfterTextChange()
@@ -6797,6 +6799,18 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(WeakClaim(Referenced::RawPtr(host)));
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+    UpdateLpxUnitFlag();
+}
+
+void TextPattern::UpdateLpxUnitFlag()
+{
+    bool hasLpx = std::any_of(spans_.begin(), spans_.end(), LPX_UNIT_SPAN_FILTER);
+    CHECK_NULL_VOID(hasLpxUnitStyle_ != hasLpx);
+    hasLpxUnitStyle_ = hasLpx;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    hasLpx ? host->RegisterLpxAttribute(LpxAttribute::LPX_TEXT_SPAN)
+           : host->UnRegisterLpxAttribute(LpxAttribute::LPX_TEXT_SPAN);
 }
 
 void TextPattern::StyledStringRegisterResource()
@@ -6931,6 +6945,7 @@ void TextPattern::ProcessSpanString()
         auto imageSpan = DynamicCast<ImageSpanItem>(span);
         if (imageSpan) {
             dataDetectorAdapter_->textForAI_ += u'\n';
+            imageSpan->SetImageSpanOptions(imageSpan->options); // update LPX flag
             MountImageNode(imageSpan);
         } else {
             dataDetectorAdapter_->textForAI_ += span->content;
@@ -7003,6 +7018,7 @@ void TextPattern::SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans)
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateContent(textForDisplay_);
+    UpdateLpxUnitFlag();
 }
 
 RectF TextPattern::GetTextContentRect(bool isActualText) const

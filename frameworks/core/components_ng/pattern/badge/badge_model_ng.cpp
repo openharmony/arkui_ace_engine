@@ -76,11 +76,15 @@ void BadgeModelNG::CreateByFrameNode(const RefPtr<FrameNode>& frameNode, BadgePa
     } else {
         layoutProperty->UpdateBadgePositionX(badgeTheme->GetBadgePositionX());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgePositionX.value_or(Dimension()), LpxAttribute::LPX_BADGE_POSITION_X, frameNode);
     if (badgeParameters.badgePositionY.has_value()) {
         layoutProperty->UpdateBadgePositionY(badgeParameters.badgePositionY.value());
     } else {
         layoutProperty->UpdateBadgePositionY(badgeTheme->GetBadgePositionY());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgePositionY.value_or(Dimension()), LpxAttribute::LPX_BADGE_POSITION_Y, frameNode);
     if (badgeParameters.isPositionXy.has_value()) {
         layoutProperty->UpdateIsPositionXy(badgeParameters.isPositionXy.value());
     } else {
@@ -109,6 +113,8 @@ static void UpdateBadgeStyleProperties(BadgeParameters& badgeParameters, const R
     } else {
         layoutProperty->UpdateBadgeOuterBorderWidth(badgeTheme->GetBadgeOuterBorderWidth());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(badgeParameters.badgeOuterBorderWidth.value_or(Dimension()),
+        LpxAttribute::LPX_BADGE_OUTER_BORDER_WIDTH, frameNode);
     if (badgeParameters.isEnableAutoAvoidance.has_value()) {
         layoutProperty->UpdateIsEnableAutoAvoidance(badgeParameters.isEnableAutoAvoidance.value());
     } else {
@@ -137,11 +143,15 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
     } else {
         layoutProperty->UpdateBadgeFontSize(badgeTheme->GetBadgeFontSize());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgeFontSize.value_or(Dimension()), LpxAttribute::LPX_FONT_SIZE, frameNode);
     if (badgeParameters.badgeCircleSize.has_value()) {
         layoutProperty->UpdateBadgeCircleSize(badgeParameters.badgeCircleSize.value());
     } else {
         layoutProperty->UpdateBadgeCircleSize(badgeTheme->GetBadgeCircleSize());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgeCircleSize.value_or(Dimension()), LpxAttribute::LPX_BADGE_CIRCLE_SIZE, frameNode);
     if (badgeParameters.badgeBorderColor.has_value()) {
         layoutProperty->UpdateBadgeBorderColor(badgeParameters.badgeBorderColor.value());
     } else {
@@ -152,6 +162,8 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
     } else {
         layoutProperty->UpdateBadgeBorderWidth(badgeTheme->GetBadgeBorderWidth());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgeBorderWidth.value_or(Dimension()), LpxAttribute::LPX_BADGE_BORDER_WIDTH, frameNode);
     if (badgeParameters.badgeFontWeight.has_value()) {
         layoutProperty->UpdateBadgeFontWeight(badgeParameters.badgeFontWeight.value());
     } else {
@@ -203,11 +215,15 @@ void BadgeModelNG::SetBadgeParam(
     } else {
         layoutProperty->UpdateBadgePositionX(badgeTheme->GetBadgePositionX());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgePositionX.value_or(Dimension()), LpxAttribute::LPX_BADGE_POSITION_X, frameNode);
     if (badgeParameters.badgePositionY.has_value()) {
         layoutProperty->UpdateBadgePositionY(badgeParameters.badgePositionY.value());
     } else {
         layoutProperty->UpdateBadgePositionY(badgeTheme->GetBadgePositionY());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        badgeParameters.badgePositionY.value_or(Dimension()), LpxAttribute::LPX_BADGE_POSITION_Y, frameNode);
     if (badgeParameters.isPositionXy.has_value()) {
         layoutProperty->UpdateIsPositionXy(badgeParameters.isPositionXy.value());
     } else {
